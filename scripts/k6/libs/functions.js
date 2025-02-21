@@ -221,6 +221,56 @@ export function createInvitation(bearerToken, issuerAccessToken) {
   }
 }
 
+export function getIssuerPublicDid(issuerAccessToken) {
+  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/wallet/dids/public`;
+  const params = {
+    headers: {
+      "x-api-key": issuerAccessToken,
+    }
+  };
+
+  return http.get(url, params);
+}
+
+export function createDidExchangeRequest(holderAccessToken, issuerPublicDid) {
+  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/connections/did-exchange/create-request?their_public_did=${issuerPublicDid}`;
+  const params = {
+    headers: {
+      "x-api-key": holderAccessToken,
+    },
+  };
+
+  try {
+    // console.log(`Request URL: ${url}`);
+    const response = http.post(url, null, params);
+    // console.log(`Request params: ${JSON.stringify(params, null, 2)}`);
+    // console.log(`Holder Access tpoken: ${holderAccessToken}`);
+    return response;
+  } catch (error) {
+    console.error(`Error creating invitation: ${error.message}`);
+    throw error;
+  }
+}
+
+export function getIssuerConnectionId(issuerAccessToken, holderDid) {
+  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/connections?their_did=${holderDid}`;
+  const params = {
+    headers: {
+      "x-api-key": issuerAccessToken,
+    },
+  };
+
+  try {
+    // console.log(`Request URL: ${url}`);
+    const response = http.get(url, params);
+    // console.log(`Request params: ${JSON.stringify(params, null, 2)}`);
+    return response;
+  } catch (error) {
+    console.error(`Error creating invitation: ${error.message}`);
+    throw error;
+  }
+}
+
 export function acceptInvitation(holderAccessToken, invitationObj) {
   const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/connections/accept-invitation`;
   const params = {

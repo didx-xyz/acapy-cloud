@@ -11,6 +11,9 @@ import {
   genericWaitForSSEEvent,
   getWalletIndex,
   retry,
+  getIssuerPublicDid,
+  createDidExchangeRequest,
+  getIssuerConnectionId,
 } from "../libs/functions.js";
 import { bootstrapIssuer } from "../libs/setup.js";
 // import bootstrapIssuer from "./bootstrap-issuer.js";
@@ -112,12 +115,40 @@ export default function (data) {
 
   // console.log(`VU: ${__VU}, Iteration: ${__ITER}, Wallet Index: ${walletIndex}, Issuer Index: ${issuerIndex}, Issuer Wallet ID: ${issuer.walletId}`);
 
+  let publicDidResponse;
+  try {
+    publicDidResponse = retry(() => {
+      const response = getIssuerPublicDid(issuer.accessToken);
+      if (response.status !== 200) {
+        throw new Error(`publicDidResponse: Non-200 status: ${response.body}`);
+      }
+      return response;
+    }, 5, 2000);
+  } catch (e) {
+    console.error(`Failed after retries: ${e.message}`);
+    publicDidResponse = e.response || e;
+  }
+
+  check(publicDidResponse, {
+    "Public DID retrieved successfully": (r) => {
+      if (r.status !== 200) {
+        throw new Error(
+          `Unexpected response status while getting public DID:\nStatus: ${r.status}\nBody: ${r.body}`
+        );
+      }
+      return true;
+    },
+  });
+
+  const { did: issuerPublicDid } = JSON.parse(publicDidResponse.body);
+
+
   let createInvitationResponse;
   try {
     createInvitationResponse = retry(() => {
-      const response = createInvitation(bearerToken, issuer.accessToken);
+      const response = createDidExchangeRequest(wallet.access_token, issuerPublicDid);
       if (response.status !== 200) {
-        throw new Error(`Non-200 status: ${response.status}`);
+        throw new Error(`createInvitationResponse Non-200 status: ${response.body}`);
       }
       return response;
     }, 5, 2000);
@@ -135,44 +166,13 @@ export default function (data) {
       return true;
     },
   });
-  const { invitation: invitationObj, connection_id: issuerConnectionId } =
+  const { my_did: holderDid, connection_id: holderConnectionId } =
     JSON.parse(createInvitationResponse.body);
-
-  let acceptInvitationResponse;
-  try {
-    acceptInvitationResponse = retry(() => {
-      const response = acceptInvitation(wallet.access_token, invitationObj);
-      if (response.status !== 200) {
-        throw new Error(`Non-200 status: ${response.status}`);
-      }
-      return response;
-    }
-    , 5, 2000);
-  }
-  catch (e) {
-    console.error(`Failed after retries: ${e.message}`);
-    createInvitationResponse = e.response || e;
-  }
-
-  check(acceptInvitationResponse, {
-    "Invitation accepted successfully": (r) => {
-      if (r.status !== 200) {
-        throw new Error(
-          `Unexpected response while accepting invitation: ${r.response}`
-        );
-      }
-      return true;
-    },
-  });
-
-  const { connection_id: holderInvitationConnectionId } = JSON.parse(
-    acceptInvitationResponse.body
-  );
 
   const waitForSSEEventResponse = genericWaitForSSEEvent({
     accessToken: wallet.access_token,
     walletId: wallet.wallet_id,
-    threadId: holderInvitationConnectionId,
+    threadId: holderConnectionId,
     eventType: "completed",
     sseUrlPath: "connections/connection_id",
     topic: "connections",
@@ -191,12 +191,32 @@ export default function (data) {
     [sseCheckMessage]: (r) => r === true
   });
 
+  // Issuer is now going to check
+
+  let getIssuerConnectionIdResponse;
+  try {
+    getIssuerConnectionIdResponse = retry(() => {
+      const response = getIssuerConnectionId(issuer.accessToken, holderDid);
+      if (response.status !== 200) {
+        throw new Error(`getIssuerConnectionId Non-200 status: ${response.status} ${response.body}`);
+      }
+      return response;
+    }
+    , 5, 2000);
+  }
+  catch (e) {
+    console.error(`Failed after retries: ${e.message}`);
+    getIssuerConnectionIdResponse = e.response || e;
+  }
+
+  const [{ connection_id: issuerConnectionId }] = JSON.parse(getIssuerConnectionIdResponse.body);
+
   const holderData = JSON.stringify({
     wallet_label: wallet.wallet_label,
     wallet_name: wallet.wallet_name,
     wallet_id: wallet.wallet_id,
     access_token: wallet.access_token,
-    connection_id: holderInvitationConnectionId,
+    connection_id: holderConnectionId,
     issuer_connection_id: issuerConnectionId,
     issuer_wallet_name: issuer.walletName,
     issuer_wallet_id: issuer.walletId,
