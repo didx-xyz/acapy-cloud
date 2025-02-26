@@ -854,7 +854,7 @@ export function genericWaitForSSEEvent({
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
       if (attempt > 0) {
-          console.warn(`VU ${__VU}: Iteration ${__ITER}: Retry attempt ${attempt}/${maxRetries}`);
+          console.warn(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent Retry attempt ${attempt}/${maxRetries}`);
           sleep(retryDelay);
       }
 
@@ -874,9 +874,9 @@ export function genericWaitForSSEEvent({
                   if (!event.data || event.data.trim() === "") {
                       emptyPingCount++;
                       hadEmptyPing = true;
-                      console.log(`VU ${__VU}: Iteration ${__ITER}: Empty ping received: ${emptyPingCount}`);
+                      console.log(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent Empty ping received: ${emptyPingCount}`);
                       if (emptyPingCount >= maxEmptyPings) {
-                          console.error(`VU ${__VU}: Iteration ${__ITER}: Failed after ${maxEmptyPings} empty pings`);
+                          console.error(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent Failed after ${maxEmptyPings} empty pings`);
                           client.close();
                           failed = true;
                           return false;
@@ -891,29 +891,40 @@ export function genericWaitForSSEEvent({
                           eventData.payload &&
                           eventData.payload.state === expectedState) {
                           if (hadEmptyPing) {
-                              console.log(`VU ${__VU}: Iteration ${__ITER}: Successfully received event after ${emptyPingCount} empty ping(s)`);
+                              console.log(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent Successfully received event after ${emptyPingCount} empty ping(s)`);
                           }
                           client.close();
                           succeeded = true;
                       }
                   } catch (error) {
-                      console.error(`VU ${__VU}: Iteration ${__ITER}: Failed to parse event: ${error.message}`);
+                      console.error(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent Failed to parse event: ${error.message}`);
                       client.close();
                       failed = true;
                   }
               });
 
               client.on("error", (error) => {
-                  console.error(`VU ${__VU}: Iteration ${__ITER}: SSE connection error: ${error.error()}`);
+                  console.error(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent SSE connection error: ${error.error()}`);
                   client.close();
                   failed = true;
               });
           }
       );
 
-      if (!response || response.status !== 200) {
-          console.error(`VU ${__VU}: Iteration ${__ITER}: Failed to connect: ${response ? response.status : 'no response'}`);
-          continue;
+      if (!response) {
+        console.warn(`VU ${__VU}: Iteration ${__ITER}: SSE connection failed completely - no response object returned`);
+        continue;
+      } else if (response.status !== 200) {
+        console.warn(`VU ${__VU}: Iteration ${__ITER}: SSE connection failed with status: ${response.status}`);
+
+        // Log more details about the response
+        console.warn(`VU ${__VU}: Iteration ${__ITER}: Response details:
+          - Body: ${response.body ? response.body : 'undefined'}
+          - Headers: ${JSON.stringify(response.headers)}
+          - Error: ${response.error ? response.error : 'none'}
+          - URL: ${sseUrl}
+          - Timestamp: ${new Date().toISOString()}`);
+        continue;
       }
 
       while (!succeeded && !failed && attempt < maxRetries) {
@@ -927,7 +938,7 @@ export function genericWaitForSSEEvent({
 
       if (succeeded) {
           if (attempt > 0) {
-              console.log(`VU ${__VU}: Iteration ${__ITER}: Reconnection attempt ${attempt} was successful`);
+              console.log(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent Reconnection attempt ${attempt} was successful`);
           }
           return true;
       }
@@ -937,7 +948,7 @@ export function genericWaitForSSEEvent({
       }
   }
 
-  console.error(`VU ${__VU}: Iteration ${__ITER}: SSE connection failed after ${maxRetries} retries for event type: ${eventType}, state: ${expectedState}, topic: ${topic}, threadId: ${threadId}`);
+  console.error(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent SSE connection failed after ${maxRetries} retries for event type: ${eventType}, state: ${expectedState}, topic: ${topic}, threadId: ${threadId}`);
   return false;
 }
 
@@ -952,17 +963,17 @@ export function retry(fn, retries = 3, delay = 2000) {
         return result;
       }
       // For subsequent successful attempts, log the success
-      console.log(`VU ${__VU}: Iteration ${__ITER}: Succeeded on attempt ${attempts + 1}`);
+      console.log(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent Succeeded on attempt ${attempts + 1}`);
       return result;
     } catch (e) {
       attempts++;
       // Only log from second attempt onwards
       if (attempts > 1) {
-        console.warn(`VU ${__VU}: Iteration ${__ITER}: Attempt ${attempts} failed: ${e.message}`);
+        console.warn(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent Attempt ${attempts} failed: ${e.message}`);
       }
 
       if (attempts >= retries) {
-        console.error(`VU ${__VU}: Iteration ${__ITER}: All ${retries} attempts failed`);
+        console.error(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent All ${retries} attempts failed`);
         throw e;
       }
 
