@@ -204,7 +204,7 @@ runs:
 
         # Clean up: delete the temporary pod
         echo "Cleaning up..."
-        kubectl -n $NAMESPACE delete pod $POD_NAME
+        kubectl -n $NAMESPACE delete pod $POD_NAME --force
 
         echo "Done!"
       env:
