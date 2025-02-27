@@ -134,7 +134,7 @@ spec:
           {{- include "common.tplvalues.render" (dict "value" .Values.startupProbe "context" $) | nindent 10 }}
         {{- end }}
         resources:
-          {{- toYaml .Values.resources | nindent 12 }}
+          {{- toYaml .Values.resources | nindent 10 }}
         envFrom:
         {{- if .Values.secretData }}
           - secretRef:
@@ -170,7 +170,7 @@ spec:
       {{- range .Values.extraContainers }}
       - name: "{{ .name }}"
         securityContext:
-          {{- toYaml .securityContext | nindent 12 }}
+          {{- toYaml .securityContext | nindent 10 }}
         image: "{{ .image.repository | default $.Values.image.repository }}:{{ .image.tag | default $.Values.image.tag }}"
         imagePullPolicy: {{ .image.pullPolicy | default $.Values.image.pullPolicy }}
         ports:
@@ -178,7 +178,7 @@ spec:
           containerPort: {{ .port }}
           protocol: TCP
         resources:
-          {{- toYaml .resources | nindent 12 }}
+          {{- toYaml .resources | nindent 10 }}
         command:
         {{- range .command }}
         - {{ tpl ( toString . ) $ | quote }}
