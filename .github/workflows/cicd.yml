@@ -529,7 +529,7 @@ jobs:
               const result = await github.rest.actions.createWorkflowDispatch({
                 owner: process.env.REPO_OWNER,
                 repo: process.env.REPO_NAME,
-                workflow_id: 'cd.yml',
+                workflow_id: 'notify.yml',
                 ref: 'master',
                 inputs: {
                   'helm-version': process.env.HELM_VERSION,
