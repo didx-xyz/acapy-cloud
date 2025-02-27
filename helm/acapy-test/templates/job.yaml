@@ -48,7 +48,7 @@ spec:
           {{- toYaml .Values.args | nindent 10 }}
         {{- end }}
         resources:
-          {{- toYaml .Values.resources | nindent 12 }}
+          {{- toYaml .Values.resources | nindent 10 }}
         envFrom:
         - secretRef:
             name: {{ include "acapy-test.fullname" . }}
