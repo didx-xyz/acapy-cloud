@@ -19,7 +19,7 @@ async def init_nats_client() -> AsyncGenerator[JetStreamContext, Any]:
 
     connect_kwargs = {
         "servers": [NATS_SERVER],
-        "reconnect_time_wait": 0.5,  # Shorter wait time for faster reconnection
+        "reconnect_time_wait": 1,  # Shorter wait time for faster reconnection
         "max_reconnect_attempts": -1,  # Infinite reconnection attempts
         "error_cb": error_callback,
         "disconnected_cb": disconnected_callback,

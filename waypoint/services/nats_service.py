@@ -1,5 +1,6 @@
 import asyncio
 import time
+import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 from typing import Optional
@@ -46,6 +47,7 @@ class NatsEventsProcessor:
         topic: str,
         state: str,
         start_time: str,
+        state_uuid: uuid.UUID,
     ) -> JetStreamContext.PullSubscription:
         bound_logger = logger.bind(
             body={
@@ -54,6 +56,7 @@ class NatsEventsProcessor:
                 "topic": topic,
                 "state": state,
                 "start_time": start_time,
+                "uuid": state_uuid,
             }
         )
 
@@ -93,6 +96,11 @@ class NatsEventsProcessor:
                 subscription = await self.js_context.pull_subscribe(
                     config=config, **subscribe_kwargs
                 )
+
+                # Get consumer info to verify that the subscription was successful
+                # TODO test if this is necessary/helps
+                await subscription.consumer_info()
+
                 bound_logger.debug("Successfully subscribed to JetStream")
                 return subscription
             except BadSubscriptionError as e:
@@ -122,7 +130,7 @@ class NatsEventsProcessor:
     ):
         duration = duration or SSE_TIMEOUT
         look_back = look_back or SSE_LOOK_BACK
-
+        state_uuid = uuid.uuid4()
         bound_logger = logger.bind(
             body={
                 "wallet_id": wallet_id,
@@ -131,6 +139,7 @@ class NatsEventsProcessor:
                 "state": state,
                 "duration": duration,
                 "look_back": look_back,
+                "uuid": state_uuid,
             }
         )
         bound_logger.debug("Processing events")
@@ -146,6 +155,7 @@ class NatsEventsProcessor:
 
         async def event_generator(*, subscription: JetStreamContext.PullSubscription):
             try:
+                nr_of_timeout_errors = 0
                 end_time = time.time() + duration
                 while not stop_event.is_set():
                     remaining_time = end_time - time.time()
@@ -157,7 +167,7 @@ class NatsEventsProcessor:
 
                     try:
                         messages = await subscription.fetch(
-                            batch=5, timeout=0.5, heartbeat=0.2
+                            batch=5, timeout=0.5, heartbeat=0.05
                         )
                         for message in messages:
                             event = orjson.loads(message.data)
@@ -167,30 +177,45 @@ class NatsEventsProcessor:
 
                     except FetchTimeoutError:
                         # Fetch timeout, continue
-                        bound_logger.trace("Timeout fetching messages continuing...")
+                        bound_logger.debug("Timeout fetching messages continuing...")
                         await asyncio.sleep(0.1)
 
                     except TimeoutError:
-                        # Timeout error, resubscribe
-                        bound_logger.warning(
-                            "Subscription lost connection, attempting to resubscribe..."
-                        )
-                        try:
-                            await subscription.unsubscribe()
-                        except BadSubscriptionError as e:
-                            # If we can't unsubscribe, log the error and continue
+                        bound_logger.error("<><><>TimeoutError<><><>")
+                        if nr_of_timeout_errors == 5:
                             bound_logger.warning(
-                                "BadSubscriptionError unsubscribing from NATS: {}", e
+                                "Subscription lost connection, attempting to resubscribe..."
                             )
+                            try:
+                                await subscription.unsubscribe()
+                                bound_logger.debug("Unsubscribed.")
+                            except BadSubscriptionError as e:
+                                bound_logger.warning(
+                                    "BadSubscriptionError unsubscribing from NATS after subscription lost: {}",
+                                    e,
+                                )
 
-                        subscription = await self._subscribe(
-                            group_id=group_id,
-                            wallet_id=wallet_id,
-                            topic=topic,
-                            state=state,
-                            start_time=start_time,
-                        )
-                        bound_logger.debug("Successfully resubscribed to NATS.")
+                            subscription = await self._subscribe(
+                                group_id=group_id,
+                                wallet_id=wallet_id,
+                                topic=topic,
+                                state=state,
+                                start_time=start_time,
+                                state_uuid=state_uuid,
+                            )
+                            bound_logger.debug("Successfully resubscribed to NATS.")
+                            nr_of_timeout_errors = 0
+
+                            continue
+
+                        bound_logger.debug("TimeoutError, retrying...")
+                        nr_of_timeout_errors += 1
+                        await asyncio.sleep(0.1)
+
+                    except Error as e:
+                        bound_logger.error("Nats error in event generator: {}", e)
+                        stop_event.set()
+                        raise
 
                     except Exception:  # pylint: disable=W0718
                         bound_logger.exception("Unexpected error in event generator")
@@ -201,6 +226,17 @@ class NatsEventsProcessor:
                 bound_logger.debug("Event generator cancelled")
                 stop_event.set()
 
+            finally:
+                bound_logger.debug("Closing subscription...")
+                if subscription:
+                    try:
+                        await subscription.unsubscribe()
+                        bound_logger.debug("Subscription closed")
+                    except BadSubscriptionError as e:
+                        bound_logger.warning(
+                            "BadSubscriptionError unsubscribing from NATS: {}", e
+                        )
+
         subscription = None
         try:
             subscription = await self._subscribe(
@@ -209,22 +245,12 @@ class NatsEventsProcessor:
                 topic=topic,
                 state=state,
                 start_time=start_time,
+                state_uuid=state_uuid,
             )
             yield event_generator(subscription=subscription)
         except Exception as e:  # pylint: disable=W0718
             bound_logger.exception("Unexpected error processing events")
             raise e
-
-        finally:
-            if subscription:
-                try:
-                    bound_logger.trace("Closing subscription...")
-                    await subscription.unsubscribe()
-                    bound_logger.debug("Subscription closed")
-                except BadSubscriptionError as e:
-                    bound_logger.warning(
-                        "BadSubscriptionError unsubscribing from NATS: {}", e
-                    )
 
     async def check_jetstream(self):
         try:
