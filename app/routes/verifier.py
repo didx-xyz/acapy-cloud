@@ -12,6 +12,8 @@ from app.models.verifier import (
     CreateProofRequest,
     RejectProofRequest,
     SendProofRequest,
+    CredPrecis,
+    CredInfo,
 )
 from app.services.verifier.acapy_verifier_v2 import VerifierV2
 from app.util.acapy_verifier_utils import assert_valid_prover, assert_valid_verifier
@@ -456,7 +458,7 @@ async def delete_proof(
 @router.get(
     "/proofs/{proof_id}/credentials",
     summary="Get Matching Credentials for a Proof",
-    response_model=List[IndyCredPrecis],
+    response_model=List[CredPrecis],
 )
 async def get_credentials_by_proof_id(
     proof_id: str,
@@ -464,7 +466,7 @@ async def get_credentials_by_proof_id(
     limit: Optional[int] = limit_query_parameter,
     offset: Optional[int] = offset_query_parameter,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
-) -> List[IndyCredPrecis]:
+) -> List[CredPrecis]:
     """
     Get matching credentials for a presentation exchange
     ---
@@ -486,8 +488,8 @@ async def get_credentials_by_proof_id(
 
     Returns:
     ---
-        List[IndyCredPrecis]
-            A list of applicable Indy credentials
+        List[CredPrecis]
+            A list of applicable credentials
     """
     bound_logger = logger.bind(body={"proof_id": proof_id})
     bound_logger.debug("GET request received: Get credentials for a proof request")
@@ -507,4 +509,14 @@ async def get_credentials_by_proof_id(
         raise
 
     bound_logger.debug("Successfully fetched credentials for proof request.")
-    return result
+    return [
+        CredPrecis(
+            cred_info=CredInfo(
+                **cred.cred_info.model_dump(),
+                credential_id=cred.cred_info.referent
+            ),
+            interval=cred.interval,
+            presentation_referents=cred.presentation_referents,
+        )
+        for cred in result
+    ]
