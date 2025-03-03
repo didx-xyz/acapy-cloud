@@ -10,6 +10,7 @@ import app.routes.verifier as test_module
 from app.dependencies.auth import AcaPyAuth
 from app.exceptions.cloudapi_exception import CloudApiException
 from app.main import app
+from app.models.verifier import CredInfo, CredPrecis
 from app.routes.verifier import acapy_auth_from_header, get_credentials_by_proof_id
 from app.services.verifier.acapy_verifier_v2 import VerifierV2
 from app.tests.services.verifier.utils import indy_pres_spec, sample_indy_proof_request
@@ -300,9 +301,25 @@ async def test_get_credentials_by_proof_id(
         "client_from_auth",
         return_value=mock_context_managed_controller(mock_agent_controller),
     )
-    cred_precis = IndyCredPrecis(
-        cred_info=IndyCredInfo(cred_def_id="WgWxqztrNooG92RXvxSTWv:3:CL:20:tag")
-    )
+    cred_precis = [
+        IndyCredPrecis(
+            cred_info=IndyCredInfo(
+                cred_def_id="WgWxqztrNooG92RXvxSTWv:3:CL:20:tag",
+                referent="abcde",
+                attrs={"attr1": "value1"},
+            ),
+        )
+    ]
+    returned_cred_precis = [
+        CredPrecis(
+            cred_info=CredInfo(
+                **cred.cred_info.model_dump(), credential_id=cred.cred_info.referent
+            ),
+            interval=cred.interval,
+            presentation_referents=cred.presentation_referents,
+        )
+        for cred in cred_precis
+    ]
 
     # V2
     when(VerifierV2).get_credentials_by_proof_id(
@@ -311,7 +328,7 @@ async def test_get_credentials_by_proof_id(
         referent=None,
         limit=100,
         offset=0,
-    ).thenReturn(to_async([cred_precis]))
+    ).thenReturn(to_async(cred_precis))
 
     result = await test_module.get_credentials_by_proof_id(
         proof_id="v2-abcd",
@@ -321,7 +338,7 @@ async def test_get_credentials_by_proof_id(
         offset=0,
     )
 
-    assert result == [cred_precis]
+    assert result == returned_cred_precis
     verify(VerifierV2).get_credentials_by_proof_id(
         controller=mock_agent_controller,
         proof_id="v2-abcd",

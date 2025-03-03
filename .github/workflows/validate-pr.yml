@@ -85,13 +85,13 @@ jobs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: context.issue.number,
-                  body: `${process.env.BOT_COMMENT_IDENTIFIER}\n⚠️ Your PR title should start with an emoji!\n\nExample valid titles:\n- ✨ Add new feature (or :sparkles: Add new feature)\n- 🐛 Fix login bug (or :bug: Fix login bug)\n- 📝 Update documentation (or :memo: Update documentation)\n\nTo view all valid emojis, check out [gitmoji.dev](https://gitmoji.dev) for a comprehensive list of Git-friendly emojis!\n\nPlease update your PR title and try again.`
+                  body: `${process.env.BOT_COMMENT_IDENTIFIER}\n⚠️ Your PR title should start with an emoji!\n\nExample valid titles:\n- ✨ Add new feature (or \`:sparkles: Add new feature\`)\n- 🐛 Fix login bug (or \`:bug: Fix login bug\`)\n- 📝 Update documentation (or \`:memo: Update documentation\`)\n\nTo view all valid emojis, check out [gitmoji.dev](https://gitmoji.dev) for a comprehensive list of Git-friendly emojis!\n\nPlease update your PR title and try again.`
                 });
               }
 
               // Create warning annotation instead of failing
               // Change to `core.setFailed()` to fail the check
-              core.warning(`PR title should start with an emoji! Current title: "${prTitle}". Use either Unicode emoji (🔥) or GitHub shortcode format (:fire:)`);
+              core.warning(`PR title should start with an emoji! Current title: "${prTitle}". Use either Unicode emoji (🔥) or GitHub shortcode format (\`:fire:\`)`);
             } else if (botComment) {
               // If title is now valid and we have a comment, delete it
               await github.rest.issues.deleteComment({
@@ -114,10 +114,10 @@ jobs:
             const comments = JSON.parse(process.env.PR_COMMENTS);
             const MAX_LENGTH = parseInt(process.env.MAX_LENGTH, 10);
 
-            const emojiRegex = /^(?:[\p{Emoji_Presentation}\p{Extended_Pictographic}]|:[a-z0-9_+-]+:)/u;
+            const emojiRegex = /^((?:[\p{Emoji_Presentation}\p{Extended_Pictographic}]|:[a-z0-9_+-]+:)[\s]*)+/u;
 
             // Remove emoji prefix and its trailing space for length check
-            const titleWithoutEmoji = prTitle.replace(emojiRegex, '');
+            const titleWithoutEmoji = prTitle.replace(emojiRegex, '').trim();
 
             // Find our bot's validation comment if it exists
             const botComment = comments.find(comment =>
@@ -126,6 +126,10 @@ jobs:
             );
 
             const commentBody = `${process.env.BOT_COMMENT_IDENTIFIER}\n⚠️ Your PR title is too long!\n\nPR titles should be no longer than ${MAX_LENGTH} characters (excluding emoji). Your title is ${titleWithoutEmoji.length} characters long.\n\nPlease update your PR title to be more concise.`;
+
+            core.debug(`Original title: "${prTitle}"`);
+            core.debug(`Title without prefix emojis: "${titleWithoutEmoji}"`);
+            core.debug(`Length: ${titleWithoutEmoji.length}`);
 
             if (titleWithoutEmoji.length > MAX_LENGTH) {
               if (!botComment) {
