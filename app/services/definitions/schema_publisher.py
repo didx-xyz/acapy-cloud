@@ -15,7 +15,7 @@ class SchemaPublisher:
         self._controller = controller
 
     async def publish_schema(
-        self, schema_request: SchemaSendRequest
+        self, schema_request: AnonCredsSchema
     ) -> CredentialSchema:
         try:
             result = await handle_acapy_call(
