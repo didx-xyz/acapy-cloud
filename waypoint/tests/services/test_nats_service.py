@@ -6,7 +6,7 @@ import pytest
 from nats.aio.client import Client as NATS
 from nats.aio.errors import ErrConnectionClosed, ErrNoServers, ErrTimeout
 from nats.errors import BadSubscriptionError, Error, TimeoutError
-from nats.js.api import ConsumerConfig, ConsumerInfo, DeliverPolicy
+from nats.js.api import ConsumerConfig, DeliverPolicy
 from nats.js.client import JetStreamContext
 from nats.js.errors import FetchTimeoutError
 
@@ -24,15 +24,6 @@ async def mock_nats_client():
         mock_nats.jetstream.return_value = mock_jetstream
         mock_connect.return_value = mock_nats
         yield mock_jetstream
-
-
-@pytest.fixture
-async def mock_consumer_info():
-    consumer_info = ConsumerInfo(
-        name="consumer_name", stream_name="stream_name", config="SomeConfig"
-    )
-    mock_con_info = AsyncMock(return_value=consumer_info)
-    return mock_con_info
 
 
 @pytest.mark.anyio
@@ -58,12 +49,11 @@ async def test_init_nats_client_error(exception):
 
 @pytest.mark.anyio
 async def test_nats_events_processor_subscribe(
-    mock_nats_client, mock_consumer_info  # pylint: disable=redefined-outer-name
+    mock_nats_client,  # pylint: disable=redefined-outer-name
 ):
     processor = NatsEventsProcessor(mock_nats_client)
     mock_subscription = AsyncMock(spec=JetStreamContext.PullSubscription)
     mock_nats_client.pull_subscribe.return_value = mock_subscription
-    mock_subscription.consumer_info = mock_consumer_info
 
     with patch("waypoint.services.nats_service.ConsumerConfig") as mock_config:
         mock_config.return_value = ConsumerConfig(
@@ -77,7 +67,7 @@ async def test_nats_events_processor_subscribe(
             topic="proofs",
             state="done",
             start_time="2024-10-24T09:17:17.998149541Z",
-            state_uuid="state_uuid",
+            request_uuid="state_uuid",
         )
 
         mock_nats_client.pull_subscribe.assert_called_once_with(
@@ -85,7 +75,6 @@ async def test_nats_events_processor_subscribe(
             stream=NATS_STATE_STREAM,
             config=mock_config.return_value,
         )
-        mock_subscription.consumer_info.assert_called_once()
         assert isinstance(subscription, JetStreamContext.PullSubscription)
 
 
@@ -104,7 +93,7 @@ async def test_nats_events_processor_subscribe_error(
             topic="proofs",
             state="done",
             start_time="2024-10-24T09:17:17.998149541Z",
-            state_uuid="state_uuid",
+            request_uuid="state_uuid",
         )
 
 
@@ -112,13 +101,11 @@ async def test_nats_events_processor_subscribe_error(
 @pytest.mark.parametrize("group_id", [None, "group_id"])
 async def test_process_events(
     mock_nats_client,  # pylint: disable=redefined-outer-name
-    mock_consumer_info,  # pylint: disable=redefined-outer-name
     group_id,
 ):
     processor = NatsEventsProcessor(mock_nats_client)
     mock_subscription = AsyncMock()
     mock_nats_client.pull_subscribe.return_value = mock_subscription
-    mock_subscription.consumer_info = mock_consumer_info
 
     mock_message = AsyncMock()
     mock_message.headers = {"event_topic": "test_topic"}
@@ -153,17 +140,15 @@ async def test_process_events(
 
     mock_subscription.fetch.assert_called()
     mock_message.ack.assert_called_once()
-    mock_subscription.consumer_info.assert_called_once()
 
 
 @pytest.mark.anyio
 async def test_process_events_cancelled_error(
-    mock_nats_client, mock_consumer_info  # pylint: disable=redefined-outer-name
+    mock_nats_client,  # pylint: disable=redefined-outer-name
 ):
     processor = NatsEventsProcessor(mock_nats_client)
     mock_subscription = AsyncMock()
     mock_nats_client.pull_subscribe.return_value = mock_subscription
-    mock_subscription.consumer_info = mock_consumer_info
 
     stop_event = asyncio.Event()
 
@@ -182,17 +167,15 @@ async def test_process_events_cancelled_error(
 
     assert len(events) == 0
     assert stop_event.is_set()
-    mock_subscription.consumer_info.assert_called_once()
 
 
 @pytest.mark.anyio
 async def test_process_events_fetch_timeout_error(
-    mock_nats_client, mock_consumer_info  # pylint: disable=redefined-outer-name
+    mock_nats_client,  # pylint: disable=redefined-outer-name
 ):
     processor = NatsEventsProcessor(mock_nats_client)
     mock_subscription = AsyncMock()
     mock_nats_client.pull_subscribe.return_value = mock_subscription
-    mock_subscription.consumer_info = mock_consumer_info
 
     mock_subscription.fetch.side_effect = FetchTimeoutError
 
@@ -211,7 +194,6 @@ async def test_process_events_fetch_timeout_error(
 
     assert len(events) == 0
     assert stop_event.is_set()
-    mock_subscription.consumer_info.assert_called_once()
 
 
 @pytest.mark.anyio
@@ -300,12 +282,11 @@ async def test_process_events_bad_subscription_error_on_unsubscribe(
 
 @pytest.mark.anyio
 async def test_process_events_base_exception(
-    mock_nats_client, mock_consumer_info  # pylint: disable=redefined-outer-name
+    mock_nats_client,  # pylint: disable=redefined-outer-name
 ):
     processor = NatsEventsProcessor(mock_nats_client)
     mock_subscription = AsyncMock()
     mock_nats_client.pull_subscribe.return_value = mock_subscription
-    mock_subscription.consumer_info = mock_consumer_info
 
     # Mock fetch to raise a generic exception
     mock_subscription.fetch.side_effect = Exception("Test base exception")
