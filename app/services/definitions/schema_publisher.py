@@ -55,9 +55,7 @@ class SchemaPublisher:
             acapy_call=self._controller.wallet.get_public_did,
         )
 
-        _schema_id = (
-            f"{pub_did.result.did}:2:{schema.var_schema.name}:{schema.var_schema.version}"
-        )
+        _schema_id = f"{pub_did.result.did}:2:{schema.var_schema.name}:{schema.var_schema.version}"
         self._logger.debug(
             "Fetching schema id `{}` which is associated with request",
             _schema_id,
