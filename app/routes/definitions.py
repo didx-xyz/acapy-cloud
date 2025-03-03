@@ -188,7 +188,7 @@ async def get_schema(
     async with client_from_auth(auth) as aries_controller:
         schema = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=aries_controller.schema.get_schema,
+            acapy_call=aries_controller.anoncreds_schemas.get_schema,
             schema_id=schema_id,
         )
 
