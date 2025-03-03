@@ -197,6 +197,7 @@ class NatsEventsProcessor:
 
                     except TimeoutError:
                         bound_logger.warning("No heartbeat received on subscription")
+                        num_timeout_errors += 1
 
                         if num_timeout_errors == MAX_TIMEOUT_ERRORS:
                             bound_logger.warning(
@@ -228,7 +229,6 @@ class NatsEventsProcessor:
                             num_timeout_errors = 0
                             continue
 
-                        num_timeout_errors += 1
                         await asyncio.sleep(0.1)
 
                     except Error as e:
