@@ -2134,8 +2134,8 @@ paths:
         \        The presentation_referent of the proof to match, comma separated\
         \ str of presentation_referents\n    limit: Optional int\n        The number\
         \ of credentials to fetch\n    offset: Optional int\n        The index to\
-        \ start fetching credentials from\n\nReturns:\n---\n    List[IndyCredPrecis]\n\
-        \        A list of applicable Indy credentials"
+        \ start fetching credentials from\n\nReturns:\n---\n    List[CredPrecis]\n\
+        \        A list of applicable credentials"
       operationId: get_credentials_by_proof_id_v1_verifier_proofs__proof_id__credentials_get
       security:
       - APIKeyHeader: []
@@ -2187,7 +2187,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/IndyCredPrecis'
+                  $ref: '#/components/schemas/CredPrecis'
                 title: Response Get Credentials By Proof Id V1 Verifier Proofs  Proof
                   Id  Credentials Get
         '422':
@@ -2284,7 +2284,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/app__models__wallet__IndyCredInfo'
+                $ref: '#/components/schemas/IndyCredInfo'
         '422':
           description: Validation Error
           content:
@@ -3760,17 +3760,76 @@ components:
       - version
       - attribute_names
       title: CreateSchema
+    CredInfo:
+      properties:
+        attrs:
+          type: object
+          title: Attrs
+          description: Attribute names and value
+        cred_def_id:
+          type: string
+          title: Cred Def Id
+          description: Credential definition identifier
+        referent:
+          type: string
+          title: Referent
+          description: Credential identifier
+        credential_id:
+          type: string
+          title: Credential Id
+          description: Credential identifier
+        cred_rev_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cred Rev Id
+          description: Credential revocation identifier
+        rev_reg_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Rev Reg Id
+          description: Revocation registry identifier
+        schema_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Schema Id
+          description: Schema identifier
+      type: object
+      title: CredInfo
     CredInfoList:
       properties:
         results:
           anyOf:
           - items:
-              $ref: '#/components/schemas/app__models__wallet__IndyCredInfo'
+              $ref: '#/components/schemas/IndyCredInfo'
             type: array
           - type: 'null'
           title: Results
       type: object
       title: CredInfoList
+    CredPrecis:
+      properties:
+        cred_info:
+          $ref: '#/components/schemas/CredInfo'
+          description: Credential info
+        interval:
+          anyOf:
+          - $ref: '#/components/schemas/IndyNonRevocationInterval'
+          - type: 'null'
+          description: Non-revocation interval from presentation request
+        presentation_referents:
+          anyOf:
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Presentation Referents
+          description: Presentation referents
+      type: object
+      required:
+      - cred_info
+      title: CredPrecis
     CredRevokedResult:
       properties:
         revoked:
@@ -3813,7 +3872,9 @@ components:
           title: Id
           description: The ID of the credential
         issuanceDate:
-          type: string
+          anyOf:
+          - type: string
+          - type: 'null'
           title: Issuancedate
           description: The issuance date
         issuer:
@@ -3834,6 +3895,18 @@ components:
           type: array
           title: Type
           description: The JSON-LD type of the credential
+        validFrom:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Validfrom
+          description: The valid from date
+        validUntil:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Validuntil
+          description: The valid until date
         additional_properties:
           type: object
           title: Additional Properties
@@ -3842,7 +3915,6 @@ components:
       required:
       - '@context'
       - credentialSubject
-      - issuanceDate
       - issuer
       - type
       title: Credential
@@ -4409,28 +4481,54 @@ components:
       type: object
       title: Hangup
       description: Hangup
-    IndyCredPrecis:
+    IndyCredInfo:
       properties:
-        cred_info:
-          $ref: '#/components/schemas/aries_cloudcontroller__models__indy_cred_info__IndyCredInfo'
-          description: Credential info
-        interval:
+        attrs:
           anyOf:
-          - $ref: '#/components/schemas/IndyNonRevocationInterval'
-          - type: 'null'
-          description: Non-revocation interval from presentation request
-        presentation_referents:
-          anyOf:
-          - items:
+          - additionalProperties:
               type: string
-            type: array
+            type: object
           - type: 'null'
-          title: Presentation Referents
+          title: Attrs
+          description: Attribute names and value
+        cred_def_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cred Def Id
+          description: Credential definition identifier
+        cred_rev_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cred Rev Id
+          description: Credential revocation identifier
+        credential_id:
+          type: string
+          title: Credential Id
+          description: (deprecated - renamed to credential_id) Credential identifier
+          deprecated: true
+        rev_reg_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Rev Reg Id
+          description: Revocation registry identifier
+        schema_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Schema Id
+          description: Schema identifier
+        referent:
+          type: string
+          title: Referent
+          description: Credential identifier
       type: object
       required:
-      - cred_info
-      title: IndyCredPrecis
-      description: IndyCredPrecis
+      - credential_id
+      - referent
+      title: IndyCredInfo
     IndyCredential:
       properties:
         credential_definition_id:
@@ -6600,97 +6698,6 @@ components:
       - msg
       - type
       title: ValidationError
-    app__models__wallet__IndyCredInfo:
-      properties:
-        attrs:
-          anyOf:
-          - additionalProperties:
-              type: string
-            type: object
-          - type: 'null'
-          title: Attrs
-          description: Attribute names and value
-        cred_def_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Cred Def Id
-          description: Credential definition identifier
-        cred_rev_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Cred Rev Id
-          description: Credential revocation identifier
-        credential_id:
-          type: string
-          title: Credential Id
-          description: (deprecated - renamed to credential_id) Credential identifier
-          deprecated: true
-        rev_reg_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Rev Reg Id
-          description: Revocation registry identifier
-        schema_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Schema Id
-          description: Schema identifier
-        referent:
-          type: string
-          title: Referent
-          description: Credential identifier
-      type: object
-      required:
-      - credential_id
-      - referent
-      title: IndyCredInfo
-    aries_cloudcontroller__models__indy_cred_info__IndyCredInfo:
-      properties:
-        attrs:
-          anyOf:
-          - additionalProperties:
-              type: string
-            type: object
-          - type: 'null'
-          title: Attrs
-          description: Attribute names and value
-        cred_def_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Cred Def Id
-          description: Credential definition identifier
-        cred_rev_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Cred Rev Id
-          description: Credential revocation identifier
-        referent:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Referent
-          description: Wallet referent
-        rev_reg_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Rev Reg Id
-          description: Revocation registry identifier
-        schema_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Schema Id
-          description: Schema identifier
-      type: object
-      title: IndyCredInfo
-      description: IndyCredInfo
   securitySchemes:
     APIKeyHeader:
       type: apiKey
