@@ -445,12 +445,14 @@ async def test_get_credentials_for_request(
 
         result = response.json()[0]
         assert "cred_info" in result
+        assert result["cred_info"]["referent"] == result["cred_info"]["credential_id"]
         assert [
             attr
             in [
                 "attrs",
                 "cred_def_info",
                 "referent",
+                "credential_id",
                 "interval",
                 "presentation_referents",
             ]
