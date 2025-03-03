@@ -14,8 +14,7 @@ from nats.js.errors import FetchTimeoutError
 from shared.constants import NATS_STATE_STREAM, NATS_STATE_SUBJECT
 from shared.models.webhook_events import CloudApiWebhookEventGeneric
 from shared.services.nats_jetstream import init_nats_client
-from waypoint.services.nats_service import NatsEventsProcessor, MAX_TIMEOUT_ERRORS
-
+from waypoint.services.nats_service import MAX_TIMEOUT_ERRORS, NatsEventsProcessor
 
 sample_message_data = {
     "wallet_id": "some_wallet_id",

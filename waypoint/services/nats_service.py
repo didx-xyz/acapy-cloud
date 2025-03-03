@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 import orjson
-from nats.errors import BadSubscriptionError, Error, TimeoutError
+from nats.errors import BadSubscriptionError, ConnectionClosedError, Error, TimeoutError
 from nats.js.api import ConsumerConfig, DeliverPolicy
 from nats.js.client import JetStreamContext
 from nats.js.errors import FetchTimeoutError
@@ -209,7 +209,7 @@ class NatsEventsProcessor:
                             try:
                                 await subscription.unsubscribe()
                                 bound_logger.info("Unsubscribed")
-                            except BadSubscriptionError as e:
+                            except (BadSubscriptionError, ConnectionClosedError) as e:
                                 bound_logger.warning(
                                     "BadSubscriptionError after connection lost: {}",
                                     e,
@@ -251,7 +251,7 @@ class NatsEventsProcessor:
                     try:
                         await subscription.unsubscribe()
                         bound_logger.debug("Subscription closed")
-                    except BadSubscriptionError as e:
+                    except (BadSubscriptionError, ConnectionClosedError) as e:
                         bound_logger.warning(
                             "BadSubscriptionError unsubscribing from NATS: {}", e
                         )
