@@ -171,7 +171,7 @@ async def get_schemas_by_id(
     get_schema_futures = [
         handle_acapy_call(
             logger=logger,
-            acapy_call=aries_controller.schema.get_schema,
+            acapy_call=aries_controller.anoncreds_schemas.get_schema,
             schema_id=schema_id,
         )
         for schema_id in schema_ids
@@ -180,7 +180,7 @@ async def get_schemas_by_id(
     # Wait for completion of futures
     if get_schema_futures:
         logger.debug("Fetching each of the created schemas")
-        schema_results: List[SchemaGetResult] = await asyncio.gather(
+        schema_results: List[GetSchemaResult] = await asyncio.gather(
             *get_schema_futures
         )
     else:
@@ -189,7 +189,7 @@ async def get_schemas_by_id(
 
     # transform all schemas into response model (if schemas returned)
     schemas = [
-        credential_schema_from_acapy(schema.var_schema)
+        schema_from_acapy(schema)
         for schema in schema_results
         if schema.var_schema
     ]
