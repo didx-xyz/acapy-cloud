@@ -198,7 +198,9 @@ async def test_process_events_fetch_timeout_error(
 
 
 @pytest.mark.anyio
-async def test_process_events_timeout_error_handling(mock_nats_client):
+async def test_process_events_timeout_error_handling(
+    mock_nats_client,  # pylint: disable=redefined-outer-name
+):
     mock_subscription = AsyncMock()
 
     # Counter to track the number of TimeoutErrors raised
@@ -391,19 +393,6 @@ async def test_check_jetstream_exception(
     mock_nats_client.account_info.assert_called_once()
 
 
-def test_heartbeat_validation():
-    with patch(
-        "os.getenv",
-        side_effect=lambda key, default=None: (
-            "1.0" if key in ["NATS_HEARTBEAT", "NATS_TIMEOUT"] else default
-        ),
-    ):
-        importlib.reload(importlib.import_module("waypoint.services.nats_service"))
-        from waypoint.services.nats_service import HEARTBEAT
-
-    assert HEARTBEAT == 0.2  # Should be set to TIMEOUT / 5
-
-
 @pytest.mark.anyio
 async def test_retry_logging(
     mock_nats_client,  # pylint: disable=redefined-outer-name
@@ -413,27 +402,29 @@ async def test_retry_logging(
     # Create a mock logger
     with patch("waypoint.services.nats_service.logger") as mock_logger:
         # Create a mock retry state
-        retry_state = AsyncMock()
-        retry_state.outcome = Mock()
-        retry_state.outcome.failed = True
+        state = AsyncMock()
+        state.outcome = Mock()
+        state.outcome.failed = True
         expected_exception = TimeoutError("Test timeout")
-        retry_state.outcome.exception.return_value = expected_exception
-        retry_state.attempt_number = 3
+        state.outcome.exception.return_value = expected_exception
+        state.attempt_number = 3
 
         # Call the function with the mock retry state
-        processor._retry_log(mock_logger, retry_state)
+        processor._retry_log(mock_logger, state)  # pylint: disable=protected-access
 
         # Assert that the logger was called with the expected message
         mock_logger.warning.assert_called_once_with(
             "Retry attempt {} failed due to {}: {}",
-            retry_state.attempt_number,
+            state.attempt_number,
             expected_exception.__class__.__name__,
             expected_exception,
         )
 
 
 @pytest.mark.anyio
-async def test_general_error_handling(mock_nats_client):
+async def test_general_error_handling(
+    mock_nats_client,  # pylint: disable=redefined-outer-name
+):
     processor = NatsEventsProcessor(mock_nats_client)
     mock_subscription = AsyncMock()
     mock_nats_client.pull_subscribe.return_value = mock_subscription
@@ -461,3 +452,16 @@ async def test_general_error_handling(mock_nats_client):
 
     # Verify unsubscribe was attempted
     mock_subscription.unsubscribe.assert_called_once()
+
+
+def test_heartbeat_validation():
+    with patch(
+        "os.getenv",
+        side_effect=lambda key, default=None: (
+            "1.0" if key in ["NATS_HEARTBEAT", "NATS_TIMEOUT"] else default
+        ),
+    ):
+        importlib.reload(importlib.import_module("waypoint.services.nats_service"))
+        from waypoint.services.nats_service import HEARTBEAT
+
+    assert HEARTBEAT == 0.2  # Should be set to TIMEOUT / 5
