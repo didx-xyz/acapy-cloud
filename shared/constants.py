@@ -48,7 +48,7 @@ LEDGER_REGISTRATION_URL = os.getenv("LEDGER_REGISTRATION_URL", f"{url}:9000/regi
 
 # Sse
 SSE_TIMEOUT = int(
-    os.getenv("SSE_TIMEOUT", "60")
+    os.getenv("SSE_TIMEOUT", "30")
 )  # maximum duration of an SSE connection
 DISCONNECT_CHECK_PERIOD = float(
     os.getenv("DISCONNECT_CHECK_PERIOD", "0.2")
