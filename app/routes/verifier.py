@@ -1,7 +1,6 @@
 from typing import List, Optional
 from uuid import UUID
 
-from aries_cloudcontroller import IndyCredPrecis
 from fastapi import APIRouter, Depends
 
 from app.dependencies.acapy_clients import client_from_auth
