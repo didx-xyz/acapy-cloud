@@ -139,9 +139,8 @@ async def get_schemas_as_governance(
     bound_logger.debug("Fetching created schemas")
     response = await handle_acapy_call(
         logger=bound_logger,
-        acapy_call=aries_controller.schema.get_created_schemas,
-        schema_id=schema_id,
-        schema_issuer_did=schema_issuer_did,
+        acapy_call=aries_controller.anoncreds_schemas.get_schemas,
+        schema_issuer_id=schema_issuer_did,
         schema_name=schema_name,
         schema_version=schema_version,
     )
