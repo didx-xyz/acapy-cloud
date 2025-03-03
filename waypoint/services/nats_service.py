@@ -31,10 +31,10 @@ from shared.models.webhook_events import CloudApiWebhookEventGeneric
 logger = get_logger(__name__)
 
 # Read NATS subscription config from environment variables
-BATCH_SIZE = os.getenv("NATS_BATCH_SIZE", 1)
-TIMEOUT = os.getenv("NATS_TIMEOUT", 0.5)
-HEARTBEAT = float(os.getenv("NATS_HEARTBEAT", 0.05))
-MAX_TIMEOUT_ERRORS = os.getenv("NATS_MAX_TIMEOUT_ERRORS", 3)
+BATCH_SIZE = int(os.getenv("NATS_BATCH_SIZE", "1"))
+TIMEOUT = float(os.getenv("NATS_TIMEOUT", "1.0"))
+HEARTBEAT = float(os.getenv("NATS_HEARTBEAT", "0.2"))
+MAX_TIMEOUT_ERRORS = int(os.getenv("NATS_MAX_TIMEOUT_ERRORS", "3"))
 
 # Validate heartbeat value to avoid NATS error
 if HEARTBEAT >= TIMEOUT / 2:
