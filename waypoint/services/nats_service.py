@@ -1,4 +1,5 @@
 import asyncio
+import functools
 import os
 import time
 from contextlib import asynccontextmanager
@@ -56,6 +57,17 @@ class NatsEventsProcessor:
     def __init__(self, jetstream: JetStreamContext):
         self.js_context: JetStreamContext = jetstream
 
+    def _retry_log(self, bound_logger, retry_state: RetryCallState):
+        """Custom logging for retry attempts."""
+        if retry_state.outcome.failed:
+            exception = retry_state.outcome.exception()
+            bound_logger.warning(
+                "Retry attempt {} failed due to {}: {}",
+                retry_state.attempt_number,
+                type(exception).__name__,
+                exception,
+            )
+
     async def _subscribe(
         self,
         *,
@@ -76,6 +88,8 @@ class NatsEventsProcessor:
                 "request_uuid": request_uuid,
             }
         )
+        # Use functools.partial to bind bound_logger to _retry_log
+        retry_log_with_bound_logger = functools.partial(self._retry_log, bound_logger)
 
         group_id = group_id or "*"
         subscribe_kwargs = {
@@ -88,23 +102,12 @@ class NatsEventsProcessor:
             opt_start_time=start_time,
         )
 
-        def _retry_log(retry_state: RetryCallState):
-            """Custom logging for retry attempts."""
-            if retry_state.outcome.failed:
-                exception = retry_state.outcome.exception()
-                bound_logger.warning(
-                    "Retry attempt {} failed due to {}: {}",
-                    retry_state.attempt_number,
-                    type(exception).__name__,
-                    exception,
-                )
-
         # This is a custom retry decorator that will retry on TimeoutError
         # and wait exponentially up to a max of 16 seconds between retries indefinitely
         @retry(
             retry=retry_if_exception_type(TimeoutError),
             wait=wait_exponential(multiplier=1, max=16),
-            after=_retry_log,
+            after=retry_log_with_bound_logger,
             stop=stop_never,
         )
         async def pull_subscribe():
