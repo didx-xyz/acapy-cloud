@@ -85,7 +85,6 @@ async def create_schema(
     response_model=List[CredentialSchema],
 )
 async def get_schemas(
-    schema_id: Optional[str] = None,
     schema_issuer_did: Optional[str] = None,
     schema_name: Optional[str] = None,
     schema_version: Optional[str] = None,
@@ -107,7 +106,6 @@ async def get_schemas(
 
     Parameters (Optional):
     ---
-        schema_id: str
         schema_issuer_did: str
         schema_name: str
         schema_version: str
@@ -121,7 +119,6 @@ async def get_schemas(
     bound_logger = logger.bind(
         body={
             "is_governance": is_governance,
-            "schema_id": schema_id,
             "schema_issuer_did": schema_issuer_did,
             "schema_name": schema_name,
             "schema_version": schema_version,
@@ -133,7 +130,6 @@ async def get_schemas(
         if not is_governance:  # regular tenant is calling endpoint
             schemas = await schemas_service.get_schemas_as_tenant(
                 aries_controller=aries_controller,
-                schema_id=schema_id,
                 schema_issuer_did=schema_issuer_did,
                 schema_name=schema_name,
                 schema_version=schema_version,
@@ -143,7 +139,6 @@ async def get_schemas(
             try:
                 schemas = await schemas_service.get_schemas_as_governance(
                     aries_controller=aries_controller,
-                    schema_id=schema_id,
                     schema_issuer_did=schema_issuer_did,
                     schema_name=schema_name,
                     schema_version=schema_version,
