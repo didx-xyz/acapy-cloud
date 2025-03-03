@@ -114,10 +114,10 @@ jobs:
             const comments = JSON.parse(process.env.PR_COMMENTS);
             const MAX_LENGTH = parseInt(process.env.MAX_LENGTH, 10);
 
-            const emojiRegex = /^(?:[\p{Emoji_Presentation}\p{Extended_Pictographic}]|:[a-z0-9_+-]+:)/u;
+            const emojiRegex = /^((?:[\p{Emoji_Presentation}\p{Extended_Pictographic}]|:[a-z0-9_+-]+:)[\s]*)+/u;
 
             // Remove emoji prefix and its trailing space for length check
-            const titleWithoutEmoji = prTitle.replace(emojiRegex, '');
+            const titleWithoutEmoji = prTitle.replace(emojiRegex, '').trim();
 
             // Find our bot's validation comment if it exists
             const botComment = comments.find(comment =>
@@ -126,6 +126,10 @@ jobs:
             );
 
             const commentBody = `${process.env.BOT_COMMENT_IDENTIFIER}\n⚠️ Your PR title is too long!\n\nPR titles should be no longer than ${MAX_LENGTH} characters (excluding emoji). Your title is ${titleWithoutEmoji.length} characters long.\n\nPlease update your PR title to be more concise.`;
+
+            core.debug(`Original title: "${prTitle}"`);
+            core.debug(`Title without prefix emojis: "${titleWithoutEmoji}"`);
+            core.debug(`Length: ${titleWithoutEmoji.length}`);
 
             if (titleWithoutEmoji.length > MAX_LENGTH) {
               if (!botComment) {
