@@ -23,7 +23,7 @@ from app.models.definitions import (
 )
 from app.util.definitions import (
     credential_definition_from_acapy,
-    credential_schema_from_acapy,
+    schema_from_acapy
 )
 from app.util.retry_method import coroutine_with_retry
 from shared.log_config import get_logger
@@ -195,7 +195,7 @@ async def get_schema(
     if not schema.var_schema:
         raise HTTPException(404, f"Schema with id {schema_id} not found.")
 
-    result = credential_schema_from_acapy(schema.var_schema)
+    result = schema_from_acapy(schema.var_schema)
     bound_logger.debug("Successfully fetched schema by id.")
     return result
 
