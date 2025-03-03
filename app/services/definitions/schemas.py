@@ -40,12 +40,22 @@ async def create_schema(
 
     did_result = await aries_controller.wallet.get_public_did()
     endorser_did = did_result.result.did
+
+    anoncreds_schema = handle_model_with_validation(
+        logger=bound_logger,
+        model_class=AnonCredsSchema,
+        attr_names=schema.attribute_names,
+        name=schema.name,
+        version=schema.version,
+        issuer_id=endorser_did,
+    )
+
+    # Using the default values for schema_post_option
+    # as the governance agent is the issuer
     schema_request = handle_model_with_validation(
         logger=bound_logger,
-        model_class=SchemaSendRequest,
-        attributes=schema.attribute_names,
-        schema_name=schema.name,
-        schema_version=schema.version,
+        model_class=SchemaPostRequest,
+        var_schema=anoncreds_schema
     )
 
     result = await publisher.publish_schema(schema_request)
