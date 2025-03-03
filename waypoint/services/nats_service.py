@@ -1,4 +1,5 @@
 import asyncio
+import os
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
@@ -28,6 +29,22 @@ from shared.log_config import get_logger
 from shared.models.webhook_events import CloudApiWebhookEventGeneric
 
 logger = get_logger(__name__)
+
+# Read NATS subscription config from environment variables
+BATCH_SIZE = os.getenv("NATS_BATCH_SIZE", 1)
+TIMEOUT = os.getenv("NATS_TIMEOUT", 0.5)
+HEARTBEAT = float(os.getenv("NATS_HEARTBEAT", 0.05))
+MAX_TIMEOUT_ERRORS = os.getenv("NATS_MAX_TIMEOUT_ERRORS", 3)
+
+# Validate heartbeat value to avoid NATS error
+if HEARTBEAT >= TIMEOUT / 2:
+    logger.warning(
+        "HEARTBEAT value ({}) must be less than half the TIMEOUT ({})",
+        HEARTBEAT,
+        TIMEOUT,
+    )
+    HEARTBEAT = TIMEOUT / 5
+    logger.warning("Setting HEARTBEAT to {} to avoid NATS error", HEARTBEAT)
 
 
 class NatsEventsProcessor:
@@ -167,7 +184,7 @@ class NatsEventsProcessor:
 
                     try:
                         messages = await subscription.fetch(
-                            batch=5, timeout=0.5, heartbeat=0.05
+                            batch=BATCH_SIZE, timeout=TIMEOUT, heartbeat=HEARTBEAT
                         )
                         for message in messages:
                             event = orjson.loads(message.data)
