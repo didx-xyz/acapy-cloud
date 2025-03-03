@@ -127,7 +127,7 @@ async def test_process_events(
         topic="test_topic",
         state="state",
         stop_event=stop_event,
-        duration=0.5,
+        duration=0.01,
     ) as event_generator:
         events = []
         async for event in event_generator:
@@ -159,7 +159,7 @@ async def test_process_events_cancelled_error(
             topic="test_topic",
             state="state",
             stop_event=stop_event,
-            duration=0.5,
+            duration=0.01,
         ) as event_generator:
             events = []
             async for event in event_generator:
@@ -186,7 +186,7 @@ async def test_process_events_fetch_timeout_error(
         topic="test_topic",
         state="state",
         stop_event=stop_event,
-        duration=0.5,
+        duration=0.01,
     ) as event_generator:
         events = []
         async for event in event_generator:
@@ -219,7 +219,7 @@ async def test_process_events_timeout_error(
         topic="test_topic",
         state="state",
         stop_event=stop_event,
-        duration=0.5,
+        duration=0.01,
     ) as event_generator:
         events = []
         async for event in event_generator:
@@ -261,7 +261,7 @@ async def test_process_events_bad_subscription_error_on_unsubscribe(
         topic="test_topic",
         state="state",
         stop_event=stop_event,
-        duration=0.5,
+        duration=0.01,
     ) as event_generator:
         events = []
         async for event in event_generator:
@@ -301,7 +301,7 @@ async def test_process_events_base_exception(
             topic="test_topic",
             state="state",
             stop_event=stop_event,
-            duration=0.5,
+            duration=0.01,
         ) as event_generator:
             events = []
             async for event in event_generator:
