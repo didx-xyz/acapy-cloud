@@ -27,6 +27,7 @@ postgresql:
       EOSQL
   # https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   resourcesPreset: none
+  maxConnections: 1010
 persistentVolumeClaimRetentionPolicy:
   enabled: true
   whenDeleted: Delete
@@ -40,7 +41,8 @@ pgpool:
     passwords: trust-registry;governance;multitenant;mediator
   adminUsername: admin
   adminPassword: admin
-  maxPool: 1000
+  numInitChildren: 100
+  maxPool: 10
   # https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   resourcesPreset: none
   tls:

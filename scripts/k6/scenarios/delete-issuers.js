@@ -6,10 +6,12 @@ import { SharedArray } from "k6/data";
 import { Counter } from "k6/metrics";
 import { getBearerToken } from "../libs/auth.js";
 import { deleteTenant, getWalletIdByWalletName } from "../libs/functions.js";
+import file from "k6/x/file"; // Add file import
 
 const vus = Number.parseInt(__ENV.VUS, 10);
 const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
 const issuerPrefix = __ENV.ISSUER_PREFIX;
+const outputPrefix = `${issuerPrefix}`;
 
 export const options = {
   scenarios: {
@@ -54,9 +56,20 @@ const wallets = new SharedArray("wallets", () => {
   return walletsArray;
 });
 
+const filepath = `output/${outputPrefix}-create-issuers.json`;
+
 export function setup() {
   const bearerToken = getBearerToken();
   return { bearerToken }; // eslint-disable-line no-eval
+}
+
+export function teardown() {
+  try {
+    file.deleteFile(filepath);
+    console.log(`Successfully deleted file: ${filepath}`);
+  } catch (error) {
+    console.error(`Error deleting file ${filepath}: ${error}`);
+  }
 }
 
 const iterationsPerVU = options.scenarios.default.iterations;
@@ -75,7 +88,7 @@ export default function (data) {
   const deleteHolderResponse = deleteTenant(bearerToken, walletId);
   check(deleteHolderResponse, {
     "Delete Issuer Tenant Response status code is 204": (r) => {
-      if (r.status !== 204) {
+      if (r.status !== 204 && r.status !== 200) {
         console.error(
           `Unexpected response status while deleting issuer tenant ${walletId}: ${r.status}`
         );

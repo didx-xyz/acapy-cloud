@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "acapy-cloud-endorser"
-version = "4.2.0"
+version = "4.3.0"
 description = "Endorser submodule for acapy-cloud"
 authors = [
   "Mourits de Beer <mourits.debeer@didx.co.za>",
@@ -11,9 +11,9 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "~3.12.8"
 
-aries-cloudcontroller = "==1.2.0.post20241205"
-dependency-injector = "~=4.45.0"
-fastapi = "~0.115.0"
+aries-cloudcontroller = "==1.2.1.post20250228"
+dependency-injector = "^4.46.0"
+fastapi = "~0.115.10"
 httpx = "~0.28.0"
 loguru = "~0.7.2"
 nats-py = { extras = ["nkeys"], version = "^2.9.0" }
@@ -36,7 +36,7 @@ pytest-cov = "~6.0.0"
 pytest-mock = "~3.14.0"
 
 [build-system]
-requires = ["poetry-core>=2.0.1"]
+requires = ["poetry-core>=2.1.1"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.coverage.run]

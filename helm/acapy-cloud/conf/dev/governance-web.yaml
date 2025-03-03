@@ -119,7 +119,7 @@ env:
 podSecurityContext:
   fsGroup: 65534
 securityContext:
-  runAsUser: 0
+  runAsUser: 65534
 
 extraVolumes:
   - name: logs

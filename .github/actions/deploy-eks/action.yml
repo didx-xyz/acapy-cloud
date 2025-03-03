@@ -3,42 +3,48 @@ description: Deploy to EKS
 
 inputs:
   aws-region:
-    description: "The AWS region where the EKS cluster is located"
+    description: The AWS region where the EKS cluster is located
     required: true
   aws-role-arn:
-    description: "The ARN of the AWS role to assume"
+    description: The ARN of the AWS role to assume
     required: true
   aws-role-session-name:
-    description: "The name of the AWS role session"
+    description: The name of the AWS role session
     required: true
   clean-start:
-    description: "Whether to clean up the EKS cluster before deploying"
+    description: Whether to clean up the EKS cluster before deploying
     required: false
     default: "false"
   cluster-name:
-    description: "The name of the EKS cluster"
+    description: The name of the EKS cluster
     required: true
   environment:
-    description: "The environment to deploy to"
+    description: The environment to deploy to
     required: true
   helm-version:
-    description: "The version of Helm to use"
+    description: The version of Helm to use
+    required: true
+  helmfile-path:
+    description: The path to the Helmfile to use
     required: false
-    default: v3.17.0
+    default: ./helm/acapy-cloud.yaml.gotmpl
   helmfile-plugins:
-    description: "The Helmfile plugins to install"
+    description: The Helmfile plugins to install
     required: false
     default: https://github.com/databus23/helm-diff
   helmfile-version:
-    description: "The version of Helmfile to use"
-    required: false
-    default: v0.170.1
+    description: The version of Helmfile to use
+    required: true
   image-tag:
-    description: "The tag of the Docker image to deploy"
+    description: The tag of the Docker image to deploy
     required: true
   namespace:
-    description: "The Kubernetes namespace to deploy to"
+    description: The Kubernetes namespace to deploy to
     required: true
+  pipelines-dir:
+    description: The directory containing the Redpanda Connect pipelines
+    required: true
+    default: ./resources/connect-processors/cloud/pipelines
 
 runs:
   using: composite
@@ -62,12 +68,12 @@ runs:
     - name: Helmfile Destroy
       if: inputs.clean-start == 'true'
       # https://github.com/helmfile/helmfile-action
-      uses: helmfile/helmfile-action@v2.0.2
+      uses: helmfile/helmfile-action@v2
       with:
         helmfile-args: |
           destroy \
             --environment ${{ inputs.environment }} \
-            -f ./helm/acapy-cloud.yaml.gotmpl \
+            -f ${{ inputs.helmfile-path }} \
             --state-values-set namespace=${{ inputs.namespace }}
         helm-plugins: ${{ inputs.helmfile-plugins }}
         helmfile-version: ${{ inputs.helmfile-version }}
@@ -78,22 +84,23 @@ runs:
       # https://docs.redpanda.com/redpanda-connect/get-started/quickstarts/helm-chart/#run-multiple-pipelines-in-streams-mode
       run: |
         kubectl create configmap connect-cloud-pipelines \
-          --from-file=./resources/connect-processors/cloud/pipelines/ \
+          --from-file=$PIPELINES_DIR \
           --dry-run=client \
           -o yaml \
           -n $NAMESPACE | kubectl apply -f -
         kubectl -n $NAMESPACE rollout restart deploy/connect-cloud || true
       env:
         NAMESPACE: ${{ inputs.namespace }}
+        PIPELINES_DIR: ${{ inputs.pipelines-dir }}
 
     - name: Helmfile Apply
       # https://github.com/helmfile/helmfile-action
-      uses: helmfile/helmfile-action@v2.0.2
+      uses: helmfile/helmfile-action@v2
       with:
         helmfile-args: |
           apply \
             --environment ${{ inputs.environment }} \
-            -f ./helm/acapy-cloud.yaml.gotmpl \
+            -f ${{ inputs.helmfile-path }} \
             --state-values-set image.tag=${{ inputs.image-tag }} \
             --state-values-set image.registry=ghcr.io/${{ github.repository_owner }} \
             --state-values-set pgProxyEnabled=${{ inputs.clean-start == 'false' }} \

@@ -5,7 +5,7 @@ WORKDIR /trustregistry
 COPY trustregistry/poetry.lock /trustregistry
 COPY trustregistry/pyproject.toml /trustregistry
 
-ARG POETRY_VERSION=2.0.1
+ARG POETRY_VERSION=2.1.1
 RUN pip install --no-cache-dir poetry==${POETRY_VERSION}
 # Set Poetry's cache and virtualenvs path to a writable directory
 ENV POETRY_CACHE_DIR=/tmp/.cache/pypoetry

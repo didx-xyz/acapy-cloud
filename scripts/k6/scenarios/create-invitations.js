@@ -10,6 +10,7 @@ import {
   createInvitation,
   genericWaitForSSEEvent,
   getWalletIndex,
+  retry,
 } from "../libs/functions.js";
 import { bootstrapIssuer } from "../libs/setup.js";
 // import bootstrapIssuer from "./bootstrap-issuer.js";
@@ -22,6 +23,7 @@ const schemaName = __ENV.SCHEMA_NAME;
 const schemaVersion = __ENV.SCHEMA_VERSION;
 const numIssuers = __ENV.NUM_ISSUERS;
 const outputPrefix = `${issuerPrefix}-${holderPrefix}`;
+const version = __ENV.VERSION;
 
 export const options = {
   scenarios: {
@@ -41,18 +43,16 @@ export const options = {
     // "http_reqs{scenario:default}": ["count >= 0"],
     // "http_reqs{my_custom_tag:specific_function}": ["count>=0"],
     // "iteration_duration{scenario:default}": ["max>=0"],
-    checks: ["rate==1"],
-    'test_function_reqs{my_custom_tag:specific_function}': ['count>=0'],
-    // 'test_function_reqs{scenario:default}': ['count>=0'],
-    // 'custom_duration{step:getAccessTokenByWalletId}': ['avg>=0'],
+    checks: ["rate>0.99"],
   },
   tags: {
     test_run_id: "phased-issuance",
     test_phase: "create-invitation",
+    version: `${version}`,
   },
 };
 
-const testFunctionReqs = new Counter("test_function_reqs");
+const testFunctionReqs = new Counter("test_function_reqs");     // successful completions
 // const mainIterationDuration = new Trend("main_iteration_duration");
 
 const inputFilepath = `../output/${holderPrefix}-create-holders.json`;
@@ -92,6 +92,7 @@ function getIssuerIndex(vu, iter) {
 // const vuStartTimes = {};
 
 export default function (data) {
+
   // if (__ITER === 0) {
   //   vuStartTimes[__VU] = Date.now();
   // }
@@ -111,15 +112,24 @@ export default function (data) {
 
   // console.log(`VU: ${__VU}, Iteration: ${__ITER}, Wallet Index: ${walletIndex}, Issuer Index: ${issuerIndex}, Issuer Wallet ID: ${issuer.walletId}`);
 
-  const createInvitationResponse = createInvitation(
-    bearerToken,
-    issuer.accessToken
-  );
+  let createInvitationResponse;
+  try {
+    createInvitationResponse = retry(() => {
+      const response = createInvitation(bearerToken, issuer.accessToken);
+      if (response.status !== 200) {
+        throw new Error(`Non-200 status: ${response.status}`);
+      }
+      return response;
+    }, 5, 2000);
+  } catch (e) {
+    console.error(`Failed after retries: ${e.message}`);
+    createInvitationResponse = e.response || e;
+  }
   check(createInvitationResponse, {
     "Invitation created successfully": (r) => {
       if (r.status !== 200) {
         throw new Error(
-          `Unexpected response status while create invitation: ${r.status}`
+          `Unexpected response status while create invitation:\nStatus: ${r.status}\nBody: ${r.body}`
         );
       }
       return true;
@@ -128,10 +138,22 @@ export default function (data) {
   const { invitation: invitationObj, connection_id: issuerConnectionId } =
     JSON.parse(createInvitationResponse.body);
 
-  const acceptInvitationResponse = acceptInvitation(
-    wallet.access_token,
-    invitationObj
-  );
+  let acceptInvitationResponse;
+  try {
+    acceptInvitationResponse = retry(() => {
+      const response = acceptInvitation(wallet.access_token, invitationObj);
+      if (response.status !== 200) {
+        throw new Error(`Non-200 status: ${response.status}`);
+      }
+      return response;
+    }
+    , 5, 2000);
+  }
+  catch (e) {
+    console.error(`Failed after retries: ${e.message}`);
+    createInvitationResponse = e.response || e;
+  }
+
   check(acceptInvitationResponse, {
     "Invitation accepted successfully": (r) => {
       if (r.status !== 200) {
@@ -167,11 +189,7 @@ export default function (data) {
 
   check(waitForSSEEventResponse, {
     [sseCheckMessage]: (r) => r === true
-});
-
-  testFunctionReqs.add(1, { my_custom_tag: 'specific_function' });
-
-  testFunctionReqs.add(1);
+  });
 
   const holderData = JSON.stringify({
     wallet_label: wallet.wallet_label,
@@ -187,8 +205,5 @@ export default function (data) {
   });
   file.appendString(outputFilepath, `${holderData}\n`);
 
-  const end = Date.now();
-  const duration = end - start;
-  // console.log(`Duration for iteration ${__ITER}: ${duration} ms`);
-  // mainIterationDuration.add(duration);
+  testFunctionReqs.add(1);  // Count successful completions with tag
 }

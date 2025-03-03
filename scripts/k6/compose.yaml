@@ -1,0 +1,46 @@
+services:
+  xk6:
+    build: .
+    container_name: xk6
+    image: xk6
+    tty: true
+    depends_on:
+      datadog:
+        condition: service_healthy
+    volumes:
+      # - ./output:/k6/output
+      # - .env.local:/k6/.env.local
+      - ../k6:/k6
+
+    entrypoint: /bin/bash
+    command: ./scripts/main.sh -c batch
+    environment:
+      - K6_STATSD_ADDR=datadog:8125
+      - K6_CONSOLE_OUTPUT_FANCY=true
+      - BASE_HOLDER_PREFIX=dev9
+      - BASE_VUS=20
+      - BASE_ITERATIONS=10
+      - TOTAL_BATCHES=5
+      - VERSION=latest
+      - ISSUERS=issuer1
+
+  datadog:
+    image: datadog/agent:latest
+    container_name: datadog
+    healthcheck:
+      test: ["CMD", "agent", "health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    env_file:
+      - .env.local    # Only load API key from here
+    environment:
+      - DD_SITE=datadoghq.eu
+      - DD_DOGSTATSD_NON_LOCAL_TRAFFIC=1
+      - DD_HOSTNAME=k6-metrics
+      - DD_DOGSTATSD_STATS_ENABLE=true
+      - DD_PROCESS_AGENT_ENABLED=false
+      - DOCKER_CONTENT_TRUST=1
+      - DD_LOG_LEVEL=warn
+    ports:
+      - "8125:8125/udp"

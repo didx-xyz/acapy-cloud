@@ -10,6 +10,14 @@ source "${K6_DIR}/env.sh"
 
 source "${SCRIPT_DIR}/common.sh"
 
+# Trap SIGINT to ensure k6 process is terminated
+trap 'cleanup_k6' SIGINT
+
+cleanup_k6() {
+  pkill -f xk6 || true
+  echo "Terminated k6 process"
+}
+
 usage() {
   cat <<EOF
 Usage: $(basename "$0") -c COLLECTION [-s STACK] [-C]

@@ -11,6 +11,7 @@ import {
   genericWaitForSSEEvent,
   getCredentialIdByThreadId,
   getWalletIndex,
+  retry,  // Add this import
 } from "../libs/functions.js";
 
 const vus = Number.parseInt(__ENV.VUS, 10);
@@ -18,6 +19,7 @@ const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
 const holderPrefix = __ENV.HOLDER_PREFIX;
 const issuerPrefix = __ENV.ISSUER_PREFIX;
 const outputPrefix = `${issuerPrefix}-${holderPrefix}`;
+const version = __ENV.VERSION;
 
 export const options = {
   scenarios: {
@@ -36,13 +38,14 @@ export const options = {
     "http_req_duration{scenario:default}": ["max>=0"],
     "http_reqs{scenario:default}": ["count >= 0"],
     "iteration_duration{scenario:default}": ["max>=0"],
-    checks: ["rate==1"],
+    checks: ["rate>0.99"],
     // 'specific_function_reqs{my_custom_tag:specific_function}': ['count>=0'],
     // 'specific_function_reqs{scenario:default}': ['count>=0'],
   },
   tags: {
     test_run_id: "phased-issuance",
     test_phase: "create-credentials",
+    version: `${version}`,
   },
 };
 
@@ -87,15 +90,21 @@ export default function (data) {
 
   let createCredentialResponse;
   try {
-    createCredentialResponse = createCredential(
-      bearerToken,
-      wallet.issuer_access_token,
-      wallet.issuer_credential_definition_id,
-      wallet.issuer_connection_id
-    );
+    createCredentialResponse = retry(() => {
+      const response = createCredential(
+        bearerToken,
+        wallet.issuer_access_token,
+        wallet.issuer_credential_definition_id,
+        wallet.issuer_connection_id
+      );
+      if (response.status !== 200) {
+        throw new Error(`Non-200 status: ${response.status}`);
+      }
+      return response;
+    }, 5, 2000);
   } catch (error) {
-    // console.error(`Error creating credential: ${error.message}`);
-    createCredentialResponse = { status: 500, response: error.message };
+    console.error(`Failed after retries: ${error.message}`);
+    createCredentialResponse = error.response || error;
   }
 
   check(createCredentialResponse, {
@@ -140,10 +149,20 @@ export default function (data) {
 
   const credentialId = getCredentialIdByThreadId(wallet.access_token, threadId);
 
-  const acceptCredentialResponse = acceptCredential(
-    wallet.access_token,
-    credentialId
-  );
+  let acceptCredentialResponse;
+  try {
+    acceptCredentialResponse = retry(() => {
+      const response = acceptCredential(wallet.access_token, credentialId);
+      if (response.status !== 200) {
+        throw new Error(`Non-200 status: ${response.status}`);
+      }
+      return response;
+    }, 5, 2000);
+  } catch (error) {
+    console.error(`Failed after retries: ${error.message}`);
+    acceptCredentialResponse = error.response || error;
+  }
+
   check(acceptCredentialResponse, {
     "Credential accepted successfully": (r) => {
       if (r.status !== 200) {

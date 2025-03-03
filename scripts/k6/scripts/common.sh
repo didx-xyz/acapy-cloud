@@ -23,7 +23,7 @@ wrn() {
 
 run_test() {
   local test_script="$1"
-  xk6 run --out statsd "${test_script}"
+  xk6 run -o output-statsd "${test_script}"
   local exit_code=$?
   if [[ ${exit_code} -ne 0 ]]; then
     echo "Test ${test_script} failed with exit code ${exit_code}" >&2

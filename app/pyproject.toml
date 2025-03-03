@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "acapy-cloud-app"
-version = "4.2.0"
+version = "4.3.0"
 description = "Main app submodule for acapy-cloud"
 authors = [
   "Mourits de Beer <mourits.debeer@didx.co.za>",
@@ -13,9 +13,9 @@ python = "~3.12.8"
 
 aiohttp = "~3.11.7"
 aiocache = "~0.12.0"
-aries-cloudcontroller = "==1.2.0.post20241205"
+aries-cloudcontroller = "==1.2.1.post20250228"
 base58 = "~2.1.1"
-fastapi = "~0.115.0"
+fastapi = "~0.115.10"
 httpx = "~0.28.0"
 loguru = "~0.7.2"
 orjson = "~3.10.7"
@@ -42,7 +42,7 @@ pytest-mock = "~3.14.0"
 pytest-xdist = "^3.6.1"
 
 [build-system]
-requires = ["poetry-core>=2.0.1"]
+requires = ["poetry-core>=2.1.1"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.coverage.run]

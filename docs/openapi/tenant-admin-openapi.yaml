@@ -11,9 +11,7 @@ info:
     https://www.didx.co.za/acapy-cloud/index.html
 
     '
-  version: 4.2.0
-servers:
-- url: /tenant-admin
+  version: 4.3.0
 paths:
   /v1/tenants:
     post:

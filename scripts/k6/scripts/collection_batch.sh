@@ -6,13 +6,26 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 config() {
   # Global test configuration
-  export BASE_VUS=30
-  export BASE_ITERATIONS=20
+  export BASE_VUS=${BASE_VUS:-30}
+  export BASE_ITERATIONS=${BASE_ITERATIONS:-10}
   export VUS=${BASE_VUS}
   export ITERATIONS=${BASE_ITERATIONS}
-  export SCHEMA_NAME="modelX_acc"
-  export BASE_HOLDER_PREFIX="theholder"
-  export TOTAL_BATCHES=10  # New configuration parameter
+  export SCHEMA_NAME="didx_acc"
+  export BASE_HOLDER_PREFIX=${BASE_HOLDER_PREFIX:-"demoholder"}
+  export TOTAL_BATCHES=${TOTAL_BATCHES:-2}  # New configuration parameter
+  # Default issuers if none are provided
+  default_issuers=("local_pop" "local_acc")
+
+  # Check if ISSUERS environment variable is set
+  if [ -n "${ISSUERS}" ]; then
+    # Split the string into an array using space as delimiter
+    IFS=' ' read -ra issuers <<< "${ISSUERS}"
+  else
+    # Use defaults
+    issuers=("${default_issuers[@]}")
+  fi
+
+  export issuers
 }
 
 calculate_create_creds_load() {
@@ -38,7 +51,7 @@ should_create_holders() {
 init() {
   local issuer_prefix="$1"
   export ISSUER_PREFIX="${issuer_prefix}"
-  xk6 run --out statsd ./scenarios/bootstrap-issuer.js -e ITERATIONS=1 -e VUS=1
+  xk6 run ./scenarios/bootstrap-issuer.js -e ITERATIONS=1 -e VUS=1
 }
 
 create_holders() {
@@ -47,8 +60,8 @@ create_holders() {
 
   export ISSUER_PREFIX="${issuer_prefix}"
   export HOLDER_PREFIX="${holder_prefix}"
-  export SLEEP_DURATION=0.01
-  xk6 run --out statsd ./scenarios/create-holders.js
+  export SLEEP_DURATION=0.1
+  xk6 run -o output-statsd ./scenarios/create-holders.js
 }
 
 scenario_create_invitations() {
@@ -71,7 +84,7 @@ scenario_create_proof_verified() {
 scenario_revoke_credentials() {
   local iterations=$((ITERATIONS * VUS))
   local vus=1
-  xk6 run --out statsd ./scenarios/revoke-credentials.js -e ITERATIONS=${iterations} -e VUS=${vus}
+  xk6 run -o output-statsd ./scenarios/revoke-credentials.js -e ITERATIONS=${iterations} -e VUS=${vus}
 }
 
 scenario_create_proof_unverified() {
@@ -81,7 +94,23 @@ scenario_create_proof_unverified() {
 
 cleanup() {
   log "Cleaning up..."
-  xk6 run --out statsd ./scenarios/delete-holders.js
+
+  # Clean up holders
+  for batch_num in $(seq 1 ${TOTAL_BATCHES}); do
+    local holder_prefix="${BASE_HOLDER_PREFIX}_${batch_num}k"
+    export HOLDER_PREFIX="${holder_prefix}"
+
+    log "Cleaning up holders with prefix ${holder_prefix}..."
+    xk6 run -o output-statsd ./scenarios/delete-holders.js
+  done
+
+  # Clean up issuers
+  for issuer in "${issuers[@]}"; do
+    export ISSUER_PREFIX="${issuer}"
+
+    log "Cleaning up issuer ${issuer}..."
+    xk6 run -o output-statsd ./scenarios/delete-issuers.js -e ITERATIONS=1 -e VUS=1
+  done
 }
 
 run_batch() {
@@ -123,8 +152,6 @@ run_collection() {
   local deployments="$1"
 
   config
-
-  local issuers=("theissuer_pop" "theissuer_acc")
 
   for issuer in "${issuers[@]}"; do
     for batch_num in $(seq 1 ${TOTAL_BATCHES}); do

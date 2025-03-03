@@ -4,12 +4,15 @@
 import { check } from "k6";
 import { SharedArray } from "k6/data";
 import { Counter } from "k6/metrics";
+import file from "k6/x/file"; // Add file import
 import { getBearerToken } from "../libs/auth.js";
 import { deleteTenant, getWalletIdByWalletName } from "../libs/functions.js";
 
-const vus = Number.parseInt(__ENV.VUS, 10);
-const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
-const holderPrefix = __ENV.HOLDER_PREFIX;
+const vus = Number(__ENV.VUS || 1);
+const iterations = Number(__ENV.ITERATIONS || 1);
+const holderPrefix = __ENV.HOLDER_PREFIX || "holder";
+const issuerPrefix = __ENV.ISSUER_PREFIX || "issuer";
+const outputPrefix = `${holderPrefix}`;
 
 export const options = {
   scenarios: {
@@ -55,13 +58,20 @@ const wallets = new SharedArray("wallets", () => {
   return walletsArray;
 });
 
-const numIssuers = 1;
-const issuers = [];
-const filepath = "output/create-holders.json";
+const filepath = `output/${outputPrefix}-create-holders.json`;
 
 export function setup() {
   const bearerToken = getBearerToken();
   return { bearerToken };
+}
+
+export function teardown() {
+  try {
+    file.deleteFile(filepath);
+    console.log(`Successfully deleted file: ${filepath}`);
+  } catch (error) {
+    console.error(`Error deleting file ${filepath}: ${error}`);
+  }
 }
 
 const iterationsPerVU = options.scenarios.default.iterations;
@@ -80,7 +90,7 @@ export default function (data) {
   const deleteHolderResponse = deleteTenant(bearerToken, walletId);
   check(deleteHolderResponse, {
     "Delete Holder Tenant Response status code is 204": (r) => {
-      if (r.status !== 204) {
+      if (r.status !== 204 && r.status !== 200) {
         console.error(
           `Unexpected response status while deleting holder tenant ${walletId}: ${r.status}`
         );

@@ -233,6 +233,9 @@ async def test_delete_connection(
         await bob_member_client.get(f"{CONNECTIONS_BASE_PATH}/{bob_connection_id}")
     assert exc.value.status_code == 404
 
+    # Short sleep to allow alice's records to update
+    await asyncio.sleep(0.5)
+
     # Check that the connection is deleted for alice as well
     with pytest.raises(HTTPException) as exc:
         await alice_member_client.get(f"{CONNECTIONS_BASE_PATH}/{alice_connection_id}")

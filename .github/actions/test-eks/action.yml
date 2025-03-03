@@ -3,40 +3,45 @@ description: Run Tests against EKS
 
 inputs:
   clean-start:
-    description: "Whether this is a clean start or not"
+    description: Whether this is a clean start or not
     required: false
     default: "false"
   environment:
-    description: "The environment to deploy to"
+    description: The environment to deploy to
     required: true
   helm-version:
-    description: "The version of Helm to use"
+    description: The version of Helm to use
+    required: true
+  helmfile-path:
+    description: The path to the Helmfile to use
     required: false
-    default: v3.17.0
+    default: ./helm/acapy-test.yaml.gotmpl
   helmfile-plugins:
-    description: "The Helmfile plugins to install"
+    description: The Helmfile plugins to install
     required: false
     default: https://github.com/databus23/helm-diff
   helmfile-version:
-    description: "The version of Helmfile to use"
-    required: false
-    default: v0.170.1
+    description: The version of Helmfile to use
+    required: true
   image-tag:
-    description: "The tag of the Docker image to deploy"
+    description: The tag of the Docker image to deploy
+    required: true
+  mise-version:
+    description: "The version of Mise to use"
     required: true
   namespace:
-    description: "The Kubernetes namespace to deploy to"
+    description: The Kubernetes namespace to deploy to
     required: true
   pytest-completions:
-    description: "How many completions to run"
+    description: How many completions to run
     required: false
     default: "1"
-  run-regression-tests:
-    description: "Whether to run regression tests"
+  regression-tests:
+    description: Whether to run regression tests
     required: false
     default: "true"
   run-tests:
-    description: "Whether to run tests"
+    description: Whether to run tests
     required: false
     default: "true"
 
@@ -45,23 +50,23 @@ runs:
 
   steps:
     - name: Helmfile run regression tests
-      if: inputs.run-regression-tests == 'true'
+      if: inputs.regression-tests == 'true'
       id: pytest-regression
       # https://github.com/helmfile/helmfile-action
-      uses: helmfile/helmfile-action@v2.0.2
+      uses: helmfile/helmfile-action@v2
       with:
         helmfile-args: |
           apply \
             --environment ${{ inputs.environment }} \
-            -f ./helm/acapy-test.yaml.gotmpl \
+            -f ${{ inputs.helmfile-path }} \
             --set image.tag=${{ inputs.image-tag }} \
             --set image.registry=ghcr.io/${{ github.repository_owner }} \
             --set completions=${{ inputs.pytest-completions }} \
             --state-values-set release=acapy-test-regression \
             --set fullnameOverride=acapy-test-regression \
-            --set env.RUN_REGRESSION_TESTS=${{ inputs.run-regression-tests }} \
+            --set env.RUN_REGRESSION_TESTS=${{ inputs.regression-tests }} \
             --set env.FAIL_ON_RECREATING_FIXTURES=${{ inputs.clean-start != 'true' }} \
-            --state-values-set regressionEnabled=${{ inputs.run-regression-tests }} \
+            --state-values-set regressionEnabled=${{ inputs.regression-tests }} \
             --state-values-set namespace=${{ inputs.namespace }}
         helm-plugins: ${{ inputs.helmfile-plugins }}
         helmfile-version: ${{ inputs.helmfile-version }}
@@ -71,12 +76,12 @@ runs:
       if: inputs.run-tests != 'false'
       id: pytest
       # https://github.com/helmfile/helmfile-action
-      uses: helmfile/helmfile-action@v2.0.2
+      uses: helmfile/helmfile-action@v2
       with:
         helmfile-args: |
           apply \
             --environment ${{ inputs.environment }} \
-            -f ./helm/acapy-test.yaml.gotmpl \
+            -f ${{ inputs.helmfile-path }} \
             --set image.tag=${{ inputs.image-tag }} \
             --set image.registry=ghcr.io/${{ github.repository_owner }} \
             --set completions=${{ inputs.pytest-completions }} \
@@ -199,7 +204,7 @@ runs:
 
         # Clean up: delete the temporary pod
         echo "Cleaning up..."
-        kubectl -n $NAMESPACE delete pod $POD_NAME
+        kubectl -n $NAMESPACE delete pod $POD_NAME --force
 
         echo "Done!"
       env:
@@ -217,7 +222,7 @@ runs:
     - name: Pytest coverage comment
       if: steps.pytest.outcome == 'success'
       # https://github.com/MishaKav/pytest-coverage-comment
-      uses: MishaKav/pytest-coverage-comment@v1.1.53
+      uses: MishaKav/pytest-coverage-comment@v1
       with:
         pytest-coverage-path: ./pytest/test_coverage.txt
         junitxml-path: ./pytest/test_output.xml
@@ -230,7 +235,7 @@ runs:
     - name: Pytest regression coverage comment
       if: steps.pytest-regression.outcome == 'success'
       # https://github.com/MishaKav/pytest-coverage-comment
-      uses: MishaKav/pytest-coverage-comment@v1.1.53
+      uses: MishaKav/pytest-coverage-comment@v1
       with:
         pytest-coverage-path: ./pytest-regression/test_coverage.txt
         junitxml-path: ./pytest-regression/test_output.xml
@@ -263,13 +268,13 @@ runs:
 
     - name: Helmfile destroy pytest
       # https://github.com/helmfile/helmfile-action
-      uses: helmfile/helmfile-action@v2.0.2
+      uses: helmfile/helmfile-action@v2
       if: always()
       with:
         helmfile-args: |
           destroy \
             --environment ${{ inputs.environment }} \
-            -f ./helm/acapy-test.yaml.gotmpl \
+            -f ${{ inputs.helmfile-path }} \
             --state-values-set release=acapy-test
         helm-plugins: ${{ inputs.helmfile-plugins }}
         helmfile-version: ${{ inputs.helmfile-version }}
@@ -277,13 +282,13 @@ runs:
 
     - name: Helmfile destroy pytest regression
       # https://github.com/helmfile/helmfile-action
-      uses: helmfile/helmfile-action@v2.0.2
+      uses: helmfile/helmfile-action@v2
       if: always()
       with:
         helmfile-args: |
           destroy \
             --environment ${{ inputs.environment }} \
-            -f ./helm/acapy-test.yaml.gotmpl \
+            -f ${{ inputs.helmfile-path }} \
             --state-values-set release=acapy-test-regression \
             --state-values-set namespace=${{ inputs.namespace }}
         helm-plugins: ${{ inputs.helmfile-plugins }}

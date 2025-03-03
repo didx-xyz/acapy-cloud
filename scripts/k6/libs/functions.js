@@ -150,8 +150,8 @@ export function deleteTenant(bearerToken, walletId) {
 
     if (response.status === 204 || response.status === 200) {
       // Request was successful
-      if (responseBody === null) {
-        // console.log(`Wallet ${walletId} deleted successfully.`);
+      if (responseBody === null || responseBody === "null") {
+        console.log(`Wallet ${walletId} deleted successfully.`);
       } else {
         console.error(
           `Failed to delete wallet ${walletId}. Response body: ${responseBody}`
@@ -292,8 +292,10 @@ export function createCredential(
     if (response.status >= 200 && response.status < 300) {
       return response;
     }
-    console.error(`Request failed with status ${response.status}`);
-    console.error(`Response body: ${response.body}`);
+    console.error(`createCredential request failed with status ${response.status}`);
+    // if (response.body) {
+    //   console.error(`Response body: ${response.body}`);
+    // }
     return response.body;
   } catch (error) {
     console.error(`Error accepting invitation: ${error.message}`);
@@ -792,10 +794,10 @@ export function genericWaitForSSEEvent({
   sseUrlPath,
   topic,
   expectedState,
-  lookBack = 5,
-  maxRetries = 3,
-  retryDelay = 1,
-  maxEmptyPings = 1,
+  lookBack = 45,
+  maxRetries = 5,
+  retryDelay = 2,
+  maxEmptyPings = 3,
   sseTag
 }) {
   const sseUrl = `${__ENV.CLOUDAPI_URL}/tenant/v1/sse/${walletId}/${sseUrlPath}/${threadId}/${eventType}?look_back=${lookBack}`;
@@ -809,6 +811,7 @@ export function genericWaitForSSEEvent({
       let succeeded = false;
       let failed = false;
       let emptyPingCount = 0;
+      let hadEmptyPing = false;
 
       const response = sse.open(
           sseUrl,
@@ -820,11 +823,13 @@ export function genericWaitForSSEEvent({
               client.on("event", (event) => {
                   if (!event.data || event.data.trim() === "") {
                       emptyPingCount++;
+                      hadEmptyPing = true;
+                      console.log(`VU ${__VU}: Iteration ${__ITER}: Empty ping received: ${emptyPingCount}`);
                       if (emptyPingCount >= maxEmptyPings) {
                           console.error(`VU ${__VU}: Iteration ${__ITER}: Failed after ${maxEmptyPings} empty pings`);
                           client.close();
                           failed = true;
-                          return false;  // Signal to exit the whole function
+                          return false;
                       }
                       return;
                   }
@@ -835,6 +840,9 @@ export function genericWaitForSSEEvent({
                           eventData.topic === topic &&
                           eventData.payload &&
                           eventData.payload.state === expectedState) {
+                          if (hadEmptyPing) {
+                              console.log(`VU ${__VU}: Iteration ${__ITER}: Successfully received event after ${emptyPingCount} empty ping(s)`);
+                          }
                           client.close();
                           succeeded = true;
                       }
@@ -881,6 +889,36 @@ export function genericWaitForSSEEvent({
 
   console.error(`VU ${__VU}: Iteration ${__ITER}: SSE connection failed after ${maxRetries} retries for event type: ${eventType}, state: ${expectedState}, topic: ${topic}, threadId: ${threadId}`);
   return false;
+}
+
+export function retry(fn, retries = 3, delay = 2000) {
+  let attempts = 0;
+
+  while (attempts < retries) {
+    try {
+      const result = fn();
+      // If first attempt succeeds, just return the result without logging
+      if (attempts === 0) {
+        return result;
+      }
+      // For subsequent successful attempts, log the success
+      console.log(`VU ${__VU}: Iteration ${__ITER}: Succeeded on attempt ${attempts + 1}`);
+      return result;
+    } catch (e) {
+      attempts++;
+      // Only log from second attempt onwards
+      if (attempts > 1) {
+        console.warn(`VU ${__VU}: Iteration ${__ITER}: Attempt ${attempts} failed: ${e.message}`);
+      }
+
+      if (attempts >= retries) {
+        console.error(`VU ${__VU}: Iteration ${__ITER}: All ${retries} attempts failed`);
+        throw e;
+      }
+
+      sleep(delay / 1000);
+    }
+  }
 }
 
 // {

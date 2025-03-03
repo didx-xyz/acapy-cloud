@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "acapy-cloud-trust-registry"
-version = "4.2.0"
+version = "4.3.0"
 description = "Trust Registry submodule for acapy-cloud"
 authors = [
   "Mourits de Beer <mourits.debeer@didx.co.za>",
@@ -12,7 +12,7 @@ package-mode = false
 python = "~3.12.8"
 
 alembic = "~1.14.0"
-fastapi = "~0.115.0"
+fastapi = "~0.115.10"
 httpx = "~0.28.0"
 loguru = "~0.7.2"
 orjson = "~3.10.7"
@@ -34,7 +34,7 @@ pytest-cov = "~6.0.0"
 pytest-mock = "~3.14.0"
 
 [build-system]
-requires = ["poetry-core>=2.0.1"]
+requires = ["poetry-core>=2.1.1"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.coverage.run]
