@@ -44,10 +44,10 @@ on:
 permissions: {}
 
 env:
-  TAILSCALE_VERSION: 1.80.2
+  TAILSCALE_VERSION: latest
   HELMFILE_VERSION: v0.171.0
   HELM_VERSION: v3.17.1
-  MISE_VERSION: 2025.2.8
+  MISE_VERSION: 2025.3.0
 
 jobs:
   format:
