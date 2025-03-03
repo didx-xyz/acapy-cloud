@@ -1,15 +1,15 @@
 from aries_cloudcontroller import CredentialDefinition as AcaPyCredentialDefinition
-from aries_cloudcontroller import ModelSchema
+from aries_cloudcontroller import SchemaState
 
 from app.models.definitions import CredentialDefinition, CredentialSchema
 
 
-def credential_schema_from_acapy(schema: ModelSchema):
+def credential_schema_from_acapy(schema: SchemaState):
     return CredentialSchema(
-        id=schema.id,
-        name=schema.name,
-        version=schema.version,
-        attribute_names=schema.attr_names,
+        id=schema.schema_id,
+        name=schema.var_schema.name,
+        version=schema.var_schema.version,
+        attribute_names=schema.var_schema.attr_names,
     )
 
 
