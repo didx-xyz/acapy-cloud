@@ -34,8 +34,8 @@ class SchemaPublisher:
                 )
                 raise CloudApiException("Error while creating schema.") from e
 
-        if result.sent and result.sent.schema_id:
-            await register_schema(schema_id=result.sent.schema_id)
+        if result.schema_state.state == "finished" and result.schema_state.schema_id:
+            await register_schema(schema_id=result.schema_state.schema_id)
         else:
             self._logger.error("No SchemaSendResult in `publish_schema` response.")
             raise CloudApiException(
