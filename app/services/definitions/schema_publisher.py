@@ -20,9 +20,8 @@ class SchemaPublisher:
         try:
             result = await handle_acapy_call(
                 logger=self._logger,
-                acapy_call=self._controller.schema.publish_schema,
+                acapy_call=self._controller.anoncreds_schemas.create_schema,
                 body=schema_request,
-                create_transaction_for_endorser=False,
             )
         except CloudApiException as e:
             if "already exist" in e.detail and e.status_code == 400:
