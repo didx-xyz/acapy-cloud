@@ -113,11 +113,6 @@ class NatsEventsProcessor:
                 subscription = await self.js_context.pull_subscribe(
                     config=config, **subscribe_kwargs
                 )
-
-                # Get consumer info to verify that the subscription was successful
-                # TODO test if this is necessary/helps
-                await subscription.consumer_info()
-
                 bound_logger.debug("Successfully subscribed to JetStream")
                 return subscription
             except BadSubscriptionError as e:
@@ -172,7 +167,7 @@ class NatsEventsProcessor:
 
         async def event_generator(*, subscription: JetStreamContext.PullSubscription):
             try:
-                nr_of_timeout_errors = 0
+                num_timeout_errors = 0
                 end_time = time.time() + duration
                 while not stop_event.is_set():
                     remaining_time = end_time - time.time()
@@ -198,20 +193,25 @@ class NatsEventsProcessor:
                         await asyncio.sleep(0.1)
 
                     except TimeoutError:
-                        bound_logger.error("<><><>TimeoutError<><><>")
-                        if nr_of_timeout_errors == 5:
+                        bound_logger.warning("No heartbeat received on subscription")
+
+                        if num_timeout_errors == MAX_TIMEOUT_ERRORS:
                             bound_logger.warning(
-                                "Subscription lost connection, attempting to resubscribe..."
+                                "Max number of timeout errors reached ({}), "
+                                "attempting to resubscribe...",
+                                num_timeout_errors,
                             )
+
                             try:
                                 await subscription.unsubscribe()
-                                bound_logger.debug("Unsubscribed.")
+                                bound_logger.info("Unsubscribed")
                             except BadSubscriptionError as e:
                                 bound_logger.warning(
-                                    "BadSubscriptionError unsubscribing from NATS after subscription lost: {}",
+                                    "BadSubscriptionError after connection lost: {}",
                                     e,
                                 )
 
+                            # Attempt to resubscribe
                             subscription = await self._subscribe(
                                 group_id=group_id,
                                 wallet_id=wallet_id,
@@ -220,13 +220,12 @@ class NatsEventsProcessor:
                                 start_time=start_time,
                                 request_uuid=request_uuid,
                             )
-                            bound_logger.debug("Successfully resubscribed to NATS.")
-                            nr_of_timeout_errors = 0
+                            bound_logger.info("Successfully resubscribed to NATS.")
 
+                            num_timeout_errors = 0
                             continue
 
-                        bound_logger.debug("TimeoutError, retrying...")
-                        nr_of_timeout_errors += 1
+                        num_timeout_errors += 1
                         await asyncio.sleep(0.1)
 
                     except Error as e:
