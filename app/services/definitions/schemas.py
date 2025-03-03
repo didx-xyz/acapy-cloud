@@ -3,9 +3,9 @@ from typing import List, Optional
 
 from aries_cloudcontroller import (
     AcaPyClient,
+    AnonCredsSchema,
     GetSchemaResult,
     SchemaPostRequest,
-    AnonCredsSchema,
 )
 
 from app.exceptions import (
