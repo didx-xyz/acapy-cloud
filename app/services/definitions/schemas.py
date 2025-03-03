@@ -1,7 +1,7 @@
 import asyncio
 from typing import List, Optional
 
-from aries_cloudcontroller import AcaPyClient, SchemaGetResult, SchemaSendRequest
+from aries_cloudcontroller import AcaPyClient, SchemaGetResult, SchemaPostRequest, AnonCredsSchema
 
 from app.exceptions import (
     CloudApiException,
