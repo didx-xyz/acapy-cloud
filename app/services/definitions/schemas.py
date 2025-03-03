@@ -38,6 +38,8 @@ async def create_schema(
             status_code=403,
         )
 
+    did_result = await aries_controller.wallet.get_public_did()
+    endorser_did = did_result.result.did
     schema_request = handle_model_with_validation(
         logger=bound_logger,
         model_class=SchemaSendRequest,
