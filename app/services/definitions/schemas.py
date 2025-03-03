@@ -1,7 +1,12 @@
 import asyncio
 from typing import List, Optional
 
-from aries_cloudcontroller import AcaPyClient, GetSchemaResult, SchemaPostRequest, AnonCredsSchema
+from aries_cloudcontroller import (
+    AcaPyClient,
+    GetSchemaResult,
+    SchemaPostRequest,
+    AnonCredsSchema,
+)
 
 from app.exceptions import (
     CloudApiException,
@@ -53,9 +58,7 @@ async def create_schema(
     # Using the default values for schema_post_option
     # as the governance agent is the issuer
     schema_request = handle_model_with_validation(
-        logger=bound_logger,
-        model_class=SchemaPostRequest,
-        var_schema=anoncreds_schema
+        logger=bound_logger, model_class=SchemaPostRequest, var_schema=anoncreds_schema
     )
 
     result = await publisher.publish_schema(schema_request)
@@ -189,9 +192,7 @@ async def get_schemas_by_id(
 
     # transform all schemas into response model (if schemas returned)
     schemas = [
-        schema_from_acapy(schema)
-        for schema in schema_results
-        if schema.var_schema
+        schema_from_acapy(schema) for schema in schema_results if schema.var_schema
     ]
 
     return schemas
