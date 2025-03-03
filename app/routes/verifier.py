@@ -9,10 +9,10 @@ from app.exceptions import CloudApiException
 from app.models.verifier import (
     AcceptProofRequest,
     CreateProofRequest,
+    CredInfo,
+    CredPrecis,
     RejectProofRequest,
     SendProofRequest,
-    CredPrecis,
-    CredInfo,
 )
 from app.services.verifier.acapy_verifier_v2 import VerifierV2
 from app.util.acapy_verifier_utils import assert_valid_prover, assert_valid_verifier
@@ -511,8 +511,7 @@ async def get_credentials_by_proof_id(
     return [
         CredPrecis(
             cred_info=CredInfo(
-                **cred.cred_info.model_dump(),
-                credential_id=cred.cred_info.referent
+                **cred.cred_info.model_dump(), credential_id=cred.cred_info.referent
             ),
             interval=cred.interval,
             presentation_referents=cred.presentation_referents,

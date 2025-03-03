@@ -1,7 +1,12 @@
 from enum import Enum
 from typing import Optional, Union
 
-from aries_cloudcontroller import DIFPresSpec, DIFProofRequest, IndyPresSpec, IndyNonRevocationInterval
+from aries_cloudcontroller import (
+    DIFPresSpec,
+    DIFProofRequest,
+    IndyNonRevocationInterval,
+    IndyPresSpec,
+)
 from aries_cloudcontroller import IndyProofRequest as AcaPyIndyProofRequest
 from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
 
@@ -123,9 +128,7 @@ class RejectProofRequest(ProofId):
 
 
 class CredInfo(BaseModel):
-    attrs: dict = Field(
-        default=None, description="Attribute names and value"
-    )
+    attrs: dict = Field(default=None, description="Attribute names and value")
     cred_def_id: str = Field(
         default=None, description="Credential definition identifier"
     )
@@ -137,9 +140,7 @@ class CredInfo(BaseModel):
     rev_reg_id: Optional[str] = Field(
         default=None, description="Revocation registry identifier"
     )
-    schema_id: Optional[str] = Field(
-        default=None, description="Schema identifier"
-    )
+    schema_id: Optional[str] = Field(default=None, description="Schema identifier")
 
 
 class CredPrecis(BaseModel):
