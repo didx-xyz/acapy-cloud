@@ -85,13 +85,13 @@ jobs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: context.issue.number,
-                  body: `${process.env.BOT_COMMENT_IDENTIFIER}\n⚠️ Your PR title should start with an emoji!\n\nExample valid titles:\n- ✨ Add new feature (or :sparkles: Add new feature)\n- 🐛 Fix login bug (or :bug: Fix login bug)\n- 📝 Update documentation (or :memo: Update documentation)\n\nTo view all valid emojis, check out [gitmoji.dev](https://gitmoji.dev) for a comprehensive list of Git-friendly emojis!\n\nPlease update your PR title and try again.`
+                  body: `${process.env.BOT_COMMENT_IDENTIFIER}\n⚠️ Your PR title should start with an emoji!\n\nExample valid titles:\n- ✨ Add new feature (or \`:sparkles: Add new feature\`)\n- 🐛 Fix login bug (or \`:bug: Fix login bug\`)\n- 📝 Update documentation (or \`:memo: Update documentation\`)\n\nTo view all valid emojis, check out [gitmoji.dev](https://gitmoji.dev) for a comprehensive list of Git-friendly emojis!\n\nPlease update your PR title and try again.`
                 });
               }
 
               // Create warning annotation instead of failing
               // Change to `core.setFailed()` to fail the check
-              core.warning(`PR title should start with an emoji! Current title: "${prTitle}". Use either Unicode emoji (🔥) or GitHub shortcode format (:fire:)`);
+              core.warning(`PR title should start with an emoji! Current title: "${prTitle}". Use either Unicode emoji (🔥) or GitHub shortcode format (\`:fire:\`)`);
             } else if (botComment) {
               // If title is now valid and we have a comment, delete it
               await github.rest.issues.deleteComment({
