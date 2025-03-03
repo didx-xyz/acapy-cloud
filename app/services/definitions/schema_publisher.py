@@ -46,7 +46,7 @@ class SchemaPublisher:
         return result
 
     async def _handle_existing_schema(
-        self, schema: SchemaSendRequest
+        self, schema: SchemaPostRequest
     ) -> CredentialSchema:
         self._logger.info("Handling case of schema already existing on ledger")
         self._logger.debug("Fetching public DID for governance controller")
