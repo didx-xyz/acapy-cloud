@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Optional, Union
 
 from aries_cloudcontroller import (
+    AnoncredsPresentationRequest,
     DIFPresSpec,
     DIFProofRequest,
     IndyNonRevocationInterval,
