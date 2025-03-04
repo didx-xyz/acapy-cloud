@@ -118,7 +118,7 @@ async def get_credential_definitions(
     response = await handle_acapy_call(
         logger=bound_logger,
         acapy_call=aries_controller.anoncreds_credential_definitions.get_credential_definitions,
-        issuer_did=issuer_did,
+        issuer_id=issuer_did,
         schema_id=schema_id,
         schema_issuer_did=schema_issuer_did,
         schema_name=schema_name,
