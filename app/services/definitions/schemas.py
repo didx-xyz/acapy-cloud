@@ -1,7 +1,12 @@
 import asyncio
 from typing import List, Optional
 
-from aries_cloudcontroller import AcaPyClient, SchemaGetResult, SchemaSendRequest
+from aries_cloudcontroller import (
+    AcaPyClient,
+    AnonCredsSchema,
+    GetSchemaResult,
+    SchemaPostRequest,
+)
 
 from app.exceptions import (
     CloudApiException,
@@ -14,7 +19,7 @@ from app.routes.trust_registry import (
 )
 from app.routes.trust_registry import get_schemas as get_trust_registry_schemas
 from app.services.definitions.schema_publisher import SchemaPublisher
-from app.util.definitions import credential_schema_from_acapy
+from app.util.definitions import schema_from_acapy
 from shared.constants import GOVERNANCE_AGENT_URL
 from shared.log_config import get_logger
 
@@ -38,12 +43,22 @@ async def create_schema(
             status_code=403,
         )
 
-    schema_request = handle_model_with_validation(
+    did_result = await aries_controller.wallet.get_public_did()
+    endorser_did = did_result.result.did
+
+    anoncreds_schema = handle_model_with_validation(
         logger=bound_logger,
-        model_class=SchemaSendRequest,
-        attributes=schema.attribute_names,
-        schema_name=schema.name,
-        schema_version=schema.version,
+        model_class=AnonCredsSchema,
+        attr_names=schema.attribute_names,
+        name=schema.name,
+        version=schema.version,
+        issuer_id=endorser_did,
+    )
+
+    # Using the default values for schema_post_option
+    # as the governance agent is the issuer
+    schema_request = handle_model_with_validation(
+        logger=bound_logger, model_class=SchemaPostRequest, var_schema=anoncreds_schema
     )
 
     result = await publisher.publish_schema(schema_request)
@@ -127,9 +142,8 @@ async def get_schemas_as_governance(
     bound_logger.debug("Fetching created schemas")
     response = await handle_acapy_call(
         logger=bound_logger,
-        acapy_call=aries_controller.schema.get_created_schemas,
-        schema_id=schema_id,
-        schema_issuer_did=schema_issuer_did,
+        acapy_call=aries_controller.anoncreds_schemas.get_schemas,
+        schema_issuer_id=schema_issuer_did,
         schema_name=schema_name,
         schema_version=schema_version,
     )
@@ -160,7 +174,7 @@ async def get_schemas_by_id(
     get_schema_futures = [
         handle_acapy_call(
             logger=logger,
-            acapy_call=aries_controller.schema.get_schema,
+            acapy_call=aries_controller.anoncreds_schemas.get_schema,
             schema_id=schema_id,
         )
         for schema_id in schema_ids
@@ -169,7 +183,7 @@ async def get_schemas_by_id(
     # Wait for completion of futures
     if get_schema_futures:
         logger.debug("Fetching each of the created schemas")
-        schema_results: List[SchemaGetResult] = await asyncio.gather(
+        schema_results: List[GetSchemaResult] = await asyncio.gather(
             *get_schema_futures
         )
     else:
@@ -178,9 +192,7 @@ async def get_schemas_by_id(
 
     # transform all schemas into response model (if schemas returned)
     schemas = [
-        credential_schema_from_acapy(schema.var_schema)
-        for schema in schema_results
-        if schema.var_schema
+        schema_from_acapy(schema) for schema in schema_results if schema.var_schema
     ]
 
     return schemas
