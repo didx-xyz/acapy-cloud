@@ -64,7 +64,7 @@ async def create_credential_definition(
         revocation_registry_size=REGISTRY_SIZE,
         support_revocation=support_revocation,
     )
-    
+
     request_body = handle_model_with_validation(
         logger=logger,
         model_class=CredDefPostRequest,
