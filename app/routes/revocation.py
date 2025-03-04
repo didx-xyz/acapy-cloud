@@ -363,7 +363,7 @@ async def fix_revocation_registry_entry_state(
         bound_logger.debug("Fixing revocation registry entry state")
         response = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=aries_controller.revocation.update_rev_reg_revoked_state,
+            acapy_call=aries_controller.anoncreds_revocation.update_rev_reg_revoked_state,
             rev_reg_id=revocation_registry_id,
             apply_ledger_update=apply_ledger_update,
         )
