@@ -56,13 +56,15 @@ command:
 
 livenessProbe:
   httpGet:
-    path: /status/text
+    path: /status
     port: "{{ trunc 15 .Release.Name }}"
   timeoutSeconds: 10
 readinessProbe:
   httpGet:
-    path: /status/text
+    path: /status
     port: "{{ trunc 15 .Release.Name }}"
+
+terminationGracePeriodSeconds: 10
 
 # resources:
 #   requests:
