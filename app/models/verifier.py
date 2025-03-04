@@ -18,6 +18,7 @@ class ProofRequestType(str, Enum):
     INDY: str = "indy"
     JWT: str = "jwt"
     LD_PROOF: str = "ld_proof"
+    ANONCREDS: str = "anoncreds"
 
 
 class IndyProofRequest(AcaPyIndyProofRequest):
