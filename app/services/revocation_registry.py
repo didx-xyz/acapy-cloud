@@ -4,11 +4,11 @@ from typing import Dict, List, Optional
 from aries_cloudcontroller import (
     AcaPyClient,
     ClearPendingRevocationsRequest,
-    CredRevRecordResult,
+    CredRevRecordResultSchemaAnoncreds,
     IssuerCredRevRecord,
     IssuerRevRegRecord,
-    PublishRevocations,
-    RevokeRequest,
+    PublishRevocationsSchemaAnoncreds,
+    RevokeRequestSchemaAnoncreds,
     RevRegResult,
     TxnOrPublishRevocationsResult,
 )
@@ -99,14 +99,14 @@ async def revoke_credential(
 
     request_body = handle_model_with_validation(
         logger=bound_logger,
-        model_class=RevokeRequest,
+        model_class=RevokeRequestSchemaAnoncreds,
         cred_ex_id=strip_protocol_prefix(credential_exchange_id),
         publish=auto_publish_to_ledger,
     )
     try:
         revoke_result = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=controller.revocation.revoke_credential,
+            acapy_call=controller.anoncreds_revocation.revoke,
             body=request_body,
         )
     except CloudApiException as e:
@@ -125,7 +125,7 @@ async def revoke_credential(
             n_try += 1
             # Safely fetch revocation record and check if change reflected
             record = await coroutine_with_retry(
-                coroutine_func=controller.revocation.get_revocation_status,
+                coroutine_func=controller.anoncreds_revocation.get_cred_rev_record,
                 args=(strip_protocol_prefix(credential_exchange_id),),
                 logger=bound_logger,
                 max_attempts=5,
@@ -189,8 +189,10 @@ async def publish_pending_revocations(
     try:
         result = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=controller.revocation.publish_revocations,
-            body=PublishRevocations(rrid2crid=revocation_registry_credential_map),
+            acapy_call=controller.anoncreds_revocation.publish_revocations,
+            body=PublishRevocationsSchemaAnoncreds(
+                rrid2crid=revocation_registry_credential_map
+            ),
         )
     except CloudApiException as e:
         raise CloudApiException(
@@ -291,7 +293,7 @@ async def get_credential_revocation_record(
     try:
         result = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=controller.revocation.get_revocation_status,
+            acapy_call=controller.anoncreds_revocation.get_cred_rev_record,
             cred_ex_id=strip_protocol_prefix(credential_exchange_id),
             cred_rev_id=credential_revocation_id,
             rev_reg_id=revocation_registry_id,
@@ -301,7 +303,7 @@ async def get_credential_revocation_record(
             f"Failed to get revocation status: {e.detail}", e.status_code
         ) from e
 
-    if not isinstance(result, CredRevRecordResult):
+    if not isinstance(result, CredRevRecordResultSchemaAnoncreds):
         bound_logger.error(
             "Unexpected type returned from get_revocation_status: `{}`.", result
         )
@@ -396,7 +398,7 @@ async def validate_rev_reg_ids(
         try:
             rev_reg_result = await handle_acapy_call(
                 logger=bound_logger,
-                acapy_call=controller.revocation.get_registry,
+                acapy_call=controller.anoncreds_revocation.get_revocation_registry,
                 rev_reg_id=rev_reg_id,
             )
             if rev_reg_result.result is None:
@@ -465,9 +467,9 @@ async def get_created_active_registries(
         # Both will be in active state when created
         reg = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=controller.revocation.get_created_registries,
+            acapy_call=controller.anoncreds_revocation.get_revocation_registries,
             cred_def_id=cred_def_id,
-            state="active",
+            state="finished",
         )
         return reg.rev_reg_ids
     except CloudApiException as e:
@@ -515,7 +517,7 @@ async def get_pending_revocations(
     try:
         result = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=controller.revocation.get_registry,
+            acapy_call=controller.anoncreds_revocation.get_revocation_registry,
             rev_reg_id=rev_reg_id,
         )
     except CloudApiException as e:

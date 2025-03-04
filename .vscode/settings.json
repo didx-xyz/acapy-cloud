@@ -12,6 +12,7 @@
     "aiohttp",
     "aiosignal",
     "aiter",
+    "anoncreds",
     "anyio",
     "apikey",
     "armv",
