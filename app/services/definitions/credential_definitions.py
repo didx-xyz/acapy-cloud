@@ -77,10 +77,10 @@ async def create_credential_definition(
         result.credential_definition_state.credential_definition_id
     )
 
-    if result.txn and result.txn.transaction_id:
+    if result.registration_metadata["txn"]:
         await wait_for_transaction_ack(
             aries_controller=aries_controller,
-            transaction_id=result.txn.transaction_id,
+            transaction_id=result.registration_metadata["txn"]["transaction_id"],
             max_attempts=CRED_DEF_ACK_TIMEOUT,
             retry_delay=1,
         )
