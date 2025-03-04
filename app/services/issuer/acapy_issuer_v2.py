@@ -6,6 +6,7 @@ from aries_cloudcontroller import (
     V20CredExFree,
     V20CredExRecord,
     V20CredFilter,
+    V20CredFilterAnoncreds,
     V20CredFilterIndy,
     V20CredOfferConnFreeRequest,
     V20CredPreview,
@@ -57,8 +58,24 @@ class IssuerV2(Issuer):
                 cred_def_id=credential.indy_credential_detail.credential_definition_id,
             )
             cred_filter = V20CredFilter(indy=indy_model)
+
         elif credential.type == CredentialType.LD_PROOF:
             cred_filter = V20CredFilter(ld_proof=credential.ld_credential_detail)
+
+        elif credential.type == CredentialType.ANONCREDS:
+            bound_logger.debug("Getting credential preview from attributes")
+            credential_preview = cls.__preview_from_attributes(
+                attributes=credential.anoncreds_credential_detail.attributes
+            )
+
+            anon_model = handle_model_with_validation(
+                logger=bound_logger,
+                model_class=V20CredFilterAnoncreds,
+                cred_def_id=credential.anoncreds_credential_detail.credential_definition_id,
+                issuer_id=credential.anoncreds_credential_detail.issuer_id,
+            )
+            cred_filter = V20CredFilter(anoncreds=anon_model)
+            
         else:
             raise CloudApiException(
                 f"Unsupported credential type: {credential.type}", status_code=501
