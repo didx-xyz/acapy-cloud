@@ -120,7 +120,6 @@ async def get_credential_definitions(
         acapy_call=aries_controller.anoncreds_credential_definitions.get_credential_definitions,
         issuer_id=issuer_did,
         schema_id=schema_id,
-        schema_issuer_did=schema_issuer_did,
         schema_name=schema_name,
         schema_version=schema_version,
     )
@@ -148,7 +147,7 @@ async def get_credential_definitions(
         credential_definition_results = []
 
     credential_definitions = [
-        credential_definition_from_acapy(credential_definition.credential_definition)
+        credential_definition_from_acapy(credential_definition)
         for credential_definition in credential_definition_results
         if credential_definition.credential_definition
     ]
