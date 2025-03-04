@@ -46,19 +46,21 @@ class PresentationExchange(BaseModel):
 def presentation_record_to_model(record: V20PresExRecord) -> PresentationExchange:
     if isinstance(record, V20PresExRecord):
         try:
-            presentation = (
-                IndyProof(**record.by_format.pres["indy"])
-                if record.by_format.pres
-                else None
-            )
+            presentation = None
+            if record.by_format.pres:
+                key = list(record.by_format.pres.keys())[0]
+                presentation = record.by_format.pres[key]
+
         except AttributeError:
             logger.info("Presentation record has no indy presentation")
             presentation = None
 
         try:
-            presentation_request = IndyProofRequest(
-                **record.by_format.pres_request["indy"]
-            )
+            presentation_request = None
+            if record.by_format.pres_request:
+                key = list(record.by_format.pres_request.keys())[0]
+                presentation_request = record.by_format.pres_request[key]
+
         except AttributeError:
             logger.info("Presentation record has no indy presentation request")
             presentation_request = None
