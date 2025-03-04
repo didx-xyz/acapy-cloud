@@ -43,6 +43,7 @@ podAnnotations:
     }]
 podLabels:
   sidecar.istio.io/inject: "false"
+  tags.datadoghq.com/env: local
 
 readinessProbe:
   initialDelaySeconds: 1

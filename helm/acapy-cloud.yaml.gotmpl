@@ -72,10 +72,10 @@ releases:
       {{- end }}
       {{- end }}
       - deploymentLabels:
-          tags.datadoghq.com/env: {{ $.Environment.Name }}
+          tags.datadoghq.com/env: acapy-cloud-{{ $.Environment.Name }}
         podLabels:
           admission.datadoghq.com/enabled: {{ quote $.Values.ddInjectEnabled }}
-          tags.datadoghq.com/env: {{ $.Environment.Name }}
+          tags.datadoghq.com/env: acapy-cloud-{{ $.Environment.Name }}
     set:
       {{- if not (eq $release "mediator") }}
       - name: image.registry
@@ -96,10 +96,10 @@ releases:
     values:
       - ./ledger-nodes/conf/{{ .Environment.Name }}/values.yaml
       - deploymentLabels:
-          tags.datadoghq.com/env: {{ .Environment.Name }}
+          tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
         podLabels:
           admission.datadoghq.com/enabled: "false"
-          tags.datadoghq.com/env: {{ .Environment.Name }}
+          tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
           sidecar.istio.io/inject: "false"
     set:
       - name: image.registry
@@ -115,10 +115,10 @@ releases:
     values:
       - ./acapy-cloud/conf/{{ .Environment.Name }}/ledger-browser.yaml
       - deploymentLabels:
-          tags.datadoghq.com/env: {{ .Environment.Name }}
+          tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
         podLabels:
           admission.datadoghq.com/enabled: "false"
-          tags.datadoghq.com/env: {{ .Environment.Name }}
+          tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
           sidecar.istio.io/inject: "false"
     set:
       - name: image.registry
@@ -139,7 +139,7 @@ releases:
         deployment:
           podLabels:
             admission.datadoghq.com/enabled: "false"
-            tags.datadoghq.com/env: {{ .Environment.Name }}
+            tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
             sidecar.istio.io/inject: "false"
           podAnnotations:
             ad.datadoghq.com/logs_exclude: "true" # Disable datadog log shipping
@@ -154,6 +154,8 @@ releases:
       - ./nats/values.yaml
       - nats:
           replicaCount: {{ default 1 .Values.natsReplicaCount }}
+          podLabels:
+            tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
 
   # https://github.com/bitnami/charts/tree/main/bitnami/postgresql-ha
   - name: postgres
@@ -164,6 +166,12 @@ releases:
     version: 15.3.0
     values:
       - ../tilt/acapy-cloud/postgres.yaml
+      - postgresql:
+          podLabels:
+            tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
+        pgpool:
+          podLabels:
+            tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
 
   # https://github.com/rowanruseler/helm-charts/tree/main/charts/pgadmin4
   - name: pgadmin
@@ -175,6 +183,8 @@ releases:
     installed: {{ .Values.pgAdmin.enabled }}
     values:
       - ../tilt/acapy-cloud/pgadmin.yaml
+      - podLabels:
+          tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
       {{- with .Values.pgAdmin.ingress }}
       - ingress:
           {{ toYaml . | nindent 10 }}

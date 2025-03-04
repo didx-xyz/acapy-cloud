@@ -5,6 +5,7 @@ postgresql:
     sidecar.istio.io/proxyCPU: 10m
   podLabels:
     sidecar.istio.io/inject: "false"
+    tags.datadoghq.com/env: local
   # Due to bug in Askar (https://github.com/hyperledger/aries-askar/issues/299)
   # we can't use PGPool on first boot and we need to guarantee that we talk to
   # the primary Postgres instance.
@@ -36,6 +37,7 @@ pgpool:
     sidecar.istio.io/proxyCPU: 10m
   podLabels:
     sidecar.istio.io/inject: "false"
+    tags.datadoghq.com/env: local
   customUsers:
     usernames: trust-registry;governance;multitenant;mediator
     passwords: trust-registry;governance;multitenant;mediator
