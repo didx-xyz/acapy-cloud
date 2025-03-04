@@ -293,7 +293,7 @@ async def get_credential_revocation_record(
     try:
         result = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=controller.revocation.get_revocation_status,
+            acapy_call=controller.anoncreds_revocation.get_cred_rev_record,
             cred_ex_id=strip_protocol_prefix(credential_exchange_id),
             cred_rev_id=credential_revocation_id,
             rev_reg_id=revocation_registry_id,
@@ -303,7 +303,7 @@ async def get_credential_revocation_record(
             f"Failed to get revocation status: {e.detail}", e.status_code
         ) from e
 
-    if not isinstance(result, CredRevRecordResult):
+    if not isinstance(result, CredRevRecordResultSchemaAnoncreds):
         bound_logger.error(
             "Unexpected type returned from get_revocation_status: `{}`.", result
         )
