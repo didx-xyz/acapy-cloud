@@ -192,7 +192,7 @@ async def get_schema(
     if not schema.var_schema:
         raise HTTPException(404, f"Schema with id {schema_id} not found.")
 
-    result = schema_from_acapy(schema.var_schema)
+    result = schema_from_acapy(schema)
     bound_logger.debug("Successfully fetched schema by id.")
     return result
 
