@@ -165,7 +165,7 @@ releases:
     chart: oci://registry-1.docker.io/bitnamicharts/postgresql-ha
     version: 15.3.0
     values:
-      - ../tilt/acapy-cloud/postgres.yaml
+      - ./acapy-cloud/conf/postgres.yaml
       - postgresql:
           podLabels:
             tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
@@ -182,7 +182,7 @@ releases:
     version: 1.35.0
     installed: {{ .Values.pgAdmin.enabled }}
     values:
-      - ../tilt/acapy-cloud/pgadmin.yaml
+      - ./acapy-cloud/conf/pgadmin.yaml
       - podLabels:
           tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
       {{- with .Values.pgAdmin.ingress }}
