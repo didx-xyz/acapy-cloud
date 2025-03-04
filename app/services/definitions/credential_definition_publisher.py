@@ -36,7 +36,7 @@ class CredentialDefinitionPublisher:
         try:
             result = await handle_acapy_call(
                 logger=self._logger,
-                acapy_call=self._controller.credential_definition.publish_cred_def,
+                acapy_call=self._controller.anoncreds_credential_definitions.create_credential_definition,
                 body=request_body,
             )
         except CloudApiException as e:
