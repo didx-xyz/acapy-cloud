@@ -1,4 +1,4 @@
-from aries_cloudcontroller import GetSchemaResult, SchemaState,GetCredDefResult
+from aries_cloudcontroller import GetCredDefResult, GetSchemaResult, SchemaState
 
 from app.models.definitions import CredentialDefinition, CredentialSchema
 
