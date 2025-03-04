@@ -12,6 +12,7 @@ class CredentialType(str, Enum):
     INDY: str = "indy"
     JWT: str = "jwt"
     LD_PROOF: str = "ld_proof"
+    ANONCREDS: str = "anoncreds"
 
 
 class IndyCredential(BaseModel):
@@ -19,10 +20,17 @@ class IndyCredential(BaseModel):
     attributes: Dict[str, str]
 
 
+class AnonCredsCredential(BaseModel):
+    credential_definition_id: str
+    issuer_id: str
+    attributes: Dict[str, str]
+
+
 class CredentialBase(SaveExchangeRecordField):
     type: CredentialType = CredentialType.INDY
     indy_credential_detail: Optional[IndyCredential] = None
     ld_credential_detail: Optional[LDProofVCDetail] = None
+    anoncreds_credential_detail: Optional[AnonCredsCredential] = None
 
     @field_validator("indy_credential_detail", mode="before")
     @classmethod
@@ -39,6 +47,15 @@ class CredentialBase(SaveExchangeRecordField):
         if values.data.get("type") == CredentialType.LD_PROOF and value is None:
             raise CloudApiValueError(
                 "ld_credential_detail must be populated if `ld_proof` credential type is selected"
+            )
+        return value
+
+    @field_validator("anoncreds_credential_detail", mode="before")
+    @classmethod
+    def check_anoncreds_credential_detail(cls, value, values: ValidationInfo):
+        if values.data.get("type") == CredentialType.ANONCREDS and value is None:
+            raise CloudApiValueError(
+                "anoncreds_credential_detail must be populated if `anoncreds` credential type is selected"
             )
         return value
 
