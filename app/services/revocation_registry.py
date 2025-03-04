@@ -99,14 +99,14 @@ async def revoke_credential(
 
     request_body = handle_model_with_validation(
         logger=bound_logger,
-        model_class=RevokeRequest,
+        model_class=RevokeRequestSchemaAnoncreds,
         cred_ex_id=strip_protocol_prefix(credential_exchange_id),
         publish=auto_publish_to_ledger,
     )
     try:
         revoke_result = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=controller.revocation.revoke_credential,
+            acapy_call=controller.anoncreds_revocation.revoke,
             body=request_body,
         )
     except CloudApiException as e:
@@ -125,7 +125,7 @@ async def revoke_credential(
             n_try += 1
             # Safely fetch revocation record and check if change reflected
             record = await coroutine_with_retry(
-                coroutine_func=controller.revocation.get_revocation_status,
+                coroutine_func=controller.anoncreds_revocation.get_cred_rev_record,
                 args=(strip_protocol_prefix(credential_exchange_id),),
                 logger=bound_logger,
                 max_attempts=5,
