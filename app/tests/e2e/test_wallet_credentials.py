@@ -42,7 +42,6 @@ async def test_get_and_delete_credential_record(
         f"{WALLET_CREDENTIALS_PATH}/{credential_id}"
     )
     assert fetch_response.status_code == 200
-    fetch_response = fetch_response.json()
 
     # Assert we can delete this credential
     delete_response = await alice_member_client.delete(

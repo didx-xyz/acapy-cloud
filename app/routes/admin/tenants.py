@@ -150,7 +150,7 @@ async def create_tenant(
         label=wallet_label,
         wallet_key=base58.b58encode(token_urlsafe(48)).decode(),
         wallet_name=wallet_name,
-        wallet_type="askar",
+        wallet_type=body.wallet_type,
         group_id=body.group_id,
         extra_settings=body.extra_settings,
     )
