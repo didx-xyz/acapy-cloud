@@ -49,13 +49,27 @@ async def create_credential_definition(
     if support_revocation:
         await publisher.check_endorser_connection()
 
+    inner_cred_def = handle_model_with_validation(
+        logger=logger,
+        model_class=InnerCredDef,
+        issuer_id=public_did[8:],
+        schema_id=credential_definition.schema_id,
+        tag=credential_definition.tag,
+    )
+
+    options = handle_model_with_validation(
+        logger=logger,
+        model_class=CredDefPostOptions,
+        create_transaction_for_endorser=True,
+        revocation_registry_size=REGISTRY_SIZE,
+        support_revocation=support_revocation,
+    )
+    
     request_body = handle_model_with_validation(
         logger=logger,
-        model_class=CredentialDefinitionSendRequest,
-        schema_id=credential_definition.schema_id,
-        support_revocation=support_revocation,
-        tag=credential_definition.tag,
-        revocation_registry_size=REGISTRY_SIZE,
+        model_class=CredDefPostRequest,
+        credential_definition=inner_cred_def,
+        options=options,
     )
 
     result = await publisher.publish_credential_definition(request_body)
