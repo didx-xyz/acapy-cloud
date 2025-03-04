@@ -465,9 +465,9 @@ async def get_created_active_registries(
         # Both will be in active state when created
         reg = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=controller.revocation.get_created_registries,
+            acapy_call=controller.anoncreds_revocation.get_revocation_registries,
             cred_def_id=cred_def_id,
-            state="active",
+            state="finished",
         )
         return reg.rev_reg_ids
     except CloudApiException as e:
