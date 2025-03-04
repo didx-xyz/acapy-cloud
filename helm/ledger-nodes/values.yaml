@@ -78,6 +78,10 @@ livenessProbe:
       if ! grep -q '"Has_write_consensus": true' "$INFO_FILE"; then
         echo "Error: No write consensus"
         exit 1
+      fi &&
+      if ! (timeout 1 bash -c "</dev/tcp/localhost/9701" 2>/dev/null); then
+        echo "Error: Port 9701 is not open"
+        exit 1
       fi
   initialDelaySeconds: 60
   periodSeconds: 10
