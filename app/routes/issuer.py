@@ -84,7 +84,10 @@ async def send_credential(
             ) from e
 
         schema_id = None
-        if credential.type == CredentialType.INDY or credential.type == CredentialType.ANONCREDS:
+        if (
+            credential.type == CredentialType.INDY
+            or credential.type == CredentialType.ANONCREDS
+        ):
             # Retrieve the schema_id based on the credential definition id
             schema_id = await schema_id_from_credential_definition_id(
                 aries_controller,
@@ -171,7 +174,10 @@ async def create_offer(
             ) from e
 
         schema_id = None
-        if credential.type == CredentialType.INDY or credential.type == CredentialType.ANONCREDS:
+        if (
+            credential.type == CredentialType.INDY
+            or credential.type == CredentialType.ANONCREDS
+        ):
             # Retrieve the schema_id based on the credential definition id
             schema_id = await schema_id_from_credential_definition_id(
                 aries_controller,

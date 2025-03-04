@@ -75,7 +75,7 @@ class IssuerV2(Issuer):
                 issuer_id=credential.anoncreds_credential_detail.issuer_id,
             )
             cred_filter = V20CredFilter(anoncreds=anon_model)
-            
+
         else:
             raise CloudApiException(
                 f"Unsupported credential type: {credential.type}", status_code=501
