@@ -531,7 +531,7 @@ async def get_pending_revocations(
     try:
         result = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=controller.revocation.get_registry,
+            acapy_call=controller.anoncreds_revocation.get_revocation_registry,
             rev_reg_id=rev_reg_id,
         )
     except CloudApiException as e:
