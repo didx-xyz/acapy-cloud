@@ -3,7 +3,7 @@ name: nats
 description: A small wrapper Helm chart for bitnami/nats
 type: application
 version: "9"
-appVersion: 2.10.25
+appVersion: 2.x.x
 
 dependencies:
   # https://github.com/bitnami/charts/tree/main/bitnami/common

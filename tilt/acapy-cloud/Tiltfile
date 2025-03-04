@@ -3,7 +3,7 @@ load("ext://color", "color")
 load("ext://helm_resource", "helm_resource", "helm_repo")
 
 # https://github.com/bitnami/charts/tree/main/bitnami/postgresql-ha
-postgres_version = "15.3.0"
+postgres_version = "15.3.3"
 # https://github.com/rowanruseler/helm-charts/tree/main/charts/pgadmin4
 pgadmin_version = "1.35.0"
 
@@ -16,7 +16,7 @@ cpu_arch = str(local("uname -m", echo_off=True, quiet=True)).lower().strip()
 def setup_postgres(namespace):
     print(color.green("Installing Postgres..."))
 
-    values_file = "./tilt/acapy-cloud/postgres.yaml"
+    values_file = "./helm/acapy-cloud/conf/postgres.yaml"
 
     ## Setup HA Postgres
     # https://github.com/bitnami/charts/tree/main/bitnami/postgresql-ha
@@ -47,7 +47,7 @@ def setup_postgres(namespace):
 def setup_pgadmin(namespace, ingress_domain):
     print(color.green("Installing pgAdmin..."))
 
-    values_file = "./tilt/acapy-cloud/pgadmin.yaml"
+    values_file = "./helm/acapy-cloud/conf/pgadmin.yaml"
     pgadmin_host = "pgadmin." + ingress_domain
 
     ## Setup pgAdmin
