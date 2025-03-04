@@ -84,16 +84,17 @@ async def send_credential(
             ) from e
 
         schema_id = None
-        if (
-            credential.type == CredentialType.INDY
-            or credential.type == CredentialType.ANONCREDS
-        ):
+        if credential.type == CredentialType.INDY:
             # Retrieve the schema_id based on the credential definition id
             schema_id = await schema_id_from_credential_definition_id(
                 aries_controller,
                 credential.indy_credential_detail.credential_definition_id,
             )
-
+        if credential.type == CredentialType.ANONCREDS:
+            schema_id = await schema_id_from_credential_definition_id(
+                aries_controller,
+                credential.anoncreds_credential_detail.credential_definition_id,
+            )
         # Make sure we are allowed to issue according to trust registry rules
         await assert_valid_issuer(public_did, schema_id)
 
