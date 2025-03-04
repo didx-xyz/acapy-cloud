@@ -1,7 +1,12 @@
 import asyncio
 from typing import List, Optional
 
-from aries_cloudcontroller import AcaPyClient, CredentialDefinitionSendRequest
+from aries_cloudcontroller import (
+    AcaPyClient,
+    CredDefPostOptions,
+    CredDefPostRequest,
+    InnerCredDef,
+)
 
 from app.exceptions import handle_acapy_call, handle_model_with_validation
 from app.models.definitions import CreateCredentialDefinition, CredentialDefinition
