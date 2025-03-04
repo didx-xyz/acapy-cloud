@@ -106,6 +106,8 @@ class AcceptProofRequest(ProofId, SaveExchangeRecordField):
     type: ProofRequestType = ProofRequestType.INDY
     indy_presentation_spec: Optional[IndyPresSpec] = None
     dif_presentation_spec: Optional[DIFPresSpec] = None
+    # Controller uses IndyPresSpec for anoncreds
+    anoncreds_presentation_spec: Optional[IndyPresSpec] = None
 
     @field_validator("indy_presentation_spec", mode="before")
     @classmethod
@@ -122,6 +124,15 @@ class AcceptProofRequest(ProofId, SaveExchangeRecordField):
         if values.data.get("type") == ProofRequestType.LD_PROOF and value is None:
             raise CloudApiValueError(
                 "dif_presentation_spec must be populated if `ld_proof` type is selected"
+            )
+        return value
+
+    @field_validator("anoncreds_presentation_spec", mode="before")
+    @classmethod
+    def check_anoncreds_proof_request(cls, value, values: ValidationInfo):
+        if values.data.get("type") == ProofRequestType.ANONCREDS and value is None:
+            raise CloudApiValueError(
+                "anoncreds_proof_request must be populated if `anoncreds` type is selected"
             )
         return value
 
