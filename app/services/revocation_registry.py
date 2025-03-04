@@ -189,8 +189,10 @@ async def publish_pending_revocations(
     try:
         result = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=controller.revocation.publish_revocations,
-            body=PublishRevocations(rrid2crid=revocation_registry_credential_map),
+            acapy_call=controller.anoncreds_revocation.publish_revocations,
+            body=PublishRevocationsSchemaAnoncreds(
+                rrid2crid=revocation_registry_credential_map
+            ),
         )
     except CloudApiException as e:
         raise CloudApiException(
