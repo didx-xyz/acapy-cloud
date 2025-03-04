@@ -1,7 +1,12 @@
 import asyncio
 from typing import List, Optional
 
-from aries_cloudcontroller import AcaPyClient, CredentialDefinitionSendRequest
+from aries_cloudcontroller import (
+    AcaPyClient,
+    CredDefPostOptions,
+    CredDefPostRequest,
+    InnerCredDef,
+)
 
 from app.exceptions import handle_acapy_call, handle_model_with_validation
 from app.models.definitions import CreateCredentialDefinition, CredentialDefinition
@@ -44,22 +49,38 @@ async def create_credential_definition(
     if support_revocation:
         await publisher.check_endorser_connection()
 
+    inner_cred_def = handle_model_with_validation(
+        logger=logger,
+        model_class=InnerCredDef,
+        issuer_id=public_did[8:],
+        schema_id=credential_definition.schema_id,
+        tag=credential_definition.tag,
+    )
+
+    options = handle_model_with_validation(
+        logger=logger,
+        model_class=CredDefPostOptions,
+        create_transaction_for_endorser=True,
+        revocation_registry_size=REGISTRY_SIZE,
+        support_revocation=support_revocation,
+    )
+
     request_body = handle_model_with_validation(
         logger=logger,
-        model_class=CredentialDefinitionSendRequest,
-        schema_id=credential_definition.schema_id,
-        support_revocation=support_revocation,
-        tag=credential_definition.tag,
-        revocation_registry_size=REGISTRY_SIZE,
+        model_class=CredDefPostRequest,
+        credential_definition=inner_cred_def,
+        options=options,
     )
 
     result = await publisher.publish_credential_definition(request_body)
-    credential_definition_id = result.sent.credential_definition_id
+    credential_definition_id = (
+        result.credential_definition_state.credential_definition_id
+    )
 
-    if result.txn and result.txn.transaction_id:
+    if result.registration_metadata["txn"]:
         await wait_for_transaction_ack(
             aries_controller=aries_controller,
-            transaction_id=result.txn.transaction_id,
+            transaction_id=result.registration_metadata["txn"]["transaction_id"],
             max_attempts=CRED_DEF_ACK_TIMEOUT,
             retry_delay=1,
         )
@@ -96,11 +117,9 @@ async def get_credential_definitions(
 
     response = await handle_acapy_call(
         logger=bound_logger,
-        acapy_call=aries_controller.credential_definition.get_created_cred_defs,
-        issuer_did=issuer_did,
-        cred_def_id=credential_definition_id,
+        acapy_call=aries_controller.anoncreds_credential_definitions.get_credential_definitions,
+        issuer_id=issuer_did,
         schema_id=schema_id,
-        schema_issuer_did=schema_issuer_did,
         schema_name=schema_name,
         schema_version=schema_version,
     )
@@ -110,7 +129,7 @@ async def get_credential_definitions(
     get_credential_definition_futures = [
         handle_acapy_call(
             logger=bound_logger,
-            acapy_call=aries_controller.credential_definition.get_cred_def,
+            acapy_call=aries_controller.anoncreds_credential_definitions.get_credential_definition,
             cred_def_id=credential_definition_id,
         )
         for credential_definition_id in credential_definition_ids
@@ -128,7 +147,7 @@ async def get_credential_definitions(
         credential_definition_results = []
 
     credential_definitions = [
-        credential_definition_from_acapy(credential_definition.credential_definition)
+        credential_definition_from_acapy(credential_definition)
         for credential_definition in credential_definition_results
         if credential_definition.credential_definition
     ]
