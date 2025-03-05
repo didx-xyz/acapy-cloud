@@ -6,6 +6,7 @@ from aries_cloudcontroller import (
     AnonCredsSchema,
     GetSchemaResult,
     SchemaPostRequest,
+    SchemaSendRequest,
 )
 
 from app.exceptions import (
@@ -13,7 +14,7 @@ from app.exceptions import (
     handle_acapy_call,
     handle_model_with_validation,
 )
-from app.models.definitions import CreateSchema, CredentialSchema
+from app.models.definitions import CreateSchema, CredentialSchema, SchemaType
 from app.routes.trust_registry import (
     get_schema_by_id as get_trust_registry_schema_by_id,
 )
