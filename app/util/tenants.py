@@ -122,3 +122,26 @@ def assert_valid_group(
         raise WalletNotFoundException(wallet_id=wallet_id)
 
     logger.debug("Wallet {} belongs to group {}.", wallet_id, group_id)
+
+
+async def is_anoncreds_wallet(wallet_id: str, logger: Logger) -> bool:
+    """Check if the wallet with wallet_id is an anoncreds wallet.
+    Args:
+        wallet_id (str): The wallet_id we want to check.
+        logger (Logger): A logger object.
+
+    Returns:
+        bool: True if wallet is anoncreds wallet, False otherwise.
+    """
+    async with get_tenant_admin_controller() as admin_controller:
+        wallet = await handle_acapy_call(
+            acapy_call=admin_controller.multitenancy.get_wallet,
+            wallet_id=wallet_id,
+            logger=logger,
+        )
+        if not wallet:
+            logger.info("Bad request: Wallet not found.")
+            raise WalletNotFoundException(wallet_id=wallet_id)
+
+        wallet_type = wallet.settings.get("wallet.type")
+        return wallet_type == "askar-anoncreds"
