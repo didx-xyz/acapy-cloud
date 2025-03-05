@@ -128,6 +128,8 @@ class SchemaPublisher:
             result,
         )
         return result
+
+    async def publish_anoncreds_schema(
         self, schema_request: SchemaPostRequest
     ) -> CredentialSchema:
         try:
@@ -138,7 +140,7 @@ class SchemaPublisher:
             )
         except CloudApiException as e:
             if "already exist" in e.detail and e.status_code == 400:
-                result = await self._handle_existing_schema(schema_request)
+                result = await self._handle_existing_anoncreds_schema(schema_request)
                 return result
             else:
                 self._logger.warning(
@@ -158,7 +160,7 @@ class SchemaPublisher:
         result = credential_schema_from_acapy(result.schema_state)
         return result
 
-    async def _handle_existing_schema(
+    async def _handle_existing_anoncreds_schema(
         self, schema: SchemaPostRequest
     ) -> CredentialSchema:
         self._logger.info("Handling case of schema already existing on ledger")
