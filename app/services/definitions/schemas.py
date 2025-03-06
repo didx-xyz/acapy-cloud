@@ -124,6 +124,7 @@ async def get_schemas_as_tenant(
         wallet_type = "askar-anoncreds"
     else:
         wallet_type = "askar"
+
     if schema_id:  # fetch specific id
         trust_registry_schemas = [await get_trust_registry_schema_by_id(schema_id)]
     else:  # client is not filtering by schema_id, fetch all
