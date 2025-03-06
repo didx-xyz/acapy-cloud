@@ -13,7 +13,7 @@ from app.exceptions import CloudApiException, handle_acapy_call
 from app.models.definitions import CredentialSchema
 from app.services.trust_registry.schemas import register_schema
 from app.util.definitions import (
-    credential_anon_schema_from_acapy,
+    anoncreds_credential_schema,
     credential_schema_from_acapy,
 )
 
@@ -160,7 +160,7 @@ class SchemaPublisher:
                 "An unexpected error occurred: could not publish schema."
             )
 
-        result = credential_anon_schema_from_acapy(result.schema_state)
+        result = anoncreds_credential_schema(result.schema_state)
         return result
 
     async def _handle_existing_anoncreds_schema(
@@ -231,7 +231,7 @@ class SchemaPublisher:
             )
             raise CloudApiException(error_message, 409)
 
-        result = credential_anon_schema_from_acapy(_schema)
+        result = anoncreds_credential_schema(_schema)
         self._logger.debug(
             "Schema already exists on ledger. Returning schema definition: `{}`.",
             result,
