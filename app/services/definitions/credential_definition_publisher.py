@@ -86,11 +86,13 @@ class CredentialDefinitionPublisher:
 
         return result
 
-    async def wait_for_revocation_registry(self, credential_definition_id):
+    async def wait_for_revocation_registry(self, credential_definition_id, wallet_type):
         try:
             self._logger.debug("Waiting for revocation registry creation")
             await asyncio.wait_for(
-                wait_for_active_registry(self._controller, credential_definition_id),
+                wait_for_active_registry(
+                    self._controller, credential_definition_id, wallet_type
+                ),
                 timeout=REGISTRY_CREATION_TIMEOUT,
             )
         except asyncio.TimeoutError as e:
