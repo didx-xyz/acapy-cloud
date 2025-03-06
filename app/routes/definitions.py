@@ -212,7 +212,7 @@ async def get_schema(
             if not schema.var_schema:
                 raise HTTPException(404, f"Schema with id {schema_id} not found.")
 
-            result = anon_schema_from_acapy(schema)
+            result = anoncreds_schema_from_acapy(schema)
 
         elif wallet_type == "askar":
 
