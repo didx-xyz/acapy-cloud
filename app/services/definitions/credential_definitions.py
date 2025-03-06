@@ -57,33 +57,43 @@ async def create_credential_definition(
     else:
         wallet_type = "askar"
 
-    options = handle_model_with_validation(
-        logger=logger,
-        model_class=CredDefPostOptions,
-        create_transaction_for_endorser=True,
-        revocation_registry_size=REGISTRY_SIZE,
-        support_revocation=support_revocation,
-    )
+    if wallet_type == "askar-anoncreds":
 
-    request_body = handle_model_with_validation(
-        logger=logger,
-        model_class=CredDefPostRequest,
-        credential_definition=inner_cred_def,
-        options=options,
-    )
-
-    result = await publisher.publish_credential_definition(request_body)
-    credential_definition_id = (
-        result.credential_definition_state.credential_definition_id
-    )
-
-    if result.registration_metadata["txn"]:
-        await wait_for_transaction_ack(
-            aries_controller=aries_controller,
-            transaction_id=result.registration_metadata["txn"]["transaction_id"],
-            max_attempts=CRED_DEF_ACK_TIMEOUT,
-            retry_delay=1,
+        inner_cred_def = handle_model_with_validation(
+            logger=bound_logger,
+            model_class=InnerCredDef,
+            issuer_id=public_did[8:],
+            schema_id=credential_definition.schema_id,
+            tag=credential_definition.tag,
         )
+
+        options = handle_model_with_validation(
+            logger=bound_logger,
+            model_class=CredDefPostOptions,
+            create_transaction_for_endorser=True,
+            revocation_registry_size=REGISTRY_SIZE,
+            support_revocation=support_revocation,
+        )
+
+        request_body = handle_model_with_validation(
+            logger=bound_logger,
+            model_class=CredDefPostRequest,
+            credential_definition=inner_cred_def,
+            options=options,
+        )
+
+        result = await publisher.publish_anoncreds_credential_definition(request_body)
+        credential_definition_id = (
+            result.credential_definition_state.credential_definition_id
+        )
+
+        if result.registration_metadata["txn"]:
+            await wait_for_transaction_ack(
+                aries_controller=aries_controller,
+                transaction_id=result.registration_metadata["txn"]["transaction_id"],
+                max_attempts=CRED_DEF_ACK_TIMEOUT,
+                retry_delay=1,
+            )
 
     elif wallet_type == "askar":
         
