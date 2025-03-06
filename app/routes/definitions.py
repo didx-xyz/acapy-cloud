@@ -206,16 +206,35 @@ async def get_schema(
             wallet_type = "askar"
 
     async with client_from_auth(auth) as aries_controller:
-        schema = await handle_acapy_call(
-            logger=bound_logger,
-            acapy_call=aries_controller.anoncreds_schemas.get_schema,
-            schema_id=schema_id,
-        )
+        if wallet_type == "askar-anoncreds":
 
-    if not schema.var_schema:
-        raise HTTPException(404, f"Schema with id {schema_id} not found.")
+            schema = await handle_acapy_call(
+                logger=bound_logger,
+                acapy_call=aries_controller.anoncreds_schemas.get_schema,
+                schema_id=schema_id,
+            )
 
-    result = schema_from_acapy(schema)
+            if not schema.var_schema:
+                raise HTTPException(404, f"Schema with id {schema_id} not found.")
+
+            result = anon_schema_from_acapy(schema)
+
+        elif wallet_type == "askar":
+
+            schema = await handle_acapy_call(
+                logger=bound_logger,
+                acapy_call=aries_controller.schema.get_schema,
+                schema_id=schema_id,
+            )
+
+            if not schema.var_schema:
+                raise HTTPException(404, f"Schema with id {schema_id} not found.")
+
+            result = credential_schema_from_acapy(schema.var_schema)
+
+        else:
+            raise HTTPException(500, "Unknown wallet type")
+
     bound_logger.debug("Successfully fetched schema by id.")
     return result
 
