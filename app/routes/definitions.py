@@ -27,7 +27,7 @@ from app.util.definitions import (
     credential_schema_from_acapy,
 )
 from app.util.retry_method import coroutine_with_retry
-from app.util.tenants import get_wallet_id_from_b64encoded_jwt, is_anoncreds_wallet
+from app.util.tenants import is_anoncreds_wallet
 from shared.log_config import get_logger
 
 logger = get_logger(__name__)
