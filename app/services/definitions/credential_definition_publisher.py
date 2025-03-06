@@ -33,6 +33,8 @@ class CredentialDefinitionPublisher:
             )
 
     async def publish_credential_definition(self, request_body):
+
+    async def publish_anoncreds_credential_definition(self, request_body):
         try:
             result = await handle_acapy_call(
                 logger=self._logger,
