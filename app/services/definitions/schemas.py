@@ -57,7 +57,15 @@ async def create_schema(
     server_config = await aries_controller.server.get_config()
     wallet_type = server_config.config.get("wallet.type")
 
-    if schema.schema_type == SchemaType.ANONCREDS and wallet_type == "askar-anoncreds":
+    required_wallet_type = (
+        "askar-anoncreds" if schema.schema_type == SchemaType.ANONCREDS else "askar"
+    )
+    if wallet_type != required_wallet_type:
+        raise CloudApiException(
+            f"{schema.schema_type} can only be created by"
+            f" '{"askar" if schema.schema_type == "INDY" else "askar-anoncreds"}' wallet types",
+            status_code=400,
+        )
         anoncreds_schema = handle_model_with_validation(
             logger=bound_logger,
             model_class=AnonCredsSchema,
