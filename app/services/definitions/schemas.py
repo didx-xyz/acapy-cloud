@@ -97,13 +97,6 @@ async def create_schema(
 
         result = await publisher.publish_schema(schema_request)
 
-    else:
-        raise CloudApiException(
-            # TODO: Improve message
-            "Wallet type does not match schema type. Cannot create schema.",
-            status_code=400,
-        )
-
     bound_logger.debug("Successfully published and registered schema.")
     return result
 
