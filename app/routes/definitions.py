@@ -197,9 +197,7 @@ async def get_schema(
 
         else:
             if await is_anoncreds_wallet(
-                wallet_id=get_wallet_id_from_b64encoded_jwt(
-                    aries_controller.tenant_jwt.split(".")[1]
-                ),
+                aries_controller=aries_controller,
                 logger=logger,
             ):
                 wallet_type = "askar-anoncreds"
