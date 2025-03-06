@@ -17,7 +17,7 @@ from app.services.definitions.credential_definition_publisher import (
 from app.services.trust_registry.util.issuer import assert_valid_issuer
 from app.util.assert_public_did import assert_public_did
 from app.util.definitions import credential_definition_from_acapy
-from app.util.tenants import is_anoncreds_wallet
+from app.util.tenants import get_wallet_type
 from app.util.transaction_acked import wait_for_transaction_ack
 from shared import CRED_DEF_ACK_TIMEOUT, REGISTRY_SIZE
 from shared.log_config import get_logger
@@ -51,13 +51,10 @@ async def create_credential_definition(
     if support_revocation:
         await publisher.check_endorser_connection()
 
-    if is_anoncreds_wallet(
+    wallet_type = get_wallet_type(
         aries_controller=aries_controller,
         logger=bound_logger,
-    ):
-        wallet_type = "askar-anoncreds"
-    else:
-        wallet_type = "askar"
+    )
 
     if wallet_type == "askar-anoncreds":
 
@@ -150,13 +147,10 @@ async def get_credential_definitions(
         }
     )
     bound_logger.debug("Getting created credential definitions")
-    if is_anoncreds_wallet(
+    wallet_type = get_wallet_type(
         aries_controller=aries_controller,
         logger=bound_logger,
-    ):
-        wallet_type = "askar-anoncreds"
-    else:
-        wallet_type = "askar"
+    )
 
     if wallet_type == "askar-anoncreds":
         response = await handle_acapy_call(

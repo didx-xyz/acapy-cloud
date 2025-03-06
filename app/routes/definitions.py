@@ -399,13 +399,10 @@ async def get_credential_definition_by_id(
     bound_logger.debug("GET request received: Get credential definition by id")
 
     async with client_from_auth(auth) as aries_controller:
-        if await is_anoncreds_wallet(
+        wallet_type = get_wallet_type(
             aries_controller=aries_controller,
             logger=bound_logger,
-        ):
-            wallet_type = "askar-anoncreds"
-        else:
-            wallet_type = "askar"
+        )
 
         bound_logger.debug("Getting credential definition")
         if wallet_type == "askar-anoncreds":
