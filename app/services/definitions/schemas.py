@@ -219,6 +219,7 @@ async def get_schemas_as_governance(
 async def get_schemas_by_id(
     aries_controller: AcaPyClient,
     schema_ids: List[str],
+    wallet_type: str,
 ) -> List[CredentialSchema]:
     """
     Fetch schemas with attributes using schema IDs.
@@ -226,25 +227,52 @@ async def get_schemas_by_id(
     Retrieve the relevant schemas from the ledger:
     """
     logger.debug("Fetching schemas from schema ids")
+    if wallet_type == "askar-anoncreds":
 
-    get_schema_futures = [
-        handle_acapy_call(
-            logger=logger,
-            acapy_call=aries_controller.anoncreds_schemas.get_schema,
-            schema_id=schema_id,
-        )
-        for schema_id in schema_ids
-    ]
+        logger.info("Fetching schemas from anoncreds wallet")
+        get_schema_futures = [
+            handle_acapy_call(
+                logger=logger,
+                acapy_call=aries_controller.anoncreds_schemas.get_schema,
+                schema_id=schema_id,
+            )
+            for schema_id in schema_ids
+        ]
 
-    # Wait for completion of futures
-    if get_schema_futures:
-        logger.debug("Fetching each of the created schemas")
-        schema_results: List[GetSchemaResult] = await asyncio.gather(
-            *get_schema_futures
-        )
+        # Wait for completion of futures
+        if get_schema_futures:
+            logger.debug("Fetching each of the created schemas")
+            schema_results: List[GetSchemaResult] = await asyncio.gather(
+                *get_schema_futures
+            )
+        else:
+            logger.debug("No created schema ids returned")
+            schema_results = []
+    elif wallet_type == "askar":
+        logger.debug("Fetching schemas from askar wallet")
+        get_schema_futures = [
+            handle_acapy_call(
+                logger=logger,
+                acapy_call=aries_controller.schema.get_schema,
+                schema_id=schema_id,
+            )
+            for schema_id in schema_ids
+        ]
+
+        # Wait for completion of futures
+        if get_schema_futures:
+            logger.debug("Fetching each of the created schemas")
+            schema_results: List[SchemaGetResult] = await asyncio.gather(
+                *get_schema_futures
+            )
+        else:
+            logger.debug("No created schema ids returned")
+            schema_results = []
     else:
-        logger.debug("No created schema ids returned")
-        schema_results = []
+        raise CloudApiException(
+            "Wallet type not supported. Cannot get schemas.",
+            status_code=400,
+        )
 
     # transform all schemas into response model (if schemas returned)
     schemas = [
