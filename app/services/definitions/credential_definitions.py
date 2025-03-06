@@ -98,7 +98,7 @@ async def create_credential_definition(
             )
 
     elif wallet_type == "askar":
-        
+
         request_body = handle_model_with_validation(
             logger=bound_logger,
             model_class=CredentialDefinitionSendRequest,
