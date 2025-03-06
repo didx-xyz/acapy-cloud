@@ -5,6 +5,7 @@ from aries_cloudcontroller import (
     AcaPyClient,
     AnonCredsSchema,
     GetSchemaResult,
+    SchemaGetResult,
     SchemaPostRequest,
     SchemaSendRequest,
 )
