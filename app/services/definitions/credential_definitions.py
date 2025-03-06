@@ -85,6 +85,27 @@ async def create_credential_definition(
             retry_delay=1,
         )
 
+    elif wallet_type == "askar":
+        
+        request_body = handle_model_with_validation(
+            logger=bound_logger,
+            model_class=CredentialDefinitionSendRequest,
+            schema_id=credential_definition.schema_id,
+            support_revocation=support_revocation,
+            tag=credential_definition.tag,
+            revocation_registry_size=REGISTRY_SIZE,
+        )
+
+        result = await publisher.publish_credential_definition(request_body)
+        credential_definition_id = result.sent.credential_definition_id
+
+        if result.txn and result.txn.transaction_id:
+            await wait_for_transaction_ack(
+                aries_controller=aries_controller,
+                transaction_id=result.txn.transaction_id,
+                max_attempts=CRED_DEF_ACK_TIMEOUT,
+                retry_delay=1,
+            )
     if support_revocation:
         await publisher.wait_for_revocation_registry(credential_definition_id)
 
