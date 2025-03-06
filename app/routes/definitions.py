@@ -196,13 +196,10 @@ async def get_schema(
             wallet_type = server_config.config.get("wallet.type")
 
         else:
-            if await is_anoncreds_wallet(
+            wallet_type = get_wallet_type(
                 aries_controller=aries_controller,
                 logger=bound_logger,
-            ):
-                wallet_type = "askar-anoncreds"
-            else:
-                wallet_type = "askar"
+            )
 
         if wallet_type == "askar-anoncreds":
 
