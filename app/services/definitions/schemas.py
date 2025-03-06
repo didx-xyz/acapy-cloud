@@ -21,7 +21,10 @@ from app.routes.trust_registry import (
 )
 from app.routes.trust_registry import get_schemas as get_trust_registry_schemas
 from app.services.definitions.schema_publisher import SchemaPublisher
-from app.util.definitions import anoncreds_schema_from_acapy, credential_schema_from_acapy
+from app.util.definitions import (
+    anoncreds_schema_from_acapy,
+    credential_schema_from_acapy,
+)
 from app.util.tenants import get_wallet_type
 from shared.constants import GOVERNANCE_AGENT_URL
 from shared.log_config import get_logger
