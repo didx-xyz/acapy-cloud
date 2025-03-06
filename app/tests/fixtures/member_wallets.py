@@ -20,7 +20,9 @@ async def alice_tenant(request) -> AsyncGenerator[CreateTenantResponse, Any]:
 
     async with get_tenant_admin_client() as admin_client:
         if test_mode == TestMode.clean_run:
-            tenant = await create_tenant(admin_client, "alice", "askar-anoncreds")
+            tenant = await create_tenant(
+                admin_client, name="alice", wallet_type="askar-anoncreds"
+            )
 
             yield tenant
 
@@ -40,7 +42,9 @@ async def bob_tenant(request) -> AsyncGenerator[CreateTenantResponse, Any]:
 
     async with get_tenant_admin_client() as admin_client:
         if test_mode == TestMode.clean_run:
-            tenant = await create_tenant(admin_client, "bob", "askar-anoncreds")
+            tenant = await create_tenant(
+                admin_client, name="bob", wallet_type="askar-anoncreds"
+            )
 
             yield tenant
 
@@ -82,7 +86,9 @@ async def faber_issuer(request) -> AsyncGenerator[CreateTenantResponse, Any]:
 
     async with get_tenant_admin_client() as admin_client:
         if test_mode == TestMode.clean_run:
-            issuer_tenant = await create_issuer_tenant(admin_client, "faber")
+            issuer_tenant = await create_issuer_tenant(
+                admin_client, name="faber", wallet_type="askar"
+            )
 
             yield issuer_tenant
 
@@ -103,7 +109,7 @@ async def meld_co_issuer_verifier(request) -> AsyncGenerator[CreateTenantRespons
     async with get_tenant_admin_client() as admin_client:
         if test_mode == TestMode.clean_run:
             issuer_and_verifier_tenant = await create_issuer_and_verifier_tenant(
-                admin_client, "meldCo"
+                admin_client, name="meldCo", wallet_type="askar"
             )
 
             yield issuer_and_verifier_tenant
