@@ -72,14 +72,14 @@ livenessProbe:
   httpGet:
     path: /status/live
     port: "{{ trunc 15 .Release.Name }}"
-  initialDelaySeconds: 300
-  timeoutSeconds: 30
 readinessProbe:
   httpGet:
     path: /status/ready
     port: "{{ trunc 15 .Release.Name }}"
-  initialDelaySeconds: 5
-  timeoutSeconds: 30
+startupProbe:
+  httpGet:
+    path: /status/live
+    port: "{{ trunc 15 .Release.Name }}"
 
 # resources:
 #   requests:

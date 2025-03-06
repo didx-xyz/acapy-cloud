@@ -81,6 +81,10 @@ readinessProbe:
   httpGet:
     path: /health/ready
     port: "{{ trunc 15 .Release.Name }}"
+startupProbe:
+  httpGet:
+    path: /health/live
+    port: "{{ trunc 15 .Release.Name }}"
 
 lifecycle:
   preStop:
