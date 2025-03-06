@@ -194,6 +194,17 @@ async def get_schema(
         server_config = await aries_controller.server.get_config()
         wallet_type = server_config.config.get("wallet.type")
 
+    else:
+        if await is_anoncreds_wallet(
+            wallet_id=get_wallet_id_from_b64encoded_jwt(
+                aries_controller.tenant_jwt.split(".")[1]
+            ),
+            logger=logger,
+        ):
+            wallet_type = "askar-anoncreds"
+        else:
+            wallet_type = "askar"
+
     async with client_from_auth(auth) as aries_controller:
         schema = await handle_acapy_call(
             logger=bound_logger,
