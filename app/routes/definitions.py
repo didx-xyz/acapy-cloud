@@ -186,6 +186,13 @@ async def get_schema(
     """
     bound_logger = logger.bind(body={"schema_id": schema_id})
     bound_logger.debug("GET request received: Get schema by id")
+    is_governance = auth.role == Role.GOVERNANCE
+
+    if is_governance:
+        # controller.settings.get_settings() returns None ????
+        # Get the wallet type from the server config
+        server_config = await aries_controller.server.get_config()
+        wallet_type = server_config.config.get("wallet.type")
 
     async with client_from_auth(auth) as aries_controller:
         schema = await handle_acapy_call(
