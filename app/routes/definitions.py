@@ -399,12 +399,28 @@ async def get_credential_definition_by_id(
     bound_logger.debug("GET request received: Get credential definition by id")
 
     async with client_from_auth(auth) as aries_controller:
-        bound_logger.debug("Getting credential definition")
-        credential_definition = await handle_acapy_call(
+        if await is_anoncreds_wallet(
+            aries_controller=aries_controller,
             logger=bound_logger,
-            acapy_call=aries_controller.anoncreds_credential_definitions.get_credential_definition,
-            cred_def_id=credential_definition_id,
-        )
+        ):
+            wallet_type = "askar-anoncreds"
+        else:
+            wallet_type = "askar"
+
+        bound_logger.debug("Getting credential definition")
+        if wallet_type == "askar-anoncreds":
+            credential_definition = await handle_acapy_call(
+                logger=bound_logger,
+                acapy_call=aries_controller.anoncreds_credential_definitions.get_credential_definition,
+                cred_def_id=credential_definition_id,
+            )
+
+        elif wallet_type == "askar":
+            credential_definition = await handle_acapy_call(
+                logger=bound_logger,
+                acapy_call=aries_controller.credential_definition.get_cred_def,
+                cred_def_id=credential_definition_id,
+            )
 
         if not credential_definition.credential_definition:
             raise HTTPException(
