@@ -29,7 +29,7 @@ class CredentialDefinition(BaseModel):
 
 
 class CreateSchema(BaseModel):
-    schema_type: SchemaType = SchemaType.ANONCREDS
+    schema_type: SchemaType = SchemaType.INDY
     name: str = Field(..., examples=[sample_name])
     version: str = Field(..., examples=[sample_version])
     attribute_names: List[str] = Field(..., examples=[sample_attribute_names])
