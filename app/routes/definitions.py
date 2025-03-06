@@ -198,7 +198,7 @@ async def get_schema(
         else:
             if await is_anoncreds_wallet(
                 aries_controller=aries_controller,
-                logger=logger,
+                logger=bound_logger,
             ):
                 wallet_type = "askar-anoncreds"
             else:

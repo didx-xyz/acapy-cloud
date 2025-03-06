@@ -117,7 +117,7 @@ async def get_schemas_as_tenant(
     bound_logger.debug("Fetching schemas from trust registry")
     if await is_anoncreds_wallet(
         aries_controller=aries_controller,
-        logger=logger,
+        logger=bound_logger,
     ):
         wallet_type = "askar-anoncreds"
     else:
