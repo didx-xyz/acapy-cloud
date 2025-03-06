@@ -114,26 +114,56 @@ async def get_credential_definitions(
         }
     )
     bound_logger.debug("Getting created credential definitions")
-
-    response = await handle_acapy_call(
+    if is_anoncreds_wallet(
+        aries_controller=aries_controller,
         logger=bound_logger,
-        acapy_call=aries_controller.anoncreds_credential_definitions.get_credential_definitions,
-        issuer_id=issuer_did,
-        schema_id=schema_id,
-        schema_name=schema_name,
-        schema_version=schema_version,
-    )
+    ):
+        wallet_type = "askar-anoncreds"
+    else:
+        wallet_type = "askar"
 
-    # Initiate retrieving all credential definitions
-    credential_definition_ids = response.credential_definition_ids or []
-    get_credential_definition_futures = [
-        handle_acapy_call(
+    if wallet_type == "askar-anoncreds":
+        response = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=aries_controller.anoncreds_credential_definitions.get_credential_definition,
-            cred_def_id=credential_definition_id,
+            acapy_call=aries_controller.anoncreds_credential_definitions.get_credential_definitions,
+            issuer_id=issuer_did,
+            schema_id=schema_id,
+            schema_name=schema_name,
+            schema_version=schema_version,
         )
-        for credential_definition_id in credential_definition_ids
-    ]
+
+        # Initiate retrieving all credential definitions
+        credential_definition_ids = response.credential_definition_ids or []
+        get_credential_definition_futures = [
+            handle_acapy_call(
+                logger=bound_logger,
+                acapy_call=aries_controller.anoncreds_credential_definitions.get_credential_definition,
+                cred_def_id=credential_definition_id,
+            )
+            for credential_definition_id in credential_definition_ids
+        ]
+    elif wallet_type == "askar":
+        response = await handle_acapy_call(
+            logger=bound_logger,
+            acapy_call=aries_controller.credential_definition.get_created_cred_defs,
+            issuer_did=issuer_did,
+            cred_def_id=credential_definition_id,
+            schema_id=schema_id,
+            schema_issuer_did=schema_issuer_did,
+            schema_name=schema_name,
+            schema_version=schema_version,
+        )
+
+        # Initiate retrieving all credential definitions
+        credential_definition_ids = response.credential_definition_ids or []
+        get_credential_definition_futures = [
+            handle_acapy_call(
+                logger=bound_logger,
+                acapy_call=aries_controller.credential_definition.get_cred_def,
+                cred_def_id=credential_definition_id,
+            )
+            for credential_definition_id in credential_definition_ids
+        ]
 
     # Wait for completion of retrieval and transform all credential definitions
     # into response model (if a credential definition was returned)
