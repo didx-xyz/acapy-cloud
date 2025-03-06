@@ -6,9 +6,8 @@ from typing import Optional
 from aries_cloudcontroller import AcaPyClient, WalletRecordWithGroups
 from fastapi import HTTPException
 
-from app.exceptions import CloudApiException
 from app.dependencies.acapy_clients import get_tenant_admin_controller
-from app.exceptions import handle_acapy_call
+from app.exceptions import CloudApiException, handle_acapy_call
 from app.models.tenants import Tenant
 
 
