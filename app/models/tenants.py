@@ -67,7 +67,7 @@ class CreateTenantRequest(BaseModel):
     group_id: Optional[str] = group_id_field
     image_url: Optional[str] = image_url_field
     extra_settings: Optional[Dict[ExtraSettings, bool]] = ExtraSettings_field
-    wallet_type: Optional[str] = Field(
+    wallet_type: Optional[Literal["askar", "askar-anoncreds"]] = Field(
         default="askar",
         description="The type of wallet to create. 'askar' or 'askar-anoncreds' are supported.",
     )
