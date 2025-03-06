@@ -40,7 +40,7 @@ async def bob_tenant(request) -> AsyncGenerator[CreateTenantResponse, Any]:
 
     async with get_tenant_admin_client() as admin_client:
         if test_mode == TestMode.clean_run:
-            tenant = await create_tenant(admin_client, "bob")
+            tenant = await create_tenant(admin_client, "bob", "askar-anoncreds")
 
             yield tenant
 
