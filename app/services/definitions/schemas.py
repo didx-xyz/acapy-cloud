@@ -211,6 +211,7 @@ async def get_schemas_as_governance(
     schemas = await get_schemas_by_id(
         aries_controller=aries_controller,
         schema_ids=schema_ids,
+        wallet_type=wallet_type,
     )
 
     return schemas
