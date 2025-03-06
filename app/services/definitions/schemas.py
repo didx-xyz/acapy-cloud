@@ -21,7 +21,7 @@ from app.routes.trust_registry import (
 )
 from app.routes.trust_registry import get_schemas as get_trust_registry_schemas
 from app.services.definitions.schema_publisher import SchemaPublisher
-from app.util.definitions import schema_from_acapy
+from app.util.definitions import credential_schema_from_acapy, anon_schema_from_acapy
 from app.util.tenants import get_wallet_id_from_b64encoded_jwt, is_anoncreds_wallet
 from shared.constants import GOVERNANCE_AGENT_URL
 from shared.log_config import get_logger
@@ -249,6 +249,13 @@ async def get_schemas_by_id(
         else:
             logger.debug("No created schema ids returned")
             schema_results = []
+
+            # transform all schemas into response model (if schemas returned)
+            schemas = [
+                anon_schema_from_acapy(schema)
+                for schema in schema_results
+                if schema.var_schema
+            ]
     elif wallet_type == "askar":
         logger.debug("Fetching schemas from askar wallet")
         get_schema_futures = [
@@ -269,15 +276,17 @@ async def get_schemas_by_id(
         else:
             logger.debug("No created schema ids returned")
             schema_results = []
+
+        # transform all schemas into response model (if schemas returned)
+        schemas = [
+            credential_schema_from_acapy(schema.var_schema)
+            for schema in schema_results
+            if schema.var_schema
+        ]
     else:
         raise CloudApiException(
             "Wallet type not supported. Cannot get schemas.",
             status_code=400,
         )
-
-    # transform all schemas into response model (if schemas returned)
-    schemas = [
-        schema_from_acapy(schema) for schema in schema_results if schema.var_schema
-    ]
 
     return schemas
