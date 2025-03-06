@@ -61,7 +61,7 @@ livenessProbe:
   timeoutSeconds: 10
 readinessProbe:
   httpGet:
-    path: /status
+    path: /status/text
     port: "{{ trunc 15 .Release.Name }}"
 
 terminationGracePeriodSeconds: 10
