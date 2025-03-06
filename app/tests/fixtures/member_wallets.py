@@ -60,7 +60,9 @@ async def acme_verifier(request) -> AsyncGenerator[CreateTenantResponse, Any]:
 
     async with get_tenant_admin_client() as admin_client:
         if test_mode == TestMode.clean_run:
-            verifier_tenant = await create_verifier_tenant(admin_client, "acme")
+            verifier_tenant = await create_verifier_tenant(
+                admin_client, name="acme", wallet_type="askar-anoncreds"
+            )
 
             yield verifier_tenant
 
