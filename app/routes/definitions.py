@@ -194,7 +194,7 @@ async def get_schema(
             # Get the wallet type from the server config
             server_config = await aries_controller.server.get_config()
             wallet_type = server_config.config.get("wallet.type")
-        
+
         else:
             if await is_anoncreds_wallet(
                 wallet_id=get_wallet_id_from_b64encoded_jwt(
