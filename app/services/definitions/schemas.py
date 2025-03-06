@@ -115,7 +115,15 @@ async def get_schemas_as_tenant(
         }
     )
     bound_logger.debug("Fetching schemas from trust registry")
-
+    if await is_anoncreds_wallet(
+        wallet_id=get_wallet_id_from_b64encoded_jwt(
+            aries_controller.tenant_jwt.split(".")[1]
+        ),
+        logger=logger,
+    ):
+        wallet_type = "askar-anoncreds"
+    else:
+        wallet_type = "askar"
     if schema_id:  # fetch specific id
         trust_registry_schemas = [await get_trust_registry_schema_by_id(schema_id)]
     else:  # client is not filtering by schema_id, fetch all
@@ -127,6 +135,7 @@ async def get_schemas_as_tenant(
     schemas = await get_schemas_by_id(
         aries_controller=aries_controller,
         schema_ids=schema_ids,
+        wallet_type=wallet_type,
     )
 
     if schema_issuer_did:
