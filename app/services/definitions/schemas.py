@@ -66,6 +66,7 @@ async def create_schema(
             f" '{"askar" if schema.schema_type == "INDY" else "askar-anoncreds"}' wallet types",
             status_code=400,
         )
+    if wallet_type == "askar-anoncreds":
         anoncreds_schema = handle_model_with_validation(
             logger=bound_logger,
             model_class=AnonCredsSchema,
@@ -85,7 +86,7 @@ async def create_schema(
 
         result = await publisher.publish_anoncreds_schema(schema_request)
 
-    elif schema.schema_type == SchemaType.INDY and wallet_type == "askar":
+    elif wallet_type == "askar":
         schema_request = handle_model_with_validation(
             logger=bound_logger,
             model_class=SchemaSendRequest,
