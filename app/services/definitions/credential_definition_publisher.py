@@ -33,6 +33,31 @@ class CredentialDefinitionPublisher:
             )
 
     async def publish_credential_definition(self, request_body):
+        try:
+            result = await handle_acapy_call(
+                logger=self._logger,
+                acapy_call=self._controller.credential_definition.publish_cred_def,
+                body=request_body,
+            )
+        except CloudApiException as e:
+            self._logger.warning(
+                "An Exception was caught while publishing cred def: `{}` `{}`",
+                e.detail,
+                e.status_code,
+            )
+            if "already exists" in e.detail:
+                self._logger.info("Credential definition already exists")
+                raise CloudApiException(status_code=409, detail=e.detail) from e
+            else:
+                self._logger.error(
+                    "Error while creating credential definition: `{}`", e.detail
+                )
+                raise CloudApiException(
+                    detail=f"Error while creating credential definition: {e.detail}",
+                    status_code=e.status_code,
+                ) from e
+
+        return result
 
     async def publish_anoncreds_credential_definition(self, request_body):
         try:
