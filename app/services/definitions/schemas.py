@@ -176,15 +176,33 @@ async def get_schemas_as_governance(
             status_code=403,
         )
 
-    # Get all created schema ids that match the filter
-    bound_logger.debug("Fetching created schemas")
-    response = await handle_acapy_call(
-        logger=bound_logger,
-        acapy_call=aries_controller.anoncreds_schemas.get_schemas,
-        schema_issuer_id=schema_issuer_did,
-        schema_name=schema_name,
-        schema_version=schema_version,
-    )
+    # controller.settings.get_settings() returns None ????
+    # Get the wallet type from the server config
+    server_config = await aries_controller.server.get_config()
+    wallet_type = server_config.config.get("wallet.type")
+
+    if wallet_type == "askar-anoncreds":
+        # Get all created schema ids that match the filter
+        bound_logger.debug("Fetching created schemas")
+        response = await handle_acapy_call(
+            logger=bound_logger,
+            acapy_call=aries_controller.anoncreds_schemas.get_schemas,
+            schema_issuer_id=schema_issuer_did,
+            schema_name=schema_name,
+            schema_version=schema_version,
+        )
+
+    elif wallet_type == "askar":
+        # Get all created schema ids that match the filter
+        bound_logger.debug("Fetching created schemas")
+        response = await handle_acapy_call(
+            logger=bound_logger,
+            acapy_call=aries_controller.schema.get_created_schemas,
+            schema_id=schema_id,
+            schema_issuer_did=schema_issuer_did,
+            schema_name=schema_name,
+            schema_version=schema_version,
+        )
 
     # Initiate retrieving all schemas
     schema_ids = response.schema_ids or []
