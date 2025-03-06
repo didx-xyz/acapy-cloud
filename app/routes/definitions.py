@@ -188,24 +188,24 @@ async def get_schema(
     bound_logger.debug("GET request received: Get schema by id")
     is_governance = auth.role == Role.GOVERNANCE
 
-    if is_governance:
-        # controller.settings.get_settings() returns None ????
-        # Get the wallet type from the server config
-        server_config = await aries_controller.server.get_config()
-        wallet_type = server_config.config.get("wallet.type")
-
-    else:
-        if await is_anoncreds_wallet(
-            wallet_id=get_wallet_id_from_b64encoded_jwt(
-                aries_controller.tenant_jwt.split(".")[1]
-            ),
-            logger=logger,
-        ):
-            wallet_type = "askar-anoncreds"
-        else:
-            wallet_type = "askar"
-
     async with client_from_auth(auth) as aries_controller:
+        if is_governance:
+            # controller.settings.get_settings() returns None ????
+            # Get the wallet type from the server config
+            server_config = await aries_controller.server.get_config()
+            wallet_type = server_config.config.get("wallet.type")
+        
+        else:
+            if await is_anoncreds_wallet(
+                wallet_id=get_wallet_id_from_b64encoded_jwt(
+                    aries_controller.tenant_jwt.split(".")[1]
+                ),
+                logger=logger,
+            ):
+                wallet_type = "askar-anoncreds"
+            else:
+                wallet_type = "askar"
+
         if wallet_type == "askar-anoncreds":
 
             schema = await handle_acapy_call(
