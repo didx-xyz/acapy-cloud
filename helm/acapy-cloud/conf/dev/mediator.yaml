@@ -135,7 +135,7 @@ initContainers:
       - sh
       - -c
       - |
-        until curl -s http://governance-agent:3020 -o /dev/null; do
+        until curl -s http://governance-agent:3021 -o /dev/null; do
           echo "waiting for governance-agent to be healthy"
           sleep 2
         done
@@ -145,7 +145,7 @@ initContainers:
       - sh
       - -c
       - |
-        until curl -s http://multitenant-agent:3020; do
+        until curl -s http://multitenant-agent:3021 -o /dev/null; do
           echo "waiting for multitenant-agent to be healthy"
           sleep 2
         done
