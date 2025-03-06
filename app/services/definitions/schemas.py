@@ -47,7 +47,11 @@ async def create_schema(
     did_result = await aries_controller.wallet.get_public_did()
     endorser_did = did_result.result.did
 
-    wallet_type = (await aries_controller.settings.get_settings())["wallet.type"]
+    # controller.settings.get_settings() returns None ????
+    # Get the wallet type from the server config
+    server_config = await aries_controller.server.get_config()
+    wallet_type = server_config.config.get("wallet.type")
+
     if schema.schema_type == SchemaType.ANONCREDS and wallet_type == "askar-anoncreds":
         anoncreds_schema = handle_model_with_validation(
             logger=bound_logger,
