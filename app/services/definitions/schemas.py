@@ -248,7 +248,7 @@ async def get_schemas_by_id(
 
             # transform all schemas into response model (if schemas returned)
             schemas = [
-                anon_schema_from_acapy(schema)
+                anoncreds_schema_from_acapy(schema)
                 for schema in schema_results
                 if schema.var_schema
             ]
