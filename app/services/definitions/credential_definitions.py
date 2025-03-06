@@ -116,8 +116,11 @@ async def create_credential_definition(
                 max_attempts=CRED_DEF_ACK_TIMEOUT,
                 retry_delay=1,
             )
+
     if support_revocation:
-        await publisher.wait_for_revocation_registry(credential_definition_id)
+        await publisher.wait_for_revocation_registry(
+            credential_definition_id=credential_definition_id, wallet_type=wallet_type
+        )
 
     return credential_definition_id
 
