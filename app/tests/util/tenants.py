@@ -44,11 +44,14 @@ async def create_issuer_and_verifier_tenant(admin_client: RichAsyncClient, name:
     return await post_tenant_request(admin_client, request)
 
 
-async def create_tenant(admin_client: RichAsyncClient, name: str):
+async def create_tenant(
+    admin_client: RichAsyncClient, name: str, wallet_type: str = "askar"
+):
     request = CreateTenantRequest(
         image_url="https://aries.ca/images/sample.png",
         wallet_label=append_random_string(name),
         group_id="TenantGroup",
+        wallet_type=wallet_type,
     )
     return await post_tenant_request(admin_client, request)
 
