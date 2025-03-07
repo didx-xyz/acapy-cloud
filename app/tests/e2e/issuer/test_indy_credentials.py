@@ -20,7 +20,7 @@ OOB_BASE_PATH = oob_router.prefix
 
 @pytest.mark.anyio
 async def test_send_credential_oob(
-    faber_client: RichAsyncClient,
+    faber_indy_client: RichAsyncClient,
     schema_definition: CredentialSchema,
     credential_definition_id: str,
     alice_member_client: RichAsyncClient,
@@ -32,7 +32,7 @@ async def test_send_credential_oob(
         },
     }
 
-    response = await faber_client.post(
+    response = await faber_indy_client.post(
         CREDENTIALS_BASE_PATH + "/create-offer",
         json=credential,
     )
@@ -46,7 +46,7 @@ async def test_send_credential_oob(
     cred_ex_id = data["credential_exchange_id"]
 
     try:
-        invitation_response = await faber_client.post(
+        invitation_response = await faber_indy_client.post(
             OOB_BASE_PATH + "/create-invitation",
             json={
                 "create_connection": False,
@@ -80,25 +80,25 @@ async def test_send_credential_oob(
 
     finally:
         # Clean up created offer
-        await faber_client.delete(f"{CREDENTIALS_BASE_PATH}/{cred_ex_id}")
+        await faber_indy_client.delete(f"{CREDENTIALS_BASE_PATH}/{cred_ex_id}")
 
 
 @pytest.mark.anyio
 async def test_send_credential(
-    faber_client: RichAsyncClient,
+    faber_indy_client: RichAsyncClient,
     schema_definition: CredentialSchema,
     credential_definition_id: str,
-    faber_and_alice_connection: FaberAliceConnect,
+    faber_indy_and_alice_connection: FaberAliceConnect,
 ):
     credential = {
-        "connection_id": faber_and_alice_connection.faber_connection_id,
+        "connection_id": faber_indy_and_alice_connection.faber_connection_id,
         "indy_credential_detail": {
             "credential_definition_id": credential_definition_id,
             "attributes": sample_credential_attributes,
         },
     }
 
-    response = await faber_client.post(
+    response = await faber_indy_client.post(
         CREDENTIALS_BASE_PATH,
         json=credential,
     )
@@ -112,7 +112,7 @@ async def test_send_credential(
     cred_ex_id = data["credential_exchange_id"]
     try:
         assert await check_webhook_state(
-            client=faber_client,
+            client=faber_indy_client,
             topic="credentials",
             state="offer-sent",
             filter_map={
@@ -122,12 +122,12 @@ async def test_send_credential(
 
     finally:
         # Clean up created offer
-        await faber_client.delete(f"{CREDENTIALS_BASE_PATH}/{cred_ex_id}")
+        await faber_indy_client.delete(f"{CREDENTIALS_BASE_PATH}/{cred_ex_id}")
 
 
 @pytest.mark.anyio
 async def test_create_offer(
-    faber_client: RichAsyncClient,
+    faber_indy_client: RichAsyncClient,
     schema_definition: CredentialSchema,
     credential_definition_id: str,
 ):
@@ -138,7 +138,7 @@ async def test_create_offer(
         },
     }
 
-    response = await faber_client.post(
+    response = await faber_indy_client.post(
         CREDENTIALS_BASE_PATH + "/create-offer",
         json=credential,
     )
@@ -152,7 +152,7 @@ async def test_create_offer(
     cred_ex_id = data["credential_exchange_id"]
     try:
         assert await check_webhook_state(
-            client=faber_client,
+            client=faber_indy_client,
             topic="credentials",
             state="offer-sent",
             filter_map={
@@ -162,25 +162,25 @@ async def test_create_offer(
 
     finally:
         # Clean up created offer
-        await faber_client.delete(f"{CREDENTIALS_BASE_PATH}/{cred_ex_id}")
+        await faber_indy_client.delete(f"{CREDENTIALS_BASE_PATH}/{cred_ex_id}")
 
 
 @pytest.mark.anyio
 async def test_send_credential_request(
     alice_member_client: RichAsyncClient,
-    faber_client: RichAsyncClient,
-    faber_and_alice_connection: FaberAliceConnect,
+    faber_indy_client: RichAsyncClient,
+    faber_indy_and_alice_connection: FaberAliceConnect,
     credential_definition_id: str,
 ):
     credential = {
-        "connection_id": faber_and_alice_connection.faber_connection_id,
+        "connection_id": faber_indy_and_alice_connection.faber_connection_id,
         "indy_credential_detail": {
             "credential_definition_id": credential_definition_id,
             "attributes": sample_credential_attributes,
         },
     }
 
-    response = await faber_client.post(
+    response = await faber_indy_client.post(
         CREDENTIALS_BASE_PATH,
         json=credential,
     )
@@ -188,7 +188,7 @@ async def test_send_credential_request(
     thread_id = credential_exchange["thread_id"]
 
     assert await check_webhook_state(
-        client=faber_client,
+        client=faber_indy_client,
         topic="credentials",
         state="offer-sent",
         filter_map={
@@ -229,7 +229,7 @@ async def test_send_credential_request(
             },
         ),
         check_webhook_state(
-            client=faber_client,
+            client=faber_indy_client,
             topic="credentials",
             state="request-received",
             filter_map={
@@ -242,12 +242,12 @@ async def test_send_credential_request(
 
 @pytest.mark.anyio
 async def test_revoke_credential(
-    faber_client: RichAsyncClient,
+    faber_indy_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     credential_definition_id_revocable: str,
-    faber_and_alice_connection: FaberAliceConnect,
+    faber_indy_and_alice_connection: FaberAliceConnect,
 ):
-    faber_connection_id = faber_and_alice_connection.faber_connection_id
+    faber_connection_id = faber_indy_and_alice_connection.faber_connection_id
 
     credential = {
         "connection_id": faber_connection_id,
@@ -259,7 +259,7 @@ async def test_revoke_credential(
 
     # create and send credential offer: issuer
     faber_credential_response = (
-        await faber_client.post(
+        await faber_indy_client.post(
             CREDENTIALS_BASE_PATH,
             json=credential,
         )
@@ -292,7 +292,7 @@ async def test_revoke_credential(
         },
     )
 
-    response = await faber_client.post(
+    response = await faber_indy_client.post(
         f"{CREDENTIALS_BASE_PATH}/revoke",
         json={
             "credential_exchange_id": faber_credential_exchange_id,

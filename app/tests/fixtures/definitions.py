@@ -151,10 +151,10 @@ async def get_clean_or_regression_test_cred_def(
 async def credential_definition_id(
     request,
     schema_definition: CredentialSchema,  # pylint: disable=redefined-outer-name
-    faber_client: RichAsyncClient,
+    faber_indy_client: RichAsyncClient,
 ) -> str:
     auth = acapy_auth_verified(
-        acapy_auth_from_header(faber_client.headers["x-api-key"])
+        acapy_auth_from_header(faber_indy_client.headers["x-api-key"])
     )
     result = await get_clean_or_regression_test_cred_def(
         test_mode=request.param,
@@ -169,10 +169,10 @@ async def credential_definition_id(
 async def credential_definition_id_revocable(
     request,
     schema_definition_alt: CredentialSchema,  # pylint: disable=redefined-outer-name
-    faber_client: RichAsyncClient,
+    faber_indy_client: RichAsyncClient,
 ) -> str:
     auth = acapy_auth_verified(
-        acapy_auth_from_header(faber_client.headers["x-api-key"])
+        acapy_auth_from_header(faber_indy_client.headers["x-api-key"])
     )
     result = await get_clean_or_regression_test_cred_def(
         test_mode=request.param,
@@ -187,10 +187,10 @@ async def credential_definition_id_revocable(
 async def meld_co_credential_definition_id(
     request,
     schema_definition: CredentialSchema,  # pylint: disable=redefined-outer-name
-    meld_co_client: RichAsyncClient,
+    meld_co_indy_client: RichAsyncClient,
 ) -> str:
     auth = acapy_auth_verified(
-        acapy_auth_from_header(meld_co_client.headers["x-api-key"])
+        acapy_auth_from_header(meld_co_indy_client.headers["x-api-key"])
     )
     result = await get_clean_or_regression_test_cred_def(
         test_mode=request.param,

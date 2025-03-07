@@ -54,11 +54,11 @@ async def bob_member_client(
 
 
 @pytest.fixture(scope="session")
-async def faber_client(
-    faber_issuer: CreateTenantResponse,
+async def faber_indy_client(
+    faber_indy_issuer: CreateTenantResponse,
 ) -> AsyncGenerator[RichAsyncClient, Any]:
     async with get_tenant_client(
-        token=faber_issuer.access_token, name="Faber"
+        token=faber_indy_issuer.access_token, name="Faber_indy"
     ) as faber_async_client:
         yield faber_async_client
 
@@ -74,11 +74,11 @@ async def acme_client(
 
 
 @pytest.fixture(scope="session")
-async def meld_co_client(
-    meld_co_issuer_verifier: CreateTenantResponse,
+async def meld_co_indy_client(
+    meld_co_indy_issuer_verifier: CreateTenantResponse,
 ) -> AsyncGenerator[RichAsyncClient, Any]:
     async with get_tenant_client(
-        token=meld_co_issuer_verifier.access_token, name="MeldCo"
+        token=meld_co_indy_issuer_verifier.access_token, name="MeldCo_indy"
     ) as meld_co_async_client:
         yield meld_co_async_client
 

@@ -12,12 +12,12 @@ CONNECTIONS_BASE_PATH = router.prefix
 @pytest.mark.anyio
 @pytest.mark.xdist_group(name="issuer_test_group_3")
 async def test_accept_use_public_did(
-    faber_client: RichAsyncClient,  # issuer has public did
-    meld_co_client: RichAsyncClient,  # also has public did
+    faber_indy_client: RichAsyncClient,  # issuer has public did
+    meld_co_indy_client: RichAsyncClient,  # also has public did
 ):
     invite_json = CreateInvitation(use_public_did=True).model_dump()
 
-    response = await faber_client.post(
+    response = await faber_indy_client.post(
         f"{CONNECTIONS_BASE_PATH}/create-invitation", json=invite_json
     )
     assert response.status_code == 200
@@ -33,7 +33,7 @@ async def test_accept_use_public_did(
         invitation=invitation["invitation"],
     ).model_dump()
 
-    accept_response = await meld_co_client.post(
+    accept_response = await meld_co_indy_client.post(
         f"{CONNECTIONS_BASE_PATH}/accept-invitation",
         json=accept_invite_json,
     )
@@ -45,7 +45,7 @@ async def test_accept_use_public_did(
     assert_that(connection_record).has_state("request-sent")
 
     assert await check_webhook_state(
-        client=meld_co_client,
+        client=meld_co_indy_client,
         topic="connections",
         state="completed",
         filter_map={
@@ -57,12 +57,12 @@ async def test_accept_use_public_did(
 @pytest.mark.anyio
 @pytest.mark.xdist_group(name="issuer_test_group_4")
 async def test_accept_use_public_did_between_issuer_and_holder(
-    faber_client: RichAsyncClient,  # issuer has public did
+    faber_indy_client: RichAsyncClient,  # issuer has public did
     alice_member_client: RichAsyncClient,  # no public did
 ):
     invite_json = CreateInvitation(use_public_did=True).model_dump()
 
-    response = await faber_client.post(
+    response = await faber_indy_client.post(
         f"{CONNECTIONS_BASE_PATH}/create-invitation", json=invite_json
     )
     assert response.status_code == 200

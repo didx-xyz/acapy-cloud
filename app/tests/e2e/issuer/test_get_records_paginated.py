@@ -18,10 +18,10 @@ CREDENTIALS_BASE_PATH = router.prefix
 )
 @pytest.mark.xdist_group(name="issuer_test_group_4")
 async def test_get_credential_exchange_records_paginated(
-    faber_client: RichAsyncClient,
+    faber_indy_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     credential_definition_id: str,
-    faber_and_alice_connection: FaberAliceConnect,
+    faber_indy_and_alice_connection: FaberAliceConnect,
 ):
     num_credentials_to_test = 5
     test_attributes = {"name": "Alice", "age": "44"}
@@ -33,7 +33,7 @@ async def test_get_credential_exchange_records_paginated(
         for i in range(num_credentials_to_test):
             test_attributes["speed"] = str(i)
             credential_v2 = {
-                "connection_id": faber_and_alice_connection.faber_connection_id,
+                "connection_id": faber_indy_and_alice_connection.faber_connection_id,
                 "indy_credential_detail": {
                     "credential_definition_id": credential_definition_id,
                     "attributes": test_attributes,
@@ -41,7 +41,7 @@ async def test_get_credential_exchange_records_paginated(
                 "save_exchange_record": True,
             }
 
-            response = await faber_client.post(
+            response = await faber_indy_client.post(
                 CREDENTIALS_BASE_PATH, json=credential_v2
             )
 
@@ -150,13 +150,13 @@ async def test_get_credential_exchange_records_paginated(
 
         for params in invalid_params:
             with pytest.raises(HTTPException) as exc:
-                await faber_client.get(CREDENTIALS_BASE_PATH, params=params)
+                await faber_indy_client.get(CREDENTIALS_BASE_PATH, params=params)
             assert exc.value.status_code == 422
 
     finally:
         # Clean up created credential exchange records
         for cred_ex_id in faber_cred_ex_ids:
-            await faber_client.delete(f"{CREDENTIALS_BASE_PATH}/{cred_ex_id}")
+            await faber_indy_client.delete(f"{CREDENTIALS_BASE_PATH}/{cred_ex_id}")
         for alice_record in alice_cred_ex_records:
             cred_ex_id = alice_record["credential_exchange_id"]
             await alice_member_client.delete(f"{CREDENTIALS_BASE_PATH}/{cred_ex_id}")

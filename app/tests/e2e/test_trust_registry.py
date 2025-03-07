@@ -51,8 +51,8 @@ async def test_get_schema_by_id(
 @pytest.mark.anyio
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_get_actors(
-    faber_issuer: CreateTenantResponse,
-    faber_acapy_client: AcaPyClient,
+    faber_indy_issuer: CreateTenantResponse,
+    faber_indy_acapy_client: AcaPyClient,
     trust_registry_client: RichAsyncClient,
 ):
     all_actors = await trust_registry_client.get(
@@ -63,17 +63,17 @@ async def test_get_actors(
     assert_that(actors[0]).contains("id", "name", "roles", "did", "didcomm_invitation")
 
     actors_by_id = await trust_registry_client.get(
-        f"{CLOUDAPI_TRUST_REGISTRY_PATH}/actors?actor_id={faber_issuer.wallet_id}"
+        f"{CLOUDAPI_TRUST_REGISTRY_PATH}/actors?actor_id={faber_indy_issuer.wallet_id}"
     )
     assert actors_by_id.status_code == 200
     actor = actors_by_id.json()[0]
 
     actor_did = actor["did"]
-    did_result = await faber_acapy_client.wallet.get_public_did()
+    did_result = await faber_indy_acapy_client.wallet.get_public_did()
     assert actor_did == f"did:sov:{did_result.result.did}"
 
     actor_name = actor["name"]
-    assert actor_name == faber_issuer.wallet_label
+    assert actor_name == faber_indy_issuer.wallet_label
     assert_that(actor).contains("id", "name", "roles", "did", "didcomm_invitation")
 
     actors_by_did = await trust_registry_client.get(
@@ -85,7 +85,7 @@ async def test_get_actors(
     )
 
     actors_by_name = await trust_registry_client.get(
-        f"{CLOUDAPI_TRUST_REGISTRY_PATH}/actors?actor_name={faber_issuer.wallet_label}"
+        f"{CLOUDAPI_TRUST_REGISTRY_PATH}/actors?actor_name={faber_indy_issuer.wallet_label}"
     )
     assert actors_by_name.status_code == 200
     assert_that(actors_by_name.json()[0]).contains(
@@ -123,7 +123,7 @@ async def test_get_actors_x(trust_registry_client: RichAsyncClient):
 @pytest.mark.anyio
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_get_issuers(
-    faber_issuer: CreateTenantResponse,  # pylint: disable=unused-argument
+    faber_indy_issuer: CreateTenantResponse,  # pylint: disable=unused-argument
     trust_registry_client: RichAsyncClient,
 ):
     actors = await trust_registry_client.get(

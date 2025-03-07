@@ -32,14 +32,16 @@ TENANTS_BASE_PATH = tenants_router.prefix
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_create_did_exchange_request(
     alice_member_client: RichAsyncClient,
-    faber_client: RichAsyncClient,
+    faber_indy_client: RichAsyncClient,
     alice_acapy_client: AcaPyClient,
-    faber_acapy_client: AcaPyClient,
+    faber_indy_acapy_client: AcaPyClient,
     use_did: Optional[str],
     use_did_method: Optional[str],
     use_public_did: bool,
 ):
-    faber_public_did = await acapy_wallet.get_public_did(controller=faber_acapy_client)
+    faber_public_did = await acapy_wallet.get_public_did(
+        controller=faber_indy_acapy_client
+    )
 
     request_data = {"their_public_did": qualified_did_sov(faber_public_did.did)}
 
@@ -95,7 +97,7 @@ async def test_create_did_exchange_request(
             )
             # Faber now has a complete connection too
             assert await check_webhook_state(
-                faber_client,
+                faber_indy_client,
                 topic="connections",
                 state="completed",
                 filter_map={"their_did": alice_did},
@@ -117,19 +119,21 @@ async def test_create_did_exchange_request(
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_accept_did_exchange_invitation(
     alice_member_client: RichAsyncClient,
-    faber_client: RichAsyncClient,
+    faber_indy_client: RichAsyncClient,
     tenant_admin_client: RichAsyncClient,
-    faber_acapy_client: AcaPyClient,
+    faber_indy_acapy_client: AcaPyClient,
     use_public_did: bool,
 ):
     # First disable auto-accept invites for Faber
-    faber_wallet_id = get_wallet_id_from_async_client(client=faber_client)
+    faber_wallet_id = get_wallet_id_from_async_client(client=faber_indy_client)
     await tenant_admin_client.put(
         f"{TENANTS_BASE_PATH}/{faber_wallet_id}",
         json={"extra_settings": {"ACAPY_AUTO_ACCEPT_REQUESTS": False}},
     )
 
-    faber_public_did = await acapy_wallet.get_public_did(controller=faber_acapy_client)
+    faber_public_did = await acapy_wallet.get_public_did(
+        controller=faber_indy_acapy_client
+    )
 
     request_data = {"their_public_did": qualified_did_sov(faber_public_did.did)}
 
@@ -143,7 +147,7 @@ async def test_accept_did_exchange_invitation(
 
     try:
         faber_connection_request_received_event = await check_webhook_state(
-            faber_client,
+            faber_indy_client,
             topic="connections",
             state="request-received",
             filter_map={"their_did": alice_did},
@@ -156,7 +160,7 @@ async def test_accept_did_exchange_invitation(
             "use_public_did": use_public_did,
         }
 
-        faber_accept_request_response = await faber_client.post(
+        faber_accept_request_response = await faber_indy_client.post(
             f"{CONNECTIONS_BASE_PATH}/did-exchange/accept-request", params=accept_params
         )
         assert faber_accept_request_response.status_code == 200
@@ -173,7 +177,7 @@ async def test_accept_did_exchange_invitation(
 
         # And Faber's connection is complete
         assert await check_webhook_state(
-            faber_client,
+            faber_indy_client,
             topic="connections",
             state="completed",
             filter_map={"connection_id": faber_connection_id},

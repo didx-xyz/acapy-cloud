@@ -475,7 +475,7 @@ async def test_accept_proof_request_verifier_has_issuer_role(
     meld_co_issue_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     meld_co_credential_definition_id: str,
     alice_member_client: RichAsyncClient,
-    meld_co_client: RichAsyncClient,
+    meld_co_indy_client: RichAsyncClient,
     meld_co_and_alice_connection: MeldCoAliceConnect,
 ):
     request_body = {
@@ -484,7 +484,7 @@ async def test_accept_proof_request_verifier_has_issuer_role(
             restrictions=[{"cred_def_id": meld_co_credential_definition_id}]
         ).to_dict(),
     }
-    send_proof_response = await send_proof_request(meld_co_client, request_body)
+    send_proof_response = await send_proof_request(meld_co_indy_client, request_body)
 
     meld_co_proof_id = send_proof_response["proof_id"]
     thread_id = send_proof_response["thread_id"]
@@ -531,7 +531,7 @@ async def test_accept_proof_request_verifier_has_issuer_role(
 
     await assert_both_webhooks_received(
         alice_member_client,
-        meld_co_client,
+        meld_co_indy_client,
         "proofs",
         "done",
         alice_proof_id,

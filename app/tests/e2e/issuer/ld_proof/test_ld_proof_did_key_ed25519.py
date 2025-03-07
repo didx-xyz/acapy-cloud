@@ -26,13 +26,13 @@ credential_ = create_credential("Ed25519Signature2018")
 
 @pytest.mark.anyio
 async def test_send_jsonld_key_ed25519(
-    faber_client: RichAsyncClient,
-    faber_and_alice_connection: FaberAliceConnect,
+    faber_indy_client: RichAsyncClient,
+    faber_indy_and_alice_connection: FaberAliceConnect,
     alice_member_client: RichAsyncClient,
     register_issuer_key_ed25519: str,
 ):
-    alice_connection_id = faber_and_alice_connection.alice_connection_id
-    faber_connection_id = faber_and_alice_connection.faber_connection_id
+    alice_connection_id = faber_indy_and_alice_connection.alice_connection_id
+    faber_connection_id = faber_indy_and_alice_connection.faber_connection_id
 
     # Updating JSON-LD credential did:key with proofType ed25519
     credential = deepcopy(credential_)
@@ -42,7 +42,7 @@ async def test_send_jsonld_key_ed25519(
     ] = register_issuer_key_ed25519
 
     # Send credential
-    response = await faber_client.post(
+    response = await faber_indy_client.post(
         CREDENTIALS_BASE_PATH,
         json=credential,
     )
@@ -82,16 +82,16 @@ async def test_send_jsonld_key_ed25519(
 
     finally:
         # Clean up created offer
-        await faber_client.delete(f"{CREDENTIALS_BASE_PATH}/{cred_ex_id}")
+        await faber_indy_client.delete(f"{CREDENTIALS_BASE_PATH}/{cred_ex_id}")
 
 
 @pytest.mark.anyio
 async def test_send_jsonld_oob(
-    faber_client: RichAsyncClient,
+    faber_indy_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     register_issuer_key_ed25519: str,
 ):
-    invitation_response = await faber_client.post(
+    invitation_response = await faber_indy_client.post(
         OOB_BASE_PATH + "/create-invitation",
         json={
             "create_connection": True,
@@ -123,7 +123,7 @@ async def test_send_jsonld_oob(
 
     await asyncio.sleep(0.5)  # connection may take moment to reflect
 
-    faber_connections_response = await faber_client.get(
+    faber_connections_response = await faber_indy_client.get(
         CONNECTIONS_BASE_PATH, params={"invitation_msg_id": invitation["@id"]}
     )
     faber_connections = faber_connections_response.json()
@@ -140,7 +140,7 @@ async def test_send_jsonld_oob(
     ] = register_issuer_key_ed25519
 
     # Send credential
-    response = await faber_client.post(
+    response = await faber_indy_client.post(
         CREDENTIALS_BASE_PATH,
         json=credential,
     )
@@ -162,17 +162,17 @@ async def test_send_jsonld_oob(
 
     finally:
         # Clean up created offer
-        await faber_client.delete(f"{CREDENTIALS_BASE_PATH}/{cred_ex_id}")
+        await faber_indy_client.delete(f"{CREDENTIALS_BASE_PATH}/{cred_ex_id}")
 
 
 @pytest.mark.anyio
 async def test_send_jsonld_request(
     alice_member_client: RichAsyncClient,
-    faber_client: RichAsyncClient,
-    faber_and_alice_connection: FaberAliceConnect,
+    faber_indy_client: RichAsyncClient,
+    faber_indy_and_alice_connection: FaberAliceConnect,
     register_issuer_key_ed25519: str,
 ):
-    faber_connection_id = faber_and_alice_connection.faber_connection_id
+    faber_connection_id = faber_indy_and_alice_connection.faber_connection_id
 
     # Updating JSON-LD credential did:key with proofType ed25519
     credential = deepcopy(credential_)
@@ -181,7 +181,7 @@ async def test_send_jsonld_request(
         "issuer"
     ] = register_issuer_key_ed25519
 
-    response = await faber_client.post(
+    response = await faber_indy_client.post(
         CREDENTIALS_BASE_PATH,
         json=credential,
     )
@@ -191,7 +191,7 @@ async def test_send_jsonld_request(
 
     result = await asyncio.gather(
         check_webhook_state(
-            client=faber_client,
+            client=faber_indy_client,
             topic="credentials",
             state="offer-sent",
             filter_map={
@@ -225,7 +225,7 @@ async def test_send_jsonld_request(
 
     await assert_both_webhooks_received(
         alice_member_client,
-        faber_client,
+        faber_indy_client,
         "credentials",
         "done",
         alice_cred_ex_id,
@@ -236,11 +236,11 @@ async def test_send_jsonld_request(
 @pytest.mark.anyio
 async def test_issue_jsonld_ed(
     alice_member_client: RichAsyncClient,
-    faber_client: RichAsyncClient,
-    faber_and_alice_connection: FaberAliceConnect,
+    faber_indy_client: RichAsyncClient,
+    faber_indy_and_alice_connection: FaberAliceConnect,
     register_issuer_key_ed25519: str,
 ):
-    faber_connection_id = faber_and_alice_connection.faber_connection_id
+    faber_connection_id = faber_indy_and_alice_connection.faber_connection_id
 
     # Updating JSON-LD credential did:key with proofType ed25519
     credential = deepcopy(credential_)
@@ -249,7 +249,7 @@ async def test_issue_jsonld_ed(
         "issuer"
     ] = register_issuer_key_ed25519
 
-    response = await faber_client.post(
+    response = await faber_indy_client.post(
         CREDENTIALS_BASE_PATH,
         json=credential,
     )
@@ -259,7 +259,7 @@ async def test_issue_jsonld_ed(
 
     result = await asyncio.gather(
         check_webhook_state(
-            client=faber_client,
+            client=faber_indy_client,
             topic="credentials",
             state="offer-sent",
             filter_map={
@@ -293,7 +293,7 @@ async def test_issue_jsonld_ed(
 
     await assert_both_webhooks_received(
         alice_member_client,
-        faber_client,
+        faber_indy_client,
         "credentials",
         "done",
         alice_cred_ex_id,
@@ -306,11 +306,11 @@ async def test_issue_jsonld_ed(
 
 @pytest.mark.anyio
 async def test_send_jsonld_mismatch_ed_bbs(
-    faber_client: RichAsyncClient,
-    faber_and_alice_connection: FaberAliceConnect,
+    faber_indy_client: RichAsyncClient,
+    faber_indy_and_alice_connection: FaberAliceConnect,
     register_issuer_key_ed25519: str,
 ):
-    faber_connection_id = faber_and_alice_connection.faber_connection_id
+    faber_connection_id = faber_indy_and_alice_connection.faber_connection_id
 
     # Creating JSON-LD credential did:key with proofType: BbsBlsSignature2020
     credential = deepcopy(credential_)
@@ -322,7 +322,7 @@ async def test_send_jsonld_mismatch_ed_bbs(
 
     # Send credential must fail did:key made with ed25519 mismatch with proofType:BbsBlsSignature2020
     with pytest.raises(HTTPException) as exc:
-        await faber_client.post(
+        await faber_indy_client.post(
             CREDENTIALS_BASE_PATH,
             json=credential,
         )
