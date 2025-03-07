@@ -72,14 +72,14 @@ async def issue_indy_credential_to_alice(
 @pytest.fixture(scope="function")
 async def meld_co_issue_indy_credential_to_alice(
     meld_co_indy_client: RichAsyncClient,
-    meld_co_credential_definition_id: str,
+    meld_co_indy_credential_definition_id: str,
     meld_co_indy_and_alice_connection: MeldCoAliceConnect,
     alice_member_client: RichAsyncClient,
 ) -> CredentialExchange:
     credential = {
         "connection_id": meld_co_indy_and_alice_connection.meld_co_connection_id,
         "indy_credential_detail": {
-            "credential_definition_id": meld_co_credential_definition_id,
+            "credential_definition_id": meld_co_indy_credential_definition_id,
             "attributes": sample_credential_attributes,
         },
     }
@@ -123,7 +123,7 @@ async def meld_co_issue_indy_credential_to_alice(
 async def issue_alice_indy_creds(
     faber_indy_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-    credential_definition_id_revocable: str,
+    indy_credential_definition_id_revocable: str,
     faber_indy_and_alice_connection: FaberAliceConnect,
 ) -> List[CredentialExchange]:
     # Fetch existing records so we can filter to exclude them. Necessary to cater for long running / regression tests
@@ -139,7 +139,7 @@ async def issue_alice_indy_creds(
             "connection_id": faber_conn_id,
             "save_exchange_record": True,
             "indy_credential_detail": {
-                "credential_definition_id": credential_definition_id_revocable,
+                "credential_definition_id": indy_credential_definition_id_revocable,
                 "attributes": {"speed": str(i), "name": "Alice", "age": "44"},
             },
         }
@@ -207,9 +207,7 @@ async def issue_alice_indy_creds(
 @pytest.fixture(scope="function")
 async def revoke_alice_indy_creds(
     faber_indy_client: RichAsyncClient,
-    issue_alice_indy_creds: List[
-        CredentialExchange
-    ],  # pylint: disable=redefined-outer-name
+    issue_alice_indy_creds,  # pylint: disable=redefined-outer-name
 ) -> List[CredentialExchange]:
 
     for cred in issue_alice_indy_creds:
@@ -227,9 +225,7 @@ async def revoke_alice_indy_creds(
 async def revoke_alice_indy_creds_and_publish(
     request,
     faber_indy_client: RichAsyncClient,
-    issue_alice_indy_creds: List[
-        CredentialExchange
-    ],  # pylint: disable=redefined-outer-name
+    issue_alice_indy_creds,  # pylint: disable=redefined-outer-name
 ) -> List[CredentialExchange]:
 
     auto_publish = False
@@ -266,7 +262,7 @@ class ReferentCredDef(BaseModel):
 async def get_or_issue_regression_cred_revoked(
     faber_indy_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-    credential_definition_id_revocable: str,
+    indy_credential_definition_id_revocable: str,
     faber_indy_and_alice_connection: FaberAliceConnect,
 ) -> ReferentCredDef:
     revoked_attribute_name = "Alice-revoked"
@@ -297,7 +293,7 @@ async def get_or_issue_regression_cred_revoked(
             "connection_id": faber_indy_and_alice_connection.faber_connection_id,
             "save_exchange_record": True,
             "indy_credential_detail": {
-                "credential_definition_id": credential_definition_id_revocable,
+                "credential_definition_id": indy_credential_definition_id_revocable,
                 "attributes": {
                     "speed": "10",
                     "name": revoked_attribute_name,
