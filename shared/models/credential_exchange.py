@@ -81,14 +81,20 @@ def schema_cred_def_from_record(
     record: V20CredExRecord,
 ) -> Tuple[Optional[str], Optional[str]]:
     if record.by_format and record.by_format.cred_offer:
-        indy = record.by_format.cred_offer.get("indy", {})
+        key = list(record.by_format.cred_offer.keys())
+        if "ld_proof" in key:
+            return None, None
+        ex_record = record.by_format.cred_offer.get(key[0], {})
     elif record.by_format and record.by_format.cred_proposal:
-        indy = record.by_format.cred_proposal.get("indy", {})
+        key = list(record.by_format.cred_proposal.keys())
+        if "ld_proof" in key:
+            return None, None
+        ex_record = record.by_format.cred_proposal.get(key[0], {})
     else:
-        indy = {}
+        ex_record = {}
 
-    schema_id = indy.get("schema_id", None)
-    credential_definition_id = indy.get("cred_def_id", None)
+    schema_id = ex_record.get("schema_id", None)
+    credential_definition_id = ex_record.get("cred_def_id", None)
 
     return schema_id, credential_definition_id
 
