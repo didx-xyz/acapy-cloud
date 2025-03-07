@@ -1,12 +1,11 @@
 from unittest.mock import AsyncMock, patch
 
 import pytest
-
-from app.dependencies.auth import AcaPyAuth
 from aries_cloudcontroller.exceptions import ApiException, BadRequestException
 from aries_cloudcontroller.models.schema_get_result import ModelSchema, SchemaGetResult
 from fastapi import HTTPException
 
+from app.dependencies.auth import AcaPyAuth
 from app.models.definitions import CredentialSchema
 from app.routes.definitions import get_schema
 
@@ -108,7 +107,9 @@ async def test_get_schema_by_id_404():
         return_value=SchemaGetResult(var_schema=None)
     )
     mock_auth = AcaPyAuth(token="mocked_token", role="TENANT")
-    with patch("app.routes.definitions.client_from_auth") as mock_client_from_auth, patch(
+    with patch(
+        "app.routes.definitions.client_from_auth"
+    ) as mock_client_from_auth, patch(
         "app.routes.definitions.get_wallet_type"
     ) as mock_get_wallet_type:
         # Configure client_from_auth to return our mocked aries_controller on enter
