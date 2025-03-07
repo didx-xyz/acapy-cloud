@@ -147,7 +147,7 @@ async def get_credential_definitions(
         }
     )
     bound_logger.debug("Getting created credential definitions")
-    wallet_type = get_wallet_type(
+    wallet_type = await get_wallet_type(
         aries_controller=aries_controller,
         logger=bound_logger,
     )
