@@ -18,6 +18,7 @@ from app.util.pagination import (
     offset_query_parameter,
     order_by_query_parameter,
 )
+from app.util.tenants import get_wallet_type
 from app.util.save_exchange_record import save_exchange_record_query
 from shared.log_config import get_logger
 from shared.models.credential_exchange import CredentialExchange, Role, State
@@ -82,6 +83,13 @@ async def send_credential(
                 "Wallet making this request has no public DID. Only issuers with a public DID can make this request.",
                 403,
             ) from e
+
+        wallet_type = await get_wallet_type(aries_controller, bound_logger)
+        if credential.type == CredentialType.ANONCREDS and wallet_type != "askar-anoncreds":
+            raise CloudApiException(
+                "Anoncreds credentials can only be issued by an askar-anoncreds wallet",
+                400,
+            )
 
         schema_id = None
         if credential.type == CredentialType.INDY:
@@ -175,6 +183,14 @@ async def create_offer(
             ) from e
 
         schema_id = None
+
+        wallet_type = await get_wallet_type(aries_controller, bound_logger)
+        if credential.type == CredentialType.ANONCREDS and wallet_type != "askar-anoncreds":
+            raise CloudApiException(
+                "Anoncreds credentials can only be issued by an askar-anoncreds wallet",
+                400,
+            )
+
         if (
             credential.type == CredentialType.INDY
             or credential.type == CredentialType.ANONCREDS
