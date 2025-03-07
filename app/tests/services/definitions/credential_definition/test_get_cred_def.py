@@ -41,7 +41,10 @@ async def test_get_credential_definitions_success():
     ) as mock_handle_acapy_call, patch(
         "app.services.definitions.credential_definitions.credential_definition_from_acapy",
         side_effect=lambda x: CredDef(id=x.id, schema_id=x.schema_id, tag=x.tag),
-    ):
+    ), patch(
+        "app.services.definitions.credential_definitions.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
 
         mock_handle_acapy_call.side_effect = [
             CredentialDefinitionsCreatedResult(
@@ -79,7 +82,10 @@ async def test_get_credential_definitions_with_filters():
     ) as mock_handle_acapy_call, patch(
         "app.services.definitions.credential_definitions.credential_definition_from_acapy",
         side_effect=lambda x: CredDef(id=x.id, schema_id=x.schema_id, tag=x.tag),
-    ):
+    ), patch(
+        "app.services.definitions.credential_definitions.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
 
         mock_handle_acapy_call.side_effect = [
             CredentialDefinitionsCreatedResult(
@@ -109,7 +115,10 @@ async def test_get_credential_definitions_no_results():
 
     with patch(
         "app.services.definitions.credential_definitions.handle_acapy_call"
-    ) as mock_handle_acapy_call:
+    ) as mock_handle_acapy_call, patch(
+        "app.services.definitions.credential_definitions.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
         mock_handle_acapy_call.return_value = CredentialDefinitionsCreatedResult(
             credential_definition_ids=None
         )
@@ -140,7 +149,10 @@ async def test_get_credential_definitions_some_missing():
     ) as mock_handle_acapy_call, patch(
         "app.services.definitions.credential_definitions.credential_definition_from_acapy",
         side_effect=lambda x: CredDef(id=x.id, schema_id=x.schema_id, tag=x.tag),
-    ):
+    ), patch(
+        "app.services.definitions.credential_definitions.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
 
         mock_handle_acapy_call.side_effect = [
             CredentialDefinitionsCreatedResult(

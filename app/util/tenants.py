@@ -7,7 +7,7 @@ from aries_cloudcontroller import AcaPyClient, WalletRecordWithGroups
 from fastapi import HTTPException
 
 from app.dependencies.acapy_clients import get_tenant_admin_controller
-from app.exceptions import handle_acapy_call
+from app.exceptions import CloudApiException, handle_acapy_call
 from app.models.tenants import Tenant
 
 
@@ -122,3 +122,28 @@ def assert_valid_group(
         raise WalletNotFoundException(wallet_id=wallet_id)
 
     logger.debug("Wallet {} belongs to group {}.", wallet_id, group_id)
+
+
+async def get_wallet_type(aries_controller: AcaPyClient, logger: Logger) -> str:
+    """Check if the aries_controller has an anoncreds wallet.
+    Args:
+        aries_controller (AcaPyClient): The wallet controller to check.
+        logger (Logger): A logger object.
+
+    Returns:
+        wallet_type: The wallet type of the controller.
+    """
+    controller_token = aries_controller.tenant_jwt.split(".")[1]
+    controller_wallet_id = get_wallet_id_from_b64encoded_jwt(controller_token)
+    async with get_tenant_admin_controller() as admin_controller:
+        wallet = await handle_acapy_call(
+            acapy_call=admin_controller.multitenancy.get_wallet,
+            wallet_id=controller_wallet_id,
+            logger=logger,
+        )
+        if not wallet:
+            logger.info("Bad request: Wallet not found.")
+            raise CloudApiException(status_code=401, detail="Wallet not found.")
+
+        wallet_type = wallet.settings.get("wallet.type")
+        return wallet_type
