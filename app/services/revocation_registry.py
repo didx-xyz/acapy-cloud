@@ -531,11 +531,17 @@ async def get_pending_revocations(
     """
     bound_logger = logger.bind(body={"rev_reg_id": rev_reg_id})
     bound_logger.debug("Fetching pending revocations for a revocation registry")
-
+    wallet_type = await get_wallet_type(controller, bound_logger)
     try:
+        if wallet_type == "askar-anoncreds":
+            acapy_call = controller.anoncreds_revocation.get_revocation_registry
+
+        elif wallet_type == "askar":
+            acapy_call = controller.revocation.get_registry
+
         result = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=controller.anoncreds_revocation.get_revocation_registry,
+            acapy_call=acapy_call,
             rev_reg_id=rev_reg_id,
         )
     except CloudApiException as e:
