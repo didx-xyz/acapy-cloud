@@ -4,10 +4,13 @@ from typing import Dict, List, Literal, Optional
 from aries_cloudcontroller import (
     AcaPyClient,
     ClearPendingRevocationsRequest,
+    CredRevRecordResult,
     CredRevRecordResultSchemaAnoncreds,
     IssuerCredRevRecord,
     IssuerRevRegRecord,
+    PublishRevocations,
     PublishRevocationsSchemaAnoncreds,
+    RevokeRequest,
     RevokeRequestSchemaAnoncreds,
     RevRegResult,
     TxnOrPublishRevocationsResult,
