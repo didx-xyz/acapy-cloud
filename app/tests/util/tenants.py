@@ -17,29 +17,38 @@ async def post_tenant_request(
     return CreateTenantResponse.model_validate_json(response.text)
 
 
-async def create_issuer_tenant(admin_client: RichAsyncClient, name: str):
+async def create_issuer_tenant(
+    admin_client: RichAsyncClient, name: str, wallet_type: str = "askar"
+):
     request = CreateTenantRequest(
         wallet_label=append_random_string(name),
         roles=["issuer"],
         group_id="IssuerGroup",
+        wallet_type=wallet_type,
     )
     return await post_tenant_request(admin_client, request)
 
 
-async def create_verifier_tenant(admin_client: RichAsyncClient, name: str):
+async def create_verifier_tenant(
+    admin_client: RichAsyncClient, name: str, wallet_type: str = "askar"
+):
     request = CreateTenantRequest(
         wallet_label=append_random_string(name),
         roles=["verifier"],
         group_id="VerifierGroup",
+        wallet_type=wallet_type,
     )
     return await post_tenant_request(admin_client, request)
 
 
-async def create_issuer_and_verifier_tenant(admin_client: RichAsyncClient, name: str):
+async def create_issuer_and_verifier_tenant(
+    admin_client: RichAsyncClient, name: str, wallet_type: str = "askar"
+):
     request = CreateTenantRequest(
         wallet_label=append_random_string(name),
         roles=["issuer", "verifier"],
         group_id="IssuerAndVerifierGroup",
+        wallet_type=wallet_type,
     )
     return await post_tenant_request(admin_client, request)
 

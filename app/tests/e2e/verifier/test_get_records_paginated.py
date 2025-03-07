@@ -22,7 +22,7 @@ VERIFIER_BASE_PATH = router.prefix
 async def test_get_presentation_exchange_records_paginated(
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-    credential_definition_id: str,
+    indy_credential_definition_id: str,
     acme_and_alice_connection: AcmeAliceConnect,
 ):
     num_presentation_requests_to_test = 5
@@ -36,7 +36,7 @@ async def test_get_presentation_exchange_records_paginated(
                 "save_exchange_record": True,
                 "connection_id": acme_and_alice_connection.acme_connection_id,
                 "indy_proof_request": sample_indy_proof_request(
-                    restrictions=[{"cred_def_id": credential_definition_id}]
+                    restrictions=[{"cred_def_id": indy_credential_definition_id}]
                 ).to_dict(),
             }
             response = await send_proof_request(acme_client, request_body)

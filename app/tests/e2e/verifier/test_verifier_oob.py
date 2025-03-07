@@ -29,7 +29,7 @@ CONNECTIONS_BASE_PATH = connections_router.prefix
 
 @pytest.mark.anyio
 async def test_accept_proof_request_oob(
-    issue_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+    issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     alice_member_client: RichAsyncClient,
     bob_member_client: RichAsyncClient,
 ):
@@ -127,8 +127,8 @@ async def test_accept_proof_request_oob(
     reason="Verifier trust registry OOB connection already tested in test_verifier",
 )
 async def test_accept_proof_request_verifier_oob_connection(
-    credential_definition_id: str,
-    issue_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+    indy_credential_definition_id: str,
+    issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
 ):
@@ -173,7 +173,9 @@ async def test_accept_proof_request_verifier_oob_connection(
                 "requested_attributes": {
                     "name": {
                         "name": "name",
-                        "restrictions": [{"cred_def_id": credential_definition_id}],
+                        "restrictions": [
+                            {"cred_def_id": indy_credential_definition_id}
+                        ],
                     }
                 },
                 "requested_predicates": {
@@ -181,7 +183,9 @@ async def test_accept_proof_request_verifier_oob_connection(
                         "name": "age",
                         "p_type": ">=",
                         "p_value": 21,
-                        "restrictions": [{"cred_def_id": credential_definition_id}],
+                        "restrictions": [
+                            {"cred_def_id": indy_credential_definition_id}
+                        ],
                     }
                 },
             },

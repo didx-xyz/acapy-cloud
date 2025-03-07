@@ -24,7 +24,7 @@ async def test_revoke_many_credentials(
     revoke_many: List[  # pylint: disable=unused-argument, redefined-outer-name
         CredentialExchange
     ],
-    credential_definition_id_revocable: str,
+    indy_credential_definition_id_revocable: str,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
@@ -44,7 +44,7 @@ async def test_revoke_many_credentials(
                 "THE_SPEED": {
                     "name": "speed",
                     "restrictions": [
-                        {"cred_def_id": credential_definition_id_revocable}
+                        {"cred_def_id": indy_credential_definition_id_revocable}
                     ],
                 }
             },
@@ -111,7 +111,7 @@ async def test_revoke_many_credentials(
 @pytest.fixture(scope="function")
 async def revoke_many(
     request,
-    faber_client: RichAsyncClient,
+    faber_indy_client: RichAsyncClient,
     issue_many_creds: List[CredentialExchange],  # pylint: disable=redefined-outer-name
 ) -> List[CredentialExchange]:
 
@@ -120,7 +120,7 @@ async def revoke_many(
         auto_publish = False
 
     for cred in issue_many_creds:
-        await faber_client.post(
+        await faber_indy_client.post(
             f"{CREDENTIALS_BASE_PATH}/revoke",
             json={
                 "credential_exchange_id": cred.credential_exchange_id,
@@ -133,17 +133,17 @@ async def revoke_many(
 
 @pytest.fixture(scope="function")
 async def issue_many_creds(
-    faber_client: RichAsyncClient,
+    faber_indy_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-    credential_definition_id_revocable: str,
-    faber_and_alice_connection: FaberAliceConnect,
+    indy_credential_definition_id_revocable: str,
+    faber_indy_and_alice_connection: FaberAliceConnect,
 ) -> List[CredentialExchange]:
     # Fetch existing records so we can filter to exclude them. Necessary to cater for long running / regression tests
     existing_records = (
         await alice_member_client.get(CREDENTIALS_BASE_PATH + "?state=offer-received")
     ).json()
 
-    faber_conn_id = faber_and_alice_connection.faber_connection_id
+    faber_conn_id = faber_indy_and_alice_connection.faber_connection_id
 
     faber_cred_ex_ids = []
     num_to_issue = 75
@@ -152,13 +152,13 @@ async def issue_many_creds(
             "connection_id": faber_conn_id,
             "save_exchange_record": True,
             "indy_credential_detail": {
-                "credential_definition_id": credential_definition_id_revocable,
+                "credential_definition_id": indy_credential_definition_id_revocable,
                 "attributes": {"speed": str(i), "name": "Alice", "age": "44"},
             },
         }
 
         faber_cred_ex_id = (
-            await faber_client.post(
+            await faber_indy_client.post(
                 CREDENTIALS_BASE_PATH,
                 json=credential,
             )
@@ -171,7 +171,7 @@ async def issue_many_creds(
         await asyncio.sleep(0.25)
         alice_cred_ex_response = (
             await alice_member_client.get(
-                f"{CREDENTIALS_BASE_PATH}?connection_id={faber_and_alice_connection.alice_connection_id}"
+                f"{CREDENTIALS_BASE_PATH}?connection_id={faber_indy_and_alice_connection.alice_connection_id}"
             )
         ).json()
         alice_cred_ex_response = [
@@ -202,7 +202,7 @@ async def issue_many_creds(
         )
 
     cred_ex_response = (
-        await faber_client.get(
+        await faber_indy_client.get(
             CREDENTIALS_BASE_PATH + "?connection_id=" + faber_conn_id
         )
     ).json()

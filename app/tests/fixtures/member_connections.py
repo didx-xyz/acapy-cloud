@@ -38,15 +38,15 @@ async def bob_and_alice_connection(
 
 
 @pytest.fixture(scope="function")
-async def faber_and_alice_connection(
+async def faber_indy_and_alice_connection(
     alice_member_client: RichAsyncClient,
-    faber_client: RichAsyncClient,
+    faber_indy_client: RichAsyncClient,
     test_mode: str,  # pylint: disable=redefined-outer-name
 ) -> FaberAliceConnect:
     bob_alice_connection = await create_connection_by_test_mode(
         test_mode=test_mode,
         alice_member_client=alice_member_client,
-        bob_member_client=faber_client,
+        bob_member_client=faber_indy_client,
         alias="AliceFaberConnection",
         did_exchange=True,
     )
@@ -94,12 +94,12 @@ async def acme_and_alice_connection(
 
 # Create fixture to handle parameters and return either meld_co-alice connection fixture
 @pytest.fixture(scope="function")
-async def meld_co_and_alice_connection(
+async def meld_co_indy_and_alice_connection(
     request,
     alice_tenant: CreateTenantResponse,
     alice_member_client: RichAsyncClient,
-    meld_co_client: RichAsyncClient,
-    meld_co_issuer_verifier: CreateTenantResponse,
+    meld_co_indy_client: RichAsyncClient,
+    meld_co_indy_issuer_verifier: CreateTenantResponse,
     test_mode: str,  # pylint: disable=redefined-outer-name
 ) -> MeldCoAliceConnect:
     if hasattr(request, "param") and request.param == "trust_registry":
@@ -109,8 +109,8 @@ async def meld_co_and_alice_connection(
             acme_alice_connect = await connect_using_trust_registry_invite(
                 alice_member_client=alice_member_client,
                 alice_tenant=alice_tenant,
-                verifier_client=meld_co_client,
-                verifier=meld_co_issuer_verifier,
+                verifier_client=meld_co_indy_client,
+                verifier=meld_co_indy_issuer_verifier,
                 connection_alias=connection_alias,
             )
         elif test_mode == TestMode.regression_run:
@@ -119,8 +119,8 @@ async def meld_co_and_alice_connection(
             acme_alice_connect = await fetch_or_create_trust_registry_connection(
                 alice_member_client=alice_member_client,
                 alice_tenant=alice_tenant,
-                verifier_client=meld_co_client,
-                verifier=meld_co_issuer_verifier,
+                verifier_client=meld_co_indy_client,
+                verifier=meld_co_indy_issuer_verifier,
                 connection_alias=f"{connection_alias_prefix}-{connection_alias}",
             )
         else:
@@ -135,7 +135,7 @@ async def meld_co_and_alice_connection(
         bob_alice_connection = await create_connection_by_test_mode(
             test_mode=test_mode,
             alice_member_client=alice_member_client,
-            bob_member_client=meld_co_client,
+            bob_member_client=meld_co_indy_client,
             alias="AliceMeldCoConnection",
             did_exchange=True,
         )

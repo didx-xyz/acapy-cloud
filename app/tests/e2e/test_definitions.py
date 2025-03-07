@@ -80,12 +80,12 @@ async def test_get_schema(
 )
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_create_credential_definition(
-    schema_definition: CredentialSchema,
-    faber_acapy_client: AcaPyClient,
-    faber_client: RichAsyncClient,
+    indy_schema_definition: CredentialSchema,
+    faber_indy_acapy_client: AcaPyClient,
+    faber_indy_client: RichAsyncClient,
     support_revocation: bool,
 ):
-    schema_id = schema_definition.id
+    schema_id = indy_schema_definition.id
     tag = random_string(5)
     credential_definition = CreateCredentialDefinition(
         schema_id=schema_id,
@@ -94,7 +94,7 @@ async def test_create_credential_definition(
     )
 
     auth = acapy_auth_verified(
-        acapy_auth_from_header(faber_client.headers["x-api-key"])
+        acapy_auth_from_header(faber_indy_client.headers["x-api-key"])
     )
 
     result = (
@@ -103,8 +103,8 @@ async def test_create_credential_definition(
         )
     ).model_dump()
 
-    faber_public_did = await get_public_did(faber_acapy_client)
-    schema = await faber_acapy_client.schema.get_schema(schema_id=schema_id)
+    faber_public_did = await get_public_did(faber_indy_acapy_client)
+    schema = await faber_indy_acapy_client.schema.get_schema(schema_id=schema_id)
 
     assert_that(result).has_id(
         f"{faber_public_did.did}:3:CL:{schema.var_schema.seq_no}:{tag}"
@@ -123,7 +123,7 @@ async def test_create_credential_definition(
         cred_def_id = result["id"]
         # Assert that revocation registry was created
         rev_reg_result = (
-            await faber_acapy_client.revocation.get_active_registry_for_cred_def(
+            await faber_indy_acapy_client.revocation.get_active_registry_for_cred_def(
                 cred_def_id=cred_def_id
             )
         )
@@ -133,7 +133,7 @@ async def test_create_credential_definition(
         assert issuer_rev_reg_record.issuer_did == faber_public_did.did
 
         revocation_registries = (
-            await faber_acapy_client.revocation.get_created_registries(
+            await faber_indy_acapy_client.revocation.get_created_registries(
                 cred_def_id=cred_def_id
             )
         ).rev_reg_ids

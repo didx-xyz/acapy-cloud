@@ -20,7 +20,9 @@ async def alice_tenant(request) -> AsyncGenerator[CreateTenantResponse, Any]:
 
     async with get_tenant_admin_client() as admin_client:
         if test_mode == TestMode.clean_run:
-            tenant = await create_tenant(admin_client, "alice", "askar-anoncreds")
+            tenant = await create_tenant(
+                admin_client, name="alice", wallet_type="askar-anoncreds"
+            )
 
             yield tenant
 
@@ -40,7 +42,9 @@ async def bob_tenant(request) -> AsyncGenerator[CreateTenantResponse, Any]:
 
     async with get_tenant_admin_client() as admin_client:
         if test_mode == TestMode.clean_run:
-            tenant = await create_tenant(admin_client, "bob", "askar-anoncreds")
+            tenant = await create_tenant(
+                admin_client, name="bob", wallet_type="askar-anoncreds"
+            )
 
             yield tenant
 
@@ -60,7 +64,9 @@ async def acme_verifier(request) -> AsyncGenerator[CreateTenantResponse, Any]:
 
     async with get_tenant_admin_client() as admin_client:
         if test_mode == TestMode.clean_run:
-            verifier_tenant = await create_verifier_tenant(admin_client, "acme")
+            verifier_tenant = await create_verifier_tenant(
+                admin_client, name="acme", wallet_type="askar-anoncreds"
+            )
 
             yield verifier_tenant
 
@@ -75,12 +81,14 @@ async def acme_verifier(request) -> AsyncGenerator[CreateTenantResponse, Any]:
 
 
 @pytest.fixture(scope="session", params=TestMode.fixture_params)
-async def faber_issuer(request) -> AsyncGenerator[CreateTenantResponse, Any]:
+async def faber_indy_issuer(request) -> AsyncGenerator[CreateTenantResponse, Any]:
     test_mode = request.param
 
     async with get_tenant_admin_client() as admin_client:
         if test_mode == TestMode.clean_run:
-            issuer_tenant = await create_issuer_tenant(admin_client, "faber")
+            issuer_tenant = await create_issuer_tenant(
+                admin_client, name="faber_indy", wallet_type="askar"
+            )
 
             yield issuer_tenant
 
@@ -95,13 +103,15 @@ async def faber_issuer(request) -> AsyncGenerator[CreateTenantResponse, Any]:
 
 
 @pytest.fixture(scope="session", params=TestMode.fixture_params)
-async def meld_co_issuer_verifier(request) -> AsyncGenerator[CreateTenantResponse, Any]:
+async def meld_co_indy_issuer_verifier(
+    request,
+) -> AsyncGenerator[CreateTenantResponse, Any]:
     test_mode = request.param
 
     async with get_tenant_admin_client() as admin_client:
         if test_mode == TestMode.clean_run:
             issuer_and_verifier_tenant = await create_issuer_and_verifier_tenant(
-                admin_client, "meldCo"
+                admin_client, name="meldCo_indy", wallet_type="askar"
             )
 
             yield issuer_and_verifier_tenant
