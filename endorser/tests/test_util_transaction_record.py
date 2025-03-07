@@ -1,8 +1,8 @@
 import json
-from unittest.mock import MagicMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
-from aries_cloudcontroller import TransactionRecord
+from aries_cloudcontroller import AdminConfig, TransactionRecord
 
 from endorser.util.transaction_record import (
     get_did_and_schema_id_from_cred_def_attachment,
@@ -109,6 +109,9 @@ def test_is_credential_definition_transaction_exception():
 async def test_get_did_and_schema_id_from_cred_def_attachment(mock_acapy_client):
     mock_acapy_client.schema.get_schema.return_value = MagicMock(
         var_schema=MagicMock(id="schema_id")
+    )
+    mock_acapy_client.server.get_config.return_value = AdminConfig(
+        config={"wallet.type": "askar"}
     )
 
     did, schema_id = await get_did_and_schema_id_from_cred_def_attachment(
