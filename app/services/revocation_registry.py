@@ -100,17 +100,32 @@ async def revoke_credential(
         }
     )
     bound_logger.debug("Revoking an issued credential")
+    wallet_type = await get_wallet_type(controller, bound_logger)
 
-    request_body = handle_model_with_validation(
-        logger=bound_logger,
-        model_class=RevokeRequestSchemaAnoncreds,
-        cred_ex_id=strip_protocol_prefix(credential_exchange_id),
-        publish=auto_publish_to_ledger,
-    )
+    if wallet_type == "askar-anoncreds":
+        request_body = handle_model_with_validation(
+            logger=bound_logger,
+            model_class=RevokeRequestSchemaAnoncreds,
+            cred_ex_id=strip_protocol_prefix(credential_exchange_id),
+            publish=auto_publish_to_ledger,
+        )
+
+        acapy_call = controller.anoncreds_revocation.revoke
+
+    elif wallet_type == "askar":
+        request_body = handle_model_with_validation(
+            logger=bound_logger,
+            model_class=RevokeRequest,
+            cred_ex_id=strip_protocol_prefix(credential_exchange_id),
+            publish=auto_publish_to_ledger,
+        )
+
+        acapy_call = controller.revocation.revoke_credential
+
     try:
         revoke_result = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=controller.anoncreds_revocation.revoke,
+            acapy_call=acapy_call,
             body=request_body,
         )
     except CloudApiException as e:
