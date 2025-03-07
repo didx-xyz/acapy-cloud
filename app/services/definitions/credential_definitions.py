@@ -204,11 +204,19 @@ async def get_credential_definitions(
     else:
         bound_logger.debug("No definition ids returned")
         credential_definition_results = []
-
-    credential_definitions = [
-        credential_definition_from_acapy(credential_definition)
-        for credential_definition in credential_definition_results
-        if credential_definition.credential_definition
-    ]
+    if wallet_type == "askar-anoncreds":
+        credential_definitions = [
+            credential_definition_from_acapy(credential_definition)
+            for credential_definition in credential_definition_results
+            if credential_definition.credential_definition
+        ]
+    elif wallet_type == "askar":
+        credential_definitions = [
+            credential_definition_from_acapy(
+                credential_definition.credential_definition
+            )
+            for credential_definition in credential_definition_results
+            if credential_definition.credential_definition
+        ]
 
     return credential_definitions
