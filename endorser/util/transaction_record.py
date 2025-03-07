@@ -70,14 +70,26 @@ async def get_did_and_schema_id_from_cred_def_attachment(
     schema_seq_id = attachment["operation"]["ref"]
 
     logger.debug("Fetching schema with seq id: `{}`", schema_seq_id)
-    schema = await client.anoncreds_schemas.get_schema(schema_id=str(schema_seq_id))
+    server_config = await client.server.get_config()
+    wallet_type = server_config.config.get("wallet.type")
+    if wallet_type == "askar":
+        schema = await client.schema.get_schema(schema_id=str(schema_seq_id))
 
-    if not schema.var_schema or not schema.schema_id:
-        raise Exception(  # pylint: disable=W0719
-            "Could not extract schema id from schema response."
-        )
+        if not schema.var_schema or not schema.var_schema.id:
+            raise Exception(  # pylint: disable=W0719
+                "Could not extract schema id from schema response."
+            )
 
-    schema_id = schema.schema_id
+        schema_id = schema.var_schema.id
+    elif wallet_type == "askar-anoncreds":
+        schema = await client.anoncreds_schemas.get_schema(schema_id=str(schema_seq_id))
+
+        if not schema.var_schema or not schema.schema_id:
+            raise Exception(  # pylint: disable=W0719
+                "Could not extract schema id from schema response."
+            )
+
+        schema_id = schema.schema_id
     return (did, schema_id)
 
 
