@@ -17,6 +17,7 @@ from app.models.issuer import (
 )
 from app.services import revocation_registry
 from app.util.retry_method import coroutine_with_retry_until_value
+from app.util.tenants import get_wallet_type
 from shared import PUBLISH_REVOCATIONS_TIMEOUT
 from shared.log_config import get_logger
 
