@@ -70,7 +70,7 @@ async def test_send_proof_request(
 @pytest.mark.anyio
 @pytest.mark.xdist_group(name="issuer_test_group_3")
 async def test_accept_proof_request(
-    issue_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+    issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     alice_member_client: RichAsyncClient,
     acme_client: RichAsyncClient,
     credential_definition_id: str,
@@ -229,7 +229,7 @@ async def test_reject_proof_request(
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_get_proof_and_get_proofs(
     acme_and_alice_connection: AcmeAliceConnect,
-    issue_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+    issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     credential_definition_id: str,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
@@ -413,7 +413,7 @@ async def test_delete_proof(
 @pytest.mark.anyio
 @pytest.mark.xdist_group(name="issuer_test_group_3")
 async def test_get_credentials_for_request(
-    issue_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+    issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     acme_and_alice_connection: AcmeAliceConnect,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
@@ -468,18 +468,18 @@ async def test_get_credentials_for_request(
 
 @pytest.mark.anyio
 @pytest.mark.parametrize(
-    "meld_co_and_alice_connection", ["trust_registry", "default"], indirect=True
+    "meld_co_indy_and_alice_connection", ["trust_registry", "default"], indirect=True
 )
 @pytest.mark.xdist_group(name="issuer_test_group_3")
 async def test_accept_proof_request_verifier_has_issuer_role(
-    meld_co_issue_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+    meld_co_issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     meld_co_credential_definition_id: str,
     alice_member_client: RichAsyncClient,
     meld_co_indy_client: RichAsyncClient,
-    meld_co_and_alice_connection: MeldCoAliceConnect,
+    meld_co_indy_and_alice_connection: MeldCoAliceConnect,
 ):
     request_body = {
-        "connection_id": meld_co_and_alice_connection.meld_co_connection_id,
+        "connection_id": meld_co_indy_and_alice_connection.meld_co_connection_id,
         "indy_proof_request": sample_indy_proof_request(
             restrictions=[{"cred_def_id": meld_co_credential_definition_id}]
         ).to_dict(),
@@ -547,7 +547,7 @@ async def test_accept_proof_request_verifier_has_issuer_role(
 @pytest.mark.parametrize("alice_save_exchange_record", [None, False, True])
 @pytest.mark.xdist_group(name="issuer_test_group_4")
 async def test_saving_of_presentation_exchange_records(
-    issue_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+    issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     credential_definition_id: str,
     alice_member_client: RichAsyncClient,
     acme_client: RichAsyncClient,

@@ -20,7 +20,7 @@ sample_credential_attributes = {"speed": "10", "name": "Alice", "age": "44"}
 
 
 @pytest.fixture(scope="function")
-async def issue_credential_to_alice(
+async def issue_indy_credential_to_alice(
     faber_indy_client: RichAsyncClient,
     credential_definition_id: str,
     faber_indy_and_alice_connection: FaberAliceConnect,
@@ -70,7 +70,7 @@ async def issue_credential_to_alice(
 
 
 @pytest.fixture(scope="function")
-async def meld_co_issue_credential_to_alice(
+async def meld_co_issue_indy_credential_to_alice(
     meld_co_indy_client: RichAsyncClient,
     meld_co_credential_definition_id: str,
     meld_co_indy_and_alice_connection: MeldCoAliceConnect,
@@ -120,7 +120,7 @@ async def meld_co_issue_credential_to_alice(
 
 
 @pytest.fixture(scope="function")
-async def issue_alice_creds(
+async def issue_alice_indy_creds(
     faber_indy_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     credential_definition_id_revocable: str,
@@ -205,12 +205,14 @@ async def issue_alice_creds(
 
 
 @pytest.fixture(scope="function")
-async def revoke_alice_creds(
+async def revoke_alice_indy_creds(
     faber_indy_client: RichAsyncClient,
-    issue_alice_creds: List[CredentialExchange],  # pylint: disable=redefined-outer-name
+    issue_alice_indy_creds: List[
+        CredentialExchange
+    ],  # pylint: disable=redefined-outer-name
 ) -> List[CredentialExchange]:
 
-    for cred in issue_alice_creds:
+    for cred in issue_alice_indy_creds:
         await faber_indy_client.post(
             f"{REVOCATION_BASE_PATH}/revoke",
             json={
@@ -218,21 +220,23 @@ async def revoke_alice_creds(
             },
         )
 
-    return issue_alice_creds
+    return issue_alice_indy_creds
 
 
 @pytest.fixture(scope="function")
-async def revoke_alice_creds_and_publish(
+async def revoke_alice_indy_creds_and_publish(
     request,
     faber_indy_client: RichAsyncClient,
-    issue_alice_creds: List[CredentialExchange],  # pylint: disable=redefined-outer-name
+    issue_alice_indy_creds: List[
+        CredentialExchange
+    ],  # pylint: disable=redefined-outer-name
 ) -> List[CredentialExchange]:
 
     auto_publish = False
     if hasattr(request, "param") and request.param == "auto_publish_true":
         auto_publish = True
 
-    for cred in issue_alice_creds:
+    for cred in issue_alice_indy_creds:
         await faber_indy_client.post(
             f"{REVOCATION_BASE_PATH}/revoke",
             json={
@@ -250,7 +254,7 @@ async def revoke_alice_creds_and_publish(
             },
         )
 
-    return issue_alice_creds
+    return issue_alice_indy_creds
 
 
 class ReferentCredDef(BaseModel):
@@ -443,7 +447,7 @@ async def get_or_issue_regression_cred_valid(
 
 
 @pytest.fixture(scope="function")
-async def issue_alice_many_creds(
+async def issue_alice_many_indy_creds(
     request,
     faber_indy_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,

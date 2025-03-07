@@ -29,7 +29,7 @@ CONNECTIONS_BASE_PATH = connections_router.prefix
 
 @pytest.mark.anyio
 async def test_accept_proof_request_oob(
-    issue_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+    issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     alice_member_client: RichAsyncClient,
     bob_member_client: RichAsyncClient,
 ):
@@ -128,7 +128,7 @@ async def test_accept_proof_request_oob(
 )
 async def test_accept_proof_request_verifier_oob_connection(
     credential_definition_id: str,
-    issue_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+    issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
 ):

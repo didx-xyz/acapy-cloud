@@ -15,12 +15,12 @@ from app.services.trust_registry.actors import (
 from app.tests.fixtures.credentials import (
     get_or_issue_regression_cred_revoked,
     get_or_issue_regression_cred_valid,
-    issue_alice_creds,
-    issue_alice_many_creds,
-    issue_credential_to_alice,
-    meld_co_issue_credential_to_alice,
-    revoke_alice_creds,
-    revoke_alice_creds_and_publish,
+    issue_alice_indy_creds,
+    issue_alice_many_indy_creds,
+    issue_indy_credential_to_alice,
+    meld_co_issue_indy_credential_to_alice,
+    revoke_alice_indy_creds,
+    revoke_alice_indy_creds_and_publish,
 )
 from app.tests.fixtures.definitions import (
     credential_definition_id,

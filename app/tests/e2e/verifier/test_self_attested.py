@@ -18,7 +18,7 @@ async def test_self_attested_attributes(
     acme_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
     alice_member_client: RichAsyncClient,
-    issue_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+    issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
 ):
 
     request_body = {

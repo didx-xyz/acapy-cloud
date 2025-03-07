@@ -57,14 +57,14 @@ signed_doc = {
 async def test_sign_jsonld(
     faber_indy_acapy_client: AcaPyClient,
     faber_indy_client: RichAsyncClient,
-    issue_credential_to_alice: CredentialExchange,
+    issue_indy_credential_to_alice: CredentialExchange,
 ):
     # First assert 422 error for providing both pub_did and verkey:
     with pytest.raises(CloudApiValueError) as exc:
         JsonLdSignRequest(
             verkey="abcde",
             pub_did="abcde",
-            credential_id=issue_credential_to_alice["credential_exchange_id"][3:],
+            credential_id=issue_indy_credential_to_alice["credential_exchange_id"][3:],
             signature_options=SignatureOptions(
                 proof_purpose="test", verification_method="ed25519"
             ).model_dump(),

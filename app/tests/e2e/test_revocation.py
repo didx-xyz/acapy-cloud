@@ -25,9 +25,9 @@ skip_regression_test_reason = "Skip publish-revocations in regression mode"
 )
 async def test_clear_pending_revokes(
     faber_indy_client: RichAsyncClient,
-    revoke_alice_creds: List[CredentialExchange],
+    revoke_alice_indy_creds: List[CredentialExchange],
 ):
-    faber_cred_ex_id = revoke_alice_creds[0].credential_exchange_id
+    faber_cred_ex_id = revoke_alice_indy_creds[0].credential_exchange_id
     revocation_record_response = await faber_indy_client.get(
         f"{REVOCATION_BASE_PATH}/revocation/record"
         + "?credential_exchange_id="
@@ -59,7 +59,7 @@ async def test_clear_pending_revokes(
     # ]
     # todo: aca-py now provides response. Make assertions based on response
 
-    for cred in revoke_alice_creds:
+    for cred in revoke_alice_indy_creds:
         rev_record = (
             await faber_indy_client.get(
                 f"{REVOCATION_BASE_PATH}/revocation/record"
@@ -86,7 +86,7 @@ async def test_clear_pending_revokes(
 )
 async def test_clear_pending_revokes_no_map(
     faber_indy_client: RichAsyncClient,
-    revoke_alice_creds: List[CredentialExchange],
+    revoke_alice_indy_creds: List[CredentialExchange],
 ):
     # clear_revoke_response = (
     await faber_indy_client.post(
@@ -97,7 +97,7 @@ async def test_clear_pending_revokes_no_map(
 
     # todo: aca-py now provides response. Make assertions based on response
 
-    for cred in revoke_alice_creds:
+    for cred in revoke_alice_indy_creds:
         rev_record = (
             await faber_indy_client.get(
                 f"{REVOCATION_BASE_PATH}/revocation/record"
@@ -153,9 +153,9 @@ async def test_clear_pending_revokes_bad_payload(
 )
 async def test_publish_all_revocations_for_rev_reg_id(
     faber_indy_client: RichAsyncClient,
-    revoke_alice_creds: List[CredentialExchange],
+    revoke_alice_indy_creds: List[CredentialExchange],
 ):
-    faber_cred_ex_id = revoke_alice_creds[0].credential_exchange_id
+    faber_cred_ex_id = revoke_alice_indy_creds[0].credential_exchange_id
     response = (
         await faber_indy_client.get(
             f"{REVOCATION_BASE_PATH}/revocation/record"
@@ -171,7 +171,7 @@ async def test_publish_all_revocations_for_rev_reg_id(
         json={"revocation_registry_credential_map": {rev_reg_id: []}},
     )
 
-    await check_revocation_status(faber_indy_client, revoke_alice_creds, "revoked")
+    await check_revocation_status(faber_indy_client, revoke_alice_indy_creds, "revoked")
 
 
 @pytest.mark.anyio
@@ -181,14 +181,14 @@ async def test_publish_all_revocations_for_rev_reg_id(
 )
 async def test_publish_all_revocations_no_payload(
     faber_indy_client: RichAsyncClient,
-    revoke_alice_creds: List[CredentialExchange],
+    revoke_alice_indy_creds: List[CredentialExchange],
 ):
     await faber_indy_client.post(
         f"{REVOCATION_BASE_PATH}/publish-revocations",
         json={"revocation_registry_credential_map": {}},
     )
 
-    await check_revocation_status(faber_indy_client, revoke_alice_creds, "revoked")
+    await check_revocation_status(faber_indy_client, revoke_alice_indy_creds, "revoked")
 
 
 async def check_revocation_status(
@@ -215,9 +215,9 @@ async def check_revocation_status(
 )
 async def test_publish_one_revocation(
     faber_indy_client: RichAsyncClient,
-    revoke_alice_creds: List[CredentialExchange],
+    revoke_alice_indy_creds: List[CredentialExchange],
 ):
-    faber_cred_ex_id = revoke_alice_creds[0].credential_exchange_id
+    faber_cred_ex_id = revoke_alice_indy_creds[0].credential_exchange_id
     response = (
         await faber_indy_client.get(
             f"{REVOCATION_BASE_PATH}/revocation/record"
@@ -233,7 +233,7 @@ async def test_publish_one_revocation(
         json={"revocation_registry_credential_map": {rev_reg_id: [cred_rev_id]}},
     )
 
-    for cred in revoke_alice_creds:
+    for cred in revoke_alice_indy_creds:
         rev_record = (
             await faber_indy_client.get(
                 f"{REVOCATION_BASE_PATH}/revocation/record"
@@ -301,9 +301,9 @@ async def test_publish_revocations_bad_payload(
 )
 async def test_get_pending_revocations(
     faber_indy_client: RichAsyncClient,
-    revoke_alice_creds: List[CredentialExchange],
+    revoke_alice_indy_creds: List[CredentialExchange],
 ):
-    faber_cred_ex_id = revoke_alice_creds[0].credential_exchange_id
+    faber_cred_ex_id = revoke_alice_indy_creds[0].credential_exchange_id
     revocation_record_response = await faber_indy_client.get(
         f"{REVOCATION_BASE_PATH}/revocation/record"
         + "?credential_exchange_id="
