@@ -26,8 +26,10 @@ async def test_get_schemas_as_tenant_all():
     ), patch(
         "app.services.definitions.schemas.get_schemas_by_id",
         return_value=mock_trust_registry_schemas,
-    ):
-
+    ), patch(
+        "app.services.definitions.schemas.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
         result = await get_schemas_as_tenant(mock_aries_controller)
 
         assert len(result) == 2
@@ -48,7 +50,10 @@ async def test_get_schemas_as_tenant_by_id():
         return_value=mock_schema,
     ), patch(
         "app.services.definitions.schemas.get_schemas_by_id", return_value=[mock_schema]
-    ):
+    ), patch(
+        "app.services.definitions.schemas.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
 
         result = await get_schemas_as_tenant(mock_aries_controller, schema_id="schema1")
 
@@ -81,7 +86,10 @@ async def test_get_schemas_as_tenant_filter_issuer_did():
         return_value=mock_schemas,
     ), patch(
         "app.services.definitions.schemas.get_schemas_by_id", return_value=mock_schemas
-    ):
+    ), patch(
+        "app.services.definitions.schemas.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
 
         result = await get_schemas_as_tenant(
             mock_aries_controller, schema_issuer_did="abc123"
@@ -109,7 +117,10 @@ async def test_get_schemas_as_tenant_filter_name():
         return_value=mock_schemas,
     ), patch(
         "app.services.definitions.schemas.get_schemas_by_id", return_value=mock_schemas
-    ):
+    ), patch(
+        "app.services.definitions.schemas.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
 
         result = await get_schemas_as_tenant(
             mock_aries_controller, schema_name="Test Schema 1"
@@ -137,7 +148,10 @@ async def test_get_schemas_as_tenant_filter_version():
         return_value=mock_schemas,
     ), patch(
         "app.services.definitions.schemas.get_schemas_by_id", return_value=mock_schemas
-    ):
+    ), patch(
+        "app.services.definitions.schemas.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
 
         result = await get_schemas_as_tenant(
             mock_aries_controller, schema_version="2.0"
