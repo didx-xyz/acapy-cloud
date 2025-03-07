@@ -1,7 +1,7 @@
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from aries_cloudcontroller import SchemaSendRequest
+from aries_cloudcontroller import AdminConfig, SchemaSendRequest
 
 from app.exceptions import CloudApiException
 from app.models.definitions import CreateSchema, CredentialSchema
@@ -18,6 +18,9 @@ async def test_create_schema_success():
     # Mock the necessary dependencies
     mock_aries_controller = AsyncMock()
     mock_aries_controller.configuration.host = "https://governance-agent-url"
+    mock_aries_controller.server.get_config = AsyncMock(
+        return_value=AdminConfig(config={"wallet.type": "askar"})
+    )
 
     mock_schema_publisher = AsyncMock()
     mock_schema_publisher.publish_schema.return_value = CredentialSchema(
