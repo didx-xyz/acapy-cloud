@@ -49,7 +49,9 @@ async def test_get_schemas_by_id_success():
         ),
     ):
 
-        result = await get_schemas_by_id(mock_aries_controller, mock_schema_ids, "askar")
+        result = await get_schemas_by_id(
+            mock_aries_controller, mock_schema_ids, "askar"
+        )
 
         assert len(result) == 2
         assert all(isinstance(schema, CredentialSchema) for schema in result)
