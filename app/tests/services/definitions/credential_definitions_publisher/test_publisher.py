@@ -99,7 +99,7 @@ async def test_wait_for_revocation_registry_success(publisher):
         "app.services.definitions.credential_definition_publisher.REGISTRY_CREATION_TIMEOUT",
         1,
     ):
-        await publisher.wait_for_revocation_registry(mock_cred_def_id)
+        await publisher.wait_for_revocation_registry(mock_cred_def_id, "askar")
         # If no exception is raised, the test passes
 
 
@@ -115,6 +115,6 @@ async def test_wait_for_revocation_registry_timeout(publisher):
         0.1,
     ):
         with pytest.raises(CloudApiException) as exc_info:
-            await publisher.wait_for_revocation_registry(mock_cred_def_id)
+            await publisher.wait_for_revocation_registry(mock_cred_def_id, "askar")
         assert exc_info.value.status_code == 504
         assert "Timeout waiting for revocation registry creation" in str(exc_info.value)
