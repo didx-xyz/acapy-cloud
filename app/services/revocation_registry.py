@@ -128,8 +128,14 @@ async def revoke_credential(
         while not revoked and n_try < max_tries:
             n_try += 1
             # Safely fetch revocation record and check if change reflected
+            if wallet_type == "askar-anoncreds":
+                coroutine_func = controller.anoncreds_revocation.get_cred_rev_record
+
+            elif wallet_type == "askar":
+                coroutine_func = controller.revocation.get_revocation_status
+
             record = await coroutine_with_retry(
-                coroutine_func=controller.anoncreds_revocation.get_cred_rev_record,
+                coroutine_func=coroutine_func,
                 args=(strip_protocol_prefix(credential_exchange_id),),
                 logger=bound_logger,
                 max_attempts=5,
