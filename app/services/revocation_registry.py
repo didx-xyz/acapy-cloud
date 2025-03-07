@@ -293,11 +293,17 @@ async def get_credential_revocation_record(
         }
     )
     bound_logger.debug("Fetching the revocation status for a credential exchange")
-
+    wallet_type = await get_wallet_type(controller, bound_logger)
     try:
+        if wallet_type == "askar-anoncreds":
+            acapy_call = controller.anoncreds_revocation.get_cred_rev_record
+
+        elif wallet_type == "askar":
+            acapy_call = controller.revocation.get_revocation_status
+
         result = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=controller.anoncreds_revocation.get_cred_rev_record,
+            acapy_call=acapy_call,
             cred_ex_id=strip_protocol_prefix(credential_exchange_id),
             cred_rev_id=credential_revocation_id,
             rev_reg_id=revocation_registry_id,
@@ -307,7 +313,9 @@ async def get_credential_revocation_record(
             f"Failed to get revocation status: {e.detail}", e.status_code
         ) from e
 
-    if not isinstance(result, CredRevRecordResultSchemaAnoncreds):
+    if not isinstance(
+        result, (CredRevRecordResultSchemaAnoncreds, CredRevRecordResult)
+    ):
         bound_logger.error(
             "Unexpected type returned from get_revocation_status: `{}`.", result
         )
