@@ -419,7 +419,7 @@ async def get_credential_definition_by_id(
                 cred_def_id=credential_definition_id,
             )
 
-        if not credential_definition.credential_definition:
+        if not credential_definition:
             raise HTTPException(
                 404,
                 f"Credential Definition with id {credential_definition_id} not found.",
@@ -428,6 +428,8 @@ async def get_credential_definition_by_id(
         bound_logger.debug("Cast credential definition response to model")
         cloudapi_credential_definition = credential_definition_from_acapy(
             credential_definition
+            if wallet_type == "askar-anoncreds"
+            else credential_definition.credential_definition
         )
 
         # We need to update the schema_id on the returned credential definition as
