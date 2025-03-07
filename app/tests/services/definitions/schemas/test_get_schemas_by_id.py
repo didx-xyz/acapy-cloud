@@ -49,7 +49,7 @@ async def test_get_schemas_by_id_success():
         ),
     ):
 
-        result = await get_schemas_by_id(mock_aries_controller, mock_schema_ids)
+        result = await get_schemas_by_id(mock_aries_controller, mock_schema_ids, "askar")
 
         assert len(result) == 2
         assert all(isinstance(schema, CredentialSchema) for schema in result)
@@ -69,7 +69,7 @@ async def test_get_schemas_by_id_success():
 async def test_get_schemas_by_id_empty_list():
     mock_aries_controller = AsyncMock(spec=AcaPyClient)
 
-    result = await get_schemas_by_id(mock_aries_controller, [])
+    result = await get_schemas_by_id(mock_aries_controller, [], "askar")
 
     assert len(result) == 0
 
@@ -85,6 +85,6 @@ async def test_get_schemas_by_id_error_handling():
         side_effect=Exception("Test error"),
     ):
         with pytest.raises(Exception) as exc_info:
-            await get_schemas_by_id(mock_aries_controller, mock_schema_ids)
+            await get_schemas_by_id(mock_aries_controller, mock_schema_ids, "askar")
 
         assert str(exc_info.value) == "Test error"
