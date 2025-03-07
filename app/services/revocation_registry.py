@@ -190,13 +190,21 @@ async def publish_pending_revocations(
         controller=controller,
         revocation_registry_credential_map=revocation_registry_credential_map,
     )
+    wallet_type = await get_wallet_type(controller, bound_logger)
     try:
+        if wallet_type == "askar-anoncreds":
+            acapy_call = controller.anoncreds_revocation.publish_revocations
+            body = PublishRevocationsSchemaAnoncreds(
+                rrid2crid=revocation_registry_credential_map
+            )
+        elif wallet_type == "askar":
+            acapy_call = controller.revocation.publish_revocations
+            body = PublishRevocations(rrid2crid=revocation_registry_credential_map)
+
         result = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=controller.anoncreds_revocation.publish_revocations,
-            body=PublishRevocationsSchemaAnoncreds(
-                rrid2crid=revocation_registry_credential_map
-            ),
+            acapy_call=acapy_call,
+            body=body,
         )
     except CloudApiException as e:
         raise CloudApiException(
