@@ -43,7 +43,10 @@ async def test_get_credential_definition_by_id_success():
         "app.routes.definitions.client_from_auth"
     ) as mock_client_from_auth, patch(
         "app.routes.definitions.get_schema"
-    ) as mock_get_schema:
+    ) as mock_get_schema, patch(
+        "app.routes.definitions.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
         # Configure client_from_auth to return our mocked aries_controller on enter
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -76,7 +79,12 @@ async def test_get_credential_definition_by_id_error(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
 
-    with patch("app.routes.definitions.client_from_auth") as mock_client_from_auth:
+    with patch(
+        "app.routes.definitions.client_from_auth"
+    ) as mock_client_from_auth, patch(
+        "app.routes.definitions.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
         # Configure client_from_auth to return our mocked aries_controller on enter
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -98,10 +106,15 @@ async def test_get_credential_definition_by_id_error(
 async def test_get_credential_definition_by_id_404():
     mock_aries_controller = AsyncMock()
     mock_aries_controller.credential_definition.get_cred_def = AsyncMock(
-        return_value=CredentialDefinitionGetResult(credential_definition=None)
+        return_value=None
     )
 
-    with patch("app.routes.definitions.client_from_auth") as mock_client_from_auth:
+    with patch(
+        "app.routes.definitions.client_from_auth"
+    ) as mock_client_from_auth, patch(
+        "app.routes.definitions.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
         # Configure client_from_auth to return our mocked aries_controller on enter
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
