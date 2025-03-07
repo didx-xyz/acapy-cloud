@@ -22,14 +22,14 @@ sample_credential_attributes = {"speed": "10", "name": "Alice", "age": "44"}
 @pytest.fixture(scope="function")
 async def issue_indy_credential_to_alice(
     faber_indy_client: RichAsyncClient,
-    credential_definition_id: str,
+    indy_credential_definition_id: str,
     faber_indy_and_alice_connection: FaberAliceConnect,
     alice_member_client: RichAsyncClient,
 ) -> CredentialExchange:
     credential = {
         "connection_id": faber_indy_and_alice_connection.faber_connection_id,
         "indy_credential_detail": {
-            "credential_definition_id": credential_definition_id,
+            "credential_definition_id": indy_credential_definition_id,
             "attributes": sample_credential_attributes,
         },
     }
@@ -359,7 +359,7 @@ async def get_or_issue_regression_cred_revoked(
 async def get_or_issue_regression_cred_valid(
     faber_indy_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-    credential_definition_id_revocable: str,
+    indy_credential_definition_id_revocable: str,
     faber_indy_and_alice_connection: FaberAliceConnect,
 ):
     valid_credential_attribute_name = "Alice-valid"
@@ -391,7 +391,7 @@ async def get_or_issue_regression_cred_valid(
             "connection_id": faber_indy_and_alice_connection.faber_connection_id,
             "save_exchange_record": True,
             "indy_credential_detail": {
-                "credential_definition_id": credential_definition_id_revocable,
+                "credential_definition_id": indy_credential_definition_id_revocable,
                 "attributes": {
                     "speed": "10",
                     "name": valid_credential_attribute_name,
@@ -447,7 +447,7 @@ async def issue_alice_many_indy_creds(
     request,
     faber_indy_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-    credential_definition_id: str,
+    indy_credential_definition_id: str,
     faber_indy_and_alice_connection: FaberAliceConnect,
 ) -> List[CredentialExchange]:
 
@@ -460,7 +460,7 @@ async def issue_alice_many_indy_creds(
             "connection_id": faber_conn_id,
             "save_exchange_record": True,
             "indy_credential_detail": {
-                "credential_definition_id": credential_definition_id,
+                "credential_definition_id": indy_credential_definition_id,
                 "attributes": {"speed": str(i), "name": "Alice", "age": "44"},
             },
         }
