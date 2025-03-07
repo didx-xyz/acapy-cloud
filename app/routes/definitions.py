@@ -196,7 +196,7 @@ async def get_schema(
             wallet_type = server_config.config.get("wallet.type")
 
         else:
-            wallet_type = get_wallet_type(
+            wallet_type = await get_wallet_type(
                 aries_controller=aries_controller,
                 logger=bound_logger,
             )
