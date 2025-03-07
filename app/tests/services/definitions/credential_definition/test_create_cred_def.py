@@ -29,7 +29,10 @@ async def test_create_credential_definition_success():
         "app.services.definitions.credential_definitions.assert_valid_issuer"
     ), patch(
         "app.services.definitions.credential_definitions.handle_model_with_validation"
-    ) as mock_handle_model:
+    ) as mock_handle_model, patch(
+        "app.services.definitions.credential_definitions.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
 
         mock_handle_model.return_value = CredentialDefinitionSendRequest(
             schema_id="CXQseFxV34pcb8vf32XhEa:2:test_schema:0.3.0",
@@ -73,7 +76,10 @@ async def test_create_credential_definition_with_revocation():
         "app.services.definitions.credential_definitions.wait_for_transaction_ack"
     ), patch(
         "app.services.definitions.credential_definitions.CredentialDefinitionSendRequest"
-    ):
+    ), patch(
+        "app.services.definitions.credential_definitions.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
 
         result = await create_credential_definition(
             mock_aries_controller, create_cred_def_payload, True
@@ -83,7 +89,7 @@ async def test_create_credential_definition_with_revocation():
         mock_publisher.check_endorser_connection.assert_called_once()
         mock_publisher.publish_credential_definition.assert_called_once()
         mock_publisher.wait_for_revocation_registry.assert_called_once_with(
-            "test_cred_def_id"
+            credential_definition_id="test_cred_def_id", wallet_type="askar"
         )
 
 
