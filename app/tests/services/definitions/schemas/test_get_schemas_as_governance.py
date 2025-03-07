@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from aries_cloudcontroller import AdminConfig
 
 from app.exceptions import CloudApiException
 from app.models.definitions import CredentialSchema
@@ -11,7 +12,9 @@ from app.services.definitions.schemas import get_schemas_as_governance
 async def test_get_schemas_as_governance_success():
     mock_aries_controller = AsyncMock()
     mock_aries_controller.configuration.host = "https://governance-agent-url"
-
+    mock_aries_controller.server.get_config = AsyncMock(
+        return_value=AdminConfig(config={"wallet.type": "askar"})
+    )
     mock_schema_ids = ["schema1", "schema2"]
     mock_schemas = [
         CredentialSchema(
@@ -63,7 +66,9 @@ async def test_get_schemas_as_governance_non_governance_agent():
 async def test_get_schemas_as_governance_with_filters():
     mock_aries_controller = AsyncMock()
     mock_aries_controller.configuration.host = "https://governance-agent-url"
-
+    mock_aries_controller.server.get_config = AsyncMock(
+        return_value=AdminConfig(config={"wallet.type": "askar"})
+    )
     mock_schema_ids = ["schema1"]
     mock_schemas = [
         CredentialSchema(
@@ -101,7 +106,9 @@ async def test_get_schemas_as_governance_with_filters():
 async def test_get_schemas_as_governance_no_schemas():
     mock_aries_controller = AsyncMock()
     mock_aries_controller.configuration.host = "https://governance-agent-url"
-
+    mock_aries_controller.server.get_config = AsyncMock(
+        return_value=AdminConfig(config={"wallet.type": "askar"})
+    )
     mock_response = MagicMock()
     mock_response.schema_ids = None
 
