@@ -51,11 +51,10 @@ async def create_credential_definition(
     if support_revocation:
         await publisher.check_endorser_connection()
 
-    wallet_type = get_wallet_type(
+    wallet_type = await get_wallet_type(
         aries_controller=aries_controller,
         logger=bound_logger,
     )
-
     if wallet_type == "askar-anoncreds":
 
         inner_cred_def = handle_model_with_validation(
