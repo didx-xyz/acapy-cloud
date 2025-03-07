@@ -69,7 +69,7 @@ async def get_clean_or_regression_test_schema(
 
 
 @pytest.fixture(scope="session", params=TestMode.fixture_params)
-async def schema_definition(
+async def indy_schema_definition(
     request,
     mock_governance_auth: AcaPyAuthVerified,
 ) -> CredentialSchema:
@@ -79,7 +79,7 @@ async def schema_definition(
 
 
 @pytest.fixture(scope="session", params=TestMode.fixture_params)
-async def schema_definition_alt(
+async def indy_schema_definition_alt(
     request,
     mock_governance_auth: AcaPyAuthVerified,
 ) -> CredentialSchema:
@@ -148,9 +148,9 @@ async def get_clean_or_regression_test_cred_def(
 
 
 @pytest.fixture(scope="session", params=TestMode.fixture_params)
-async def credential_definition_id(
+async def indy_credential_definition_id(
     request,
-    schema_definition: CredentialSchema,  # pylint: disable=redefined-outer-name
+    indy_schema_definition: CredentialSchema,  # pylint: disable=redefined-outer-name
     faber_indy_client: RichAsyncClient,
 ) -> str:
     auth = acapy_auth_verified(
@@ -159,16 +159,16 @@ async def credential_definition_id(
     result = await get_clean_or_regression_test_cred_def(
         test_mode=request.param,
         auth=auth,
-        schema=schema_definition,
+        schema=indy_schema_definition,
         support_revocation=False,
     )
     return result.id
 
 
 @pytest.fixture(scope="session", params=TestMode.fixture_params)
-async def credential_definition_id_revocable(
+async def indy_credential_definition_id_revocable(
     request,
-    schema_definition_alt: CredentialSchema,  # pylint: disable=redefined-outer-name
+    indy_schema_definition_alt: CredentialSchema,  # pylint: disable=redefined-outer-name
     faber_indy_client: RichAsyncClient,
 ) -> str:
     auth = acapy_auth_verified(
@@ -177,16 +177,16 @@ async def credential_definition_id_revocable(
     result = await get_clean_or_regression_test_cred_def(
         test_mode=request.param,
         auth=auth,
-        schema=schema_definition_alt,
+        schema=indy_schema_definition_alt,
         support_revocation=True,
     )
     return result.id
 
 
 @pytest.fixture(scope="session", params=TestMode.fixture_params)
-async def meld_co_credential_definition_id(
+async def meld_co_indy_credential_definition_id(
     request,
-    schema_definition: CredentialSchema,  # pylint: disable=redefined-outer-name
+    indy_schema_definition: CredentialSchema,  # pylint: disable=redefined-outer-name
     meld_co_indy_client: RichAsyncClient,
 ) -> str:
     auth = acapy_auth_verified(
@@ -195,7 +195,7 @@ async def meld_co_credential_definition_id(
     result = await get_clean_or_regression_test_cred_def(
         test_mode=request.param,
         auth=auth,
-        schema=schema_definition,
+        schema=indy_schema_definition,
         support_revocation=False,
     )
     return result.id

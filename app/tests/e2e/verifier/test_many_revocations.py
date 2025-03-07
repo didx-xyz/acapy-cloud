@@ -24,7 +24,7 @@ async def test_revoke_many_credentials(
     revoke_many: List[  # pylint: disable=unused-argument, redefined-outer-name
         CredentialExchange
     ],
-    credential_definition_id_revocable: str,
+    indy_credential_definition_id_revocable: str,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
@@ -44,7 +44,7 @@ async def test_revoke_many_credentials(
                 "THE_SPEED": {
                     "name": "speed",
                     "restrictions": [
-                        {"cred_def_id": credential_definition_id_revocable}
+                        {"cred_def_id": indy_credential_definition_id_revocable}
                     ],
                 }
             },
@@ -135,7 +135,7 @@ async def revoke_many(
 async def issue_many_creds(
     faber_indy_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-    credential_definition_id_revocable: str,
+    indy_credential_definition_id_revocable: str,
     faber_indy_and_alice_connection: FaberAliceConnect,
 ) -> List[CredentialExchange]:
     # Fetch existing records so we can filter to exclude them. Necessary to cater for long running / regression tests
@@ -152,7 +152,7 @@ async def issue_many_creds(
             "connection_id": faber_conn_id,
             "save_exchange_record": True,
             "indy_credential_detail": {
-                "credential_definition_id": credential_definition_id_revocable,
+                "credential_definition_id": indy_credential_definition_id_revocable,
                 "attributes": {"speed": str(i), "name": "Alice", "age": "44"},
             },
         }

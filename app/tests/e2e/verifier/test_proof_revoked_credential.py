@@ -31,7 +31,7 @@ async def test_proof_revoked_credential(
     revoke_alice_creds_and_publish: List[  # pylint: disable=unused-argument
         CredentialExchange
     ],
-    credential_definition_id_revocable: str,
+    indy_credential_definition_id_revocable: str,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
@@ -51,7 +51,7 @@ async def test_proof_revoked_credential(
                 "THE_SPEED": {
                     "name": "speed",
                     "restrictions": [
-                        {"cred_def_id": credential_definition_id_revocable}
+                        {"cred_def_id": indy_credential_definition_id_revocable}
                     ],
                 }
             },

@@ -21,13 +21,13 @@ OOB_BASE_PATH = oob_router.prefix
 @pytest.mark.anyio
 async def test_send_credential_oob(
     faber_indy_client: RichAsyncClient,
-    schema_definition: CredentialSchema,
-    credential_definition_id: str,
+    indy_schema_definition: CredentialSchema,
+    indy_credential_definition_id: str,
     alice_member_client: RichAsyncClient,
 ):
     credential = {
         "indy_credential_detail": {
-            "credential_definition_id": credential_definition_id,
+            "credential_definition_id": indy_credential_definition_id,
             "attributes": sample_credential_attributes,
         },
     }
@@ -41,7 +41,7 @@ async def test_send_credential_oob(
     assert_that(data).contains("credential_exchange_id")
     assert_that(data).has_state("offer-sent")
     assert_that(data).has_attributes(sample_credential_attributes)
-    assert_that(data).has_schema_id(schema_definition.id)
+    assert_that(data).has_schema_id(indy_schema_definition.id)
 
     cred_ex_id = data["credential_exchange_id"]
 
@@ -86,14 +86,14 @@ async def test_send_credential_oob(
 @pytest.mark.anyio
 async def test_send_credential(
     faber_indy_client: RichAsyncClient,
-    schema_definition: CredentialSchema,
-    credential_definition_id: str,
+    indy_schema_definition: CredentialSchema,
+    indy_credential_definition_id: str,
     faber_indy_and_alice_connection: FaberAliceConnect,
 ):
     credential = {
         "connection_id": faber_indy_and_alice_connection.faber_connection_id,
         "indy_credential_detail": {
-            "credential_definition_id": credential_definition_id,
+            "credential_definition_id": indy_credential_definition_id,
             "attributes": sample_credential_attributes,
         },
     }
@@ -107,7 +107,7 @@ async def test_send_credential(
     assert_that(data).contains("credential_exchange_id")
     assert_that(data).has_state("offer-sent")
     assert_that(data).has_attributes(sample_credential_attributes)
-    assert_that(data).has_schema_id(schema_definition.id)
+    assert_that(data).has_schema_id(indy_schema_definition.id)
 
     cred_ex_id = data["credential_exchange_id"]
     try:
@@ -128,12 +128,12 @@ async def test_send_credential(
 @pytest.mark.anyio
 async def test_create_offer(
     faber_indy_client: RichAsyncClient,
-    schema_definition: CredentialSchema,
-    credential_definition_id: str,
+    indy_schema_definition: CredentialSchema,
+    indy_credential_definition_id: str,
 ):
     credential = {
         "indy_credential_detail": {
-            "credential_definition_id": credential_definition_id,
+            "credential_definition_id": indy_credential_definition_id,
             "attributes": sample_credential_attributes,
         },
     }
@@ -147,7 +147,7 @@ async def test_create_offer(
     assert_that(data).contains("credential_exchange_id")
     assert_that(data).has_state("offer-sent")
     assert_that(data).has_attributes(sample_credential_attributes)
-    assert_that(data).has_schema_id(schema_definition.id)
+    assert_that(data).has_schema_id(indy_schema_definition.id)
 
     cred_ex_id = data["credential_exchange_id"]
     try:
@@ -170,12 +170,12 @@ async def test_send_credential_request(
     alice_member_client: RichAsyncClient,
     faber_indy_client: RichAsyncClient,
     faber_indy_and_alice_connection: FaberAliceConnect,
-    credential_definition_id: str,
+    indy_credential_definition_id: str,
 ):
     credential = {
         "connection_id": faber_indy_and_alice_connection.faber_connection_id,
         "indy_credential_detail": {
-            "credential_definition_id": credential_definition_id,
+            "credential_definition_id": indy_credential_definition_id,
             "attributes": sample_credential_attributes,
         },
     }
@@ -244,7 +244,7 @@ async def test_send_credential_request(
 async def test_revoke_credential(
     faber_indy_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-    credential_definition_id_revocable: str,
+    indy_credential_definition_id_revocable: str,
     faber_indy_and_alice_connection: FaberAliceConnect,
 ):
     faber_connection_id = faber_indy_and_alice_connection.faber_connection_id
@@ -252,7 +252,7 @@ async def test_revoke_credential(
     credential = {
         "connection_id": faber_connection_id,
         "indy_credential_detail": {
-            "credential_definition_id": credential_definition_id_revocable,
+            "credential_definition_id": indy_credential_definition_id_revocable,
             "attributes": sample_credential_attributes,
         },
     }

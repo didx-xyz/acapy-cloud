@@ -23,11 +23,11 @@ from app.tests.fixtures.credentials import (
     revoke_alice_indy_creds_and_publish,
 )
 from app.tests.fixtures.definitions import (
-    credential_definition_id,
-    credential_definition_id_revocable,
-    meld_co_credential_definition_id,
-    schema_definition,
-    schema_definition_alt,
+    indy_credential_definition_id,
+    indy_credential_definition_id_revocable,
+    indy_schema_definition,
+    indy_schema_definition_alt,
+    meld_co_indy_credential_definition_id,
 )
 from app.tests.util.ledger import create_public_did
 from shared.log_config import get_logger

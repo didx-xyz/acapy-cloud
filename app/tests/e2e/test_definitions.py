@@ -80,12 +80,12 @@ async def test_get_schema(
 )
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_create_credential_definition(
-    schema_definition: CredentialSchema,
+    indy_schema_definition: CredentialSchema,
     faber_indy_acapy_client: AcaPyClient,
     faber_indy_client: RichAsyncClient,
     support_revocation: bool,
 ):
-    schema_id = schema_definition.id
+    schema_id = indy_schema_definition.id
     tag = random_string(5)
     credential_definition = CreateCredentialDefinition(
         schema_id=schema_id,

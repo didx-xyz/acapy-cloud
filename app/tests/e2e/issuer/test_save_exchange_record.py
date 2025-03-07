@@ -20,7 +20,7 @@ CREDENTIALS_BASE_PATH = router.prefix
 @pytest.mark.xdist_group(name="issuer_test_group_3")
 async def test_issue_credential_with_save_exchange_record(
     faber_indy_client: RichAsyncClient,
-    credential_definition_id: str,
+    indy_credential_definition_id: str,
     faber_indy_and_alice_connection: FaberAliceConnect,
     alice_member_client: RichAsyncClient,
     save_exchange_record: Optional[bool],
@@ -28,7 +28,7 @@ async def test_issue_credential_with_save_exchange_record(
     credential = {
         "connection_id": faber_indy_and_alice_connection.faber_connection_id,
         "indy_credential_detail": {
-            "credential_definition_id": credential_definition_id,
+            "credential_definition_id": indy_credential_definition_id,
             "attributes": sample_credential_attributes,
         },
         "save_exchange_record": save_exchange_record,
@@ -115,7 +115,7 @@ async def test_issue_credential_with_save_exchange_record(
 @pytest.mark.xdist_group(name="issuer_test_group_4")
 async def test_request_credential_with_save_exchange_record(
     faber_indy_client: RichAsyncClient,
-    credential_definition_id: str,
+    indy_credential_definition_id: str,
     faber_indy_and_alice_connection: FaberAliceConnect,
     alice_member_client: RichAsyncClient,
     save_exchange_record: bool,
@@ -124,7 +124,7 @@ async def test_request_credential_with_save_exchange_record(
     credential = {
         "connection_id": faber_indy_and_alice_connection.faber_connection_id,
         "indy_credential_detail": {
-            "credential_definition_id": credential_definition_id,
+            "credential_definition_id": indy_credential_definition_id,
             "attributes": {"speed": "20", "name": "Alice", "age": "44"},
         },
         "save_exchange_record": True,  # so we can safely delete faber cred ex record in finally block
@@ -210,7 +210,7 @@ async def test_request_credential_with_save_exchange_record(
 @pytest.mark.xdist_group(name="issuer_test_group_3")
 async def test_get_cred_exchange_records(
     faber_indy_client: RichAsyncClient,
-    credential_definition_id: str,
+    indy_credential_definition_id: str,
     faber_indy_and_alice_connection: FaberAliceConnect,
     alice_member_client: RichAsyncClient,
 ):
@@ -222,7 +222,7 @@ async def test_get_cred_exchange_records(
     credential = {
         "connection_id": faber_indy_and_alice_connection.faber_connection_id,
         "indy_credential_detail": {
-            "credential_definition_id": credential_definition_id,
+            "credential_definition_id": indy_credential_definition_id,
             "attributes": {"speed": "20", "name": "Alice", "age": "44"},
         },
         "save_exchange_record": True,

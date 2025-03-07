@@ -14,8 +14,8 @@ CLOUDAPI_TRUST_REGISTRY_PATH = router.prefix
 @pytest.mark.anyio
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_get_schemas(
-    schema_definition: CredentialSchema,  # pylint: disable=unused-argument
-    schema_definition_alt: CredentialSchema,  # pylint: disable=unused-argument
+    indy_schema_definition: CredentialSchema,  # pylint: disable=unused-argument
+    indy_schema_definition_alt: CredentialSchema,  # pylint: disable=unused-argument
     trust_registry_client: RichAsyncClient,
 ):
     schemas_response = await trust_registry_client.get(
@@ -30,10 +30,10 @@ async def test_get_schemas(
 @pytest.mark.anyio
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_get_schema_by_id(
-    schema_definition: CredentialSchema, trust_registry_client: RichAsyncClient
+    indy_schema_definition: CredentialSchema, trust_registry_client: RichAsyncClient
 ):
     schema_response = await trust_registry_client.get(
-        f"{CLOUDAPI_TRUST_REGISTRY_PATH}/schemas/{schema_definition.id}"
+        f"{CLOUDAPI_TRUST_REGISTRY_PATH}/schemas/{indy_schema_definition.id}"
     )
 
     assert schema_response.status_code == 200

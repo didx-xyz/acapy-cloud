@@ -20,7 +20,7 @@ CREDENTIALS_BASE_PATH = router.prefix
 async def test_get_credential_exchange_records_paginated(
     faber_indy_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-    credential_definition_id: str,
+    indy_credential_definition_id: str,
     faber_indy_and_alice_connection: FaberAliceConnect,
 ):
     num_credentials_to_test = 5
@@ -35,7 +35,7 @@ async def test_get_credential_exchange_records_paginated(
             credential_v2 = {
                 "connection_id": faber_indy_and_alice_connection.faber_connection_id,
                 "indy_credential_detail": {
-                    "credential_definition_id": credential_definition_id,
+                    "credential_definition_id": indy_credential_definition_id,
                     "attributes": test_attributes,
                 },
                 "save_exchange_record": True,
