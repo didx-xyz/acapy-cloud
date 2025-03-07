@@ -73,9 +73,7 @@ async def test_get_and_delete_credential_record(
 @pytest.mark.xdist_group(name="issuer_test_group_4")
 async def test_get_credential_record_with_limit(
     alice_member_client: RichAsyncClient,
-    issue_alice_many_indy_creds: List[
-        CredentialExchange
-    ],  # pylint: disable=unused-argument
+    issue_alice_many_indy_creds,  # pylint: disable=unused-argument
 ):
     valid_params = [
         {"limit": 1},
