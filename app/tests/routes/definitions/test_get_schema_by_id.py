@@ -1,11 +1,17 @@
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from aries_cloudcontroller.exceptions import ApiException, BadRequestException
-from aries_cloudcontroller.models.schema_get_result import ModelSchema, SchemaGetResult
+from aries_cloudcontroller import (
+    AdminConfig,
+    ApiException,
+    ModelSchema,
+    SchemaGetResult,
+)
+from aries_cloudcontroller.exceptions import BadRequestException
 from fastapi import HTTPException
 
 from app.dependencies.auth import AcaPyAuth
+from app.dependencies.role import Role
 from app.models.definitions import CredentialSchema
 from app.routes.definitions import get_schema
 
@@ -30,15 +36,15 @@ acapy_response = SchemaGetResult(
 @pytest.mark.parametrize(
     "role",
     [
-        "GOVERNANCE",
-        "TENANT",
+        Role.GOVERNANCE,
+        Role.TENANT,
     ],
 )
 async def test_get_schema_by_id_success(role):
     mock_aries_controller = AsyncMock()
     mock_aries_controller.schema.get_schema = AsyncMock(return_value=acapy_response)
     mock_aries_controller.server.get_config = AsyncMock(
-        return_value={"wallet.type": "askar"}
+        return_value=AdminConfig(config={"wallet.type": "askar"})
     )
     mock_auth = AcaPyAuth(token="mocked_token", role=role)
     with patch(
@@ -64,8 +70,8 @@ async def test_get_schema_by_id_success(role):
 @pytest.mark.parametrize(
     "exception_class, expected_status_code, expected_detail, role",
     [
-        (BadRequestException, 400, "Bad request", "GOVERNANCE"),
-        (ApiException, 500, "Internal Server Error", "TENANT"),
+        (BadRequestException, 400, "Bad request", Role.GOVERNANCE),
+        (ApiException, 500, "Internal Server Error", Role.TENANT),
     ],
 )
 async def test_get_schema_by_id_fail_acapy_error(
@@ -76,7 +82,7 @@ async def test_get_schema_by_id_fail_acapy_error(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
     mock_aries_controller.server.get_config = AsyncMock(
-        return_value={"wallet.type": "askar"}
+        return_value=AdminConfig(config={"wallet.type": "askar"})
     )
     mock_auth = AcaPyAuth(token="mocked_token", role=role)
     with patch(
