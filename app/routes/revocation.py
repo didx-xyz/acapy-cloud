@@ -366,13 +366,24 @@ async def fix_revocation_registry_entry_state(
     bound_logger.debug("PUT request received: Fix revocation registry entry state")
 
     async with client_from_auth(auth) as aries_controller:
-        bound_logger.debug("Fixing revocation registry entry state")
-        response = await handle_acapy_call(
-            logger=bound_logger,
-            acapy_call=aries_controller.anoncreds_revocation.update_rev_reg_revoked_state,
-            rev_reg_id=revocation_registry_id,
-            apply_ledger_update=apply_ledger_update,
-        )
+        wallet_type = get_wallet_type(aries_controller, bound_logger)
+        if wallet_type == "anoncreds":
+            bound_logger.debug("Fixing revocation registry entry state")
+            response = await handle_acapy_call(
+                logger=bound_logger,
+                acapy_call=aries_controller.anoncreds_revocation.update_rev_reg_revoked_state,
+                rev_reg_id=revocation_registry_id,
+                apply_ledger_update=apply_ledger_update,
+            )
+
+        elif wallet_type == "askar":
+            bound_logger.debug("Fixing revocation registry entry state")
+            response = await handle_acapy_call(
+                logger=bound_logger,
+                acapy_call=aries_controller.revocation.update_rev_reg_revoked_state,
+                rev_reg_id=revocation_registry_id,
+                apply_ledger_update=apply_ledger_update,
+            )
 
     bound_logger.debug("Successfully fixed revocation registry entry state.")
     return response
