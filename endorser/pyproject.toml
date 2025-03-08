@@ -13,7 +13,7 @@ python = "~3.12.8"
 
 aries-cloudcontroller = "==1.2.1.post20250228"
 dependency-injector = "^4.46.0"
-fastapi = "~0.115.10"
+fastapi = "~0.115.11"
 httpx = "~0.28.0"
 loguru = "~0.7.2"
 nats-py = { extras = ["nkeys"], version = "^2.9.0" }
