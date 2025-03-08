@@ -12,7 +12,7 @@ package-mode = false
 python = "~3.12.8"
 
 alembic = "~1.14.0"
-fastapi = "~0.115.10"
+fastapi = "~0.115.11"
 httpx = "~0.28.0"
 loguru = "~0.7.2"
 orjson = "~3.10.7"
