@@ -43,6 +43,8 @@ async def test_send_credential_success(credential):
         return_value="schema_id",
     ), patch(
         "app.routes.issuer.assert_valid_issuer"
+    ), patch(
+        "app.routes.issuer.get_wallet_type", return_value="askar"
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -81,6 +83,8 @@ async def test_send_credential_fail_acapy_error(
         return_value="schema_id",
     ), patch(
         "app.routes.issuer.assert_valid_issuer"
+    ), patch(
+        "app.routes.issuer.get_wallet_type", return_value="askar"
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
