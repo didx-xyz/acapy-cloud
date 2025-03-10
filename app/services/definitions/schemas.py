@@ -16,9 +16,6 @@ from app.exceptions import (
     handle_model_with_validation,
 )
 from app.models.definitions import CreateSchema, CredentialSchema, SchemaType
-from app.routes.trust_registry import (
-    get_schema_by_id as get_trust_registry_schema_by_id,
-)
 from app.routes.trust_registry import get_schemas as get_trust_registry_schemas
 from app.services.definitions.schema_publisher import SchemaPublisher
 from app.util.definitions import (
@@ -52,7 +49,6 @@ async def create_schema(
     did_result = await aries_controller.wallet.get_public_did()
     endorser_did = did_result.result.did
 
-    # controller.settings.get_settings() returns None ????
     # Get the wallet type from the server config
     server_config = await aries_controller.server.get_config()
     wallet_type = server_config.config.get("wallet.type")
