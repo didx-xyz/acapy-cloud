@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List
 
 from pydantic import BaseModel, Field
@@ -8,6 +9,11 @@ sample_credential_definition_id = "5Q1Zz9foMeAA8Q7mrmzCfZ:3:CL:7:default"
 sample_name = "test_schema"
 sample_version = "0.3"
 sample_attribute_names = ["name", "age"]
+
+
+class SchemaType(str, Enum):
+    INDY: str = "indy"
+    ANONCREDS: str = "anoncreds"
 
 
 class CreateCredentialDefinition(BaseModel):
@@ -23,6 +29,10 @@ class CredentialDefinition(BaseModel):
 
 
 class CreateSchema(BaseModel):
+    schema_type: SchemaType = Field(
+        default=SchemaType.INDY,
+        description="The type of schema to create. Supported values are 'indy' and 'anoncreds'.",
+    )
     name: str = Field(..., examples=[sample_name])
     version: str = Field(..., examples=[sample_version])
     attribute_names: List[str] = Field(..., examples=[sample_attribute_names])

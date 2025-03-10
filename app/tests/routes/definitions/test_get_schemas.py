@@ -31,7 +31,7 @@ schema_response = [
         ({}, schema_response, Role.GOVERNANCE),
         ({}, [], Role.TENANT),
         (
-            {"schema_id": "27aG25kMFticzJ8GHH87BB:2:Test_Schema_1:0.1.0"},
+            {"schema_name": "Test_Schema_1"},
             [schema_response[0]],
             Role.TENANT,
         ),
@@ -44,7 +44,6 @@ schema_response = [
         ),
         (
             {
-                "schema_id": "27aG25kMFticzJ8GHH87BB:2:Test_Schema_1:0.1.0",
                 "schema_name": "Test_Schema_1",
                 "schema_version": "0.1.0",
             },
@@ -72,7 +71,6 @@ async def test_get_schemas_success(params, response, role):
         if role == Role.TENANT:
             mock_get_schemas_as_tenant.assert_called_once_with(
                 aries_controller=mock_aries_controller,
-                schema_id=params.get("schema_id"),
                 schema_issuer_did=params.get("schema_issuer_did"),
                 schema_name=params.get("schema_name"),
                 schema_version=params.get("schema_version"),
@@ -80,7 +78,6 @@ async def test_get_schemas_success(params, response, role):
         else:
             mock_get_schemas_as_governance.assert_called_once_with(
                 aries_controller=mock_aries_controller,
-                schema_id=params.get("schema_id"),
                 schema_issuer_did=params.get("schema_issuer_did"),
                 schema_name=params.get("schema_name"),
                 schema_version=params.get("schema_version"),
