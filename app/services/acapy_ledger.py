@@ -5,6 +5,7 @@ from aries_cloudcontroller import (
     AcaPyClient,
     GetDIDEndpointResponse,
     GetSchemaResult,
+    SchemaGetResult,
     TAAAccept,
     TAAInfo,
     TAARecord,
@@ -158,7 +159,7 @@ async def accept_taa_if_required(aries_controller: AcaPyClient) -> None:
 # Looks like function itself is at args[0] hence args[2] for cred_def_id
 @cached(cache=SimpleMemoryCache, key_builder=lambda *args: args[2])
 async def schema_id_from_credential_definition_id(
-    controller: AcaPyClient, credential_definition_id: str
+    controller: AcaPyClient, credential_definition_id: str, wallet_type: str
 ) -> str:
     """
     From a credential definition, get the identifier for its schema.
@@ -192,15 +193,28 @@ async def schema_id_from_credential_definition_id(
     seq_no = tokens[3]
 
     bound_logger.debug("Fetching schema using sequence number: `{}`", seq_no)
-    schema: GetSchemaResult = await handle_acapy_call(
-        logger=logger,
-        acapy_call=controller.anoncreds_schemas.get_schema,
-        schema_id=seq_no,
-    )
+    if wallet_type == "askar":
+        schema_indy: SchemaGetResult = await handle_acapy_call(
+            logger=logger,
+            acapy_call=controller.schema.get_schema,
+            schema_id=seq_no,
+        )
+        if not schema_indy.var_schema.id:
+            bound_logger.warning("No schema found with sequence number: `{}`.", seq_no)
+            raise CloudApiException(f"Schema with id {seq_no} not found.", 404)
+        schema_id = schema_indy.var_schema.id
 
-    if not schema.schema_id:
-        bound_logger.warning("No schema found with sequence number: `{}`.", seq_no)
-        raise CloudApiException(f"Schema with id {seq_no} not found.", 404)
+    elif wallet_type == "askar-anoncreds":
+        schema: GetSchemaResult = await handle_acapy_call(
+            logger=logger,
+            acapy_call=controller.anoncreds_schemas.get_schema,
+            schema_id=seq_no,
+        )
+
+        if not schema.schema_id:
+            bound_logger.warning("No schema found with sequence number: `{}`.", seq_no)
+            raise CloudApiException(f"Schema with id {seq_no} not found.", 404)
+        schema_id = schema.schema_id
 
     bound_logger.debug("Successfully obtained schema id from credential definition.")
-    return schema.schema_id
+    return schema_id
