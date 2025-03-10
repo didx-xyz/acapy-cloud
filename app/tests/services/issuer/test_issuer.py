@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from aiohttp import RequestInfo
 from aries_cloudcontroller import AcaPyClient
@@ -24,51 +26,52 @@ async def test_send_credential(
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
 ):
-    cred_ex = mock(CredentialExchange)
+    with patch("app.routes.issuer.get_wallet_type", return_value="askar"):
+        cred_ex = mock(CredentialExchange)
 
-    mocker.patch.object(
-        test_module,
-        "client_from_auth",
-        return_value=mock_context_managed_controller(mock_agent_controller),
-    )
+        mocker.patch.object(
+            test_module,
+            "client_from_auth",
+            return_value=mock_context_managed_controller(mock_agent_controller),
+        )
 
-    when(test_module).assert_valid_issuer(...).thenReturn(to_async(True))
-    when(test_module).schema_id_from_credential_definition_id(
-        mock_agent_controller, cred_def_id
-    ).thenReturn(to_async("schema_id"))
-    when(IssuerV2).send_credential(...).thenReturn(to_async(cred_ex))
-    when(test_module).assert_public_did(...).thenReturn(to_async(did))
+        when(test_module).assert_valid_issuer(...).thenReturn(to_async(True))
+        when(test_module).schema_id_from_credential_definition_id(
+            mock_agent_controller, cred_def_id, "askar"
+        ).thenReturn(to_async("schema_id"))
+        when(IssuerV2).send_credential(...).thenReturn(to_async(cred_ex))
+        when(test_module).assert_public_did(...).thenReturn(to_async(did))
 
-    credential = test_module.SendCredential(
-        connection_id="conn_id",
-        indy_credential_detail=IndyCredential(
-            credential_definition_id=cred_def_id,
-            attributes={"name": "John", "age": "23"},
-        ),
-    )
+        credential = test_module.SendCredential(
+            connection_id="conn_id",
+            indy_credential_detail=IndyCredential(
+                credential_definition_id=cred_def_id,
+                attributes={"name": "John", "age": "23"},
+            ),
+        )
 
-    result = await test_module.send_credential(credential, mock_tenant_auth)
+        result = await test_module.send_credential(credential, mock_tenant_auth)
 
-    assert result is cred_ex
-    verify(IssuerV2).send_credential(...)
-    verify(test_module).schema_id_from_credential_definition_id(
-        mock_agent_controller, cred_def_id
-    )
-    verify(test_module).assert_public_did(mock_agent_controller)
-    verify(test_module).assert_valid_issuer(did, "schema_id")
+        assert result is cred_ex
+        verify(IssuerV2).send_credential(...)
+        verify(test_module).schema_id_from_credential_definition_id(
+            mock_agent_controller, cred_def_id, "askar"
+        )
+        verify(test_module).assert_public_did(mock_agent_controller)
+        verify(test_module).assert_valid_issuer(did, "schema_id")
 
-    request_info = mock(RequestInfo)
-    request_info.real_url = "www.real.co.za"
+        request_info = mock(RequestInfo)
+        request_info.real_url = "www.real.co.za"
 
-    when(test_module).assert_valid_issuer(...).thenReturn(to_async(True))
-    when(test_module).assert_public_did(...).thenReturn(to_async(did))
-    when(test_module).schema_id_from_credential_definition_id(
-        mock_agent_controller, cred_def_id
-    ).thenReturn(to_async("schema_id"))
-    when(IssuerV2).send_credential(...).thenRaise(CloudApiException("abc"))
+        when(test_module).assert_valid_issuer(...).thenReturn(to_async(True))
+        when(test_module).assert_public_did(...).thenReturn(to_async(did))
+        when(test_module).schema_id_from_credential_definition_id(
+            mock_agent_controller, cred_def_id, "askar"
+        ).thenReturn(to_async("schema_id"))
+        when(IssuerV2).send_credential(...).thenRaise(CloudApiException("abc"))
 
-    with pytest.raises(CloudApiException):
-        await test_module.send_credential(credential, mock_tenant_auth)
+        with pytest.raises(CloudApiException):
+            await test_module.send_credential(credential, mock_tenant_auth)
 
 
 @pytest.mark.anyio
@@ -318,23 +321,25 @@ async def test_create_offer(
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
 ):
-    mocker.patch.object(
-        test_module,
-        "client_from_auth",
-        return_value=mock_context_managed_controller(mock_agent_controller),
-    )
-    v2_credential = mock(CredentialBase)
+    with patch("app.routes.issuer.get_wallet_type", return_value="askar"):
 
-    v2_credential.type = "Indy"
+        mocker.patch.object(
+            test_module,
+            "client_from_auth",
+            return_value=mock_context_managed_controller(mock_agent_controller),
+        )
+        v2_credential = mock(CredentialBase)
 
-    v2_record = mock(CredentialExchange)
+        v2_credential.type = "Indy"
 
-    when(IssuerV2).create_offer(...).thenReturn(to_async(v2_record))
+        v2_record = mock(CredentialExchange)
 
-    when(test_module).assert_public_did(...).thenReturn(to_async(did))
-    when(test_module).assert_valid_issuer(...).thenReturn(to_async(True))
-    await test_module.create_offer(v2_credential, mock_tenant_auth)
+        when(IssuerV2).create_offer(...).thenReturn(to_async(v2_record))
 
-    verify(IssuerV2).create_offer(
-        controller=mock_agent_controller, credential=v2_credential
-    )
+        when(test_module).assert_public_did(...).thenReturn(to_async(did))
+        when(test_module).assert_valid_issuer(...).thenReturn(to_async(True))
+        await test_module.create_offer(v2_credential, mock_tenant_auth)
+
+        verify(IssuerV2).create_offer(
+            controller=mock_agent_controller, credential=v2_credential
+        )
