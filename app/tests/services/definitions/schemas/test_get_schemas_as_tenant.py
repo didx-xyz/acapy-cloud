@@ -9,7 +9,7 @@ from app.services.definitions.schemas import get_schemas_as_tenant
 
 schema_1_issuer_did = "abc123"
 schema_id_1 = f"{schema_1_issuer_did}:schema1"
-schema_id_2 = f"xyz456:schema2"
+schema_id_2 = "xyz456:schema2"
 schema_name_1 = "Test Schema 1"
 schema_name_2 = "Test Schema 2"
 schema_version_1 = "1.0"
