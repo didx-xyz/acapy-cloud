@@ -80,7 +80,7 @@ async def test_schema_id_from_credential_definition_id_seq_no(
     )
 
     schema_id = await schema_id_from_credential_definition_id(
-        mock_agent_controller, cred_def_id_seq_no
+        mock_agent_controller, cred_def_id_seq_no, "askar"
     )
 
     assert_that(schema_id).is_equal_to(schema_id)
@@ -97,7 +97,7 @@ async def test_schema_id_from_credential_definition_id_schema_id(
     when(mock_agent_controller.schema).get_schema(...)
 
     schema_id = await schema_id_from_credential_definition_id(
-        mock_agent_controller, cred_def_id_schema_id
+        mock_agent_controller, cred_def_id_schema_id, "askar"
     )
 
     verify(mock_agent_controller.schema, times=0).get_schema(...)
@@ -146,7 +146,7 @@ async def test_schema_id_from_credential_definition_id_caching(
 
     # First call
     result3 = await schema_id_from_credential_definition_id(
-        mock_agent_controller, cred_def_id_old
+        mock_agent_controller, cred_def_id_old, "askar"
     )
     # Second call with same cred_def_id
     result4 = await schema_id_from_credential_definition_id(
@@ -175,7 +175,7 @@ async def test_schema_id_from_credential_definition_id_caching(
     )
 
     await schema_id_from_credential_definition_id(
-        mock_agent_controller, cred_def_id_old2
+        mock_agent_controller, cred_def_id_old2, "askar"
     )
 
     # Assert both API calls were made
