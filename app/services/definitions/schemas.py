@@ -251,12 +251,12 @@ async def get_schemas_by_id(
             logger.debug("No created schema ids returned")
             schema_results = []
 
-            # transform all schemas into response model (if schemas returned)
-            schemas = [
-                anoncreds_schema_from_acapy(schema)
-                for schema in schema_results
-                if schema.var_schema
-            ]
+        # transform all schemas into response model (if schemas returned)
+        schemas = [
+            anoncreds_schema_from_acapy(schema)
+            for schema in schema_results
+            if schema.var_schema
+        ]
     elif wallet_type == "askar":
         logger.debug("Fetching schemas from askar wallet")
         get_schema_futures = [
