@@ -67,7 +67,7 @@ async def create_schema(
         )
         bound_logger.info("Bad request: {}", error_message)
         raise CloudApiException(error_message, status_code=400)
-    if wallet_type == "askar-anoncreds":
+    elif wallet_type == "askar-anoncreds":
         anoncreds_schema = handle_model_with_validation(
             logger=bound_logger,
             model_class=AnonCredsSchema,
@@ -86,7 +86,7 @@ async def create_schema(
         )
 
         result = await publisher.publish_anoncreds_schema(schema_request)
-    elif wallet_type == "askar":
+    else:  # wallet_type == "askar"
         schema_request = handle_model_with_validation(
             logger=bound_logger,
             model_class=SchemaSendRequest,
