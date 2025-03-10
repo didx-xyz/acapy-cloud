@@ -62,8 +62,8 @@ async def create_schema(
     )
     if wallet_type != required_wallet_type:
         error_message = (
-            f"{schema.schema_type} can only be created by"
-            f" '{"askar" if schema.schema_type == "INDY" else "askar-anoncreds"}' wallet types"
+            f"{schema.schema_type} schemas can only be created "
+            f"by '{required_wallet_type}' wallet types"
         )
         bound_logger.info("Bad request: {}", error_message)
         raise CloudApiException(error_message, status_code=400)
