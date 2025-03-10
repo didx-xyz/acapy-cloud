@@ -61,11 +61,12 @@ async def create_schema(
         "askar-anoncreds" if schema.schema_type == SchemaType.ANONCREDS else "askar"
     )
     if wallet_type != required_wallet_type:
-        raise CloudApiException(
+        error_message = (
             f"{schema.schema_type} can only be created by"
-            f" '{"askar" if schema.schema_type == "INDY" else "askar-anoncreds"}' wallet types",
-            status_code=400,
+            f" '{"askar" if schema.schema_type == "INDY" else "askar-anoncreds"}' wallet types"
         )
+        bound_logger.info("Bad request: {}", error_message)
+        raise CloudApiException(error_message, status_code=400)
     if wallet_type == "askar-anoncreds":
         anoncreds_schema = handle_model_with_validation(
             logger=bound_logger,
@@ -85,7 +86,6 @@ async def create_schema(
         )
 
         result = await publisher.publish_anoncreds_schema(schema_request)
-
     elif wallet_type == "askar":
         schema_request = handle_model_with_validation(
             logger=bound_logger,
@@ -192,7 +192,6 @@ async def get_schemas_as_governance(
             schema_name=schema_name,
             schema_version=schema_version,
         )
-
     elif wallet_type == "askar":
         # Get all created schema ids that match the filter
         bound_logger.debug("Fetching created schemas")
@@ -203,6 +202,11 @@ async def get_schemas_as_governance(
             schema_issuer_did=schema_issuer_did,
             schema_name=schema_name,
             schema_version=schema_version,
+        )
+    else:
+        raise CloudApiException(
+            "Wallet type not supported. Cannot get schemas.",
+            status_code=400,
         )
 
     # Initiate retrieving all schemas
@@ -230,7 +234,6 @@ async def get_schemas_by_id(
     """
     logger.debug("Fetching schemas from schema ids")
     if wallet_type == "askar-anoncreds":
-
         logger.info("Fetching schemas from anoncreds wallet")
         get_schema_futures = [
             handle_acapy_call(
