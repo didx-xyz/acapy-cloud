@@ -29,7 +29,10 @@ class CredentialDefinition(BaseModel):
 
 
 class CreateSchema(BaseModel):
-    schema_type: SchemaType = SchemaType.INDY
+    schema_type: SchemaType = Field(
+        default=SchemaType.INDY,
+        description="The type of schema to create. Supported values are 'indy' and 'anoncreds'.",
+    )
     name: str = Field(..., examples=[sample_name])
     version: str = Field(..., examples=[sample_version])
     attribute_names: List[str] = Field(..., examples=[sample_attribute_names])
