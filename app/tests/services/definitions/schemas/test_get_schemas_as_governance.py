@@ -7,6 +7,15 @@ from app.exceptions import CloudApiException
 from app.models.definitions import CredentialSchema
 from app.services.definitions.schemas import get_schemas_as_governance
 
+mock_schemas = [
+    CredentialSchema(
+        id="schema1", name="Test Schema 1", version="1.0", attribute_names=["attr1"]
+    ),
+    CredentialSchema(
+        id="schema2", name="Test Schema 2", version="2.0", attribute_names=["attr2"]
+    ),
+]
+
 
 @pytest.mark.anyio
 async def test_get_schemas_as_governance_success():
@@ -16,14 +25,6 @@ async def test_get_schemas_as_governance_success():
         return_value=AdminConfig(config={"wallet.type": "askar"})
     )
     mock_schema_ids = ["schema1", "schema2"]
-    mock_schemas = [
-        CredentialSchema(
-            id="schema1", name="Test Schema 1", version="1.0", attribute_names=["attr1"]
-        ),
-        CredentialSchema(
-            id="schema2", name="Test Schema 2", version="2.0", attribute_names=["attr2"]
-        ),
-    ]
 
     mock_response = MagicMock()
     mock_response.schema_ids = mock_schema_ids
@@ -70,11 +71,6 @@ async def test_get_schemas_as_governance_with_filters():
         return_value=AdminConfig(config={"wallet.type": "askar"})
     )
     mock_schema_ids = ["schema1"]
-    mock_schemas = [
-        CredentialSchema(
-            id="schema1", name="Test Schema 1", version="1.0", attribute_names=["attr1"]
-        ),
-    ]
 
     mock_response = MagicMock()
     mock_response.schema_ids = mock_schema_ids
@@ -85,7 +81,8 @@ async def test_get_schemas_as_governance_with_filters():
     ), patch(
         "app.services.definitions.schemas.handle_acapy_call", return_value=mock_response
     ), patch(
-        "app.services.definitions.schemas.get_schemas_by_id", return_value=mock_schemas
+        "app.services.definitions.schemas.get_schemas_by_id",
+        return_value=[mock_schemas[0]],
     ):
 
         result = await get_schemas_as_governance(
@@ -134,14 +131,6 @@ async def test_get_schemas_as_governance_anoncreds():
         return_value=AdminConfig(config={"wallet.type": "askar-anoncreds"})
     )
     mock_schema_ids = ["schema1", "schema2"]
-    mock_schemas = [
-        CredentialSchema(
-            id="schema1", name="Test Schema 1", version="1.0", attribute_names=["attr1"]
-        ),
-        CredentialSchema(
-            id="schema2", name="Test Schema 2", version="2.0", attribute_names=["attr2"]
-        ),
-    ]
 
     mock_response = MagicMock()
     mock_response.schema_ids = mock_schema_ids

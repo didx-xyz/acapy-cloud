@@ -43,38 +43,39 @@ acapy_anoncreds_response = GetSchemaResult(
 )
 
 
-@pytest.mark.anyio
-@pytest.mark.parametrize(
-    "role",
-    [
-        Role.GOVERNANCE,
-        Role.TENANT,
-    ],
-)
-async def test_get_schema_by_id_success(role):
+@pytest.fixture
+def setup_askar_wallet_type_mocks():
     mock_aries_controller = AsyncMock()
-    mock_aries_controller.schema.get_schema = AsyncMock(return_value=acapy_response)
     mock_aries_controller.server.get_config = AsyncMock(
         return_value=AdminConfig(config={"wallet.type": "askar"})
     )
-    mock_auth = AcaPyAuth(token="mocked_token", role=role)
     with patch(
         "app.routes.definitions.client_from_auth"
     ) as mock_client_from_auth, patch(
         "app.routes.definitions.get_wallet_type"
     ) as mock_get_wallet_type:
-        # Configure client_from_auth to return our mocked aries_controller on enter
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )
         mock_get_wallet_type.return_value = "askar"
-        response = await get_schema(schema_id=schema_id, auth=mock_auth)
+        yield mock_aries_controller
 
-        assert response == schema_response
 
-        mock_aries_controller.schema.get_schema.assert_awaited_once_with(
-            schema_id=schema_id,
-        )
+@pytest.mark.anyio
+@pytest.mark.parametrize("role", [Role.GOVERNANCE, Role.TENANT])
+async def test_get_schema_by_id_success(
+    setup_askar_wallet_type_mocks, role  # pylint: disable=redefined-outer-name
+):
+    mock_aries_controller = setup_askar_wallet_type_mocks
+    mock_aries_controller.schema.get_schema = AsyncMock(return_value=acapy_response)
+    mock_auth = AcaPyAuth(token="mocked_token", role=role)
+
+    response = await get_schema(schema_id=schema_id, auth=mock_auth)
+
+    assert response == schema_response
+    mock_aries_controller.schema.get_schema.assert_awaited_once_with(
+        schema_id=schema_id,
+    )
 
 
 @pytest.mark.anyio
@@ -86,35 +87,26 @@ async def test_get_schema_by_id_success(role):
     ],
 )
 async def test_get_schema_by_id_fail_acapy_error(
-    exception_class, expected_status_code, expected_detail, role
+    setup_askar_wallet_type_mocks,  # pylint: disable=redefined-outer-name
+    exception_class,
+    expected_status_code,
+    expected_detail,
+    role,
 ):
-    mock_aries_controller = AsyncMock()
+    mock_aries_controller = setup_askar_wallet_type_mocks
     mock_aries_controller.schema.get_schema = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
-    mock_aries_controller.server.get_config = AsyncMock(
-        return_value=AdminConfig(config={"wallet.type": "askar"})
-    )
     mock_auth = AcaPyAuth(token="mocked_token", role=role)
-    with patch(
-        "app.routes.definitions.client_from_auth"
-    ) as mock_client_from_auth, patch(
-        "app.routes.definitions.get_wallet_type"
-    ) as mock_get_wallet_type:
-        # Configure client_from_auth to return our mocked aries_controller on enter
-        mock_client_from_auth.return_value.__aenter__.return_value = (
-            mock_aries_controller
-        )
-        mock_get_wallet_type.return_value = "askar"
 
-        with pytest.raises(HTTPException) as exc:
-            await get_schema(schema_id=schema_id, auth=mock_auth)
+    with pytest.raises(HTTPException) as exc:
+        await get_schema(schema_id=schema_id, auth=mock_auth)
 
-        assert exc.value.status_code == expected_status_code
-        assert exc.value.detail == expected_detail
-        mock_aries_controller.schema.get_schema.assert_awaited_once_with(
-            schema_id=schema_id,
-        )
+    assert exc.value.status_code == expected_status_code
+    assert exc.value.detail == expected_detail
+    mock_aries_controller.schema.get_schema.assert_awaited_once_with(
+        schema_id=schema_id,
+    )
 
 
 @pytest.mark.anyio
