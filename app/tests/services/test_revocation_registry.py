@@ -325,7 +325,7 @@ async def test_get_credential_revocation_record_invalid_result_type(
             await rg.get_credential_revocation_record(
                 controller=mock_agent_controller,
                 credential_exchange_id=cred_ex_id,
-        )
+            )
 
 
 @pytest.mark.anyio
@@ -385,7 +385,9 @@ async def test_validate_rev_reg_ids_success(mock_agent_controller: AcaPyClient):
             to_async(
                 RevRegResult(
                     result=IssuerRevRegRecord(
-                        pending_pub=revocation_registry_credential_map.get("rev_reg_id1")
+                        pending_pub=revocation_registry_credential_map.get(
+                            "rev_reg_id1"
+                        )
                     )
                 )
             )
@@ -408,7 +410,8 @@ async def test_validate_rev_reg_ids_non_existent(mock_agent_controller: AcaPyCli
         ).thenRaise(ApiException(status=404, reason="Registry ID does not exist"))
 
         with pytest.raises(
-            CloudApiException, match="The rev_reg_id `invalid_rev_reg_id` does not exist"
+            CloudApiException,
+            match="The rev_reg_id `invalid_rev_reg_id` does not exist",
         ) as exc_info:
             await rg.validate_rev_reg_ids(
                 mock_agent_controller, {"invalid_rev_reg_id": ["cred_rev_id_4"]}
@@ -428,7 +431,9 @@ async def test_validate_rev_reg_ids_no_pending_publications(
         # Mock response with no pending publications
         when(mock_agent_controller.revocation).get_registry(
             rev_reg_id="valid_rev_reg_id_1"
-        ).thenReturn(to_async(RevRegResult(result=IssuerRevRegRecord(pending_pub=None))))
+        ).thenReturn(
+            to_async(RevRegResult(result=IssuerRevRegRecord(pending_pub=None)))
+        )
 
         with pytest.raises(
             CloudApiException, match="No pending publications found"
@@ -452,7 +457,9 @@ async def test_validate_rev_reg_ids_cred_rev_id_not_pending(
         when(mock_agent_controller.revocation).get_registry(
             rev_reg_id="valid_rev_reg_id_1"
         ).thenReturn(
-            to_async(RevRegResult(result=IssuerRevRegRecord(pending_pub=["cred_rev_id_2"])))
+            to_async(
+                RevRegResult(result=IssuerRevRegRecord(pending_pub=["cred_rev_id_2"]))
+            )
         )
 
         with pytest.raises(
@@ -508,7 +515,7 @@ async def test_get_pending_revocations_failure(
         when(mock_agent_controller.revocation).get_registry(
             rev_reg_id=rev_reg_id
         ).thenRaise(ApiException(reason=error_message, status=status_code))
-    
+
         with pytest.raises(
             CloudApiException,
             match=f"500: Failed to get pending revocations: {error_message}",
@@ -516,5 +523,5 @@ async def test_get_pending_revocations_failure(
             await rg.get_pending_revocations(
                 controller=mock_agent_controller, rev_reg_id=rev_reg_id
             )
-    
+
         assert exc_info.value.status_code == status_code
