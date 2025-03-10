@@ -175,22 +175,22 @@ class SchemaPublisher:
             acapy_call=self._controller.wallet.get_public_did,
         )
 
-        _schema_id = f"{pub_did.result.did}:2:{schema.var_schema.name}:{schema.var_schema.version}"
+        schema_id = f"{pub_did.result.did}:2:{schema.var_schema.name}:{schema.var_schema.version}"
         self._logger.debug(
             "Fetching schema id `{}` which is associated with request",
-            _schema_id,
+            schema_id,
         )
 
-        _schema: GetSchemaResult = await handle_acapy_call(
+        fetched_schema: GetSchemaResult = await handle_acapy_call(
             logger=self._logger,
             acapy_call=self._controller.anoncreds_schemas.get_schema,
-            schema_id=_schema_id,
+            schema_id=schema_id,
         )
 
         # Edge case where the governance agent has changed its public did
         # Then we need to retrieve the schema in a different way as constructing
         # the schema ID the way above will not be correct due to different public did.
-        if _schema.var_schema is None:
+        if fetched_schema.var_schema is None:
             self._logger.debug(
                 "Schema not found. Governance agent may have changed public DID. "
                 "Fetching schemas created by governance with requested name and version"
@@ -222,18 +222,20 @@ class SchemaPublisher:
                 )
                 raise CloudApiException(error_message, 409)
             self._logger.debug("Using updated schema id with new DID")
-            _schema: GetSchemaResult = schemas[0]
+            fetched_schema: GetSchemaResult = schemas[0]
 
         # Schema exists with different attributes
-        if set(_schema.var_schema.attr_names) != set(schema.var_schema.attr_names):
+        if set(fetched_schema.var_schema.attr_names) != set(
+            schema.var_schema.attr_names
+        ):
             error_message = (
                 "Error creating schema: Schema already exists with different attribute "
                 f"names. Given: `{str(set(schema.var_schema.attr_names))}`. "
-                f"Found: `{str(set(_schema.var_schema.attr_names))}`."
+                f"Found: `{str(set(fetched_schema.var_schema.attr_names))}`."
             )
             raise CloudApiException(error_message, 409)
 
-        result = anoncreds_credential_schema(_schema)
+        result = anoncreds_credential_schema(fetched_schema)
         self._logger.debug(
             "Schema already exists on ledger. Returning schema definition: `{}`.",
             result,
