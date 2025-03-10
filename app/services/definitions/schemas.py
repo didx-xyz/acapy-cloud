@@ -103,7 +103,6 @@ async def create_schema(
 
 async def get_schemas_as_tenant(
     aries_controller: AcaPyClient,
-    schema_id: Optional[str] = None,
     schema_issuer_did: Optional[str] = None,
     schema_name: Optional[str] = None,
     schema_version: Optional[str] = None,
@@ -113,7 +112,6 @@ async def get_schemas_as_tenant(
     """
     bound_logger = logger.bind(
         body={
-            "schema_id": schema_id,
             "schema_issuer_did": schema_issuer_did,
             "schema_name": schema_name,
             "schema_version": schema_version,
@@ -125,10 +123,7 @@ async def get_schemas_as_tenant(
         logger=bound_logger,
     )
 
-    if schema_id:  # fetch specific id
-        trust_registry_schemas = [await get_trust_registry_schema_by_id(schema_id)]
-    else:  # client is not filtering by schema_id, fetch all
-        trust_registry_schemas = await get_trust_registry_schemas()
+    trust_registry_schemas = await get_trust_registry_schemas()
 
     schema_ids = [schema.id for schema in trust_registry_schemas]
 
@@ -153,7 +148,6 @@ async def get_schemas_as_tenant(
 
 async def get_schemas_as_governance(
     aries_controller: AcaPyClient,
-    schema_id: Optional[str] = None,
     schema_issuer_did: Optional[str] = None,
     schema_name: Optional[str] = None,
     schema_version: Optional[str] = None,
@@ -163,7 +157,6 @@ async def get_schemas_as_governance(
     """
     bound_logger = logger.bind(
         body={
-            "schema_id": schema_id,
             "schema_issuer_did": schema_issuer_did,
             "schema_name": schema_name,
             "schema_version": schema_version,
@@ -198,7 +191,6 @@ async def get_schemas_as_governance(
         response = await handle_acapy_call(
             logger=bound_logger,
             acapy_call=aries_controller.schema.get_created_schemas,
-            schema_id=schema_id,
             schema_issuer_did=schema_issuer_did,
             schema_name=schema_name,
             schema_version=schema_version,

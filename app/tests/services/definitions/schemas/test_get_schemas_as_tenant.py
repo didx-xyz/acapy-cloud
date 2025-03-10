@@ -68,7 +68,7 @@ async def test_get_schemas_as_tenant_by_id():
         mock_get_wallet_type.return_value = "askar"
 
         result = await get_schemas_as_tenant(
-            mock_aries_controller, schema_id=schema_id_1
+            mock_aries_controller, schema_name=schema_name_1
         )
 
         assert len(result) == 1
