@@ -20,9 +20,11 @@ async def test_clear_pending_revocations_success():
     with patch(
         "app.routes.revocation.client_from_auth"
     ) as mock_client_from_auth, patch(
-        "app.services.revocation_registry.clear_pending_revocations",
-        mock_clear_pending_revocations,
-    ):
+        "app.services.revocation_registry.clear_pending_revocations"
+    ) as mock_clear_pending_revocations, patch(
+        "app.routes.revocation.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )
@@ -61,7 +63,10 @@ async def test_clear_pending_revocations_fail_acapy_error(
         "app.routes.revocation.client_from_auth"
     ) as mock_client_from_auth, pytest.raises(
         HTTPException, match=expected_detail
-    ) as exc:
+    ) as exc, patch(
+        "app.routes.revocation.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )
