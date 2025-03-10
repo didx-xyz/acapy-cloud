@@ -206,7 +206,7 @@ async def get_schemas_as_governance(
     else:
         raise CloudApiException(
             "Wallet type not supported. Cannot get schemas.",
-            status_code=400,
+            status_code=500,
         )
 
     # Initiate retrieving all schemas
@@ -290,7 +290,7 @@ async def get_schemas_by_id(
     else:
         raise CloudApiException(
             "Wallet type not supported. Cannot get schemas.",
-            status_code=400,
+            status_code=500,
         )
 
     return schemas
