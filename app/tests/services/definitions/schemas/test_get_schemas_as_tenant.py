@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from aries_cloudcontroller import AcaPyClient
 
+from app.exceptions import CloudApiException
 from app.models.definitions import CredentialSchema
 from app.services.definitions.schemas import get_schemas_as_tenant
 
@@ -159,3 +160,49 @@ async def test_get_schemas_as_tenant_filter_version():
 
         assert len(result) == 1
         assert result[0].version == "2.0"
+
+
+@pytest.mark.anyio
+async def test_get_schemas_as_tenant_anoncreds():
+    mock_aries_controller = AsyncMock(spec=AcaPyClient)
+
+    mock_trust_registry_schemas = [
+        CredentialSchema(
+            id="schema1", name="Test Schema 1", version="1.0", attribute_names=["attr1"]
+        ),
+        CredentialSchema(
+            id="schema2", name="Test Schema 2", version="2.0", attribute_names=["attr2"]
+        ),
+    ]
+
+    with patch(
+        "app.services.definitions.schemas.get_trust_registry_schemas",
+        return_value=mock_trust_registry_schemas,
+    ), patch(
+        "app.services.definitions.schemas.get_schemas_by_id",
+        return_value=mock_trust_registry_schemas,
+    ), patch(
+        "app.services.definitions.schemas.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar-anoncreds"
+        result = await get_schemas_as_tenant(mock_aries_controller)
+
+        assert len(result) == 2
+        assert all(isinstance(schema, CredentialSchema) for schema in result)
+        assert [schema.id for schema in result] == ["schema1", "schema2"]
+
+
+@pytest.mark.anyio
+async def test_get_schemas_as_tenant_unsupported_wallet_type():
+    mock_aries_controller = AsyncMock(spec=AcaPyClient)
+
+    with patch(
+        "app.services.definitions.schemas.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "unsupported"
+
+        with pytest.raises(CloudApiException) as exc_info:
+            await get_schemas_as_tenant(mock_aries_controller)
+
+        assert exc_info.value.status_code == 500
+        assert "Wallet type not supported. Cannot get schemas." in str(exc_info.value)
