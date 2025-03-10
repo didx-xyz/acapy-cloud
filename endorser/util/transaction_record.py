@@ -82,9 +82,7 @@ async def get_did_and_schema_id_from_cred_def_attachment(
         schema_id = schema.schema_id
 
     if not schema_id:
-        raise Exception(  # pylint: disable=W0719
-            "Could not extract schema id from schema response."
-        )
+        raise ValueError("Could not extract schema id from schema response.")
     return (did, schema_id)
 
 

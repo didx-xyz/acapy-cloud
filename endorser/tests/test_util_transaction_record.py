@@ -162,7 +162,7 @@ async def test_get_did_and_schema_id_from_cred_def_attachment_fail_no_var_schema
     mock_acapy_client.server.get_config.return_value = AdminConfig(
         config={"wallet.type": "askar"}
     )
-    with pytest.raises(Exception) as exc:
+    with pytest.raises(ValueError) as exc:
         await get_did_and_schema_id_from_cred_def_attachment(
             mock_acapy_client,
             {"identifier": "identifier_value", "operation": {"ref": "ref_value"}},
