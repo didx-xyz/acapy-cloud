@@ -136,7 +136,6 @@ async def get_schemas(
                 schema_name=schema_name,
                 schema_version=schema_version,
             )
-
         else:  # Governance is calling the endpoint
             try:
                 schemas = await schemas_service.get_schemas_as_governance(
@@ -190,11 +189,9 @@ async def get_schema(
 
     async with client_from_auth(auth) as aries_controller:
         if is_governance:
-            # controller.settings.get_settings() returns None ????
             # Get the wallet type from the server config
             server_config = await aries_controller.server.get_config()
             wallet_type = server_config.config.get("wallet.type")
-
         else:
             wallet_type = await get_wallet_type(
                 aries_controller=aries_controller,
@@ -202,7 +199,6 @@ async def get_schema(
             )
 
         if wallet_type == "askar-anoncreds":
-
             schema = await handle_acapy_call(
                 logger=bound_logger,
                 acapy_call=aries_controller.anoncreds_schemas.get_schema,
@@ -213,9 +209,7 @@ async def get_schema(
                 raise HTTPException(404, f"Schema with id {schema_id} not found.")
 
             result = anoncreds_schema_from_acapy(schema)
-
         elif wallet_type == "askar":
-
             schema = await handle_acapy_call(
                 logger=bound_logger,
                 acapy_call=aries_controller.schema.get_schema,
@@ -226,8 +220,8 @@ async def get_schema(
                 raise HTTPException(404, f"Schema with id {schema_id} not found.")
 
             result = credential_schema_from_acapy(schema.var_schema)
-
         else:
+            # Should never happen
             raise HTTPException(500, "Unknown wallet type")
 
     bound_logger.debug("Successfully fetched schema by id.")
