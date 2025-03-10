@@ -58,8 +58,8 @@ async def test_get_schemas_as_tenant_by_id():
 
     mock_schema = mock_schemas[0]
     with patch(
-        "app.services.definitions.schemas.get_trust_registry_schema_by_id",
-        return_value=mock_schema,
+        "app.services.definitions.schemas.get_trust_registry_schemas",
+        return_value=[mock_schema],
     ), patch(
         "app.services.definitions.schemas.get_schemas_by_id", return_value=[mock_schema]
     ), patch(
