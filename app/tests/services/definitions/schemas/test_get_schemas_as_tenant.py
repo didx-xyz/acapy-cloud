@@ -198,7 +198,10 @@ async def test_get_schemas_as_tenant_unsupported_wallet_type():
 
     with patch(
         "app.services.definitions.schemas.get_wallet_type"
-    ) as mock_get_wallet_type:
+    ) as mock_get_wallet_type, patch(
+        "app.services.definitions.schemas.get_trust_registry_schemas",
+        return_value=[],
+    ):
         mock_get_wallet_type.return_value = "unsupported"
 
         with pytest.raises(CloudApiException) as exc_info:
