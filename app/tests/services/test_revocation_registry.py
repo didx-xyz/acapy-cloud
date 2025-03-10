@@ -1,4 +1,4 @@
-from unittest.mock import ANY
+from unittest.mock import ANY, patch
 
 import pytest
 from aries_cloudcontroller import (
@@ -77,66 +77,74 @@ async def test_get_active_revocation_registry_for_credential(
 @pytest.mark.anyio
 async def test_revoke_credential(mock_agent_controller: AcaPyClient):
     # Success
-    when(mock_agent_controller.revocation).revoke_credential(
-        body=RevokeRequest(cred_ex_id=cred_id, publish=False)
-    ).thenReturn(to_async({}))
-
-    revoke_credential_result = await rg.revoke_credential(
-        controller=mock_agent_controller,
-        credential_exchange_id=cred_id,
-        auto_publish_to_ledger=False,
-    )
-
-    assert revoke_credential_result.cred_rev_ids_published == {}
-
-    # Fail
-    error_msg = "dummy_message"
-    with pytest.raises(
-        CloudApiException, match=f"Failed to revoke credential: {error_msg}"
-    ) as exc:
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
         when(mock_agent_controller.revocation).revoke_credential(
             body=RevokeRequest(cred_ex_id=cred_id, publish=False)
-        ).thenRaise(ApiException(reason=error_msg, status=500))
-        await rg.revoke_credential(
+        ).thenReturn(to_async({}))
+
+        revoke_credential_result = await rg.revoke_credential(
             controller=mock_agent_controller,
             credential_exchange_id=cred_id,
             auto_publish_to_ledger=False,
         )
-        assert exc.value.status_code == 500
+
+        assert revoke_credential_result.cred_rev_ids_published == {}
+
+        # Fail
+        error_msg = "dummy_message"
+        with pytest.raises(
+            CloudApiException, match=f"Failed to revoke credential: {error_msg}"
+        ) as exc:
+            when(mock_agent_controller.revocation).revoke_credential(
+                body=RevokeRequest(cred_ex_id=cred_id, publish=False)
+            ).thenRaise(ApiException(reason=error_msg, status=500))
+            await rg.revoke_credential(
+                controller=mock_agent_controller,
+                credential_exchange_id=cred_id,
+                auto_publish_to_ledger=False,
+            )
+            assert exc.value.status_code == 500
 
 
 @pytest.mark.anyio
 async def test_publish_pending_revocations_success(mock_agent_controller: AcaPyClient):
     # Simulate successful validation
-    when(rg).validate_rev_reg_ids(
-        controller=mock_agent_controller,
-        revocation_registry_credential_map=revocation_registry_credential_map,
-    ).thenReturn(to_async())
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
+        when(rg).validate_rev_reg_ids(
+            controller=mock_agent_controller,
+            revocation_registry_credential_map=revocation_registry_credential_map,
+        ).thenReturn(to_async())
 
-    # Simulate successful publish revocations call
-    when(mock_agent_controller.revocation).publish_revocations(
-        body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
-    ).thenReturn(
-        to_async(
-            TxnOrPublishRevocationsResult(
-                txn=[
-                    TransactionRecord(
-                        transaction_id="97a46fab-5499-42b3-a2a1-7eb9faad31c0"
-                    )
-                ]
+        # Simulate successful publish revocations call
+        when(mock_agent_controller.revocation).publish_revocations(
+            body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
+        ).thenReturn(
+            to_async(
+                TxnOrPublishRevocationsResult(
+                    txn=[
+                        TransactionRecord(
+                            transaction_id="97a46fab-5499-42b3-a2a1-7eb9faad31c0"
+                        )
+                    ]
+                )
             )
         )
-    )
 
-    await rg.publish_pending_revocations(
-        controller=mock_agent_controller,
-        revocation_registry_credential_map=revocation_registry_credential_map,
-    )
+        await rg.publish_pending_revocations(
+            controller=mock_agent_controller,
+            revocation_registry_credential_map=revocation_registry_credential_map,
+        )
 
-    # You may also verify that publish_revocations was called with expected arguments
-    verify(mock_agent_controller.revocation, times=1).publish_revocations(
-        body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
-    )
+        # You may also verify that publish_revocations was called with expected arguments
+        verify(mock_agent_controller.revocation, times=1).publish_revocations(
+            body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
+        )
 
 
 @pytest.mark.anyio
@@ -145,31 +153,35 @@ async def test_publish_pending_revocations_failure(mock_agent_controller: AcaPyC
     status_code = 500
 
     # Simulate successful validation
-    when(rg).validate_rev_reg_ids(
-        controller=mock_agent_controller,
-        revocation_registry_credential_map=revocation_registry_credential_map,
-    ).thenReturn(to_async())
-
-    # Simulate failure in publish revocations call
-    when(mock_agent_controller.revocation).publish_revocations(
-        body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
-    ).thenRaise(ApiException(reason=error_message, status=status_code))
-
-    with pytest.raises(
-        CloudApiException,
-        match=f"Failed to publish pending revocations: {error_message}",
-    ) as exc:
-        await rg.publish_pending_revocations(
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
+        when(rg).validate_rev_reg_ids(
             controller=mock_agent_controller,
             revocation_registry_credential_map=revocation_registry_credential_map,
+        ).thenReturn(to_async())
+
+        # Simulate failure in publish revocations call
+        when(mock_agent_controller.revocation).publish_revocations(
+            body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
+        ).thenRaise(ApiException(reason=error_message, status=status_code))
+
+        with pytest.raises(
+            CloudApiException,
+            match=f"Failed to publish pending revocations: {error_message}",
+        ) as exc:
+            await rg.publish_pending_revocations(
+                controller=mock_agent_controller,
+                revocation_registry_credential_map=revocation_registry_credential_map,
+            )
+
+        assert exc.value.status_code == status_code
+
+        # You may also verify that publish_revocations was attempted
+        verify(mock_agent_controller.revocation, times=1).publish_revocations(
+            body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
         )
-
-    assert exc.value.status_code == status_code
-
-    # You may also verify that publish_revocations was attempted
-    verify(mock_agent_controller.revocation, times=1).publish_revocations(
-        body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
-    )
 
 
 @pytest.mark.anyio
@@ -243,22 +255,26 @@ async def test_get_credential_revocation_record_success(
         cred_rev_id=cred_rev_id,
         rev_reg_id=revocation_registry_id,
     )
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
 
-    # Mock successful response from ACA-Py
-    when(mock_agent_controller.revocation).get_revocation_status(
-        cred_ex_id=cred_ex_id,
-        cred_rev_id=cred_rev_id,
-        rev_reg_id=revocation_registry_id,
-    ).thenReturn(to_async(CredRevRecordResult(result=expected_result)))
+        # Mock successful response from ACA-Py
+        when(mock_agent_controller.revocation).get_revocation_status(
+            cred_ex_id=cred_ex_id,
+            cred_rev_id=cred_rev_id,
+            rev_reg_id=revocation_registry_id,
+        ).thenReturn(to_async(CredRevRecordResult(result=expected_result)))
 
-    result = await rg.get_credential_revocation_record(
-        controller=mock_agent_controller,
-        credential_exchange_id=cred_ex_id,
-        credential_revocation_id=cred_rev_id,
-        revocation_registry_id=revocation_registry_id,
-    )
+        result = await rg.get_credential_revocation_record(
+            controller=mock_agent_controller,
+            credential_exchange_id=cred_ex_id,
+            credential_revocation_id=cred_rev_id,
+            revocation_registry_id=revocation_registry_id,
+        )
 
-    assert result == expected_result
+        assert result == expected_result
 
 
 @pytest.mark.anyio
@@ -268,38 +284,47 @@ async def test_get_credential_revocation_record_api_exception(
     error_message = "Failed to get revocation status"
     status_code = 500
 
-    # Mock ApiException from ACA-Py
-    when(mock_agent_controller.revocation).get_revocation_status(
-        cred_ex_id=cred_ex_id, cred_rev_id=ANY, rev_reg_id=ANY
-    ).thenRaise(ApiException(reason=error_message, status=status_code))
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
 
-    with pytest.raises(
-        CloudApiException, match=f"Failed to get revocation status: {error_message}"
-    ) as exc_info:
-        await rg.get_credential_revocation_record(
-            controller=mock_agent_controller,
-            credential_exchange_id=cred_ex_id,
-        )
+        # Mock ApiException from ACA-Py
+        when(mock_agent_controller.revocation).get_revocation_status(
+            cred_ex_id=cred_ex_id, cred_rev_id=ANY, rev_reg_id=ANY
+        ).thenRaise(ApiException(reason=error_message, status=status_code))
 
-    assert exc_info.value.status_code == status_code
+        with pytest.raises(
+            CloudApiException, match=f"Failed to get revocation status: {error_message}"
+        ) as exc_info:
+            await rg.get_credential_revocation_record(
+                controller=mock_agent_controller,
+                credential_exchange_id=cred_ex_id,
+            )
+
+        assert exc_info.value.status_code == status_code
 
 
 @pytest.mark.anyio
 async def test_get_credential_revocation_record_invalid_result_type(
     mock_agent_controller: AcaPyClient,
 ):
-    # Mock unexpected response type from ACA-Py
-    when(mock_agent_controller.revocation).get_revocation_status(
-        cred_ex_id=cred_ex_id, cred_rev_id=ANY, rev_reg_id=ANY
-    ).thenReturn(to_async("unexpected_type"))
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
+        # Mock unexpected response type from ACA-Py
+        when(mock_agent_controller.revocation).get_revocation_status(
+            cred_ex_id=cred_ex_id, cred_rev_id=ANY, rev_reg_id=ANY
+        ).thenReturn(to_async("unexpected_type"))
 
-    with pytest.raises(
-        CloudApiException,
-        match="Error retrieving revocation status for credential exchange ID",
-    ):
-        await rg.get_credential_revocation_record(
-            controller=mock_agent_controller,
-            credential_exchange_id=cred_ex_id,
+        with pytest.raises(
+            CloudApiException,
+            match="Error retrieving revocation status for credential exchange ID",
+        ):
+            await rg.get_credential_revocation_record(
+                controller=mock_agent_controller,
+                credential_exchange_id=cred_ex_id,
         )
 
 
@@ -351,100 +376,120 @@ async def test_get_credential_definition_id_from_exchange_id(
 
 @pytest.mark.anyio
 async def test_validate_rev_reg_ids_success(mock_agent_controller: AcaPyClient):
-    # Mock successful retrieval of revocation registry
-    when(mock_agent_controller.revocation).get_registry(...).thenReturn(
-        to_async(
-            RevRegResult(
-                result=IssuerRevRegRecord(
-                    pending_pub=revocation_registry_credential_map.get("rev_reg_id1")
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
+        # Mock successful retrieval of revocation registry
+        when(mock_agent_controller.revocation).get_registry(...).thenReturn(
+            to_async(
+                RevRegResult(
+                    result=IssuerRevRegRecord(
+                        pending_pub=revocation_registry_credential_map.get("rev_reg_id1")
+                    )
                 )
             )
         )
-    )
 
-    await rg.validate_rev_reg_ids(
-        mock_agent_controller, revocation_registry_credential_map
-    )
+        await rg.validate_rev_reg_ids(
+            mock_agent_controller, revocation_registry_credential_map
+        )
 
 
 @pytest.mark.anyio
 async def test_validate_rev_reg_ids_non_existent(mock_agent_controller: AcaPyClient):
-    # Mock ApiException for non-existent revocation registry ID
-    when(mock_agent_controller.revocation).get_registry(
-        rev_reg_id="invalid_rev_reg_id"
-    ).thenRaise(ApiException(status=404, reason="Registry ID does not exist"))
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
+        # Mock ApiException for non-existent revocation registry ID
+        when(mock_agent_controller.revocation).get_registry(
+            rev_reg_id="invalid_rev_reg_id"
+        ).thenRaise(ApiException(status=404, reason="Registry ID does not exist"))
 
-    with pytest.raises(
-        CloudApiException, match="The rev_reg_id `invalid_rev_reg_id` does not exist"
-    ) as exc_info:
-        await rg.validate_rev_reg_ids(
-            mock_agent_controller, {"invalid_rev_reg_id": ["cred_rev_id_4"]}
-        )
+        with pytest.raises(
+            CloudApiException, match="The rev_reg_id `invalid_rev_reg_id` does not exist"
+        ) as exc_info:
+            await rg.validate_rev_reg_ids(
+                mock_agent_controller, {"invalid_rev_reg_id": ["cred_rev_id_4"]}
+            )
 
-    assert exc_info.value.status_code == 404
+        assert exc_info.value.status_code == 404
 
 
 @pytest.mark.anyio
 async def test_validate_rev_reg_ids_no_pending_publications(
     mock_agent_controller: AcaPyClient,
 ):
-    # Mock response with no pending publications
-    when(mock_agent_controller.revocation).get_registry(
-        rev_reg_id="valid_rev_reg_id_1"
-    ).thenReturn(to_async(RevRegResult(result=IssuerRevRegRecord(pending_pub=None))))
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
+        # Mock response with no pending publications
+        when(mock_agent_controller.revocation).get_registry(
+            rev_reg_id="valid_rev_reg_id_1"
+        ).thenReturn(to_async(RevRegResult(result=IssuerRevRegRecord(pending_pub=None))))
 
-    with pytest.raises(
-        CloudApiException, match="No pending publications found"
-    ) as exc_info:
-        await rg.validate_rev_reg_ids(
-            mock_agent_controller, {"valid_rev_reg_id_1": ["cred_rev_id_1"]}
-        )
+        with pytest.raises(
+            CloudApiException, match="No pending publications found"
+        ) as exc_info:
+            await rg.validate_rev_reg_ids(
+                mock_agent_controller, {"valid_rev_reg_id_1": ["cred_rev_id_1"]}
+            )
 
-    assert exc_info.value.status_code == 404
+        assert exc_info.value.status_code == 404
 
 
 @pytest.mark.anyio
 async def test_validate_rev_reg_ids_cred_rev_id_not_pending(
     mock_agent_controller: AcaPyClient,
 ):
-    # Mock response where cred_rev_id is not in pending_pub
-    when(mock_agent_controller.revocation).get_registry(
-        rev_reg_id="valid_rev_reg_id_1"
-    ).thenReturn(
-        to_async(RevRegResult(result=IssuerRevRegRecord(pending_pub=["cred_rev_id_2"])))
-    )
-
-    with pytest.raises(
-        CloudApiException, match="is not pending publication"
-    ) as exc_info:
-        await rg.validate_rev_reg_ids(
-            mock_agent_controller, {"valid_rev_reg_id_1": ["cred_rev_id_1"]}
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
+        # Mock response where cred_rev_id is not in pending_pub
+        when(mock_agent_controller.revocation).get_registry(
+            rev_reg_id="valid_rev_reg_id_1"
+        ).thenReturn(
+            to_async(RevRegResult(result=IssuerRevRegRecord(pending_pub=["cred_rev_id_2"])))
         )
 
-    assert exc_info.value.status_code == 404
+        with pytest.raises(
+            CloudApiException, match="is not pending publication"
+        ) as exc_info:
+            await rg.validate_rev_reg_ids(
+                mock_agent_controller, {"valid_rev_reg_id_1": ["cred_rev_id_1"]}
+            )
+
+        assert exc_info.value.status_code == 404
 
 
 @pytest.mark.anyio
 async def test_get_pending_revocations_success(
     mock_agent_controller: AcaPyClient,
 ):
-    rev_reg_id = "mocked_rev_reg_id"
-    # Mock successful response from ACA-Py
-    when(mock_agent_controller.revocation).get_registry(
-        rev_reg_id=rev_reg_id
-    ).thenReturn(
-        to_async(
-            RevRegResult(
-                result=IssuerRevRegRecord(
-                    rev_reg_id=rev_reg_id, max_cred_num=max_cred_num
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
+        rev_reg_id = "mocked_rev_reg_id"
+        # Mock successful response from ACA-Py
+        when(mock_agent_controller.revocation).get_registry(
+            rev_reg_id=rev_reg_id
+        ).thenReturn(
+            to_async(
+                RevRegResult(
+                    result=IssuerRevRegRecord(
+                        rev_reg_id=rev_reg_id, max_cred_num=max_cred_num
+                    )
                 )
             )
         )
-    )
 
-    await rg.get_pending_revocations(
-        controller=mock_agent_controller, rev_reg_id=rev_reg_id
-    )
+        await rg.get_pending_revocations(
+            controller=mock_agent_controller, rev_reg_id=rev_reg_id
+        )
 
 
 @pytest.mark.anyio
@@ -455,17 +500,21 @@ async def test_get_pending_revocations_failure(
     status_code = 500
 
     rev_reg_id = "mocked_rev_reg_id"
-    # Mock ApiException from ACA-Py
-    when(mock_agent_controller.revocation).get_registry(
-        rev_reg_id=rev_reg_id
-    ).thenRaise(ApiException(reason=error_message, status=status_code))
-
-    with pytest.raises(
-        CloudApiException,
-        match=f"500: Failed to get pending revocations: {error_message}",
-    ) as exc_info:
-        await rg.get_pending_revocations(
-            controller=mock_agent_controller, rev_reg_id=rev_reg_id
-        )
-
-    assert exc_info.value.status_code == status_code
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
+        # Mock ApiException from ACA-Py
+        when(mock_agent_controller.revocation).get_registry(
+            rev_reg_id=rev_reg_id
+        ).thenRaise(ApiException(reason=error_message, status=status_code))
+    
+        with pytest.raises(
+            CloudApiException,
+            match=f"500: Failed to get pending revocations: {error_message}",
+        ) as exc_info:
+            await rg.get_pending_revocations(
+                controller=mock_agent_controller, rev_reg_id=rev_reg_id
+            )
+    
+        assert exc_info.value.status_code == status_code
