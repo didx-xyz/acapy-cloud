@@ -134,41 +134,69 @@ async def test_revoke_credential(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_publish_pending_revocations_success(mock_agent_controller: AcaPyClient):
+@pytest.mark.parametrize("wallet_type", ["askar", "askar-anoncreds"])
+async def test_publish_pending_revocations_success(
+    mock_agent_controller: AcaPyClient, wallet_type
+):
     # Simulate successful validation
     with patch(
         "app.services.revocation_registry.get_wallet_type"
     ) as mock_get_wallet_type:
-        mock_get_wallet_type.return_value = "askar"
+        mock_get_wallet_type.return_value = wallet_type
         when(rg).validate_rev_reg_ids(
             controller=mock_agent_controller,
             revocation_registry_credential_map=revocation_registry_credential_map,
         ).thenReturn(to_async())
 
         # Simulate successful publish revocations call
-        when(mock_agent_controller.revocation).publish_revocations(
-            body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
-        ).thenReturn(
-            to_async(
-                TxnOrPublishRevocationsResult(
-                    txn=[
-                        TransactionRecord(
-                            transaction_id="97a46fab-5499-42b3-a2a1-7eb9faad31c0"
-                        )
-                    ]
+        if wallet_type == "askar":
+            when(mock_agent_controller.revocation).publish_revocations(
+                body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
+            ).thenReturn(
+                to_async(
+                    TxnOrPublishRevocationsResult(
+                        txn=[
+                            TransactionRecord(
+                                transaction_id="97a46fab-5499-42b3-a2a1-7eb9faad31c0"
+                            )
+                        ]
+                    )
                 )
             )
-        )
+        elif wallet_type == "askar-anoncreds":
+            when(mock_agent_controller.anoncreds_revocation).publish_revocations(
+                body=PublishRevocationsSchemaAnoncreds(
+                    rrid2crid=revocation_registry_credential_map
+                )
+            ).thenReturn(
+                to_async(
+                    TxnOrPublishRevocationsResult(
+                        txn=[
+                            TransactionRecord(
+                                transaction_id="97a46fab-5499-42b3-a2a1-7eb9faad31c0"
+                            )
+                        ]
+                    )
+                )
+            )
 
         await rg.publish_pending_revocations(
             controller=mock_agent_controller,
             revocation_registry_credential_map=revocation_registry_credential_map,
         )
 
-        # You may also verify that publish_revocations was called with expected arguments
-        verify(mock_agent_controller.revocation, times=1).publish_revocations(
-            body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
-        )
+        if wallet_type == "askar":
+            verify(mock_agent_controller.revocation, times=1).publish_revocations(
+                body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
+            )
+        elif wallet_type == "askar-anoncreds":
+            verify(
+                mock_agent_controller.anoncreds_revocation, times=1
+            ).publish_revocations(
+                body=PublishRevocationsSchemaAnoncreds(
+                    rrid2crid=revocation_registry_credential_map
+                )
+            )
 
 
 @pytest.mark.anyio
