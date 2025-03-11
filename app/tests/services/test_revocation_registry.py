@@ -543,6 +543,28 @@ async def test_validate_rev_reg_ids_non_existent(mock_agent_controller: AcaPyCli
 
 
 @pytest.mark.anyio
+async def test_validate_rev_reg_ids_error(mock_agent_controller: AcaPyClient):
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
+        # Mock ApiException for non-existent revocation registry ID
+        when(mock_agent_controller.revocation).get_registry(
+            rev_reg_id="invalid_rev_reg_id"
+        ).thenRaise(ApiException(status=500, reason="ERROR"))
+
+        with pytest.raises(
+            CloudApiException,
+            match="An error occurred while validating requested",
+        ) as exc_info:
+            await rg.validate_rev_reg_ids(
+                mock_agent_controller, {"invalid_rev_reg_id": ["cred_rev_id_4"]}
+            )
+
+        assert exc_info.value.status_code == 500
+
+
+@pytest.mark.anyio
 async def test_validate_rev_reg_ids_no_pending_publications(
     mock_agent_controller: AcaPyClient,
 ):
