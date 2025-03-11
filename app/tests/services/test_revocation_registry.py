@@ -330,10 +330,17 @@ async def test_clear_pending_revocations_failure(mock_agent_controller: AcaPyCli
 
 
 @pytest.mark.anyio
+@pytest.mark.parametrize(
+    "wallet_type, schema",
+    [
+        ("askar", IssuerCredRevRecord),
+        ("askar-anoncreds", IssuerCredRevRecordSchemaAnoncreds),
+    ],
+)
 async def test_get_credential_revocation_record_success(
-    mock_agent_controller: AcaPyClient,
+    mock_agent_controller: AcaPyClient, wallet_type, schema
 ):
-    expected_result = IssuerCredRevRecord(
+    expected_result = schema(
         cred_ex_id=cred_ex_id,
         cred_rev_id=cred_rev_id,
         rev_reg_id=revocation_registry_id,
@@ -341,22 +348,37 @@ async def test_get_credential_revocation_record_success(
     with patch(
         "app.services.revocation_registry.get_wallet_type"
     ) as mock_get_wallet_type:
-        mock_get_wallet_type.return_value = "askar"
+        mock_get_wallet_type.return_value = wallet_type
 
         # Mock successful response from ACA-Py
-        when(mock_agent_controller.revocation).get_revocation_status(
-            cred_ex_id=cred_ex_id,
-            cred_rev_id=cred_rev_id,
-            rev_reg_id=revocation_registry_id,
-        ).thenReturn(to_async(CredRevRecordResult(result=expected_result)))
+        if wallet_type == "askar":
+            when(mock_agent_controller.revocation).get_revocation_status(
+                cred_ex_id=cred_ex_id,
+                cred_rev_id=cred_rev_id,
+                rev_reg_id=revocation_registry_id,
+            ).thenReturn(to_async(CredRevRecordResult(result=expected_result)))
 
-        result = await rg.get_credential_revocation_record(
-            controller=mock_agent_controller,
-            credential_exchange_id=cred_ex_id,
-            credential_revocation_id=cred_rev_id,
-            revocation_registry_id=revocation_registry_id,
-        )
+            result = await rg.get_credential_revocation_record(
+                controller=mock_agent_controller,
+                credential_exchange_id=cred_ex_id,
+                credential_revocation_id=cred_rev_id,
+                revocation_registry_id=revocation_registry_id,
+            )
+        elif wallet_type == "askar-anoncreds":
+            when(mock_agent_controller.anoncreds_revocation).get_cred_rev_record(
+                cred_ex_id=cred_ex_id,
+                cred_rev_id=cred_rev_id,
+                rev_reg_id=revocation_registry_id,
+            ).thenReturn(
+                to_async(CredRevRecordResultSchemaAnoncreds(result=expected_result))
+            )
 
+            result = await rg.get_credential_revocation_record(
+                controller=mock_agent_controller,
+                credential_exchange_id=cred_ex_id,
+                credential_revocation_id=cred_rev_id,
+                revocation_registry_id=revocation_registry_id,
+            )
         assert result == expected_result
 
 
