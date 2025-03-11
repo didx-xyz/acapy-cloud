@@ -115,6 +115,23 @@ async def test_revoke_credential(mock_agent_controller: AcaPyClient):
             )
             assert exc.value.status_code == 500
 
+    # Success for askar-anoncreds
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar-anoncreds"
+        when(mock_agent_controller.anoncreds_revocation).revoke(
+            body=RevokeRequestSchemaAnoncreds(cred_ex_id=cred_id, publish=False)
+        ).thenReturn(to_async({}))
+
+        revoke_credential_result = await rg.revoke_credential(
+            controller=mock_agent_controller,
+            credential_exchange_id=cred_id,
+            auto_publish_to_ledger=False,
+        )
+
+        assert revoke_credential_result.cred_rev_ids_published == {}
+
 
 @pytest.mark.anyio
 async def test_publish_pending_revocations_success(mock_agent_controller: AcaPyClient):
