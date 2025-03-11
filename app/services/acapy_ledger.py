@@ -206,7 +206,7 @@ async def schema_id_from_credential_definition_id(
             raise CloudApiException(f"Schema with id {seq_no} not found.", 404)
         schema_id = schema_indy.var_schema.id
 
-    elif wallet_type == "askar-anoncreds":
+    else:  # wallet_type == "askar-anoncreds"
         schema: GetSchemaResult = await handle_acapy_call(
             logger=logger,
             acapy_call=controller.anoncreds_schemas.get_schema,
