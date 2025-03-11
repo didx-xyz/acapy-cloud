@@ -112,7 +112,7 @@ async def revoke_credential(
 
         acapy_call = controller.anoncreds_revocation.revoke
 
-    elif wallet_type == "askar":
+    else : # wallet_type == "askar":
         request_body = handle_model_with_validation(
             logger=bound_logger,
             model_class=RevokeRequest,
@@ -146,7 +146,7 @@ async def revoke_credential(
             if wallet_type == "askar-anoncreds":
                 coroutine_func = controller.anoncreds_revocation.get_cred_rev_record
 
-            elif wallet_type == "askar":
+            else: # wallet_type == "askar":
                 coroutine_func = controller.revocation.get_revocation_status
 
             record = await coroutine_with_retry(
@@ -218,7 +218,7 @@ async def publish_pending_revocations(
             body = PublishRevocationsSchemaAnoncreds(
                 rrid2crid=revocation_registry_credential_map
             )
-        elif wallet_type == "askar":
+        else: # wallet_type == "askar":
             acapy_call = controller.revocation.publish_revocations
             body = PublishRevocations(rrid2crid=revocation_registry_credential_map)
 
@@ -327,7 +327,7 @@ async def get_credential_revocation_record(
         if wallet_type == "askar-anoncreds":
             acapy_call = controller.anoncreds_revocation.get_cred_rev_record
 
-        elif wallet_type == "askar":
+        else: # wallet_type == "askar":
             acapy_call = controller.revocation.get_revocation_status
 
         result = await handle_acapy_call(
@@ -440,7 +440,7 @@ async def validate_rev_reg_ids(
             if wallet_type == "askar-anoncreds":
                 acapy_call = controller.anoncreds_revocation.get_revocation_registry
 
-            elif wallet_type == "askar":
+            else: # wallet_type == "askar":
                 acapy_call = controller.revocation.get_registry
 
             rev_reg_result = await handle_acapy_call(
@@ -580,7 +580,7 @@ async def get_pending_revocations(
         if wallet_type == "askar-anoncreds":
             acapy_call = controller.anoncreds_revocation.get_revocation_registry
 
-        elif wallet_type == "askar":
+        else: # wallet_type == "askar":
             acapy_call = controller.revocation.get_registry
 
         result = await handle_acapy_call(
