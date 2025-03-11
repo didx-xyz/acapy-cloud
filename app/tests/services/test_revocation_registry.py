@@ -617,13 +617,27 @@ async def test_validate_rev_reg_ids_cred_rev_id_not_pending(
 
 
 @pytest.mark.anyio
-async def test_get_pending_revocations_success(
+async def test_validate_rev_reg_ids_result_none(
     mock_agent_controller: AcaPyClient,
 ):
     with patch(
         "app.services.revocation_registry.get_wallet_type"
     ) as mock_get_wallet_type:
         mock_get_wallet_type.return_value = "askar"
+        # Mock response where cred_rev_id is not in pending_pub
+        when(mock_agent_controller.revocation).get_registry(
+            rev_reg_id="valid_rev_reg_id_1"
+        ).thenReturn(to_async(RevRegResult(result=None)))
+
+        with pytest.raises(
+            CloudApiException,
+            match="Bad request: Failed to retrieve revocation registry",
+        ) as exc_info:
+            await rg.validate_rev_reg_ids(
+                mock_agent_controller, {"valid_rev_reg_id_1": ["cred_rev_id_1"]}
+            )
+
+        assert exc_info.value.status_code == 404
         rev_reg_id = "mocked_rev_reg_id"
         # Mock successful response from ACA-Py
         when(mock_agent_controller.revocation).get_registry(
