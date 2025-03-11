@@ -1,5 +1,10 @@
 from aries_cloudcontroller import CredentialDefinition as AcaPyCredentialDefinition
-from aries_cloudcontroller import GetSchemaResult, ModelSchema, SchemaState
+from aries_cloudcontroller import (
+    GetCredDefResult,
+    GetSchemaResult,
+    ModelSchema,
+    SchemaState,
+)
 
 from app.models.definitions import CredentialDefinition, CredentialSchema
 
@@ -31,9 +36,20 @@ def anoncreds_schema_from_acapy(schema: GetSchemaResult):
     )
 
 
-def credential_definition_from_acapy(credential_definition: AcaPyCredentialDefinition):
-    return CredentialDefinition(
-        id=credential_definition.id,
-        tag=credential_definition.tag,
-        schema_id=credential_definition.schema_id,
-    )
+def credential_definition_from_acapy(
+    credential_definition: GetCredDefResult | AcaPyCredentialDefinition,
+):
+    if isinstance(credential_definition, GetCredDefResult):
+        # Anoncreds Cred Def
+        return CredentialDefinition(
+            id=credential_definition.credential_definition_id,
+            tag=credential_definition.credential_definition.tag,
+            schema_id=credential_definition.credential_definition.schema_id,
+        )
+    else:
+        # Indy Cred Def
+        return CredentialDefinition(
+            id=credential_definition.id,
+            tag=credential_definition.tag,
+            schema_id=credential_definition.schema_id,
+        )
