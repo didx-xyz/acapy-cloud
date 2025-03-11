@@ -14,7 +14,8 @@ imagePullSecrets: []
 labels: {}
 podLabels:
   sidecar.istio.io/inject: "false"
-podAnnotations: {}
+podAnnotations:
+  cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
 
 # This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
 serviceAccount:
