@@ -40,7 +40,7 @@ def credential_definition_from_acapy(
     credential_definition: GetCredDefResult | AcaPyCredentialDefinition,
 ):
     if isinstance(credential_definition, GetCredDefResult):
-        # Anoncreds Cred Def
+        # AnonCreds Cred Def
         return CredentialDefinition(
             id=credential_definition.credential_definition_id,
             tag=credential_definition.credential_definition.tag,

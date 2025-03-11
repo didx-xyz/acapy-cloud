@@ -90,7 +90,7 @@ async def send_credential(
             and wallet_type != "askar-anoncreds"
         ):
             raise CloudApiException(
-                "Anoncreds credentials can only be issued by an askar-anoncreds wallet",
+                "AnonCreds credentials can only be issued by an askar-anoncreds wallet",
                 400,
             )
 
@@ -193,7 +193,7 @@ async def create_offer(
             and wallet_type != "askar-anoncreds"
         ):
             raise CloudApiException(
-                "Anoncreds credentials can only be issued by an askar-anoncreds wallet",
+                "AnonCreds credentials can only be issued by an askar-anoncreds wallet",
                 400,
             )
 

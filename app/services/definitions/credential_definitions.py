@@ -84,7 +84,7 @@ async def create_credential_definition(
             result.credential_definition_state.credential_definition_id
         )
 
-        # Set Anoncreds transaction info if it exists
+        # Set AnonCreds transaction info if it exists
         result_txn = result.registration_metadata.get("txn")
         transaction_id = result_txn.get("transaction_id") if result_txn else None
     else:  # wallet_type == "askar"
