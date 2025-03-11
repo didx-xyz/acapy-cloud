@@ -187,8 +187,6 @@ async def create_offer(
                 403,
             ) from e
 
-        schema_id = None
-
         wallet_type = await get_wallet_type(aries_controller, bound_logger)
         if (
             credential.type == CredentialType.ANONCREDS
@@ -199,14 +197,19 @@ async def create_offer(
                 400,
             )
 
-        if (
-            credential.type == CredentialType.INDY
-            or credential.type == CredentialType.ANONCREDS
-        ):
+        schema_id = None
+        if credential.type == CredentialType.INDY:
             # Retrieve the schema_id based on the credential definition id
             schema_id = await schema_id_from_credential_definition_id(
                 aries_controller,
                 credential.indy_credential_detail.credential_definition_id,
+                wallet_type,
+            )
+
+        if credential.type == CredentialType.ANONCREDS:
+            schema_id = await schema_id_from_credential_definition_id(
+                aries_controller,
+                credential.anoncreds_credential_detail.credential_definition_id,
                 wallet_type,
             )
 
@@ -262,7 +265,7 @@ async def request_credential(
         record = await IssuerV2.get_record(aries_controller, credential_exchange_id)
 
         schema_id = None
-        if record.type == "indy" or record.type == "anoncreds":
+        if record.type in ["indy", "anoncreds"]:
             if not record.credential_definition_id or not record.schema_id:
                 raise CloudApiException(
                     "Record has no credential definition or schema associated. "
