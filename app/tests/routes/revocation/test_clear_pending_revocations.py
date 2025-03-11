@@ -108,4 +108,4 @@ async def test_clear_pending_revocations_fail_anoncreds_error():
             clear_pending_request=clear_request, auth="mocked_auth"
         )
 
-    assert exc.value.status_code == 500
+    assert exc.value.status_code == 501

@@ -276,7 +276,7 @@ async def clear_pending_revocations(
         if wallet_type == "askar-anoncreds":
             raise CloudApiException(
                 "Clearing pending revocations is not supported for the 'anoncreds' wallet type.",
-                500,
+                501,
             )
         bound_logger.debug("Clearing pending revocations")
         response = await revocation_registry.clear_pending_revocations(
