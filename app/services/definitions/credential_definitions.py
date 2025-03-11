@@ -56,7 +56,6 @@ async def create_credential_definition(
         logger=bound_logger,
     )
     if wallet_type == "askar-anoncreds":
-
         inner_cred_def = handle_model_with_validation(
             logger=bound_logger,
             model_class=InnerCredDef,
@@ -92,9 +91,7 @@ async def create_credential_definition(
                 max_attempts=CRED_DEF_ACK_TIMEOUT,
                 retry_delay=1,
             )
-
-    elif wallet_type == "askar":
-
+    else:  # wallet_type == "askar"
         request_body = handle_model_with_validation(
             logger=bound_logger,
             model_class=CredentialDefinitionSendRequest,
@@ -171,7 +168,7 @@ async def get_credential_definitions(
             )
             for credential_definition_id in credential_definition_ids
         ]
-    elif wallet_type == "askar":
+    else:  # wallet_type == "askar"
         response = await handle_acapy_call(
             logger=bound_logger,
             acapy_call=aries_controller.credential_definition.get_created_cred_defs,
@@ -204,13 +201,14 @@ async def get_credential_definitions(
     else:
         bound_logger.debug("No definition ids returned")
         credential_definition_results = []
+
     if wallet_type == "askar-anoncreds":
         credential_definitions = [
             credential_definition_from_acapy(credential_definition)
             for credential_definition in credential_definition_results
             if credential_definition.credential_definition
         ]
-    elif wallet_type == "askar":
+    else:  # wallet_type == "askar"
         credential_definitions = [
             credential_definition_from_acapy(
                 credential_definition.credential_definition
