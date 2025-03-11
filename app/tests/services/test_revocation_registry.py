@@ -968,7 +968,6 @@ async def test_revoke_credential_with_transaction_result(
 
 @pytest.mark.anyio
 async def test_wait_for_active_registry(mock_agent_controller: AcaPyClient):
-    cred_def_id = "mocked_cred_def_id"
     wallet_type = "askar"
 
     # Mock the get_created_active_registries function to return active registries
