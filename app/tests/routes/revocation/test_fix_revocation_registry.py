@@ -106,7 +106,12 @@ rev_reg_update = RevRegWalletUpdatedResult(
             rev_reg_no_update,
             "askar",
         ),
-        (rev_reg_id_valid, True, rev_reg_update, "askar-anoncreds"),
+        (
+            rev_reg_id_valid,
+            True,
+            rev_reg_update,
+            "askar-anoncreds",
+        ),
     ],
 )
 async def test_fix_revocation_registry_entry_state_success(

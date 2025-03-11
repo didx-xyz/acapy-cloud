@@ -196,6 +196,7 @@ async def publish_revocations(
         if not result:
             bound_logger.debug("No revocations to publish.")
             return RevokedResponse()
+
         # TODO The anoncreds response seems to be broken, looks like agent response model not what it's
         # supposed to be. Need to investigate further.
         endorser_transaction_ids = [txn.transaction_id for txn in result.txn]

@@ -16,7 +16,6 @@ from app.routes.revocation import clear_pending_revocations
 @pytest.mark.anyio
 async def test_clear_pending_revocations_success():
     mock_aries_controller = AsyncMock()
-    mock_clear_pending_revocations = AsyncMock()
 
     with patch(
         "app.routes.revocation.client_from_auth"
