@@ -638,20 +638,43 @@ async def test_validate_rev_reg_ids_result_none(
             )
 
         assert exc_info.value.status_code == 404
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("wallet_type", ["askar", "askar-anoncreds"])
+async def test_get_pending_revocations_success(
+    mock_agent_controller: AcaPyClient, wallet_type
+):
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = wallet_type
         rev_reg_id = "mocked_rev_reg_id"
         # Mock successful response from ACA-Py
-        when(mock_agent_controller.revocation).get_registry(
-            rev_reg_id=rev_reg_id
-        ).thenReturn(
-            to_async(
-                RevRegResult(
-                    result=IssuerRevRegRecord(
-                        rev_reg_id=rev_reg_id, max_cred_num=max_cred_num
+        if wallet_type == "askar":
+            when(mock_agent_controller.revocation).get_registry(
+                rev_reg_id=rev_reg_id
+            ).thenReturn(
+                to_async(
+                    RevRegResult(
+                        result=IssuerRevRegRecord(
+                            rev_reg_id=rev_reg_id, max_cred_num=max_cred_num
+                        )
                     )
                 )
             )
-        )
-
+        elif wallet_type == "askar-anoncreds":
+            when(mock_agent_controller.anoncreds_revocation).get_revocation_registry(
+                rev_reg_id=rev_reg_id
+            ).thenReturn(
+                to_async(
+                    RevRegResultSchemaAnoncreds(
+                        result=IssuerRevRegRecord(
+                            rev_reg_id=rev_reg_id, max_cred_num=max_cred_num
+                        )
+                    )
+                )
+            )
         await rg.get_pending_revocations(
             controller=mock_agent_controller, rev_reg_id=rev_reg_id
         )
