@@ -273,7 +273,7 @@ async def clear_pending_revocations(
 
     async with client_from_auth(auth) as aries_controller:
         wallet_type = await get_wallet_type(aries_controller, bound_logger)
-        if wallet_type == "anoncreds":
+        if wallet_type == "askar-anoncreds":
             raise CloudApiException(
                 "Clearing pending revocations is not supported for the 'anoncreds' wallet type.",
                 500,
@@ -369,7 +369,7 @@ async def fix_revocation_registry_entry_state(
 
     async with client_from_auth(auth) as aries_controller:
         wallet_type = await get_wallet_type(aries_controller, bound_logger)
-        if wallet_type == "anoncreds":
+        if wallet_type == "askar-anoncreds":
             acapy_call = (
                 aries_controller.anoncreds_revocation.update_rev_reg_revoked_state
             )
