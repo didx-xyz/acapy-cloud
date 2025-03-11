@@ -480,24 +480,41 @@ async def test_get_credential_definition_id_from_exchange_id(
 
 
 @pytest.mark.anyio
-async def test_validate_rev_reg_ids_success(mock_agent_controller: AcaPyClient):
+@pytest.mark.parametrize("wallet_type", ["askar", "askar-anoncreds"])
+async def test_validate_rev_reg_ids_success(
+    mock_agent_controller: AcaPyClient, wallet_type
+):
     with patch(
         "app.services.revocation_registry.get_wallet_type"
     ) as mock_get_wallet_type:
-        mock_get_wallet_type.return_value = "askar"
+        mock_get_wallet_type.return_value = wallet_type
         # Mock successful retrieval of revocation registry
-        when(mock_agent_controller.revocation).get_registry(...).thenReturn(
-            to_async(
-                RevRegResult(
-                    result=IssuerRevRegRecord(
-                        pending_pub=revocation_registry_credential_map.get(
-                            "rev_reg_id1"
+        if wallet_type == "askar":
+            when(mock_agent_controller.revocation).get_registry(...).thenReturn(
+                to_async(
+                    RevRegResult(
+                        result=IssuerRevRegRecord(
+                            pending_pub=revocation_registry_credential_map.get(
+                                "rev_reg_id1"
+                            )
                         )
                     )
                 )
             )
-        )
-
+        elif wallet_type == "askar-anoncreds":
+            when(mock_agent_controller.anoncreds_revocation).get_revocation_registry(
+                rev_reg_id="rev_reg_id1"
+            ).thenReturn(
+                to_async(
+                    RevRegResultSchemaAnoncreds(
+                        result=IssuerRevRegRecord(
+                            pending_pub=revocation_registry_credential_map.get(
+                                "rev_reg_id1"
+                            )
+                        )
+                    )
+                )
+            )
         await rg.validate_rev_reg_ids(
             mock_agent_controller, revocation_registry_credential_map
         )
