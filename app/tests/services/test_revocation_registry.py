@@ -765,3 +765,37 @@ async def test_get_created_active_registries(
         )
 
         assert result == active_registries
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("wallet_type", ["askar", "askar-anoncreds"])
+async def test_get_created_active_registries_error(
+    mock_agent_controller: AcaPyClient, wallet_type
+):
+    cred_def_id = "mocked_cred_def_id"
+
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = wallet_type
+
+        if wallet_type == "askar":
+            when(mock_agent_controller.revocation).get_created_registries(
+                cred_def_id=cred_def_id, state="active"
+            ).thenRaise(ApiException(reason="Error", status=500))
+        elif wallet_type == "askar-anoncreds":
+            when(mock_agent_controller.anoncreds_revocation).get_revocation_registries(
+                cred_def_id=cred_def_id, state="finished"
+            ).thenRaise(ApiException(reason="Error", status=500))
+
+        with pytest.raises(
+            CloudApiException,
+            match="Error while creating credential definition",
+        ) as exc_info:
+            await rg.get_created_active_registries(
+                controller=mock_agent_controller,
+                cred_def_id=cred_def_id,
+                wallet_type=wallet_type,
+            )
+
+        assert exc_info.value.status_code == 500
