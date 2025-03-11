@@ -84,13 +84,9 @@ async def create_credential_definition(
             result.credential_definition_state.credential_definition_id
         )
 
-        if result.registration_metadata["txn"]:
-            await wait_for_transaction_ack(
-                aries_controller=aries_controller,
-                transaction_id=result.registration_metadata["txn"]["transaction_id"],
-                max_attempts=CRED_DEF_ACK_TIMEOUT,
-                retry_delay=1,
-            )
+        # Set Anoncreds transaction info if it exists
+        result_txn = result.registration_metadata.get("txn")
+        transaction_id = result_txn.get("transaction_id") if result_txn else None
     else:  # wallet_type == "askar"
         request_body = handle_model_with_validation(
             logger=bound_logger,
@@ -104,13 +100,17 @@ async def create_credential_definition(
         result = await publisher.publish_credential_definition(request_body)
         credential_definition_id = result.sent.credential_definition_id
 
-        if result.txn and result.txn.transaction_id:
-            await wait_for_transaction_ack(
-                aries_controller=aries_controller,
-                transaction_id=result.txn.transaction_id,
-                max_attempts=CRED_DEF_ACK_TIMEOUT,
-                retry_delay=1,
-            )
+        # Set Indy transaction info if it exists
+        result_txn = result.txn
+        transaction_id = result_txn.transaction_id if result_txn else None
+
+    if transaction_id:
+        await wait_for_transaction_ack(
+            aries_controller=aries_controller,
+            transaction_id=transaction_id,
+            max_attempts=CRED_DEF_ACK_TIMEOUT,
+            retry_delay=1,
+        )
 
     if support_revocation:
         await publisher.wait_for_revocation_registry(
