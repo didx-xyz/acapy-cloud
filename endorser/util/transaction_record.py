@@ -1,8 +1,9 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 import orjson
 from aries_cloudcontroller import AcaPyClient, TransactionRecord
 
+from endorser.services.endorser_config import EndorserConfig
 from shared.log_config import get_logger
 from shared.models.endorsement import TransactionTypes
 
@@ -65,20 +66,22 @@ def is_credential_definition_transaction(
 
 async def get_did_and_schema_id_from_cred_def_attachment(
     client: AcaPyClient, attachment: Dict[str, Any]
-):
+) -> Tuple[str, str]:
     did = "did:sov:" + attachment["identifier"]
     schema_seq_id = attachment["operation"]["ref"]
 
-    logger.debug("Fetching schema with seq id: `{}`", schema_seq_id)
-    schema = await client.schema.get_schema(schema_id=str(schema_seq_id))
+    wallet_type = EndorserConfig().wallet_type  # Get wallet type from config singleton
+    if wallet_type == "askar-anoncreds":
+        logger.debug("Fetching anoncreds schema with id: `{}`", schema_seq_id)
+        schema = await client.anoncreds_schemas.get_schema(schema_id=str(schema_seq_id))
+        schema_id = schema.schema_id
+    else:  # askar
+        logger.debug("Fetching indy schema with id: `{}`", schema_seq_id)
+        schema = await client.schema.get_schema(schema_id=str(schema_seq_id))
+        schema_id = schema.var_schema.id if schema.var_schema else None
 
-    if not schema.var_schema or not schema.var_schema.id:
-        raise Exception(  # pylint: disable=W0719
-            "Could not extract schema id from schema response."
-        )
-
-    schema_id = schema.var_schema.id
-
+    if not schema_id:
+        raise ValueError(f"Could not extract schema id from schema response: {schema}.")
     return (did, schema_id)
 
 

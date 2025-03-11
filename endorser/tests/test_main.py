@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 
 from endorser.main import app, app_lifespan, health_check, health_ready
 from endorser.services.endorsement_processor import EndorsementProcessor
+from endorser.services.endorser_config import EndorserConfig
 
 
 def test_create_app():
@@ -33,7 +34,9 @@ async def test_app_lifespan():
     )
 
     # Patch the Container to return the mocked container
-    with patch("endorser.main.Container", return_value=container_mock):
+    with patch("endorser.main.Container", return_value=container_mock), patch.object(
+        EndorserConfig, "initialize", new_callable=AsyncMock
+    ):
         # Run the app_lifespan context manager
         async with app_lifespan(FastAPI()):
             pass

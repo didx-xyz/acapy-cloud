@@ -399,14 +399,26 @@ async def get_credential_definition_by_id(
     bound_logger.debug("GET request received: Get credential definition by id")
 
     async with client_from_auth(auth) as aries_controller:
-        bound_logger.debug("Getting credential definition")
-        credential_definition = await handle_acapy_call(
+        wallet_type = await get_wallet_type(
+            aries_controller=aries_controller,
             logger=bound_logger,
-            acapy_call=aries_controller.credential_definition.get_cred_def,
-            cred_def_id=credential_definition_id,
         )
 
-        if not credential_definition.credential_definition:
+        bound_logger.debug("Getting credential definition")
+        if wallet_type == "askar-anoncreds":
+            credential_definition = await handle_acapy_call(
+                logger=bound_logger,
+                acapy_call=aries_controller.anoncreds_credential_definitions.get_credential_definition,
+                cred_def_id=credential_definition_id,
+            )
+        else:  # wallet_type == "askar"
+            credential_definition = await handle_acapy_call(
+                logger=bound_logger,
+                acapy_call=aries_controller.credential_definition.get_cred_def,
+                cred_def_id=credential_definition_id,
+            )
+
+        if not credential_definition:
             raise HTTPException(
                 404,
                 f"Credential Definition with id {credential_definition_id} not found.",
@@ -414,13 +426,15 @@ async def get_credential_definition_by_id(
 
         bound_logger.debug("Cast credential definition response to model")
         cloudapi_credential_definition = credential_definition_from_acapy(
-            credential_definition.credential_definition
+            credential_definition
+            if wallet_type == "askar-anoncreds"
+            else credential_definition.credential_definition
         )
 
         # We need to update the schema_id on the returned credential definition as
         # ACA-Py returns the schema_id as the seq_no
         bound_logger.debug("Fetching schema associated with definition's schema id")
-        schema = await get_schema(
+        schema = await get_schema(  # TODO: Avoid using endpoint method here
             schema_id=cloudapi_credential_definition.schema_id,
             auth=auth,
         )

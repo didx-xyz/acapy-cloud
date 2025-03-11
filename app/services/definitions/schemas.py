@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from aries_cloudcontroller import (
     AcaPyClient,
@@ -213,7 +213,7 @@ async def get_schemas_as_governance(
 async def get_schemas_by_id(
     aries_controller: AcaPyClient,
     schema_ids: List[str],
-    wallet_type: str,
+    wallet_type: Literal["askar", "askar-anoncreds"],
 ) -> List[CredentialSchema]:
     """
     Fetch schemas with attributes using schema IDs.

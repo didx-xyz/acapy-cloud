@@ -90,6 +90,52 @@ async def test_publish_credential_definition_other_error(publisher):
 
 
 @pytest.mark.anyio
+async def test_publish_anoncreds_credential_definition_success(publisher):
+    mock_request_body = MagicMock()
+    mock_result = MagicMock()
+
+    with patch(
+        "app.services.definitions.credential_definition_publisher.handle_acapy_call",
+        return_value=mock_result,
+    ):
+        result = await publisher.publish_anoncreds_credential_definition(
+            mock_request_body
+        )
+        assert result == mock_result
+
+
+@pytest.mark.anyio
+async def test_publish_anoncreds_credential_definition_already_exists(publisher):
+    mock_request_body = MagicMock()
+
+    with patch(
+        "app.services.definitions.credential_definition_publisher.handle_acapy_call",
+        side_effect=CloudApiException(detail="already exists", status_code=400),
+    ):
+        with pytest.raises(CloudApiException) as exc_info:
+            await publisher.publish_anoncreds_credential_definition(mock_request_body)
+        assert exc_info.value.status_code == 409
+        assert "already exists" in exc_info.value.detail
+
+
+@pytest.mark.anyio
+async def test_publish_anoncreds_credential_definition_other_error(publisher):
+    mock_request_body = MagicMock()
+
+    with patch(
+        "app.services.definitions.credential_definition_publisher.handle_acapy_call",
+        side_effect=CloudApiException(detail="Some error", status_code=500),
+    ):
+        with pytest.raises(CloudApiException) as exc_info:
+            await publisher.publish_anoncreds_credential_definition(mock_request_body)
+        assert exc_info.value.status_code == 500
+        assert (
+            "Error while creating anoncreds credential definition"
+            in exc_info.value.detail
+        )
+
+
+@pytest.mark.anyio
 async def test_wait_for_revocation_registry_success(publisher):
     mock_cred_def_id = "test_cred_def_id"
 
@@ -99,7 +145,7 @@ async def test_wait_for_revocation_registry_success(publisher):
         "app.services.definitions.credential_definition_publisher.REGISTRY_CREATION_TIMEOUT",
         1,
     ):
-        await publisher.wait_for_revocation_registry(mock_cred_def_id)
+        await publisher.wait_for_revocation_registry(mock_cred_def_id, "askar")
         # If no exception is raised, the test passes
 
 
@@ -115,6 +161,6 @@ async def test_wait_for_revocation_registry_timeout(publisher):
         0.1,
     ):
         with pytest.raises(CloudApiException) as exc_info:
-            await publisher.wait_for_revocation_registry(mock_cred_def_id)
+            await publisher.wait_for_revocation_registry(mock_cred_def_id, "askar")
         assert exc_info.value.status_code == 504
         assert "Timeout waiting for revocation registry creation" in str(exc_info.value)

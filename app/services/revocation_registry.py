@@ -1,5 +1,5 @@
 import asyncio
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional
 
 from aries_cloudcontroller import (
     AcaPyClient,
@@ -454,7 +454,9 @@ async def validate_rev_reg_ids(
 
 
 async def get_created_active_registries(
-    controller: AcaPyClient, cred_def_id: str
+    controller: AcaPyClient,
+    cred_def_id: str,
+    wallet_type: Literal["askar", "askar-anoncreds"],
 ) -> List[str]:
     """
     Get the active revocation registries for a credential definition with state active.
@@ -462,13 +464,21 @@ async def get_created_active_registries(
     """
     bound_logger = logger.bind(body={"cred_def_id": cred_def_id})
     try:
-        # Both will be in active state when created
-        reg = await handle_acapy_call(
-            logger=bound_logger,
-            acapy_call=controller.revocation.get_created_registries,
-            cred_def_id=cred_def_id,
-            state="active",
-        )
+        if wallet_type == "askar-anoncreds":
+            # Both will be in active state when created
+            reg = await handle_acapy_call(
+                logger=bound_logger,
+                acapy_call=controller.anoncreds_revocation.get_revocation_registries,
+                cred_def_id=cred_def_id,
+                state="finished",
+            )
+        elif wallet_type == "askar":
+            reg = await handle_acapy_call(
+                logger=bound_logger,
+                acapy_call=controller.revocation.get_created_registries,
+                cred_def_id=cred_def_id,
+                state="active",
+            )
         return reg.rev_reg_ids
     except CloudApiException as e:
         detail = (
@@ -479,7 +489,9 @@ async def get_created_active_registries(
 
 
 async def wait_for_active_registry(
-    controller: AcaPyClient, cred_def_id: str
+    controller: AcaPyClient,
+    cred_def_id: str,
+    wallet_type: Literal["askar", "askar-anoncreds"],
 ) -> List[str]:
     active_registries = []
     sleep_duration = 0  # First sleep should be 0
@@ -487,7 +499,9 @@ async def wait_for_active_registry(
     # we want both active registries ready before trying to publish revocations to it
     while len(active_registries) < 2:
         await asyncio.sleep(sleep_duration)
-        active_registries = await get_created_active_registries(controller, cred_def_id)
+        active_registries = await get_created_active_registries(
+            controller, cred_def_id, wallet_type
+        )
         sleep_duration = 0.5  # Following sleeps should wait 0.5s before retry
 
     return active_registries

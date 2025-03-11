@@ -41,16 +41,16 @@ class CredentialDefinitionPublisher:
             )
         except CloudApiException as e:
             self._logger.warning(
-                "An Exception was caught while publishing cred def: `{}` `{}`",
+                "An Exception was caught while publishing indy cred def: `{}` `{}`",
                 e.detail,
                 e.status_code,
             )
             if "already exists" in e.detail:
-                self._logger.info("Credential definition already exists")
+                self._logger.info("Indy credential definition already exists")
                 raise CloudApiException(status_code=409, detail=e.detail) from e
             else:
                 self._logger.error(
-                    "Error while creating credential definition: `{}`", e.detail
+                    "Error while creating indy credential definition: `{}`", e.detail
                 )
                 raise CloudApiException(
                     detail=f"Error while creating credential definition: {e.detail}",
@@ -59,11 +59,41 @@ class CredentialDefinitionPublisher:
 
         return result
 
-    async def wait_for_revocation_registry(self, credential_definition_id):
+    async def publish_anoncreds_credential_definition(self, request_body):
+        try:
+            result = await handle_acapy_call(
+                logger=self._logger,
+                acapy_call=self._controller.anoncreds_credential_definitions.create_credential_definition,
+                body=request_body,
+            )
+        except CloudApiException as e:
+            self._logger.warning(
+                "An Exception was caught while publishing anoncreds cred def: `{}` `{}`",
+                e.detail,
+                e.status_code,
+            )
+            if "already exists" in e.detail:
+                self._logger.info("Anoncreds credential definition already exists")
+                raise CloudApiException(status_code=409, detail=e.detail) from e
+            else:
+                self._logger.error(
+                    "Error while creating anoncreds credential definition: `{}`",
+                    e.detail,
+                )
+                raise CloudApiException(
+                    detail=f"Error while creating anoncreds credential definition: {e.detail}",
+                    status_code=e.status_code,
+                ) from e
+
+        return result
+
+    async def wait_for_revocation_registry(self, credential_definition_id, wallet_type):
         try:
             self._logger.debug("Waiting for revocation registry creation")
             await asyncio.wait_for(
-                wait_for_active_registry(self._controller, credential_definition_id),
+                wait_for_active_registry(
+                    self._controller, credential_definition_id, wallet_type
+                ),
                 timeout=REGISTRY_CREATION_TIMEOUT,
             )
         except asyncio.TimeoutError as e:

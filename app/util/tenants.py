@@ -1,7 +1,7 @@
 import base64
 import json
 from logging import Logger
-from typing import Optional
+from typing import Literal, Optional
 
 from aries_cloudcontroller import AcaPyClient, WalletRecordWithGroups
 from fastapi import HTTPException
@@ -124,7 +124,9 @@ def assert_valid_group(
     logger.debug("Wallet {} belongs to group {}.", wallet_id, group_id)
 
 
-async def get_wallet_type(aries_controller: AcaPyClient, logger: Logger) -> str:
+async def get_wallet_type(
+    aries_controller: AcaPyClient, logger: Logger
+) -> Literal["askar", "askar-anoncreds"]:
     """Check if the aries_controller has an anoncreds wallet.
     Args:
         aries_controller (AcaPyClient): The wallet controller to check.
@@ -146,4 +148,8 @@ async def get_wallet_type(aries_controller: AcaPyClient, logger: Logger) -> str:
             raise CloudApiException(status_code=401, detail="Wallet not found.")
 
         wallet_type = wallet.settings.get("wallet.type")
+
+        if wallet_type not in ["askar", "askar-anoncreds"]:
+            raise CloudApiException(status_code=401, detail="Invalid wallet type.")
+
         return wallet_type

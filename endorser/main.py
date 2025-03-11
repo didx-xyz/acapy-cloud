@@ -8,6 +8,7 @@ from scalar_fastapi import get_scalar_api_reference
 
 from endorser.services.dependency_injection.container import Container
 from endorser.services.endorsement_processor import EndorsementProcessor
+from endorser.services.endorser_config import EndorserConfig
 from shared.constants import PROJECT_VERSION
 from shared.log_config import get_logger
 from shared.util.set_event_loop_policy import set_event_loop_policy
@@ -25,6 +26,12 @@ async def app_lifespan(_: FastAPI):
     container = Container()
     await container.init_resources()
     container.wire(modules=[__name__])
+
+    # Initialize the EndorserConfig singleton
+    config = EndorserConfig()
+    await config.initialize()
+
+    logger.info("Endorser wallet type: `{}`", config.wallet_type)
 
     endorsement_processor = await container.endorsement_processor()
     endorsement_processor.start()
