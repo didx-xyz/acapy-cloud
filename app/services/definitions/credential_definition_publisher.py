@@ -41,16 +41,16 @@ class CredentialDefinitionPublisher:
             )
         except CloudApiException as e:
             self._logger.warning(
-                "An Exception was caught while publishing cred def: `{}` `{}`",
+                "An Exception was caught while publishing indy cred def: `{}` `{}`",
                 e.detail,
                 e.status_code,
             )
             if "already exists" in e.detail:
-                self._logger.info("Credential definition already exists")
+                self._logger.info("Indy credential definition already exists")
                 raise CloudApiException(status_code=409, detail=e.detail) from e
             else:
                 self._logger.error(
-                    "Error while creating credential definition: `{}`", e.detail
+                    "Error while creating indy credential definition: `{}`", e.detail
                 )
                 raise CloudApiException(
                     detail=f"Error while creating credential definition: {e.detail}",
@@ -68,19 +68,20 @@ class CredentialDefinitionPublisher:
             )
         except CloudApiException as e:
             self._logger.warning(
-                "An Exception was caught while publishing cred def: `{}` `{}`",
+                "An Exception was caught while publishing anoncreds cred def: `{}` `{}`",
                 e.detail,
                 e.status_code,
             )
             if "already exists" in e.detail:
-                self._logger.info("Credential definition already exists")
+                self._logger.info("Anoncreds credential definition already exists")
                 raise CloudApiException(status_code=409, detail=e.detail) from e
             else:
                 self._logger.error(
-                    "Error while creating credential definition: `{}`", e.detail
+                    "Error while creating anoncreds credential definition: `{}`",
+                    e.detail,
                 )
                 raise CloudApiException(
-                    detail=f"Error while creating credential definition: {e.detail}",
+                    detail=f"Error while creating anoncreds credential definition: {e.detail}",
                     status_code=e.status_code,
                 ) from e
 
