@@ -732,3 +732,36 @@ async def test_get_pending_revocations_result_none(
             )
 
         assert exc_info.value.status_code == 500
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("wallet_type", ["askar", "askar-anoncreds"])
+async def test_get_created_active_registries(
+    mock_agent_controller: AcaPyClient, wallet_type
+):
+    cred_def_id = "mocked_cred_def_id"
+    active_registries = ["reg_id_1", "reg_id_2"]
+
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = wallet_type
+
+        if wallet_type == "askar":
+            when(mock_agent_controller.revocation).get_created_registries(
+                cred_def_id=cred_def_id, state="active"
+            ).thenReturn(to_async(RevRegsCreated(rev_reg_ids=active_registries)))
+        elif wallet_type == "askar-anoncreds":
+            when(mock_agent_controller.anoncreds_revocation).get_revocation_registries(
+                cred_def_id=cred_def_id, state="finished"
+            ).thenReturn(
+                to_async(RevRegsCreatedSchemaAnoncreds(rev_reg_ids=active_registries))
+            )
+
+        result = await rg.get_created_active_registries(
+            controller=mock_agent_controller,
+            cred_def_id=cred_def_id,
+            wallet_type=wallet_type,
+        )
+
+        assert result == active_registries
