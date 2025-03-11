@@ -706,3 +706,29 @@ async def test_get_pending_revocations_failure(
             )
 
         assert exc_info.value.status_code == status_code
+
+
+@pytest.mark.anyio
+async def test_get_pending_revocations_result_none(
+    mock_agent_controller: AcaPyClient,
+):
+
+    rev_reg_id = "mocked_rev_reg_id"
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
+        # Mock ApiException from ACA-Py
+        when(mock_agent_controller.revocation).get_registry(
+            rev_reg_id=rev_reg_id
+        ).thenReturn(to_async(RevRegResultSchemaAnoncreds(result=None)))
+
+        with pytest.raises(
+            CloudApiException,
+            match="Error retrieving pending revocations for revocation registry with ID",
+        ) as exc_info:
+            await rg.get_pending_revocations(
+                controller=mock_agent_controller, rev_reg_id=rev_reg_id
+            )
+
+        assert exc_info.value.status_code == 500
