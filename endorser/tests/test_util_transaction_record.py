@@ -1,9 +1,10 @@
 import json
-from unittest.mock import AsyncMock, MagicMock, Mock
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from aries_cloudcontroller import AdminConfig, TransactionRecord
 
+from endorser.services.endorser_config import EndorserConfig
 from endorser.util.transaction_record import (
     get_did_and_schema_id_from_cred_def_attachment,
     get_endorsement_request_attachment,
@@ -152,20 +153,29 @@ async def test_is_credential_definition_transaction_fail_no_ref():
     )
 
 
+@pytest.mark.parametrize("wallet_type", ["askar", "askar-anoncreds"])
 @pytest.mark.anyio
 async def test_get_did_and_schema_id_from_cred_def_attachment_fail_no_var_schema_id(
     mock_acapy_client,
+    wallet_type,
 ):
-    mock_acapy_client.schema.get_schema.return_value = MagicMock(
-        var_schema=MagicMock(id="")
-    )
-    mock_acapy_client.server.get_config.return_value = AdminConfig(
-        config={"wallet.type": "askar"}
-    )
-    with pytest.raises(ValueError) as exc:
-        await get_did_and_schema_id_from_cred_def_attachment(
-            mock_acapy_client,
-            {"identifier": "identifier_value", "operation": {"ref": "ref_value"}},
+    if wallet_type == "askar":
+        mock_acapy_client.schema.get_schema.return_value = MagicMock(
+            var_schema=MagicMock(id=None)
+        )
+    else:
+        mock_acapy_client.anoncreds_schemas.get_schema.return_value = MagicMock(
+            schema_id=None
         )
 
-    assert str(exc.value) == "Could not extract schema id from schema response."
+    # Patch the EndorserConfig singleton
+    with patch.object(
+        EndorserConfig, "wallet_type", new_callable=Mock(return_value=wallet_type)
+    ):
+        with pytest.raises(ValueError) as exc:
+            await get_did_and_schema_id_from_cred_def_attachment(
+                mock_acapy_client,
+                {"identifier": "identifier_value", "operation": {"ref": "ref_value"}},
+            )
+
+        assert "Could not extract schema id from schema response" in str(exc.value)
