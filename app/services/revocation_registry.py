@@ -1,5 +1,5 @@
 import asyncio
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional
 
 from aries_cloudcontroller import (
     AcaPyClient,
@@ -454,7 +454,9 @@ async def validate_rev_reg_ids(
 
 
 async def get_created_active_registries(
-    controller: AcaPyClient, cred_def_id: str, wallet_type: str
+    controller: AcaPyClient,
+    cred_def_id: str,
+    wallet_type: Literal["askar", "askar-anoncreds"],
 ) -> List[str]:
     """
     Get the active revocation registries for a credential definition with state active.
@@ -487,7 +489,9 @@ async def get_created_active_registries(
 
 
 async def wait_for_active_registry(
-    controller: AcaPyClient, cred_def_id: str, wallet_type: str
+    controller: AcaPyClient,
+    cred_def_id: str,
+    wallet_type: Literal["askar", "askar-anoncreds"],
 ) -> List[str]:
     active_registries = []
     sleep_duration = 0  # First sleep should be 0
