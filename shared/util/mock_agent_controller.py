@@ -1,6 +1,7 @@
 import pytest
 from aries_cloudcontroller import (
     AcaPyClient,
+    AnoncredsRevocationApi,
     ConnectionApi,
     CredentialsApi,
     EndorseTransactionApi,
@@ -26,6 +27,7 @@ async def noop():
 def get_mock_agent_controller() -> AcaPyClient:
     controller = mock(AcaPyClient)
     controller.__aexit__ = noop
+    controller.anoncreds_revocation = mock(AnoncredsRevocationApi)
     controller.connection = mock(ConnectionApi)
     controller.credentials = mock(CredentialsApi)
     controller.endorse_transaction = mock(EndorseTransactionApi)
