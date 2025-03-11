@@ -374,7 +374,7 @@ async def fix_revocation_registry_entry_state(
                 aries_controller.anoncreds_revocation.update_rev_reg_revoked_state
             )
 
-        else: # wallet_type == "askar":
+        else:  # wallet_type == "askar":
             acapy_call = aries_controller.revocation.update_rev_reg_revoked_state
 
         response = await handle_acapy_call(
