@@ -98,22 +98,19 @@ rev_reg_update = RevRegWalletUpdatedResult(
 
 @pytest.mark.anyio
 @pytest.mark.parametrize(
-    "rev_reg_id, apply_ledger_update, response",
+    "rev_reg_id, apply_ledger_update, response, wallet_type",
     [
         (
             rev_reg_id_valid,
             False,
             rev_reg_no_update,
+            "askar",
         ),
-        (
-            rev_reg_id_valid,
-            True,
-            rev_reg_update,
-        ),
+        (rev_reg_id_valid, True, rev_reg_update, "askar-anoncreds"),
     ],
 )
 async def test_fix_revocation_registry_entry_state_success(
-    rev_reg_id, apply_ledger_update, response
+    rev_reg_id, apply_ledger_update, response, wallet_type
 ):
     mock_aries_controller = AsyncMock()
 
@@ -126,7 +123,7 @@ async def test_fix_revocation_registry_entry_state_success(
     ) as mock_logger, patch(
         "app.routes.revocation.get_wallet_type"
     ) as mock_get_wallet_type:
-        mock_get_wallet_type.return_value = "askar"
+        mock_get_wallet_type.return_value = wallet_type
 
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -141,7 +138,11 @@ async def test_fix_revocation_registry_entry_state_success(
 
         mock_handle_acapy_call.assert_awaited_once_with(
             logger=mock_logger.bind(),
-            acapy_call=mock_aries_controller.revocation.update_rev_reg_revoked_state,
+            acapy_call=(
+                mock_aries_controller.revocation.update_rev_reg_revoked_state
+                if wallet_type == "askar"
+                else mock_aries_controller.anoncreds_revocation.update_rev_reg_revoked_state
+            ),
             rev_reg_id=rev_reg_id,
             apply_ledger_update=apply_ledger_update,
         )
