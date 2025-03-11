@@ -42,8 +42,14 @@ class EndorserConfig:
         ) as client:
             server_config = await client.server.get_config()
             wallet_type = server_config.config.get("wallet.type")
-            if wallet_type not in ["askar", "askar-anoncreds"]:
-                logger.critical("Invalid wallet type: `{}`", wallet_type)
-                raise ValueError(f"Invalid wallet type: {wallet_type}")
+
+        if wallet_type not in ["askar", "askar-anoncreds"]:
+            logger.critical("Invalid wallet type: `{}`", wallet_type)
+            raise ValueError(f"Invalid wallet type: {wallet_type}")
 
         return wallet_type
+
+    def reset(self):
+        """Reset the singleton instance for testing purposes."""
+        self._wallet_type = None
+        self._initialized = False

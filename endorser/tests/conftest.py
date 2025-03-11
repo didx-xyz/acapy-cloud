@@ -26,4 +26,6 @@ def mock_acapy_client():
     client.endorse_transaction.endorse_transaction = AsyncMock()
     client.schema.get_schema = AsyncMock()
     client.server.get_config = AsyncMock()
+    client.__aenter__.return_value = client
+    client.__aexit__.return_value = AsyncMock()
     return client
