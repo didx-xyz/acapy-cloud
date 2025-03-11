@@ -5,10 +5,13 @@ from aries_cloudcontroller import (
     AcaPyClient,
     ClearPendingRevocationsRequest,
     CredRevRecordResult,
+    CredRevRecordResultSchemaAnoncreds,
     IssuerCredRevRecord,
     IssuerRevRegRecord,
     PublishRevocations,
+    PublishRevocationsSchemaAnoncreds,
     RevokeRequest,
+    RevokeRequestSchemaAnoncreds,
     RevRegResult,
     TxnOrPublishRevocationsResult,
 )
@@ -21,6 +24,7 @@ from app.exceptions import (
 from app.models.issuer import ClearPendingRevocationsResult, RevokedResponse
 from app.util.credentials import strip_protocol_prefix
 from app.util.retry_method import coroutine_with_retry
+from app.util.tenants import get_wallet_type
 from shared.log_config import get_logger
 
 logger = get_logger(__name__)
@@ -96,17 +100,32 @@ async def revoke_credential(
         }
     )
     bound_logger.debug("Revoking an issued credential")
+    wallet_type = await get_wallet_type(controller, bound_logger)
 
-    request_body = handle_model_with_validation(
-        logger=bound_logger,
-        model_class=RevokeRequest,
-        cred_ex_id=strip_protocol_prefix(credential_exchange_id),
-        publish=auto_publish_to_ledger,
-    )
+    if wallet_type == "askar-anoncreds":
+        request_body = handle_model_with_validation(
+            logger=bound_logger,
+            model_class=RevokeRequestSchemaAnoncreds,
+            cred_ex_id=strip_protocol_prefix(credential_exchange_id),
+            publish=auto_publish_to_ledger,
+        )
+
+        acapy_call = controller.anoncreds_revocation.revoke
+
+    else:  # wallet_type == "askar":
+        request_body = handle_model_with_validation(
+            logger=bound_logger,
+            model_class=RevokeRequest,
+            cred_ex_id=strip_protocol_prefix(credential_exchange_id),
+            publish=auto_publish_to_ledger,
+        )
+
+        acapy_call = controller.revocation.revoke_credential
+
     try:
         revoke_result = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=controller.revocation.revoke_credential,
+            acapy_call=acapy_call,
             body=request_body,
         )
     except CloudApiException as e:
@@ -124,8 +143,14 @@ async def revoke_credential(
         while not revoked and n_try < max_tries:
             n_try += 1
             # Safely fetch revocation record and check if change reflected
+            if wallet_type == "askar-anoncreds":
+                coroutine_func = controller.anoncreds_revocation.get_cred_rev_record
+
+            else:  # wallet_type == "askar":
+                coroutine_func = controller.revocation.get_revocation_status
+
             record = await coroutine_with_retry(
-                coroutine_func=controller.revocation.get_revocation_status,
+                coroutine_func=coroutine_func,
                 args=(strip_protocol_prefix(credential_exchange_id),),
                 logger=bound_logger,
                 max_attempts=5,
@@ -186,11 +211,21 @@ async def publish_pending_revocations(
         controller=controller,
         revocation_registry_credential_map=revocation_registry_credential_map,
     )
+    wallet_type = await get_wallet_type(controller, bound_logger)
     try:
+        if wallet_type == "askar-anoncreds":
+            acapy_call = controller.anoncreds_revocation.publish_revocations
+            body = PublishRevocationsSchemaAnoncreds(
+                rrid2crid=revocation_registry_credential_map
+            )
+        else:  # wallet_type == "askar":
+            acapy_call = controller.revocation.publish_revocations
+            body = PublishRevocations(rrid2crid=revocation_registry_credential_map)
+
         result = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=controller.revocation.publish_revocations,
-            body=PublishRevocations(rrid2crid=revocation_registry_credential_map),
+            acapy_call=acapy_call,
+            body=body,
         )
     except CloudApiException as e:
         raise CloudApiException(
@@ -287,11 +322,17 @@ async def get_credential_revocation_record(
         }
     )
     bound_logger.debug("Fetching the revocation status for a credential exchange")
-
+    wallet_type = await get_wallet_type(controller, bound_logger)
     try:
+        if wallet_type == "askar-anoncreds":
+            acapy_call = controller.anoncreds_revocation.get_cred_rev_record
+
+        else:  # wallet_type == "askar":
+            acapy_call = controller.revocation.get_revocation_status
+
         result = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=controller.revocation.get_revocation_status,
+            acapy_call=acapy_call,
             cred_ex_id=strip_protocol_prefix(credential_exchange_id),
             cred_rev_id=credential_revocation_id,
             rev_reg_id=revocation_registry_id,
@@ -301,7 +342,9 @@ async def get_credential_revocation_record(
             f"Failed to get revocation status: {e.detail}", e.status_code
         ) from e
 
-    if not isinstance(result, CredRevRecordResult):
+    if not isinstance(
+        result, (CredRevRecordResultSchemaAnoncreds, CredRevRecordResult)
+    ):
         bound_logger.error(
             "Unexpected type returned from get_revocation_status: `{}`.", result
         )
@@ -357,7 +400,7 @@ async def get_credential_definition_id_from_exchange_id(
             err.detail,
         )
         return
-    except Exception:  # pylint: disable=W0718
+    except (KeyError, AttributeError):
         bound_logger.exception(
             "Exception caught while constructing cred def id from record."
         )
@@ -391,14 +434,21 @@ async def validate_rev_reg_ids(
         return
 
     bound_logger.debug("Validating revocation registry ids")
-
+    wallet_type = await get_wallet_type(controller, bound_logger)
     for rev_reg_id in rev_reg_id_list:
         try:
+            if wallet_type == "askar-anoncreds":
+                acapy_call = controller.anoncreds_revocation.get_revocation_registry
+
+            else:  # wallet_type == "askar":
+                acapy_call = controller.revocation.get_registry
+
             rev_reg_result = await handle_acapy_call(
                 logger=bound_logger,
-                acapy_call=controller.revocation.get_registry,
+                acapy_call=acapy_call,
                 rev_reg_id=rev_reg_id,
             )
+
             if rev_reg_result.result is None:
                 message = (
                     "Bad request: Failed to retrieve revocation registry "
@@ -525,11 +575,17 @@ async def get_pending_revocations(
     """
     bound_logger = logger.bind(body={"rev_reg_id": rev_reg_id})
     bound_logger.debug("Fetching pending revocations for a revocation registry")
-
+    wallet_type = await get_wallet_type(controller, bound_logger)
     try:
+        if wallet_type == "askar-anoncreds":
+            acapy_call = controller.anoncreds_revocation.get_revocation_registry
+
+        else:  # wallet_type == "askar":
+            acapy_call = controller.revocation.get_registry
+
         result = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=controller.revocation.get_registry,
+            acapy_call=acapy_call,
             rev_reg_id=rev_reg_id,
         )
     except CloudApiException as e:

@@ -17,6 +17,7 @@ from app.models.issuer import (
 )
 from app.services import revocation_registry
 from app.util.retry_method import coroutine_with_retry_until_value
+from app.util.tenants import get_wallet_type
 from shared import PUBLISH_REVOCATIONS_TIMEOUT
 from shared.log_config import get_logger
 
@@ -196,6 +197,8 @@ async def publish_revocations(
             bound_logger.debug("No revocations to publish.")
             return RevokedResponse()
 
+        # TODO The anoncreds response seems to be broken, looks like agent response model not what it's
+        # supposed to be. Need to investigate further.
         endorser_transaction_ids = [txn.transaction_id for txn in result.txn]
         for endorser_transaction_id in endorser_transaction_ids:
             bound_logger.debug(
@@ -270,6 +273,12 @@ async def clear_pending_revocations(
     bound_logger.debug("POST request received: Clear pending revocations")
 
     async with client_from_auth(auth) as aries_controller:
+        wallet_type = await get_wallet_type(aries_controller, bound_logger)
+        if wallet_type == "askar-anoncreds":
+            raise CloudApiException(
+                "Clearing pending revocations is not supported for the 'anoncreds' wallet type.",
+                501,
+            )
         bound_logger.debug("Clearing pending revocations")
         response = await revocation_registry.clear_pending_revocations(
             controller=aries_controller,
@@ -360,10 +369,18 @@ async def fix_revocation_registry_entry_state(
     bound_logger.debug("PUT request received: Fix revocation registry entry state")
 
     async with client_from_auth(auth) as aries_controller:
-        bound_logger.debug("Fixing revocation registry entry state")
+        wallet_type = await get_wallet_type(aries_controller, bound_logger)
+        if wallet_type == "askar-anoncreds":
+            acapy_call = (
+                aries_controller.anoncreds_revocation.update_rev_reg_revoked_state
+            )
+
+        else:  # wallet_type == "askar":
+            acapy_call = aries_controller.revocation.update_rev_reg_revoked_state
+
         response = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=aries_controller.revocation.update_rev_reg_revoked_state,
+            acapy_call=acapy_call,
             rev_reg_id=revocation_registry_id,
             apply_ledger_update=apply_ledger_update,
         )
