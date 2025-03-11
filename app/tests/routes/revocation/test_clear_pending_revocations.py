@@ -8,6 +8,7 @@ from aries_cloudcontroller.exceptions import (
 )
 from fastapi import HTTPException
 
+from app.exceptions import CloudApiException
 from app.models.issuer import ClearPendingRevocationsRequest
 from app.routes.revocation import clear_pending_revocations
 
@@ -80,3 +81,31 @@ async def test_clear_pending_revocations_fail_acapy_error(
         )
 
     assert exc.value.status_code == expected_status_code
+
+
+@pytest.mark.anyio
+async def test_clear_pending_revocations_fail_anoncreds_error():
+    mock_aries_controller = AsyncMock()
+
+    with patch(
+        "app.routes.revocation.client_from_auth"
+    ) as mock_client_from_auth, pytest.raises(
+        CloudApiException,
+        match="Clearing pending revocations is not supported for the 'anoncreds' wallet type.",
+    ) as exc, patch(
+        "app.routes.revocation.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar-anoncreds"
+        mock_client_from_auth.return_value.__aenter__.return_value = (
+            mock_aries_controller
+        )
+
+        clear_request = ClearPendingRevocationsRequest(
+            revocation_registry_credential_map={}
+        )
+
+        await clear_pending_revocations(
+            clear_pending_request=clear_request, auth="mocked_auth"
+        )
+
+    assert exc.value.status_code == 500
