@@ -434,7 +434,7 @@ async def get_credential_definition_by_id(
         # We need to update the schema_id on the returned credential definition as
         # ACA-Py returns the schema_id as the seq_no
         bound_logger.debug("Fetching schema associated with definition's schema id")
-        schema = await get_schema(
+        schema = await get_schema(  # TODO: Avoid using endpoint method here
             schema_id=cloudapi_credential_definition.schema_id,
             auth=auth,
         )
