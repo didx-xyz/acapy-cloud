@@ -237,6 +237,37 @@ async def test_publish_pending_revocations_failure(mock_agent_controller: AcaPyC
 
 
 @pytest.mark.anyio
+async def test_publish_pending_revocations_no_txn_response(
+    mock_agent_controller: AcaPyClient,
+):
+
+    # Simulate successful validation
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar"
+        when(rg).validate_rev_reg_ids(
+            controller=mock_agent_controller,
+            revocation_registry_credential_map=revocation_registry_credential_map,
+        ).thenReturn(to_async())
+
+        # Simulate failure in publish revocations call
+        when(mock_agent_controller.revocation).publish_revocations(
+            body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
+        ).thenReturn(to_async(TxnOrPublishRevocationsResult()))
+
+        await rg.publish_pending_revocations(
+            controller=mock_agent_controller,
+            revocation_registry_credential_map=revocation_registry_credential_map,
+        )
+
+        # You may also verify that publish_revocations was attempted
+        verify(mock_agent_controller.revocation, times=1).publish_revocations(
+            body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
+        )
+
+
+@pytest.mark.anyio
 async def test_clear_pending_revocations_success(mock_agent_controller: AcaPyClient):
     expected_result_map = {"rev_reg_id1": []}
 
