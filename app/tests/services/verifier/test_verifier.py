@@ -178,6 +178,33 @@ async def test_create_proof_request(mock_tenant_auth: AcaPyAuth):
 
 
 @pytest.mark.anyio
+async def test_create_proof_request_exception(mock_tenant_auth: AcaPyAuth):
+    when(VerifierV2).create_proof_request(...).thenRaise(CloudApiException("ERROR"))
+    with pytest.raises(CloudApiException, match="500: ERROR") as exc:
+        await test_module.create_proof_request(
+            body=test_module.CreateProofRequest(
+                indy_proof_request=sample_indy_proof_request(),
+                connection_id="abcde",
+            ),
+            auth=mock_tenant_auth,
+        )
+    assert exc.value.status_code == 500
+
+
+@pytest.mark.anyio
+async def test_create_proof_request_no_result(mock_tenant_auth: AcaPyAuth):
+    when(VerifierV2).create_proof_request(...).thenReturn(to_async(None))
+    result = await test_module.create_proof_request(
+        body=test_module.CreateProofRequest(
+            indy_proof_request=sample_indy_proof_request(),
+            connection_id="abcde",
+        ),
+        auth=mock_tenant_auth,
+    )
+    assert result is None
+
+
+@pytest.mark.anyio
 async def test_accept_proof_request_v2(
     mock_agent_controller: AcaPyClient,
     mock_context_managed_controller: MockContextManagedController,
