@@ -1,5 +1,3 @@
-from unittest.mock import AsyncMock, patch
-
 import pytest
 from aries_cloudcontroller import (
     AcaPyClient,
