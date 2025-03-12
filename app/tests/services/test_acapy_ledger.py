@@ -1,45 +1,71 @@
+from unittest.mock import AsyncMock, patch
+
 import pytest
 from aries_cloudcontroller import (
     AcaPyClient,
     ApiException,
+    GetDIDEndpointResponse,
+    GetSchemaResult,
     ModelSchema,
     SchemaGetResult,
-    TAAAccept,
     TAAInfo,
     TAARecord,
     TAAResult,
+    TxnOrRegisterLedgerNymResponse,
 )
 from assertpy import assert_that
-from fastapi import HTTPException
 from mockito import verify, when
 
 from app.exceptions import CloudApiException
 from app.services.acapy_ledger import (
     accept_taa,
+    accept_taa_if_required,
     get_did_endpoint,
     get_taa,
+    register_nym_on_ledger,
     schema_id_from_credential_definition_id,
 )
 from app.tests.util.mock import to_async
 
 
 @pytest.mark.anyio
-async def test_error_on_get_taa(mock_agent_controller: AcaPyClient):
+async def test_get_taa_success(mock_agent_controller: AcaPyClient):
+    taa_info = TAAInfo(taa_required=True, taa_record=TAARecord(digest="digest"))
+    when(mock_agent_controller.ledger).fetch_taa().thenReturn(
+        to_async(TAAResult(result=taa_info))
+    )
+
+    result, mechanism = await get_taa(mock_agent_controller)
+    assert_that(result).is_equal_to(taa_info)
+    assert_that(mechanism).is_equal_to("service_agreement")
+
+
+@pytest.mark.anyio
+async def test_get_taa_failure(mock_agent_controller: AcaPyClient):
     when(mock_agent_controller.ledger).fetch_taa().thenReturn(
         to_async(TAAResult(result=TAAInfo(taa_required=True)))
     )
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(CloudApiException) as exc:
         await get_taa(mock_agent_controller)
     assert exc.value.status_code == 500
     assert "Something went wrong. Could not get TAA." in exc.value.detail
 
 
 @pytest.mark.anyio
-async def test_error_on_accept_taa(mock_agent_controller: AcaPyClient):
-    when(mock_agent_controller.ledger).accept_taa(
-        body=TAAAccept(mechanism="data", text=None, version=None)
-    ).thenRaise(ApiException(status=500))
+async def test_accept_taa_success(mock_agent_controller: AcaPyClient):
+    taa_record = TAARecord(digest="digest")
+    when(mock_agent_controller.ledger).accept_taa(...).thenReturn(to_async(None))
+
+    await accept_taa(mock_agent_controller, taa=taa_record, mechanism="data")
+    verify(mock_agent_controller.ledger).accept_taa(...)
+
+
+@pytest.mark.anyio
+async def test_accept_taa_failure(mock_agent_controller: AcaPyClient):
+    when(mock_agent_controller.ledger).accept_taa(...).thenRaise(
+        ApiException(status=500)
+    )
 
     with pytest.raises(CloudApiException) as exc:
         await accept_taa(
@@ -50,15 +76,77 @@ async def test_error_on_accept_taa(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_error_on_get_did_endpoint(mock_agent_controller: AcaPyClient):
+async def test_get_did_endpoint_success(mock_agent_controller: AcaPyClient):
+    expected_response = GetDIDEndpointResponse(endpoint="http://example.com")
+    when(mock_agent_controller.ledger).get_did_endpoint(did="data").thenReturn(
+        to_async(expected_response)
+    )
+
+    response = await get_did_endpoint(mock_agent_controller, "data")
+    assert_that(response).is_equal_to(expected_response)
+
+
+@pytest.mark.anyio
+async def test_get_did_endpoint_failure(mock_agent_controller: AcaPyClient):
     when(mock_agent_controller.ledger).get_did_endpoint(did="data").thenReturn(
         to_async(None)
     )
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(CloudApiException) as exc:
         await get_did_endpoint(mock_agent_controller, "data")
     assert exc.value.status_code == 404
     assert exc.value.detail == "Could not obtain issuer endpoint."
+
+
+@pytest.mark.anyio
+async def test_register_nym_on_ledger_success(mock_agent_controller: AcaPyClient):
+    expected_response = TxnOrRegisterLedgerNymResponse()
+    when(mock_agent_controller.ledger).register_nym(...).thenReturn(
+        to_async(expected_response)
+    )
+
+    response = await register_nym_on_ledger(
+        mock_agent_controller,
+        did="did",
+        verkey="verkey",
+        alias="alias",
+        role="role",
+        connection_id="conn_id",
+        create_transaction_for_endorser="endorser",
+    )
+    assert_that(response).is_equal_to(expected_response)
+
+
+@pytest.mark.anyio
+async def test_register_nym_on_ledger_failure(mock_agent_controller: AcaPyClient):
+    when(mock_agent_controller.ledger).register_nym(...).thenRaise(
+        ApiException(status=500)
+    )
+
+    with pytest.raises(CloudApiException) as exc:
+        await register_nym_on_ledger(
+            mock_agent_controller,
+            did="did",
+            verkey="verkey",
+            alias="alias",
+            role="role",
+            connection_id="conn_id",
+            create_transaction_for_endorser="endorser",
+        )
+    assert exc.value.status_code == 500
+    assert "Error registering NYM on ledger" in exc.value.detail
+
+
+@pytest.mark.anyio
+async def test_accept_taa_if_required(mock_agent_controller: AcaPyClient):
+    taa_info = TAAInfo(taa_required=True, taa_record=TAARecord(digest="digest"))
+    when(mock_agent_controller.ledger).fetch_taa().thenReturn(
+        to_async(TAAResult(result=taa_info))
+    )
+    when(mock_agent_controller.ledger).accept_taa(...).thenReturn(to_async(None))
+
+    await accept_taa_if_required(mock_agent_controller)
+    verify(mock_agent_controller.ledger).accept_taa(...)
 
 
 @pytest.mark.anyio
@@ -70,13 +158,7 @@ async def test_schema_id_from_credential_definition_id_seq_no(
     cred_def_id_seq_no = "Ehx3RZSV38pn3MYvxtHhbQ:3:CL:58278:tag"
 
     when(mock_agent_controller.schema).get_schema(schema_id=seq_no).thenReturn(
-        to_async(
-            SchemaGetResult(
-                var_schema=ModelSchema(
-                    id=schema_id,
-                )
-            )
-        )
+        to_async(SchemaGetResult(var_schema=ModelSchema(id=schema_id)))
     )
 
     schema_id = await schema_id_from_credential_definition_id(
@@ -88,6 +170,26 @@ async def test_schema_id_from_credential_definition_id_seq_no(
 
 
 @pytest.mark.anyio
+async def test_schema_id_from_credential_definition_id_seq_no_anoncreds(
+    mock_agent_controller: AcaPyClient,
+):
+    schema_id = "Ehx3RZSV38pn3MYvxtHhbQ:2:schema_name:1.0.1"
+    seq_no = "58279"
+    cred_def_id_seq_no = f"Ehx3RZSV38pn3MYvxtHhbQ:3:CL:{seq_no}:tag"
+
+    when(mock_agent_controller.anoncreds_schemas).get_schema(
+        schema_id=seq_no
+    ).thenReturn(to_async(GetSchemaResult(schema_id=schema_id)))
+
+    schema_id_fetched = await schema_id_from_credential_definition_id(
+        mock_agent_controller, cred_def_id_seq_no, "askar-anoncreds"
+    )
+
+    assert_that(schema_id_fetched).is_equal_to(schema_id)
+    verify(mock_agent_controller.anoncreds_schemas).get_schema(schema_id=seq_no)
+
+
+@pytest.mark.anyio
 async def test_schema_id_from_credential_definition_id_schema_id(
     mock_agent_controller: AcaPyClient,
 ):
@@ -96,12 +198,12 @@ async def test_schema_id_from_credential_definition_id_schema_id(
 
     when(mock_agent_controller.schema).get_schema(...)
 
-    schema_id = await schema_id_from_credential_definition_id(
+    schema_id_fetched = await schema_id_from_credential_definition_id(
         mock_agent_controller, cred_def_id_schema_id, "askar"
     )
 
     verify(mock_agent_controller.schema, times=0).get_schema(...)
-    assert_that(schema_id).is_equal_to(schema_id)
+    assert_that(schema_id_fetched).is_equal_to(schema_id)
 
 
 @pytest.mark.anyio
@@ -135,13 +237,7 @@ async def test_schema_id_from_credential_definition_id_caching(
 
     # Setup mock for old format
     when(mock_agent_controller.schema).get_schema(schema_id="456").thenReturn(
-        to_async(
-            SchemaGetResult(
-                var_schema=ModelSchema(
-                    id=schema_id,
-                )
-            )
-        )
+        to_async(SchemaGetResult(var_schema=ModelSchema(id=schema_id)))
     )
 
     # First call
@@ -181,3 +277,45 @@ async def test_schema_id_from_credential_definition_id_caching(
     # Assert both API calls were made
     verify(mock_agent_controller.schema).get_schema(schema_id="456")
     verify(mock_agent_controller.schema).get_schema(schema_id="789")
+
+
+@pytest.mark.anyio
+async def test_schema_id_from_credential_definition_id_no_schema_askar(
+    mock_agent_controller: AcaPyClient,
+):
+    seq_no = "58275"
+    cred_def_id_seq_no = f"Ehx3RZSV38pn3MYvxtHhbQ:3:CL:{seq_no}:tag"
+
+    # Mock the handle_acapy_call to return a SchemaGetResult without an ID
+    when(mock_agent_controller.schema).get_schema(schema_id=seq_no).thenReturn(
+        to_async(GetSchemaResult(schema_id=None))
+    )
+
+    with pytest.raises(CloudApiException) as exc:
+        await schema_id_from_credential_definition_id(
+            mock_agent_controller, cred_def_id_seq_no, "askar"
+        )
+
+    assert exc.value.status_code == 404
+    assert f"Schema with id {seq_no} not found." in exc.value.detail
+
+
+@pytest.mark.anyio
+async def test_schema_id_from_credential_definition_id_no_schema_askar_anoncreds(
+    mock_agent_controller: AcaPyClient,
+):
+    seq_no = "58276"
+    cred_def_id_seq_no = f"Ehx3RZSV38pn3MYvxtHhbQ:3:CL:{seq_no}:tag"
+
+    # Mock the handle_acapy_call to return a GetSchemaResult without a schema_id
+    when(mock_agent_controller.anoncreds_schemas).get_schema(
+        schema_id=seq_no
+    ).thenReturn(to_async(GetSchemaResult(schema_id=None)))
+
+    with pytest.raises(CloudApiException) as exc:
+        await schema_id_from_credential_definition_id(
+            mock_agent_controller, cred_def_id_seq_no, "askar-anoncreds"
+        )
+
+    assert exc.value.status_code == 404
+    assert f"Schema with id {seq_no} not found." in exc.value.detail
