@@ -46,6 +46,10 @@ class VerifierV2(Verifier):
             presentation_request = V20PresRequestByFormat(
                 dif=create_proof_request.dif_proof_request
             )
+        elif create_proof_request.type == ProofRequestType.ANONCREDS:
+            presentation_request = V20PresRequestByFormat(
+                anoncreds=create_proof_request.anoncreds_proof_request
+            )
         else:
             raise CloudApiException(
                 f"Unsupported credential type: {create_proof_request.type.value}",
