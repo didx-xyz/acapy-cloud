@@ -91,6 +91,39 @@ async def test_send_proof_request_v2(
 
 
 @pytest.mark.anyio
+async def test_send_proof_request_v2_exception(
+    mock_agent_controller: AcaPyClient,
+    mock_context_managed_controller: MockContextManagedController,
+    mock_tenant_auth: AcaPyAuth,
+    mocker: MockerFixture,
+):
+    # V2
+    when(VerifierV2).send_proof_request(...).thenRaise(CloudApiException("ERROR"))
+    mocker.patch.object(
+        test_module,
+        "assert_valid_verifier",
+        return_value=None,
+    )
+
+    send_proof_request = test_module.SendProofRequest(
+        connection_id="abcde",
+        indy_proof_request=sample_indy_proof_request(),
+    )
+
+    mocker.patch.object(
+        test_module,
+        "client_from_auth",
+        return_value=mock_context_managed_controller(mock_agent_controller),
+    )
+
+    with pytest.raises(CloudApiException, match="500: ERROR") as exc:
+        await test_module.send_proof_request(
+            body=send_proof_request,
+            auth=mock_tenant_auth,
+        )
+    assert exc.value.status_code == 500
+
+@pytest.mark.anyio
 async def test_create_proof_request(mock_tenant_auth: AcaPyAuth):
     when(VerifierV2).create_proof_request(...).thenReturn(
         to_async(presentation_exchange_record_2)
