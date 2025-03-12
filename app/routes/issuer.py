@@ -8,7 +8,6 @@ from app.dependencies.auth import AcaPyAuth, acapy_auth_from_header
 from app.exceptions import CloudApiException
 from app.models.issuer import CreateOffer, CredentialType, SendCredential
 from app.services.acapy_ledger import schema_id_from_credential_definition_id
-from app.services.acapy_wallet import assert_public_did
 from app.services.issuer.acapy_issuer_v2 import IssuerV2
 from app.services.trust_registry.util.issuer import assert_valid_issuer
 from app.util.did import did_from_credential_definition_id, qualified_did_sov
@@ -19,6 +18,7 @@ from app.util.pagination import (
     order_by_query_parameter,
 )
 from app.util.save_exchange_record import save_exchange_record_query
+from app.util.valid_issuer import assert_public_did_and_wallet_type
 from shared.log_config import get_logger
 from shared.models.credential_exchange import CredentialExchange, Role, State
 
@@ -73,15 +73,10 @@ async def send_credential(
     bound_logger.debug("POST request received: Send credential")
 
     async with client_from_auth(auth) as aries_controller:
-        # Assert the agent has a public did
-        try:
-            public_did = await assert_public_did(aries_controller)
-        except CloudApiException as e:
-            bound_logger.warning("Asserting agent has public DID failed: {}", e)
-            raise CloudApiException(
-                "Wallet making this request has no public DID. Only issuers with a public DID can make this request.",
-                403,
-            ) from e
+        # Assert the agent has a public did, and using valid wallet type
+        public_did, wallet_type = await assert_public_did_and_wallet_type(
+            aries_controller, credential.type, bound_logger
+        )
 
         schema_id = None
         if credential.type == CredentialType.INDY:
@@ -89,8 +84,14 @@ async def send_credential(
             schema_id = await schema_id_from_credential_definition_id(
                 aries_controller,
                 credential.indy_credential_detail.credential_definition_id,
+                wallet_type,
             )
-
+        if credential.type == CredentialType.ANONCREDS:
+            schema_id = await schema_id_from_credential_definition_id(
+                aries_controller,
+                credential.anoncreds_credential_detail.credential_definition_id,
+                wallet_type,
+            )
         # Make sure we are allowed to issue according to trust registry rules
         await assert_valid_issuer(public_did, schema_id)
 
@@ -160,15 +161,10 @@ async def create_offer(
     bound_logger.debug("POST request received: Create credential offer")
 
     async with client_from_auth(auth) as aries_controller:
-        # Assert the agent has a public did
-        try:
-            public_did = await assert_public_did(aries_controller)
-        except CloudApiException as e:
-            bound_logger.warning("Asserting agent has public DID failed: {}", e)
-            raise CloudApiException(
-                "Wallet making this request has no public DID. Only issuers with a public DID can make this request.",
-                403,
-            ) from e
+        # Assert the agent has a public did, and using valid wallet type
+        public_did, wallet_type = await assert_public_did_and_wallet_type(
+            aries_controller, credential.type, bound_logger
+        )
 
         schema_id = None
         if credential.type == CredentialType.INDY:
@@ -176,6 +172,14 @@ async def create_offer(
             schema_id = await schema_id_from_credential_definition_id(
                 aries_controller,
                 credential.indy_credential_detail.credential_definition_id,
+                wallet_type,
+            )
+
+        if credential.type == CredentialType.ANONCREDS:
+            schema_id = await schema_id_from_credential_definition_id(
+                aries_controller,
+                credential.anoncreds_credential_detail.credential_definition_id,
+                wallet_type,
             )
 
         # Make sure we are allowed to issue according to trust registry rules
@@ -230,7 +234,7 @@ async def request_credential(
         record = await IssuerV2.get_record(aries_controller, credential_exchange_id)
 
         schema_id = None
-        if record.type == "indy":
+        if record.type in ["indy", "anoncreds"]:
             if not record.credential_definition_id or not record.schema_id:
                 raise CloudApiException(
                     "Record has no credential definition or schema associated. "

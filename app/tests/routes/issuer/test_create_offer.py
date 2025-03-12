@@ -10,7 +10,12 @@ from aries_cloudcontroller.exceptions import (
 from fastapi import HTTPException
 
 from app.exceptions.cloudapi_exception import CloudApiException
-from app.models.issuer import CreateOffer, CredentialType, IndyCredential
+from app.models.issuer import (
+    AnonCredsCredential,
+    CreateOffer,
+    CredentialType,
+    IndyCredential,
+)
 from app.routes.issuer import create_offer
 
 indy_cred = IndyCredential(
@@ -35,6 +40,11 @@ ld_cred = LDProofVCDetail(
     ),
     options=LDProofVCOptions(proofType="Ed25519Signature2018"),
 )
+anoncreds_cred = AnonCredsCredential(
+    issuer_id="WgWxqztrNooG92RXvxSTWv",
+    credential_definition_id="WgWxqztrNooG92RXvxSTWv:3:CL:20:tag",
+    attributes={},
+)
 
 
 @pytest.mark.anyio
@@ -49,30 +59,61 @@ ld_cred = LDProofVCDetail(
             type=CredentialType.LD_PROOF,
             ld_credential_detail=ld_cred,
         ),
+        CreateOffer(
+            type=CredentialType.ANONCREDS,
+            anoncreds_credential_detail=anoncreds_cred,
+        ),
     ],
 )
-async def test_create_offer_success(credential):
+@pytest.mark.parametrize("wallet_type", ["askar", "askar-anoncreds"])
+async def test_create_offer_success(credential, wallet_type):
     mock_aries_controller = AsyncMock()
     issuer = Mock()
     issuer.create_offer = AsyncMock()
 
     with patch("app.routes.issuer.client_from_auth") as mock_client_from_auth, patch(
         "app.routes.issuer.IssuerV2", new=issuer
-    ), patch("app.routes.issuer.assert_public_did", return_value="public_did"), patch(
+    ), patch(
+        "app.util.valid_issuer.assert_public_did", return_value="public_did"
+    ), patch(
         "app.routes.issuer.schema_id_from_credential_definition_id",
         return_value="schema_id",
     ), patch(
         "app.routes.issuer.assert_valid_issuer"
+    ), patch(
+        "app.util.valid_issuer.get_wallet_type", return_value=wallet_type
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )
 
-        await create_offer(credential=credential, auth="mocked_auth")
+        if (
+            credential.type is CredentialType.ANONCREDS
+            and wallet_type != "askar-anoncreds"
+        ):
+            with pytest.raises(CloudApiException) as exc:
+                await create_offer(credential=credential, auth="mocked_auth")
+            assert exc.value.status_code == 400
+            assert (
+                exc.value.detail
+                == "AnonCreds credentials can only be issued by an askar-anoncreds wallet"
+            )
+        elif (
+            credential.type == CredentialType.INDY and wallet_type == "askar-anoncreds"
+        ):
+            with pytest.raises(CloudApiException) as exc:
+                await create_offer(credential=credential, auth="mocked_auth")
+            assert exc.value.status_code == 400
+            assert (
+                exc.value.detail
+                == "Indy credentials can only be issued by an askar wallet"
+            )
+        else:
+            await create_offer(credential=credential, auth="mocked_auth")
 
-        issuer.create_offer.assert_awaited_once_with(
-            controller=mock_aries_controller, credential=credential
-        )
+            issuer.create_offer.assert_awaited_once_with(
+                controller=mock_aries_controller, credential=credential
+            )
 
 
 @pytest.mark.anyio
@@ -97,12 +138,14 @@ async def test_create_offer_fail_acapy_error(
     ) as mock_client_from_auth, pytest.raises(
         HTTPException, match=expected_detail
     ) as exc, patch(
-        "app.routes.issuer.assert_public_did", return_value="public_did"
+        "app.util.valid_issuer.assert_public_did", return_value="public_did"
     ), patch(
         "app.routes.issuer.schema_id_from_credential_definition_id",
         return_value="schema_id",
     ), patch(
         "app.routes.issuer.assert_valid_issuer"
+    ), patch(
+        "app.util.valid_issuer.get_wallet_type", return_value="askar"
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -130,7 +173,7 @@ async def test_create_offer_fail_bad_public_did():
     mock_aries_controller.issue_credential_v2_0.issue_credential_automated = AsyncMock()
 
     with patch("app.routes.issuer.client_from_auth") as mock_client_from_auth, patch(
-        "app.routes.issuer.assert_public_did",
+        "app.util.valid_issuer.assert_public_did",
         AsyncMock(side_effect=CloudApiException(status_code=404, detail="Not found")),
     ), pytest.raises(
         HTTPException,

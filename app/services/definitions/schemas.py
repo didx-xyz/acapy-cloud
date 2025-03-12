@@ -22,7 +22,7 @@ from app.util.definitions import (
     anoncreds_schema_from_acapy,
     credential_schema_from_acapy,
 )
-from app.util.tenants import get_wallet_type
+from app.util.wallet_type_checks import get_wallet_type
 from shared.constants import GOVERNANCE_AGENT_URL
 from shared.log_config import get_logger
 

@@ -1,3 +1,4 @@
+from logging import Logger
 from typing import Dict, List, Optional
 
 from aries_cloudcontroller import (
@@ -6,6 +7,7 @@ from aries_cloudcontroller import (
     V20CredExFree,
     V20CredExRecord,
     V20CredFilter,
+    V20CredFilterAnoncreds,
     V20CredFilterIndy,
     V20CredOfferConnFreeRequest,
     V20CredPreview,
@@ -43,26 +45,9 @@ class IssuerV2(Issuer):
             }
         )
 
-        credential_preview = None
-        # Determine the appropriate filter based on the type
-        if credential.type == CredentialType.INDY:
-            bound_logger.debug("Getting credential preview from attributes")
-            credential_preview = cls.__preview_from_attributes(
-                attributes=credential.indy_credential_detail.attributes
-            )
-
-            indy_model = handle_model_with_validation(
-                logger=bound_logger,
-                model_class=V20CredFilterIndy,
-                cred_def_id=credential.indy_credential_detail.credential_definition_id,
-            )
-            cred_filter = V20CredFilter(indy=indy_model)
-        elif credential.type == CredentialType.LD_PROOF:
-            cred_filter = V20CredFilter(ld_proof=credential.ld_credential_detail)
-        else:
-            raise CloudApiException(
-                f"Unsupported credential type: {credential.type}", status_code=501
-            )
+        credential_preview, cred_filter = cls._get_credential_preview_and_filter(
+            credential, bound_logger
+        )
 
         bound_logger.debug("Issue v2 credential (automated)")
         request_body = V20CredExFree(
@@ -91,25 +76,9 @@ class IssuerV2(Issuer):
             }
         )
 
-        credential_preview = None
-        # Determine the appropriate filter based on the type
-        if credential.type == CredentialType.INDY:
-            bound_logger.debug("Getting credential preview from attributes")
-            credential_preview = cls.__preview_from_attributes(
-                attributes=credential.indy_credential_detail.attributes
-            )
-            indy_model = handle_model_with_validation(
-                logger=bound_logger,
-                model_class=V20CredFilterIndy,
-                cred_def_id=credential.indy_credential_detail.credential_definition_id,
-            )
-            cred_filter = V20CredFilter(indy=indy_model)
-        elif credential.type == CredentialType.LD_PROOF:
-            cred_filter = V20CredFilter(ld_proof=credential.ld_credential_detail)
-        else:
-            raise CloudApiException(
-                f"Unsupported credential type: {credential.type}", status_code=501
-            )
+        credential_preview, cred_filter = cls._get_credential_preview_and_filter(
+            credential, bound_logger
+        )
 
         bound_logger.debug("Creating v2 credential offer")
         request_body = V20CredOfferConnFreeRequest(
@@ -125,6 +94,46 @@ class IssuerV2(Issuer):
 
         bound_logger.debug("Returning v2 create offer result as CredentialExchange.")
         return cls.__record_to_model(record)
+
+    @classmethod
+    def _get_credential_preview_and_filter(
+        cls, credential: CredentialBase, bound_logger: Logger
+    ):
+        credential_preview = None
+        if credential.type == CredentialType.INDY:
+            bound_logger.debug("Getting credential preview from attributes")
+            credential_preview = cls.__preview_from_attributes(
+                attributes=credential.indy_credential_detail.attributes
+            )
+            indy_model = handle_model_with_validation(
+                logger=bound_logger,
+                model_class=V20CredFilterIndy,
+                cred_def_id=credential.indy_credential_detail.credential_definition_id,
+            )
+            cred_filter = V20CredFilter(indy=indy_model)
+
+        elif credential.type == CredentialType.LD_PROOF:
+            cred_filter = V20CredFilter(ld_proof=credential.ld_credential_detail)
+
+        elif credential.type == CredentialType.ANONCREDS:
+            bound_logger.debug("Getting credential preview from attributes")
+            credential_preview = cls.__preview_from_attributes(
+                attributes=credential.anoncreds_credential_detail.attributes
+            )
+            anon_model = handle_model_with_validation(
+                logger=bound_logger,
+                model_class=V20CredFilterAnoncreds,
+                cred_def_id=credential.anoncreds_credential_detail.credential_definition_id,
+                issuer_id=credential.anoncreds_credential_detail.issuer_id,
+            )
+            cred_filter = V20CredFilter(anoncreds=anon_model)
+
+        else:
+            raise CloudApiException(
+                f"Unsupported credential type: {credential.type.value}", status_code=501
+            )
+
+        return credential_preview, cred_filter
 
     @classmethod
     async def request_credential(
@@ -169,6 +178,7 @@ class IssuerV2(Issuer):
         )
 
         if not record.cred_ex_record:
+            bound_logger.error("Stored record has no credential exchange record.")
             raise CloudApiException("Stored record has no credential exchange record.")
 
         bound_logger.debug(
@@ -249,6 +259,7 @@ class IssuerV2(Issuer):
         )
 
         if not record.cred_ex_record:
+            bound_logger.error("Record has no credential exchange record.")
             raise CloudApiException("Record has no credential exchange record.")
 
         bound_logger.debug("Returning v2 credential record as CredentialExchange.")

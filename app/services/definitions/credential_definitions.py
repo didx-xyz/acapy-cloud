@@ -17,8 +17,8 @@ from app.services.definitions.credential_definition_publisher import (
 from app.services.trust_registry.util.issuer import assert_valid_issuer
 from app.util.assert_public_did import assert_public_did
 from app.util.definitions import credential_definition_from_acapy
-from app.util.tenants import get_wallet_type
 from app.util.transaction_acked import wait_for_transaction_ack
+from app.util.wallet_type_checks import get_wallet_type
 from shared import CRED_DEF_ACK_TIMEOUT, REGISTRY_SIZE
 from shared.log_config import get_logger
 
@@ -84,7 +84,7 @@ async def create_credential_definition(
             result.credential_definition_state.credential_definition_id
         )
 
-        # Set Anoncreds transaction info if it exists
+        # Set AnonCreds transaction info if it exists
         result_txn = result.registration_metadata.get("txn")
         transaction_id = result_txn.get("transaction_id") if result_txn else None
     else:  # wallet_type == "askar"

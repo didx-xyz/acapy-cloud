@@ -14,8 +14,15 @@ from aries_cloudcontroller import (
 from assertpy import assert_that
 from mockito import when
 
-from app.models.issuer import CredentialWithConnection, IndyCredential
+from app.exceptions.cloudapi_exception import CloudApiException
+from app.models.issuer import (
+    AnonCredsCredential,
+    CredentialType,
+    CredentialWithConnection,
+    IndyCredential,
+)
 from app.services.issuer.acapy_issuer_v2 import IssuerV2
+from app.tests.routes.issuer.test_create_offer import ld_cred
 from app.tests.util.mock import to_async
 
 schema_id_1 = "WgWxqztrNooG92RXvxSTWv:2:schema_name:1.0"
@@ -80,6 +87,7 @@ v2_credential_exchange_records = [
         ),
     ),
 ]
+v2_record = v2_credential_exchange_records[0]
 
 
 @pytest.mark.anyio
@@ -98,9 +106,18 @@ async def test_get_records(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_get_records_with_query_params(mock_agent_controller: AcaPyClient):
-    v2_record = v2_credential_exchange_records[0]
+async def test_get_records_empty(mock_agent_controller: AcaPyClient):
+    when(mock_agent_controller.issue_credential_v2_0).get_records(...).thenReturn(
+        to_async(V20CredExRecordListResult(results=[]))
+    )
 
+    records = await IssuerV2.get_records(mock_agent_controller)
+
+    assert len(records) == 0
+
+
+@pytest.mark.anyio
+async def test_get_records_with_query_params(mock_agent_controller: AcaPyClient):
     when(mock_agent_controller.issue_credential_v2_0).get_records(
         limit=100,
         offset=0,
@@ -132,8 +149,6 @@ async def test_get_records_with_query_params(mock_agent_controller: AcaPyClient)
 
 @pytest.mark.anyio
 async def test_get_record(mock_agent_controller: AcaPyClient):
-    v2_record = v2_credential_exchange_records[0]
-
     when(mock_agent_controller.issue_credential_v2_0).get_record(
         cred_ex_id=v2_record.cred_ex_record.cred_ex_id
     ).thenReturn(to_async(v2_record))
@@ -157,6 +172,22 @@ async def test_get_record(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
+async def test_get_record_no_cred_ex_record(mock_agent_controller: AcaPyClient):
+    when(mock_agent_controller.issue_credential_v2_0).get_record(
+        cred_ex_id=v2_record.cred_ex_record.cred_ex_id
+    ).thenReturn(to_async(V20CredExRecordDetail()))
+
+    with pytest.raises(CloudApiException) as exc:
+        await IssuerV2.get_record(
+            mock_agent_controller,
+            credential_exchange_id=v2_record.cred_ex_record.cred_ex_id,
+        )
+
+    assert exc.value.detail == "Record has no credential exchange record."
+    assert exc.value.status_code == 500
+
+
+@pytest.mark.anyio
 async def test_delete_credential_exchange(
     mock_agent_controller: AcaPyClient,
 ):
@@ -173,8 +204,6 @@ async def test_delete_credential_exchange(
 
 @pytest.mark.anyio
 async def test_send_credential(mock_agent_controller: AcaPyClient):
-    v2_record = v2_credential_exchange_records[0]
-
     credential = CredentialWithConnection(
         connection_id=v2_record.cred_ex_record.connection_id,
         indy_credential_detail=IndyCredential(
@@ -208,9 +237,20 @@ async def test_send_credential(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_store_credential(mock_agent_controller: AcaPyClient):
-    v2_record = v2_credential_exchange_records[0]
+async def test_send_credential_unsupported_cred_type(
+    mock_agent_controller: AcaPyClient,
+):
+    credential = CredentialWithConnection(type="jwt", connection_id="abc")
 
+    with pytest.raises(CloudApiException) as exc:
+        await IssuerV2.send_credential(mock_agent_controller, credential)
+
+    assert exc.value.detail == "Unsupported credential type: jwt"
+    assert exc.value.status_code == 501
+
+
+@pytest.mark.anyio
+async def test_store_credential(mock_agent_controller: AcaPyClient):
     when(mock_agent_controller.issue_credential_v2_0).store_credential(
         cred_ex_id=v2_record.cred_ex_record.cred_ex_id,
         body=V20CredStoreRequest(),
@@ -228,9 +268,24 @@ async def test_store_credential(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_request_credential(mock_agent_controller: AcaPyClient):
-    v2_record = v2_credential_exchange_records[0]
+async def test_store_credential_no_record(mock_agent_controller: AcaPyClient):
+    when(mock_agent_controller.issue_credential_v2_0).store_credential(
+        cred_ex_id=v2_record.cred_ex_record.cred_ex_id,
+        body=V20CredStoreRequest(),
+    ).thenReturn(to_async(V20CredExRecordDetail()))
 
+    with pytest.raises(CloudApiException) as exc:
+        await IssuerV2.store_credential(
+            mock_agent_controller,
+            credential_exchange_id=v2_record.cred_ex_record.cred_ex_id,
+        )
+
+    assert exc.value.detail == "Stored record has no credential exchange record."
+    assert exc.value.status_code == 500
+
+
+@pytest.mark.anyio
+async def test_request_credential(mock_agent_controller: AcaPyClient):
     when(mock_agent_controller.issue_credential_v2_0).send_request(
         cred_ex_id=v2_record.cred_ex_record.cred_ex_id,
         body=V20CredRequestRequest(holder_did=None),
@@ -245,3 +300,72 @@ async def test_request_credential(mock_agent_controller: AcaPyClient):
         credential_exchange.credential_exchange_id
         == f"v2-{v2_record.cred_ex_record.cred_ex_id}"
     )
+
+
+@pytest.mark.anyio
+async def test_create_offer_indy(mock_agent_controller: AcaPyClient):
+    credential = CredentialWithConnection(
+        type=CredentialType.INDY,
+        indy_credential_detail=IndyCredential(
+            credential_definition_id="WgWxqztrNooG92RXvxSTWv:3:CL:20:tag",
+            attributes={"name": "Alice", "age": "30"},
+        ),
+        connection_id="abc",
+    )
+
+    when(mock_agent_controller.issue_credential_v2_0).create_offer(...).thenReturn(
+        to_async(v2_record.cred_ex_record)
+    )
+    result = await IssuerV2.create_offer(mock_agent_controller, credential)
+
+    assert result.credential_exchange_id == f"v2-{v2_record.cred_ex_record.cred_ex_id}"
+
+
+@pytest.mark.anyio
+async def test_create_offer_ld_proof(mock_agent_controller: AcaPyClient):
+    credential = CredentialWithConnection(
+        type=CredentialType.LD_PROOF,
+        ld_credential_detail=ld_cred,
+        connection_id="abc",
+    )
+
+    when(mock_agent_controller.issue_credential_v2_0).create_offer(...).thenReturn(
+        to_async(v2_record.cred_ex_record)
+    )
+    result = await IssuerV2.create_offer(mock_agent_controller, credential)
+
+    assert result.credential_exchange_id == f"v2-{v2_record.cred_ex_record.cred_ex_id}"
+
+
+@pytest.mark.anyio
+async def test_create_offer_anoncreds(mock_agent_controller: AcaPyClient):
+    credential = CredentialWithConnection(
+        type=CredentialType.ANONCREDS,
+        anoncreds_credential_detail=AnonCredsCredential(
+            credential_definition_id="WgWxqztrNooG92RXvxSTWv:3:CL:20:tag",
+            issuer_id="WgWxqztrNooG92RXvxSTWv",
+            attributes={"name": "Bob", "age": "25"},
+        ),
+        connection_id="abc",
+    )
+
+    when(mock_agent_controller.issue_credential_v2_0).create_offer(...).thenReturn(
+        to_async(v2_record.cred_ex_record)
+    )
+
+    result = await IssuerV2.create_offer(mock_agent_controller, credential)
+
+    assert result.credential_exchange_id == f"v2-{v2_record.cred_ex_record.cred_ex_id}"
+
+
+@pytest.mark.anyio
+async def test_create_offer_unsupported_credential_type(
+    mock_agent_controller: AcaPyClient,
+):
+    credential = CredentialWithConnection(type="jwt", connection_id="abc")
+
+    with pytest.raises(CloudApiException) as exc:
+        await IssuerV2.create_offer(mock_agent_controller, credential)
+
+    assert exc.value.detail == "Unsupported credential type: jwt"
+    assert exc.value.status_code == 501

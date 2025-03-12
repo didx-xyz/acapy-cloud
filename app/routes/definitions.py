@@ -27,7 +27,7 @@ from app.util.definitions import (
     credential_schema_from_acapy,
 )
 from app.util.retry_method import coroutine_with_retry
-from app.util.tenants import get_wallet_type
+from app.util.wallet_type_checks import get_wallet_type
 from shared.log_config import get_logger
 
 logger = get_logger(__name__)

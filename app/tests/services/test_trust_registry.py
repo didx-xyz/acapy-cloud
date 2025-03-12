@@ -58,7 +58,18 @@ async def test_assert_valid_issuer(
     mocked_client_get_schema.get = AsyncMock(return_value=response_schema)
     patch_client_schema.return_value.__aenter__.return_value = mocked_client_get_schema
 
+    # Valid issuer and schema
     await assert_valid_issuer(did=did, schema_id=schema_id)
+
+    # Schema is not registered in registry
+    not_found_response = HTTPException(status_code=404)
+    mocked_client_get_schema.get = AsyncMock(side_effect=not_found_response)
+    patch_client_schema.return_value.__aenter__.return_value = mocked_client_get_schema
+    with pytest.raises(
+        TrustRegistryException,
+        match=f"Schema with id {schema_id} is not registered in trust registry.",
+    ):
+        await assert_valid_issuer(did=did, schema_id=schema_id)
 
     # No actor with specified did
     mocked_client_get_did.get = AsyncMock(return_value=Response(404))
@@ -66,18 +77,19 @@ async def test_assert_valid_issuer(
         await assert_valid_issuer(did=did, schema_id=schema_id)
 
     # Actor does not have required role 'issuer'
-    mocked_client_get_schema.get = AsyncMock(
-        return_value=Response(
-            200, json={"id": "actor-id", "roles": ["verifier"], "did": did}
-        )
+    actor_without_issuer_role = Actor(
+        id="actor-id", roles=["verifier"], did=did, name="abc"
     )
-    with pytest.raises(TrustRegistryException):
-        await assert_valid_issuer(did=did, schema_id=schema_id)
-
-    # Schema is not registered in registry
-    not_found_response = Response(status_code=404)
-    mocked_client_get_schema.get = AsyncMock(return_value=not_found_response)
-    with pytest.raises(TrustRegistryException):
+    response_actor_without_issuer_role = Response(
+        200, json=actor_without_issuer_role.model_dump()
+    )
+    mocked_client_get_did.get = AsyncMock(
+        return_value=response_actor_without_issuer_role
+    )
+    with pytest.raises(
+        TrustRegistryException,
+        match="Actor actor-id does not have required role 'issuer'.",
+    ):
         await assert_valid_issuer(did=did, schema_id=schema_id)
 
 

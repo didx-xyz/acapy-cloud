@@ -1,9 +1,10 @@
-from typing import Optional, Tuple
+from typing import Literal, Optional, Tuple
 
 from aiocache import SimpleMemoryCache, cached
 from aries_cloudcontroller import (
     AcaPyClient,
     GetDIDEndpointResponse,
+    GetSchemaResult,
     SchemaGetResult,
     TAAAccept,
     TAAInfo,
@@ -154,11 +155,13 @@ async def accept_taa_if_required(aries_controller: AcaPyClient) -> None:
         )
 
 
-# Grab cred_def_id from args to use as cache-key
-# Looks like function itself is at args[0] hence args[2] for cred_def_id
+# Use the cred_def_id from args as cache-key
+# The function itself is at args[0], so args[2] refers to cred_def_id
 @cached(cache=SimpleMemoryCache, key_builder=lambda *args: args[2])
 async def schema_id_from_credential_definition_id(
-    controller: AcaPyClient, credential_definition_id: str
+    controller: AcaPyClient,
+    credential_definition_id: str,
+    wallet_type: Literal["askar", "askar-anoncreds"],
 ) -> str:
     """
     From a credential definition, get the identifier for its schema.
@@ -192,13 +195,28 @@ async def schema_id_from_credential_definition_id(
     seq_no = tokens[3]
 
     bound_logger.debug("Fetching schema using sequence number: `{}`", seq_no)
-    schema: SchemaGetResult = await handle_acapy_call(
-        logger=logger, acapy_call=controller.schema.get_schema, schema_id=seq_no
-    )
+    if wallet_type == "askar":
+        schema_indy: SchemaGetResult = await handle_acapy_call(
+            logger=logger,
+            acapy_call=controller.schema.get_schema,
+            schema_id=seq_no,
+        )
+        if not schema_indy.var_schema or not schema_indy.var_schema.id:
+            bound_logger.warning("No schema found with sequence number: `{}`.", seq_no)
+            raise CloudApiException(f"Schema with id {seq_no} not found.", 404)
+        schema_id = schema_indy.var_schema.id
 
-    if not schema.var_schema or not schema.var_schema.id:
-        bound_logger.warning("No schema found with sequence number: `{}`.", seq_no)
-        raise CloudApiException(f"Schema with id {seq_no} not found.", 404)
+    else:  # wallet_type == "askar-anoncreds"
+        schema: GetSchemaResult = await handle_acapy_call(
+            logger=logger,
+            acapy_call=controller.anoncreds_schemas.get_schema,
+            schema_id=seq_no,
+        )
+
+        if not schema.schema_id:
+            bound_logger.warning("No schema found with sequence number: `{}`.", seq_no)
+            raise CloudApiException(f"Schema with id {seq_no} not found.", 404)
+        schema_id = schema.schema_id
 
     bound_logger.debug("Successfully obtained schema id from credential definition.")
-    return schema.var_schema.id
+    return schema_id
