@@ -762,6 +762,38 @@ async def test_get_credentials_by_proof_id(
 
 
 @pytest.mark.anyio
+async def test_get_credentials_by_proof_id_exception(
+    mock_agent_controller: AcaPyClient,
+    mock_context_managed_controller: MockContextManagedController,
+    mock_tenant_auth: AcaPyAuth,
+    mocker: MockerFixture,
+):
+    mocker.patch.object(
+        test_module,
+        "client_from_auth",
+        return_value=mock_context_managed_controller(mock_agent_controller),
+    )
+
+    # V2
+    when(VerifierV2).get_credentials_by_proof_id(
+        controller=mock_agent_controller,
+        proof_id="v2-abcd",
+        referent=None,
+        limit=100,
+        offset=0,
+    ).thenRaise(CloudApiException("ERROR"))
+
+    with pytest.raises(CloudApiException, match="500: ERROR"):
+        await test_module.get_credentials_by_proof_id(
+            proof_id="v2-abcd",
+            auth=mock_tenant_auth,
+            referent=None,
+            limit=100,
+            offset=0,
+        )
+
+
+@pytest.mark.anyio
 async def test_get_credentials_by_proof_id_bad_limit():
     client = TestClient(app)
 
