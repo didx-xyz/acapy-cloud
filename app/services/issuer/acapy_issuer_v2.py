@@ -78,7 +78,7 @@ class IssuerV2(Issuer):
 
         else:
             raise CloudApiException(
-                f"Unsupported credential type: {credential.type}", status_code=501
+                f"Unsupported credential type: {credential.type.value}", status_code=501
             )
 
         bound_logger.debug("Issue v2 credential (automated)")
@@ -140,7 +140,7 @@ class IssuerV2(Issuer):
 
         else:
             raise CloudApiException(
-                f"Unsupported credential type: {credential.type}", status_code=501
+                f"Unsupported credential type: {credential.type.value}", status_code=501
             )
 
         bound_logger.debug("Creating v2 credential offer")
@@ -201,6 +201,7 @@ class IssuerV2(Issuer):
         )
 
         if not record.cred_ex_record:
+            bound_logger.error("Stored record has no credential exchange record.")
             raise CloudApiException("Stored record has no credential exchange record.")
 
         bound_logger.debug(
@@ -281,6 +282,7 @@ class IssuerV2(Issuer):
         )
 
         if not record.cred_ex_record:
+            bound_logger.error("Record has no credential exchange record.")
             raise CloudApiException("Record has no credential exchange record.")
 
         bound_logger.debug("Returning v2 credential record as CredentialExchange.")
