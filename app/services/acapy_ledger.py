@@ -201,7 +201,7 @@ async def schema_id_from_credential_definition_id(
             acapy_call=controller.schema.get_schema,
             schema_id=seq_no,
         )
-        if not schema_indy.var_schema.id:
+        if not schema_indy.var_schema or not schema_indy.var_schema.id:
             bound_logger.warning("No schema found with sequence number: `{}`.", seq_no)
             raise CloudApiException(f"Schema with id {seq_no} not found.", 404)
         schema_id = schema_indy.var_schema.id
