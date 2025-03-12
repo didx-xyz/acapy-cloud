@@ -458,6 +458,29 @@ async def test_delete_proof(
 
 
 @pytest.mark.anyio
+async def test_delete_proof_exception(
+    mock_agent_controller: AcaPyClient,
+    mock_context_managed_controller: MockContextManagedController,
+    mock_tenant_auth: AcaPyAuth,
+    mocker: MockerFixture,
+):
+    mocker.patch.object(
+        test_module,
+        "client_from_auth",
+        return_value=mock_context_managed_controller(mock_agent_controller),
+    )
+
+    when(VerifierV2).delete_proof(
+        controller=mock_agent_controller, proof_id="v2-1234"
+    ).thenRaise(CloudApiException("ERROR"))
+
+    with pytest.raises(CloudApiException, match="500: ERROR") as exc:
+        await test_module.delete_proof(proof_id="v2-1234", auth=mock_tenant_auth)
+
+    assert exc.value.status_code == 500
+
+
+@pytest.mark.anyio
 async def test_get_proof_record(
     mock_agent_controller: AcaPyClient,
     mock_context_managed_controller: MockContextManagedController,
