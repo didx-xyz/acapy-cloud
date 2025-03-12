@@ -1,11 +1,20 @@
 import asyncio
-from unittest.mock import AsyncMock, MagicMock
+from logging import Logger
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from aries_cloudcontroller import ConnRecord, TransactionRecord
+from aries_cloudcontroller import (
+    AcaPyClient,
+    ConnRecord,
+    InvitationMessage,
+    InvitationRecord,
+    TransactionRecord,
+)
 
+from app.exceptions import CloudApiException
 from app.services.onboarding.util.register_issuer_did import (
     wait_endorser_connection_completed,
+    wait_for_connection_completion,
     wait_transactions_endorsed,
 )
 
@@ -214,3 +223,63 @@ async def test_wait_issuer_did_transaction_endorsed_max_retries_no_ack():
     logger.error.assert_called_with(
         "Maximum number of retries exceeded while waiting for transaction ack"
     )
+
+
+@pytest.mark.anyio
+async def test_wait_issuer_did_transaction_endorsed_no_transactions():
+    logger = MagicMock()
+    issuer_controller = MagicMock()
+
+    issuer_controller.endorse_transaction.get_records = AsyncMock(
+        return_value=MagicMock(results=[])
+    )
+
+    with pytest.raises(asyncio.TimeoutError):
+        await wait_transactions_endorsed(
+            issuer_controller=issuer_controller,
+            issuer_connection_id="test_id",
+            logger=logger,
+            max_attempts=15,
+            retry_delay=0.01,
+        )
+
+    assert issuer_controller.endorse_transaction.get_records.call_count == 15
+    logger.error.assert_called_with(
+        "Maximum number of retries exceeded with exception. Failing."
+    )
+
+
+@pytest.mark.anyio
+async def test_wait_for_connection_completion_timeout():
+    # Setup
+    issuer_controller = MagicMock()
+    issuer_controller.out_of_band.receive_invitation = AsyncMock()
+    endorser_controller = MagicMock(spec=AcaPyClient)
+    invitation = InvitationRecord(invitation=InvitationMessage())
+    logger = MagicMock(spec=Logger)
+
+    # Mock the wait_endorser_connection_completed to raise a TimeoutError
+    with patch(
+        "app.services.onboarding.util.register_issuer_did.wait_endorser_connection_completed",
+        new_callable=AsyncMock,
+    ) as mock_wait_endorser_connection_completed:
+        mock_wait_endorser_connection_completed.side_effect = asyncio.TimeoutError
+
+        # Test and assert
+        with pytest.raises(CloudApiException) as exc:
+            await wait_for_connection_completion(
+                issuer_controller=issuer_controller,
+                endorser_controller=endorser_controller,
+                invitation=invitation,
+                logger=logger,
+            )
+
+        # Assertions
+        assert (
+            exc.value.detail
+            == "Timeout occurred while waiting for connection with endorser to complete."
+        )
+        assert exc.value.status_code == 504
+        logger.error.assert_called_with(
+            "Waiting for invitation complete event has timed out."
+        )
