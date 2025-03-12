@@ -1,4 +1,7 @@
 from aries_cloudcontroller import (
+    AnoncredsPresentationReqAttrSpec,
+    AnoncredsPresentationRequest,
+    AnoncredsPresentationRequestNonRevoked,
     AttachDecorator,
     AttachDecoratorData,
     DIFProofRequest,
