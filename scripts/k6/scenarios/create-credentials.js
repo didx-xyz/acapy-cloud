@@ -12,6 +12,7 @@ import {
   getCredentialIdByThreadId,
   getWalletIndex,
   retry,  // Add this import
+  genericPolling,
 } from "../libs/functions.js";
 
 const vus = Number.parseInt(__ENV.VUS, 10);
@@ -126,7 +127,7 @@ export default function (data) {
   // console.log(`Holer access token: ${wallet.holder_access_token}`);
   // console.log(`Wallet ID: ${wallet.wallet_id}`);
 
-  const waitForSSEEventResponse = genericWaitForSSEEvent({
+  const waitForSSEEventResponse = genericPolling({
     accessToken: wallet.access_token,
     walletId: wallet.wallet_id,
     threadId: threadId,
@@ -134,7 +135,8 @@ export default function (data) {
     sseUrlPath: "credentials/thread_id",
     topic: "credentials",
     expectedState: "offer-received",
-    maxDuration: 10,
+    maxAttempts: 10,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
+    lookBack: 60,
     sseTag: "credential_offer_received",
   });
 

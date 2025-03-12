@@ -14,6 +14,7 @@ import {
   getIssuerPublicDid,
   createDidExchangeRequest,
   getIssuerConnectionId,
+  genericPolling,
 } from "../libs/functions.js";
 import { bootstrapIssuer } from "../libs/setup.js";
 // import bootstrapIssuer from "./bootstrap-issuer.js";
@@ -104,7 +105,12 @@ export default function (data) {
 
   // console.log(`VU: ${__VU}, Iteration: ${__ITER}, Wallet Index: ${walletIndex}, Issuer Index: ${issuerIndex}, Issuer Wallet ID: ${issuer.walletId}`);
 
+  let holderConnectionId;
+  let issuerConnectionId;
+  let invitationObj;
+
   if (useDidExchange) {
+    // console.log(`Using DID Exchange`);
     let publicDidResponse;
     try {
       publicDidResponse = retry(() => {
@@ -159,7 +165,29 @@ export default function (data) {
     const { my_did: holderDid, connection_id: holderConnectionId } =
       JSON.parse(createInvitationResponse.body);
 
-    const waitForSSEEventResponse = genericWaitForSSEEvent({
+    // const waitForSSEEventResponse = genericWaitForSSEEvent({
+    //   accessToken: wallet.access_token,
+    //   walletId: wallet.wallet_id,
+    //   threadId: holderConnectionId,
+    //   eventType: "completed",
+    //   sseUrlPath: "connections/connection_id",
+    //   topic: "connections",
+    //   expectedState: "completed",
+    //   maxDuration: 60,
+    //   // maxRetries: 30,
+    //   // retryDelay: 2,
+    //   // lookBack: 20,
+    //   sseTag: "connection_ready",
+    // });
+
+    // const sseEventError = "SSE event was not received successfully";
+    // const sseCheckMessage = "SSE Event received successfully: connection-ready";
+
+    // check(waitForSSEEventResponse, {
+    //   [sseCheckMessage]: (r) => r === true
+    // });
+
+    const waitForSSEEventResponse = genericPolling({
       accessToken: wallet.access_token,
       walletId: wallet.wallet_id,
       threadId: holderConnectionId,
@@ -167,16 +195,16 @@ export default function (data) {
       sseUrlPath: "connections/connection_id",
       topic: "connections",
       expectedState: "completed",
-      maxDuration: 60,
-      // maxRetries: 30,
-      // retryDelay: 2,
-      // lookBack: 20,
-      sseTag: "connection_ready",
+      maxAttempts: 3,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
+      lookBack: 60,
+      // Pass through the tag for metrics/tracing
+      sseTag: "connection_ready"
     });
 
     const sseEventError = "SSE event was not received successfully";
     const sseCheckMessage = "SSE Event received successfully: connection-ready";
 
+    // Check if the polling was successful, maintaining the same check structure
     check(waitForSSEEventResponse, {
       [sseCheckMessage]: (r) => r === true
     });
@@ -199,7 +227,7 @@ export default function (data) {
       getIssuerConnectionIdResponse = e.response || e;
     }
 
-    const [{ connection_id: issuerConnectionId }] = JSON.parse(getIssuerConnectionIdResponse.body);
+    [{ connection_id: issuerConnectionId }] = JSON.parse(getIssuerConnectionIdResponse.body);
 
   } else {
     let createInvitationResponse;
@@ -225,8 +253,8 @@ export default function (data) {
         return true;
       },
     });
-    const { invitation: invitationObj, connection_id: issuerConnectionId } =
-      JSON.parse(createInvitationResponse.body);
+    ({ invitation: invitationObj, connection_id: issuerConnectionId } =
+      JSON.parse(createInvitationResponse.body));
 
     let acceptInvitationResponse;
     try {
@@ -259,26 +287,51 @@ export default function (data) {
       acceptInvitationResponse.body
     );
 
-    const waitForSSEEventResponse = genericWaitForSSEEvent({
+    // const waitForSSEEventResponse = genericWaitForSSEEvent({
+    //   accessToken: wallet.access_token,
+    //   walletId: wallet.wallet_id,
+    //   threadId: holderConnectionId,
+    //   eventType: "completed",
+    //   sseUrlPath: "connections/connection_id",
+    //   topic: "connections",
+    //   expectedState: "completed",
+    //   maxDuration: 60,
+    //   // maxRetries: 30,
+    //   // retryDelay: 2,
+    //   // lookBack: 20,
+    //   sseTag: "connection_ready",
+    // });
+
+    // const sseCheckMessage = "SSE Event received successfully: connection-ready";
+
+    // check(waitForSSEEventResponse, {
+    //   [sseCheckMessage]: (r) => r === true
+    // });
+
+    // Using the new HTTP polling function instead of SSE
+    const pollResult = genericPolling({
       accessToken: wallet.access_token,
       walletId: wallet.wallet_id,
       threadId: holderConnectionId,
       eventType: "completed",
-      sseUrlPath: "connections/connection_id",
+      sseUrlPath: "connections/connection_id",  // Preserved the original path structure
       topic: "connections",
       expectedState: "completed",
-      maxDuration: 60,
-      // maxRetries: 30,
-      // retryDelay: 2,
-      // lookBack: 20,
-      sseTag: "connection_ready",
+      maxAttempts: 3,  // Will use the default backoff strategy: 0.5s, 1s, 2s, 5s, 10s, 15s
+      lookBack: 60
     });
 
-    const sseCheckMessage = "SSE Event received successfully: connection-ready";
+    const checkMessage = "Connection completed event detected successfully";
 
-    check(waitForSSEEventResponse, {
-      [sseCheckMessage]: (r) => r === true
+    // Check if the polling was successful
+    check(pollResult, {
+      [checkMessage]: (r) => r === true
     });
+
+    // Optionally, you can also record how many attempts it took
+    // if (pollResult.success) {
+    //   console.log(`Event found after ${pollResult.attempts} polling attempts`);
+    // }
 
   }
 

@@ -32,8 +32,8 @@ calculate_create_creds_load() {
   local base_vus=$1
   local base_iters=$2
 
-  export VUS=$((base_vus / 2))
-  export ITERATIONS=$((base_iters * 2))
+  export VUS=$((base_vus / 3))
+  export ITERATIONS=$((base_iters * 3))
 
   log "Adjusted load for create credentials - VUs: ${VUS}, Iterations: ${ITERATIONS}"
 }
@@ -60,7 +60,7 @@ create_holders() {
 
   export ISSUER_PREFIX="${issuer_prefix}"
   export HOLDER_PREFIX="${holder_prefix}"
-  export SLEEP_DURATION=0.1
+  export SLEEP_DURATION=0
   xk6 run -o output-statsd ./scenarios/create-holders.js
 }
 
