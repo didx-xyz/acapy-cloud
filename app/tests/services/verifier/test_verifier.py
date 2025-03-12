@@ -617,6 +617,92 @@ async def test_get_proof_records(
 
 
 @pytest.mark.anyio
+async def test_get_proof_records_exception(
+    mock_agent_controller: AcaPyClient,
+    mock_context_managed_controller: MockContextManagedController,
+    mock_tenant_auth: AcaPyAuth,
+    mocker: MockerFixture,
+):
+    mocker.patch.object(
+        test_module,
+        "client_from_auth",
+        return_value=mock_context_managed_controller(mock_agent_controller),
+    )
+    with when(VerifierV2).get_proof_records(
+        controller=mock_agent_controller,
+        limit=100,
+        offset=0,
+        order_by="id",
+        descending=True,
+        connection_id=None,
+        role=None,
+        state=None,
+        thread_id=None,
+    ).thenRaise(CloudApiException("ERROR")):
+        with pytest.raises(CloudApiException, match="500: ERROR"):
+            await test_module.get_proof_records(
+                auth=mock_tenant_auth,
+                limit=100,
+                offset=0,
+                order_by="id",
+                descending=True,
+                connection_id=None,
+                role=None,
+                state=None,
+                thread_id=None,
+            )
+
+
+@pytest.mark.anyio
+async def test_get_proof_records_no_result(
+    mock_agent_controller: AcaPyClient,
+    mock_context_managed_controller: MockContextManagedController,
+    mock_tenant_auth: AcaPyAuth,
+    mocker: MockerFixture,
+):
+    mocker.patch.object(
+        test_module,
+        "client_from_auth",
+        return_value=mock_context_managed_controller(mock_agent_controller),
+    )
+    with when(VerifierV2).get_proof_records(
+        controller=mock_agent_controller,
+        limit=100,
+        offset=0,
+        order_by="id",
+        descending=True,
+        connection_id=None,
+        role=None,
+        state=None,
+        thread_id=None,
+    ).thenReturn(to_async(None)):
+        result = await test_module.get_proof_records(
+            auth=mock_tenant_auth,
+            limit=100,
+            offset=0,
+            order_by="id",
+            descending=True,
+            connection_id=None,
+            role=None,
+            state=None,
+            thread_id=None,
+        )
+
+        assert result is None
+        verify(VerifierV2).get_proof_records(
+            controller=mock_agent_controller,
+            limit=100,
+            offset=0,
+            order_by="id",
+            descending=True,
+            connection_id=None,
+            role=None,
+            state=None,
+            thread_id=None,
+        )
+
+
+@pytest.mark.anyio
 async def test_get_credentials_by_proof_id(
     mock_agent_controller: AcaPyClient,
     mock_context_managed_controller: MockContextManagedController,
