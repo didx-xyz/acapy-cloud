@@ -19,7 +19,7 @@ from app.util.pagination import (
     order_by_query_parameter,
 )
 from app.util.save_exchange_record import save_exchange_record_query
-from app.util.tenants import get_wallet_type
+from app.util.wallet_type_checks import get_wallet_type
 from shared.log_config import get_logger
 from shared.models.credential_exchange import CredentialExchange, Role, State
 
