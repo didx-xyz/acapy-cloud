@@ -155,10 +155,6 @@ helm upgrade --install acapy-regression-test \
   ./helm/acapy-test
 ```
 
-> [!NOTE]
-> At the time of writing, if you are running tests on an ARM based machine, it is
-> expected that `bbs` tests will fail as `bbs` is not currently supported on ARM.
-
 ## CI/CD
 
 Please, refer to the [CI/CD docs](./.github/workflows/README.md) for more

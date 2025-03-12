@@ -1,5 +1,4 @@
-ARG BBS_SUFFIX="-bbs"
-FROM ghcr.io/didx-xyz/acapy-agent${BBS_SUFFIX}:py3.12-1.2.1-20250306
+FROM ghcr.io/didx-xyz/acapy-agent:py3.12-1.2.1-20250306
 
 USER root
 
