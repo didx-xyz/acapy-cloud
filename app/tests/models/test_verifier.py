@@ -98,6 +98,15 @@ def test_accept_proof_request_model():
         dif_presentation_spec=DIFPresSpec(),
     )
 
+    AcceptProofRequest(
+        proof_id="abc",
+        anoncreds_presentation_spec=IndyPresSpec(
+            requested_attributes={},
+            requested_predicates={},
+            self_attested_attributes={},
+        ),
+    )
+
     with pytest.raises(CloudApiValueError) as exc:
         AcceptProofRequest(type=ProofRequestType.INDY, indy_presentation_spec=None)
     assert exc.value.detail == (
@@ -107,6 +116,13 @@ def test_accept_proof_request_model():
         AcceptProofRequest(type=ProofRequestType.LD_PROOF, dif_presentation_spec=None)
     assert exc.value.detail == (
         "dif_presentation_spec must be populated if `ld_proof` type is selected"
+    )
+    with pytest.raises(CloudApiValueError) as exc:
+        AcceptProofRequest(
+            type=ProofRequestType.ANONCREDS, anoncreds_presentation_spec=None
+        )
+    assert exc.value.detail == (
+        "anoncreds_proof_request must be populated if `anoncreds` type is selected"
     )
 
 
