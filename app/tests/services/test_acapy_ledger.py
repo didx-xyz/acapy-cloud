@@ -116,11 +116,11 @@ async def test_schema_id_from_credential_definition_id_caching(
 
     # First call
     result1 = await schema_id_from_credential_definition_id(
-        mock_agent_controller, cred_def_id
+        mock_agent_controller, cred_def_id, "askar"
     )
     # Second call with same cred_def_id
     result2 = await schema_id_from_credential_definition_id(
-        mock_agent_controller, cred_def_id
+        mock_agent_controller, cred_def_id, "askar"
     )
 
     # Assert results are the same
@@ -150,7 +150,7 @@ async def test_schema_id_from_credential_definition_id_caching(
     )
     # Second call with same cred_def_id
     result4 = await schema_id_from_credential_definition_id(
-        mock_agent_controller, cred_def_id_old
+        mock_agent_controller, cred_def_id_old, "askar"
     )
 
     # Assert results are the same
