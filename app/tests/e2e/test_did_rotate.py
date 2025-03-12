@@ -16,6 +16,7 @@ CONNECTIONS_BASE_PATH = connections_router.prefix
 @pytest.mark.anyio
 @pytest.mark.parametrize("did_method", ["did:peer:2", "did:peer:4"])
 @pytest.mark.xdist_group(name="issuer_test_group")
+@pytest.mark.filterwarnings("ignore:DeprecationWarning")  # options is deprecated
 async def test_rotate_did(
     alice_member_client: RichAsyncClient,
     alice_acapy_client: AcaPyClient,
