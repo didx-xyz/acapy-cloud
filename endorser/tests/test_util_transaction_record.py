@@ -2,7 +2,7 @@ import json
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from aries_cloudcontroller import AdminConfig, TransactionRecord
+from aries_cloudcontroller import TransactionRecord
 
 from endorser.services.endorser_config import EndorserConfig
 from endorser.util.transaction_record import (
@@ -107,22 +107,39 @@ def test_is_credential_definition_transaction_exception():
 
 
 @pytest.mark.anyio
-async def test_get_did_and_schema_id_from_cred_def_attachment(mock_acapy_client):
-    mock_acapy_client.schema.get_schema.return_value = MagicMock(
-        var_schema=MagicMock(id="schema_id")
-    )
-    mock_acapy_client.server.get_config.return_value = AdminConfig(
-        config={"wallet.type": "askar"}
-    )
+@pytest.mark.parametrize("wallet_type", ["askar", "askar-anoncreds"])
+async def test_get_did_and_schema_id_from_cred_def_attachment(
+    mock_acapy_client, wallet_type
+):
+    if wallet_type == "askar":
+        mock_acapy_client.schema.get_schema.return_value = MagicMock(
+            var_schema=MagicMock(id="schema_id")
+        )
+    else:
+        mock_acapy_client.anoncreds_schemas.get_schema.return_value = MagicMock(
+            schema_id="schema_id"
+        )
 
-    did, schema_id = await get_did_and_schema_id_from_cred_def_attachment(
-        mock_acapy_client,
-        {"identifier": "identifier_value", "operation": {"ref": "ref_value"}},
-    )
+    # Patch the EndorserConfig singleton
+    with patch.object(
+        EndorserConfig, "wallet_type", new_callable=Mock(return_value=wallet_type)
+    ):
+        did, schema_id = await get_did_and_schema_id_from_cred_def_attachment(
+            mock_acapy_client,
+            {"identifier": "identifier_value", "operation": {"ref": "ref_value"}},
+        )
 
     assert did == "did:sov:identifier_value"
     assert schema_id == "schema_id"
-    mock_acapy_client.schema.get_schema.assert_awaited_once_with(schema_id="ref_value")
+
+    if wallet_type == "askar":
+        mock_acapy_client.schema.get_schema.assert_awaited_once_with(
+            schema_id="ref_value"
+        )
+    else:
+        mock_acapy_client.anoncreds_schemas.get_schema.assert_awaited_once_with(
+            schema_id="ref_value"
+        )
 
 
 @pytest.mark.anyio
@@ -153,8 +170,8 @@ async def test_is_credential_definition_transaction_fail_no_ref():
     )
 
 
-@pytest.mark.parametrize("wallet_type", ["askar", "askar-anoncreds"])
 @pytest.mark.anyio
+@pytest.mark.parametrize("wallet_type", ["askar", "askar-anoncreds"])
 async def test_get_did_and_schema_id_from_cred_def_attachment_fail_no_var_schema_id(
     mock_acapy_client,
     wallet_type,
