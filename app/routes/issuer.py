@@ -93,6 +93,10 @@ async def send_credential(
                 "AnonCreds credentials can only be issued by an askar-anoncreds wallet",
                 400,
             )
+        if credential.type == CredentialType.INDY and wallet_type == "askar-anoncreds":
+            raise CloudApiException(
+                "Indy credentials can only be issued by an askar wallet", 400
+            )
 
         schema_id = None
         if credential.type == CredentialType.INDY:
@@ -195,6 +199,10 @@ async def create_offer(
             raise CloudApiException(
                 "AnonCreds credentials can only be issued by an askar-anoncreds wallet",
                 400,
+            )
+        if credential.type == CredentialType.INDY and wallet_type == "askar-anoncreds":
+            raise CloudApiException(
+                "Indy credentials can only be issued by an askar wallet", 400
             )
 
         schema_id = None

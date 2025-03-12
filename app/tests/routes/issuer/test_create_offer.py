@@ -96,6 +96,16 @@ async def test_create_offer_success(credential, wallet_type):
                 exc.value.detail
                 == "AnonCreds credentials can only be issued by an askar-anoncreds wallet"
             )
+        elif (
+            credential.type == CredentialType.INDY and wallet_type == "askar-anoncreds"
+        ):
+            with pytest.raises(CloudApiException) as exc:
+                await create_offer(credential=credential, auth="mocked_auth")
+            assert exc.value.status_code == 400
+            assert (
+                exc.value.detail
+                == "Indy credentials can only be issued by an askar wallet"
+            )
         else:
             await create_offer(credential=credential, auth="mocked_auth")
 
