@@ -395,6 +395,44 @@ async def test_reject_proof_request(
 
 
 @pytest.mark.anyio
+async def test_reject_proof_request_bad_state(
+    mock_agent_controller: AcaPyClient,
+    mock_context_managed_controller: MockContextManagedController,
+    mock_tenant_auth: AcaPyAuth,
+    mocker: MockerFixture,
+):
+    mocker.patch.object(
+        test_module,
+        "client_from_auth",
+        return_value=mock_context_managed_controller(mock_agent_controller),
+    )
+
+    proof_request_v2 = test_module.RejectProofRequest(
+        proof_id="v2-1234", problem_report="rejected"
+    )
+
+    presentation_exchange_record_2.state = "done"
+    when(VerifierV2).get_proof_record(
+        controller=mock_agent_controller, proof_id=proof_request_v2.proof_id
+    ).thenReturn(to_async(presentation_exchange_record_2))
+
+    with pytest.raises(
+        CloudApiException,
+        match="400: Proof record must be in state `request-received` to reject; record has state: `done`.",
+    ):
+        await test_module.reject_proof_request(
+            body=test_module.RejectProofRequest(
+                proof_id="v2-1234", problem_report="rejected"
+            ),
+            auth=mock_tenant_auth,
+        )
+
+    verify(VerifierV2).get_proof_record(
+        controller=mock_agent_controller, proof_id=proof_request_v2.proof_id
+    )
+
+
+@pytest.mark.anyio
 async def test_delete_proof(
     mock_agent_controller: AcaPyClient,
     mock_context_managed_controller: MockContextManagedController,
