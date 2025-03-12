@@ -26,7 +26,7 @@ async def test_send_credential(
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
 ):
-    with patch("app.routes.issuer.get_wallet_type", return_value="askar"):
+    with patch("app.util.valid_issuer.get_wallet_type", return_value="askar"):
         cred_ex = mock(CredentialExchange)
 
         mocker.patch.object(
@@ -40,7 +40,7 @@ async def test_send_credential(
             mock_agent_controller, cred_def_id, "askar"
         ).thenReturn(to_async("schema_id"))
         when(IssuerV2).send_credential(...).thenReturn(to_async(cred_ex))
-        when(test_module).assert_public_did(...).thenReturn(to_async(did))
+        when("app.util.valid_issuer").assert_public_did(...).thenReturn(to_async(did))
 
         credential = test_module.SendCredential(
             connection_id="conn_id",
@@ -57,14 +57,14 @@ async def test_send_credential(
         verify(test_module).schema_id_from_credential_definition_id(
             mock_agent_controller, cred_def_id, "askar"
         )
-        verify(test_module).assert_public_did(mock_agent_controller)
+        verify("app.util.valid_issuer").assert_public_did(mock_agent_controller)
         verify(test_module).assert_valid_issuer(did, "schema_id")
 
         request_info = mock(RequestInfo)
         request_info.real_url = "www.real.co.za"
 
         when(test_module).assert_valid_issuer(...).thenReturn(to_async(True))
-        when(test_module).assert_public_did(...).thenReturn(to_async(did))
+        when("app.util.valid_issuer").assert_public_did(...).thenReturn(to_async(did))
         when(test_module).schema_id_from_credential_definition_id(
             mock_agent_controller, cred_def_id, "askar"
         ).thenReturn(to_async("schema_id"))
@@ -321,8 +321,7 @@ async def test_create_offer(
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
 ):
-    with patch("app.routes.issuer.get_wallet_type", return_value="askar"):
-
+    with patch("app.util.valid_issuer.get_wallet_type", return_value="askar"):
         mocker.patch.object(
             test_module,
             "client_from_auth",
@@ -336,7 +335,7 @@ async def test_create_offer(
 
         when(IssuerV2).create_offer(...).thenReturn(to_async(v2_record))
 
-        when(test_module).assert_public_did(...).thenReturn(to_async(did))
+        when("app.util.valid_issuer").assert_public_did(...).thenReturn(to_async(did))
         when(test_module).assert_valid_issuer(...).thenReturn(to_async(True))
         await test_module.create_offer(v2_credential, mock_tenant_auth)
 

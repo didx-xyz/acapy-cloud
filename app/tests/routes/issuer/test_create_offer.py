@@ -73,13 +73,15 @@ async def test_create_offer_success(credential, wallet_type):
 
     with patch("app.routes.issuer.client_from_auth") as mock_client_from_auth, patch(
         "app.routes.issuer.IssuerV2", new=issuer
-    ), patch("app.routes.issuer.assert_public_did", return_value="public_did"), patch(
+    ), patch(
+        "app.util.valid_issuer.assert_public_did", return_value="public_did"
+    ), patch(
         "app.routes.issuer.schema_id_from_credential_definition_id",
         return_value="schema_id",
     ), patch(
         "app.routes.issuer.assert_valid_issuer"
     ), patch(
-        "app.routes.issuer.get_wallet_type", return_value=wallet_type
+        "app.util.valid_issuer.get_wallet_type", return_value=wallet_type
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -136,14 +138,14 @@ async def test_create_offer_fail_acapy_error(
     ) as mock_client_from_auth, pytest.raises(
         HTTPException, match=expected_detail
     ) as exc, patch(
-        "app.routes.issuer.assert_public_did", return_value="public_did"
+        "app.util.valid_issuer.assert_public_did", return_value="public_did"
     ), patch(
         "app.routes.issuer.schema_id_from_credential_definition_id",
         return_value="schema_id",
     ), patch(
         "app.routes.issuer.assert_valid_issuer"
     ), patch(
-        "app.routes.issuer.get_wallet_type", return_value="askar"
+        "app.util.valid_issuer.get_wallet_type", return_value="askar"
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -171,7 +173,7 @@ async def test_create_offer_fail_bad_public_did():
     mock_aries_controller.issue_credential_v2_0.issue_credential_automated = AsyncMock()
 
     with patch("app.routes.issuer.client_from_auth") as mock_client_from_auth, patch(
-        "app.routes.issuer.assert_public_did",
+        "app.util.valid_issuer.assert_public_did",
         AsyncMock(side_effect=CloudApiException(status_code=404, detail="Not found")),
     ), pytest.raises(
         HTTPException,
