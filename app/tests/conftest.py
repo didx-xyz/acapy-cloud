@@ -3,7 +3,7 @@
 import mockito
 import pytest
 
-from app.tests.fixtures.dids import register_issuer_key_bbs, register_issuer_key_ed25519
+from app.tests.fixtures.dids import register_issuer_key_ed25519
 from app.tests.fixtures.member_acapy_clients import (
     acme_acapy_client,
     alice_acapy_client,
