@@ -53,6 +53,22 @@ def sample_indy_proof_request(restrictions=None) -> IndyProofRequest:
     )
 
 
+def sample_anoncreds_proof_request(restrictions=None) -> AnoncredsPresentationRequest:
+    return AnoncredsPresentationRequest(
+        name="string",
+        non_revoked=AnoncredsPresentationRequestNonRevoked(),
+        nonce="12345",
+        requested_attributes={
+            "0_speed_uuid": AnoncredsPresentationReqAttrSpec(
+                name="speed",
+                restrictions=restrictions,
+            )
+        },
+        requested_predicates={},
+        version="1.0",
+    )
+
+
 dif_proof_request = DIFProofRequest(
     options=None, presentation_definition=PresentationDefinition()
 )
