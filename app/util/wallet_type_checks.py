@@ -5,6 +5,7 @@ from aries_cloudcontroller import AcaPyClient
 
 from app.dependencies.acapy_clients import get_tenant_admin_controller
 from app.exceptions import CloudApiException, handle_acapy_call
+from app.models.issuer import CredentialType
 from app.util.tenants import get_wallet_id_from_b64encoded_jwt
 
 
@@ -37,3 +38,17 @@ async def get_wallet_type(
             raise CloudApiException(status_code=401, detail="Invalid wallet type.")
 
         return wallet_type
+
+
+def assert_wallet_type_for_credential(
+    wallet_type: Literal["askar", "askar-anoncreds"], credential_type: CredentialType
+) -> None:
+    if credential_type == CredentialType.ANONCREDS and wallet_type != "askar-anoncreds":
+        raise CloudApiException(
+            "AnonCreds credentials can only be issued by an askar-anoncreds wallet",
+            400,
+        )
+    if credential_type == CredentialType.INDY and wallet_type == "askar-anoncreds":
+        raise CloudApiException(
+            "Indy credentials can only be issued by an askar wallet", 400
+        )

@@ -19,7 +19,10 @@ from app.util.pagination import (
     order_by_query_parameter,
 )
 from app.util.save_exchange_record import save_exchange_record_query
-from app.util.wallet_type_checks import get_wallet_type
+from app.util.wallet_type_checks import (
+    assert_wallet_type_for_credential,
+    get_wallet_type,
+)
 from shared.log_config import get_logger
 from shared.models.credential_exchange import CredentialExchange, Role, State
 
@@ -85,18 +88,7 @@ async def send_credential(
             ) from e
 
         wallet_type = await get_wallet_type(aries_controller, bound_logger)
-        if (
-            credential.type == CredentialType.ANONCREDS
-            and wallet_type != "askar-anoncreds"
-        ):
-            raise CloudApiException(
-                "AnonCreds credentials can only be issued by an askar-anoncreds wallet",
-                400,
-            )
-        if credential.type == CredentialType.INDY and wallet_type == "askar-anoncreds":
-            raise CloudApiException(
-                "Indy credentials can only be issued by an askar wallet", 400
-            )
+        assert_wallet_type_for_credential(wallet_type, credential.type)
 
         schema_id = None
         if credential.type == CredentialType.INDY:
@@ -192,18 +184,7 @@ async def create_offer(
             ) from e
 
         wallet_type = await get_wallet_type(aries_controller, bound_logger)
-        if (
-            credential.type == CredentialType.ANONCREDS
-            and wallet_type != "askar-anoncreds"
-        ):
-            raise CloudApiException(
-                "AnonCreds credentials can only be issued by an askar-anoncreds wallet",
-                400,
-            )
-        if credential.type == CredentialType.INDY and wallet_type == "askar-anoncreds":
-            raise CloudApiException(
-                "Indy credentials can only be issued by an askar wallet", 400
-            )
+        assert_wallet_type_for_credential(wallet_type, credential.type)
 
         schema_id = None
         if credential.type == CredentialType.INDY:
