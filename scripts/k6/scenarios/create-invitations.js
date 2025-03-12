@@ -11,6 +11,10 @@ import {
   genericWaitForSSEEvent,
   getWalletIndex,
   retry,
+  getIssuerPublicDid,
+  createDidExchangeRequest,
+  getIssuerConnectionId,
+  genericPolling,
 } from "../libs/functions.js";
 import { bootstrapIssuer } from "../libs/setup.js";
 // import bootstrapIssuer from "./bootstrap-issuer.js";
@@ -60,6 +64,7 @@ const inputFilepathIssuer = `../output/${issuerPrefix}-create-issuers.json`;
 const data = open(inputFilepath, "r");
 const dataIssuer = open(inputFilepathIssuer, "r");
 const outputFilepath = `output/${outputPrefix}-create-invitation.json`;
+const useDidExchange = __ENV.USE_DID_EXCHANGE === 'true';
 
 export function setup() {
   const bearerToken = getBearerToken();
@@ -68,18 +73,6 @@ export function setup() {
   file.writeString(outputFilepath, "");
 
   const walletName = issuerPrefix;
-  // const credDefTag = walletName;
-  // const issuers = bootstrapIssuer(
-  //   numIssuers,
-  //   walletName,
-  //   credDefTag,
-  //   schemaName,
-  //   schemaVersion
-  // );
-
-  // if (!issuers || issuers.length === 0) {
-  //   console.error("Failed to bootstrap issuers.");
-  // }
 
   return { bearerToken, issuers, holders };
 }
@@ -112,91 +105,242 @@ export default function (data) {
 
   // console.log(`VU: ${__VU}, Iteration: ${__ITER}, Wallet Index: ${walletIndex}, Issuer Index: ${issuerIndex}, Issuer Wallet ID: ${issuer.walletId}`);
 
-  let createInvitationResponse;
-  try {
-    createInvitationResponse = retry(() => {
-      const response = createInvitation(bearerToken, issuer.accessToken);
-      if (response.status !== 200) {
-        throw new Error(`Non-200 status: ${response.status}`);
-      }
-      return response;
-    }, 5, 2000);
-  } catch (e) {
-    console.error(`Failed after retries: ${e.message}`);
-    createInvitationResponse = e.response || e;
-  }
-  check(createInvitationResponse, {
-    "Invitation created successfully": (r) => {
-      if (r.status !== 200) {
-        throw new Error(
-          `Unexpected response status while create invitation:\nStatus: ${r.status}\nBody: ${r.body}`
-        );
-      }
-      return true;
-    },
-  });
-  const { invitation: invitationObj, connection_id: issuerConnectionId } =
-    JSON.parse(createInvitationResponse.body);
+  let holderConnectionId;
+  let issuerConnectionId;
+  let invitationObj;
 
-  let acceptInvitationResponse;
-  try {
-    acceptInvitationResponse = retry(() => {
-      const response = acceptInvitation(wallet.access_token, invitationObj);
-      if (response.status !== 200) {
-        throw new Error(`Non-200 status: ${response.status}`);
-      }
-      return response;
+  if (useDidExchange) {
+    // console.log(`Using DID Exchange`);
+    let publicDidResponse;
+    try {
+      publicDidResponse = retry(() => {
+        const response = getIssuerPublicDid(issuer.accessToken);
+        if (response.status !== 200) {
+          throw new Error(`publicDidResponse: Non-200 status: ${response.body}`);
+        }
+        return response;
+      }, 5, 2000);
+    } catch (e) {
+      console.error(`Failed after retries: ${e.message}`);
+      publicDidResponse = e.response || e;
     }
-    , 5, 2000);
-  }
-  catch (e) {
-    console.error(`Failed after retries: ${e.message}`);
-    createInvitationResponse = e.response || e;
-  }
 
-  check(acceptInvitationResponse, {
-    "Invitation accepted successfully": (r) => {
-      if (r.status !== 200) {
-        throw new Error(
-          `Unexpected response while accepting invitation: ${r.response}`
-        );
+    check(publicDidResponse, {
+      "Public DID retrieved successfully": (r) => {
+        if (r.status !== 200) {
+          throw new Error(
+            `Unexpected response status while getting public DID:\nStatus: ${r.status}\nBody: ${r.body}`
+          );
+        }
+        return true;
+      },
+    });
+
+    const { did: issuerPublicDid } = JSON.parse(publicDidResponse.body);
+
+
+    let createInvitationResponse;
+    try {
+      createInvitationResponse = retry(() => {
+        const response = createDidExchangeRequest(wallet.access_token, issuerPublicDid);
+        if (response.status !== 200) {
+          throw new Error(`createInvitationResponse Non-200 status: ${response.body}`);
+        }
+        return response;
+      }, 5, 2000);
+    } catch (e) {
+      console.error(`Failed after retries: ${e.message}`);
+      createInvitationResponse = e.response || e;
+    }
+    check(createInvitationResponse, {
+      "Invitation created successfully": (r) => {
+        if (r.status !== 200) {
+          throw new Error(
+            `Unexpected response status while create invitation:\nStatus: ${r.status}\nBody: ${r.body}`
+          );
+        }
+        return true;
+      },
+    });
+    const { my_did: holderDid, connection_id: holderConnectionId } =
+      JSON.parse(createInvitationResponse.body);
+
+    // const waitForSSEEventResponse = genericWaitForSSEEvent({
+    //   accessToken: wallet.access_token,
+    //   walletId: wallet.wallet_id,
+    //   threadId: holderConnectionId,
+    //   eventType: "completed",
+    //   sseUrlPath: "connections/connection_id",
+    //   topic: "connections",
+    //   expectedState: "completed",
+    //   maxDuration: 60,
+    //   // maxRetries: 30,
+    //   // retryDelay: 2,
+    //   // lookBack: 20,
+    //   sseTag: "connection_ready",
+    // });
+
+    // const sseEventError = "SSE event was not received successfully";
+    // const sseCheckMessage = "SSE Event received successfully: connection-ready";
+
+    // check(waitForSSEEventResponse, {
+    //   [sseCheckMessage]: (r) => r === true
+    // });
+
+    const waitForSSEEventResponse = genericPolling({
+      accessToken: wallet.access_token,
+      walletId: wallet.wallet_id,
+      threadId: holderConnectionId,
+      eventType: "completed",
+      sseUrlPath: "connections/connection_id",
+      topic: "connections",
+      expectedState: "completed",
+      maxAttempts: 3,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
+      lookBack: 60,
+      // Pass through the tag for metrics/tracing
+      sseTag: "connection_ready"
+    });
+
+    const sseEventError = "SSE event was not received successfully";
+    const sseCheckMessage = "SSE Event received successfully: connection-ready";
+
+    // Check if the polling was successful, maintaining the same check structure
+    check(waitForSSEEventResponse, {
+      [sseCheckMessage]: (r) => r === true
+    });
+
+    // Issuer is now going to check
+
+    let getIssuerConnectionIdResponse;
+    try {
+      getIssuerConnectionIdResponse = retry(() => {
+        const response = getIssuerConnectionId(issuer.accessToken, holderDid);
+        if (response.status !== 200) {
+          throw new Error(`getIssuerConnectionId Non-200 status: ${response.status} ${response.body}`);
+        }
+        return response;
       }
-      return true;
-    },
-  });
+      , 5, 2000);
+    }
+    catch (e) {
+      console.error(`Failed after retries: ${e.message}`);
+      getIssuerConnectionIdResponse = e.response || e;
+    }
 
-  const { connection_id: holderInvitationConnectionId } = JSON.parse(
-    acceptInvitationResponse.body
-  );
+    [{ connection_id: issuerConnectionId }] = JSON.parse(getIssuerConnectionIdResponse.body);
 
-  const waitForSSEEventResponse = genericWaitForSSEEvent({
-    accessToken: wallet.access_token,
-    walletId: wallet.wallet_id,
-    threadId: holderInvitationConnectionId,
-    eventType: "completed",
-    sseUrlPath: "connections/connection_id",
-    topic: "connections",
-    expectedState: "completed",
-    maxDuration: 60,
-    // maxRetries: 30,
-    // retryDelay: 2,
-    // lookBack: 20,
-    sseTag: "connection_ready",
-  });
+  } else {
+    let createInvitationResponse;
+    try {
+      createInvitationResponse = retry(() => {
+        const response = createInvitation(bearerToken, issuer.accessToken);
+        if (response.status !== 200) {
+          throw new Error(`Non-200 status: ${response.status}`);
+        }
+        return response;
+      }, 5, 2000);
+    } catch (e) {
+      console.error(`Failed after retries: ${e.message}`);
+      createInvitationResponse = e.response || e;
+    }
+    check(createInvitationResponse, {
+      "Invitation created successfully": (r) => {
+        if (r.status !== 200) {
+          throw new Error(
+            `Unexpected response status while create invitation:\nStatus: ${r.status}\nBody: ${r.body}`
+          );
+        }
+        return true;
+      },
+    });
+    ({ invitation: invitationObj, connection_id: issuerConnectionId } =
+      JSON.parse(createInvitationResponse.body));
 
-  const sseEventError = "SSE event was not received successfully";
-  const sseCheckMessage = "SSE Event received successfully: connection-ready";
+    let acceptInvitationResponse;
+    try {
+      acceptInvitationResponse = retry(() => {
+        const response = acceptInvitation(wallet.access_token, invitationObj);
+        if (response.status !== 200) {
+          throw new Error(`Non-200 status: ${response.status}`);
+        }
+        return response;
+      }
+      , 5, 2000);
+    }
+    catch (e) {
+      console.error(`Failed after retries: ${e.message}`);
+      createInvitationResponse = e.response || e;
+    }
 
-  check(waitForSSEEventResponse, {
-    [sseCheckMessage]: (r) => r === true
-  });
+    check(acceptInvitationResponse, {
+      "Invitation accepted successfully": (r) => {
+        if (r.status !== 200) {
+          throw new Error(
+            `Unexpected response while accepting invitation: ${r.response}`
+          );
+        }
+        return true;
+      },
+    });
+
+    const { connection_id: holderConnectionId } = JSON.parse(
+      acceptInvitationResponse.body
+    );
+
+    // const waitForSSEEventResponse = genericWaitForSSEEvent({
+    //   accessToken: wallet.access_token,
+    //   walletId: wallet.wallet_id,
+    //   threadId: holderConnectionId,
+    //   eventType: "completed",
+    //   sseUrlPath: "connections/connection_id",
+    //   topic: "connections",
+    //   expectedState: "completed",
+    //   maxDuration: 60,
+    //   // maxRetries: 30,
+    //   // retryDelay: 2,
+    //   // lookBack: 20,
+    //   sseTag: "connection_ready",
+    // });
+
+    // const sseCheckMessage = "SSE Event received successfully: connection-ready";
+
+    // check(waitForSSEEventResponse, {
+    //   [sseCheckMessage]: (r) => r === true
+    // });
+
+    // Using the new HTTP polling function instead of SSE
+    const pollResult = genericPolling({
+      accessToken: wallet.access_token,
+      walletId: wallet.wallet_id,
+      threadId: holderConnectionId,
+      eventType: "completed",
+      sseUrlPath: "connections/connection_id",  // Preserved the original path structure
+      topic: "connections",
+      expectedState: "completed",
+      maxAttempts: 3,  // Will use the default backoff strategy: 0.5s, 1s, 2s, 5s, 10s, 15s
+      lookBack: 60
+    });
+
+    const checkMessage = "Connection completed event detected successfully";
+
+    // Check if the polling was successful
+    check(pollResult, {
+      [checkMessage]: (r) => r === true
+    });
+
+    // Optionally, you can also record how many attempts it took
+    // if (pollResult.success) {
+    //   console.log(`Event found after ${pollResult.attempts} polling attempts`);
+    // }
+
+  }
 
   const holderData = JSON.stringify({
     wallet_label: wallet.wallet_label,
     wallet_name: wallet.wallet_name,
     wallet_id: wallet.wallet_id,
     access_token: wallet.access_token,
-    connection_id: holderInvitationConnectionId,
+    connection_id: holderConnectionId,
     issuer_connection_id: issuerConnectionId,
     issuer_wallet_name: issuer.walletName,
     issuer_wallet_id: issuer.walletId,

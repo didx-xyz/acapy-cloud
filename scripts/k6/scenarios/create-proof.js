@@ -13,6 +13,7 @@ import {
   getWalletIndex,
   sendProofRequest,
   retry,  // Add this import
+  genericPolling,
 } from "../libs/functions.js";
 
 const vus = Number.parseInt(__ENV.VUS, 10);
@@ -115,7 +116,7 @@ export default function (data) {
 
   const { thread_id: threadId } = JSON.parse(sendProofRequestResponse.body);
 
-  const waitForSSEEventReceivedResponse = genericWaitForSSEEvent({
+  const waitForSSEEventReceivedResponse = genericPolling({
     accessToken: wallet.access_token,
     walletId: wallet.wallet_id,
     threadId: threadId,
@@ -123,7 +124,8 @@ export default function (data) {
     sseUrlPath: "proofs/thread_id",
     topic: "proofs",
     expectedState: "request-received",
-    maxDuration: 10,
+    maxAttempts: 10,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
+    lookBack: 60,
     sseTag: "proof_request_received",
   });
 
@@ -179,7 +181,7 @@ export default function (data) {
   });
 
   // console.log(`Initiate wait for SSE event: done`);
-  const waitForSSEProofDoneRequest = genericWaitForSSEEvent({
+  const waitForSSEProofDoneRequest = genericPolling({
     accessToken: wallet.access_token,
     walletId: wallet.wallet_id,
     threadId: threadId,
@@ -187,7 +189,8 @@ export default function (data) {
     sseUrlPath: "proofs/thread_id",
     topic: "proofs",
     expectedState: "done",
-    maxDuration: 10,
+    maxAttempts: 10,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
+    lookBack: 60,
     sseTag: "proof_done",
   });
 
@@ -196,7 +199,7 @@ export default function (data) {
 
   check(waitForSSEProofDoneRequest, {
     [sseCheckMessageProofDone]: (r) => r === true
-});
+  });
 
   // check(waitForSSEProofDoneRequest, {
   //   "SSE Proof Request state: done": (r) => {
