@@ -312,6 +312,47 @@ async def test_accept_proof_request_v2_no_result(
     assert result is None
     verify(VerifierV2).accept_proof_request(...)
 
+
+@pytest.mark.anyio
+async def test_accept_proof_request_v2_no_connection(
+    mock_agent_controller: AcaPyClient,
+    mock_context_managed_controller: MockContextManagedController,
+    mock_tenant_auth: AcaPyAuth,
+    mocker: MockerFixture,
+):
+    presentation_exchange_record_no_conn = presentation_exchange_record_2.model_copy()
+    presentation_exchange_record_no_conn.connection_id = None
+    # V2
+    when(VerifierV2).accept_proof_request(...).thenReturn(
+        to_async(presentation_exchange_record_no_conn)
+    )
+    when(VerifierV2).get_proof_record(...).thenReturn(
+        to_async(presentation_exchange_record_no_conn)
+    )
+
+    presentation = test_module.AcceptProofRequest(
+        proof_id="v2-1234", indy_presentation_spec=indy_pres_spec
+    )
+
+    mocker.patch.object(
+        test_module,
+        "client_from_auth",
+        return_value=mock_context_managed_controller(mock_agent_controller),
+    )
+
+    mocker.patch.object(
+        test_module, "assert_valid_prover", new_callable=AsyncMock, return_value=None
+    )
+
+    result = await test_module.accept_proof_request(
+        body=presentation,
+        auth=mock_tenant_auth,
+    )
+
+    assert result is presentation_exchange_record_no_conn
+    verify(VerifierV2).accept_proof_request(...)
+
+
 @pytest.mark.anyio
 async def test_reject_proof_request(
     mock_agent_controller: AcaPyClient,
