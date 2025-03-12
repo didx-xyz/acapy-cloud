@@ -1,3 +1,4 @@
+from logging import Logger
 from typing import Dict, List, Optional
 
 from aries_cloudcontroller import (
@@ -44,42 +45,9 @@ class IssuerV2(Issuer):
             }
         )
 
-        credential_preview = None
-        # Determine the appropriate filter based on the type
-        if credential.type == CredentialType.INDY:
-            bound_logger.debug("Getting credential preview from attributes")
-            credential_preview = cls.__preview_from_attributes(
-                attributes=credential.indy_credential_detail.attributes
-            )
-
-            indy_model = handle_model_with_validation(
-                logger=bound_logger,
-                model_class=V20CredFilterIndy,
-                cred_def_id=credential.indy_credential_detail.credential_definition_id,
-            )
-            cred_filter = V20CredFilter(indy=indy_model)
-
-        elif credential.type == CredentialType.LD_PROOF:
-            cred_filter = V20CredFilter(ld_proof=credential.ld_credential_detail)
-
-        elif credential.type == CredentialType.ANONCREDS:
-            bound_logger.debug("Getting credential preview from attributes")
-            credential_preview = cls.__preview_from_attributes(
-                attributes=credential.anoncreds_credential_detail.attributes
-            )
-
-            anon_model = handle_model_with_validation(
-                logger=bound_logger,
-                model_class=V20CredFilterAnoncreds,
-                cred_def_id=credential.anoncreds_credential_detail.credential_definition_id,
-                issuer_id=credential.anoncreds_credential_detail.issuer_id,
-            )
-            cred_filter = V20CredFilter(anoncreds=anon_model)
-
-        else:
-            raise CloudApiException(
-                f"Unsupported credential type: {credential.type.value}", status_code=501
-            )
+        credential_preview, cred_filter = cls._get_credential_preview_and_filter(
+            credential, bound_logger
+        )
 
         bound_logger.debug("Issue v2 credential (automated)")
         request_body = V20CredExFree(
@@ -108,8 +76,30 @@ class IssuerV2(Issuer):
             }
         )
 
+        credential_preview, cred_filter = cls._get_credential_preview_and_filter(
+            credential, bound_logger
+        )
+
+        bound_logger.debug("Creating v2 credential offer")
+        request_body = V20CredOfferConnFreeRequest(
+            auto_remove=credential.auto_remove,
+            credential_preview=credential_preview,
+            filter=cred_filter,
+        )
+        record = await handle_acapy_call(
+            logger=bound_logger,
+            acapy_call=controller.issue_credential_v2_0.create_offer,
+            body=request_body,
+        )
+
+        bound_logger.debug("Returning v2 create offer result as CredentialExchange.")
+        return cls.__record_to_model(record)
+
+    @classmethod
+    def _get_credential_preview_and_filter(
+        cls, credential: CredentialBase, bound_logger: Logger
+    ):
         credential_preview = None
-        # Determine the appropriate filter based on the type
         if credential.type == CredentialType.INDY:
             bound_logger.debug("Getting credential preview from attributes")
             credential_preview = cls.__preview_from_attributes(
@@ -143,20 +133,7 @@ class IssuerV2(Issuer):
                 f"Unsupported credential type: {credential.type.value}", status_code=501
             )
 
-        bound_logger.debug("Creating v2 credential offer")
-        request_body = V20CredOfferConnFreeRequest(
-            auto_remove=credential.auto_remove,
-            credential_preview=credential_preview,
-            filter=cred_filter,
-        )
-        record = await handle_acapy_call(
-            logger=bound_logger,
-            acapy_call=controller.issue_credential_v2_0.create_offer,
-            body=request_body,
-        )
-
-        bound_logger.debug("Returning v2 create offer result as CredentialExchange.")
-        return cls.__record_to_model(record)
+        return credential_preview, cred_filter
 
     @classmethod
     async def request_credential(
