@@ -44,6 +44,7 @@ from shared.util.mock_agent_controller import (
     mock_context_managed_controller,
     mock_governance_auth,
     mock_tenant_auth,
+    mock_tenant_auth_verified,
 )
 
 # Unused imports make pytest fixtures visible to tests within this module

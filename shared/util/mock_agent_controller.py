@@ -65,7 +65,7 @@ def mock_context_managed_controller():
 
 
 @pytest.fixture(scope="session")
-def mock_governance_auth():
+def mock_governance_auth() -> AcaPyAuthVerified:
     auth = mock(AcaPyAuthVerified)
     auth.role = Role.GOVERNANCE
     auth.token = GOVERNANCE_AGENT_API_KEY
@@ -83,8 +83,17 @@ def mock_admin_auth() -> AcaPyAuthVerified:
 
 
 @pytest.fixture
-def mock_tenant_auth():
+def mock_tenant_auth() -> AcaPyAuth:
     auth = mock(AcaPyAuth)
     auth.role = Role.TENANT
     auth.token = "tenant.test_token"
+    return auth
+
+
+@pytest.fixture
+def mock_tenant_auth_verified() -> AcaPyAuthVerified:
+    auth = mock(AcaPyAuthVerified)
+    auth.role = Role.TENANT
+    auth.token = "tenant.test_token"
+    auth.wallet_id = "tenant_wallet_id"
     return auth

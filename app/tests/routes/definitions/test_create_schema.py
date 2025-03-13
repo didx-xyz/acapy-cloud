@@ -1,21 +1,33 @@
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from aries_cloudcontroller import SchemaSendRequest
 
 from app.exceptions import CloudApiException
 from app.models.definitions import CreateSchema, CredentialSchema
 from app.routes.definitions import create_schema
 
-create_schema_body = CreateSchema(
-    name="Test_Schema_1", version="0.1.0", attribute_names=["attr1", "attr2"]
+create_indy_schema_body = CreateSchema(
+    schema_type="indy",
+    name="Test_Indy_Schema_1",
+    version="0.1.0",
+    attribute_names=["attr1", "attr2"],
 )
-schema_send_request = SchemaSendRequest(
-    attributes=["attr1", "attr2"], schema_name="Test_Schema_1", schema_version="0.1.0"
+
+create_anoncreds_schema_body = CreateSchema(
+    schema_type="anoncreds",
+    name="Test_Anoncreds_Schema_1",
+    version="0.1.0",
+    attribute_names=["attr1", "attr2"],
 )
-create_schema_response = CredentialSchema(
-    id="27aG25kMFticzJ8GHH87BB:2:Test_Schema_1:0.1.0",
-    name="Test_Schema_1",
+create_indy_schema_response = CredentialSchema(
+    id="27aG25kMFticzJ8GHH87BB:2:Test_Indy_Schema_1:0.1.0",
+    name="Test_Indy_Schema_1",
+    version="0.1.0",
+    attribute_names=["attr1", "attr2"],
+)
+create_anoncreds_schema_response = CredentialSchema(
+    id="27aG25kMFticzJ8GHH87BB:2:Test_Anoncreds_Schema_1:0.1.0",
+    name="Test_Anoncreds_Schema_1",
     version="0.1.0",
     attribute_names=["attr1", "attr2"],
 )
@@ -23,29 +35,71 @@ create_schema_response = CredentialSchema(
 
 @pytest.mark.anyio
 @pytest.mark.parametrize(
-    "request_body",
-    [
-        create_schema_body,
-    ],
+    "request_body", [create_anoncreds_schema_body, create_indy_schema_body]
 )
-async def test_create_schema_success(request_body):
+async def test_create_schema_success(
+    mock_tenant_auth_verified, mock_governance_auth, request_body
+):
     mock_aries_controller = AsyncMock()
     mock_create_schema_service = AsyncMock()
+
+    if request_body == create_anoncreds_schema_body:
+        schema_type = "anoncreds"
+        create_schema_response = create_anoncreds_schema_response
+    else:
+        schema_type = "indy"
+        create_schema_response = create_indy_schema_response
+
     mock_create_schema_service.return_value = create_schema_response
 
     with patch(
-        "app.routes.definitions.get_governance_controller"
-    ) as mock_get_governance_controller, patch(
+        "app.routes.definitions.client_from_auth"
+    ) as mock_client_from_auth, patch(
         "app.routes.definitions.schemas_service.create_schema",
         mock_create_schema_service,
+    ), patch(
+        "app.routes.definitions.assert_valid_issuer", AsyncMock()
     ):
-        mock_get_governance_controller.return_value.__aenter__.return_value = (
+        mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )
 
-        response = await create_schema(
-            schema=request_body, governance_auth="mocked_auth"
-        )
+        # Mock the assertion of public DID and wallet type
+        if schema_type == "anoncreds":
+            # Assert wallet_type checks
+            for wallet_type in ["askar-anoncreds", "askar"]:
+                with patch(
+                    "app.util.valid_issuer.assert_issuer_public_did",
+                    return_value="public_did",
+                ), patch(
+                    "app.util.valid_issuer.get_wallet_type",
+                    return_value=wallet_type,
+                ):
+                    if wallet_type == "askar-anoncreds":
+                        # Succeeds with anoncreds wallet type
+                        response = await create_schema(
+                            schema=request_body, auth=mock_tenant_auth_verified
+                        )
+                    else:
+                        # Fails with askar wallet type
+                        with pytest.raises(
+                            CloudApiException,
+                            match="Only valid AnonCreds issuers can create AnonCreds schemas",
+                        ) as exc:
+                            await create_schema(
+                                schema=request_body, auth=mock_tenant_auth_verified
+                            )
+                        assert exc.value.status_code == 403
+        else:
+            # Indy request fails with tenant auth
+            with pytest.raises(CloudApiException, match="Unauthorized") as exc:
+                await create_schema(schema=request_body, auth=mock_tenant_auth_verified)
+            assert exc.value.status_code == 403
+
+            # Succeeds with governance auth
+            response = await create_schema(
+                schema=request_body, auth=mock_governance_auth
+            )
 
         mock_create_schema_service.assert_called_once_with(
             aries_controller=mock_aries_controller,
@@ -64,17 +118,22 @@ async def test_create_schema_success(request_body):
         (500, "Internal Server Error"),
     ],
 )
-async def test_create_schema_failure(expected_status_code, expected_detail):
+async def test_create_schema_failure(
+    mock_tenant_auth, expected_status_code, expected_detail
+):
     mock_aries_controller = AsyncMock()
     mock_create_schema_service = AsyncMock()
 
     with patch(
-        "app.routes.definitions.get_governance_controller"
-    ) as mock_get_governance_controller, patch(
+        "app.routes.definitions.client_from_auth"
+    ) as mock_client_from_auth, patch(
         "app.routes.definitions.schemas_service.create_schema",
         mock_create_schema_service,
+    ), patch(
+        "app.routes.definitions.assert_valid_issuer",
+        AsyncMock(),
     ):
-        mock_get_governance_controller.return_value.__aenter__.return_value = (
+        mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )
 
@@ -82,12 +141,17 @@ async def test_create_schema_failure(expected_status_code, expected_detail):
             status_code=expected_status_code, detail=expected_detail
         )
 
-        with pytest.raises(CloudApiException, match=expected_detail):
-            await create_schema(
-                schema=create_schema_body, governance_auth="mocked_auth"
-            )
+        # Mock the assertion of public DID and wallet type
+        with patch(
+            "app.routes.definitions.assert_public_did_and_wallet_type",
+            return_value=("public_did", "askar-anoncreds"),
+        ):
+            with pytest.raises(CloudApiException, match=expected_detail):
+                await create_schema(
+                    schema=create_anoncreds_schema_body, auth=mock_tenant_auth
+                )
 
         mock_create_schema_service.assert_called_once_with(
             aries_controller=mock_aries_controller,
-            schema=create_schema_body,
+            schema=create_anoncreds_schema_body,
         )
