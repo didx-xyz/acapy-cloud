@@ -69,6 +69,15 @@ async def create_tenant(
 
     Use this endpoint to create a new Tenant, which is the same as creating a new Wallet.
 
+    NB: To work with AnonCreds, the `askar-anoncreds` wallet type is required. i.e. To issue, verify, or
+    hold AnonCreds, the issuer, verifier, or holder, requires the anoncreds wallet type.
+
+    Indy credentials are compatible with `askar-anoncreds` wallets for holders or verifiers:
+    i.e. an anoncreds wallet can hold or verify Indy credentials.
+
+    However, issuers are restricted: an issuer with `askar` wallet type can only issue Indy credentials,
+    and an issuer with `askar-anoncreds` wallet type can only issue AnonCreds.
+
     The `wallet_label` is a required field that allows you to assign an alias to the Tenant.
     This label is used as the default alias in connections (i.e. the other party will see this name in their records).
 
@@ -89,10 +98,6 @@ async def create_tenant(
     The `image_url` is an optional field for assigning an image to the Wallet. For actors, this will also be added to
     the trust registry.
 
-    The `wallet_type` is an optional field that allows you to specify the type of wallet to create. The default is
-    `askar`, but you can also specify `askar-anoncreds`. The `askar-anoncreds` wallet type is required for wallets that
-    will be used for issuing anoncreds.
-
     `extra_settings` is an optional field intended for advanced users, which allows configuring wallet behaviour.
 
     Request body:
@@ -107,7 +112,7 @@ async def create_tenant(
             image_url: Optional[str]
                 An optional image URL for the Tenant.
             wallet_type: Optional[Literal["askar", "askar-anoncreds"]]
-                The type of wallet to create. 'askar' or 'askar-anoncreds' are supported.
+                The type of wallet to create. 'askar' or 'askar-anoncreds' are supported, with 'askar' as the default.
             extra_settings: Optional[dict]]
                 Optional per-tenant settings to configure wallet behaviour for advanced users.
 
