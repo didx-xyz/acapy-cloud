@@ -58,7 +58,8 @@ async def create_oob_invitation(
     bound_logger = logger.bind(body=body)
     bound_logger.debug("POST request received: Create OOB invitation")
     if body is None:
-        body = CreateOobInvitation()
+        # If no body is provided, create a connection invitation
+        body = CreateOobInvitation(create_connection=True)
 
     handshake_protocols = (
         [
