@@ -58,7 +58,7 @@ async def test_accept_invitation_oob(
 
     connection_record = (
         await alice_member_client.get(
-            f"{CONNECTIONS_BASE_PATH}/{oob_record["connection_id"]}"
+            f"{CONNECTIONS_BASE_PATH}/{oob_record['connection_id']}"
         )
     ).json()
 

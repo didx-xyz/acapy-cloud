@@ -63,7 +63,7 @@ async def create_schema(
             options=SchemaPostOption(
                 # TODO:
                 # create_transaction_for_endorser=True,
-                # endorser_connection_id=public_did,
+                # endorser_connection_id=endorser_connection_id,
             ),
         )
 

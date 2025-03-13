@@ -63,7 +63,7 @@ async def test_send_proof_request(
     finally:
         # Clean up:
         await acme_client.delete(
-            VERIFIER_BASE_PATH + f"/proofs/{send_proof_response["proof_id"]}",
+            VERIFIER_BASE_PATH + f"/proofs/{send_proof_response['proof_id']}",
         )
 
 
@@ -462,7 +462,7 @@ async def test_get_credentials_for_request(
     finally:
         # Clean up:
         await acme_client.delete(
-            VERIFIER_BASE_PATH + f"/proofs/{send_proof_response["proof_id"]}",
+            VERIFIER_BASE_PATH + f"/proofs/{send_proof_response['proof_id']}",
         )
 
 
