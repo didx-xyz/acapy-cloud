@@ -2,14 +2,12 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from aries_cloudcontroller import (
-    AdminConfig,
     AnonCredsSchema,
     SchemaPostOption,
     SchemaPostRequest,
     SchemaSendRequest,
 )
 
-from app.exceptions import CloudApiException
 from app.models.definitions import CreateSchema, CredentialSchema, SchemaType
 from app.services.definitions.schemas import create_schema
 
