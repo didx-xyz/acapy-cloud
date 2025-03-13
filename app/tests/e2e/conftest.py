@@ -23,6 +23,8 @@ from app.tests.fixtures.credentials import (
     revoke_alice_indy_creds_and_publish,
 )
 from app.tests.fixtures.definitions import (
+    anoncreds_schema_definition,
+    anoncreds_schema_definition_alt,
     indy_credential_definition_id,
     indy_credential_definition_id_revocable,
     indy_schema_definition,
