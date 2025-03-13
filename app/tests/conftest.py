@@ -8,8 +8,10 @@ from app.tests.fixtures.member_acapy_clients import (
     acme_acapy_client,
     alice_acapy_client,
     bob_acapy_client,
+    faber_anoncreds_acapy_client,
     faber_indy_acapy_client,
     governance_acapy_client,
+    meld_co_anoncreds_acapy_client,
     meld_co_indy_acapy_client,
     tenant_admin_acapy_client,
 )
@@ -17,8 +19,10 @@ from app.tests.fixtures.member_async_clients import (
     acme_client,
     alice_member_client,
     bob_member_client,
+    faber_anoncreds_client,
     faber_indy_client,
     governance_client,
+    meld_co_anoncreds_client,
     meld_co_indy_client,
     mock_async_client,
     tenant_admin_client,
@@ -35,7 +39,9 @@ from app.tests.fixtures.member_wallets import (
     acme_verifier,
     alice_tenant,
     bob_tenant,
+    faber_anoncreds_issuer,
     faber_indy_issuer,
+    meld_co_anoncreds_issuer_verifier,
     meld_co_indy_issuer_verifier,
 )
 from shared.util.mock_agent_controller import (
