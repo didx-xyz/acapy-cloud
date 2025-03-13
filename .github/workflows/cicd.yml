@@ -164,7 +164,7 @@ jobs:
           - image: acapy-cloud/agent
             context: .
             file: dockerfiles/agents/Dockerfile
-            platforms: linux/arm64
+            platforms: linux/amd64,linux/arm64
           - image: acapy-cloud/app
             context: .
             file: dockerfiles/app/Dockerfile
