@@ -35,8 +35,9 @@ async def send_credential(
     """
     Create and send a credential, automating the issuer-side flow
     ---
-    NB: Only a tenant with the issuer role can send credentials and indy credentials require an "askar" `wallet_type`,
-    while anoncreds require a "askar-anoncreds" `wallet_type`.
+    NB: Only a tenant with the issuer role can send credentials.
+    To send Indy credentials, the issuer requires an "askar" wallet type.
+    To send AnonCreds, the "askar-anoncreds" wallet type is required.
 
     When sending a credential, the credential type must be one of `indy`, `anoncreds` or `ld_proof`.
     ```json
@@ -123,8 +124,9 @@ async def create_offer(
     """
     Create a credential offer, not bound to any connection
     ---
-    NB: Only a tenant with the issuer role can create credential offers and indy credentials require an "askar"
-    `wallet_type`, while anoncreds require a "askar-anoncreds" `wallet_type`.
+    NB: Only a tenant with the issuer role can send credentials.
+    To send Indy credentials, the issuer requires an "askar" wallet type.
+    To send AnonCreds, the "askar-anoncreds" wallet type is required.
 
     This endpoint takes the same body as the send credential endpoint, but without a connection id. This
     means the credential will not be sent, but it will do the initial step of creating a credential exchange record,
