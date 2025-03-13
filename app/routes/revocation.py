@@ -239,7 +239,7 @@ async def clear_pending_revocations(
     Clear pending revocations
     ---
 
-    Note: This endpoint is not supported for the 'askar-anoncreds' `wallet_type`.
+    Note: This endpoint is not supported for the 'askar-anoncreds' wallet type.
 
     Revocations that are in a pending state can be cleared, such that they are no longer set to be revoked.
 
