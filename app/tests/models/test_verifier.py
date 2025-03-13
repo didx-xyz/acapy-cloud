@@ -36,7 +36,7 @@ def test_proof_request_base_model():
             ),
         )
     assert exc.value.detail == (
-        "Only dif_proof_request must not be populated if `ld_proof` type is selected"
+        "Only dif_proof_request must be populated if `ld_proof` type is selected"
     )
 
     with pytest.raises(CloudApiValueError) as exc:
@@ -50,7 +50,7 @@ def test_proof_request_base_model():
             ),
         )
     assert exc.value.detail == (
-        "Only indy_proof_request must not be populated if `indy` type is selected"
+        "Only indy_proof_request must be populated if `indy` type is selected"
     )
 
     with pytest.raises(CloudApiValueError) as exc:
@@ -64,7 +64,7 @@ def test_proof_request_base_model():
             ),
         )
     assert exc.value.detail == (
-        "Only anoncreds_proof_request must not be populated if `anoncreds` type is selected"
+        "Only anoncreds_proof_request must be populated if `anoncreds` type is selected"
     )
 
     with pytest.raises(CloudApiValueError) as exc:

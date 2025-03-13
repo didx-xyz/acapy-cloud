@@ -64,21 +64,21 @@ class ProofRequestBase(BaseModel):
             dif_proof is not None or anoncreds_proof is not None
         ):
             raise CloudApiValueError(
-                "Only indy_proof_request must not be populated if `indy` type is selected"
+                "Only indy_proof_request must be populated if `indy` type is selected"
             )
 
         if proof_type == ProofRequestType.LD_PROOF and (
             indy_proof is not None or anoncreds_proof is not None
         ):
             raise CloudApiValueError(
-                "Only dif_proof_request must not be populated if `ld_proof` type is selected"
+                "Only dif_proof_request must be populated if `ld_proof` type is selected"
             )
 
         if proof_type == ProofRequestType.ANONCREDS and (
             indy_proof is not None or dif_proof is not None
         ):
             raise CloudApiValueError(
-                "Only anoncreds_proof_request must not be populated if `anoncreds` type is selected"
+                "Only anoncreds_proof_request must be populated if `anoncreds` type is selected"
             )
 
         return values
