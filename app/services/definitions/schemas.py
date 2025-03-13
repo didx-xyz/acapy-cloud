@@ -6,6 +6,7 @@ from aries_cloudcontroller import (
     AnonCredsSchema,
     GetSchemaResult,
     SchemaGetResult,
+    SchemaPostOption,
     SchemaPostRequest,
     SchemaSendRequest,
 )
@@ -32,57 +33,42 @@ logger = get_logger(__name__)
 async def create_schema(
     aries_controller: AcaPyClient,
     schema: CreateSchema,
+    public_did: Optional[str] = None,  # Required for anoncreds schemas
 ) -> CredentialSchema:
     """
     Create a schema and register it in the trust registry
+
+    NB: Auth is handled in the route, so we assume the request is valid:
+    - Indy schemas are only created by governance agents
+    - AnonCreds schemas are only created by valid issuers with the correct wallet type
     """
     bound_logger = logger.bind(body=schema)
     publisher = SchemaPublisher(controller=aries_controller, logger=logger)
 
-    logger.debug("Asserting governance agent is host being called")
-    if aries_controller.configuration.host != GOVERNANCE_AGENT_URL:
-        raise CloudApiException(
-            "Only governance agents are allowed to access this endpoint.",
-            status_code=403,
-        )
-
-    did_result = await aries_controller.wallet.get_public_did()
-    endorser_did = did_result.result.did
-
-    # Get the wallet type from the server config
-    server_config = await aries_controller.server.get_config()
-    wallet_type = server_config.config.get("wallet.type")
-
-    required_wallet_type = (
-        "askar-anoncreds" if schema.schema_type == SchemaType.ANONCREDS else "askar"
-    )
-    if wallet_type != required_wallet_type:
-        error_message = (
-            f"{schema.schema_type} schemas can only be created "
-            f"by '{required_wallet_type}' wallet types"
-        )
-        bound_logger.info("Bad request: {}", error_message)
-        raise CloudApiException(error_message, status_code=400)
-    elif wallet_type == "askar-anoncreds":
+    if schema.schema_type == SchemaType.ANONCREDS:
+        assert public_did is not None, "Public DID is required for AnonCreds schemas"
         anoncreds_schema = handle_model_with_validation(
             logger=bound_logger,
             model_class=AnonCredsSchema,
             attr_names=schema.attribute_names,
             name=schema.name,
             version=schema.version,
-            issuer_id=endorser_did,
+            issuer_id=public_did,
         )
 
-        # Using the default values for schema_post_option
-        # as the governance agent is the issuer
         schema_request = handle_model_with_validation(
             logger=bound_logger,
             model_class=SchemaPostRequest,
             var_schema=anoncreds_schema,
+            options=SchemaPostOption(
+                # TODO:
+                # create_transaction_for_endorser=True,
+                # endorser_connection_id=public_did,
+            ),
         )
 
         result = await publisher.publish_anoncreds_schema(schema_request)
-    else:  # wallet_type == "askar"
+    else:  # schema.schema_type == SchemaType.INDY
         schema_request = handle_model_with_validation(
             logger=bound_logger,
             model_class=SchemaSendRequest,

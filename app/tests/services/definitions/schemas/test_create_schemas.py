@@ -4,6 +4,7 @@ import pytest
 from aries_cloudcontroller import (
     AdminConfig,
     AnonCredsSchema,
+    SchemaPostOption,
     SchemaPostRequest,
     SchemaSendRequest,
 )
@@ -22,10 +23,6 @@ sample_attribute_names = ["attr1", "attr2"]
 async def test_create_schema_success():
     # Mock the necessary dependencies
     mock_aries_controller = AsyncMock()
-    mock_aries_controller.configuration.host = "https://governance-agent-url"
-    mock_aries_controller.server.get_config = AsyncMock(
-        return_value=AdminConfig(config={"wallet.type": "askar"})
-    )
 
     mock_schema_publisher = AsyncMock()
     mock_schema_publisher.publish_schema.return_value = CredentialSchema(
@@ -37,6 +34,7 @@ async def test_create_schema_success():
 
     # Create a sample CreateSchema object
     create_schema_payload = CreateSchema(
+        schema_type=SchemaType.INDY,
         name=sample_schema_name,
         version=sample_schema_version,
         attribute_names=sample_attribute_names,
@@ -44,9 +42,6 @@ async def test_create_schema_success():
 
     # Patch the necessary functions and classes
     with patch(
-        "app.services.definitions.schemas.GOVERNANCE_AGENT_URL",
-        "https://governance-agent-url",
-    ), patch(
         "app.services.definitions.schemas.SchemaPublisher",
         return_value=mock_schema_publisher,
     ), patch(
@@ -75,36 +70,8 @@ async def test_create_schema_success():
 
 
 @pytest.mark.anyio
-async def test_create_schema_non_governance_agent():
-    mock_aries_controller = AsyncMock()
-    mock_aries_controller.configuration.host = "https://non-governance-agent-url"
-
-    create_schema_payload = CreateSchema(
-        name=sample_schema_name,
-        version=sample_schema_version,
-        attribute_names=sample_attribute_names,
-    )
-
-    with patch(
-        "app.services.definitions.schemas.GOVERNANCE_AGENT_URL",
-        "https://governance-agent-url",
-    ):
-        with pytest.raises(CloudApiException) as exc_info:
-            await create_schema(mock_aries_controller, create_schema_payload)
-
-        assert exc_info.value.status_code == 403
-        assert "Only governance agents are allowed to access this endpoint." in str(
-            exc_info.value
-        )
-
-
-@pytest.mark.anyio
 async def test_create_schema_anoncreds_success():
     mock_aries_controller = AsyncMock()
-    mock_aries_controller.configuration.host = "https://governance-agent-url"
-    mock_aries_controller.server.get_config = AsyncMock(
-        return_value=AdminConfig(config={"wallet.type": "askar-anoncreds"})
-    )
 
     mock_schema_publisher = AsyncMock()
     mock_schema_publisher.publish_anoncreds_schema.return_value = CredentialSchema(
@@ -115,10 +82,10 @@ async def test_create_schema_anoncreds_success():
     )
 
     create_schema_payload = CreateSchema(
+        schema_type=SchemaType.ANONCREDS,
         name=sample_schema_name,
         version=sample_schema_version,
         attribute_names=sample_attribute_names,
-        schema_type=SchemaType.ANONCREDS,
     )
 
     with patch(
@@ -144,11 +111,14 @@ async def test_create_schema_anoncreds_success():
                     version=sample_schema_version,
                     attr_names=sample_attribute_names,
                     issuer_id="test_did",
-                )
+                ),
+                options=SchemaPostOption(),
             ),
         ]
 
-        result = await create_schema(mock_aries_controller, create_schema_payload)
+        result = await create_schema(
+            mock_aries_controller, create_schema_payload, public_did="test_did"
+        )
 
         assert isinstance(result, CredentialSchema)
         assert result.id == sample_schema_id
@@ -158,29 +128,3 @@ async def test_create_schema_anoncreds_success():
 
         mock_schema_publisher.publish_anoncreds_schema.assert_called_once()
         assert mock_handle_model.call_count == 2
-
-
-@pytest.mark.anyio
-async def test_create_schema_unsupported_wallet_type():
-    mock_aries_controller = AsyncMock()
-    mock_aries_controller.configuration.host = "https://governance-agent-url"
-    mock_aries_controller.server.get_config = AsyncMock(
-        return_value=AdminConfig(config={"wallet.type": "unsupported"})
-    )
-
-    create_schema_payload = CreateSchema(
-        name=sample_schema_name,
-        version=sample_schema_version,
-        attribute_names=sample_attribute_names,
-        schema_type=SchemaType.ANONCREDS,
-    )
-
-    with patch(
-        "app.services.definitions.schemas.GOVERNANCE_AGENT_URL",
-        "https://governance-agent-url",
-    ):
-        with pytest.raises(CloudApiException) as exc_info:
-            await create_schema(mock_aries_controller, create_schema_payload)
-
-        assert exc_info.value.status_code == 400
-        assert "can only be created by" in str(exc_info.value)
