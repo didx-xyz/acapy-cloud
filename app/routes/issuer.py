@@ -36,12 +36,15 @@ async def send_credential(
     Create and send a credential, automating the issuer-side flow
     ---
     NB: Only a tenant with the issuer role can send credentials.
+    To send Indy credentials, the issuer requires an "askar" wallet type.
+    To send AnonCreds, the "askar-anoncreds" wallet type is required.
 
-    When creating a credential, the credential type must be one of `indy` or `ld_proof`.
+    When sending a credential, the credential type must be one of `indy`, `anoncreds` or `ld_proof`.
     ```json
     {
-        "type": "indy" or "ld_proof",
+        "type": "indy", "anoncreds" or "ld_proof",
         "indy_credential_detail": {...}, <-- Required if type is indy
+        "anoncreds_credential_detail": {...}, <-- Required if type is anoncreds
         "ld_credential_detail": {...}, <-- Required if type is ld_proof
         "save_exchange_record": true, <-- Whether the credential exchange record should be saved on completion.
         "connection_id": "string", <-- The issuer's reference to the connection they want to submit the credential to.
@@ -121,7 +124,9 @@ async def create_offer(
     """
     Create a credential offer, not bound to any connection
     ---
-    NB: Only a tenant with the issuer role can create credential offers.
+    NB: Only a tenant with the issuer role can send credentials.
+    To send Indy credentials, the issuer requires an "askar" wallet type.
+    To send AnonCreds, the "askar-anoncreds" wallet type is required.
 
     This endpoint takes the same body as the send credential endpoint, but without a connection id. This
     means the credential will not be sent, but it will do the initial step of creating a credential exchange record,
@@ -130,11 +135,12 @@ async def create_offer(
     The OOB protocol allows credentials to be sent over alternative channels, such as email or QR code, where a
     connection does not yet exist between holder and issuer.
 
-    The credential type must be one of indy or ld_proof.
+    The credential type must be one of indy, anoncreds or ld_proof.
     ```json
     {
-        "type": "indy" or "ld_proof",
+        "type": "indy", "anoncreds" or "ld_proof",
         "indy_credential_detail": {...}, <-- Required if type is indy
+        "anoncreds_credential_detail": {...}, <-- Required if type is anoncreds
         "ld_credential_detail": {...}, <-- Required if type is ld_proof
         "save_exchange_record": true, <-- Whether the credential exchange record should be saved on completion.
     }
