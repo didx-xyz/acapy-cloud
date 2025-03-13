@@ -99,11 +99,7 @@ async def test_send_proof_request_v2_exception(
 ):
     # V2
     when(VerifierV2).send_proof_request(...).thenRaise(CloudApiException("ERROR"))
-    mocker.patch.object(
-        test_module,
-        "assert_valid_verifier",
-        return_value=None,
-    )
+    mocker.patch.object(test_module, "assert_valid_verifier", return_value=None)
 
     send_proof_request = test_module.SendProofRequest(
         connection_id="abcde",
@@ -152,8 +148,7 @@ async def test_send_proof_request_v2_no_response(
     )
 
     result = await test_module.send_proof_request(
-        body=send_proof_request,
-        auth=mock_tenant_auth,
+        body=send_proof_request, auth=mock_tenant_auth
     )
 
     assert result is None
@@ -234,8 +229,7 @@ async def test_accept_proof_request_v2(
     )
 
     result = await test_module.accept_proof_request(
-        body=presentation,
-        auth=mock_tenant_auth,
+        body=presentation, auth=mock_tenant_auth
     )
 
     assert result is presentation_exchange_record_2
@@ -256,7 +250,8 @@ async def test_accept_proof_request_v2_exception(
     )
 
     presentation = test_module.AcceptProofRequest(
-        proof_id="v2-1234", indy_presentation_spec=indy_pres_spec
+        proof_id="v2-1234",
+        indy_presentation_spec=indy_pres_spec,
     )
 
     mocker.patch.object(
@@ -266,14 +261,14 @@ async def test_accept_proof_request_v2_exception(
     )
 
     mocker.patch.object(
-        test_module, "assert_valid_prover", new_callable=AsyncMock, return_value=None
+        test_module,
+        "assert_valid_prover",
+        new_callable=AsyncMock,
+        return_value=None,
     )
 
     with pytest.raises(CloudApiException, match="500: ERROR") as exc:
-        await test_module.accept_proof_request(
-            body=presentation,
-            auth=mock_tenant_auth,
-        )
+        await test_module.accept_proof_request(body=presentation, auth=mock_tenant_auth)
     assert exc.value.status_code == 500
 
 
@@ -291,7 +286,8 @@ async def test_accept_proof_request_v2_no_result(
     )
 
     presentation = test_module.AcceptProofRequest(
-        proof_id="v2-1234", indy_presentation_spec=indy_pres_spec
+        proof_id="v2-1234",
+        indy_presentation_spec=indy_pres_spec,
     )
 
     mocker.patch.object(
@@ -301,7 +297,10 @@ async def test_accept_proof_request_v2_no_result(
     )
 
     mocker.patch.object(
-        test_module, "assert_valid_prover", new_callable=AsyncMock, return_value=None
+        test_module,
+        "assert_valid_prover",
+        new_callable=AsyncMock,
+        return_value=None,
     )
 
     result = await test_module.accept_proof_request(
@@ -495,12 +494,12 @@ async def test_get_proof_record(
 
     # V2
     when(VerifierV2).get_proof_record(
-        controller=mock_agent_controller, proof_id="v2-abcd"
+        controller=mock_agent_controller,
+        proof_id="v2-abcd",
     ).thenReturn(to_async(presentation_exchange_record_2))
 
     result = await test_module.get_proof_record(
-        proof_id="v2-abcd",
-        auth=mock_tenant_auth,
+        proof_id="v2-abcd", auth=mock_tenant_auth
     )
 
     assert result == presentation_exchange_record_2
@@ -528,10 +527,7 @@ async def test_get_proof_record_exception(
     ).thenRaise(CloudApiException("ERROR"))
 
     with pytest.raises(CloudApiException, match="500: ERROR") as exc:
-        await test_module.get_proof_record(
-            proof_id="v2-abcd",
-            auth=mock_tenant_auth,
-        )
+        await test_module.get_proof_record(proof_id="v2-abcd", auth=mock_tenant_auth)
 
     assert exc.value.status_code == 500
 
@@ -551,7 +547,8 @@ async def test_get_proof_record_no_result(
 
     # V2
     when(VerifierV2).get_proof_record(
-        controller=mock_agent_controller, proof_id="v2-abcd"
+        controller=mock_agent_controller,
+        proof_id="v2-abcd",
     ).thenReturn(to_async(None))
 
     result = await test_module.get_proof_record(
@@ -630,7 +627,7 @@ async def test_get_proof_records_exception(
     )
     with when(VerifierV2).get_proof_records(
         controller=mock_agent_controller,
-        limit=100,
+        limit=50,
         offset=0,
         order_by="id",
         descending=True,
@@ -642,7 +639,7 @@ async def test_get_proof_records_exception(
         with pytest.raises(CloudApiException, match="500: ERROR"):
             await test_module.get_proof_records(
                 auth=mock_tenant_auth,
-                limit=100,
+                limit=50,
                 offset=0,
                 order_by="id",
                 descending=True,
