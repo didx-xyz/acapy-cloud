@@ -221,6 +221,56 @@ export function createInvitation(bearerToken, issuerAccessToken) {
   }
 }
 
+export function getIssuerPublicDid(issuerAccessToken) {
+  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/wallet/dids/public`;
+  const params = {
+    headers: {
+      "x-api-key": issuerAccessToken,
+    }
+  };
+
+  return http.get(url, params);
+}
+
+export function createDidExchangeRequest(holderAccessToken, issuerPublicDid) {
+  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/connections/did-exchange/create-request?their_public_did=${issuerPublicDid}`;
+  const params = {
+    headers: {
+      "x-api-key": holderAccessToken,
+    },
+  };
+
+  try {
+    // console.log(`Request URL: ${url}`);
+    const response = http.post(url, null, params);
+    // console.log(`Request params: ${JSON.stringify(params, null, 2)}`);
+    // console.log(`Holder Access tpoken: ${holderAccessToken}`);
+    return response;
+  } catch (error) {
+    console.error(`Error creating invitation: ${error.message}`);
+    throw error;
+  }
+}
+
+export function getIssuerConnectionId(issuerAccessToken, holderDid) {
+  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/connections?their_did=${holderDid}`;
+  const params = {
+    headers: {
+      "x-api-key": issuerAccessToken,
+    },
+  };
+
+  try {
+    // console.log(`Request URL: ${url}`);
+    const response = http.get(url, params);
+    // console.log(`Request params: ${JSON.stringify(params, null, 2)}`);
+    return response;
+  } catch (error) {
+    console.error(`Error creating invitation: ${error.message}`);
+    throw error;
+  }
+}
+
 export function acceptInvitation(holderAccessToken, invitationObj) {
   const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/connections/accept-invitation`;
   const params = {
@@ -293,9 +343,9 @@ export function createCredential(
       return response;
     }
     console.error(`createCredential request failed with status ${response.status}`);
-    // if (response.body) {
-    //   console.error(`Response body: ${response.body}`);
-    // }
+    if (response.body) {
+      console.error(`Response body: ${response.body}`);
+    }
     return response.body;
   } catch (error) {
     console.error(`Error accepting invitation: ${error.message}`);
@@ -784,7 +834,122 @@ export function checkRevoked(issuerAccessToken, credentialExchangeId) {
   }
 }
 
-// TODO: refactor the maxDuration logic. It's not being used properly. Actually relies on server-side timeout.
+export function genericPolling({
+  accessToken,
+  walletId,
+  threadId,
+  eventType,
+  sseUrlPath,
+  topic,
+  expectedState,
+  lookBack = 60,
+  maxAttempts = 6,
+  sseTag,
+  requestTimeout = 14
+}) {
+  const endpoint = `${__ENV.CLOUDAPI_URL}/tenant/v1/sse/${walletId}/${sseUrlPath}/${threadId}/${eventType}?look_back=${lookBack}`;
+
+  // Backoff delays in seconds: 0.5, 1, 2, 5, 10, 15
+  const delays = [0.5, 1, 2, 5];
+
+  let attempts = 0;
+  const startTime = new Date();
+
+  while (attempts < maxAttempts) {
+
+    // Get the appropriate delay based on attempt number
+    const delayIndex = Math.min(attempts, delays.length - 1);
+    const currentDelay = delays[delayIndex];
+
+    // Make the HTTP request
+    const response = http.get(endpoint, {
+      headers: {
+        "x-api-key": accessToken,
+        "Content-Type": "application/json"
+      },
+      timeout: requestTimeout * 1000, // Convert seconds to milliseconds
+      tags: sseTag ? { name: sseTag } : { name: `GET_${eventType}_Event` }
+    });
+    // TODO: if it is a connection error, back-off, else the fetch timeout serves as a back-off
+    // Track success/failure metrics
+    if (response.status !== 200) {
+      if (attempts === maxAttempts - 1) {
+        console.error(`VU ${__VU}: Iteration ${__ITER}: HTTP request failed with status ${response.status}`);
+      } else if (attempts > 0) {
+        console.warn(`VU ${__VU}: Iteration ${__ITER}: Attempt: ${attempts} HTTP request failed with status ${response.status}. Sleeping for ${currentDelay}s before next attempt`);
+      }
+      attempts++;
+      sleep(currentDelay);
+      continue;
+    }
+
+    try {
+      // Handle SSE-style responses with "data:" prefix
+      const trimmedBody = response.body.trim();
+      let responseData;
+
+      if (trimmedBody.startsWith('data:')) {
+        // SSE format - parse the data after the prefix
+        const dataContent = trimmedBody.substring(5).trim();
+        responseData = JSON.parse(dataContent);
+      } else if (trimmedBody.startsWith('{') || trimmedBody.startsWith('[')) {
+        // Regular JSON
+        responseData = JSON.parse(response.body);
+      } else {
+        if (attempts === maxAttempts - 1) {
+          console.error(`VU ${__VU}: Iteration ${__ITER}: Attempt: ${attempts} Response is not parseable: ${trimmedBody}.`);
+        } else if (attempts > 0) {
+          console.warn(`VU ${__VU}: Iteration ${__ITER}: Attempt: ${attempts} Response is not parseable: ${trimmedBody}. Sleeping for ${currentDelay}s before next attempt`);
+        }
+        attempts++;
+        sleep(currentDelay);
+        continue;
+      }
+
+      // 1. SSE direct object: {wallet_id, topic, payload}
+      if (responseData.topic === topic &&
+          responseData.payload &&
+          responseData.payload.state === expectedState) {
+        // First attempt - silent success
+        if (attempts === 0) {
+          return true;
+        }
+        // Non-first attempt - log success
+        console.log(`VU ${__VU}: Iteration ${__ITER}: Found direct event match (attempt ${attempts+1})`);
+        return true;
+      }
+
+      // If we reach here, no matching event was found
+      if (attempts === maxAttempts - 1) {
+        console.error(`VU ${__VU}: Iteration ${__ITER}: No matching event found yet (attempt ${attempts+1})`);
+      } else if (attempts > 0) {
+        console.warn(`VU ${__VU}: Iteration ${__ITER}: No matching event found yet (attempt ${attempts+1})`);
+      }
+    } catch (error) {
+      if (attempts === maxAttempts - 1) {
+        console.error(`VU ${__VU}: Iteration ${__ITER}: Error parsing response: ${error.message}`);
+        console.error(`VU ${__VU}: Iteration ${__ITER}: Response body: ${response.body}`);
+      } else if (attempts > 0) {
+        console.warn(`VU ${__VU}: Iteration ${__ITER}: Error parsing response: ${error.message}`);
+        console.warn(`VU ${__VU}: Iteration ${__ITER}: Response body: ${response.body}`);
+      }
+      attempts++;
+      sleep(currentDelay);
+      continue;
+    }
+
+    // Increment attempts and sleep before next attempt
+    console.warn(`VU ${__VU}: Iteration ${__ITER}: Failed to find matching event after ${maxAttempts} attempts. Sleeping for ${currentDelay}s before next attempt`);
+    attempts++;
+    if (attempts < maxAttempts) {
+      sleep(currentDelay);
+    }
+  }
+
+  // If we get here, we've exhausted all attempts
+  console.error(`VU ${__VU}: Iteration ${__ITER}: Failed to find matching event after ${maxAttempts} attempts`);
+  return false;
+}
 
 export function genericWaitForSSEEvent({
   accessToken,
@@ -798,13 +963,16 @@ export function genericWaitForSSEEvent({
   maxRetries = 5,
   retryDelay = 2,
   maxEmptyPings = 3,
-  sseTag
+  sseTag,
+  connectionTimeout = 29 // Default timeout in seconds, set slightly below Docker's 30s
 }) {
+  const tmpUrl = `https://waypoint.cloudapi.stage.didx.co.za/sse/${walletId}/${sseUrlPath}/${threadId}/${eventType}?look_back=${lookBack}`;
   const sseUrl = `${__ENV.CLOUDAPI_URL}/tenant/v1/sse/${walletId}/${sseUrlPath}/${threadId}/${eventType}?look_back=${lookBack}`;
-
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
       if (attempt > 0) {
-          console.warn(`VU ${__VU}: Iteration ${__ITER}: Retry attempt ${attempt}/${maxRetries}`);
+          console.warn(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent Retry attempt ${attempt}/${maxRetries}`);
+          console.log(`curl -i -H "x-api-key: ${accessToken}" ${tmpUrl}`);
+          console.log(`curl -i -H "x-api-key: ${accessToken}" ${sseUrl}`);
           sleep(retryDelay);
       }
 
@@ -813,61 +981,142 @@ export function genericWaitForSSEEvent({
       let emptyPingCount = 0;
       let hadEmptyPing = false;
 
-      const response = sse.open(
-          sseUrl,
-          {
-              headers: { "x-api-key": accessToken },
-              tags: sseTag ? { k6_sse_tag: sseTag } : undefined
-          },
-          (client) => {
-              client.on("event", (event) => {
-                  if (!event.data || event.data.trim() === "") {
-                      emptyPingCount++;
-                      hadEmptyPing = true;
-                      console.log(`VU ${__VU}: Iteration ${__ITER}: Empty ping received: ${emptyPingCount}`);
-                      if (emptyPingCount >= maxEmptyPings) {
-                          console.error(`VU ${__VU}: Iteration ${__ITER}: Failed after ${maxEmptyPings} empty pings`);
+      // Track connection timing
+      const startTime = new Date();
+      let connectionDuration = 0;
+
+      try {
+          const response = sse.open(
+              sseUrl,
+              {
+                  headers: { "x-api-key": accessToken },
+                  tags: sseTag ? { k6_sse_tag: sseTag } : undefined
+              },
+              (client) => {
+                  client.on("event", (event) => {
+                      // Calculate current connection duration
+                      connectionDuration = (new Date() - startTime) / 1000;
+
+                      if (!event.data || event.data.trim() === "") {
+                          emptyPingCount++;
+                          hadEmptyPing = true;
+                          console.log(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent Empty ping received: ${emptyPingCount} (connection time: ${connectionDuration.toFixed(2)}s)`);
+                          if (emptyPingCount >= maxEmptyPings) {
+                              console.error(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent Failed after ${maxEmptyPings} empty pings (connection time: ${connectionDuration.toFixed(2)}s)`);
+                              client.close();
+                              failed = true;
+                              return false;
+                          }
+                          return;
+                      }
+
+                      try {
+                          const eventData = JSON.parse(event.data);
+                          if (eventData &&
+                              eventData.topic === topic &&
+                              eventData.payload &&
+                              eventData.payload.state === expectedState) {
+                              if (hadEmptyPing) {
+                                  console.log(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent Successfully received event after ${emptyPingCount} empty ping(s) (connection time: ${connectionDuration.toFixed(2)}s)`);
+                              }
+                              client.close();
+                              succeeded = true;
+                          }
+                      } catch (error) {
+                          console.error(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent Failed to parse event: ${error.message} (connection time: ${connectionDuration.toFixed(2)}s)`);
                           client.close();
                           failed = true;
-                          return false;
                       }
-                      return;
-                  }
+                  });
 
-                  try {
-                      const eventData = JSON.parse(event.data);
-                      if (eventData &&
-                          eventData.topic === topic &&
-                          eventData.payload &&
-                          eventData.payload.state === expectedState) {
-                          if (hadEmptyPing) {
-                              console.log(`VU ${__VU}: Iteration ${__ITER}: Successfully received event after ${emptyPingCount} empty ping(s)`);
-                          }
-                          client.close();
-                          succeeded = true;
-                      }
-                  } catch (error) {
-                      console.error(`VU ${__VU}: Iteration ${__ITER}: Failed to parse event: ${error.message}`);
+                  client.on("error", (error) => {
+                      connectionDuration = (new Date() - startTime) / 1000;
+                      const errorMessage = error.error ? error.error() : 'Unknown error';
+                      console.error(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent SSE connection error: ${errorMessage} (connection time: ${connectionDuration.toFixed(2)}s)`);
                       client.close();
                       failed = true;
-                  }
-              });
+                  });
+              }
+          );
 
-              client.on("error", (error) => {
-                  console.error(`VU ${__VU}: Iteration ${__ITER}: SSE connection error: ${error.error()}`);
-                  client.close();
-                  failed = true;
-              });
+          if (!response) {
+              connectionDuration = (new Date() - startTime) / 1000;
+              console.warn(`VU ${__VU}: Iteration ${__ITER}: SSE connection failed completely - no response object returned (connection time: ${connectionDuration.toFixed(2)}s)`);
+              continue;
+          } else if (response.status !== 200) {
+              connectionDuration = (new Date() - startTime) / 1000;
+              const errorDetails = response.error ? response.error : 'none';
+              const isTimeout = errorDetails.includes('timeout') ||
+                                 (response.error && response.error.message && response.error.message.includes('timeout'));
+
+              console.warn(`VU ${__VU}: Iteration ${__ITER}: SSE connection failed with status: ${response.status} (connection time: ${connectionDuration.toFixed(2)}s)`);
+
+              // Enhanced timeout detection and reporting
+              if (isTimeout) {
+                  console.warn(`VU ${__VU}: Iteration ${__ITER}: TIMEOUT DETECTED: Connection timed out after ${connectionDuration.toFixed(2)}s (server timeout may be set to ${connectionTimeout}s)`);
+
+                  // Add system info that might help diagnose network issues
+                  console.warn(`VU ${__VU}: Iteration ${__ITER}: Network diagnostic info:
+                      - Connection target: host.docker.internal (docker network bridge)
+                      - VU ID: ${__VU}
+                      - Execution environment: ${__ENV.K6_EXECUTION_ENV || 'unknown'}
+                      - OS: ${__ENV.OS || 'unknown'}
+                  `);
+              }
+
+              // Log more details about the response
+              console.warn(`VU ${__VU}: Iteration ${__ITER}: Response details:
+                  - Body: ${response.body ? response.body : 'undefined'}
+                  - Headers: ${JSON.stringify(response.headers)}
+                  - Error: ${errorDetails}
+                  - URL: ${sseUrl}
+                  - Timestamp: ${new Date().toISOString()}
+                  - Connection duration: ${connectionDuration.toFixed(2)}s`);
+              continue;
           }
-      );
 
-      if (!response || response.status !== 200) {
-          console.error(`VU ${__VU}: Iteration ${__ITER}: Failed to connect: ${response ? response.status : 'no response'}`);
-          continue;
-      }
+          // Monitor connection time while waiting for events
+          const maxWaitTime = 30; // seconds to wait before logging a warning about long-running connection
+          let waitCounter = 0;
+          const waitInterval = 2; // Check every 2 seconds
 
-      while (!succeeded && !failed && attempt < maxRetries) {
-          sleep(0.1);
+          while (!succeeded && !failed && attempt < maxRetries) {
+              sleep(waitInterval);
+              waitCounter += waitInterval;
+              connectionDuration = (new Date() - startTime) / 1000;
+
+              // Log a warning if connection is taking too long
+              if (waitCounter % maxWaitTime === 0) {
+                  console.warn(`VU ${__VU}: Iteration ${__ITER}: SSE connection still waiting after ${connectionDuration.toFixed(2)}s - no events received yet`);
+              }
+
+              // Check if we're approaching timeout
+              if (connectionDuration > (connectionTimeout * 0.8) && !succeeded && !failed) {
+                  console.warn(`VU ${__VU}: Iteration ${__ITER}: SSE connection approaching timeout (${connectionDuration.toFixed(2)}s / ${connectionTimeout}s)`);
+              }
+          }
+
+      } catch (e) {
+          connectionDuration = (new Date() - startTime) / 1000;
+          console.error(`VU ${__VU}: Iteration ${__ITER}: Unexpected error in SSE connection: ${e.message} (connection time: ${connectionDuration.toFixed(2)}s)`);
+
+          // Check if this is the first attempt
+          if (attempt === 0) {
+              // Add DNS lookup verification
+              try {
+                  const dnsStart = new Date();
+                  const dnsResponse = http.get("http://host.docker.internal:8000", {
+                      timeout: 2000,
+                      headers: { "x-api-key": accessToken }
+                  });
+                  const dnsTime = (new Date() - dnsStart) / 1000;
+                  console.log(`VU ${__VU}: Iteration ${__ITER}: DNS verification: status=${dnsResponse.status}, time=${dnsTime.toFixed(2)}s`);
+              } catch (dnsError) {
+                  console.warn(`VU ${__VU}: Iteration ${__ITER}: DNS verification failed: ${dnsError.message}`);
+              }
+          }
+
+          failed = true;
       }
 
       // If we failed due to empty pings, exit immediately
@@ -876,8 +1125,9 @@ export function genericWaitForSSEEvent({
       }
 
       if (succeeded) {
+          connectionDuration = (new Date() - startTime) / 1000;
           if (attempt > 0) {
-              console.log(`VU ${__VU}: Iteration ${__ITER}: Reconnection attempt ${attempt} was successful`);
+              console.log(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent Reconnection attempt ${attempt} was successful (total time: ${connectionDuration.toFixed(2)}s)`);
           }
           return true;
       }
@@ -887,7 +1137,7 @@ export function genericWaitForSSEEvent({
       }
   }
 
-  console.error(`VU ${__VU}: Iteration ${__ITER}: SSE connection failed after ${maxRetries} retries for event type: ${eventType}, state: ${expectedState}, topic: ${topic}, threadId: ${threadId}`);
+  console.error(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent SSE connection failed after ${maxRetries} retries for event type: ${eventType}, state: ${expectedState}, topic: ${topic}, threadId: ${threadId}`);
   return false;
 }
 
@@ -902,17 +1152,17 @@ export function retry(fn, retries = 3, delay = 2000) {
         return result;
       }
       // For subsequent successful attempts, log the success
-      console.log(`VU ${__VU}: Iteration ${__ITER}: Succeeded on attempt ${attempts + 1}`);
+      console.log(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent Succeeded on attempt ${attempts + 1}`);
       return result;
     } catch (e) {
       attempts++;
       // Only log from second attempt onwards
       if (attempts > 1) {
-        console.warn(`VU ${__VU}: Iteration ${__ITER}: Attempt ${attempts} failed: ${e.message}`);
+        console.warn(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent Attempt ${attempts} failed: ${e.message}`);
       }
 
       if (attempts >= retries) {
-        console.error(`VU ${__VU}: Iteration ${__ITER}: All ${retries} attempts failed`);
+        console.error(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent All ${retries} attempts failed`);
         throw e;
       }
 

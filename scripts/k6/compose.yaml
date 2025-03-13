@@ -17,12 +17,13 @@ services:
     environment:
       - K6_STATSD_ADDR=datadog:8125
       - K6_CONSOLE_OUTPUT_FANCY=true
-      - BASE_HOLDER_PREFIX=dev9
-      - BASE_VUS=20
-      - BASE_ITERATIONS=10
-      - TOTAL_BATCHES=5
-      - VERSION=latest
+      - BASE_HOLDER_PREFIX=holder7
+      - BASE_VUS=30
+      - BASE_ITERATIONS=250
+      - TOTAL_BATCHES=20
+      - VERSION=4.2.0-xchange
       - ISSUERS=issuer1
+      - USE_DID_EXCHANGE=true
 
   datadog:
     image: datadog/agent:latest
