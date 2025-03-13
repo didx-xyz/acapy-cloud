@@ -66,11 +66,12 @@ async def test_create_schema_success(
 
         # Mock the assertion of public DID and wallet type
         if schema_type == "anoncreds":
+            public_did = "public_did"
             # Assert wallet_type checks
             for wallet_type in ["askar-anoncreds", "askar"]:
                 with patch(
                     "app.util.valid_issuer.assert_issuer_public_did",
-                    return_value="public_did",
+                    return_value=public_did,
                 ), patch(
                     "app.util.valid_issuer.get_wallet_type",
                     return_value=wallet_type,
@@ -91,6 +92,7 @@ async def test_create_schema_success(
                             )
                         assert exc.value.status_code == 403
         else:
+            public_did = None
             # Indy request fails with tenant auth
             with pytest.raises(CloudApiException, match="Unauthorized") as exc:
                 await create_schema(schema=request_body, auth=mock_tenant_auth_verified)
@@ -104,6 +106,7 @@ async def test_create_schema_success(
         mock_create_schema_service.assert_called_once_with(
             aries_controller=mock_aries_controller,
             schema=request_body,
+            public_did=public_did,
         )
 
         assert response == create_schema_response
@@ -154,4 +157,5 @@ async def test_create_schema_failure(
         mock_create_schema_service.assert_called_once_with(
             aries_controller=mock_aries_controller,
             schema=create_anoncreds_schema_body,
+            public_did="public_did",
         )
