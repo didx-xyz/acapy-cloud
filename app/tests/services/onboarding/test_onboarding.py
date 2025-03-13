@@ -263,7 +263,7 @@ async def test_onboard_verifier_no_public_did(mock_agent_controller: AcaPyClient
         verifier_label="verifier_name", verifier_controller=mock_agent_controller
     )
 
-    assert_that(onboard_result).has_did(did_key.split("#")[0])
+    assert_that(onboard_result).has_did("did:key:123")
     assert str(onboard_result.didcomm_invitation) == invitation_url
     verify(mock_agent_controller.out_of_band).create_invitation(
         auto_accept=True,
