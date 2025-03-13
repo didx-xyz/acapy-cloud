@@ -85,6 +85,7 @@ async def create_schema(
         )
         raise CloudApiException("Unauthorized", 403)
 
+    public_did = None
     if schema.schema_type == SchemaType.ANONCREDS:
         # Assert request is from valid issuer, with anoncreds wallet type
         async with client_from_auth(auth) as aries_controller:
@@ -107,6 +108,7 @@ async def create_schema(
         schema_response = await schemas_service.create_schema(
             aries_controller=aries_controller,
             schema=schema,
+            public_did=public_did,
         )
     return schema_response
 
