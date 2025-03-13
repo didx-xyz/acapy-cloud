@@ -80,14 +80,27 @@ async def create_schema(
 
     if schema.schema_type == SchemaType.INDY and auth.role != Role.GOVERNANCE:
         # Prevent issuers from creating indy schemas
-        raise HTTPException(403, "Unauthorized")
+        bound_logger.info(
+            "Unauthorized request to create Indy schema from {}", auth.wallet_id
+        )
+        raise CloudApiException("Unauthorized", 403)
 
     if schema.schema_type == SchemaType.ANONCREDS:
         # Assert request is from valid issuer, with anoncreds wallet type
         async with client_from_auth(auth) as aries_controller:
-            public_did, _ = await assert_public_did_and_wallet_type(
-                aries_controller, CredentialType.ANONCREDS, bound_logger
-            )
+            try:
+                public_did, _ = await assert_public_did_and_wallet_type(
+                    aries_controller, CredentialType.ANONCREDS, bound_logger
+                )
+            except CloudApiException as e:
+                bound_logger.info(
+                    "Failed to assert wallet_id {} is valid issuer to create AnonCreds schema request: {}",
+                    auth.wallet_id,
+                    e,
+                )
+                raise CloudApiException(
+                    "Only valid AnonCreds issuers can create AnonCreds schemas", 403
+                ) from e
         await assert_valid_issuer(public_did)
 
     async with client_from_auth(auth) as aries_controller:
