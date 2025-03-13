@@ -44,47 +44,44 @@ class PresentationExchange(BaseModel):
 
 
 def presentation_record_to_model(record: V20PresExRecord) -> PresentationExchange:
-    if isinstance(record, V20PresExRecord):
-        try:
-            presentation = None
-            if record.by_format.pres:
-                key = list(record.by_format.pres.keys())[0]
-                presentation = record.by_format.pres[key]
+    presentation = None
+    presentation_request = None
 
-        except AttributeError:
-            logger.info("Presentation record has no indy presentation")
-            presentation = None
-
-        try:
-            presentation_request = None
-            if record.by_format.pres_request:
-                key = list(record.by_format.pres_request.keys())[0]
-                presentation_request = record.by_format.pres_request[key]
-
-        except AttributeError:
-            logger.info("Presentation record has no indy presentation request")
-            presentation_request = None
-
-        return PresentationExchange(
-            connection_id=record.connection_id,
-            created_at=record.created_at,
-            error_msg=record.error_msg,
-            parent_thread_id=record.pres_request.id if record.pres_request else None,
-            presentation=presentation,
-            presentation_request=presentation_request,
-            proof_id="v2-" + str(record.pres_ex_id),
-            role=record.role,
-            state=record.state,
-            thread_id=record.thread_id,
-            updated_at=record.updated_at,
-            verified=string_to_bool(record.verified),
-        )
-
+    if not record.by_format:
+        logger.info("Presentation record has no by_format attribute: {}", record)
     else:
-        raise ValueError("Presentation record format unknown.")
+        if record.by_format.pres:
+            # Get first key (we assume there is only one)
+            key = next(iter(record.by_format.pres))
+            presentation = record.by_format.pres[key]
+        else:
+            logger.debug("Presentation record has no presentation: {}", record)
+
+        if record.by_format.pres_request:
+            # Get first key (we assume there is only one)
+            key = next(iter(record.by_format.pres_request))
+            presentation_request = record.by_format.pres_request[key]
+        else:
+            logger.debug("Presentation record has no presentation request: {}", record)
+
+    return PresentationExchange(
+        connection_id=record.connection_id,
+        created_at=record.created_at,
+        error_msg=record.error_msg,
+        parent_thread_id=record.pres_request.id if record.pres_request else None,
+        presentation=presentation,
+        presentation_request=presentation_request,
+        proof_id="v2-" + str(record.pres_ex_id),
+        role=record.role,
+        state=record.state,
+        thread_id=record.thread_id,
+        updated_at=record.updated_at,
+        verified=string_to_bool(record.verified),
+    )
 
 
 def string_to_bool(verified: Optional[str]) -> Optional[bool]:
+    """Converts a string "true" or "false" to a boolean."""
     if verified == "true":
         return True
     elif verified == "false":
