@@ -2,12 +2,6 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from aries_cloudcontroller import ConnRecord
-from aries_cloudcontroller.exceptions import (
-    ApiException,
-    BadRequestException,
-    NotFoundException,
-)
-from fastapi import HTTPException
 
 from app.models.oob import ConnectToPublicDid
 from app.routes.oob import connect_to_public_did
