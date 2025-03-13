@@ -11,7 +11,7 @@ from app.models.oob import CreateOobInvitation
 from app.routes.oob import create_oob_invitation
 
 test_invitation_record = InvitationRecord(
-    invitation_url="http://example.com?oob=12345",
+    invitation_url="https://example.com?oob=12345",
     invitation_msg={},
     invitation_id="some_invitation_id",
 )
