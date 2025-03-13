@@ -46,11 +46,12 @@ async def send_proof_request(
 
     The verifier uses this endpoint to send a proof request to a specific connection, by providing the connection ID.
 
-    The proof request type must be one of indy or ld_proof.
+    The proof request type must be one of indy, anoncreds or ld_proof.
     ```json
         {
-            "type": "indy" or "ld_proof",
+            "type": "indy", "anoncreds" or "ld_proof",
             "indy_proof_request": {...}, <-- Required if type is "indy"
+            "anoncreds_proof_request": {...}, <-- Required if type is "anoncreds"
             "dif_proof_request": {...}, <-- Required if type is "ld_proof"
             "save_exchange_record": true <-- Whether the proof exchange record should be preserved after completion.
             "comment": "string", <-- This comment will appear in the proof record for the recipient as well
@@ -116,11 +117,12 @@ async def create_proof_request(
     The OOB protocol allows proof requests to be sent over alternative channels, such as email or QR code, where a
     connection does not yet exist between holder and verifier.
 
-    The proof request type must be one of indy or ld_proof.
+    The proof request type must be one of indy, anoncreds or ld_proof.
     ```json
         {
-            "type": "indy" or "ld_proof",
+            "type": "indy", "anoncreds" or "ld_proof",
             "indy_proof_request": {...}, <-- Required if type is "indy"
+            "anoncreds_proof_request": {...}, <-- Required if type is "anoncreds"
             "dif_proof_request": {...}, <-- Required if type is "ld_proof"
             "save_exchange_record": true <-- Whether the proof exchange record should be preserved after completion.
             "comment": "string", <-- This comment will appear in the proof record for the recipient as well
@@ -177,7 +179,17 @@ async def accept_proof_request(
 
     An Indy presentation contains a mapping of the requested attributes to the wallet credential id of the prover.
 
-    Example:
+    The prover must provide the proof ID of the request that they are responding to, and the presentation object.
+    ```json
+    {
+        "proof_id": "string", <-- The proof ID of the presentation request that is being accepted
+        "indy_presentation_spec": {...}, <-- Required if type is "indy"
+        "dif_presentation_spec": {...}, <-- Required if type is "ld_proof"
+        "anoncreds_presentation_spec": {...}, <-- Required if type is "anoncreds"
+    }
+    ```
+
+    Example of an Indy presentation object:
     ```json
     {
         "indy_presentation_spec": {
