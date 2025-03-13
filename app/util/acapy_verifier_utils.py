@@ -72,16 +72,12 @@ async def assert_valid_prover(  # pylint: disable=R0912
             # (eg. has issuer role), but connection is made without using public did,
             # and their did:key is not on TR. Try fetch with label instead
             actor = await get_actor_by_name(name=their_label)
-        elif e.status_code == 500:
+        else:
+            logger.warning("An error occurred while asserting valid verifier: {}", e)
             raise CloudApiException(
                 "An error occurred while asserting valid verifier. Please try again.",
                 500,
             ) from e
-        else:
-            logger.warning(
-                "An unexpected exception occurred while asserting valid verifier: {}", e
-            )
-            raise
 
     # 2. Check actor has role verifier
     if not is_verifier(actor=actor):
@@ -155,17 +151,12 @@ async def assert_valid_verifier(
                 logger.error("Could not read wallet_label from client's controller")
                 raise exc from exc_2
             actor = await get_actor_by_name(name=wallet_label)
-        elif exc.status_code == 500:
+        else:
+            logger.warning("An error occurred while asserting valid verifier: {}", exc)
             raise CloudApiException(
                 "An error occurred while asserting valid verifier. Please try again.",
                 500,
             ) from exc
-        else:
-            logger.warning(
-                "An unexpected exception occurred while asserting valid verifier: {}",
-                exc,
-            )
-            raise
 
     # 2. Check actor has role verifier, raise exception otherwise
     if not is_verifier(actor=actor):
@@ -239,10 +230,7 @@ async def get_schema_ids(
             revealed_schema_ids.add(credential.schema_id)
 
     result = list(revealed_schema_ids)
-    if result:
-        bound_logger.debug("Successfully got schema ids from presentation.")
-    else:
-        bound_logger.debug("No schema ids obtained from presentation.")
+    bound_logger.debug("Returning schema ids from presentation.")
     return result
 
 

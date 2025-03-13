@@ -3,6 +3,7 @@ from aries_cloudcontroller import DIFProofRequest, PresentationDefinition
 
 from app.models.verifier import (
     AcceptProofRequest,
+    AnoncredsPresentationRequest,
     DIFPresSpec,
     IndyPresSpec,
     IndyProofRequest,
@@ -19,7 +20,11 @@ def test_proof_request_base_model():
     assert exc.value.detail == (
         "indy_proof_request must be populated if `indy` type is selected"
     )
-
+    with pytest.raises(CloudApiValueError) as exc:
+        ProofRequestBase(type=ProofRequestType.ANONCREDS, anoncreds_proof_request=None)
+    assert exc.value.detail == (
+        "anoncreds_proof_request must be populated if `anoncreds` type is selected"
+    )
     with pytest.raises(CloudApiValueError) as exc:
         ProofRequestBase(
             type=ProofRequestType.LD_PROOF,
@@ -31,7 +36,7 @@ def test_proof_request_base_model():
             ),
         )
     assert exc.value.detail == (
-        "indy_proof_request must not be populated if `ld_proof` type is selected"
+        "Only dif_proof_request must be populated if `ld_proof` type is selected"
     )
 
     with pytest.raises(CloudApiValueError) as exc:
@@ -45,7 +50,21 @@ def test_proof_request_base_model():
             ),
         )
     assert exc.value.detail == (
-        "dif_proof_request must not be populated if `indy` type is selected"
+        "Only indy_proof_request must be populated if `indy` type is selected"
+    )
+
+    with pytest.raises(CloudApiValueError) as exc:
+        ProofRequestBase(
+            type=ProofRequestType.ANONCREDS,
+            anoncreds_proof_request=AnoncredsPresentationRequest(
+                requested_attributes={}, requested_predicates={}
+            ),
+            dif_proof_request=DIFProofRequest(
+                presentation_definition=PresentationDefinition()
+            ),
+        )
+    assert exc.value.detail == (
+        "Only anoncreds_proof_request must be populated if `anoncreds` type is selected"
     )
 
     with pytest.raises(CloudApiValueError) as exc:
@@ -54,7 +73,7 @@ def test_proof_request_base_model():
         "dif_proof_request must be populated if `ld_proof` type is selected"
     )
 
-    ProofRequestBase.check_indy_proof_request(
+    ProofRequestBase.check_proof_request(
         values=ProofRequestBase(
             indy_proof_request=IndyProofRequest(
                 requested_attributes={}, requested_predicates={}
@@ -79,6 +98,15 @@ def test_accept_proof_request_model():
         dif_presentation_spec=DIFPresSpec(),
     )
 
+    AcceptProofRequest(
+        proof_id="abc",
+        anoncreds_presentation_spec=IndyPresSpec(
+            requested_attributes={},
+            requested_predicates={},
+            self_attested_attributes={},
+        ),
+    )
+
     with pytest.raises(CloudApiValueError) as exc:
         AcceptProofRequest(type=ProofRequestType.INDY, indy_presentation_spec=None)
     assert exc.value.detail == (
@@ -88,6 +116,13 @@ def test_accept_proof_request_model():
         AcceptProofRequest(type=ProofRequestType.LD_PROOF, dif_presentation_spec=None)
     assert exc.value.detail == (
         "dif_presentation_spec must be populated if `ld_proof` type is selected"
+    )
+    with pytest.raises(CloudApiValueError) as exc:
+        AcceptProofRequest(
+            type=ProofRequestType.ANONCREDS, anoncreds_presentation_spec=None
+        )
+    assert exc.value.detail == (
+        "anoncreds_proof_request must be populated if `anoncreds` type is selected"
     )
 
 

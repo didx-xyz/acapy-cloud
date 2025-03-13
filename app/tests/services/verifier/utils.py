@@ -1,4 +1,7 @@
 from aries_cloudcontroller import (
+    AnoncredsPresentationReqAttrSpec,
+    AnoncredsPresentationRequest,
+    AnoncredsPresentationRequestNonRevoked,
     AttachDecorator,
     AttachDecoratorData,
     DIFProofRequest,
@@ -41,6 +44,22 @@ def sample_indy_proof_request(restrictions=None) -> IndyProofRequest:
         nonce="12345",
         requested_attributes={
             "0_speed_uuid": IndyProofReqAttrSpec(
+                name="speed",
+                restrictions=restrictions,
+            )
+        },
+        requested_predicates={},
+        version="1.0",
+    )
+
+
+def sample_anoncreds_proof_request(restrictions=None) -> AnoncredsPresentationRequest:
+    return AnoncredsPresentationRequest(
+        name="string",
+        non_revoked=AnoncredsPresentationRequestNonRevoked(),
+        nonce="12345",
+        requested_attributes={
+            "0_speed_uuid": AnoncredsPresentationReqAttrSpec(
                 name="speed",
                 restrictions=restrictions,
             )

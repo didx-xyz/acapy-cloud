@@ -22,6 +22,7 @@ from app.routes.verifier import (
 from app.services.verifier.acapy_verifier_v2 import VerifierV2
 from app.tests.services.verifier.utils import (
     dif_proof_request,
+    sample_anoncreds_proof_request,
     sample_indy_proof_request,
     v20_presentation_exchange_records,
 )
@@ -37,7 +38,12 @@ from shared.models.presentation_exchange import (
 @pytest.mark.anyio
 @pytest.mark.parametrize(
     "proof_type",
-    [ProofRequestType.INDY, ProofRequestType.LD_PROOF, ProofRequestType.JWT],
+    [
+        ProofRequestType.INDY,
+        ProofRequestType.LD_PROOF,
+        ProofRequestType.JWT,
+        ProofRequestType.ANONCREDS,
+    ],
 )
 async def test_create_proof_request(mock_agent_controller: AcaPyClient, proof_type):
     if proof_type != ProofRequestType.JWT:
@@ -51,6 +57,11 @@ async def test_create_proof_request(mock_agent_controller: AcaPyClient, proof_ty
             ),
             dif_proof_request=(
                 dif_proof_request if proof_type.value == "ld_proof" else None
+            ),
+            anoncreds_proof_request=(
+                sample_anoncreds_proof_request()
+                if proof_type.value == "anoncreds"
+                else None
             ),
             type=proof_type,
         )
@@ -102,7 +113,12 @@ async def test_create_proof_request_exception(
 @pytest.mark.anyio
 @pytest.mark.parametrize(
     "proof_type",
-    [ProofRequestType.INDY, ProofRequestType.LD_PROOF, ProofRequestType.JWT],
+    [
+        ProofRequestType.INDY,
+        ProofRequestType.LD_PROOF,
+        ProofRequestType.JWT,
+        ProofRequestType.ANONCREDS,
+    ],
 )
 async def test_send_proof_request(mock_agent_controller: AcaPyClient, proof_type):
     if proof_type != ProofRequestType.JWT:
@@ -117,6 +133,11 @@ async def test_send_proof_request(mock_agent_controller: AcaPyClient, proof_type
             ),
             dif_proof_request=(
                 dif_proof_request if proof_type.value == "ld_proof" else None
+            ),
+            anoncreds_proof_request=(
+                sample_anoncreds_proof_request()
+                if proof_type.value == "anoncreds"
+                else None
             ),
             connection_id="abcde",
         )
@@ -177,7 +198,12 @@ async def test_send_proof_request_exception(
 @pytest.mark.anyio
 @pytest.mark.parametrize(
     "proof_type",
-    [ProofRequestType.INDY, ProofRequestType.LD_PROOF, ProofRequestType.JWT],
+    [
+        ProofRequestType.INDY,
+        ProofRequestType.LD_PROOF,
+        ProofRequestType.JWT,
+        ProofRequestType.ANONCREDS,
+    ],
 )
 async def test_accept_proof_request(mock_agent_controller: AcaPyClient, proof_type):
     if proof_type != ProofRequestType.JWT:
@@ -198,6 +224,15 @@ async def test_accept_proof_request(mock_agent_controller: AcaPyClient, proof_ty
             ),
             dif_presentation_spec=(
                 DIFPresSpec() if proof_type.value == "ld_proof" else None
+            ),
+            anoncreds_presentation_spec=(
+                IndyPresSpec(
+                    requested_attributes={},
+                    requested_predicates={},
+                    self_attested_attributes={},
+                )
+                if proof_type.value == "anoncreds"
+                else None
             ),
             proof_id="v2-123",
         )

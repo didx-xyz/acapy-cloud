@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Optional, Union
 
 from aries_cloudcontroller import (
+    AnoncredsPresentationRequest,
     DIFPresSpec,
     DIFProofRequest,
     IndyNonRevocationInterval,
@@ -18,6 +19,7 @@ class ProofRequestType(str, Enum):
     INDY: str = "indy"
     JWT: str = "jwt"
     LD_PROOF: str = "ld_proof"
+    ANONCREDS: str = "anoncreds"
 
 
 class IndyProofRequest(AcaPyIndyProofRequest):
@@ -29,10 +31,11 @@ class ProofRequestBase(BaseModel):
     type: ProofRequestType = ProofRequestType.INDY
     indy_proof_request: Optional[IndyProofRequest] = None
     dif_proof_request: Optional[DIFProofRequest] = None
+    anoncreds_proof_request: Optional[AnoncredsPresentationRequest] = None
 
     @model_validator(mode="before")
     @classmethod
-    def check_indy_proof_request(cls, values: Union[dict, "ProofRequestBase"]):
+    def check_proof_request(cls, values: Union[dict, "ProofRequestBase"]):
         # pydantic v2 removed safe way to get key, because `values` can be a dict or this type
         if not isinstance(values, dict):
             values = values.__dict__
@@ -40,6 +43,12 @@ class ProofRequestBase(BaseModel):
         proof_type = values.get("type")
         indy_proof = values.get("indy_proof_request")
         dif_proof = values.get("dif_proof_request")
+        anoncreds_proof = values.get("anoncreds_proof_request")
+
+        if proof_type == ProofRequestType.ANONCREDS and anoncreds_proof is None:
+            raise CloudApiValueError(
+                "anoncreds_proof_request must be populated if `anoncreds` type is selected"
+            )
 
         if proof_type == ProofRequestType.INDY and indy_proof is None:
             raise CloudApiValueError(
@@ -51,14 +60,25 @@ class ProofRequestBase(BaseModel):
                 "dif_proof_request must be populated if `ld_proof` type is selected"
             )
 
-        if proof_type == ProofRequestType.INDY and dif_proof is not None:
+        if proof_type == ProofRequestType.INDY and (
+            dif_proof is not None or anoncreds_proof is not None
+        ):
             raise CloudApiValueError(
-                "dif_proof_request must not be populated if `indy` type is selected"
+                "Only indy_proof_request must be populated if `indy` type is selected"
             )
 
-        if proof_type == ProofRequestType.LD_PROOF and indy_proof is not None:
+        if proof_type == ProofRequestType.LD_PROOF and (
+            indy_proof is not None or anoncreds_proof is not None
+        ):
             raise CloudApiValueError(
-                "indy_proof_request must not be populated if `ld_proof` type is selected"
+                "Only dif_proof_request must be populated if `ld_proof` type is selected"
+            )
+
+        if proof_type == ProofRequestType.ANONCREDS and (
+            indy_proof is not None or dif_proof is not None
+        ):
+            raise CloudApiValueError(
+                "Only anoncreds_proof_request must be populated if `anoncreds` type is selected"
             )
 
         return values
@@ -86,6 +106,8 @@ class AcceptProofRequest(ProofId, SaveExchangeRecordField):
     type: ProofRequestType = ProofRequestType.INDY
     indy_presentation_spec: Optional[IndyPresSpec] = None
     dif_presentation_spec: Optional[DIFPresSpec] = None
+    # Controller uses IndyPresSpec for anoncreds
+    anoncreds_presentation_spec: Optional[IndyPresSpec] = None
 
     @field_validator("indy_presentation_spec", mode="before")
     @classmethod
@@ -102,6 +124,15 @@ class AcceptProofRequest(ProofId, SaveExchangeRecordField):
         if values.data.get("type") == ProofRequestType.LD_PROOF and value is None:
             raise CloudApiValueError(
                 "dif_presentation_spec must be populated if `ld_proof` type is selected"
+            )
+        return value
+
+    @field_validator("anoncreds_presentation_spec", mode="before")
+    @classmethod
+    def check_anoncreds_proof_request(cls, value, values: ValidationInfo):
+        if values.data.get("type") == ProofRequestType.ANONCREDS and value is None:
+            raise CloudApiValueError(
+                "anoncreds_proof_request must be populated if `anoncreds` type is selected"
             )
         return value
 

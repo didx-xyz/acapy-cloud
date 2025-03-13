@@ -46,6 +46,10 @@ class VerifierV2(Verifier):
             presentation_request = V20PresRequestByFormat(
                 dif=create_proof_request.dif_proof_request
             )
+        elif create_proof_request.type == ProofRequestType.ANONCREDS:
+            presentation_request = V20PresRequestByFormat(
+                anoncreds=create_proof_request.anoncreds_proof_request
+            )
         else:
             raise CloudApiException(
                 f"Unsupported credential type: {create_proof_request.type.value}",
@@ -88,6 +92,10 @@ class VerifierV2(Verifier):
         elif send_proof_request.type == ProofRequestType.LD_PROOF:
             presentation_request = V20PresRequestByFormat(
                 dif=send_proof_request.dif_proof_request
+            )
+        elif send_proof_request.type == ProofRequestType.ANONCREDS:
+            presentation_request = V20PresRequestByFormat(
+                anoncreds=send_proof_request.anoncreds_proof_request
             )
         else:
             raise CloudApiException(
@@ -133,6 +141,11 @@ class VerifierV2(Verifier):
         elif accept_proof_request.type == ProofRequestType.LD_PROOF:
             presentation_spec = V20PresSpecByFormatRequest(
                 auto_remove=auto_remove, dif=accept_proof_request.dif_presentation_spec
+            )
+        elif accept_proof_request.type == ProofRequestType.ANONCREDS:
+            presentation_spec = V20PresSpecByFormatRequest(
+                auto_remove=auto_remove,
+                anoncreds=accept_proof_request.anoncreds_presentation_spec,
             )
         else:
             raise CloudApiException(
