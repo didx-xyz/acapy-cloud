@@ -259,7 +259,7 @@ class ReferentCredDef(BaseModel):
 
 
 @pytest.fixture(scope="function")
-async def get_or_issue_regression_cred_revoked(
+async def get_or_issue_regression_indy_cred_revoked(
     faber_indy_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     indy_credential_definition_id_revocable: str,
@@ -356,7 +356,7 @@ async def get_or_issue_regression_cred_revoked(
 
 
 @pytest.fixture(scope="function")
-async def get_or_issue_regression_cred_valid(
+async def get_or_issue_regression_indy_cred_valid(
     faber_indy_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     indy_credential_definition_id_revocable: str,

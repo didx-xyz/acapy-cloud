@@ -63,7 +63,7 @@ async def test_send_proof_request(
     finally:
         # Clean up:
         await acme_client.delete(
-            VERIFIER_BASE_PATH + f"/proofs/{send_proof_response["proof_id"]}",
+            VERIFIER_BASE_PATH + f"/proofs/{send_proof_response['proof_id']}",
         )
 
 
@@ -462,7 +462,7 @@ async def test_get_credentials_for_request(
     finally:
         # Clean up:
         await acme_client.delete(
-            VERIFIER_BASE_PATH + f"/proofs/{send_proof_response["proof_id"]}",
+            VERIFIER_BASE_PATH + f"/proofs/{send_proof_response['proof_id']}",
         )
 
 
@@ -653,16 +653,16 @@ async def test_saving_of_presentation_exchange_records(
     reason="Run only in regression mode",
 )
 @pytest.mark.xdist_group(name="issuer_test_group_3")
-async def test_regression_proof_valid_credential(
-    get_or_issue_regression_cred_valid: ReferentCredDef,
+async def test_regression_proof_valid_indy_credential(
+    get_or_issue_regression_indy_cred_valid: ReferentCredDef,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
 ):
     unix_timestamp = int(time.time())
-    referent = get_or_issue_regression_cred_valid.referent
+    referent = get_or_issue_regression_indy_cred_valid.referent
     credential_definition_id_revocable = (
-        get_or_issue_regression_cred_valid.cred_def_revocable
+        get_or_issue_regression_indy_cred_valid.cred_def_revocable
     )
 
     # Do proof request

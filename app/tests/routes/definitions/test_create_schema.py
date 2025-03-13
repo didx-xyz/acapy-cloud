@@ -81,6 +81,12 @@ async def test_create_schema_success(
                         response = await create_schema(
                             schema=request_body, auth=mock_tenant_auth_verified
                         )
+                        assert response == create_schema_response
+                        mock_create_schema_service.assert_called_once_with(
+                            aries_controller=mock_aries_controller,
+                            schema=request_body,
+                            public_did=public_did,
+                        )
                     else:
                         # Fails with askar wallet type
                         with pytest.raises(
@@ -92,7 +98,6 @@ async def test_create_schema_success(
                             )
                         assert exc.value.status_code == 403
         else:
-            public_did = None
             # Indy request fails with tenant auth
             with pytest.raises(CloudApiException, match="Unauthorized") as exc:
                 await create_schema(schema=request_body, auth=mock_tenant_auth_verified)
@@ -102,14 +107,13 @@ async def test_create_schema_success(
             response = await create_schema(
                 schema=request_body, auth=mock_governance_auth
             )
+            assert response == create_schema_response
 
-        mock_create_schema_service.assert_called_once_with(
-            aries_controller=mock_aries_controller,
-            schema=request_body,
-            public_did=public_did,
-        )
-
-        assert response == create_schema_response
+            mock_create_schema_service.assert_called_once_with(
+                aries_controller=mock_aries_controller,
+                schema=request_body,
+                public_did=None,
+            )
 
 
 @pytest.mark.anyio

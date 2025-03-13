@@ -123,8 +123,8 @@ async def test_proof_revoked_credential(
     reason="Run only in regression mode",
 )
 @pytest.mark.xdist_group(name="issuer_test_group")
-async def test_regression_proof_revoked_credential(
-    get_or_issue_regression_cred_revoked: ReferentCredDef,
+async def test_regression_proof_revoked_indy_credential(
+    get_or_issue_regression_indy_cred_revoked: ReferentCredDef,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
@@ -132,9 +132,9 @@ async def test_regression_proof_revoked_credential(
     await asyncio.sleep(14)  # moment for revocation registry to update
     # todo: remove sleep when issue resolved: https://github.com/openwallet-foundation/acapy/issues/3018
 
-    referent = get_or_issue_regression_cred_revoked.referent
+    referent = get_or_issue_regression_indy_cred_revoked.referent
     credential_definition_id_revocable = (
-        get_or_issue_regression_cred_revoked.cred_def_revocable
+        get_or_issue_regression_indy_cred_revoked.cred_def_revocable
     )
 
     # Do proof request

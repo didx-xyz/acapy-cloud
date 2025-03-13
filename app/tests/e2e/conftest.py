@@ -13,8 +13,8 @@ from app.services.trust_registry.actors import (
     remove_actor_by_id,
 )
 from app.tests.fixtures.credentials import (
-    get_or_issue_regression_cred_revoked,
-    get_or_issue_regression_cred_valid,
+    get_or_issue_regression_indy_cred_revoked,
+    get_or_issue_regression_indy_cred_valid,
     issue_alice_indy_creds,
     issue_alice_many_indy_creds,
     issue_indy_credential_to_alice,
@@ -23,10 +23,15 @@ from app.tests.fixtures.credentials import (
     revoke_alice_indy_creds_and_publish,
 )
 from app.tests.fixtures.definitions import (
+    anoncreds_credential_definition_id,
+    anoncreds_credential_definition_id_revocable,
+    anoncreds_schema_definition,
+    anoncreds_schema_definition_alt,
     indy_credential_definition_id,
     indy_credential_definition_id_revocable,
     indy_schema_definition,
     indy_schema_definition_alt,
+    meld_co_anoncreds_credential_definition_id,
     meld_co_indy_credential_definition_id,
 )
 from app.tests.util.ledger import create_public_did

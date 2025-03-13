@@ -49,7 +49,7 @@ async def get_or_create_tenant(
         if tenant.get("wallet_label") == name:
             # get access token and append to tenant, as it's required for CreateTenantResponse model
             access_token_response = await admin_client.get(
-                f"{TENANT_BASE_PATH}/{tenant["wallet_id"]}/access-token",
+                f"{TENANT_BASE_PATH}/{tenant['wallet_id']}/access-token",
                 params={"group_id": group_id},
             )
             access_token = access_token_response.json()["access_token"]
