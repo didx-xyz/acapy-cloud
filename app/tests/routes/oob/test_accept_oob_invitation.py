@@ -3,8 +3,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from aries_cloudcontroller import OobRecord
 
-from app.routes.oob import accept_oob_invitation
 from app.models.oob import AcceptOobInvitation
+from app.routes.oob import accept_oob_invitation
 
 test_oob_record = OobRecord(
     invi_msg_id="some_invitation_id",
@@ -25,9 +25,7 @@ async def test_accept_oob_invitation_success():
         use_existing_connection=False,
         invitation={},
     )
-    with patch(
-        "app.routes.oob.client_from_auth"
-    ) as mock_client_from_auth:
+    with patch("app.routes.oob.client_from_auth") as mock_client_from_auth:
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )
