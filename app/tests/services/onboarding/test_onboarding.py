@@ -247,7 +247,7 @@ async def test_onboard_verifier_no_public_did(mock_agent_controller: AcaPyClient
         CloudApiException(detail="No public did found")
     )
 
-    did_key = "did:key:123"
+    did_key = "did:key:123#456"
     invitation_url = "https://invitation.com/"
 
     when(mock_agent_controller.out_of_band).create_invitation(...).thenReturn(
@@ -263,7 +263,7 @@ async def test_onboard_verifier_no_public_did(mock_agent_controller: AcaPyClient
         verifier_label="verifier_name", verifier_controller=mock_agent_controller
     )
 
-    assert_that(onboard_result).has_did(did_key)
+    assert_that(onboard_result).has_did(did_key.split("#")[0])
     assert str(onboard_result.didcomm_invitation) == invitation_url
     verify(mock_agent_controller.out_of_band).create_invitation(
         auto_accept=True,
@@ -285,6 +285,25 @@ async def test_onboard_verifier_no_recipient_keys(mock_agent_controller: AcaPyCl
         to_async(
             InvitationRecord(
                 invitation=InvitationMessage(services=[{"recipientKeys": []}]),
+            )
+        )
+    )
+
+    with pytest.raises(CloudApiException):
+        await verifier.onboard_verifier(
+            verifier_label="verifier_name", verifier_controller=mock_agent_controller
+        )
+
+
+@pytest.mark.anyio
+async def test_onboard_verifier_invalid_invitation(mock_agent_controller: AcaPyClient):
+    when(acapy_wallet).get_public_did(controller=mock_agent_controller).thenRaise(
+        CloudApiException(detail="No public did found")
+    )
+    when(mock_agent_controller.out_of_band).create_invitation(...).thenReturn(
+        to_async(
+            InvitationRecord(
+                invitation=InvitationMessage(services=[]),
             )
         )
     )
