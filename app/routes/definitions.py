@@ -4,12 +4,11 @@ from fastapi import APIRouter, Depends, HTTPException
 
 import app.services.definitions.credential_definitions as cred_def_service
 import app.services.definitions.schemas as schemas_service
-from app.dependencies.acapy_clients import client_from_auth, get_governance_controller
+from app.dependencies.acapy_clients import client_from_auth
 from app.dependencies.auth import (
     AcaPyAuth,
     AcaPyAuthVerified,
     acapy_auth_from_header,
-    acapy_auth_governance,
     acapy_auth_verified,
 )
 from app.dependencies.role import Role
@@ -20,13 +19,17 @@ from app.models.definitions import (
     CreateSchema,
     CredentialDefinition,
     CredentialSchema,
+    SchemaType,
 )
+from app.models.issuer import CredentialType
+from app.services.trust_registry.util.issuer import assert_valid_issuer
 from app.util.definitions import (
     anoncreds_schema_from_acapy,
     credential_definition_from_acapy,
     credential_schema_from_acapy,
 )
 from app.util.retry_method import coroutine_with_retry
+from app.util.valid_issuer import assert_public_did_and_wallet_type
 from app.util.wallet_type_checks import get_wallet_type
 from shared.log_config import get_logger
 
@@ -41,13 +44,13 @@ router = APIRouter(
 @router.post("/schemas", summary="Create a new Schema", response_model=CredentialSchema)
 async def create_schema(
     schema: CreateSchema,
-    # Only governance can create schemas
-    governance_auth: AcaPyAuthVerified = Depends(acapy_auth_governance),
+    auth: AcaPyAuthVerified = Depends(acapy_auth_verified),
 ) -> CredentialSchema:
     """
     Create and publish a new schema to the ledger
     ---
-    **NB**: Only governance can create schemas.
+    **NB**: Only governance can create Indy schemas.
+    Issuers can create AnonCreds schemas if they have an 'askar-anoncreds' wallet type.
 
     A schema is used to create credential definitions, which is used for issuing credentials.
     The schema defines the attributes that can exist in that credential.
@@ -58,6 +61,8 @@ async def create_schema(
     Request Body:
     ---
         body: CreateSchema
+            schema_type: SchemaType
+                The type of schema to create.
             name: str
                 The name of the schema.
             version: str
@@ -73,7 +78,19 @@ async def create_schema(
     bound_logger = logger.bind(body=schema)
     bound_logger.debug("POST request received: Create schema (publish and register)")
 
-    async with get_governance_controller(governance_auth) as aries_controller:
+    if schema.schema_type == SchemaType.INDY and auth.role != Role.GOVERNANCE:
+        # Prevent issuers from creating indy schemas
+        raise HTTPException(403, "Unauthorized")
+
+    if schema.schema_type == SchemaType.ANONCREDS:
+        # Assert request is from valid issuer, with anoncreds wallet type
+        async with client_from_auth(auth) as aries_controller:
+            public_did, _ = await assert_public_did_and_wallet_type(
+                aries_controller, CredentialType.ANONCREDS, bound_logger
+            )
+        await assert_valid_issuer(public_did)
+
+    async with client_from_auth(auth) as aries_controller:
         schema_response = await schemas_service.create_schema(
             aries_controller=aries_controller,
             schema=schema,
