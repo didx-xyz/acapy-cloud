@@ -7,6 +7,7 @@ from app.dependencies.auth import (
     acapy_auth_from_header,
     acapy_auth_verified,
 )
+from app.models.definitions import SchemaType
 from app.routes import definitions
 from app.routes.definitions import (
     CreateCredentialDefinition,
@@ -29,7 +30,10 @@ async def test_create_schema(
     governance_public_did: str, mock_governance_auth: AcaPyAuthVerified
 ):
     send = CreateSchema(
-        name=random_string(15), version="0.1", attribute_names=["average"]
+        schema_type=SchemaType.INDY,
+        name=random_string(15),
+        version="0.1",
+        attribute_names=["average"],
     )
 
     result = (await definitions.create_schema(send, mock_governance_auth)).model_dump()
@@ -41,6 +45,15 @@ async def test_create_schema(
     assert_that(result).has_name(send.name)
     assert_that(result).has_version(send.version)
     assert_that(result).has_attribute_names(send.attribute_names)
+
+
+@pytest.mark.anyio
+async def test_create_anoncreds_schema(
+    anoncreds_schema_definition: CredentialSchema,
+):
+    assert anoncreds_schema_definition.name == "test_anoncreds_schema"
+    assert anoncreds_schema_definition.attribute_names == ["speed", "name", "age"]
+    assert anoncreds_schema_definition.version  # It's random
 
 
 @pytest.mark.anyio
