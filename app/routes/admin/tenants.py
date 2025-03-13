@@ -89,6 +89,10 @@ async def create_tenant(
     The `image_url` is an optional field for assigning an image to the Wallet. For actors, this will also be added to
     the trust registry.
 
+    The `wallet_type` is an optional field that allows you to specify the type of wallet to create. The default is
+    `askar`, but you can also specify `askar-anoncreds`. The `askar-anoncreds` wallet type is required for wallets that
+    will be used for issuing anoncreds.
+
     `extra_settings` is an optional field intended for advanced users, which allows configuring wallet behaviour.
 
     Request body:
@@ -102,6 +106,8 @@ async def create_tenant(
                 A list of roles to assign to the Tenant.
             image_url: Optional[str]
                 An optional image URL for the Tenant.
+            wallet_type: Optional[Literal["askar", "askar-anoncreds"]]
+                The type of wallet to create. 'askar' or 'askar-anoncreds' are supported.
             extra_settings: Optional[dict]]
                 Optional per-tenant settings to configure wallet behaviour for advanced users.
 
