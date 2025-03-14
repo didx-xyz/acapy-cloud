@@ -1,9 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 from typing import Any, AsyncGenerator
 
 import nats
 from nats.aio.client import Client as NATS
 from nats.aio.errors import ErrConnectionClosed, ErrNoServers, ErrTimeout
+from nats.errors import UnexpectedEOF
 from nats.js.client import JetStreamContext
 
 from shared.constants import NATS_CREDS_FILE, NATS_SERVER
@@ -60,24 +61,44 @@ async def init_nats_client() -> AsyncGenerator[JetStreamContext, Any]:
 
 
 async def error_callback(e):
-    # Log specific critical errors as errors
-    if isinstance(e, (ErrNoServers, ErrTimeout, ErrConnectionClosed)):
-        logger.error("Critical NATS connection issue: {}", str(e))
-    elif "authentication" in str(e).lower() or "authorization" in str(e).lower():
-        logger.error("NATS authentication/authorization failure: {}", str(e))
+    global last_disconnect_time
+    error_str = str(e).lower()
+    if isinstance(e, UnexpectedEOF):
+        logger.warning("NATS unexpected EOF error: {}", e)
+    elif isinstance(e, (ErrNoServers, ErrTimeout, ErrConnectionClosed)):
+        logger.error("Critical NATS connection issue: {}", e)
+    elif "authentication" in error_str or "authorization" in error_str:
+        logger.error("NATS authentication/authorization failure: {}", e)
+    elif "empty response from server" in error_str:
+        logger.error("NATS server unavailable during connection attempt: {}", e)
     else:
-        logger.warning("NATS operational issue (possibly transient): {}", str(e))
+        if last_disconnect_time is None:
+            logger.error("NATS operational error: {}", e)
+        else:
+            time_since_disconnect = (
+                datetime.now(timezone.utc) - last_disconnect_time
+            ).total_seconds()
+            if time_since_disconnect < RECONNECT_THRESHOLD:
+                logger.warning("NATS operational error during reconnection: {}", e)
+            else:
+                logger.error(
+                    "NATS operational error. Exceeded reconnect ({}s): {}",
+                    time_since_disconnect,
+                    e,
+                )
 
 
 async def disconnected_callback():
     global last_disconnect_time, reconnect_attempts
-    last_disconnect_time = datetime.utcnow()
+    last_disconnect_time = datetime.now(timezone.utc)
     reconnect_attempts += 1
     if reconnect_attempts == 1:
-        logger.warning("Disconnected from NATS server; attempting reconnect")
+        logger.warning(
+            "Disconnected from NATS server; attempting reconnect (possibly due to scale-down)"
+        )
     elif reconnect_attempts >= MAX_ATTEMPTS_BEFORE_ERROR:
         logger.error(
-            "Persistent NATS disconnection after {} attempts; potential issue",
+            "Persistent NATS disconnection after {} attempts; cluster may be unavailable",
             reconnect_attempts,
         )
 
@@ -86,7 +107,7 @@ async def reconnected_callback():
     global last_disconnect_time, reconnect_attempts
     if last_disconnect_time:
         time_since_disconnect = (
-            datetime.utcnow() - last_disconnect_time
+            datetime.now(timezone.utc) - last_disconnect_time
         ).total_seconds()
         if (
             time_since_disconnect < RECONNECT_THRESHOLD
