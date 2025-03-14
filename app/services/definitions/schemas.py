@@ -23,6 +23,7 @@ from app.util.definitions import (
     anoncreds_schema_from_acapy,
     credential_schema_from_acapy,
 )
+from app.util.did import strip_qualified_did_sov
 from app.util.wallet_type_checks import get_wallet_type
 from shared.constants import GOVERNANCE_AGENT_URL
 from shared.log_config import get_logger
@@ -53,7 +54,7 @@ async def create_schema(
             attr_names=schema.attribute_names,
             name=schema.name,
             version=schema.version,
-            issuer_id=public_did,
+            issuer_id=strip_qualified_did_sov(public_did),
         )
 
         schema_request = handle_model_with_validation(
