@@ -152,11 +152,15 @@ class SchemaPublisher:
                 )
                 raise CloudApiException("Error while creating schema.") from e
 
-        if result.schema_state.state == "finished" and result.schema_state.schema_id:
+        if (
+            result.schema_state.state in ("finished", "wait")
+            and result.schema_state.schema_id
+        ):
             await register_schema(schema_id=result.schema_state.schema_id)
         else:
             self._logger.error(
-                "No SchemaSendResult in `publish_schema` response: {}.", result
+                "Did not get expected schema state in `publish_schema` response: {}.",
+                result,
             )
             raise CloudApiException(
                 "An unexpected error occurred: could not publish schema."

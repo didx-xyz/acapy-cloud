@@ -36,6 +36,13 @@ def qualified_did_sov(did: str) -> str:
     return did
 
 
+def strip_qualified_did_sov(did: str) -> str:
+    if did.startswith("did:sov:"):
+        return did[len("did:sov:") :]
+
+    return did
+
+
 def did_from_credential_definition_id(credential_definition_id: str) -> str:
     parts = credential_definition_id.split(":")
 
