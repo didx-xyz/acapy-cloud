@@ -114,7 +114,7 @@ async def reconnected_callback():
             and reconnect_attempts < MAX_ATTEMPTS_BEFORE_ERROR
         ):
             logger.info(
-                "Reconnected to NATS server after brief disconnect (likely restart): {}s",
+                "Reconnected to NATS server after: {}s",
                 time_since_disconnect,
             )
         else:
@@ -131,4 +131,4 @@ async def reconnected_callback():
 
 
 async def closed_callback():
-    logger.info("NATS connection closed intentionally")
+    logger.info("NATS connection closed")

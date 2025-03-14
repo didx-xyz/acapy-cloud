@@ -84,7 +84,7 @@ async def health_ready(
 ):
     try:
         jetstream_status = await asyncio.wait_for(
-            nats_processor.check_jetstream(), timeout=5.0
+            nats_processor.check_jetstream(), timeout=2.0
         )
     except asyncio.TimeoutError:
         raise HTTPException(
