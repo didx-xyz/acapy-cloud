@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from fastapi import HTTPException
 
@@ -11,7 +11,9 @@ from shared.util.rich_async_client import RichAsyncClient
 logger = get_logger(__name__)
 
 
-async def register_schema(schema_id: str) -> None:
+async def register_schema(
+    schema_id: str, schema_type: Literal["indy", "anoncreds"]
+) -> None:
     """Register a schema in the trust registry
 
     Args:
@@ -25,7 +27,8 @@ async def register_schema(schema_id: str) -> None:
     async with RichAsyncClient() as client:
         try:
             await client.post(
-                f"{TRUST_REGISTRY_URL}/registry/schemas", json={"schema_id": schema_id}
+                f"{TRUST_REGISTRY_URL}/registry/schemas",
+                json={"schema_id": schema_id, "schema_type": schema_type},
             )
         except HTTPException as e:
             bound_logger.error(

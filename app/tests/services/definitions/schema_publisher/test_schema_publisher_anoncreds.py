@@ -80,7 +80,9 @@ async def test_publish_anoncreds_schema_success(publisher):
         result = await publisher.publish_anoncreds_schema(anoncreds_schema_request)
 
         assert result == final_result
-        mock_register_schema.assert_called_once_with(schema_id=sample_schema_id)
+        mock_register_schema.assert_called_once_with(
+            schema_id=sample_schema_id, schema_type="anoncreds"
+        )
 
 
 @pytest.mark.anyio

@@ -86,7 +86,7 @@ async def test_publish_schema_success(publisher):
 
         assert result == final_result
         mock_register_schema.assert_called_once_with(
-            schema_id="CXQseFxV34pcb8vf32XhEa:2:test_schema:1.0"
+            schema_id="CXQseFxV34pcb8vf32XhEa:2:test_schema:1.0", schema_type="indy"
         )
 
 

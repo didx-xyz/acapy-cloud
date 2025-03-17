@@ -256,15 +256,15 @@ async def test_register_schema(
 ):
     schema_id = "WgWxqztrNooG92RXvxSTWv:2:schema_name:1.0"
     mock_async_client.post = AsyncMock(return_value=Response(200))
-    await register_schema(schema_id=schema_id)
+    await register_schema(schema_id=schema_id, schema_type="indy")
     mock_async_client.post.assert_called_once_with(
         TRUST_REGISTRY_URL + "/registry/schemas",
-        json={"schema_id": schema_id},
+        json={"schema_id": schema_id, "schema_type": "indy"},
     )
 
     mock_async_client.post = AsyncMock(side_effect=HTTPException(500))
     with pytest.raises(TrustRegistryException):
-        await register_schema(schema_id=schema_id)
+        await register_schema(schema_id=schema_id, schema_type="indy")
 
 
 @pytest.mark.anyio

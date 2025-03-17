@@ -29,7 +29,7 @@ async def test_register_schema():
         "trustregistry.registry.registry_schemas.crud.create_schema"
     ) as mock_crud:
         schema_id = registry_schemas.SchemaID(
-            schema_id="WgWxqztrNooG92RXvxSTWv:2:schema_name:1.0"
+            schema_id="WgWxqztrNooG92RXvxSTWv:2:schema_name:1.0", schema_type="indy"
         )
         schema = Schema(
             did="WgWxqztrNooG92RXvxSTWv",
@@ -39,7 +39,7 @@ async def test_register_schema():
         )
         mock_crud.return_value = schema
 
-        result = await registry_schemas.register_schema(schema_id)
+        result = await registry_schemas.register_schema(schema_id=schema_id)
         mock_crud.assert_called_once()
         assert result == schema
 
@@ -50,11 +50,11 @@ async def test_register_schema_x():
         "trustregistry.registry.registry_schemas.crud.create_schema"
     ) as mock_crud:
         schema_id = registry_schemas.SchemaID(
-            schema_id="WgWxqztrNooG92RXvxSTWv:2:schema_name:1.0"
+            schema_id="WgWxqztrNooG92RXvxSTWv:2:schema_name:1.0", schema_type="indy"
         )
         mock_crud.side_effect = SchemaAlreadyExistsException()
         with pytest.raises(HTTPException) as ex:
-            await registry_schemas.register_schema(schema_id)
+            await registry_schemas.register_schema(schema_id=schema_id)
 
         mock_crud.assert_called_once()
         assert ex.value.status_code == 409

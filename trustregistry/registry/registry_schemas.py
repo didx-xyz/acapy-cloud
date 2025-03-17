@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Literal
 
 from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
@@ -17,6 +17,7 @@ router = APIRouter(prefix="/registry/schemas", tags=["schema"])
 
 class SchemaID(BaseModel):
     schema_id: str = Field(..., examples=["WgWxqztrNooG92RXvxSTWv:2:schema_name:1.0"])
+    schema_type: Literal["indy", "anoncreds"] = Field(default=None)
 
 
 @router.get("", response_model=List[Schema])
@@ -42,6 +43,7 @@ async def register_schema(
                 name=schema_attrs_list[2],
                 version=schema_attrs_list[3],
                 id=schema_id.schema_id,
+                schema_type=schema_id.schema_type,
             ),
         )
     except crud.SchemaAlreadyExistsException as e:

@@ -50,3 +50,4 @@ class Schema(Base):
     did: Mapped[str] = mapped_column(String, index=True)
     name: Mapped[str] = mapped_column(String, index=True)
     version: Mapped[str] = mapped_column(String, index=True)
+    schema_type: Mapped[str] = mapped_column(String, index=True)

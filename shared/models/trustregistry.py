@@ -35,6 +35,7 @@ class Schema(BaseModel):
     name: str = Field(default=None)
     version: str = Field(default=None)
     id: str = Field(default=None)
+    schema_type: Literal["indy", "anoncreds"] = Field(default=None)
 
     @model_validator(mode="before")
     @classmethod
