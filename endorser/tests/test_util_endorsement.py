@@ -9,11 +9,8 @@ from endorser.util.endorsement import (
     retry_is_valid_issuer,
     should_accept_endorsement,
 )
-from shared.models.endorsement import Endorsement
 
-valid_endorsement = Endorsement(
-    state="request-received", transaction_id="test-transaction"
-)
+transaction_id = "test-transaction"
 
 
 @pytest.mark.anyio
@@ -39,7 +36,7 @@ async def test_should_accept_endorsement_success_claim_def(mock_acapy_client, mo
         transaction_mock
     )
 
-    result = await should_accept_endorsement(mock_acapy_client, valid_endorsement)
+    result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
     assert result is transaction_mock
 
@@ -61,7 +58,7 @@ async def test_should_accept_endorsement_fail_not_claim_def(mock_acapy_client, m
         transaction_mock
     )
 
-    result = await should_accept_endorsement(mock_acapy_client, valid_endorsement)
+    result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
     assert result is None
 
@@ -81,7 +78,7 @@ async def test_should_accept_endorsement_fail_no_attach(mock_acapy_client, mocke
         return_value=None,
     )
 
-    result = await should_accept_endorsement(mock_acapy_client, valid_endorsement)
+    result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
     assert result is None
 
@@ -101,7 +98,7 @@ async def test_should_accept_endorsement_fail_no_operation(mock_acapy_client, mo
         return_value={"something": "else"},
     )
 
-    result = await should_accept_endorsement(mock_acapy_client, valid_endorsement)
+    result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
     assert result is None
 
@@ -121,7 +118,7 @@ async def test_should_accept_endorsement_fail_no_type(mock_acapy_client, mocker)
         return_value={"operation": {"no": "type"}},
     )
 
-    result = await should_accept_endorsement(mock_acapy_client, valid_endorsement)
+    result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
     assert result is None
 
@@ -143,7 +140,29 @@ async def test_should_accept_endorsement_is_cred_def(mock_acapy_client, mocker):
         },
     )
 
-    result = await should_accept_endorsement(mock_acapy_client, valid_endorsement)
+    result = await should_accept_endorsement(mock_acapy_client, transaction_id)
+
+    assert result is transaction_mock
+
+
+@pytest.mark.anyio
+async def test_should_accept_endorsement_is_schema(mock_acapy_client, mocker):
+    # Mock transaction response
+    transaction_mock = MagicMock()
+    transaction_mock.state = "request_received"
+    mock_acapy_client.endorse_transaction.get_transaction.return_value = (
+        transaction_mock
+    )
+
+    mocker.patch(
+        "endorser.util.endorsement.get_endorsement_request_attachment",
+        return_value={
+            "identifier": "test-identifier",
+            "operation": {"ref": "test-ref", "type": "101"},  # 101 is for schema
+        },
+    )
+
+    result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
     assert result is transaction_mock
 
@@ -165,7 +184,7 @@ async def test_should_accept_endorsement_is_attrib(mock_acapy_client, mocker):
         },
     )
 
-    result = await should_accept_endorsement(mock_acapy_client, valid_endorsement)
+    result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
     assert result is transaction_mock
 
@@ -187,7 +206,7 @@ async def test_should_accept_endorsement_fail_not_cred_def(mock_acapy_client, mo
         return_value=False,
     )
 
-    result = await should_accept_endorsement(mock_acapy_client, valid_endorsement)
+    result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
     assert result is None
 
@@ -211,7 +230,7 @@ async def test_should_accept_endorsement_fail_not_correct_attach(
         return_value=True,
     )
 
-    result = await should_accept_endorsement(mock_acapy_client, valid_endorsement)
+    result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
     assert result is None
 
@@ -239,7 +258,7 @@ async def test_should_accept_endorsement_fail_not_valid_issuer(
         transaction_mock
     )
 
-    result = await should_accept_endorsement(mock_acapy_client, valid_endorsement)
+    result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
     assert result is None
 
@@ -299,7 +318,7 @@ async def test_should_accept_endorsement_retries_on_http_exception(
         side_effect=mock_retry_is_valid_issuer,
     )
 
-    result = await should_accept_endorsement(mock_acapy_client, valid_endorsement)
+    result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
     # Assertions
     assert (
@@ -365,7 +384,7 @@ async def test_should_accept_endorsement_fails_after_max_retries(
         side_effect=mock_retry_is_valid_issuer,
     )
 
-    result = await should_accept_endorsement(mock_acapy_client, valid_endorsement)
+    result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
     # Assertions
     assert (
@@ -443,10 +462,10 @@ async def test_should_accept_endorsement_fail_bad_state(mock_acapy_client):
 
 @pytest.mark.anyio
 async def test_accept_endorsement(mock_acapy_client):
-    await accept_endorsement(mock_acapy_client, valid_endorsement.transaction_id)
+    await accept_endorsement(mock_acapy_client, transaction_id)
 
     mock_acapy_client.endorse_transaction.endorse_transaction.assert_awaited_once_with(
-        tran_id=valid_endorsement.transaction_id
+        tran_id=transaction_id
     )
 
 
@@ -476,7 +495,7 @@ async def test_should_accept_endorsement_signature_request_applicable(
         return_value={"operation": {}},
     )
 
-    result = await should_accept_endorsement(mock_acapy_client, valid_endorsement)
+    result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
     assert (
         result is transaction_mock
@@ -501,7 +520,7 @@ async def test_should_accept_endorsement_signature_request_not_applicable(
         return_value={"operation": {}},
     )
 
-    result = await should_accept_endorsement(mock_acapy_client, valid_endorsement)
+    result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
     assert (
         result is None

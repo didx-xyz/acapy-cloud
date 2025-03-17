@@ -89,6 +89,10 @@ def is_attrib_type(operation_type: str) -> bool:
     return operation_type == TransactionTypes.ATTRIB
 
 
+def is_schema_type(operation_type: str) -> bool:
+    return operation_type == TransactionTypes.SCHEMA
+
+
 def is_revocation_def_or_entry(operation_type: str) -> bool:
     return operation_type in [
         TransactionTypes.REVOC_REG_DEF,

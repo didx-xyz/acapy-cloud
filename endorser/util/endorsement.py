@@ -10,6 +10,7 @@ from endorser.util.transaction_record import (
     is_attrib_type,
     is_credential_definition_transaction,
     is_revocation_def_or_entry,
+    is_schema_type,
 )
 from endorser.util.trust_registry import is_valid_issuer
 from shared.log_config import get_logger
@@ -117,6 +118,10 @@ async def check_applicable_operation_type(
     attachment: Dict[str, Any],
 ) -> bool:
     bound_logger = logger.bind(body={"transaction_id": transaction_id})
+
+    if is_schema_type(operation_type):
+        bound_logger.debug("Endorsement request is for SCHEMA type.")
+        return True
 
     if is_revocation_def_or_entry(operation_type):
         bound_logger.debug("Endorsement request is for revocation definition or entry.")
