@@ -18,11 +18,18 @@ from shared.log_config import get_logger
 logger = get_logger(__name__)
 
 # State tracking for connection issues
-last_disconnect_time = None
-reconnect_attempts = 0
 RECONNECT_THRESHOLD = 5  # Seconds for quick reconnect (restart)
 MAX_ATTEMPTS_BEFORE_ERROR = 2  # Attempts before escalating to error
 
+
+class NATSStatus:
+    def __init__(self):
+        self.last_disconnect_time = None
+        self.reconnect_attempts = 0
+
+    def reset(self):
+        self.last_disconnect_time = None
+        self.reconnect_attempts = 0
 
 async def init_nats_client() -> AsyncGenerator[JetStreamContext, Any]:
     """
