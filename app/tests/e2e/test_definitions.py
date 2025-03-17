@@ -111,7 +111,7 @@ async def test_get_anoncreds_schema(
     assert_that(schema_response).has_id(schema_id)
     assert_that(schema_response).has_name(schema_name)
     assert_that(schema_response).has_version(schema_version)
-    assert_that(schema_response).has_attribute_names(schema_attributes)
+    assert set(schema_response["attribute_names"]) == set(schema_attributes)
 
     # Another AnonCreds issuer can also fetch the same schema
     schema_response = await meld_co_anoncreds_client.get(
@@ -123,7 +123,7 @@ async def test_get_anoncreds_schema(
     assert_that(schema_response).has_id(schema_id)
     assert_that(schema_response).has_name(schema_name)
     assert_that(schema_response).has_version(schema_version)
-    assert_that(schema_response).has_attribute_names(schema_attributes)
+    assert set(schema_response["attribute_names"]) == set(schema_attributes)
 
     # An Indy issuer cannot fetch the AnonCreds schema
     with pytest.raises(HTTPException) as exc_info:
