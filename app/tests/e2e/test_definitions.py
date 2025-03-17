@@ -105,6 +105,7 @@ async def test_get_anoncreds_schema(
     schema_response = await faber_anoncreds_client.get(
         f"{DEFINITIONS_BASE_PATH}/schemas/{schema_id}"
     )
+    schema_response = schema_response.json()
 
     # Assert schema response has expected values
     assert_that(schema_response).has_id(schema_id)
@@ -116,6 +117,7 @@ async def test_get_anoncreds_schema(
     schema_response = await meld_co_anoncreds_client.get(
         f"{DEFINITIONS_BASE_PATH}/schemas/{schema_id}"
     )
+    schema_response = schema_response.json()
 
     # Assert their schema response also has expected values
     assert_that(schema_response).has_id(schema_id)
