@@ -1,7 +1,6 @@
 import pytest
 from aries_cloudcontroller import AcaPyClient
 from assertpy import assert_that
-from fastapi import HTTPException
 
 from app.dependencies.auth import (
     AcaPyAuthVerified,
