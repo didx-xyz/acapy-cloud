@@ -1,6 +1,7 @@
 import pytest
 from aries_cloudcontroller import AcaPyClient
 from assertpy import assert_that
+from fastapi import HTTPException
 
 from app.dependencies.auth import (
     AcaPyAuthVerified,
@@ -14,11 +15,14 @@ from app.routes.definitions import (
     CreateSchema,
     CredentialSchema,
 )
+from app.routes.definitions import router as definitions_router
 from app.services.acapy_wallet import get_public_did
 from app.services.trust_registry.util.schema import registry_has_schema
 from app.tests.util.regression_testing import TestMode
 from app.util.string import random_string
 from shared import RichAsyncClient
+
+DEFINITIONS_BASE_PATH = definitions_router.prefix
 
 
 @pytest.mark.anyio
@@ -80,6 +84,51 @@ async def test_get_schema(
     assert_that(result).has_name(schema.name)
     assert_that(result).has_version(schema.version)
     assert_that(result).has_attribute_names(schema.attribute_names)
+
+
+@pytest.mark.anyio
+async def test_get_anoncreds_schema(
+    anoncreds_schema_definition: CredentialSchema,
+    faber_anoncreds_client: RichAsyncClient,
+    meld_co_anoncreds_client: RichAsyncClient,
+    faber_indy_client: RichAsyncClient,
+):
+    schema_id = anoncreds_schema_definition.id
+    schema_name = anoncreds_schema_definition.name
+    schema_version = anoncreds_schema_definition.version
+    schema_attributes = anoncreds_schema_definition.attribute_names
+
+    # First of all, assert schema is on the trust registry
+    assert await registry_has_schema(schema_id)
+
+    # Faber can fetch their own schema
+    schema_response = await faber_anoncreds_client.get(
+        f"{DEFINITIONS_BASE_PATH}/schemas/{schema_id}"
+    )
+
+    # Assert schema response has expected values
+    assert_that(schema_response).has_id(schema_id)
+    assert_that(schema_response).has_name(schema_name)
+    assert_that(schema_response).has_version(schema_version)
+    assert_that(schema_response).has_attribute_names(schema_attributes)
+
+    # Another AnonCreds issuer can also fetch the same schema
+    schema_response = await meld_co_anoncreds_client.get(
+        f"{DEFINITIONS_BASE_PATH}/schemas/{schema_id}"
+    )
+
+    # Assert their schema response also has expected values
+    assert_that(schema_response).has_id(schema_id)
+    assert_that(schema_response).has_name(schema_name)
+    assert_that(schema_response).has_version(schema_version)
+    assert_that(schema_response).has_attribute_names(schema_attributes)
+
+    # An Indy issuer cannot fetch the AnonCreds schema
+    with pytest.raises(HTTPException) as exc_info:
+        await faber_indy_client.get(f"{DEFINITIONS_BASE_PATH}/schemas/{schema_id}")
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == f"Schema with id {schema_id} not found."
 
 
 @pytest.mark.anyio
