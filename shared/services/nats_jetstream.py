@@ -3,8 +3,13 @@ from typing import Any, AsyncGenerator
 
 import nats
 from nats.aio.client import Client as NATS
-from nats.aio.errors import ErrConnectionClosed, ErrNoServers, ErrTimeout
-from nats.errors import UnexpectedEOF
+from nats.errors import (
+    AuthorizationError,
+    ConnectionClosedError,
+    NoServersError,
+    TimeoutError,
+    UnexpectedEOF,
+)
 from nats.js.client import JetStreamContext
 
 from shared.constants import NATS_CREDS_FILE, NATS_SERVER
@@ -44,7 +49,7 @@ async def init_nats_client() -> AsyncGenerator[JetStreamContext, Any]:
 
     try:
         nats_client: NATS = await nats.connect(**connect_kwargs)
-    except (ErrConnectionClosed, ErrTimeout, ErrNoServers) as e:
+    except (NoServersError, TimeoutError, ConnectionClosedError) as e:
         logger.error("Failed to establish initial NATS connection: {}", e)
         raise e  # Initial failure is always an error
 
