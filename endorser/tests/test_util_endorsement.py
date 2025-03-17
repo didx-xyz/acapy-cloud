@@ -143,7 +143,26 @@ async def test_should_accept_endorsement_is_cred_def(mock_acapy_client, mocker):
         },
     )
 
-    result = await should_accept_endorsement(mock_acapy_client, valid_endorsement)
+
+
+@pytest.mark.anyio
+async def test_should_accept_endorsement_is_schema(mock_acapy_client, mocker):
+    # Mock transaction response
+    transaction_mock = MagicMock()
+    transaction_mock.state = "request_received"
+    mock_acapy_client.endorse_transaction.get_transaction.return_value = (
+        transaction_mock
+    )
+
+    mocker.patch(
+        "endorser.util.endorsement.get_endorsement_request_attachment",
+        return_value={
+            "identifier": "test-identifier",
+            "operation": {"ref": "test-ref", "type": "101"},  # 101 is for schema
+        },
+    )
+
+    result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
     assert result is transaction_mock
 
