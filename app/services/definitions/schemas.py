@@ -61,11 +61,7 @@ async def create_schema(
             logger=bound_logger,
             model_class=SchemaPostRequest,
             var_schema=anoncreds_schema,
-            options=SchemaPostOption(
-                # TODO:
-                # create_transaction_for_endorser=True,
-                # endorser_connection_id=endorser_connection_id,
-            ),
+            options=SchemaPostOption(create_transaction_for_endorser=True),
         )
 
         result = await publisher.publish_anoncreds_schema(schema_request)
@@ -153,7 +149,6 @@ async def get_schemas_as_governance(
             status_code=403,
         )
 
-    # controller.settings.get_settings() returns None ????
     # Get the wallet type from the server config
     server_config = await aries_controller.server.get_config()
     wallet_type = server_config.config.get("wallet.type")
