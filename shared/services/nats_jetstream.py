@@ -104,14 +104,16 @@ async def init_nats_client() -> AsyncGenerator[JetStreamContext, Any]:
     """
     logger.debug("Initialise NATS server ...")
 
+    nats_status = NATSStatus()
+
     connect_kwargs = {
         "servers": [NATS_SERVER],
         "reconnect_time_wait": 1,  # 1-second wait between attempts
         "max_reconnect_attempts": -1,  # Infinite attempts (we'll handle escalation)
-        "error_cb": error_callback,
-        "disconnected_cb": disconnected_callback,
-        "reconnected_cb": reconnected_callback,
-        "closed_cb": closed_callback,
+        "error_cb": nats_status.error_callback,
+        "disconnected_cb": nats_status.disconnected_callback,
+        "reconnected_cb": nats_status.reconnected_callback,
+        "closed_cb": nats_status.closed_callback,
     }
 
     if NATS_CREDS_FILE:
