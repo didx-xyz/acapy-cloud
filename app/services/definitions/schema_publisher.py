@@ -1,3 +1,4 @@
+import asyncio
 from logging import Logger
 from typing import List
 
@@ -16,6 +17,7 @@ from app.util.definitions import (
     anoncreds_credential_schema,
     credential_schema_from_acapy,
 )
+from app.util.retry_method import coroutine_with_retry_until_value
 
 
 class SchemaPublisher:
@@ -133,18 +135,23 @@ class SchemaPublisher:
         return result
 
     async def publish_anoncreds_schema(
-        self, schema_request: SchemaPostRequest
+        self,
+        schema_request: SchemaPostRequest,
+        retry_sleep_duration: int = 2,
+        max_retries: int = 15,
     ) -> CredentialSchema:
         try:
-            result = await handle_acapy_call(
+            schema_result = await handle_acapy_call(
                 logger=self._logger,
                 acapy_call=self._controller.anoncreds_schemas.create_schema,
                 body=schema_request,
             )
         except CloudApiException as e:
             if "already exist" in e.detail and e.status_code == 400:
-                result = await self._handle_existing_anoncreds_schema(schema_request)
-                return result
+                schema_result = await self._handle_existing_anoncreds_schema(
+                    schema_request
+                )
+                return schema_result
             else:
                 self._logger.warning(
                     "An unhandled Exception was caught while publishing schema: {}",
@@ -152,22 +159,55 @@ class SchemaPublisher:
                 )
                 raise CloudApiException("Error while creating schema.") from e
 
-        if (
-            result.schema_state.state in ("finished", "wait")
-            and result.schema_state.schema_id
-        ):
-            await register_schema(schema_id=result.schema_state.schema_id)
+        if schema_result.schema_state and schema_result.schema_state.schema_id:
+            schema_id = schema_result.schema_state.schema_id
         else:
             self._logger.error(
-                "Did not get expected schema state in `publish_schema` response: {}.",
-                result,
+                "Did not get expected schema_id in `publish_schema` response: {}.",
+                schema_result,
             )
             raise CloudApiException(
                 "An unexpected error occurred: could not publish schema."
             )
 
-        result = anoncreds_credential_schema(result.schema_state)
-        return result
+        state = schema_result.schema_state.state
+        if state not in ("finished", "wait"):
+            self._logger.error("Schema state is `{}`. This should not happen.", state)
+            raise CloudApiException(
+                "An unexpected error occurred: could not publish schema.",
+            )
+
+        if state == "wait":  # expected, since we require endorsement
+            transaction = schema_result.registration_metadata.get("txn")
+            transaction_id = transaction.get("transaction_id") if transaction else None
+
+            if not transaction_id:
+                self._logger.error(
+                    "No transaction id found in metadata: {}", schema_result
+                )
+                raise CloudApiException(
+                    "Could not publish schema. No transaction id found in response."
+                )
+
+            try:
+                await coroutine_with_retry_until_value(
+                    coroutine_func=self._controller.endorse_transaction.get_transaction,
+                    args=(transaction_id,),
+                    field_name="state",
+                    expected_value="transaction_acked",
+                    logger=self._logger,
+                    max_attempts=max_retries,
+                    retry_delay=retry_sleep_duration,
+                )
+            except asyncio.TimeoutError as e:
+                raise CloudApiException(
+                    "Timed out waiting for schema to be published.", 504
+                ) from e
+
+        await register_schema(schema_id=schema_id)
+
+        schema_result = anoncreds_credential_schema(schema_result.schema_state)
+        return schema_result
 
     async def _handle_existing_anoncreds_schema(
         self, schema: SchemaPostRequest
