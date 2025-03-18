@@ -14,6 +14,7 @@ config() {
   export SCHEMA_VERSION=${SCHEMA_VERSION:-"0.1.0"}
   export BASE_HOLDER_PREFIX=${BASE_HOLDER_PREFIX:-"demoholder"}
   export TOTAL_BATCHES=${TOTAL_BATCHES:-2}  # New configuration parameter
+  export DENOMINATOR=${DENOMINATOR:-3}
   # Default issuers if none are provided
   default_issuers=("local_pop" "local_acc")
 
@@ -32,9 +33,10 @@ config() {
 calculate_create_creds_load() {
   local base_vus=$1
   local base_iters=$2
+  local denominator=$3
 
-  export VUS=$((base_vus / 3))
-  export ITERATIONS=$((base_iters * 3))
+  export VUS=$((base_vus / denominator))
+  export ITERATIONS=$((base_iters * denominator))
 
   log "Adjusted load for create credentials - VUs: ${VUS}, Iterations: ${ITERATIONS}"
 }
@@ -73,7 +75,7 @@ scenario_create_credentials() {
   local original_vus=${BASE_VUS}
   local original_iters=${BASE_ITERATIONS}
 
-  calculate_create_creds_load "${original_vus}" "${original_iters}"
+  calculate_create_creds_load "${original_vus}" "${original_iters}" "${DENOMINATOR}"
 
   run_test ./scenarios/create-credentials.js
 }
