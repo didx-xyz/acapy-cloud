@@ -26,6 +26,8 @@ services:
       - USE_DID_EXCHANGE=true
       - SCHEMA_NAME="model_pop7"
       - SCHEMA_VERSION="0.1.0"
+      - DENOMINATOR=1
+      - FACTOR=3
 
   datadog:
     image: datadog/agent:latest

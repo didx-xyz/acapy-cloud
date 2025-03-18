@@ -15,6 +15,7 @@ config() {
   export BASE_HOLDER_PREFIX=${BASE_HOLDER_PREFIX:-"demoholder"}
   export TOTAL_BATCHES=${TOTAL_BATCHES:-2}  # New configuration parameter
   export DENOMINATOR=${DENOMINATOR:-3}
+  export FACTOR=${FACTOR:-1}
   # Default issuers if none are provided
   default_issuers=("local_pop" "local_acc")
 
@@ -30,7 +31,7 @@ config() {
   export issuers
 }
 
-calculate_create_creds_load() {
+divide_vus() {
   local base_vus=$1
   local base_iters=$2
   local denominator=$3
@@ -38,7 +39,18 @@ calculate_create_creds_load() {
   export VUS=$((base_vus / denominator))
   export ITERATIONS=$((base_iters * denominator))
 
-  log "Adjusted load for create credentials - VUs: ${VUS}, Iterations: ${ITERATIONS}"
+  log "Recalculated VUs - VUs: ${VUS}, Iterations: ${ITERATIONS}"
+}
+
+multiply_vus() {
+  local base_vus=$1
+  local base_iters=$2
+  local factor=$3
+
+  export VUS=$((base_vus * factor))
+  export ITERATIONS=$((base_iters / factor))
+
+  log "Recalculated VUs - VUs: ${VUS}, Iterations: ${ITERATIONS}"
 }
 
 should_init_issuer() {
@@ -75,12 +87,16 @@ scenario_create_credentials() {
   local original_vus=${BASE_VUS}
   local original_iters=${BASE_ITERATIONS}
 
-  calculate_create_creds_load "${original_vus}" "${original_iters}" "${DENOMINATOR}"
+  divide_vus "${original_vus}" "${original_iters}" "${DENOMINATOR}"
 
   run_test ./scenarios/create-credentials.js
 }
 
 scenario_create_proof_verified() {
+  local original_vus=${BASE_VUS}
+  local original_iters=${BASE_ITERATIONS}
+
+  multiply_vus "${original_vus}" "${original_iters}" "${FACTOR}"
   run_test ./scenarios/create-proof.js
 }
 
@@ -145,9 +161,6 @@ run_batch() {
   # Run the test scenarios
   run_ha_iterations "${deployments}" scenario_create_invitations
   run_ha_iterations "${deployments}" scenario_create_credentials
-
-  export VUS=${BASE_VUS}
-  export ITERATIONS=${BASE_ITERATIONS}
   run_ha_iterations "${deployments}" scenario_create_proof_verified
 }
 
