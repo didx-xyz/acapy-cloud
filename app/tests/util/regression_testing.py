@@ -70,10 +70,13 @@ async def get_or_create_tenant(
 
 
 async def get_or_create_tenant_with_delete_check(
-    admin_client: RichAsyncClient, name: str, roles: list[str]
+    admin_client: RichAsyncClient,
+    name: str,
+    roles: list[str],
+    wallet_type: Literal["askar", "askar-anoncreds"],
 ) -> AsyncGenerator[CreateTenantResponse, None]:
     tenant = await get_or_create_tenant(
-        admin_client=admin_client, name=name, roles=roles
+        admin_client=admin_client, name=name, roles=roles, wallet_type=wallet_type
     )
     try:
         yield tenant
