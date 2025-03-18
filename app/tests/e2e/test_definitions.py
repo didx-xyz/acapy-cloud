@@ -80,18 +80,16 @@ async def test_get_schema(
     schema_version = schema.version
     schema_attributes = schema.attribute_names
 
-    def assert_schema_response(schema_response):
+    def assert_schema_response(schema_response: CredentialSchema):
         # Helper method to assert schema response has expected values
         assert_that(schema_response).has_id(schema_id)
         assert_that(schema_response).has_name(schema_name)
         assert_that(schema_response).has_version(schema_version)
-        assert set(schema_response["attribute_names"]) == set(schema_attributes)
+        assert set(schema_response.attribute_names) == set(schema_attributes)
 
-    create_result = (
-        await definitions.create_schema(schema, mock_governance_auth)
-    ).model_dump()
+    create_result = await definitions.create_schema(schema, mock_governance_auth)
 
-    schema_id = create_result["id"]
+    schema_id = create_result.id
 
     expected_schema_id = f"{governance_public_did}:2:{schema.name}:{schema.version}"
     assert schema_id == expected_schema_id
