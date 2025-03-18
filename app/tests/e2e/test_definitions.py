@@ -65,25 +65,53 @@ async def test_create_anoncreds_schema(
     TestMode.regression_run in TestMode.fixture_params,
     reason="Don't create new schemas in regression mode",
 )
+@pytest.mark.xdist_group(name="issuer_test_group")
 async def test_get_schema(
-    governance_public_did: str, mock_governance_auth: AcaPyAuthVerified
+    governance_public_did: str,
+    mock_governance_auth: AcaPyAuthVerified,
+    faber_indy_client: RichAsyncClient,
+    faber_anoncreds_client: RichAsyncClient,
 ):
     # given
     schema = CreateSchema(
         name=random_string(15), version="0.1", attribute_names=["average"]
     )
+    schema_name = schema.name
+    schema_version = schema.version
+    schema_attributes = schema.attribute_names
+
+    def assert_schema_response(schema_response):
+        # Helper method to assert schema response has expected values
+        assert_that(schema_response).has_id(schema_id)
+        assert_that(schema_response).has_name(schema_name)
+        assert_that(schema_response).has_version(schema_version)
+        assert set(schema_response["attribute_names"]) == set(schema_attributes)
 
     create_result = (
         await definitions.create_schema(schema, mock_governance_auth)
     ).model_dump()
-    result = await definitions.get_schema(create_result["id"], mock_governance_auth)
 
-    assert await registry_has_schema(result.id)
-    expected_schema = f"{governance_public_did}:2:{schema.name}:{schema.version}"
-    assert_that(result).has_id(expected_schema)
-    assert_that(result).has_name(schema.name)
-    assert_that(result).has_version(schema.version)
-    assert_that(result).has_attribute_names(schema.attribute_names)
+    schema_id = create_result["id"]
+
+    expected_schema_id = f"{governance_public_did}:2:{schema.name}:{schema.version}"
+    assert schema_id == expected_schema_id
+
+    # Assert schema is on the trust registry
+    assert await registry_has_schema(schema_id)
+
+    # The schema can be fetched by governance
+    result = await definitions.get_schema(schema_id, mock_governance_auth)
+    assert_schema_response(result)
+
+    # The schema can be fetched by Indy issuers
+    auth = acapy_auth_from_header(faber_indy_client.headers["x-api-key"])
+    result = await definitions.get_schema(schema_id, auth)
+    assert_schema_response(result)
+
+    # The schema can be fetched by AnonCreds issuers
+    auth = acapy_auth_from_header(faber_anoncreds_client.headers["x-api-key"])
+    result = await definitions.get_schema(schema_id, auth)
+    assert_schema_response(result)
 
 
 @pytest.mark.anyio
