@@ -159,6 +159,7 @@ jobs:
           - acapy-cloud/tails-server
           - acapy-cloud/trust-registry
           - acapy-cloud/waypoint
+          - acapy-cloud/xk6
         include:
           - image: acapy-cloud/agent
             context: .
@@ -191,6 +192,10 @@ jobs:
           - image: acapy-cloud/waypoint
             context: .
             file: dockerfiles/waypoint/Dockerfile
+            platforms: linux/amd64,linux/arm64
+          - image: acapy-cloud/xk6
+            context: ./scripts/k6
+            file: ./scripts/k6/Dockerfile
             platforms: linux/amd64,linux/arm64
 
     steps:

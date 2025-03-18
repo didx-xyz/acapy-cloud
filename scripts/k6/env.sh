@@ -12,6 +12,4 @@ export ITERATIONS=2
 export ISSUER_PREFIX=k6_issuer
 export HOLDER_PREFIX=k6_holder
 export SCHEMA_PREFIX=k6_schema
-export SCHEMA_NAME="model_pop"
-export SCHEMA_VERSION="0.1.0"
 export NUM_ISSUERS=2

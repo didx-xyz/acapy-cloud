@@ -17,13 +17,17 @@ services:
     environment:
       - K6_STATSD_ADDR=datadog:8125
       - K6_CONSOLE_OUTPUT_FANCY=true
-      - BASE_HOLDER_PREFIX=holder7
-      - BASE_VUS=30
-      - BASE_ITERATIONS=250
-      - TOTAL_BATCHES=20
-      - VERSION=4.2.0-xchange
-      - ISSUERS=issuer1
+      - BASE_HOLDER_PREFIX=holder30
+      - BASE_VUS=15
+      - BASE_ITERATIONS=10
+      - TOTAL_BATCHES=5
+      - VERSION=4.3.1
+      - ISSUERS=issuer13
       - USE_DID_EXCHANGE=true
+      - SCHEMA_NAME="model_pop7"
+      - SCHEMA_VERSION="0.1.0"
+      - DENOMINATOR=1
+      - FACTOR=3
 
   datadog:
     image: datadog/agent:latest
