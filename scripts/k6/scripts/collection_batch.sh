@@ -10,7 +10,8 @@ config() {
   export BASE_ITERATIONS=${BASE_ITERATIONS:-10}
   export VUS=${BASE_VUS}
   export ITERATIONS=${BASE_ITERATIONS}
-  export SCHEMA_NAME="didx_acc"
+  export SCHEMA_NAME=${SCHEMA_NAME:-"didx_acc"}
+  export SCHEMA_VERSION=${SCHEMA_VERSION:-"0.1.0"}
   export BASE_HOLDER_PREFIX=${BASE_HOLDER_PREFIX:-"demoholder"}
   export TOTAL_BATCHES=${TOTAL_BATCHES:-2}  # New configuration parameter
   # Default issuers if none are provided
