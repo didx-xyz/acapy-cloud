@@ -1,3 +1,4 @@
+import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -123,6 +124,74 @@ async def test_publish_anoncreds_schema_no_schema_id(publisher):
     mock_result = SchemaResult(
         schema_state=SchemaState(
             state="finished", schema_id=None, var_schema=sample_anoncreds_schema
+        ),
+    )
+
+    with patch(
+        "app.services.definitions.schema_publisher.handle_acapy_call",
+        return_value=mock_result,
+    ):
+        with pytest.raises(CloudApiException) as exc_info:
+            await publisher.publish_anoncreds_schema(mock_schema_request)
+
+        assert "An unexpected error occurred: could not publish schema." in str(
+            exc_info.value
+        )
+
+
+@pytest.mark.anyio
+async def test_publish_anoncreds_schema_timeout_error(publisher):
+    mock_schema_request = anoncreds_schema_request
+    mock_result = SchemaResult(
+        schema_state=SchemaState(
+            state="wait", schema_id=sample_schema_id, var_schema=sample_anoncreds_schema
+        ),
+        registration_metadata={"txn": {"transaction_id": "txn_id"}},
+    )
+
+    with patch(
+        "app.services.definitions.schema_publisher.handle_acapy_call",
+        return_value=mock_result,
+    ), patch(
+        "app.services.definitions.schema_publisher.coroutine_with_retry_until_value",
+        side_effect=asyncio.TimeoutError,
+    ):
+        with pytest.raises(CloudApiException) as exc_info:
+            await publisher.publish_anoncreds_schema(mock_schema_request)
+
+        assert "Timed out waiting for schema to be published." in str(exc_info.value)
+
+
+@pytest.mark.anyio
+async def test_publish_anoncreds_schema_missing_transaction_id(publisher):
+    mock_schema_request = anoncreds_schema_request
+    mock_result = SchemaResult(
+        schema_state=SchemaState(
+            state="wait", schema_id=sample_schema_id, var_schema=sample_anoncreds_schema
+        ),
+        registration_metadata={},
+    )
+
+    with patch(
+        "app.services.definitions.schema_publisher.handle_acapy_call",
+        return_value=mock_result,
+    ):
+        with pytest.raises(CloudApiException) as exc_info:
+            await publisher.publish_anoncreds_schema(mock_schema_request)
+
+        assert "Could not publish schema. No transaction id found in response." in str(
+            exc_info.value
+        )
+
+
+@pytest.mark.anyio
+async def test_publish_anoncreds_schema_unexpected_state(publisher):
+    mock_schema_request = anoncreds_schema_request
+    mock_result = SchemaResult(
+        schema_state=SchemaState(
+            state="failed",
+            schema_id=sample_schema_id,
+            var_schema=sample_anoncreds_schema,
         ),
     )
 
