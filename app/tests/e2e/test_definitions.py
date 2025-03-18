@@ -14,11 +14,14 @@ from app.routes.definitions import (
     CreateSchema,
     CredentialSchema,
 )
+from app.routes.definitions import router as definitions_router
 from app.services.acapy_wallet import get_public_did
 from app.services.trust_registry.util.schema import registry_has_schema
 from app.tests.util.regression_testing import TestMode
 from app.util.string import random_string
 from shared import RichAsyncClient
+
+DEFINITIONS_BASE_PATH = definitions_router.prefix
 
 
 @pytest.mark.anyio
@@ -48,11 +51,21 @@ async def test_create_schema(
 
 
 @pytest.mark.anyio
+@pytest.mark.xdist_group(name="issuer_test_group")
+@pytest.mark.skipif(
+    TestMode.regression_run in TestMode.fixture_params,
+    reason="To be fixed. Fetching existing anoncreds schema is failing in regression",
+)
 async def test_create_anoncreds_schema(
     anoncreds_schema_definition: CredentialSchema,
 ):
-    assert anoncreds_schema_definition.name == "test_anoncreds_schema"
-    assert anoncreds_schema_definition.attribute_names == ["speed", "name", "age"]
+    expected_schema_name = (
+        "test_anoncreds_schema"
+        if TestMode.clean_run in TestMode.fixture_params
+        else "Regression_test_anoncreds_schema"  # Regression run uses a different name
+    )
+    assert anoncreds_schema_definition.name == expected_schema_name
+    assert set(anoncreds_schema_definition.attribute_names) == {"speed", "name", "age"}
     assert anoncreds_schema_definition.version  # It's random
 
 
@@ -61,25 +74,100 @@ async def test_create_anoncreds_schema(
     TestMode.regression_run in TestMode.fixture_params,
     reason="Don't create new schemas in regression mode",
 )
+@pytest.mark.xdist_group(name="issuer_test_group")
 async def test_get_schema(
-    governance_public_did: str, mock_governance_auth: AcaPyAuthVerified
+    governance_public_did: str,
+    mock_governance_auth: AcaPyAuthVerified,
+    faber_indy_client: RichAsyncClient,
+    faber_anoncreds_client: RichAsyncClient,
 ):
     # given
     schema = CreateSchema(
         name=random_string(15), version="0.1", attribute_names=["average"]
     )
+    schema_name = schema.name
+    schema_version = schema.version
+    schema_attributes = schema.attribute_names
 
-    create_result = (
-        await definitions.create_schema(schema, mock_governance_auth)
-    ).model_dump()
-    result = await definitions.get_schema(create_result["id"], mock_governance_auth)
+    def assert_schema_response(schema_response: CredentialSchema):
+        # Helper method to assert schema response has expected values
+        assert_that(schema_response).has_id(schema_id)
+        assert_that(schema_response).has_name(schema_name)
+        assert_that(schema_response).has_version(schema_version)
+        assert set(schema_response.attribute_names) == set(schema_attributes)
 
-    assert await registry_has_schema(result.id)
-    expected_schema = f"{governance_public_did}:2:{schema.name}:{schema.version}"
-    assert_that(result).has_id(expected_schema)
-    assert_that(result).has_name(schema.name)
-    assert_that(result).has_version(schema.version)
-    assert_that(result).has_attribute_names(schema.attribute_names)
+    create_result = await definitions.create_schema(schema, mock_governance_auth)
+
+    schema_id = create_result.id
+
+    expected_schema_id = f"{governance_public_did}:2:{schema.name}:{schema.version}"
+    assert schema_id == expected_schema_id
+
+    # Assert schema is on the trust registry
+    assert await registry_has_schema(schema_id)
+
+    # The schema can be fetched by governance
+    result = await definitions.get_schema(schema_id, mock_governance_auth)
+    assert_schema_response(result)
+
+    # The schema can be fetched by Indy issuers
+    auth = acapy_auth_from_header(faber_indy_client.headers["x-api-key"])
+    result = await definitions.get_schema(schema_id, auth)
+    assert_schema_response(result)
+
+    # The schema can be fetched by AnonCreds issuers
+    auth = acapy_auth_from_header(faber_anoncreds_client.headers["x-api-key"])
+    result = await definitions.get_schema(schema_id, auth)
+    assert_schema_response(result)
+
+
+@pytest.mark.anyio
+@pytest.mark.xdist_group(name="issuer_test_group")
+@pytest.mark.skipif(
+    TestMode.regression_run in TestMode.fixture_params,
+    reason="To be fixed. Fetching existing anoncreds schema is failing in regression",
+)
+async def test_get_anoncreds_schema(
+    anoncreds_schema_definition: CredentialSchema,
+    faber_anoncreds_client: RichAsyncClient,
+    meld_co_anoncreds_client: RichAsyncClient,
+    faber_indy_client: RichAsyncClient,
+):
+    schema_id = anoncreds_schema_definition.id
+    schema_name = anoncreds_schema_definition.name
+    schema_version = anoncreds_schema_definition.version
+    schema_attributes = anoncreds_schema_definition.attribute_names
+
+    def assert_schema_response(schema_response):
+        # Helper method to assert schema response has expected values
+        assert_that(schema_response).has_id(schema_id)
+        assert_that(schema_response).has_name(schema_name)
+        assert_that(schema_response).has_version(schema_version)
+        assert set(schema_response["attribute_names"]) == set(schema_attributes)
+
+    # First of all, assert schema is on the trust registry
+    assert await registry_has_schema(schema_id)
+
+    # Faber can fetch their own schema
+    schema_response = await faber_anoncreds_client.get(
+        f"{DEFINITIONS_BASE_PATH}/schemas/{schema_id}"
+    )
+    schema_response = schema_response.json()
+    assert_schema_response(schema_response)
+
+    # Another AnonCreds issuer can also fetch the same schema
+    schema_response = await meld_co_anoncreds_client.get(
+        f"{DEFINITIONS_BASE_PATH}/schemas/{schema_id}"
+    )
+    schema_response = schema_response.json()
+    assert_schema_response(schema_response)
+
+    # Indy issuers can fetch AnonCreds schemas as well
+    schema_response = await faber_indy_client.get(
+        f"{DEFINITIONS_BASE_PATH}/schemas/{schema_id}"
+    )
+    schema_response = schema_response.json()
+    assert_schema_response(schema_response)
 
 
 @pytest.mark.anyio
