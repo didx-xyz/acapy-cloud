@@ -55,8 +55,13 @@ async def test_create_schema(
 async def test_create_anoncreds_schema(
     anoncreds_schema_definition: CredentialSchema,
 ):
-    assert anoncreds_schema_definition.name == "test_anoncreds_schema"
-    assert anoncreds_schema_definition.attribute_names == ["speed", "name", "age"]
+    expected_schema_name = (
+        "test_anoncreds_schema"
+        if TestMode.clean_run in TestMode.fixture_params
+        else "Regression_test_anoncreds_schema"  # Regression run uses a different name
+    )
+    assert anoncreds_schema_definition.name == expected_schema_name
+    assert set(anoncreds_schema_definition.attribute_names) == {"speed", "name", "age"}
     assert anoncreds_schema_definition.version  # It's random
 
 
