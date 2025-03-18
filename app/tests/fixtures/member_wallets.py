@@ -160,7 +160,7 @@ async def meld_co_indy_issuer_verifier(
         elif test_mode == TestMode.regression_run:
             issuer_tenant = await get_or_create_tenant(
                 admin_client=admin_client,
-                name="RegressionIndyIssuerAndVerifier",
+                name="RegressionIndyIssuerVerifier",
                 roles=["issuer", "verifier"],
                 wallet_type="askar",
             )
@@ -187,7 +187,7 @@ async def meld_co_anoncreds_issuer_verifier(
         elif test_mode == TestMode.regression_run:
             issuer_tenant = await get_or_create_tenant(
                 admin_client=admin_client,
-                name="RegressionAnonCredsIssuerAndVerifier",
+                name="RegressionAnonCredsIssuerVerifier",
                 roles=["issuer", "verifier"],
                 wallet_type="askar-anoncreds",
             )
