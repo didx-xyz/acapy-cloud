@@ -269,7 +269,7 @@ async def test_create_anoncreds_credential_definition(
     )
 
     assert_that(result).has_id(
-        f"{faber_public_did.did}:3:CL:{schema.schema_metadata["seqNo"]}:{tag}"
+        f"{faber_public_did.did}:3:CL:{schema.schema_metadata['seqNo']}:{tag}"
     )
     assert_that(result).has_tag(tag)
     assert_that(result).has_schema_id(schema_id)
