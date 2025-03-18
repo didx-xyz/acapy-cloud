@@ -1,5 +1,5 @@
 import os
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Literal
 
 from app.models.tenants import CreateTenantRequest, CreateTenantResponse
 from app.tests.util.tenants import TENANT_BASE_PATH, delete_tenant, post_tenant_request
@@ -36,7 +36,10 @@ def assert_fail_on_recreating_fixtures(extra_context: str = ""):
 
 
 async def get_or_create_tenant(
-    admin_client: RichAsyncClient, name: str, roles: list[str]
+    admin_client: RichAsyncClient,
+    name: str,
+    roles: list[str],
+    wallet_type: Literal["askar", "askar-anoncreds"],
 ) -> CreateTenantResponse:
     group_id = f"{RegressionTestConfig.group_id_prefix}-{name}"
 
@@ -61,9 +64,7 @@ async def get_or_create_tenant(
 
     # If not found, create a new tenant
     request = CreateTenantRequest(
-        wallet_label=name,
-        group_id=group_id,
-        roles=roles,
+        wallet_label=name, group_id=group_id, roles=roles, wallet_type=wallet_type
     )
     return await post_tenant_request(admin_client, request)
 
