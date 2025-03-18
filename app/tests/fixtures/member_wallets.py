@@ -13,6 +13,8 @@ from app.tests.util.tenants import (
     delete_tenant,
 )
 
+default_wallet_type = "askar-anoncreds"
+
 
 @pytest.fixture(scope="function", params=TestMode.fixture_params)
 async def alice_tenant(request) -> AsyncGenerator[CreateTenantResponse, Any]:
@@ -21,7 +23,7 @@ async def alice_tenant(request) -> AsyncGenerator[CreateTenantResponse, Any]:
     async with get_tenant_admin_client() as admin_client:
         if test_mode == TestMode.clean_run:
             tenant = await create_tenant(
-                admin_client, name="alice", wallet_type="askar-anoncreds"
+                admin_client, name="alice", wallet_type=default_wallet_type
             )
 
             yield tenant
@@ -30,7 +32,10 @@ async def alice_tenant(request) -> AsyncGenerator[CreateTenantResponse, Any]:
 
         elif test_mode == TestMode.regression_run:
             tenant = await get_or_create_tenant(
-                admin_client=admin_client, name="RegressionHolderAlice", roles=[]
+                admin_client=admin_client,
+                name="RegressionHolderAlice",
+                roles=[],
+                wallet_type=default_wallet_type,
             )
 
             yield tenant
@@ -43,7 +48,7 @@ async def bob_tenant(request) -> AsyncGenerator[CreateTenantResponse, Any]:
     async with get_tenant_admin_client() as admin_client:
         if test_mode == TestMode.clean_run:
             tenant = await create_tenant(
-                admin_client, name="bob", wallet_type="askar-anoncreds"
+                admin_client, name="bob", wallet_type=default_wallet_type
             )
 
             yield tenant
@@ -52,7 +57,10 @@ async def bob_tenant(request) -> AsyncGenerator[CreateTenantResponse, Any]:
 
         elif test_mode == TestMode.regression_run:
             tenant = await get_or_create_tenant(
-                admin_client=admin_client, name="RegressionHolderBob", roles=[]
+                admin_client=admin_client,
+                name="RegressionHolderBob",
+                roles=[],
+                wallet_type=default_wallet_type,
             )
 
             yield tenant
@@ -65,7 +73,7 @@ async def acme_verifier(request) -> AsyncGenerator[CreateTenantResponse, Any]:
     async with get_tenant_admin_client() as admin_client:
         if test_mode == TestMode.clean_run:
             verifier_tenant = await create_verifier_tenant(
-                admin_client, name="acme", wallet_type="askar-anoncreds"
+                admin_client, name="acme", wallet_type=default_wallet_type
             )
 
             yield verifier_tenant
@@ -74,7 +82,10 @@ async def acme_verifier(request) -> AsyncGenerator[CreateTenantResponse, Any]:
 
         elif test_mode == TestMode.regression_run:
             verifier_tenant = await get_or_create_tenant(
-                admin_client=admin_client, name="RegressionVerifier", roles=["verifier"]
+                admin_client=admin_client,
+                name="RegressionVerifier",
+                roles=["verifier"],
+                wallet_type=default_wallet_type,
             )
 
             yield verifier_tenant
@@ -96,7 +107,10 @@ async def faber_indy_issuer(request) -> AsyncGenerator[CreateTenantResponse, Any
 
         elif test_mode == TestMode.regression_run:
             issuer_tenant = await get_or_create_tenant(
-                admin_client=admin_client, name="RegressionIssuer", roles=["issuer"]
+                admin_client=admin_client,
+                name="RegressionIndyIssuer",
+                roles=["issuer"],
+                wallet_type="askar",
             )
 
             yield issuer_tenant
@@ -118,7 +132,10 @@ async def faber_anoncreds_issuer(request) -> AsyncGenerator[CreateTenantResponse
 
         elif test_mode == TestMode.regression_run:
             issuer_tenant = await get_or_create_tenant(
-                admin_client=admin_client, name="RegressionIssuer", roles=["issuer"]
+                admin_client=admin_client,
+                name="RegressionAnonCredsIssuer",
+                roles=["issuer"],
+                wallet_type="askar-anoncreds",
             )
 
             yield issuer_tenant
@@ -143,8 +160,9 @@ async def meld_co_indy_issuer_verifier(
         elif test_mode == TestMode.regression_run:
             issuer_tenant = await get_or_create_tenant(
                 admin_client=admin_client,
-                name="RegressionIssuerAndVerifier",
+                name="RegressionIndyIssuerAndVerifier",
                 roles=["issuer", "verifier"],
+                wallet_type="askar",
             )
 
             yield issuer_tenant
@@ -169,8 +187,9 @@ async def meld_co_anoncreds_issuer_verifier(
         elif test_mode == TestMode.regression_run:
             issuer_tenant = await get_or_create_tenant(
                 admin_client=admin_client,
-                name="RegressionIssuerAndVerifier",
+                name="RegressionAnonCredsIssuerAndVerifier",
                 roles=["issuer", "verifier"],
+                wallet_type="askar-anoncreds",
             )
 
             yield issuer_tenant
