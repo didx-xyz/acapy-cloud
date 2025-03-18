@@ -51,6 +51,7 @@ async def test_create_schema(
 
 
 @pytest.mark.anyio
+@pytest.mark.xdist_group(name="issuer_test_group")
 async def test_create_anoncreds_schema(
     anoncreds_schema_definition: CredentialSchema,
 ):
@@ -86,6 +87,7 @@ async def test_get_schema(
 
 
 @pytest.mark.anyio
+@pytest.mark.xdist_group(name="issuer_test_group")
 async def test_get_anoncreds_schema(
     anoncreds_schema_definition: CredentialSchema,
     faber_anoncreds_client: RichAsyncClient,
