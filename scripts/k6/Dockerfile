@@ -14,7 +14,7 @@ RUN apk add --no-cache bash
 COPY --from=builder /app/xk6 /usr/local/bin/xk6
 
 # Add Tini
-ENV TINI_VERSION v0.19.0
+ENV TINI_VERSION=v0.19.0
 RUN apk add --no-cache tini
 
 COPY scripts /k6/scripts
