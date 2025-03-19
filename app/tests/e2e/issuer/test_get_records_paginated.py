@@ -17,9 +17,9 @@ CREDENTIALS_BASE_PATH = router.prefix
     reason="Temporarily skip; existing tests on dev don't clean up old records yet",
 )
 @pytest.mark.xdist_group(name="issuer_test_group")
-@pytest.mark.parametrize("issuer_wallet_type", ["indy", "anoncreds"])
+@pytest.mark.parametrize("credential_type", ["indy", "anoncreds"])
 async def test_get_credential_exchange_records_paginated(
-    issuer_wallet_type: str,
+    credential_type: str,
     faber_indy_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     indy_credential_definition_id: str,
@@ -28,7 +28,7 @@ async def test_get_credential_exchange_records_paginated(
     anoncreds_credential_definition_id: str,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
 ):
-    if issuer_wallet_type == "indy":
+    if credential_type == "indy":
         issuer_client = faber_indy_client
         connection = faber_indy_and_alice_connection
         credential_definition_id = indy_credential_definition_id
@@ -48,9 +48,15 @@ async def test_get_credential_exchange_records_paginated(
         # Create multiple credential exchanges
         for i in range(num_credentials_to_test):
             test_attributes["speed"] = str(i)
+            credential_key = (
+                "indy_credential_detail"
+                if credential_type == "indy"
+                else "anoncreds_credential_detail"
+            )
             credential_v2 = {
+                "type": credential_type,
                 "connection_id": issuer_connection_id,
-                "indy_credential_detail": {
+                credential_key: {
                     "credential_definition_id": credential_definition_id,
                     "attributes": test_attributes,
                 },
