@@ -133,6 +133,12 @@ async def revoke_credential(
             f"Failed to revoke credential: {e.detail}", e.status_code
         ) from e
 
+    if not revoke_result:
+        raise CloudApiException(
+            "Revocation was published but no result was returned. "
+            "Has this credential been revoked before?"
+        )
+
     if auto_publish_to_ledger:
         bound_logger.debug("Wait for publish complete")
 
@@ -177,17 +183,7 @@ async def revoke_credential(
                 }
             )
 
-        if not revoke_result:
-            raise CloudApiException(
-                "Revocation was published but no result was returned. "
-                "Has this credential been revoked before?"
-            )
-
-        if (
-            revoke_result
-            and revoke_result["txn"]
-            and revoke_result["txn"]["messages_attach"][0]
-        ):
+        if revoke_result.get("txn") and revoke_result["txn"].get("messages_attach"):
             bound_logger.debug("Successfully revoked credential.")
             return RevokedResponse.model_validate({"txn": [revoke_result["txn"]]})
 
