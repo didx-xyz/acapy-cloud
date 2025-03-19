@@ -34,8 +34,7 @@ async def test_send_credential_oob(
     }
 
     response = await faber_anoncreds_client.post(
-        CREDENTIALS_BASE_PATH + "/create-offer",
-        json=credential,
+        CREDENTIALS_BASE_PATH + "/create-offer", json=credential
     )
 
     data = response.json()
@@ -58,16 +57,13 @@ async def test_send_credential_oob(
         assert_that(invitation_response.status_code).is_equal_to(200)
 
         invitation = (invitation_response.json())["invitation"]
-
         thread_id = invitation["requests~attach"][0]["data"]["json"]["@id"]
 
         accept_response = await alice_member_client.post(
-            OOB_BASE_PATH + "/accept-invitation",
-            json={"invitation": invitation},
+            OOB_BASE_PATH + "/accept-invitation", json={"invitation": invitation}
         )
 
         oob_record = accept_response.json()
-
         assert_that(accept_response.status_code).is_equal_to(200)
         assert_that(oob_record).contains("created_at", "oob_id", "invitation")
         assert await check_webhook_state(
@@ -100,10 +96,7 @@ async def test_send_credential_and_request(
         },
     }
 
-    response = await faber_anoncreds_client.post(
-        CREDENTIALS_BASE_PATH,
-        json=credential,
-    )
+    response = await faber_anoncreds_client.post(CREDENTIALS_BASE_PATH, json=credential)
     credential_exchange = response.json()
     thread_id = credential_exchange["thread_id"]
 
@@ -127,12 +120,10 @@ async def test_send_credential_and_request(
 
     await asyncio.sleep(0.5)  # credential may take moment to reflect after webhook
     response = await alice_member_client.get(
-        CREDENTIALS_BASE_PATH,
-        params={"thread_id": thread_id},
+        CREDENTIALS_BASE_PATH, params={"thread_id": thread_id}
     )
 
     credential_exchange_id = (response.json())[0]["credential_exchange_id"]
-
     request_response = await alice_member_client.post(
         f"{CREDENTIALS_BASE_PATH}/{credential_exchange_id}/request",
     )
@@ -180,10 +171,7 @@ async def test_revoke_credential(
 
     # create and send credential offer: issuer
     faber_credential_response = (
-        await faber_anoncreds_client.post(
-            CREDENTIALS_BASE_PATH,
-            json=credential,
-        )
+        await faber_anoncreds_client.post(CREDENTIALS_BASE_PATH, json=credential)
     ).json()
     thread_id = faber_credential_response["thread_id"]
     faber_credential_exchange_id = faber_credential_response["credential_exchange_id"]
