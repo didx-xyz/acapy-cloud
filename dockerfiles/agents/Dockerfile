@@ -3,6 +3,8 @@ FROM ghcr.io/didx-xyz/acapy-agent${BBS_SUFFIX}:py3.12-test-1.2.1-20250319
 
 USER root
 
+RUN echo "Installing plugins"
+
 # Install Google Protobuf and Plugins
 ARG PROTOBUF_VERSION=5.29.3
 RUN pip install --no-cache-dir protobuf==${PROTOBUF_VERSION} \
