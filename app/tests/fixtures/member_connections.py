@@ -165,6 +165,7 @@ async def meld_co_indy_and_alice_connection(
             meld_co_connection_id=bob_alice_connection.bob_connection_id,
         )
 
+
 @pytest.fixture(scope="function")
 async def meld_co_anoncreds_and_alice_connection(
     request,
