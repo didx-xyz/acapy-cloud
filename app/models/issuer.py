@@ -22,7 +22,7 @@ class IndyCredential(BaseModel):
 
 class AnonCredsCredential(BaseModel):
     credential_definition_id: str
-    issuer_id: str
+    issuer_id: Optional[str] = None
     attributes: Dict[str, str]
 
 
