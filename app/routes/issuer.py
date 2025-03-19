@@ -10,11 +10,7 @@ from app.models.issuer import CreateOffer, CredentialType, SendCredential
 from app.services.acapy_ledger import schema_id_from_credential_definition_id
 from app.services.issuer.acapy_issuer_v2 import IssuerV2
 from app.services.trust_registry.util.issuer import assert_valid_issuer
-from app.util.did import (
-    did_from_credential_definition_id,
-    qualified_did_sov,
-    strip_qualified_did_sov,
-)
+from app.util.did import did_from_credential_definition_id, qualified_did_sov
 from app.util.pagination import (
     descending_query_parameter,
     limit_query_parameter,
@@ -100,9 +96,7 @@ async def send_credential(
                 wallet_type,
             )
             if not credential.anoncreds_credential_detail.issuer_did:
-                credential.anoncreds_credential_detail.issuer_did = (
-                    strip_qualified_did_sov(public_did)
-                )
+                credential.anoncreds_credential_detail.issuer_did = public_did
 
         # Make sure we are allowed to issue according to trust registry rules
         await assert_valid_issuer(public_did, schema_id)
@@ -197,9 +191,7 @@ async def create_offer(
                 wallet_type,
             )
             if not credential.anoncreds_credential_detail.issuer_did:
-                credential.anoncreds_credential_detail.issuer_did = (
-                    strip_qualified_did_sov(public_did)
-                )
+                credential.anoncreds_credential_detail.issuer_did = public_did
 
         # Make sure we are allowed to issue according to trust registry rules
         await assert_valid_issuer(public_did, schema_id)
