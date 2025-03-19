@@ -133,12 +133,6 @@ async def revoke_credential(
             f"Failed to revoke credential: {e.detail}", e.status_code
         ) from e
 
-    if not revoke_result:
-        raise CloudApiException(
-            "Revocation was published but no result was returned. "
-            "Has this credential been revoked before?"
-        )
-
     if auto_publish_to_ledger:
         bound_logger.debug("Wait for publish complete")
 
@@ -170,17 +164,30 @@ async def revoke_credential(
                 bound_logger.debug("Not yet revoked, waiting ...")
                 await asyncio.sleep(retry_delay)
 
-        if not revoked:
+        if not revoked or not record.result:
             raise CloudApiException(
                 "Could not assert that revocation was published within timeout. "
                 "Please check the revocation record state and retry if not revoked."
             )
 
         if wallet_type == "askar-anoncreds":
+            assert (
+                record.result.rev_reg_id is not None
+            ), "rev_reg_id is not present in the revocation response"
+            assert (
+                record.result.cred_rev_id is not None
+            ), "cred_rev_id is not present in the revocation response"
+
             return RevokedResponse(
                 cred_rev_ids_published={
                     record.result.rev_reg_id: [int(record.result.cred_rev_id)]
                 }
+            )
+
+        if not revoke_result:
+            raise CloudApiException(
+                "Revocation was published but no result was returned. "
+                "Has this credential been revoked before?"
             )
 
         if revoke_result.get("txn") and revoke_result["txn"].get("messages_attach"):
