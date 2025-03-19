@@ -196,7 +196,7 @@ jobs:
           - image: acapy-cloud/xk6
             context: ./scripts/k6
             file: ./scripts/k6/Dockerfile
-            platforms: linux/amd64,linux/arm64
+            platforms: linux/amd64
 
     steps:
       - name: Check out code
