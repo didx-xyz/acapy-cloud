@@ -170,6 +170,13 @@ async def revoke_credential(
                 "Please check the revocation record state and retry if not revoked."
             )
 
+        if wallet_type == "askar-anoncreds":
+            return RevokedResponse(
+                cred_rev_ids_published={
+                    record.result.rev_reg_id: [int(record.result.cred_rev_id)]
+                }
+            )
+        
         if not revoke_result:
             raise CloudApiException(
                 "Revocation was published but no result was returned. "
