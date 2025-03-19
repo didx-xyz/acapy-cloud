@@ -55,7 +55,8 @@ async def create_schema(
             name=schema.name,
             version=schema.version,
             issuer_id=strip_qualified_did_sov(public_did),
-            # See reason for stripping DID here: https://github.com/openwallet-foundation/acapy/issues/3540#issuecomment-2686157016
+            # See the reason for stripping did:sov from the issuer DID here:
+            # https://github.com/openwallet-foundation/acapy/issues/3540#issuecomment-2686157016
         )
 
         schema_request = handle_model_with_validation(

@@ -234,3 +234,70 @@ async def test_create_credential_definition(
         # There should be two revocation registries, assert at least one exists
         # one being used to issue credentials against and once full with to the next one
         assert len(revocation_registries) >= 1
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("support_revocation", [False, True])
+@pytest.mark.xdist_group(name="issuer_test_group")
+async def test_create_anoncreds_credential_definition(
+    anoncreds_schema_definition: CredentialSchema,
+    faber_anoncreds_acapy_client: AcaPyClient,
+    faber_anoncreds_client: RichAsyncClient,
+    support_revocation: bool,
+):
+    schema_id = anoncreds_schema_definition.id
+    tag = random_string(5)
+    credential_definition = CreateCredentialDefinition(
+        schema_id=schema_id,
+        tag=tag,
+        support_revocation=support_revocation,
+    )
+
+    auth = acapy_auth_verified(
+        acapy_auth_from_header(faber_anoncreds_client.headers["x-api-key"])
+    )
+
+    result = (
+        await definitions.create_credential_definition(
+            credential_definition=credential_definition, auth=auth
+        )
+    ).model_dump()
+
+    faber_public_did = await get_public_did(faber_anoncreds_acapy_client)
+    schema = await faber_anoncreds_acapy_client.anoncreds_schemas.get_schema(
+        schema_id=schema_id
+    )
+
+    assert_that(result).has_id(
+        f"{faber_public_did.did}:3:CL:{schema.schema_metadata['seqNo']}:{tag}"
+    )
+    assert_that(result).has_tag(tag)
+    assert_that(result).has_schema_id(schema_id)
+
+    cred_def_id = result["id"]
+    get_cred_def_result = (
+        await definitions.get_credential_definition_by_id(cred_def_id, auth)
+    ).model_dump()
+
+    assert_that(get_cred_def_result).has_tag(tag)
+    assert_that(get_cred_def_result).has_schema_id(schema_id)
+
+    if support_revocation:
+        # Assert that revocation registry was created
+        rev_reg_result = await faber_anoncreds_acapy_client.anoncreds_revocation.get_active_revocation_registry(
+            cred_def_id
+        )
+        issuer_rev_reg_record = rev_reg_result.result
+        assert issuer_rev_reg_record
+        assert cred_def_id == issuer_rev_reg_record.cred_def_id
+        assert issuer_rev_reg_record.issuer_did == faber_public_did.did
+
+        revocation_registries = (
+            await faber_anoncreds_acapy_client.anoncreds_revocation.get_revocation_registries(
+                cred_def_id=cred_def_id
+            )
+        ).rev_reg_ids
+
+        # There should be two revocation registries, assert at least one exists
+        # one being used to issue credentials against and once full with to the next one
+        assert len(revocation_registries) >= 1
