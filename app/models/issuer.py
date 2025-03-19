@@ -22,7 +22,13 @@ class IndyCredential(BaseModel):
 
 class AnonCredsCredential(BaseModel):
     credential_definition_id: str
-    issuer_id: Optional[str] = None
+    issuer_did: Optional[str] = Field(
+        default=None,
+        description=(
+            "The DID to use as the issuer of the credential. "
+            "If not provided, the public DID of the issuer wallet will be used."
+        ),
+    )
     attributes: Dict[str, str]
 
 

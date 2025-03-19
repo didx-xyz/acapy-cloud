@@ -124,7 +124,7 @@ class IssuerV2(Issuer):
                 logger=bound_logger,
                 model_class=V20CredFilterAnoncreds,
                 cred_def_id=credential.anoncreds_credential_detail.credential_definition_id,
-                issuer_id=credential.anoncreds_credential_detail.issuer_id,
+                issuer_id=credential.anoncreds_credential_detail.issuer_did,
             )
             cred_filter = V20CredFilter(anoncreds=anon_model)
 

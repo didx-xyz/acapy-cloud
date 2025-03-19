@@ -99,8 +99,8 @@ async def send_credential(
                 credential.anoncreds_credential_detail.credential_definition_id,
                 wallet_type,
             )
-            if not credential.anoncreds_credential_detail.issuer_id:
-                credential.anoncreds_credential_detail.issuer_id = (
+            if not credential.anoncreds_credential_detail.issuer_did:
+                credential.anoncreds_credential_detail.issuer_did = (
                     strip_qualified_did_sov(public_did)
                 )
 
@@ -196,8 +196,8 @@ async def create_offer(
                 credential.anoncreds_credential_detail.credential_definition_id,
                 wallet_type,
             )
-            if not credential.anoncreds_credential_detail.issuer_id:
-                credential.anoncreds_credential_detail.issuer_id = (
+            if not credential.anoncreds_credential_detail.issuer_did:
+                credential.anoncreds_credential_detail.issuer_did = (
                     strip_qualified_did_sov(public_did)
                 )
 

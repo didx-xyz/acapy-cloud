@@ -35,7 +35,7 @@ def test_credential_base_model():
     CredentialBase(  # valid anoncreds
         type=CredentialType.ANONCREDS,
         anoncreds_credential_detail=AnonCredsCredential(
-            issuer_id="WgWxqztrNooG92RXvxSTWv",
+            issuer_did="WgWxqztrNooG92RXvxSTWv",
             credential_definition_id="WgWxqztrNooG92RXvxSTWv:3:CL:20:tag",
             attributes={},
         ),
