@@ -400,7 +400,6 @@ async def test_retry_is_valid_issuer_success_after_retries(mocker):
     # Setup
     did = "did:sov:test-did"
     schema_id = "test-schema-id"
-    transaction_id = "test-transaction"
 
     # Mock is_valid_issuer to raise HTTPException first, then return True
     mock_is_valid_issuer = mocker.patch(
@@ -423,7 +422,6 @@ async def test_retry_is_valid_issuer_fails_after_max_retries(mocker):
     # Setup
     did = "did:sov:test-did"
     schema_id = "test-schema-id"
-    transaction_id = "test-transaction"
 
     # Mock is_valid_issuer to always raise HTTPException
     mock_is_valid_issuer = mocker.patch(
@@ -451,9 +449,6 @@ async def test_should_accept_endorsement_fail_bad_state(mock_acapy_client):
     mock_acapy_client.endorse_transaction.get_transaction.return_value = (
         transaction_mock
     )
-
-    # Pass the transaction ID directly
-    transaction_id = "test-transaction"
 
     result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 

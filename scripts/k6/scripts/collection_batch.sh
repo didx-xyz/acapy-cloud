@@ -115,7 +115,7 @@ cleanup() {
   log "Cleaning up..."
 
   # Clean up holders
-  for batch_num in $(seq 1 ${TOTAL_BATCHES}); do
+  for batch_num in $(seq 1 "${TOTAL_BATCHES}"); do
     local holder_prefix="${BASE_HOLDER_PREFIX}_${batch_num}k"
     export HOLDER_PREFIX="${holder_prefix}"
 
@@ -170,7 +170,7 @@ run_collection() {
   config
 
   for issuer in "${issuers[@]}"; do
-    for batch_num in $(seq 1 ${TOTAL_BATCHES}); do
+    for batch_num in $(seq 1 "${TOTAL_BATCHES}"); do
       log "Running batch ${batch_num} for issuer ${issuer}"
       run_batch "${issuer}" "${batch_num}" "${deployments}"
     done
