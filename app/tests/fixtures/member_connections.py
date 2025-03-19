@@ -47,7 +47,27 @@ async def faber_indy_and_alice_connection(
         test_mode=test_mode,
         alice_member_client=alice_member_client,
         bob_member_client=faber_indy_client,
-        alias="AliceFaberConnection",
+        alias="AliceFaberIndyConnection",
+        did_exchange=True,
+    )
+
+    return FaberAliceConnect(
+        alice_connection_id=bob_alice_connection.alice_connection_id,
+        faber_connection_id=bob_alice_connection.bob_connection_id,
+    )
+
+
+@pytest.fixture(scope="function")
+async def faber_anoncreds_and_alice_connection(
+    alice_member_client: RichAsyncClient,
+    faber_anoncreds_client: RichAsyncClient,
+    test_mode: str,  # pylint: disable=redefined-outer-name
+) -> FaberAliceConnect:
+    bob_alice_connection = await create_connection_by_test_mode(
+        test_mode=test_mode,
+        alice_member_client=alice_member_client,
+        bob_member_client=faber_anoncreds_client,
+        alias="AliceFaberAnonCredsConnection",
         did_exchange=True,
     )
 
@@ -103,7 +123,7 @@ async def meld_co_indy_and_alice_connection(
     test_mode: str,  # pylint: disable=redefined-outer-name
 ) -> MeldCoAliceConnect:
     if hasattr(request, "param") and request.param == "trust_registry":
-        connection_alias = "AliceMeldCoTrustRegistryConnection"
+        connection_alias = "AliceMeldCoIndyTrustRegistryConnection"
 
         if test_mode == TestMode.clean_run:
             acme_alice_connect = await connect_using_trust_registry_invite(
@@ -136,7 +156,59 @@ async def meld_co_indy_and_alice_connection(
             test_mode=test_mode,
             alice_member_client=alice_member_client,
             bob_member_client=meld_co_indy_client,
-            alias="AliceMeldCoConnection",
+            alias="AliceMeldCoIndyConnection",
+            did_exchange=True,
+        )
+
+        return MeldCoAliceConnect(
+            alice_connection_id=bob_alice_connection.alice_connection_id,
+            meld_co_connection_id=bob_alice_connection.bob_connection_id,
+        )
+
+@pytest.fixture(scope="function")
+async def meld_co_anoncreds_and_alice_connection(
+    request,
+    alice_tenant: CreateTenantResponse,
+    alice_member_client: RichAsyncClient,
+    meld_co_anoncreds_client: RichAsyncClient,
+    meld_co_anoncreds_issuer_verifier: CreateTenantResponse,
+    test_mode: str,  # pylint: disable=redefined-outer-name
+) -> MeldCoAliceConnect:
+    if hasattr(request, "param") and request.param == "trust_registry":
+        connection_alias = "AliceMeldCoAnonCredsTrustRegistryConnection"
+
+        if test_mode == TestMode.clean_run:
+            acme_alice_connect = await connect_using_trust_registry_invite(
+                alice_member_client=alice_member_client,
+                alice_tenant=alice_tenant,
+                verifier_client=meld_co_anoncreds_client,
+                verifier=meld_co_anoncreds_issuer_verifier,
+                connection_alias=connection_alias,
+            )
+        elif test_mode == TestMode.regression_run:
+            connection_alias_prefix = RegressionTestConfig.reused_connection_alias
+
+            acme_alice_connect = await fetch_or_create_trust_registry_connection(
+                alice_member_client=alice_member_client,
+                alice_tenant=alice_tenant,
+                verifier_client=meld_co_anoncreds_client,
+                verifier=meld_co_anoncreds_issuer_verifier,
+                connection_alias=f"{connection_alias_prefix}-{connection_alias}",
+            )
+        else:
+            assert False, f"unknown test mode: {test_mode}"
+
+        return MeldCoAliceConnect(
+            alice_connection_id=acme_alice_connect.alice_connection_id,
+            meld_co_connection_id=acme_alice_connect.acme_connection_id,
+        )
+    else:
+        # No indirect request param for trust registry connection; establish normal connection:
+        bob_alice_connection = await create_connection_by_test_mode(
+            test_mode=test_mode,
+            alice_member_client=alice_member_client,
+            bob_member_client=meld_co_anoncreds_client,
+            alias="AliceMeldCoAnonCredsConnection",
             did_exchange=True,
         )
 
