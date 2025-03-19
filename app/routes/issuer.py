@@ -99,6 +99,11 @@ async def send_credential(
                 credential.anoncreds_credential_detail.credential_definition_id,
                 wallet_type,
             )
+            if not credential.anoncreds_credential_detail.issuer_id:
+                credential.anoncreds_credential_detail.issuer_id = (
+                    strip_qualified_did_sov(public_did)
+                )
+
         # Make sure we are allowed to issue according to trust registry rules
         await assert_valid_issuer(public_did, schema_id)
 
@@ -191,6 +196,10 @@ async def create_offer(
                 credential.anoncreds_credential_detail.credential_definition_id,
                 wallet_type,
             )
+            if not credential.anoncreds_credential_detail.issuer_id:
+                credential.anoncreds_credential_detail.issuer_id = (
+                    strip_qualified_did_sov(public_did)
+                )
 
         # Make sure we are allowed to issue according to trust registry rules
         await assert_valid_issuer(public_did, schema_id)
