@@ -1,0 +1,40 @@
+input:
+  label: generate_heartbeat
+  generate:
+    interval: ${PROBE_INTERVAL:10s}
+    mapping: |
+      #!blobl
+      root = timestamp_unix()
+
+output:
+  fallback:
+    - reject_errored:
+        label: "publish_heartbeat"
+        broker:
+          pattern: fan_out_sequential
+          outputs:
+            - label: "publish_heartbeat_nats"
+              nats_jetstream:
+                urls:
+                  - ${NATS_URL:nats://nats:4222}
+                subject: ${PROBE_NATS_OUTPUT_SUBJECT:cloudapi.aries.events.probe}
+                auth:
+                  user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+                max_in_flight: ${PROBE_NATS_OUTPUT_MAX_IN_FLIGHT:1}
+            - label: "update_cache"
+              cache:
+                target: probe_write_cache
+                key: ${PROBE_NATS_OUTPUT_SUBJECT:cloudapi.aries.events.probe.write}
+    - label: "dead_letter_queue"
+      processors:
+      - label: "dead_letter_queue_mapping"
+        mapping: |
+          #!blob
+          root.message = this
+          root.metadata = metadata()
+          root.error = error()
+      - label: "dead_letter_queue_log"
+        log:
+          level: ERROR
+          message: "Processing failed due to: ${!error()}"
+      stdout: {}

@@ -1,0 +1,14 @@
+cache_resources:
+  - label: probe_write_cache
+    memory:
+      default_ttl: ${PROBE_CACHE_TTL:60s}
+
+  - label: probe_read_cache
+    memory:
+      default_ttl: ${PROBE_CACHE_TTL:60s}
+
+rate_limit_resources:
+  - label: probe_rate_limit
+    local:
+      count: ${PROBE_RATE_LIMIT_COUNT:5}
+      interval: ${PROBE_RATE_LIMIT_INTERVAL:1s}

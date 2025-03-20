@@ -1,0 +1,124 @@
+input:
+  label: "probe_liveness"
+  http_server:
+    address: ""
+    path: /livez
+    allowed_verbs:
+      - GET
+    timeout: ${PROBE_TIMEOUT:5s}
+    rate_limit: probe_rate_limit
+    sync_response:
+      status: ${! @status }
+      headers:
+        Content-Type: application/json
+
+pipeline:
+  processors:
+    - label: query_time
+      mapping: |
+        #!blobl
+        meta query_time = timestamp_unix()
+        meta probe_interval = env("PROBE_INTERVAL").or("10s").parse_duration() / 1000000000
+    - label: "log_request"
+      log:
+        level: DEBUG
+        message: 'Request received'
+        fields_mapping: |
+          #!blobl
+          if (content() != null) {
+            root.connect.message = content()
+          }
+          root.connect.metadata = metadata()
+    - label: "process_write_probe"
+      branch:
+        processors:
+          - label: "check_write_cache"
+            cache:
+              resource: probe_write_cache
+              operator: get
+              key: ${PROBE_NATS_OUTPUT_SUBJECT:cloudapi.aries.events.probe.write}
+          - label: "log_write_cache"
+            log:
+              level: DEBUG
+              message: 'Write cache:'
+              fields_mapping: |
+                #!blobl
+                root.connect.message = this
+          - label: "map_write_cache"
+            mapping: |
+              #!blobl
+              let ts = this
+              if (this != null) {
+                root.cached_timestamp = $ts.ts_format()
+                root.is_cached = true
+                root.is_live = (metadata("query_time").number() - $ts) <= metadata("probe_interval").number()
+              } else {
+                root.cached_timestamp = null
+                root.is_cached = false
+                root.is_live = false
+              }
+          - label: "log_probe_write_cache"
+            log:
+              level: DEBUG
+              message: 'Probe write cache:'
+              fields_mapping: |
+                #!blobl
+                root.connect.message = this
+        result_map: |
+          #!blobl
+          root.nats.write = this
+          meta = metadata()
+    - label: "process_read_probe"
+      branch:
+        processors:
+          - label: "check_read_cache"
+            cache:
+              resource: probe_read_cache
+              operator: get
+              key: ${PROBE_NATS_OUTPUT_SUBJECT:cloudapi.aries.events.probe.read}
+          - label: "map_read_cache"
+            mapping: |
+              #!blobl
+              let ts = this
+              if (this != null) {
+                root.cached_timestamp = $ts.ts_format()
+                root.is_cached = true
+                root.is_live = (metadata("query_time").number() - $ts) <= metadata("probe_interval").number()
+              } else {
+                root.cached_timestamp = null
+                root.is_cached = false
+                root.is_live = false
+              }
+          - label: "log_probe_read_cache"
+            log:
+              level: DEBUG
+              message: 'Probe read cache:'
+              fields_mapping: |
+                #!blobl
+                root.connect.message = this
+        result_map: |
+          #!blobl
+          root.nats.read = this
+          meta = metadata()
+    - label: probe_result
+      mapping: |
+        #!blobl
+        root = this
+        meta status = 200
+        root.is_live = true
+        if (this.nats.write.is_live == false || this.nats.read.is_live == false) {
+          meta status = 503
+          root.is_live = false
+        }
+    - label: "log_probe_result"
+      log:
+        level: DEBUG
+        message: 'Probe result:'
+        fields_mapping: |
+          #!blobl
+          root.connect.message = this
+          root.connect.metadata = metadata()
+
+output:
+  label: "probe_endpoints_output"
+  sync_response: {}

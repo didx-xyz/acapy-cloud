@@ -138,37 +138,18 @@ def setup_nats(namespace):
     )
 
 
-def setup_redpanda_connect_cloud(namespace):
-    print(color.green("Installing Redpanda Connect Cloud Processor..."))
-
-    resource_name = "connect-cloud"
-    project_root = os.getcwd()
-    current_dir = os.path.abspath(os.path.dirname(__file__))
-    values_file = project_root + "/helm/acapy-cloud/conf/local/connect-cloud.yaml"
-
-    helm_repo(
-        name="redpanda",
-        url="https://charts.redpanda.com",
-        resource_name="redpanda-repo-cloud",
-        labels=["10-helm-repos"],
-    )
-
-    pipeline_config_dir = project_root + "/resources/connect-processors/cloud/pipelines"
-    pipeline_config_files = str(
-        local("find " + pipeline_config_dir + ' -type f -name "*.yaml"', quiet=True)
-    ).splitlines()
-    print(color.green("Pipeline config files: " + str(pipeline_config_files)))
-    from_file_args = " ".join(["--from-file=" + f for f in pipeline_config_files])
-
-    # Create ConfigMap using kubectl but output only the YAML
+def apply_connect_config_map(
+    namespace, resource_name, config_dir, from_file_args, deps=[]
+):
+    print(color.green("Applying Redpanda Connect Config Map..."))
     k8s_context = os.environ.get("KIND_K8S_CONTEXT")
+
     local_resource(
-        name=resource_name + "-pipelines",
+        name=resource_name,
         cmd="kubectl --context="
         + k8s_context
         + " create configmap "
         + resource_name
-        + "-pipelines"
         + " "
         + from_file_args
         + " --dry-run=client -o yaml"
@@ -184,10 +165,66 @@ def setup_redpanda_connect_cloud(namespace):
         + " -l 'app.kubernetes.io/instance="
         + resource_name
         + "' --ignore-not-found=true",
-        deps=pipeline_config_files,
+        deps=deps,
         labels=["03-streaming"],
         allow_parallel=True,
         resource_deps=["cloudapi-ns"],
+    )
+
+
+def setup_redpanda_connect_cloud(namespace):
+    print(color.green("Installing Redpanda Connect Cloud Processor..."))
+
+    resource_name = "connect-cloud"
+    project_root = os.getcwd()
+    current_dir = os.path.abspath(os.path.dirname(__file__))
+    values_file = project_root + "/helm/acapy-cloud/conf/local/connect-cloud.yaml"
+
+    helm_repo(
+        name="redpanda",
+        url="https://charts.redpanda.com",
+        resource_name="redpanda-repo-cloud",
+        labels=["10-helm-repos"],
+    )
+
+    connect_config_dir = project_root + "/resources/connect-processors/cloud"
+    pipeline_config_files = str(
+        local(
+            "find " + connect_config_dir + '/pipelines -type f -name "*.yaml"',
+            quiet=True,
+        )
+    ).splitlines()
+    print(color.green("Pipeline config files: " + str(pipeline_config_files)))
+    pipeline_from_file_args = " ".join(
+        ["--from-file=" + f for f in pipeline_config_files]
+    )
+
+    # Create ConfigMap using kubectl but output only the YAML
+    apply_connect_config_map(
+        namespace,
+        resource_name + "-pipelines",
+        connect_config_dir + "/pipelines",
+        pipeline_from_file_args,
+        pipeline_config_files,
+    )
+
+    resource_config_files = str(
+        local(
+            "find " + connect_config_dir + '/resources -type f -name "*.yaml"',
+            quiet=True,
+        )
+    ).splitlines()
+    print(color.green("Resource config files: " + str(resource_config_files)))
+    resource_from_file_args = " ".join(
+        ["--from-file=" + f for f in resource_config_files]
+    )
+
+    apply_connect_config_map(
+        namespace,
+        resource_name + "-resources",
+        connect_config_dir + "/resources",
+        resource_from_file_args,
+        resource_config_files,
     )
 
     ## Create helm release
