@@ -9,6 +9,7 @@ from aries_cloudcontroller import (
     IssuerCredRevRecord,
     IssuerRevRegRecord,
     PublishRevocations,
+    PublishRevocationsResultSchemaAnoncreds,
     PublishRevocationsSchemaAnoncreds,
     RevokeRequest,
     RevokeRequestSchemaAnoncreds,
@@ -200,7 +201,7 @@ async def revoke_credential(
 
 async def publish_pending_revocations(
     controller: AcaPyClient, revocation_registry_credential_map: Dict[str, List[str]]
-) -> TxnOrPublishRevocationsResult:
+) -> Optional[TxnOrPublishRevocationsResult]:
     """
         Publish pending revocations
 
@@ -242,19 +243,31 @@ async def publish_pending_revocations(
             f"Failed to publish pending revocations: {e.detail}", e.status_code
         ) from e
 
-    if not result.txn or not result.txn[0].transaction_id:
+    if isinstance(result, TxnOrPublishRevocationsResult):
+        if not result.txn or not result.txn[0].transaction_id:
+            bound_logger.warning(
+                "Published pending revocations but received no endorser transaction id. Got result: {}",
+                result,
+            )
+            return
+
+        bound_logger.debug(
+            "Successfully published pending Indy revocations. Endorser transaction ids: {}.",
+            [txn.transaction_id for txn in result.txn],
+        )
+        return result
+    elif isinstance(result, PublishRevocationsResultSchemaAnoncreds):
+        bound_logger.debug("Successfully published pending AnonCreds revocations.")
+        return TxnOrPublishRevocationsResult(
+            rrid2crid=result.rrid2crid,
+            txn=None,
+        )
+    else:
         bound_logger.warning(
-            "Published pending revocations but received no endorser transaction id. Got result: {}",
+            "Unexpected response from publish_revocations: `{}`. Perhaps empty publish request?",
             result,
         )
         return
-
-    endorse_transaction_ids = [txn.transaction_id for txn in result.txn]
-    bound_logger.debug(
-        "Successfully published pending revocations. Endorser transaction ids: {}.",
-        endorse_transaction_ids,
-    )
-    return result
 
 
 async def clear_pending_revocations(
