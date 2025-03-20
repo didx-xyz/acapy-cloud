@@ -1,0 +1,35 @@
+input:
+  label: "nats_input"
+  nats_jetstream:
+    urls:
+      - ${NATS_URL:nats://nats:4222}
+    subject: ${PROBE_NATS_INPUT_SUBJECT:cloudapi.aries.events.probe}
+    stream: ${PROBE_NATS_INPUT_STREAM:"cloudapi_aries_events_probes"}
+    durable: ${PROBE_NATS_INPUT_CONSUMER_NAME:probe-read-cloud-events}
+    queue: ${PROBE_NATS_INPUT_QUEUE_GROUP:""}
+    bind: ${PROBE_NATS_INPUT_BIND:false}
+    deliver: ${PROBE_NATS_INPUT_DELIVER:"last"}
+    auth:
+      user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+    max_ack_pending: ${PROBE_NATS_INPUT_MAX_ACK_PENDING:1}
+
+output:
+  fallback:
+    - reject_errored:
+        label: "update_read_cache"
+        cache:
+          target: probe_read_cache
+          key: ${PROBE_NATS_OUTPUT_SUBJECT:cloudapi.aries.events.probe.read}
+    - label: "dead_letter_queue"
+      processors:
+      - label: "dead_letter_queue_mapping"
+        mapping: |
+          #!blobl
+          root.message = this
+          root.metadata = metadata()
+          root.error = error()
+      - label: "dead_letter_queue_log"
+        log:
+          level: ERROR
+          message: "Processing failed due to: ${!error()}"
+      stdout: {}

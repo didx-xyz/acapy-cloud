@@ -14,6 +14,15 @@ postInstall:
         - cloudapi.aries.events.*.*
       defaults: true
       storage: file
+    cloudapi_aries_events_probes:
+      subjects:
+        - cloudapi.aries.events.probe
+      defaults: true
+      storage: file
+      retention: limits
+      discard: old
+      maxAge: 10m
+      maxMsgsPerSubject: 100
     cloudapi_aries_state_monitoring:
       subjects:
         - cloudapi.aries.state_monitoring.*.*.>

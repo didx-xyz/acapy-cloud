@@ -41,10 +41,10 @@ inputs:
   namespace:
     description: The Kubernetes namespace to deploy to
     required: true
-  pipelines-dir:
-    description: The directory containing the Redpanda Connect pipelines
+  connect-configs-dir:
+    description: The directory containing the Redpanda Connect configurations
     required: true
-    default: ./resources/connect-processors/cloud/pipelines
+    default: ./resources/connect-processors/cloud
 
 runs:
   using: composite
@@ -84,15 +84,19 @@ runs:
       # https://docs.redpanda.com/redpanda-connect/get-started/quickstarts/helm-chart/#run-multiple-pipelines-in-streams-mode
       run: |
         kubectl create configmap connect-cloud-pipelines \
-          --from-file=$PIPELINES_DIR \
+          --from-file=${CONFIGS_DIR}/pipelines \
+          --dry-run=client \
+          -o yaml \
+          -n $NAMESPACE | kubectl apply -f -
+        kubectl create configmap connect-cloud-resources \
+          --from-file=${CONFIGS_DIR}/resources \
           --dry-run=client \
           -o yaml \
           -n $NAMESPACE | kubectl apply -f -
         kubectl -n $NAMESPACE rollout restart deploy/connect-cloud || true
       env:
         NAMESPACE: ${{ inputs.namespace }}
-        PIPELINES_DIR: ${{ inputs.pipelines-dir }}
-
+        CONFIGS_DIR: ${{ inputs.connect-configs-dir }}
     - name: Helmfile Apply
       # https://github.com/helmfile/helmfile-action
       uses: helmfile/helmfile-action@v2
