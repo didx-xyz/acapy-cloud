@@ -39,7 +39,13 @@ async def test_clear_pending_revokes_anoncreds(
     faber_anoncreds_client: RichAsyncClient,
     revoke_alice_anoncreds: List[CredentialExchange],
 ):
-    await clear_pending_revokes(faber_anoncreds_client, revoke_alice_anoncreds)
+    with pytest.raises(HTTPException) as exc:
+        await clear_pending_revokes(faber_anoncreds_client, revoke_alice_anoncreds)
+    assert exc.value.status_code == 501
+    assert (
+        exc.value.detail
+        == "Clearing pending revocations is not supported for the 'anoncreds' wallet type."
+    )
 
 
 async def clear_pending_revokes(
@@ -107,27 +113,8 @@ async def test_clear_pending_revokes_no_map_indy(
     faber_indy_client: RichAsyncClient,
     revoke_alice_indy_creds: List[CredentialExchange],
 ):
-    await clear_pending_revokes_no_map(faber_indy_client, revoke_alice_indy_creds)
-
-
-@pytest.mark.anyio
-@pytest.mark.skipif(
-    TestMode.regression_run in TestMode.fixture_params,
-    reason=skip_regression_test_reason,
-)
-async def test_clear_pending_revokes_no_map_anoncreds(
-    faber_anoncreds_client: RichAsyncClient,
-    revoke_alice_anoncreds: List[CredentialExchange],
-):
-    await clear_pending_revokes_no_map(faber_anoncreds_client, revoke_alice_anoncreds)
-
-
-async def clear_pending_revokes_no_map(
-    faber_client: RichAsyncClient,
-    revoke_alice_creds: List[CredentialExchange],
-):
     # clear_revoke_response = (
-    await faber_client.post(
+    await faber_indy_client.post(
         f"{REVOCATION_BASE_PATH}/clear-pending-revocations",
         json={"revocation_registry_credential_map": {}},
     )
@@ -135,9 +122,9 @@ async def clear_pending_revokes_no_map(
 
     # todo: aca-py now provides response. Make assertions based on response
 
-    for cred in revoke_alice_creds:
+    for cred in revoke_alice_indy_creds:
         rev_record = (
-            await faber_client.get(
+            await faber_indy_client.get(
                 f"{REVOCATION_BASE_PATH}/revocation/record"
                 + "?credential_exchange_id="
                 + cred.credential_exchange_id
