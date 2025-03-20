@@ -41,6 +41,9 @@ def setup_postgres(namespace):
         labels=["04-dbs"],
         resource_deps=["cloudapi-ns", "istio"],
         deps=[values_file],
+        port_forwards=[
+            port_forward(5432, name="postgres"),
+        ],
     )
 
 
