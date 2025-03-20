@@ -305,10 +305,10 @@ async def issue_alice_indy_creds(
 
 async def revoke_alice_creds(
     faber_client: RichAsyncClient,
-    issue_alice_creds: List[CredentialExchange],
+    alice_issued_creds: List[CredentialExchange],
 ) -> List[CredentialExchange]:
 
-    for cred in issue_alice_creds:
+    for cred in alice_issued_creds:
         await faber_client.post(
             f"{REVOCATION_BASE_PATH}/revoke",
             json={
@@ -316,7 +316,7 @@ async def revoke_alice_creds(
             },
         )
 
-    return issue_alice_creds
+    return alice_issued_creds
 
 
 @pytest.fixture(scope="function")
@@ -326,7 +326,7 @@ async def revoke_alice_anoncreds(
 ) -> List[CredentialExchange]:
     return await revoke_alice_creds(
         faber_client=faber_anoncreds_client,
-        issue_alice_creds=issue_alice_anoncreds,
+        alice_issued_creds=issue_alice_anoncreds,
     )
 
 
@@ -337,7 +337,7 @@ async def revoke_alice_indy_creds(
 ) -> List[CredentialExchange]:
     return await revoke_alice_creds(
         faber_client=faber_indy_client,
-        issue_alice_creds=issue_alice_indy_creds,
+        alice_issued_creds=issue_alice_indy_creds,
     )
 
 
