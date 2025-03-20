@@ -13,7 +13,7 @@ python = "~3.12.8"
 
 aiohttp = "~3.11.7"
 aiocache = "~0.12.0"
-aries-cloudcontroller = "==1.2.1.post20250228"
+aries-cloudcontroller = "==1.2.1.post20250319"
 base58 = "~2.1.1"
 fastapi = "~0.115.10"
 httpx = "~0.28.0"
