@@ -9,6 +9,7 @@ from aries_cloudcontroller import (
     IssuerCredRevRecord,
     IssuerRevRegRecord,
     PublishRevocations,
+    PublishRevocationsOptions,
     PublishRevocationsResultSchemaAnoncreds,
     PublishRevocationsSchemaAnoncreds,
     RevokeRequest,
@@ -227,7 +228,8 @@ async def publish_pending_revocations(
         if wallet_type == "askar-anoncreds":
             acapy_call = controller.anoncreds_revocation.publish_revocations
             body = PublishRevocationsSchemaAnoncreds(
-                rrid2crid=revocation_registry_credential_map
+                rrid2crid=revocation_registry_credential_map,
+                options=PublishRevocationsOptions(create_transaction_for_endorser=True),
             )
         else:  # wallet_type == "askar":
             acapy_call = controller.revocation.publish_revocations
