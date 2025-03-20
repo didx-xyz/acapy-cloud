@@ -25,8 +25,9 @@ async def test_register_schema():
         "did": "string",
         "name": "string",
         "version": "string",
+        "schema_type": "indy"
     }
-    payload = {"schema_id": schema_id}
+    payload = {"schema_id": schema_id, "schema_type": "indy",}
 
     async with RichAsyncClient(raise_status_error=False) as client:
         response = await client.post(
@@ -59,6 +60,7 @@ async def test_get_schema_by_id():
         "did": "string",
         "name": "string",
         "version": "string",
+        "schema_type": "indy"
     }
 
     async with RichAsyncClient(raise_status_error=False) as client:
@@ -82,6 +84,7 @@ async def test_update_schema():
         "did": "string_updated",
         "name": "string_updated",
         "version": "string_updated",
+        "schema_type": "indy",
     }
     payload = {"schema_id": updated_schema_id}
 
