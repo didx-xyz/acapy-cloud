@@ -278,7 +278,7 @@ async def issue_alice_anoncreds(
     anoncreds_credential_definition_id_revocable: str,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
 ) -> List[CredentialExchange]:
-    await issue_alice_creds(
+    return await issue_alice_creds(
         credential_type="anoncreds",
         faber_client=faber_anoncreds_client,
         alice_member_client=alice_member_client,
@@ -294,7 +294,7 @@ async def issue_alice_indy_creds(
     indy_credential_definition_id_revocable: str,
     faber_indy_and_alice_connection: FaberAliceConnect,
 ) -> List[CredentialExchange]:
-    await issue_alice_creds(
+    return await issue_alice_creds(
         credential_type="indy",
         faber_client=faber_indy_client,
         alice_member_client=alice_member_client,
