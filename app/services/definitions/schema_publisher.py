@@ -204,7 +204,7 @@ class SchemaPublisher:
                     "Timed out waiting for schema to be published.", 504
                 ) from e
 
-        await register_schema(schema_id=schema_id)
+        await register_schema(schema_id=schema_id, schema_type="anoncreds")
 
         schema_result = anoncreds_credential_schema(schema_result.schema_state)
         return schema_result
