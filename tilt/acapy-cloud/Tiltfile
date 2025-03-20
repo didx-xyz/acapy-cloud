@@ -227,36 +227,6 @@ def setup_redpanda_connect_cloud(namespace):
         resource_config_files,
     )
 
-    # apply_connect_config_map(namespace, resource_name + '-resources', connect_config_dir + '/resources', from_file_args, pipeline_config_files)
-    # k8s_context = os.environ.get("KIND_K8S_CONTEXT")
-    # local_resource(
-    #     name=resource_name + "-pipelines",
-    #     cmd="kubectl --context="
-    #     + k8s_context
-    #     + " create configmap "
-    #     + resource_name
-    #     + "-pipelines"
-    #     + " "
-    #     + from_file_args
-    #     + " --dry-run=client -o yaml"
-    #     + " -n "
-    #     + namespace
-    #     + " | kubectl --context="
-    #     + k8s_context
-    #     + " apply -f - && "
-    #     + "kubectl --context="
-    #     + k8s_context
-    #     + " delete pod -n "
-    #     + namespace
-    #     + " -l 'app.kubernetes.io/instance="
-    #     + resource_name
-    #     + "' --ignore-not-found=true",
-    #     deps=pipeline_config_files,
-    #     labels=["03-streaming"],
-    #     allow_parallel=True,
-    #     resource_deps=["cloudapi-ns"],
-    # )
-
     ## Create helm release
     # https://github.com/redpanda-data/helm-charts/tree/main/charts/connect
     helm_resource(

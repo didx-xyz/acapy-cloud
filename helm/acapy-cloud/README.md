@@ -50,12 +50,16 @@ acapy-cloud uses Redpanda Connect for event processing. The pipelines are define
 [connect-processors](../../resources/connect-processors) directory.
 
 Before installing Redpanda Connect, you will need to manually create therequired config maps:
+
 -  Config Map with the processor pipelines:
+
   ```bash
   kubectl create configmap connect-cloud-pipelines \
     --from-file=resources/connect-processors/cloud/pipelines
   ```
+
 -  Config Map with the processor resources:
+
   ```bash
   kubectl create configmap connect-cloud-resources \
     --from-file=resources/connect-processors/cloud/resources
