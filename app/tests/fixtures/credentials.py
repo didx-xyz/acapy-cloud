@@ -737,7 +737,8 @@ async def issue_alice_many_anoncreds(
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
 ) -> List[CredentialExchange]:
     return await issue_alice_many_creds(
-        request,
+        credential_type="anoncreds",
+        request=request,
         faber_client=faber_anoncreds_client,
         alice_member_client=alice_member_client,
         credential_definition_id=anoncreds_credential_definition_id,
@@ -754,7 +755,8 @@ async def issue_alice_many_indy_creds(
     faber_indy_and_alice_connection: FaberAliceConnect,
 ) -> List[CredentialExchange]:
     return await issue_alice_many_creds(
-        request,
+        credential_type="indy",
+        request=request,
         faber_client=faber_indy_client,
         alice_member_client=alice_member_client,
         credential_definition_id=indy_credential_definition_id,
