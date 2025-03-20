@@ -11,6 +11,8 @@ from aries_cloudcontroller import (
     IssuerCredRevRecordSchemaAnoncreds,
     IssuerRevRegRecord,
     PublishRevocations,
+    PublishRevocationsOptions,
+    PublishRevocationsResultSchemaAnoncreds,
     PublishRevocationsSchemaAnoncreds,
     RevokeRequest,
     RevokeRequestSchemaAnoncreds,
@@ -178,16 +180,15 @@ async def test_publish_pending_revocations_success(
         elif wallet_type == "askar-anoncreds":
             when(mock_agent_controller.anoncreds_revocation).publish_revocations(
                 body=PublishRevocationsSchemaAnoncreds(
-                    rrid2crid=revocation_registry_credential_map
+                    rrid2crid=revocation_registry_credential_map,
+                    options=PublishRevocationsOptions(
+                        create_transaction_for_endorser=True
+                    ),
                 )
             ).thenReturn(
                 to_async(
-                    TxnOrPublishRevocationsResult(
-                        txn=[
-                            TransactionRecord(
-                                transaction_id="97a46fab-5499-42b3-a2a1-7eb9faad31c0"
-                            )
-                        ]
+                    PublishRevocationsResultSchemaAnoncreds(
+                        rrid2crid=revocation_registry_credential_map
                     )
                 )
             )
@@ -206,7 +207,10 @@ async def test_publish_pending_revocations_success(
                 mock_agent_controller.anoncreds_revocation, times=1
             ).publish_revocations(
                 body=PublishRevocationsSchemaAnoncreds(
-                    rrid2crid=revocation_registry_credential_map
+                    rrid2crid=revocation_registry_credential_map,
+                    options=PublishRevocationsOptions(
+                        create_transaction_for_endorser=True
+                    ),
                 )
             )
 
