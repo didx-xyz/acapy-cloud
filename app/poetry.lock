@@ -197,16 +197,14 @@ test = ["anyio[trio]", "blockbuster (>=1.5.23)", "coverage[toml] (>=7)", "except
 trio = ["trio (>=0.26.1)"]
 
 [[package]]
-name = "aries-cloudcontroller"
-version = "1.2.1.post20250228"
+name = "aries_cloudcontroller"
+version = "1.2.1.post20250319"
 description = "A simple python client for controlling an ACA-Py agent"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-files = [
-    {file = "aries_cloudcontroller-1.2.1.post20250228-py3-none-any.whl", hash = "sha256:f14a530b4272ff2d056049f962adeb767a2080dee7bf56a147c0bdd76c026a79"},
-    {file = "aries_cloudcontroller-1.2.1.post20250228.tar.gz", hash = "sha256:8b9695c131309f058ba7309e46f2d92090fac76098b9132536edcf9af9f5e519"},
-]
+files = []
+develop = false
 
 [package.dependencies]
 aiohttp = ">=3.9.4,<4.0"
@@ -216,6 +214,12 @@ pydantic = ">=2.6,<3.0"
 python-dateutil = ">=2"
 typing-extensions = ">=4,<5.0"
 urllib3 = ">=2.1,<3"
+
+[package.source]
+type = "git"
+url = "https://github.com/didx-xyz/aries-cloudcontroller-python.git"
+reference = "fix-PublishRevocationsResultSchemaAnoncreds"
+resolved_reference = "709a150992b2f6e11c6a5af1de03d67cb8f8f8fa"
 
 [[package]]
 name = "astroid"
@@ -1854,4 +1858,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.12.8"
-content-hash = "9b5bc90f212571cfaa58f60763dce906173868e0f1264d350af0d6d87634c283"
+content-hash = "e5e4b125e9c32ba0acd32b676bba32c7b5726faa6c801ede384c5e1c6e15fa6a"

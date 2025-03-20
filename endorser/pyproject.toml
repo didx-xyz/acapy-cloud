@@ -11,7 +11,8 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "~3.12.8"
 
-aries-cloudcontroller = "==1.2.1.post20250228"
+# aries-cloudcontroller = "==1.2.1.post20250228"
+aries-cloudcontroller = { git = "https://github.com/didx-xyz/aries-cloudcontroller-python.git", branch = "fix-PublishRevocationsResultSchemaAnoncreds" }
 dependency-injector = "^4.46.0"
 fastapi = "~0.115.10"
 httpx = "~0.28.0"
