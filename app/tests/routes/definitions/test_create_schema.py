@@ -15,7 +15,7 @@ create_indy_schema_body = CreateSchema(
 
 create_anoncreds_schema_body = CreateSchema(
     schema_type="anoncreds",
-    name="Test_Anoncreds_Schema_1",
+    name="Test_AnonCreds_Schema_1",
     version="0.1.0",
     attribute_names=["attr1", "attr2"],
 )
@@ -26,8 +26,8 @@ create_indy_schema_response = CredentialSchema(
     attribute_names=["attr1", "attr2"],
 )
 create_anoncreds_schema_response = CredentialSchema(
-    id="27aG25kMFticzJ8GHH87BB:2:Test_Anoncreds_Schema_1:0.1.0",
-    name="Test_Anoncreds_Schema_1",
+    id="27aG25kMFticzJ8GHH87BB:2:Test_AnonCreds_Schema_1:0.1.0",
+    name="Test_AnonCreds_Schema_1",
     version="0.1.0",
     attribute_names=["attr1", "attr2"],
 )

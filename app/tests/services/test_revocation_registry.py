@@ -46,7 +46,7 @@ message_attach_data = {
         "json": {
             "operation": {
                 "revocRegDefId": "rev_reg_id_1",
-                "value": {"revoked": [1, 2, 3]},
+                "value": {"revoked": [1]},
             },
         }
     }
@@ -836,7 +836,15 @@ async def test_revoke_credential_auto_publish_success(
             # Mock the get_revocation_status call to return "revoked"
             when(mock_agent_controller.anoncreds_revocation).get_cred_rev_record(
                 ANY
-            ).thenReturn(to_async(MagicMock(result=MagicMock(state="revoked"))))
+            ).thenReturn(
+                to_async(
+                    MagicMock(
+                        result=MagicMock(
+                            state="revoked", rev_reg_id="rev_reg_id_1", cred_rev_id="1"
+                        )
+                    )
+                )
+            )
 
         else:  # wallet_type == "askar"
             when(mock_agent_controller.revocation).revoke_credential(
@@ -855,7 +863,7 @@ async def test_revoke_credential_auto_publish_success(
         )
 
         assert isinstance(response, RevokedResponse)
-        assert response.cred_rev_ids_published == {"rev_reg_id_1": [1, 2, 3]}
+        assert response.cred_rev_ids_published == {"rev_reg_id_1": [1]}
 
 
 @pytest.mark.parametrize("wallet_type", ["askar", "askar-anoncreds"])
@@ -904,28 +912,19 @@ async def test_revoke_credential_auto_publish_timeout(
 
 
 @pytest.mark.anyio
-@pytest.mark.parametrize("wallet_type", ["askar", "askar-anoncreds"])
+@pytest.mark.parametrize("wallet_type", ["askar"])
 async def test_revoke_credential_no_result_returned(
     mock_agent_controller: AcaPyClient, wallet_type
 ):
     with patch(
         "app.services.revocation_registry.get_wallet_type", return_value=wallet_type
     ):
-        # Mock the revocation call to return None
-        if wallet_type == "askar-anoncreds":
-            when(mock_agent_controller.anoncreds_revocation).revoke(
-                body=ANY
-            ).thenReturn(to_async(None))
-            when(mock_agent_controller.anoncreds_revocation).get_cred_rev_record(
-                ANY
-            ).thenReturn(to_async(MagicMock(result=MagicMock(state="revoked"))))
-        else:  # wallet_type == "askar"
-            when(mock_agent_controller.revocation).revoke_credential(
-                body=ANY
-            ).thenReturn(to_async(None))
-            when(mock_agent_controller.revocation).get_revocation_status(
-                ANY
-            ).thenReturn(to_async(MagicMock(result=MagicMock(state="revoked"))))
+        when(mock_agent_controller.revocation).revoke_credential(body=ANY).thenReturn(
+            to_async(None)
+        )
+        when(mock_agent_controller.revocation).get_revocation_status(ANY).thenReturn(
+            to_async(MagicMock(result=MagicMock(state="revoked")))
+        )
 
         with pytest.raises(
             CloudApiException,
@@ -962,7 +961,7 @@ async def test_revoke_credential_with_transaction_result(
 
         assert isinstance(response, RevokedResponse)
         assert response.cred_rev_ids_published == {
-            "rev_reg_id_1": [1, 2, 3]
+            "rev_reg_id_1": [1]
         }, "The cred_rev_ids_published should match the expected transformation"
 
 

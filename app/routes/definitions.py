@@ -356,7 +356,7 @@ async def get_credential_definitions(
         issuer_did: str
         credential_definition_id: str
         schema_id: str
-        schema_issuer_id: str
+        schema_issuer_did: str
         schema_version: str
 
     Returns:

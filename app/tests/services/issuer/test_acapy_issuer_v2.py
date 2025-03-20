@@ -343,7 +343,7 @@ async def test_create_offer_anoncreds(mock_agent_controller: AcaPyClient):
         type=CredentialType.ANONCREDS,
         anoncreds_credential_detail=AnonCredsCredential(
             credential_definition_id="WgWxqztrNooG92RXvxSTWv:3:CL:20:tag",
-            issuer_id="WgWxqztrNooG92RXvxSTWv",
+            issuer_did="WgWxqztrNooG92RXvxSTWv",
             attributes={"name": "Bob", "age": "25"},
         ),
         connection_id="abc",
