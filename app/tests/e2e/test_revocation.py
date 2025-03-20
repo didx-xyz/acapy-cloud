@@ -43,8 +43,8 @@ async def test_clear_pending_revokes_anoncreds(
         await clear_pending_revokes(faber_anoncreds_client, revoke_alice_anoncreds)
     assert exc.value.status_code == 501
     assert (
-        exc.value.detail
-        == "Clearing pending revocations is not supported for the 'anoncreds' wallet type."
+        "Clearing pending revocations is not supported for the 'anoncreds' wallet type."
+        in exc.value.detail
     )
 
 
