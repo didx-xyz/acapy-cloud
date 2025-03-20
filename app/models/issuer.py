@@ -133,7 +133,7 @@ class RevokedResponse(BaseModel):
     ) -> Dict[str, Any]:
         if isinstance(values, dict) and "txn" in values:
             # This is a List of TransactionRecord
-            txn_list: List[Dict[str, Any]] = values.get("txn", [])
+            txn_list: List[Dict[str, Any]] = values.get("txn") or []
             cred_rev_ids_published = {}
 
             for txn in txn_list:
