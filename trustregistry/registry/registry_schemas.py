@@ -17,7 +17,7 @@ router = APIRouter(prefix="/registry/schemas", tags=["schema"])
 
 class SchemaID(BaseModel):
     schema_id: str = Field(..., examples=["WgWxqztrNooG92RXvxSTWv:2:schema_name:1.0"])
-    schema_type: Literal["indy", "anoncreds"] = Field(default=None)
+    schema_type: Literal["indy", "anoncreds"] = Field(default="indy")
 
 
 @router.get("", response_model=List[Schema])
