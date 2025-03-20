@@ -259,7 +259,9 @@ async def publish_pending_revocations(
         )
         return result
     elif isinstance(result, PublishRevocationsResultSchemaAnoncreds):
-        bound_logger.debug("Successfully published pending AnonCreds revocations.")
+        bound_logger.info(
+            "Successfully published pending AnonCreds revocations: {}.", result
+        )
         return TxnOrPublishRevocationsResult(
             rrid2crid=result.rrid2crid,
             txn=None,
