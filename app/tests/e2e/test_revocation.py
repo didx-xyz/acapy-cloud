@@ -1,3 +1,4 @@
+import asyncio
 from typing import List, Literal
 
 import pytest
@@ -200,7 +201,7 @@ async def test_publish_all_revocations_for_rev_reg_id_indy(
     revoke_alice_indy_creds: List[CredentialExchange],
 ):
     await publish_all_revocations_for_rev_reg_id(
-        faber_indy_client, revoke_alice_indy_creds
+        "indy", faber_indy_client, revoke_alice_indy_creds
     )
 
 
@@ -214,11 +215,12 @@ async def test_publish_all_revocations_for_rev_reg_id_anoncreds(
     revoke_alice_anoncreds: List[CredentialExchange],
 ):
     await publish_all_revocations_for_rev_reg_id(
-        faber_anoncreds_client, revoke_alice_anoncreds
+        "anoncreds", faber_anoncreds_client, revoke_alice_anoncreds
     )
 
 
 async def publish_all_revocations_for_rev_reg_id(
+    credential_type: Literal["indy", "anoncreds"],
     faber_client: RichAsyncClient,
     revoke_alice_creds: List[CredentialExchange],
 ):
@@ -237,6 +239,10 @@ async def publish_all_revocations_for_rev_reg_id(
         f"{REVOCATION_BASE_PATH}/publish-revocations",
         json={"revocation_registry_credential_map": {rev_reg_id: []}},
     )
+
+    if credential_type == "anoncreds":
+        # TODO: Remove this once anoncreds returns transaction id to be awaited
+        await asyncio.sleep(12)
 
     await check_revocation_status(faber_client, revoke_alice_creds, "revoked")
 
