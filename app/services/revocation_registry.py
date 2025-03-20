@@ -262,8 +262,11 @@ async def publish_pending_revocations(
         bound_logger.info(
             "Successfully published pending AnonCreds revocations: {}.", result
         )
+        # Cast integer cred_rev_ids to string
+        rrid2crid = result.rrid2crid if result.rrid2crid else {}
+        rrid2crid = {k: [str(i) for i in v] for k, v in result.rrid2crid.items()}
         return TxnOrPublishRevocationsResult(
-            rrid2crid=result.rrid2crid,
+            rrid2crid=rrid2crid,
             txn=None,
         )
     else:
