@@ -11,7 +11,7 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "~3.12.8"
 
-aiohttp = "~3.11.7"
+aiohttp = "~3.11.14"
 aiocache = "~0.12.0"
 aries-cloudcontroller = "==1.2.1.post20250228"
 base58 = "~2.1.1"
