@@ -18,6 +18,8 @@ if ! docker container ls -a --format '{{.Names}}' | grep -q "^${KIND_DOCKER_CACH
     -e ENABLE_MANIFEST_CACHE=true \
     -e REGISTRIES="${registries}" \
     --hostname ${KIND_DOCKER_CACHE} \
+    --dns 1.1.1.1 \
+    --dns 1.0.0.1 \
     -v $(pwd)/tilt/docker/cache:/docker_mirror_cache \
     -v $(pwd)/tilt/docker/certs:/ca \
     -v $(pwd)/tilt/docker/resolvers.conf:/etc/nginx/resolvers.conf \
