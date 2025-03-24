@@ -158,11 +158,11 @@ async def test_schema_id_from_credential_definition_id_seq_no(
         to_async(SchemaGetResult(var_schema=ModelSchema(id=schema_id)))
     )
 
-    schema_id = await schema_id_from_credential_definition_id(
+    schema_id_response = await schema_id_from_credential_definition_id(
         mock_agent_controller, cred_def_id_seq_no, "askar"
     )
 
-    assert schema_id == schema_id
+    assert schema_id_response == schema_id
     verify(mock_agent_controller.schema).get_schema(schema_id=seq_no)
 
 
