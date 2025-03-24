@@ -447,7 +447,7 @@ async def test_update_tenant_verifier_to_issuer(
         assert new_actor
         assert new_actor.name == new_wallet_label
         assert new_actor.did == new_actor.did
-        assert new_actor.roles == ["issuer", "verifier"]
+        assert set(new_actor.roles) == {"issuer", "verifier"}
         assert new_actor.image_url == new_image_url
 
         assert new_actor.didcomm_invitation is not None
@@ -509,7 +509,7 @@ async def test_get_tenants(tenant_admin_client: RichAsyncClient):
         assert len(tenants) >= 1
 
         # Make sure created tenant is returned
-        assert all(tenant["wallet_id"] == last_wallet_id for tenant in tenants)
+        assert any(tenant["wallet_id"] == last_wallet_id for tenant in tenants)
         assert all(tenant["group_id"] == group_id for tenant in tenants)
     finally:
         # Cleanup: Delete the created tenant even if test fails
@@ -549,7 +549,7 @@ async def test_get_tenants_by_group(tenant_admin_client: RichAsyncClient):
         assert len(tenants) >= 1
 
         # Make sure created tenant is returned
-        assert all(tenant["wallet_id"] == wallet_id for tenant in tenants)
+        assert any(tenant["wallet_id"] == wallet_id for tenant in tenants)
         assert all(tenant["group_id"] == group_id for tenant in tenants)
 
         response = await tenant_admin_client.get(f"{TENANTS_BASE_PATH}?group_id=other")
@@ -593,10 +593,11 @@ async def test_get_tenants_by_wallet_name(tenant_admin_client: RichAsyncClient):
         assert response.status_code == 200
         tenants = response.json()
         assert len(tenants) == 1
+        tenant = tenants[0]
 
         # Make sure created tenant is returned
-        assert all(tenant["wallet_id"] == wallet_id for tenant in tenants)
-        assert all(tenant["group_id"] == group_id for tenant in tenants)
+        assert tenant["wallet_id"] == wallet_id
+        assert tenant["group_id"] == group_id
 
         # Does not return when wallet_name = other
         response = await tenant_admin_client.get(

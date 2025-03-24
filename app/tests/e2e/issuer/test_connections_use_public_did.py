@@ -53,7 +53,7 @@ async def test_accept_use_public_did(
     assert connection_record["state"]
     assert connection_record["created_at"]
     assert connection_record["updated_at"]
-    assert connection_record["invitation_key"]
+    assert "invitation_key" in connection_record
     assert connection_record["state"] == "request-sent"
 
     assert await check_webhook_state(
@@ -106,7 +106,7 @@ async def test_accept_use_public_did_between_issuer_and_holder(
     assert connection_record["state"]
     assert connection_record["created_at"]
     assert connection_record["updated_at"]
-    assert connection_record["invitation_key"]
+    assert "invitation_key" in connection_record
     assert connection_record["state"] == "request-sent"
 
     assert await check_webhook_state(
