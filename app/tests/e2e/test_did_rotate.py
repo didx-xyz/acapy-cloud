@@ -1,6 +1,5 @@
 import pytest
 from aries_cloudcontroller import AcaPyClient
-from assertpy import assert_that
 from fastapi import HTTPException
 
 from app.models.wallet import DIDCreate
@@ -54,8 +53,7 @@ async def test_rotate_did(
     )
     assert rotate_response.status_code == 200
     rotate_data = rotate_response.json()
-    assert_that(rotate_data).contains("to_did")
-    assert_that(rotate_data["to_did"]).is_equal_to(alice_new_did)
+    assert rotate_data["to_did"] == alice_new_did
 
 
 @pytest.mark.anyio

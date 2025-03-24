@@ -3,7 +3,6 @@ from typing import Optional
 
 import pytest
 from aries_cloudcontroller import AcaPyClient
-from assertpy import assert_that
 from fastapi import HTTPException
 
 from app.routes.admin.tenants import router as tenants_router
@@ -81,8 +80,8 @@ async def test_create_did_exchange_request(
         )
         assert response.status_code == 200
         connection_record = response.json()
-        assert_that(connection_record).contains("connection_id", "state")
-        assert_that(connection_record["state"]).is_equal_to("request-sent")
+        assert connection_record["connection_id"]
+        assert connection_record["state"] == "request-sent"
 
         alice_connection_id = connection_record["connection_id"]
         alice_did = connection_record["my_did"]

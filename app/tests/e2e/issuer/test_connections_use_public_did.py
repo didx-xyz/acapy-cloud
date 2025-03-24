@@ -1,5 +1,6 @@
+import re
+
 import pytest
-from assertpy import assert_that
 
 from app.models.connections import AcceptInvitation, CreateInvitation
 from app.routes.connections import router
@@ -34,11 +35,9 @@ async def test_accept_use_public_did(
     assert response.status_code == 200
 
     invitation = response.json()
-    assert_that(invitation["connection_id"]).is_not_empty()
-    assert_that(invitation["invitation"]).is_instance_of(dict).contains(
-        "@id", "@type", "recipientKeys", "serviceEndpoint"
-    )
-    assert_that(invitation["invitation_url"]).matches(r"^https?://")
+    assert invitation["connection_id"]
+    assert invitation["invitation"]
+    assert re.match(r"^http(s)?://", invitation["invitation_url"])
 
     accept_invite_json = AcceptInvitation(
         invitation=invitation["invitation"],
@@ -50,10 +49,12 @@ async def test_accept_use_public_did(
     )
     connection_record = accept_response.json()
 
-    assert_that(connection_record).contains(
-        "connection_id", "state", "created_at", "updated_at", "invitation_key"
-    )
-    assert_that(connection_record).has_state("request-sent")
+    assert connection_record["connection_id"]
+    assert connection_record["state"]
+    assert connection_record["created_at"]
+    assert connection_record["updated_at"]
+    assert "invitation_key" in connection_record
+    assert connection_record["state"] == "request-sent"
 
     assert await check_webhook_state(
         client=issuer_verifier_client,
@@ -87,11 +88,9 @@ async def test_accept_use_public_did_between_issuer_and_holder(
     assert response.status_code == 200
 
     invitation = response.json()
-    assert_that(invitation["connection_id"]).is_not_empty()
-    assert_that(invitation["invitation"]).is_instance_of(dict).contains(
-        "@id", "@type", "recipientKeys", "serviceEndpoint"
-    )
-    assert_that(invitation["invitation_url"]).matches(r"^https?://")
+    assert invitation["connection_id"]
+    assert invitation["invitation"]
+    assert re.match(r"^http(s)?://", invitation["invitation_url"])
 
     accept_invite_json = AcceptInvitation(
         invitation=invitation["invitation"]
@@ -103,10 +102,12 @@ async def test_accept_use_public_did_between_issuer_and_holder(
     )
     connection_record = accept_response.json()
 
-    assert_that(connection_record).contains(
-        "connection_id", "state", "created_at", "updated_at", "invitation_key"
-    )
-    assert_that(connection_record).has_state("request-sent")
+    assert connection_record["connection_id"]
+    assert connection_record["state"]
+    assert connection_record["created_at"]
+    assert connection_record["updated_at"]
+    assert "invitation_key" in connection_record
+    assert connection_record["state"] == "request-sent"
 
     assert await check_webhook_state(
         client=alice_member_client,

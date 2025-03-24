@@ -1,6 +1,5 @@
 import pytest
 from aries_cloudcontroller import AcaPyClient
-from assertpy import assert_that
 from fastapi import HTTPException
 
 from app.models.definitions import CredentialSchema
@@ -38,7 +37,10 @@ async def test_get_schema_by_id(
 
     assert schema_response.status_code == 200
     schema = schema_response.json()
-    assert_that(schema).contains("did", "name", "version", "id")
+    assert schema["did"]
+    assert schema["name"]
+    assert schema["version"]
+    assert schema["id"]
 
     with pytest.raises(HTTPException) as exc:
         await trust_registry_client.get(
@@ -55,42 +57,57 @@ async def test_get_actors(
     faber_indy_acapy_client: AcaPyClient,
     trust_registry_client: RichAsyncClient,
 ):
+    # Test getting all actors
     all_actors = await trust_registry_client.get(
         f"{CLOUDAPI_TRUST_REGISTRY_PATH}/actors"
     )
     assert all_actors.status_code == 200
     actors = all_actors.json()
-    assert_that(actors[0]).contains("id", "name", "roles", "did", "didcomm_invitation")
 
+    # Helper function to verify actor structure
+    def verify_actor_structure(actor_data):
+        assert actor_data["id"]
+        assert actor_data["name"]
+        assert actor_data["roles"]
+        assert actor_data["did"]
+        assert actor_data["didcomm_invitation"]
+
+    verify_actor_structure(actors[0])
+
+    # Test getting actors by ID
     actors_by_id = await trust_registry_client.get(
         f"{CLOUDAPI_TRUST_REGISTRY_PATH}/actors?actor_id={faber_indy_issuer.wallet_id}"
     )
     assert actors_by_id.status_code == 200
     actor = actors_by_id.json()[0]
 
+    # Verify actor DID matches the expected value
     actor_did = actor["did"]
     did_result = await faber_indy_acapy_client.wallet.get_public_did()
     assert actor_did == f"did:sov:{did_result.result.did}"
 
+    # Verify actor name matches the expected value
     actor_name = actor["name"]
     assert actor_name == faber_indy_issuer.wallet_label
-    assert_that(actor).contains("id", "name", "roles", "did", "didcomm_invitation")
 
+    # Verify actor structure
+    verify_actor_structure(actor)
+
+    # Test getting actors by DID
     actors_by_did = await trust_registry_client.get(
         f"{CLOUDAPI_TRUST_REGISTRY_PATH}/actors?actor_did={actor_did}"
     )
     assert actors_by_did.status_code == 200
-    assert_that(actors_by_did.json()[0]).contains(
-        "id", "name", "roles", "did", "didcomm_invitation"
-    )
 
+    # Test getting actors by name
     actors_by_name = await trust_registry_client.get(
         f"{CLOUDAPI_TRUST_REGISTRY_PATH}/actors?actor_name={faber_indy_issuer.wallet_label}"
     )
     assert actors_by_name.status_code == 200
-    assert_that(actors_by_name.json()[0]).contains(
-        "id", "name", "roles", "did", "didcomm_invitation"
-    )
+
+    # Verify structure for both query results
+    verify_actor_structure(actors_by_did.json()[0])
+    verify_actor_structure(actors_by_name.json()[0])
 
 
 @pytest.mark.anyio

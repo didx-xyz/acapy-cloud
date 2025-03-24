@@ -1,6 +1,5 @@
 from aries_cloudcontroller import CredentialDefinition as AcaPyCredentialDefinition
 from aries_cloudcontroller import ModelSchema
-from assertpy import assert_that
 
 from app.util.definitions import (
     credential_definition_from_acapy,
@@ -20,14 +19,12 @@ def test_credential_schema_from_acapy():
 
     schema = credential_schema_from_acapy(acapy_schema)
 
-    assert_that(schema.model_dump()).is_equal_to(
-        {
-            "id": acapy_schema.id,
-            "name": acapy_schema.name,
-            "version": acapy_schema.version,
-            "attribute_names": acapy_schema.attr_names,
-        }
-    )
+    assert schema.model_dump() == {
+        "id": acapy_schema.id,
+        "name": acapy_schema.name,
+        "version": acapy_schema.version,
+        "attribute_names": acapy_schema.attr_names,
+    }
 
 
 def test_credential_definition_from_acapy():
@@ -39,10 +36,8 @@ def test_credential_definition_from_acapy():
 
     cred_def = credential_definition_from_acapy(acapy_cred_def)
 
-    assert_that(cred_def.model_dump()).is_equal_to(
-        {
-            "id": acapy_cred_def.id,
-            "schema_id": acapy_cred_def.schema_id,
-            "tag": acapy_cred_def.tag,
-        }
-    )
+    assert cred_def.model_dump() == {
+        "id": acapy_cred_def.id,
+        "schema_id": acapy_cred_def.schema_id,
+        "tag": acapy_cred_def.tag,
+    }
