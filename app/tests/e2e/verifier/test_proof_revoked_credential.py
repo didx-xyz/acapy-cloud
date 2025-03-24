@@ -188,14 +188,14 @@ async def test_regression_proof_revoked_indy_credential(
 )
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_regression_proof_revoked_anoncreds_credential(
-    get_or_issue_regression_anoncreds_cred_revoked: ReferentCredDef,
+    get_or_issue_regression_anoncreds_revoked: ReferentCredDef,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
 ):
     await regression_proof_revoked_credential(
         "anoncreds",
-        get_or_issue_regression_anoncreds_cred_revoked,
+        get_or_issue_regression_anoncreds_revoked,
         acme_client,
         alice_member_client,
         acme_and_alice_connection,
