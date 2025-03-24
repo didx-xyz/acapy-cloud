@@ -221,6 +221,45 @@ async def test_publish_pending_revocations_success(
 
 
 @pytest.mark.anyio
+async def test_publish_pending_revocations_empty_response(
+    mock_agent_controller: AcaPyClient,
+):
+    # Simulate successful validation
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar-anoncreds"
+        when(test_module).validate_rev_reg_ids(
+            controller=mock_agent_controller,
+            revocation_registry_credential_map=revocation_registry_credential_map_input,
+        ).thenReturn(to_async())
+
+        # Simulate successful publish revocations call
+        when(mock_agent_controller.anoncreds_revocation).publish_revocations(
+            body=PublishRevocationsSchemaAnoncreds(
+                rrid2crid=revocation_registry_credential_map_input,
+                options=PublishRevocationsOptions(create_transaction_for_endorser=True),
+            )
+        ).thenReturn(
+            to_async()
+        )  # Return empty response
+
+        result = await test_module.publish_pending_revocations(
+            controller=mock_agent_controller,
+            revocation_registry_credential_map=revocation_registry_credential_map_input,
+        )
+
+        assert result is None  # We still publish, but no result is returned
+
+        verify(mock_agent_controller.anoncreds_revocation, times=1).publish_revocations(
+            body=PublishRevocationsSchemaAnoncreds(
+                rrid2crid=revocation_registry_credential_map_input,
+                options=PublishRevocationsOptions(create_transaction_for_endorser=True),
+            )
+        )
+
+
+@pytest.mark.anyio
 async def test_publish_pending_revocations_failure(mock_agent_controller: AcaPyClient):
     error_message = "Failed to publish due to network error"
     status_code = 500
