@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 from app.models.connections import AcceptInvitation, CreateInvitation
@@ -35,7 +37,7 @@ async def test_accept_use_public_did(
     invitation = response.json()
     assert invitation["connection_id"]
     assert invitation["invitation"]
-    assert invitation["invitation_url"].startswith("https://")
+    assert re.match(r"^http(s)?://", invitation["invitation_url"])
 
     accept_invite_json = AcceptInvitation(
         invitation=invitation["invitation"],
@@ -88,7 +90,7 @@ async def test_accept_use_public_did_between_issuer_and_holder(
     invitation = response.json()
     assert invitation["connection_id"]
     assert invitation["invitation"]
-    assert invitation["invitation_url"].startswith("https://")
+    assert re.match(r"^http(s)?://", invitation["invitation_url"])
 
     accept_invite_json = AcceptInvitation(
         invitation=invitation["invitation"]

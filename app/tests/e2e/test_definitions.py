@@ -129,12 +129,12 @@ async def test_get_anoncreds_schema(
     schema_version = anoncreds_schema_definition.version
     schema_attributes = anoncreds_schema_definition.attribute_names
 
-    def assert_schema_response(schema_response):
+    def assert_schema_response(schema_response: dict):
         # Helper method to assert schema response has expected values
-        assert schema_response.id == schema_id
-        assert schema_response.name == schema_name
-        assert schema_response.version == schema_version
-        assert set(schema_response.attribute_names) == set(schema_attributes)
+        assert schema_response["id"] == schema_id
+        assert schema_response["name"] == schema_name
+        assert schema_response["version"] == schema_version
+        assert set(schema_response["attribute_names"]) == set(schema_attributes)
 
     # First of all, assert schema is on the trust registry
     assert await registry_has_schema(schema_id)

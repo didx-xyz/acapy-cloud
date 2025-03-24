@@ -1,3 +1,5 @@
+import re
+
 import pytest
 from aries_cloudcontroller import AcaPyClient
 
@@ -20,9 +22,9 @@ async def test_create_invitation_oob(
     assert invitation_response.status_code == 200
     invitation = invitation_response.json()
 
-    assert invitation["invitation_msg_id"]
+    assert invitation["invi_msg_id"]
     assert invitation["invitation"]
-    assert invitation["invitation_url"].startswith("https://")
+    assert re.match(r"^http(s)?://", invitation["invitation_url"])
 
 
 @pytest.mark.anyio

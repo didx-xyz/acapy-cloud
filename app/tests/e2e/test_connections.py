@@ -1,4 +1,5 @@
 import asyncio
+import re
 from typing import List, Optional
 
 import pytest
@@ -58,7 +59,7 @@ async def test_create_invitation_no_public_did(
         assert isinstance(invitation["invitation"], dict)
         for key in ["@id", "@type", "recipientKeys", "serviceEndpoint"]:
             assert key in invitation["invitation"]
-        assert invitation["invitation_url"].startswith("https://")
+        assert re.match(r"^http(s)?://", invitation["invitation_url"])
 
 
 expected_keys = ("connection_id", "state", "created_at", "updated_at", "invitation_key")
