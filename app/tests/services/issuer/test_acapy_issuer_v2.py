@@ -11,7 +11,6 @@ from aries_cloudcontroller import (
     V20CredRequestRequest,
     V20CredStoreRequest,
 )
-from assertpy import assert_that
 from mockito import when
 
 from app.exceptions.cloudapi_exception import CloudApiException
@@ -99,10 +98,10 @@ async def test_get_records(mock_agent_controller: AcaPyClient):
     records = await IssuerV2.get_records(mock_agent_controller)
 
     assert len(records) == len(v2_credential_exchange_records)
-    assert_that(map(lambda c: c.credential_exchange_id, records)).contains(
+    assert {c.credential_exchange_id for c in records} == {
         f"v2-{v2_credential_exchange_records[0].cred_ex_record.cred_ex_id}",
         f"v2-{v2_credential_exchange_records[1].cred_ex_record.cred_ex_id}",
-    )
+    }
 
 
 @pytest.mark.anyio
@@ -142,9 +141,9 @@ async def test_get_records_with_query_params(mock_agent_controller: AcaPyClient)
     )
 
     assert len(records) == 1
-    assert_that(map(lambda c: c.credential_exchange_id, records)).contains(
+    assert {c.credential_exchange_id for c in records} == {
         f"v2-{v2_record.cred_ex_record.cred_ex_id}",
-    )
+    }
 
 
 @pytest.mark.anyio

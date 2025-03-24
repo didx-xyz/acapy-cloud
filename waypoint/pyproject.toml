@@ -29,7 +29,6 @@ uvloop = "^0.21.0"
 
 [tool.poetry.group.dev.dependencies]
 anyio = "~4.9.0"
-assertpy = "==1.1"
 black = "~25.1.0"
 isort = "~6.0.0"
 mockito = "~1.5.0"

@@ -11,7 +11,6 @@ from aries_cloudcontroller import (
     TAAResult,
     TxnOrRegisterLedgerNymResponse,
 )
-from assertpy import assert_that
 from mockito import verify, when
 
 from app.exceptions import CloudApiException
@@ -34,8 +33,8 @@ async def test_get_taa_success(mock_agent_controller: AcaPyClient):
     )
 
     result, mechanism = await get_taa(mock_agent_controller)
-    assert_that(result).is_equal_to(taa_info)
-    assert_that(mechanism).is_equal_to("service_agreement")
+    assert result == taa_info
+    assert mechanism == "service_agreement"
 
 
 @pytest.mark.anyio
@@ -81,7 +80,7 @@ async def test_get_did_endpoint_success(mock_agent_controller: AcaPyClient):
     )
 
     response = await get_did_endpoint(mock_agent_controller, "data")
-    assert_that(response).is_equal_to(expected_response)
+    assert response == expected_response
 
 
 @pytest.mark.anyio
@@ -112,7 +111,7 @@ async def test_register_nym_on_ledger_success(mock_agent_controller: AcaPyClient
         connection_id="conn_id",
         create_transaction_for_endorser="endorser",
     )
-    assert_that(response).is_equal_to(expected_response)
+    assert response == expected_response
 
 
 @pytest.mark.anyio
@@ -163,7 +162,7 @@ async def test_schema_id_from_credential_definition_id_seq_no(
         mock_agent_controller, cred_def_id_seq_no, "askar"
     )
 
-    assert_that(schema_id).is_equal_to(schema_id)
+    assert schema_id == schema_id
     verify(mock_agent_controller.schema).get_schema(schema_id=seq_no)
 
 
@@ -183,7 +182,7 @@ async def test_schema_id_from_credential_definition_id_seq_no_anoncreds(
         mock_agent_controller, cred_def_id_seq_no, "askar-anoncreds"
     )
 
-    assert_that(schema_id_fetched).is_equal_to(schema_id)
+    assert schema_id_fetched == schema_id
     verify(mock_agent_controller.anoncreds_schemas).get_schema(schema_id=seq_no)
 
 
@@ -201,7 +200,7 @@ async def test_schema_id_from_credential_definition_id_schema_id(
     )
 
     verify(mock_agent_controller.schema, times=0).get_schema(...)
-    assert_that(schema_id_fetched).is_equal_to(schema_id)
+    assert schema_id_fetched == schema_id
 
 
 @pytest.mark.anyio
@@ -224,9 +223,9 @@ async def test_schema_id_from_credential_definition_id_caching(
     )
 
     # Assert results are the same
-    assert_that(result1).is_equal_to(result2)
+    assert result1 == result2
     # Assert the schema was constructed from tokens (no API call)
-    assert_that(result1).is_equal_to(schema_id)
+    assert result1 == schema_id
     # Assert no API calls were made
     verify(mock_agent_controller.schema, times=0).get_schema(...)
 
@@ -248,9 +247,9 @@ async def test_schema_id_from_credential_definition_id_caching(
     )
 
     # Assert results are the same
-    assert_that(result3).is_equal_to(result4)
+    assert result3 == result4
     # Assert result matches mock schema ID
-    assert_that(result3).is_equal_to(schema_id)
+    assert result3 == schema_id
     # Assert API was called exactly once
     verify(mock_agent_controller.schema).get_schema(schema_id="456")
 

@@ -1,6 +1,5 @@
 import pytest
 from aries_cloudcontroller import AcaPyClient
-from assertpy import assert_that
 
 from app.dependencies.auth import (
     AcaPyAuthVerified,
@@ -44,10 +43,10 @@ async def test_create_schema(
     # Assert schemas has been registered in the trust registry
     assert await registry_has_schema(result["id"])
     expected_schema = f"{governance_public_did}:2:{send.name}:{send.version}"
-    assert_that(result).has_id(expected_schema)
-    assert_that(result).has_name(send.name)
-    assert_that(result).has_version(send.version)
-    assert_that(result).has_attribute_names(send.attribute_names)
+    assert result["id"] == expected_schema
+    assert result["name"] == send.name
+    assert result["version"] == send.version
+    assert set(result["attribute_names"]) == set(send.attribute_names)
 
 
 @pytest.mark.anyio
@@ -87,9 +86,9 @@ async def test_get_schema(
 
     def assert_schema_response(schema_response: CredentialSchema):
         # Helper method to assert schema response has expected values
-        assert_that(schema_response).has_id(schema_id)
-        assert_that(schema_response).has_name(schema_name)
-        assert_that(schema_response).has_version(schema_version)
+        assert schema_response.id == schema_id
+        assert schema_response.name == schema_name
+        assert schema_response.version == schema_version
         assert set(schema_response.attribute_names) == set(schema_attributes)
 
     create_result = await definitions.create_schema(schema, mock_governance_auth)
@@ -132,10 +131,10 @@ async def test_get_anoncreds_schema(
 
     def assert_schema_response(schema_response):
         # Helper method to assert schema response has expected values
-        assert_that(schema_response).has_id(schema_id)
-        assert_that(schema_response).has_name(schema_name)
-        assert_that(schema_response).has_version(schema_version)
-        assert set(schema_response["attribute_names"]) == set(schema_attributes)
+        assert schema_response.id == schema_id
+        assert schema_response.name == schema_name
+        assert schema_response.version == schema_version
+        assert set(schema_response.attribute_names) == set(schema_attributes)
 
     # First of all, assert schema is on the trust registry
     assert await registry_has_schema(schema_id)
@@ -199,18 +198,18 @@ async def test_create_credential_definition(
     faber_public_did = await get_public_did(faber_indy_acapy_client)
     schema = await faber_indy_acapy_client.schema.get_schema(schema_id=schema_id)
 
-    assert_that(result).has_id(
-        f"{faber_public_did.did}:3:CL:{schema.var_schema.seq_no}:{tag}"
+    assert (
+        result["id"] == f"{faber_public_did.did}:3:CL:{schema.var_schema.seq_no}:{tag}"
     )
-    assert_that(result).has_tag(tag)
-    assert_that(result).has_schema_id(schema_id)
+    assert result["tag"] == tag
+    assert result["schema_id"] == schema_id
 
     get_cred_def_result = (
         await definitions.get_credential_definition_by_id(result["id"], auth)
     ).model_dump()
 
-    assert_that(get_cred_def_result).has_tag(tag)
-    assert_that(get_cred_def_result).has_schema_id(schema_id)
+    assert get_cred_def_result["tag"] == tag
+    assert get_cred_def_result["schema_id"] == schema_id
 
     if support_revocation:
         cred_def_id = result["id"]
@@ -268,19 +267,20 @@ async def test_create_anoncreds_credential_definition(
         schema_id=schema_id
     )
 
-    assert_that(result).has_id(
-        f"{faber_public_did.did}:3:CL:{schema.schema_metadata['seqNo']}:{tag}"
+    assert (
+        result["id"]
+        == f"{faber_public_did.did}:3:CL:{schema.schema_metadata['seqNo']}:{tag}"
     )
-    assert_that(result).has_tag(tag)
-    assert_that(result).has_schema_id(schema_id)
+    assert result["tag"] == tag
+    assert result["schema_id"] == schema_id
 
     cred_def_id = result["id"]
     get_cred_def_result = (
         await definitions.get_credential_definition_by_id(cred_def_id, auth)
     ).model_dump()
 
-    assert_that(get_cred_def_result).has_tag(tag)
-    assert_that(get_cred_def_result).has_schema_id(schema_id)
+    assert get_cred_def_result["tag"] == tag
+    assert get_cred_def_result["schema_id"] == schema_id
 
     if support_revocation:
         # Assert that revocation registry was created

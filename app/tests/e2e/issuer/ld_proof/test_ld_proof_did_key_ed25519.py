@@ -2,7 +2,6 @@ import asyncio
 from copy import deepcopy
 
 import pytest
-from assertpy import assert_that
 from fastapi import HTTPException
 
 from app.routes.connections import router as conn_router
@@ -48,7 +47,7 @@ async def test_send_jsonld_key_ed25519(
     )
 
     data = response.json()
-    assert_that(data).has_state("offer-sent")
+    assert data["state"] == "offer-sent"
     cred_ex_id = data["credential_exchange_id"]
 
     try:
@@ -75,10 +74,10 @@ async def test_send_jsonld_key_ed25519(
 
         # Check if the received credential matches the sent one
         received_credential = records[-1]
-        assert_that(received_credential).has_connection_id(alice_connection_id)
-        assert_that(received_credential).has_state("offer-received")
-        assert_that(received_credential).has_role("holder")
-        assert_that(received_credential["credential_exchange_id"]).starts_with("v2")
+        assert received_credential["connection_id"] == alice_connection_id
+        assert received_credential["state"] == "offer-received"
+        assert received_credential["role"] == "holder"
+        assert received_credential["credential_exchange_id"].startswith("v2")
 
     finally:
         # Clean up created offer
@@ -108,7 +107,9 @@ async def test_send_jsonld_oob(
     )
 
     oob_record = accept_response.json()
-    assert_that(oob_record).contains("created_at", "oob_id", "invitation")
+    assert oob_record["created_at"]
+    assert oob_record["oob_id"]
+    assert oob_record["invitation"]
 
     alice_connection_id = oob_record["connection_id"]
 
@@ -146,8 +147,8 @@ async def test_send_jsonld_oob(
     )
 
     data = response.json()
-    assert_that(data).contains("credential_exchange_id")
-    assert_that(data).has_state("offer-sent")
+    assert data["credential_exchange_id"]
+    assert data["state"] == "offer-sent"
     cred_ex_id = data["credential_exchange_id"]
 
     try:

@@ -1,7 +1,6 @@
 import asyncio
 
 import pytest
-from assertpy import assert_that
 
 from app.routes.definitions import CredentialSchema
 from app.routes.issuer import router as issuer_router
@@ -38,10 +37,10 @@ async def test_send_credential_oob(
     )
 
     data = response.json()
-    assert_that(data).contains("credential_exchange_id")
-    assert_that(data).has_state("offer-sent")
-    assert_that(data).has_attributes(sample_credential_attributes)
-    assert_that(data).has_schema_id(indy_schema_definition.id)
+    assert data["credential_exchange_id"]
+    assert data["state"] == "offer-sent"
+    assert data["attributes"] == sample_credential_attributes
+    assert data["schema_id"] == indy_schema_definition.id
 
     cred_ex_id = data["credential_exchange_id"]
 
@@ -54,7 +53,7 @@ async def test_send_credential_oob(
                 "attachments": [{"id": cred_ex_id[3:], "type": "credential-offer"}],
             },
         )
-        assert_that(invitation_response.status_code).is_equal_to(200)
+        assert invitation_response.status_code == 200
 
         invitation = (invitation_response.json())["invitation"]
 
@@ -67,8 +66,10 @@ async def test_send_credential_oob(
 
         oob_record = accept_response.json()
 
-        assert_that(accept_response.status_code).is_equal_to(200)
-        assert_that(oob_record).contains("created_at", "oob_id", "invitation")
+        assert accept_response.status_code == 200
+        assert oob_record["created_at"]
+        assert oob_record["oob_id"]
+        assert oob_record["invitation"]
         assert await check_webhook_state(
             client=alice_member_client,
             topic="credentials",
@@ -104,10 +105,10 @@ async def test_send_credential(
     )
 
     data = response.json()
-    assert_that(data).contains("credential_exchange_id")
-    assert_that(data).has_state("offer-sent")
-    assert_that(data).has_attributes(sample_credential_attributes)
-    assert_that(data).has_schema_id(indy_schema_definition.id)
+    assert data["credential_exchange_id"]
+    assert data["state"] == "offer-sent"
+    assert data["attributes"] == sample_credential_attributes
+    assert data["schema_id"] == indy_schema_definition.id
 
     cred_ex_id = data["credential_exchange_id"]
     try:
@@ -144,10 +145,10 @@ async def test_create_offer(
     )
 
     data = response.json()
-    assert_that(data).contains("credential_exchange_id")
-    assert_that(data).has_state("offer-sent")
-    assert_that(data).has_attributes(sample_credential_attributes)
-    assert_that(data).has_schema_id(indy_schema_definition.id)
+    assert data["credential_exchange_id"]
+    assert data["state"] == "offer-sent"
+    assert data["attributes"] == sample_credential_attributes
+    assert data["schema_id"] == indy_schema_definition.id
 
     cred_ex_id = data["credential_exchange_id"]
     try:
