@@ -242,7 +242,7 @@ async def publish_all_revocations_for_rev_reg_id(
 
     if credential_type == "anoncreds":
         # TODO: Remove this once anoncreds returns transaction id to be awaited
-        await asyncio.sleep(12)
+        await asyncio.sleep(30)
 
     await check_revocation_status(faber_client, revoke_alice_creds, "revoked")
 
