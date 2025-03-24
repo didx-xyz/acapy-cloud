@@ -1,4 +1,4 @@
-FROM ghcr.io/didx-xyz/acapy-agent:py3.12-1.2.1-20250319
+FROM ghcr.io/didx-xyz/acapy-agent:py3.12-test-1.2.1-20250324
 
 USER root
 
