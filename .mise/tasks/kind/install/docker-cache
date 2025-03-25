@@ -8,22 +8,19 @@ registries="quay.io ghcr.io registry.k8s.io"
 # Create cache directories
 mkdir -p $(pwd)/tilt/docker/cache $(pwd)/tilt/docker/certs
 
-# Create resolver config
-echo "resolver 1.1.1.1 ipv6=off;" > $(pwd)/tilt/docker/resolvers.conf
-
 # Create cache container
 if ! docker container ls -a --format '{{.Names}}' | grep -q "^${KIND_DOCKER_CACHE}$"; then
   docker run -d --name ${KIND_DOCKER_CACHE} \
     -p 0.0.0.0:3128:3128 \
     -e ENABLE_MANIFEST_CACHE=true \
     -e REGISTRIES="${registries}" \
+    -e DISABLE_IPV6=true \
     --hostname ${KIND_DOCKER_CACHE} \
     --dns 1.1.1.1 \
     --dns 1.0.0.1 \
     -v $(pwd)/tilt/docker/cache:/docker_mirror_cache \
     -v $(pwd)/tilt/docker/certs:/ca \
-    -v $(pwd)/tilt/docker/resolvers.conf:/etc/nginx/resolvers.conf \
-    ghcr.io/rpardini/docker-registry-proxy:0.6.4-debug
+    ghcr.io/rpardini/docker-registry-proxy:0.6.5
 fi
 
 # Start cache container if not running
