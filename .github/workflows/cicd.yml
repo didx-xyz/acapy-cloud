@@ -164,7 +164,7 @@ jobs:
           - image: acapy-cloud/agent
             context: .
             file: dockerfiles/agents/Dockerfile
-            platforms: linux/amd64 # Pending BBS - linux/arm64
+            platforms: linux/amd64,linux/arm64
           - image: acapy-cloud/app
             context: .
             file: dockerfiles/app/Dockerfile
@@ -301,7 +301,7 @@ jobs:
           cp .env.example .env
           source .env
 
-          # Any portforwards will not be active after `tilt ci` has exited.
+          # Any port forwards will not be active after `tilt ci` has exited.
           kubectl port-forward svc/ledger-browser 9000:8000 -n cloudapi &
 
           poetry run pytest \

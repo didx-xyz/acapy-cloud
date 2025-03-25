@@ -259,17 +259,11 @@ def setup_redpanda_connect_cloud(namespace):
 
 
 def build_cloudapi_service(service, image={}):
-    BBS_SUFFIX = "-bbs"
-    if cpu_arch == "arm64":
-        BBS_SUFFIX = ""
-    # use custom_build instead of docker_build to support both docker and podman (in docker compatability mode)
+    # use custom_build instead of docker_build to support both docker and podman (in docker compatibility mode)
     custom_build(
         registry + "/" + service,
         # Command to build the image using docker with insecure registry
         "docker build --network=host -t $EXPECTED_REF "
-        + "--build-arg BBS_SUFFIX="
-        + BBS_SUFFIX
-        + " "
         + "--file="
         + image.get("dockerfile", "Dockerfile is required")
         + " "
