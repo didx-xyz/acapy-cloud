@@ -1,0 +1,22 @@
+fullnameOverride: driver-did-cheqd
+
+replicaCount: 1
+
+podAnnotations:
+  sidecar.istio.io/proxyCPU: 10m
+
+image:
+  registry: ghcr.io
+  name: cheqd/did-registrar
+  pullPolicy: Always
+  tag: production-latest
+
+service:
+  appProtocol: http
+  port: 3000
+  containerPort: 3000
+
+
+env:
+  FEE_PAYER_TESTNET_MNEMONIC: "testnet fee payer mnemonic"
+  # FEE_PAYER_MAINNET_MNEMONIC: "mainnet fee payer mnemonic"
