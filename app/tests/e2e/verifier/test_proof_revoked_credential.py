@@ -1,6 +1,6 @@
 import asyncio
 import time
-from typing import List
+from typing import List, Literal
 
 import pytest
 
@@ -29,11 +29,56 @@ VERIFIER_BASE_PATH = verifier_router.prefix
     reason="Proving revoked credentials is currently non-deterministic",
 )
 @pytest.mark.xdist_group(name="issuer_test_group")
-async def test_proof_revoked_credential(
+async def test_proof_revoked_credential_indy(
     revoke_alice_indy_creds_and_publish: List[  # pylint: disable=unused-argument
         CredentialExchange
     ],
     indy_credential_definition_id_revocable: str,
+    acme_client: RichAsyncClient,
+    alice_member_client: RichAsyncClient,
+    acme_and_alice_connection: AcmeAliceConnect,
+):
+    await proof_revoked_credential(
+        proof_type="indy",
+        credential_definition_id=indy_credential_definition_id_revocable,
+        acme_client=acme_client,
+        alice_member_client=alice_member_client,
+        acme_and_alice_connection=acme_and_alice_connection,
+    )
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize(
+    "revoke_alice_anoncreds_and_publish",
+    ["auto_publish_true", "default"],
+    indirect=True,
+)
+@pytest.mark.skipif(
+    TestMode.regression_run in TestMode.fixture_params,
+    reason="Proving revoked credentials is currently non-deterministic",
+)
+@pytest.mark.xdist_group(name="issuer_test_group")
+async def test_proof_revoked_credential_anoncreds(
+    revoke_alice_anoncreds_and_publish: List[  # pylint: disable=unused-argument
+        CredentialExchange
+    ],
+    anoncreds_credential_definition_id_revocable: str,
+    acme_client: RichAsyncClient,
+    alice_member_client: RichAsyncClient,
+    acme_and_alice_connection: AcmeAliceConnect,
+):
+    await proof_revoked_credential(
+        proof_type="anoncreds",
+        credential_definition_id=anoncreds_credential_definition_id_revocable,
+        acme_client=acme_client,
+        alice_member_client=alice_member_client,
+        acme_and_alice_connection=acme_and_alice_connection,
+    )
+
+
+async def proof_revoked_credential(
+    proof_type: Literal["indy", "anoncreds"],
+    credential_definition_id: str,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
@@ -44,17 +89,15 @@ async def test_proof_revoked_credential(
     # Do proof request
     request_body = {
         "comment": "Test proof of revocation",
-        "type": "indy",
-        "indy_proof_request": {
+        "type": proof_type,
+        f"{proof_type}_proof_request": {
             "name": "Proof of SPEED",
             "version": "1.0",
             "non_revoked": {"to": int(time.time())},
             "requested_attributes": {
                 "THE_SPEED": {
                     "name": "speed",
-                    "restrictions": [
-                        {"cred_def_id": indy_credential_definition_id_revocable}
-                    ],
+                    "restrictions": [{"cred_def_id": credential_definition_id}],
                 }
             },
             "requested_predicates": {},
@@ -88,8 +131,8 @@ async def test_proof_revoked_credential(
         f"{VERIFIER_BASE_PATH}/accept-request",
         json={
             "proof_id": alice_proof_exchange_id,
-            "type": "indy",
-            "indy_presentation_spec": {
+            "type": proof_type,
+            f"{proof_type}_presentation_spec": {
                 "requested_attributes": {
                     "THE_SPEED": {"cred_id": referent, "revealed": True}
                 },
@@ -129,19 +172,56 @@ async def test_regression_proof_revoked_indy_credential(
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
 ):
+    await regression_proof_revoked_credential(
+        "indy",
+        get_or_issue_regression_indy_cred_revoked,
+        acme_client,
+        alice_member_client,
+        acme_and_alice_connection,
+    )
+
+
+@pytest.mark.anyio
+@pytest.mark.skipif(
+    TestMode.clean_run in TestMode.fixture_params,
+    reason="Run only in regression mode",
+)
+@pytest.mark.xdist_group(name="issuer_test_group")
+async def test_regression_proof_revoked_anoncreds_credential(
+    get_or_issue_regression_anoncreds_revoked: ReferentCredDef,
+    acme_client: RichAsyncClient,
+    alice_member_client: RichAsyncClient,
+    acme_and_alice_connection: AcmeAliceConnect,
+):
+    await regression_proof_revoked_credential(
+        "anoncreds",
+        get_or_issue_regression_anoncreds_revoked,
+        acme_client,
+        alice_member_client,
+        acme_and_alice_connection,
+    )
+
+
+async def regression_proof_revoked_credential(
+    proof_type: Literal["indy", "anoncreds"],
+    get_or_issue_regression_cred_revoked: ReferentCredDef,
+    acme_client: RichAsyncClient,
+    alice_member_client: RichAsyncClient,
+    acme_and_alice_connection: AcmeAliceConnect,
+):
     await asyncio.sleep(14)  # moment for revocation registry to update
     # todo: remove sleep when issue resolved: https://github.com/openwallet-foundation/acapy/issues/3018
 
-    referent = get_or_issue_regression_indy_cred_revoked.referent
+    referent = get_or_issue_regression_cred_revoked.referent
     credential_definition_id_revocable = (
-        get_or_issue_regression_indy_cred_revoked.cred_def_revocable
+        get_or_issue_regression_cred_revoked.cred_def_revocable
     )
 
     # Do proof request
     request_body = {
         "comment": "Test proof of revocation",
-        "type": "indy",
-        "indy_proof_request": {
+        "type": proof_type,
+        f"{proof_type}_proof_request": {
             "non_revoked": {"to": int(time.time())},
             "requested_attributes": {
                 "THE_SPEED": {
@@ -175,8 +255,8 @@ async def test_regression_proof_revoked_indy_credential(
         f"{VERIFIER_BASE_PATH}/accept-request",
         json={
             "proof_id": alice_proof_exchange_id,
-            "type": "indy",
-            "indy_presentation_spec": {
+            "type": proof_type,
+            f"{proof_type}_presentation_spec": {
                 "requested_attributes": {
                     "THE_SPEED": {"cred_id": referent, "revealed": True}
                 },

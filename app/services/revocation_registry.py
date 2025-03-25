@@ -9,6 +9,8 @@ from aries_cloudcontroller import (
     IssuerCredRevRecord,
     IssuerRevRegRecord,
     PublishRevocations,
+    PublishRevocationsOptions,
+    PublishRevocationsResultSchemaAnoncreds,
     PublishRevocationsSchemaAnoncreds,
     RevokeRequest,
     RevokeRequestSchemaAnoncreds,
@@ -200,7 +202,7 @@ async def revoke_credential(
 
 async def publish_pending_revocations(
     controller: AcaPyClient, revocation_registry_credential_map: Dict[str, List[str]]
-) -> TxnOrPublishRevocationsResult:
+) -> Optional[TxnOrPublishRevocationsResult]:
     """
         Publish pending revocations
 
@@ -226,7 +228,8 @@ async def publish_pending_revocations(
         if wallet_type == "askar-anoncreds":
             acapy_call = controller.anoncreds_revocation.publish_revocations
             body = PublishRevocationsSchemaAnoncreds(
-                rrid2crid=revocation_registry_credential_map
+                rrid2crid=revocation_registry_credential_map,
+                options=PublishRevocationsOptions(create_transaction_for_endorser=True),
             )
         else:  # wallet_type == "askar":
             acapy_call = controller.revocation.publish_revocations
@@ -242,19 +245,36 @@ async def publish_pending_revocations(
             f"Failed to publish pending revocations: {e.detail}", e.status_code
         ) from e
 
-    if not result.txn or not result.txn[0].transaction_id:
+    if isinstance(result, TxnOrPublishRevocationsResult):
+        if not result.txn or not result.txn[0].transaction_id:
+            bound_logger.warning(
+                "Published pending revocations but received no endorser transaction id. Got result: {}",
+                result,
+            )
+            return
+
+        bound_logger.debug(
+            "Successfully published pending Indy revocations. Endorser transaction ids: {}.",
+            [txn.transaction_id for txn in result.txn],
+        )
+        return result
+    elif isinstance(result, PublishRevocationsResultSchemaAnoncreds):
+        bound_logger.info(
+            "Successfully published pending AnonCreds revocations: {}.", result
+        )
+        # Cast integer cred_rev_ids to string
+        rrid2crid = result.rrid2crid if result.rrid2crid else {}
+        rrid2crid = {k: [str(i) for i in v] for k, v in result.rrid2crid.items()}
+        return TxnOrPublishRevocationsResult(
+            rrid2crid=rrid2crid,
+            txn=None,
+        )
+    else:
         bound_logger.warning(
-            "Published pending revocations but received no endorser transaction id. Got result: {}",
+            "Unexpected response from publish_revocations: `{}`. Perhaps empty publish request?",
             result,
         )
         return
-
-    endorse_transaction_ids = [txn.transaction_id for txn in result.txn]
-    bound_logger.debug(
-        "Successfully published pending revocations. Endorser transaction ids: {}.",
-        endorse_transaction_ids,
-    )
-    return result
 
 
 async def clear_pending_revocations(
