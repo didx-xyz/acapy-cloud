@@ -15,3 +15,13 @@ service:
   appProtocol: http
   port: 9080
   containerPort: 9080
+
+livenessProbe:
+  tcpSocket:
+    port: 9080
+readinessProbe:
+  tcpSocket:
+    port: 9080
+startupProbe:
+  tcpSocket:
+    port: 9080

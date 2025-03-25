@@ -16,6 +16,15 @@ service:
   port: 3000
   containerPort: 3000
 
+livenessProbe:
+  tcpSocket:
+    port: 3000
+readinessProbe:
+  tcpSocket:
+    port: 3000
+startupProbe:
+  tcpSocket:
+    port: 3000
 
 env:
   FEE_PAYER_TESTNET_MNEMONIC: "testnet fee payer mnemonic"

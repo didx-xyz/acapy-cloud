@@ -11,6 +11,21 @@ image:
   pullPolicy: Always
   tag: latest
 
+service:
+  appProtocol: http
+  port: 8080
+  containerPort: 8080
+
+livenessProbe:
+  tcpSocket:
+    port: 8080
+readinessProbe:
+  tcpSocket:
+    port: 8080
+startupProbe:
+  tcpSocket:
+    port: 8080
+
 env:
   # Syntax: <grpc-endpoint-url:port>,boolean,time
   # 1st parameter is gRPC endpoint
@@ -21,8 +36,3 @@ env:
 
   RESOLVER_LISTENER: "0.0.0.0:8080"
   RESOLVER_LOG_LEVEL: "warn"
-
-service:
-  appProtocol: http
-  port: 8080
-  containerPort: 8080
