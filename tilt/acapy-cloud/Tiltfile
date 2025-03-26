@@ -686,9 +686,9 @@ def setup_cloudapi(build_enabled, expose):
         },
         "driver-did-cheqd": {},
         "did-registrar": {
-          "depends": ["driver-did-cheqd"],
+            "depends": ["driver-did-cheqd"],
         },
-        "did-resolver": {}
+        "did-resolver": {},
     }
 
     for release in releases:
