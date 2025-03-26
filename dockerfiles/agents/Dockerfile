@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir protobuf==${PROTOBUF_VERSION} \
   acapy-wallet-groups-plugin==1.2.1.post20250327 \
   # git+https://github.com/didx-xyz/acapy-wallet-groups-plugin@release-1.2.1-20250327 \
   git+https://github.com/didx-xyz/aries-acapy-plugins@1.2.1-20250327#subdirectory=nats_events \
-  git+https://github.com/openwallet-foundation/acapy-plugins@main#subdirectory=cheqd
+  git+https://github.com/didx-xyz/aries-acapy-plugins@cheqd-20250326#subdirectory=cheqd
 
 COPY scripts/startup.sh startup.sh
 RUN chmod +x ./startup.sh
