@@ -5,8 +5,13 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from nats.aio.client import Client as NATS
-from nats.aio.errors import ErrConnectionClosed, ErrNoServers, ErrTimeout
-from nats.errors import BadSubscriptionError, Error, TimeoutError
+from nats.errors import (
+    BadSubscriptionError,
+    ConnectionClosedError,
+    Error,
+    NoServersError,
+    TimeoutError,
+)
 from nats.js.api import ConsumerConfig, DeliverPolicy
 from nats.js.client import JetStreamContext
 from nats.js.errors import FetchTimeoutError
@@ -48,7 +53,9 @@ async def test_init_nats_client(nats_creds_file):
 
 
 @pytest.mark.anyio
-@pytest.mark.parametrize("exception", [ErrConnectionClosed, ErrTimeout, ErrNoServers])
+@pytest.mark.parametrize(
+    "exception", [ConnectionClosedError, TimeoutError, NoServersError]
+)
 async def test_init_nats_client_error(exception):
     with patch("nats.connect", side_effect=exception):
         with pytest.raises(exception):
