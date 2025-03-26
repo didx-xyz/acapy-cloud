@@ -3,7 +3,7 @@
 import mockito
 import pytest
 
-from app.tests.fixtures.dids import register_issuer_key_bbs, register_issuer_key_ed25519
+from app.tests.fixtures.dids import register_issuer_key_ed25519
 from app.tests.fixtures.member_acapy_clients import (
     acme_acapy_client,
     alice_acapy_client,
@@ -31,7 +31,9 @@ from app.tests.fixtures.member_async_clients import (
 from app.tests.fixtures.member_connections import (
     acme_and_alice_connection,
     bob_and_alice_connection,
+    faber_anoncreds_and_alice_connection,
     faber_indy_and_alice_connection,
+    meld_co_anoncreds_and_alice_connection,
     meld_co_indy_and_alice_connection,
     test_mode,
 )

@@ -1,5 +1,4 @@
 import pytest
-from assertpy.assertpy import assert_that
 
 from app.models.messaging import Message, TrustPingMsg
 from app.routes.messaging import router
@@ -22,8 +21,8 @@ async def test_send_trust_ping(
     )
     response_data = response.json()
 
-    assert_that(response.status_code).is_equal_to(200)
-    assert_that(response_data).contains("thread_id")
+    assert response.status_code == 200
+    assert "thread_id" in response_data
 
 
 @pytest.mark.anyio
@@ -38,4 +37,4 @@ async def test_send_message(
         MESSAGING_BASE_PATH + "/send-message", json=message.model_dump()
     )
 
-    assert_that(response.status_code).is_equal_to(200)
+    assert response.status_code == 200

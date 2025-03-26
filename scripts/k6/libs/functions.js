@@ -843,7 +843,7 @@ export function genericPolling({
   topic,
   expectedState,
   lookBack = 60,
-  maxAttempts = 6,
+  maxAttempts = 4,
   sseTag,
   requestTimeout = 14
 }) {

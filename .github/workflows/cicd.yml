@@ -46,8 +46,8 @@ permissions: {}
 env:
   TAILSCALE_VERSION: latest
   HELMFILE_VERSION: v0.171.0
-  HELM_VERSION: v3.17.1
-  MISE_VERSION: 2025.3.0
+  HELM_VERSION: v3.17.2
+  MISE_VERSION: 2025.3.7
 
 jobs:
   format:
@@ -159,11 +159,12 @@ jobs:
           - acapy-cloud/tails-server
           - acapy-cloud/trust-registry
           - acapy-cloud/waypoint
+          - acapy-cloud/xk6
         include:
           - image: acapy-cloud/agent
             context: .
             file: dockerfiles/agents/Dockerfile
-            platforms: linux/amd64 # Pending BBS - linux/arm64
+            platforms: linux/amd64,linux/arm64
           - image: acapy-cloud/app
             context: .
             file: dockerfiles/app/Dockerfile
@@ -192,6 +193,10 @@ jobs:
             context: .
             file: dockerfiles/waypoint/Dockerfile
             platforms: linux/amd64,linux/arm64
+          - image: acapy-cloud/xk6
+            context: ./scripts/k6
+            file: ./scripts/k6/Dockerfile
+            platforms: linux/amd64
 
     steps:
       - name: Check out code
@@ -296,7 +301,7 @@ jobs:
           cp .env.example .env
           source .env
 
-          # Any portforwards will not be active after `tilt ci` has exited.
+          # Any port forwards will not be active after `tilt ci` has exited.
           kubectl port-forward svc/ledger-browser 9000:8000 -n cloudapi &
 
           poetry run pytest \

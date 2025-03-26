@@ -11,7 +11,7 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "~3.12.8"
 
-aries-cloudcontroller = "==1.2.1.post20250228"
+aries-cloudcontroller = "==1.2.1.post20250319"
 dependency-injector = "^4.46.0"
 fastapi = "~0.115.10"
 httpx = "~0.28.0"
@@ -26,10 +26,10 @@ uvicorn = "~0.34.0"
 uvloop = "^0.21.0"
 
 [tool.poetry.group.dev.dependencies]
-anyio = "~4.8.0"
+anyio = "~4.9.0"
 black = "~25.1.0"
 isort = "~6.0.0"
-pre-commit = "~4.1.0"
+pre-commit = "~4.2.0"
 pylint = "~3.3.0"
 pytest = "~8.3.2"
 pytest-cov = "~6.0.0"

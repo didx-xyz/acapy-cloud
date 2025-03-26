@@ -2,7 +2,6 @@ import os
 
 import pytest
 from aries_cloudcontroller import DID, AcaPyClient
-from assertpy import assert_that
 
 import app.services.acapy_wallet as wallet_service
 from app.dependencies.auth import AcaPyAuthVerified
@@ -62,10 +61,11 @@ async def test_list_dids(
 async def test_create_local_did(governance_client: RichAsyncClient):
     response = await governance_client.post(WALLET_BASE_PATH)
 
-    assert_that(response.status_code).is_equal_to(200)
+    assert response.status_code == 200
     response = response.json()
 
-    assert_that(response).contains("did", "verkey")
+    assert response["did"]
+    assert response["verkey"]
 
 
 @pytest.mark.anyio
@@ -74,10 +74,11 @@ async def test_get_public_did(
 ):
     response = await governance_client.get(f"{WALLET_BASE_PATH}/public")
 
-    assert_that(response.status_code).is_equal_to(200)
+    assert response.status_code == 200
     response = response.json()
 
-    assert_that(response).contains("did", "verkey")
+    assert response["did"]
+    assert response["verkey"]
 
     res_method: DID = await get_public_did(auth=mock_governance_auth)
     assert res_method.to_dict() == response
@@ -87,7 +88,7 @@ async def test_get_public_did(
 async def test_get_did_endpoint(governance_client: RichAsyncClient):
     did = await create_did_mock(governance_client)
     response = await governance_client.get(f"{WALLET_BASE_PATH}/{did}/endpoint")
-    assert_that(response.status_code).is_equal_to(200)
+    assert response.status_code == 200
 
     response = response.json()
     assert response["did"] == did
@@ -107,16 +108,16 @@ async def test_set_public_did(
     did = did_object.did
     response = await governance_client.put(f"{WALLET_BASE_PATH}/public?did={did}")
 
-    assert_that(response.status_code).is_equal_to(200)
+    assert response.status_code == 200
 
     # With endorsement the set pub dic returns None but sets the did correctly
     # So let's get it a different way and check that it is correct
     response = await governance_client.get(f"{WALLET_BASE_PATH}/public")
-    assert_that(response.status_code).is_equal_to(200)
+    assert response.status_code == 200
     response = response.json()
 
-    assert_that(response).contains("did", "verkey")
-    assert_that(response).has_did(did)
+    assert response["verkey"]
+    assert response["did"] == did
 
 
 @pytest.mark.anyio
@@ -139,4 +140,4 @@ async def test_set_did_endpoint(
 
     retrieved_endpoint = await get_did_endpoint(did.did, auth=mock_governance_auth)
 
-    assert_that(endpoint).is_equal_to(retrieved_endpoint.endpoint)
+    assert endpoint == retrieved_endpoint.endpoint

@@ -41,7 +41,7 @@ ld_cred = LDProofVCDetail(
     options=LDProofVCOptions(proofType="Ed25519Signature2018"),
 )
 anoncreds_cred = AnonCredsCredential(
-    issuer_id="WgWxqztrNooG92RXvxSTWv",
+    issuer_did="WgWxqztrNooG92RXvxSTWv",
     credential_definition_id="WgWxqztrNooG92RXvxSTWv:3:CL:20:tag",
     attributes={},
 )

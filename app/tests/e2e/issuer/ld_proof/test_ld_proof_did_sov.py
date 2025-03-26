@@ -3,7 +3,6 @@ from copy import deepcopy
 
 import pytest
 from aries_cloudcontroller import AcaPyClient
-from assertpy import assert_that
 
 from app.routes.issuer import router as issuer_router
 from app.routes.oob import router as oob_router
@@ -50,8 +49,8 @@ async def test_send_jsonld_credential_sov(
     )
 
     data = response.json()
-    assert_that(data).contains("credential_exchange_id")
-    assert_that(data).has_state("offer-sent")
+    assert data["credential_exchange_id"]
+    assert data["state"] == "offer-sent"
     cred_ex_id = data["credential_exchange_id"]
 
     try:
@@ -78,10 +77,10 @@ async def test_send_jsonld_credential_sov(
 
         # Check if the received credential matches the sent one
         received_credential = records[-1]
-        assert_that(received_credential).has_connection_id(alice_connection_id)
-        assert_that(received_credential).has_state("offer-received")
-        assert_that(received_credential).has_role("holder")
-        assert_that(received_credential["credential_exchange_id"]).starts_with("v2")
+        assert received_credential["connection_id"] == alice_connection_id
+        assert received_credential["state"] == "offer-received"
+        assert received_credential["role"] == "holder"
+        assert received_credential["credential_exchange_id"].startswith("v2")
 
     finally:
         # Clean up created offer
@@ -113,8 +112,8 @@ async def test_send_jsonld_oob_sov(
     )
 
     data = response.json()
-    assert_that(data).contains("credential_exchange_id")
-    assert_that(data).has_state("offer-sent")
+    assert data["credential_exchange_id"]
+    assert data["state"] == "offer-sent"
     cred_ex_id = data["credential_exchange_id"]
 
     try:
@@ -132,7 +131,7 @@ async def test_send_jsonld_oob_sov(
                 ],
             },
         )
-        assert_that(invitation_response.status_code).is_equal_to(200)
+        assert invitation_response.status_code == 200
 
         invitation = (invitation_response.json())["invitation"]
 
@@ -143,8 +142,10 @@ async def test_send_jsonld_oob_sov(
 
         oob_record = accept_response.json()
 
-        assert_that(accept_response.status_code).is_equal_to(200)
-        assert_that(oob_record).contains("created_at", "oob_id", "invitation")
+        assert accept_response.status_code == 200
+        assert oob_record["created_at"]
+        assert oob_record["oob_id"]
+        assert oob_record["invitation"]
         assert await check_webhook_state(
             client=alice_member_client,
             topic="credentials",

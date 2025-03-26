@@ -195,7 +195,7 @@ export default function (data) {
   });
 
   const sseEventErrorProofDone = "SSE event was not received successfully";
-  const sseCheckMessageProofDone = "SSE Event received successfully: request-recevied";
+  const sseCheckMessageProofDone = "SSE Event received successfully: done";
 
   check(waitForSSEProofDoneRequest, {
     [sseCheckMessageProofDone]: (r) => r === true

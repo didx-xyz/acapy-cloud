@@ -22,7 +22,13 @@ class IndyCredential(BaseModel):
 
 class AnonCredsCredential(BaseModel):
     credential_definition_id: str
-    issuer_id: str
+    issuer_did: Optional[str] = Field(
+        default=None,
+        description=(
+            "The DID to use as the issuer of the credential. "
+            "If not provided, the public DID of the issuer wallet will be used."
+        ),
+    )
     attributes: Dict[str, str]
 
 
@@ -127,7 +133,7 @@ class RevokedResponse(BaseModel):
     ) -> Dict[str, Any]:
         if isinstance(values, dict) and "txn" in values:
             # This is a List of TransactionRecord
-            txn_list: List[Dict[str, Any]] = values.get("txn")
+            txn_list: List[Dict[str, Any]] = values.get("txn") or []
             cred_rev_ids_published = {}
 
             for txn in txn_list:

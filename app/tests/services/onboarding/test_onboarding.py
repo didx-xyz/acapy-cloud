@@ -12,7 +12,6 @@ from aries_cloudcontroller import (
     TransactionList,
     TransactionRecord,
 )
-from assertpy import assert_that
 from mockito import verify, when
 
 from app.exceptions import CloudApiException
@@ -78,7 +77,7 @@ async def test_onboard_issuer_public_did_exists(
         issuer_wallet_id="issuer_wallet_id",
     )
 
-    assert_that(onboard_result).has_did("did:sov:WgWxqztrNooG92RXvxSTWv")
+    assert onboard_result.did == "did:sov:WgWxqztrNooG92RXvxSTWv"
 
 
 @pytest.mark.anyio
@@ -161,7 +160,7 @@ async def test_onboard_issuer_no_public_did(
         )
 
     # Assertions
-    assert_that(onboard_result).has_did("did:sov:WgWxqztrNooG92RXvxSTWv")
+    assert onboard_result.did == "did:sov:WgWxqztrNooG92RXvxSTWv"
     verify(acapy_ledger).accept_taa_if_required(mock_agent_controller)
     verify(acapy_wallet).create_did(mock_agent_controller)
     verify(acapy_ledger).register_nym_on_ledger(
@@ -237,7 +236,7 @@ async def test_onboard_verifier_public_did_exists(mock_agent_controller: AcaPyCl
         verifier_label="verifier_name", verifier_controller=mock_agent_controller
     )
 
-    assert_that(onboard_result).has_did("did:sov:WgWxqztrNooG92RXvxSTWv")
+    assert onboard_result.did == "did:sov:WgWxqztrNooG92RXvxSTWv"
     verify(acapy_wallet).get_public_did(controller=mock_agent_controller)
 
 
@@ -263,7 +262,7 @@ async def test_onboard_verifier_no_public_did(mock_agent_controller: AcaPyClient
         verifier_label="verifier_name", verifier_controller=mock_agent_controller
     )
 
-    assert_that(onboard_result).has_did("did:key:123")
+    assert onboard_result.did == "did:key:123"
     assert str(onboard_result.didcomm_invitation) == invitation_url
     verify(mock_agent_controller.out_of_band).create_invitation(
         auto_accept=True,

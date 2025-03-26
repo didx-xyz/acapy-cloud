@@ -24,10 +24,10 @@ uvicorn = "~0.34.0"
 uvloop = "^0.21.0"
 
 [tool.poetry.group.dev.dependencies]
-anyio = "~4.8.0"
+anyio = "~4.9.0"
 black = "~25.1.0"
 isort = "~6.0.0"
-pre-commit = "~4.1.0"
+pre-commit = "~4.2.0"
 pylint = "~3.3.0"
 pytest = "~8.3.2"
 pytest-cov = "~6.0.0"

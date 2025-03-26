@@ -9,7 +9,6 @@ from aries_cloudcontroller import (
     IndyRequestedCredsRequestedAttr,
     IndyRequestedCredsRequestedPred,
 )
-from assertpy import assert_that
 from httpx import Response
 from mockito import when
 
@@ -122,10 +121,10 @@ async def test_get_schema_ids(mock_agent_controller: AcaPyClient):
             aries_controller=mock_agent_controller, presentation=presentation
         )
 
-        assert_that(got_schema_ids).contains_only(
-            "NR6Y28AiZ893utPSfoQRrz:2:test_schema:0.3",
-            "NR6Y28AiZ893utPSfoQRrz:2:another_schema:0.3",
-        )
+        # Should only contain these two schema ids
+        assert len(got_schema_ids) == 2
+        assert "NR6Y28AiZ893utPSfoQRrz:2:test_schema:0.3" in got_schema_ids
+        assert "NR6Y28AiZ893utPSfoQRrz:2:another_schema:0.3" in got_schema_ids
 
 
 @pytest.mark.anyio

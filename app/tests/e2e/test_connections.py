@@ -1,8 +1,8 @@
 import asyncio
+import re
 from typing import List, Optional
 
 import pytest
-from assertpy import assert_that
 from fastapi import HTTPException
 
 from app.models.connections import AcceptInvitation, CreateInvitation
@@ -55,11 +55,14 @@ async def test_create_invitation_no_public_did(
 
         invitation = response.json()
 
-        assert_that(invitation["connection_id"]).is_not_empty()
-        assert_that(invitation["invitation"]).is_instance_of(dict).contains(
-            "@id", "@type", "recipientKeys", "serviceEndpoint"
-        )
-        assert_that(invitation["invitation_url"]).matches(r"^https?://")
+        assert invitation["connection_id"] is not None
+        assert isinstance(invitation["invitation"], dict)
+        for key in ["@id", "@type", "recipientKeys", "serviceEndpoint"]:
+            assert key in invitation["invitation"]
+        assert re.match(r"^http(s)?://", invitation["invitation_url"])
+
+
+expected_keys = ("connection_id", "state", "created_at", "updated_at", "invitation_key")
 
 
 @pytest.mark.anyio
@@ -84,11 +87,10 @@ async def test_accept_invitation(
     )
     connection_record = accept_response.json()
 
-    assert_that(connection_record).contains(
-        "connection_id", "state", "created_at", "updated_at", "invitation_key"
-    )
-    assert_that(connection_record).has_state("request-sent")
-    assert_that(connection_record["alias"]).is_equal_to(alias)
+    for key in expected_keys:
+        assert key in connection_record
+    assert connection_record["state"] == "request-sent"
+    assert connection_record["alias"] == alias
 
     assert await check_webhook_state(
         client=alice_member_client,
@@ -202,10 +204,9 @@ async def test_get_connection_by_id(
         connection_record = connection_response.json()
 
         assert connection_response.status_code == 200
-        assert_that(connection_record).contains(
-            "connection_id", "state", "created_at", "updated_at", "invitation_key"
-        )
-        assert_that(connection_record).has_alias(connection_alias)
+        for key in expected_keys:
+            assert key in connection_record
+        assert connection_record["alias"] == connection_alias
     finally:
         await bob_member_client.delete(f"{CONNECTIONS_BASE_PATH}/{bob_connection_id}")
 

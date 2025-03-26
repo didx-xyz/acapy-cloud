@@ -17,6 +17,7 @@ from app.services.definitions.credential_definition_publisher import (
 from app.services.trust_registry.util.issuer import assert_valid_issuer
 from app.util.assert_public_did import assert_public_did
 from app.util.definitions import credential_definition_from_acapy
+from app.util.did import strip_qualified_did_sov
 from app.util.transaction_acked import wait_for_transaction_ack
 from app.util.wallet_type_checks import get_wallet_type
 from shared import CRED_DEF_ACK_TIMEOUT, REGISTRY_SIZE
@@ -59,7 +60,7 @@ async def create_credential_definition(
         inner_cred_def = handle_model_with_validation(
             logger=bound_logger,
             model_class=InnerCredDef,
-            issuer_id=public_did[8:],
+            issuer_id=strip_qualified_did_sov(public_did),
             schema_id=credential_definition.schema_id,
             tag=credential_definition.tag,
         )

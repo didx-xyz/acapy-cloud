@@ -11,6 +11,8 @@ from aries_cloudcontroller import (
     IssuerCredRevRecordSchemaAnoncreds,
     IssuerRevRegRecord,
     PublishRevocations,
+    PublishRevocationsOptions,
+    PublishRevocationsResultSchemaAnoncreds,
     PublishRevocationsSchemaAnoncreds,
     RevokeRequest,
     RevokeRequestSchemaAnoncreds,
@@ -38,7 +40,8 @@ revocation_registry_id = (
     "VagGATdBsVdBeFKeoYPe7H:4:VagGATdBsVdBeFKeoYPe7H:3:CL:141:"
     "QIOPN:CL_ACCUM:5d211963-3478-4de4-b8b6-9072759a71c8"
 )
-revocation_registry_credential_map = {"rev_reg_id1": ["cred_rev_id1", "cred_rev_id2"]}
+revocation_registry_credential_map_input = {"rev_reg_id1": ["1", "2"]}
+revocation_registry_credential_map_output = {"rev_reg_id1": [1, 2]}
 conn_id = "12345"
 transaction_id = "1234"
 message_attach_data = {
@@ -46,7 +49,7 @@ message_attach_data = {
         "json": {
             "operation": {
                 "revocRegDefId": "rev_reg_id_1",
-                "value": {"revoked": [1, 2, 3]},
+                "value": {"revoked": [1]},
             },
         }
     }
@@ -157,13 +160,15 @@ async def test_publish_pending_revocations_success(
         mock_get_wallet_type.return_value = wallet_type
         when(test_module).validate_rev_reg_ids(
             controller=mock_agent_controller,
-            revocation_registry_credential_map=revocation_registry_credential_map,
+            revocation_registry_credential_map=revocation_registry_credential_map_input,
         ).thenReturn(to_async())
 
         # Simulate successful publish revocations call
         if wallet_type == "askar":
             when(mock_agent_controller.revocation).publish_revocations(
-                body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
+                body=PublishRevocations(
+                    rrid2crid=revocation_registry_credential_map_input
+                )
             ).thenReturn(
                 to_async(
                     TxnOrPublishRevocationsResult(
@@ -178,37 +183,80 @@ async def test_publish_pending_revocations_success(
         elif wallet_type == "askar-anoncreds":
             when(mock_agent_controller.anoncreds_revocation).publish_revocations(
                 body=PublishRevocationsSchemaAnoncreds(
-                    rrid2crid=revocation_registry_credential_map
+                    rrid2crid=revocation_registry_credential_map_input,
+                    options=PublishRevocationsOptions(
+                        create_transaction_for_endorser=True
+                    ),
                 )
             ).thenReturn(
                 to_async(
-                    TxnOrPublishRevocationsResult(
-                        txn=[
-                            TransactionRecord(
-                                transaction_id="97a46fab-5499-42b3-a2a1-7eb9faad31c0"
-                            )
-                        ]
+                    PublishRevocationsResultSchemaAnoncreds(
+                        rrid2crid=revocation_registry_credential_map_output
                     )
                 )
             )
 
         await test_module.publish_pending_revocations(
             controller=mock_agent_controller,
-            revocation_registry_credential_map=revocation_registry_credential_map,
+            revocation_registry_credential_map=revocation_registry_credential_map_input,
         )
 
         if wallet_type == "askar":
             verify(mock_agent_controller.revocation, times=1).publish_revocations(
-                body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
+                body=PublishRevocations(
+                    rrid2crid=revocation_registry_credential_map_input
+                )
             )
         elif wallet_type == "askar-anoncreds":
             verify(
                 mock_agent_controller.anoncreds_revocation, times=1
             ).publish_revocations(
                 body=PublishRevocationsSchemaAnoncreds(
-                    rrid2crid=revocation_registry_credential_map
+                    rrid2crid=revocation_registry_credential_map_input,
+                    options=PublishRevocationsOptions(
+                        create_transaction_for_endorser=True
+                    ),
                 )
             )
+
+
+@pytest.mark.anyio
+async def test_publish_pending_revocations_empty_response(
+    mock_agent_controller: AcaPyClient,
+):
+    # Simulate successful validation
+    with patch(
+        "app.services.revocation_registry.get_wallet_type"
+    ) as mock_get_wallet_type:
+        mock_get_wallet_type.return_value = "askar-anoncreds"
+        when(test_module).validate_rev_reg_ids(
+            controller=mock_agent_controller,
+            revocation_registry_credential_map=revocation_registry_credential_map_input,
+        ).thenReturn(to_async())
+
+        # Simulate successful publish revocations call
+        when(mock_agent_controller.anoncreds_revocation).publish_revocations(
+            body=PublishRevocationsSchemaAnoncreds(
+                rrid2crid=revocation_registry_credential_map_input,
+                options=PublishRevocationsOptions(create_transaction_for_endorser=True),
+            )
+        ).thenReturn(
+            to_async()
+        )  # Return empty response
+
+        result = await test_module.publish_pending_revocations(
+            controller=mock_agent_controller,
+            revocation_registry_credential_map=revocation_registry_credential_map_input,
+        )
+
+        assert result is None  # We still publish, but no result is returned
+
+        verify(mock_agent_controller.anoncreds_revocation, times=1).publish_revocations(
+            body=PublishRevocationsSchemaAnoncreds(
+                rrid2crid=revocation_registry_credential_map_input,
+                options=PublishRevocationsOptions(create_transaction_for_endorser=True),
+            )
+        )
 
 
 @pytest.mark.anyio
@@ -223,12 +271,12 @@ async def test_publish_pending_revocations_failure(mock_agent_controller: AcaPyC
         mock_get_wallet_type.return_value = "askar"
         when(test_module).validate_rev_reg_ids(
             controller=mock_agent_controller,
-            revocation_registry_credential_map=revocation_registry_credential_map,
+            revocation_registry_credential_map=revocation_registry_credential_map_input,
         ).thenReturn(to_async())
 
         # Simulate failure in publish revocations call
         when(mock_agent_controller.revocation).publish_revocations(
-            body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
+            body=PublishRevocations(rrid2crid=revocation_registry_credential_map_input)
         ).thenRaise(ApiException(reason=error_message, status=status_code))
 
         with pytest.raises(
@@ -237,14 +285,14 @@ async def test_publish_pending_revocations_failure(mock_agent_controller: AcaPyC
         ) as exc:
             await test_module.publish_pending_revocations(
                 controller=mock_agent_controller,
-                revocation_registry_credential_map=revocation_registry_credential_map,
+                revocation_registry_credential_map=revocation_registry_credential_map_input,
             )
 
         assert exc.value.status_code == status_code
 
         # You may also verify that publish_revocations was attempted
         verify(mock_agent_controller.revocation, times=1).publish_revocations(
-            body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
+            body=PublishRevocations(rrid2crid=revocation_registry_credential_map_input)
         )
 
 
@@ -260,22 +308,22 @@ async def test_publish_pending_revocations_no_txn_response(
         mock_get_wallet_type.return_value = "askar"
         when(test_module).validate_rev_reg_ids(
             controller=mock_agent_controller,
-            revocation_registry_credential_map=revocation_registry_credential_map,
+            revocation_registry_credential_map=revocation_registry_credential_map_input,
         ).thenReturn(to_async())
 
         # Simulate failure in publish revocations call
         when(mock_agent_controller.revocation).publish_revocations(
-            body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
+            body=PublishRevocations(rrid2crid=revocation_registry_credential_map_input)
         ).thenReturn(to_async(TxnOrPublishRevocationsResult()))
 
         await test_module.publish_pending_revocations(
             controller=mock_agent_controller,
-            revocation_registry_credential_map=revocation_registry_credential_map,
+            revocation_registry_credential_map=revocation_registry_credential_map_input,
         )
 
         # You may also verify that publish_revocations was attempted
         verify(mock_agent_controller.revocation, times=1).publish_revocations(
-            body=PublishRevocations(rrid2crid=revocation_registry_credential_map)
+            body=PublishRevocations(rrid2crid=revocation_registry_credential_map_input)
         )
 
 
@@ -286,17 +334,19 @@ async def test_clear_pending_revocations_success(mock_agent_controller: AcaPyCli
     # Simulate successful validation
     when(test_module).validate_rev_reg_ids(
         controller=mock_agent_controller,
-        revocation_registry_credential_map=revocation_registry_credential_map,
+        revocation_registry_credential_map=revocation_registry_credential_map_input,
     ).thenReturn(to_async(None))
 
     # Mock clear_pending_revocations call to return successful result
     when(mock_agent_controller.revocation).clear_pending_revocations(
-        body=ClearPendingRevocationsRequest(purge=revocation_registry_credential_map)
+        body=ClearPendingRevocationsRequest(
+            purge=revocation_registry_credential_map_input
+        )
     ).thenReturn(to_async(PublishRevocations(rrid2crid=expected_result_map)))
 
     result = await test_module.clear_pending_revocations(
         controller=mock_agent_controller,
-        revocation_registry_credential_map=revocation_registry_credential_map,
+        revocation_registry_credential_map=revocation_registry_credential_map_input,
     )
 
     assert isinstance(result, ClearPendingRevocationsResult)
@@ -304,7 +354,9 @@ async def test_clear_pending_revocations_success(mock_agent_controller: AcaPyCli
 
     # Verify that clear_pending_revocations was called with the expected arguments
     verify(mock_agent_controller.revocation, times=1).clear_pending_revocations(
-        body=ClearPendingRevocationsRequest(purge=revocation_registry_credential_map)
+        body=ClearPendingRevocationsRequest(
+            purge=revocation_registry_credential_map_input
+        )
     )
 
 
@@ -316,12 +368,14 @@ async def test_clear_pending_revocations_failure(mock_agent_controller: AcaPyCli
     # Simulate successful validation
     when(test_module).validate_rev_reg_ids(
         controller=mock_agent_controller,
-        revocation_registry_credential_map=revocation_registry_credential_map,
+        revocation_registry_credential_map=revocation_registry_credential_map_input,
     ).thenReturn(to_async(None))
 
     # Simulate failure in clear_pending_revocations call
     when(mock_agent_controller.revocation).clear_pending_revocations(
-        body=ClearPendingRevocationsRequest(purge=revocation_registry_credential_map)
+        body=ClearPendingRevocationsRequest(
+            purge=revocation_registry_credential_map_input
+        )
     ).thenRaise(ApiException(reason=error_message, status=status_code))
 
     with pytest.raises(
@@ -330,14 +384,16 @@ async def test_clear_pending_revocations_failure(mock_agent_controller: AcaPyCli
     ) as exc:
         await test_module.clear_pending_revocations(
             controller=mock_agent_controller,
-            revocation_registry_credential_map=revocation_registry_credential_map,
+            revocation_registry_credential_map=revocation_registry_credential_map_input,
         )
 
     assert exc.value.status_code == status_code
 
     # Verify that clear_pending_revocations was attempted
     verify(mock_agent_controller.revocation, times=1).clear_pending_revocations(
-        body=ClearPendingRevocationsRequest(purge=revocation_registry_credential_map)
+        body=ClearPendingRevocationsRequest(
+            purge=revocation_registry_credential_map_input
+        )
     )
 
 
@@ -514,7 +570,7 @@ async def test_validate_rev_reg_ids_success(
                 to_async(
                     RevRegResult(
                         result=IssuerRevRegRecord(
-                            pending_pub=revocation_registry_credential_map.get(
+                            pending_pub=revocation_registry_credential_map_input.get(
                                 "rev_reg_id1"
                             )
                         )
@@ -528,7 +584,7 @@ async def test_validate_rev_reg_ids_success(
                 to_async(
                     RevRegResultSchemaAnoncreds(
                         result=IssuerRevRegRecord(
-                            pending_pub=revocation_registry_credential_map.get(
+                            pending_pub=revocation_registry_credential_map_input.get(
                                 "rev_reg_id1"
                             )
                         )
@@ -536,7 +592,7 @@ async def test_validate_rev_reg_ids_success(
                 )
             )
         await test_module.validate_rev_reg_ids(
-            mock_agent_controller, revocation_registry_credential_map
+            mock_agent_controller, revocation_registry_credential_map_input
         )
 
 
@@ -836,7 +892,15 @@ async def test_revoke_credential_auto_publish_success(
             # Mock the get_revocation_status call to return "revoked"
             when(mock_agent_controller.anoncreds_revocation).get_cred_rev_record(
                 ANY
-            ).thenReturn(to_async(MagicMock(result=MagicMock(state="revoked"))))
+            ).thenReturn(
+                to_async(
+                    MagicMock(
+                        result=MagicMock(
+                            state="revoked", rev_reg_id="rev_reg_id_1", cred_rev_id="1"
+                        )
+                    )
+                )
+            )
 
         else:  # wallet_type == "askar"
             when(mock_agent_controller.revocation).revoke_credential(
@@ -855,7 +919,7 @@ async def test_revoke_credential_auto_publish_success(
         )
 
         assert isinstance(response, RevokedResponse)
-        assert response.cred_rev_ids_published == {"rev_reg_id_1": [1, 2, 3]}
+        assert response.cred_rev_ids_published == {"rev_reg_id_1": [1]}
 
 
 @pytest.mark.parametrize("wallet_type", ["askar", "askar-anoncreds"])
@@ -904,28 +968,19 @@ async def test_revoke_credential_auto_publish_timeout(
 
 
 @pytest.mark.anyio
-@pytest.mark.parametrize("wallet_type", ["askar", "askar-anoncreds"])
+@pytest.mark.parametrize("wallet_type", ["askar"])
 async def test_revoke_credential_no_result_returned(
     mock_agent_controller: AcaPyClient, wallet_type
 ):
     with patch(
         "app.services.revocation_registry.get_wallet_type", return_value=wallet_type
     ):
-        # Mock the revocation call to return None
-        if wallet_type == "askar-anoncreds":
-            when(mock_agent_controller.anoncreds_revocation).revoke(
-                body=ANY
-            ).thenReturn(to_async(None))
-            when(mock_agent_controller.anoncreds_revocation).get_cred_rev_record(
-                ANY
-            ).thenReturn(to_async(MagicMock(result=MagicMock(state="revoked"))))
-        else:  # wallet_type == "askar"
-            when(mock_agent_controller.revocation).revoke_credential(
-                body=ANY
-            ).thenReturn(to_async(None))
-            when(mock_agent_controller.revocation).get_revocation_status(
-                ANY
-            ).thenReturn(to_async(MagicMock(result=MagicMock(state="revoked"))))
+        when(mock_agent_controller.revocation).revoke_credential(body=ANY).thenReturn(
+            to_async(None)
+        )
+        when(mock_agent_controller.revocation).get_revocation_status(ANY).thenReturn(
+            to_async(MagicMock(result=MagicMock(state="revoked")))
+        )
 
         with pytest.raises(
             CloudApiException,
@@ -962,7 +1017,7 @@ async def test_revoke_credential_with_transaction_result(
 
         assert isinstance(response, RevokedResponse)
         assert response.cred_rev_ids_published == {
-            "rev_reg_id_1": [1, 2, 3]
+            "rev_reg_id_1": [1]
         }, "The cred_rev_ids_published should match the expected transformation"
 
 

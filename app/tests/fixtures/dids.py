@@ -12,11 +12,3 @@ async def register_issuer_key_ed25519(
 ) -> AsyncGenerator[str, None]:
     async with register_issuer_key(faber_indy_client, "ed25519") as did:
         yield did
-
-
-@pytest.fixture(scope="function")
-async def register_issuer_key_bbs(
-    faber_indy_client: RichAsyncClient,
-) -> AsyncGenerator[str, None]:
-    async with register_issuer_key(faber_indy_client, "bls12381g2") as did:
-        yield did

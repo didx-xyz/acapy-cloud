@@ -21,6 +21,23 @@ streams:
 deployment:
   podLabels:
     sidecar.istio.io/inject: "false"
+  livenessProbe:
+    failureThreshold: 3
+    #NOTE: The periodSeconds is the default value for the liveness probe. If this is overridden, a corresponding value should be set in the env for PROBE_INTERVAL.
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+    httpGet:
+      path: /probes/livez
+      port: http
+
+args:
+  - -r
+  - /resources/*.yaml
+  - "-c"
+  - "/redpanda-connect.yaml"
+  - "streams"
+  - /streams/*.yaml
 
 env:
   - name: GOVERNANCE_ACAPY_LABEL
@@ -44,7 +61,20 @@ initContainers:
           echo waiting for nats cloudapi_aries_events stream;
           sleep 2;
         done
+        until nats --server nats://nats:4222 str info cloudapi_aries_events_probes >/dev/null 2>&1; do
+          echo waiting for nats cloudapi_aries_events_probes stream;
+          sleep 2;
+        done
         until nats --server nats://nats:4222 str info cloudapi_aries_state_monitoring >/dev/null 2>&1; do
           echo waiting for nats cloudapi_aries_state_monitoring stream;
           sleep 2;
         done
+
+extraVolumes:
+  - name: resources
+    configMap:
+      name: connect-cloud-resources
+extraVolumeMounts:
+  - name: resources
+    mountPath: /resources
+    readOnly: true

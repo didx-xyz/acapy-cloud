@@ -16,13 +16,29 @@ CREDENTIALS_BASE_PATH = router.prefix
     TestMode.regression_run in TestMode.fixture_params,
     reason="Temporarily skip; existing tests on dev don't clean up old records yet",
 )
-@pytest.mark.xdist_group(name="issuer_test_group_4")
+@pytest.mark.xdist_group(name="issuer_test_group")
+@pytest.mark.parametrize("credential_type", ["indy", "anoncreds"])
 async def test_get_credential_exchange_records_paginated(
+    credential_type: str,
     faber_indy_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     indy_credential_definition_id: str,
     faber_indy_and_alice_connection: FaberAliceConnect,
+    faber_anoncreds_client: RichAsyncClient,
+    anoncreds_credential_definition_id: str,
+    faber_anoncreds_and_alice_connection: FaberAliceConnect,
 ):
+    if credential_type == "indy":
+        issuer_client = faber_indy_client
+        connection = faber_indy_and_alice_connection
+        credential_definition_id = indy_credential_definition_id
+    else:
+        issuer_client = faber_anoncreds_client
+        connection = faber_anoncreds_and_alice_connection
+        credential_definition_id = anoncreds_credential_definition_id
+
+    issuer_connection_id = connection.faber_connection_id
+
     num_credentials_to_test = 5
     test_attributes = {"name": "Alice", "age": "44"}
 
@@ -32,16 +48,22 @@ async def test_get_credential_exchange_records_paginated(
         # Create multiple credential exchanges
         for i in range(num_credentials_to_test):
             test_attributes["speed"] = str(i)
+            credential_key = (
+                "indy_credential_detail"
+                if credential_type == "indy"
+                else "anoncreds_credential_detail"
+            )
             credential_v2 = {
-                "connection_id": faber_indy_and_alice_connection.faber_connection_id,
-                "indy_credential_detail": {
-                    "credential_definition_id": indy_credential_definition_id,
+                "type": credential_type,
+                "connection_id": issuer_connection_id,
+                credential_key: {
+                    "credential_definition_id": credential_definition_id,
                     "attributes": test_attributes,
                 },
                 "save_exchange_record": True,
             }
 
-            response = await faber_indy_client.post(
+            response = await issuer_client.post(
                 CREDENTIALS_BASE_PATH, json=credential_v2
             )
 
@@ -150,13 +172,13 @@ async def test_get_credential_exchange_records_paginated(
 
         for params in invalid_params:
             with pytest.raises(HTTPException) as exc:
-                await faber_indy_client.get(CREDENTIALS_BASE_PATH, params=params)
+                await issuer_client.get(CREDENTIALS_BASE_PATH, params=params)
             assert exc.value.status_code == 422
 
     finally:
         # Clean up created credential exchange records
         for cred_ex_id in faber_cred_ex_ids:
-            await faber_indy_client.delete(f"{CREDENTIALS_BASE_PATH}/{cred_ex_id}")
+            await issuer_client.delete(f"{CREDENTIALS_BASE_PATH}/{cred_ex_id}")
         for alice_record in alice_cred_ex_records:
             cred_ex_id = alice_record["credential_exchange_id"]
             await alice_member_client.delete(f"{CREDENTIALS_BASE_PATH}/{cred_ex_id}")

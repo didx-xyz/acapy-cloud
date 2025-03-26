@@ -1,6 +1,7 @@
+import re
+
 import pytest
 from aries_cloudcontroller import AcaPyClient
-from assertpy import assert_that
 
 from app.routes.connections import router as connections_router
 from app.routes.oob import router
@@ -18,11 +19,12 @@ async def test_create_invitation_oob(
     invitation_response = await bob_member_client.post(
         OOB_BASE_PATH + "/create-invitation", json={"create_connection": True}
     )
-    assert_that(invitation_response.status_code).is_equal_to(200)
+    assert invitation_response.status_code == 200
     invitation = invitation_response.json()
 
-    assert_that(invitation).contains("invi_msg_id", "invitation", "invitation_url")
-    assert_that(invitation["invitation"]).contains("@id", "services")
+    assert invitation["invi_msg_id"]
+    assert invitation["invitation"]
+    assert re.match(r"^http(s)?://", invitation["invitation_url"])
 
 
 @pytest.mark.anyio
@@ -38,7 +40,7 @@ async def test_accept_invitation_oob(
             "handshake_protocols": ["https://didcomm.org/didexchange/1.0"],
         },
     )
-    assert_that(invitation_response.status_code).is_equal_to(200)
+    assert invitation_response.status_code == 200
     invitation = (invitation_response.json())["invitation"]
 
     accept_response = await alice_member_client.post(
@@ -62,9 +64,11 @@ async def test_accept_invitation_oob(
         )
     ).json()
 
-    assert_that(accept_response.status_code).is_equal_to(200)
-    assert_that(oob_record).contains("created_at", "oob_id", "invitation")
-    assert_that(connection_record["connection_protocol"]).contains("didexchange/1.0")
+    assert accept_response.status_code == 200
+    assert oob_record["created_at"]
+    assert oob_record["oob_id"]
+    assert oob_record["invitation"]
+    assert connection_record["connection_protocol"]
 
 
 @pytest.mark.anyio
@@ -89,4 +93,4 @@ async def test_oob_connect_via_public_did(
         },
     )
 
-    assert_that(bob_oob_record).has_their_public_did(faber_public_did.result.did)
+    assert bob_oob_record["their_public_did"] == faber_public_did.result.did

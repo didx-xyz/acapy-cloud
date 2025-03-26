@@ -1,6 +1,5 @@
 import pytest
 from aries_cloudcontroller import AcaPyClient, SignatureOptions
-from assertpy import assert_that
 from fastapi import HTTPException
 
 from app.models.jsonld import JsonLdSignRequest, JsonLdVerifyRequest
@@ -70,9 +69,7 @@ async def test_sign_jsonld(
             ).model_dump(),
         )
 
-    assert_that(exc.value.detail).contains(
-        "Please provide either or neither, but not both"
-    )
+    assert "Please provide either or neither, but not both" in exc.value.detail
 
     # Success pub_did
     faber_pub_did = (await faber_indy_acapy_client.wallet.get_public_did()).result.did
@@ -145,8 +142,9 @@ async def test_verify_jsonld(
         await alice_member_client.post(
             JSONLD_BASE_PATH + "/verify", json=jsonld_verify.model_dump()
         )
-    assert_that(exc.value.detail).contains(
+    assert (
         "Please provide either, but not both, public did of the verkey or the verkey for the document"
+        in exc.value.detail
     )
     assert exc.value.status_code == 400
 
@@ -161,7 +159,7 @@ async def test_verify_jsonld(
         )
 
     assert exc.value.status_code == 422
-    assert_that(exc.value.detail).contains("Failed to verify payload")
+    assert "Failed to verify payload" in exc.value.detail
 
     # Success
     jsonld_verify.public_did = None

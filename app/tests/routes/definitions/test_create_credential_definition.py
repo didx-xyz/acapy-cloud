@@ -65,8 +65,6 @@ async def test_create_credential_definition_fail_acapy_error(
 ):
     mock_aries_controller = AsyncMock()
 
-    mock_create_credential_definition = AsyncMock()
-
     with patch(
         "app.routes.definitions.client_from_auth"
     ) as mock_get_client_controller, patch(
