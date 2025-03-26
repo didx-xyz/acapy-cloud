@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timezone
+import time
 from typing import Any, AsyncGenerator
 
 import nats
@@ -51,20 +51,18 @@ class NATSStatus:
             if self.last_disconnect_time is None:
                 logger.error("NATS operational error: {}", e)
             else:
-                time_since_disconnect = (
-                    datetime.now(timezone.utc) - self.last_disconnect_time
-                ).total_seconds()
-                if time_since_disconnect < RECONNECT_THRESHOLD:
+                seconds_since_disconnect = time.time() - self.last_disconnect_time
+                if seconds_since_disconnect < RECONNECT_THRESHOLD:
                     logger.warning("NATS operational error during reconnection: {}", e)
                 else:
                     logger.error(
                         "NATS operational error. Exceeded reconnect ({}s): {}",
-                        time_since_disconnect,
+                        seconds_since_disconnect,
                         e,
                     )
 
     async def disconnected_callback(self):
-        self.last_disconnect_time = datetime.now(timezone.utc)
+        self.last_disconnect_time = time.time()
         self.reconnect_attempts += 1
         if self.reconnect_attempts >= MAX_ATTEMPTS_BEFORE_ERROR:
             logger.error(
@@ -78,21 +76,19 @@ class NATSStatus:
 
     async def reconnected_callback(self):
         if self.last_disconnect_time:
-            time_since_disconnect = (
-                datetime.now(timezone.utc) - self.last_disconnect_time
-            ).total_seconds()
+            seconds_since_disconnect = time.time() - self.last_disconnect_time
             if (
-                time_since_disconnect < RECONNECT_THRESHOLD
+                seconds_since_disconnect < RECONNECT_THRESHOLD
                 and self.reconnect_attempts < MAX_ATTEMPTS_BEFORE_ERROR
             ):
                 logger.info(
                     "Reconnected to NATS server after: {}s",
-                    time_since_disconnect,
+                    seconds_since_disconnect,
                 )
             else:
                 logger.warning(
                     "Reconnected to NATS server after delay or multiple attempts: {}s, attempts={}",
-                    time_since_disconnect,
+                    seconds_since_disconnect,
                     self.reconnect_attempts,
                 )
         else:
