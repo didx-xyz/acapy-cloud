@@ -66,14 +66,14 @@ class NATSStatus:
     async def disconnected_callback(self):
         self.last_disconnect_time = datetime.now(timezone.utc)
         self.reconnect_attempts += 1
-        if self.reconnect_attempts == 1:
-            logger.warning(
-                "Disconnected from NATS server; attempting reconnect (possibly due to scale-down)"
-            )
-        elif self.reconnect_attempts >= MAX_ATTEMPTS_BEFORE_ERROR:
+        if self.reconnect_attempts >= MAX_ATTEMPTS_BEFORE_ERROR:
             logger.error(
                 "Persistent NATS disconnection after {} attempts; cluster may be unavailable",
                 self.reconnect_attempts,
+            )
+        else:
+            logger.warning(
+                "Disconnected from NATS server; attempting reconnect (possibly due to scale-down)"
             )
 
     async def reconnected_callback(self):
