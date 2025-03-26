@@ -173,7 +173,9 @@ runs:
           containers:
           - name: $POD_NAME
             image: $CONTAINER_IMAGE
-            command: [\"sleep\", \"3600\"]
+            command:
+            - sleep
+            - inf
             volumeMounts:
             - name: pytest-volume
               mountPath: $MOUNT_PATH/pytest
@@ -186,7 +188,8 @@ runs:
           - name: pytest-regression-volume
             persistentVolumeClaim:
               claimName: $PVC_NAME_REGRESSION
-          restartPolicy: Never" > pytest-results-pod.yaml
+          restartPolicy: Never
+          terminationGracePeriodSeconds: 5" > pytest-results-pod.yaml
 
         kubectl apply -f pytest-results-pod.yaml
 
@@ -204,7 +207,7 @@ runs:
 
         # Clean up: delete the temporary pod
         echo "Cleaning up..."
-        kubectl -n $NAMESPACE delete pod $POD_NAME --force
+        kubectl -n $NAMESPACE delete pod $POD_NAME
 
         echo "Done!"
       env:
