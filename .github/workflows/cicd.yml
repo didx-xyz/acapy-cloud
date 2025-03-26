@@ -228,6 +228,7 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{version}}-{{sha}},priority=901
 
       - name: Build and push Docker images
         uses: docker/build-push-action@v6
