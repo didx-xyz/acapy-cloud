@@ -11,7 +11,7 @@ info:
     https://www.didx.co.za/acapy-cloud/index.html
 
     '
-  version: 4.3.0
+  version: 5.0.0rc0
 paths:
   /v1/tenants:
     post:
@@ -19,7 +19,14 @@ paths:
       - 'admin: tenants'
       summary: Create New Tenant
       description: "Create a New Tenant\n---\n\nUse this endpoint to create a new\
-        \ Tenant, which is the same as creating a new Wallet.\n\nThe `wallet_label`\
+        \ Tenant, which is the same as creating a new Wallet.\n\nNB: To work with\
+        \ AnonCreds, the `askar-anoncreds` wallet type is required. i.e. To issue,\
+        \ verify, or\nhold AnonCreds, the issuer, verifier, or holder, requires the\
+        \ anoncreds wallet type.\n\nIndy credentials are compatible with `askar-anoncreds`\
+        \ wallets for holders or verifiers:\ni.e. an anoncreds wallet can hold or\
+        \ verify Indy credentials.\n\nHowever, issuers are restricted: an issuer with\
+        \ `askar` wallet type can only issue Indy credentials,\nand an issuer with\
+        \ `askar-anoncreds` wallet type can only issue AnonCreds.\n\nThe `wallet_label`\
         \ is a required field that allows you to assign an alias to the Tenant.\n\
         This label is used as the default alias in connections (i.e. the other party\
         \ will see this name in their records).\n\nIf roles (issuer and/or verifier)\
@@ -43,12 +50,15 @@ paths:
         \        wallet_name: Optional[str]\n            An optional wallet name.\n\
         \        roles: Optional[List[str]]\n            A list of roles to assign\
         \ to the Tenant.\n        image_url: Optional[str]\n            An optional\
-        \ image URL for the Tenant.\n        extra_settings: Optional[dict]]\n   \
-        \         Optional per-tenant settings to configure wallet behaviour for advanced\
-        \ users.\n\nResponse body:\n---\n    CreateTenantResponse\n        wallet_id:\
-        \ str\n        wallet_label: str\n        wallet_name: str\n        created_at:\
-        \ str\n        image_url: Optional[str]\n        group_id: Optional[str]\n\
-        \        updated_at: str\n        access_token: str"
+        \ image URL for the Tenant.\n        wallet_type: Optional[Literal[\"askar\"\
+        , \"askar-anoncreds\"]]\n            The type of wallet to create. 'askar'\
+        \ or 'askar-anoncreds' are supported, with 'askar' as the default.\n     \
+        \   extra_settings: Optional[dict]\n            Optional per-tenant settings\
+        \ to configure wallet behaviour for advanced users.\n\nResponse body:\n---\n\
+        \    CreateTenantResponse\n        wallet_id: str\n        wallet_label: str\n\
+        \        wallet_name: str\n        created_at: str\n        image_url: Optional[str]\n\
+        \        group_id: Optional[str]\n        updated_at: str\n        access_token:\
+        \ str"
       operationId: create_tenant_v1_tenants_post
       security:
       - APIKeyHeader: []
@@ -476,6 +486,17 @@ components:
             for advanced users.
           examples:
           - ACAPY_AUTO_ACCEPT_INVITES: false
+        wallet_type:
+          anyOf:
+          - type: string
+            enum:
+            - askar
+            - askar-anoncreds
+          - type: 'null'
+          title: Wallet Type
+          description: The type of wallet to create. 'askar' or 'askar-anoncreds'
+            are supported.
+          default: askar
       type: object
       required:
       - wallet_label
