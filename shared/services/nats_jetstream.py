@@ -27,9 +27,8 @@ class NATSStatus:
         self.last_disconnect_time = None
         self.reconnect_attempts = 0
 
-    def reset(self):
-        self.last_disconnect_time = None
-        self.reconnect_attempts = 0
+    def _reset(self):
+        self.__init__()
 
     async def error_callback(self, e):
         error_str = str(e).lower()
@@ -92,7 +91,7 @@ class NATSStatus:
         else:
             logger.info("Reconnected to NATS server")
         # Reset state on successful reconnect
-        self.reset()
+        self._reset()
 
     async def closed_callback(self):
         logger.info("NATS connection closed")
