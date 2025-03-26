@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "acapy-cloud-waypoint"
-version = "4.3.0"
+version = "5.0.0rc0"
 description = "Webhook state signalling service for acapy-cloud"
 authors = [
   "Mourits de Beer <mourits.debeer@didx.co.za>",

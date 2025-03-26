@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "acapy-cloud-app"
-version = "4.3.0"
+version = "5.0.0rc0"
 description = "Main app submodule for acapy-cloud"
 authors = [
   "Mourits de Beer <mourits.debeer@didx.co.za>",

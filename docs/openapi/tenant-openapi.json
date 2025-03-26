@@ -3,7 +3,7 @@
   "info": {
     "title": "CloudAPI Tenant",
     "description": "\nWelcome to CloudAPI Tenant!\n\nFor detailed guidance on using the API, please visit our official documentation:\nhttps://www.didx.co.za/acapy-cloud/index.html\n",
-    "version": "4.3.0"
+    "version": "5.0.0rc0"
   },
   "servers": [
     {
@@ -840,7 +840,7 @@
           "definitions"
         ],
         "summary": "Create a new Schema",
-        "description": "Create and publish a new schema to the ledger\n---\n**NB**: Only governance can create schemas.\n\nA schema is used to create credential definitions, which is used for issuing credentials.\nThe schema defines the attributes that can exist in that credential.\n\nWhen a schema is created, it is published to the ledger and written to our public trust registry,\nso that everyone in the ecosystem can view schemas that are valid and available.\n\nRequest Body:\n---\n    body: CreateSchema\n        name: str\n            The name of the schema.\n        version: str\n            The version of the schema.\n        attribute_names: List[str]\n            The attribute names of the schema.\n\nReturns:\n---\n    CredentialSchema\n        The created schema object",
+        "description": "Create and publish a new schema to the ledger\n---\n**NB**: Only governance can create Indy schemas.\nIssuers can create AnonCreds schemas if they have an 'askar-anoncreds' wallet type.\n\nA schema is used to create credential definitions, which is used for issuing credentials.\nThe schema defines the attributes that can exist in that credential.\n\nWhen a schema is created, it is published to the ledger and written to our public trust registry,\nso that everyone in the ecosystem can view schemas that are valid and available.\n\nRequest Body:\n---\n    body: CreateSchema\n        schema_type: SchemaType\n            The type of schema to create.\n        name: str\n            The name of the schema.\n        version: str\n            The version of the schema.\n        attribute_names: List[str]\n            The attribute names of the schema.\n\nReturns:\n---\n    CredentialSchema\n        The created schema object",
         "operationId": "create_schema_v1_definitions_schemas_post",
         "security": [
           {
@@ -885,7 +885,7 @@
           "definitions"
         ],
         "summary": "Get Created Schemas",
-        "description": "Get created schemas\n---\nAll tenants can call this endpoint to view available schemas.\n\nIf governance calls this endpoint, it will return all the schemas created by governance\n(whether the schemas are on the trust registry or not).\n\nIf tenants call this endpoint, it will return all schemas on the trust registry.\nThe difference between this endpoint and the public trust registry endpoint, is that this response includes\nthe attribute information of the schemas.\n\nResults can be filtered by the parameters listed below.\n\nParameters (Optional):\n---\n    schema_id: str\n    schema_issuer_did: str\n    schema_name: str\n    schema_version: str\n\nReturns:\n---\n    List[CredentialSchema]\n        A list of created schemas",
+        "description": "Get created schemas\n---\nAll tenants can call this endpoint to view available schemas.\n\nIf governance calls this endpoint, it will return all the schemas created by governance\n(whether the schemas are on the trust registry or not).\n\nIf tenants call this endpoint, it will return all schemas on the trust registry.\nThe difference between this endpoint and the public trust registry endpoint, is that this response includes\nthe attribute information of the schemas.\n\nResults can be filtered by the parameters listed below.\n\nParameters (Optional):\n---\n    schema_issuer_did: str\n    schema_name: str\n    schema_version: str\n\nReturns:\n---\n    List[CredentialSchema]\n        A list of created schemas",
         "operationId": "get_schemas_v1_definitions_schemas_get",
         "security": [
           {
@@ -893,22 +893,6 @@
           }
         ],
         "parameters": [
-          {
-            "name": "schema_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Schema Id"
-            }
-          },
           {
             "name": "schema_issuer_did",
             "in": "query",
@@ -1085,7 +1069,7 @@
           "definitions"
         ],
         "summary": "Get Created Credential Definitions",
-        "description": "Get credential definitions created by the tenant\n---\nThis endpoint returns all credential definitions created by the tenant. Only issuers can create\ncredential definitions, and so only issuers will get results from this endpoint.\n\nThe results can be filtered by the parameters listed below.\n\nParameters (Optional):\n---\n    issuer_did: str\n    credential_definition_id: str\n    schema_id: str\n    schema_issuer_id: str\n    schema_version: str\n\nReturns:\n---\n    List[CredentialDefinition]\n        A list of created credential definitions",
+        "description": "Get credential definitions created by the tenant\n---\nThis endpoint returns all credential definitions created by the tenant. Only issuers can create\ncredential definitions, and so only issuers will get results from this endpoint.\n\nThe results can be filtered by the parameters listed below.\n\nParameters (Optional):\n---\n    issuer_did: str\n    credential_definition_id: str\n    schema_id: str\n    schema_issuer_did: str\n    schema_version: str\n\nReturns:\n---\n    List[CredentialDefinition]\n        A list of created credential definitions",
         "operationId": "get_credential_definitions_v1_definitions_credentials_get",
         "security": [
           {
@@ -1272,7 +1256,7 @@
           "issuer"
         ],
         "summary": "Send Holder a Credential",
-        "description": "Create and send a credential, automating the issuer-side flow\n---\nNB: Only a tenant with the issuer role can send credentials.\n\nWhen creating a credential, the credential type must be one of `indy` or `ld_proof`.\n```json\n{\n    \"type\": \"indy\" or \"ld_proof\",\n    \"indy_credential_detail\": {...}, <-- Required if type is indy\n    \"ld_credential_detail\": {...}, <-- Required if type is ld_proof\n    \"save_exchange_record\": true, <-- Whether the credential exchange record should be saved on completion.\n    \"connection_id\": \"string\", <-- The issuer's reference to the connection they want to submit the credential to.\n}\n```\nSetting the `save_exchange_record` field to True will save the exchange record after the credential is accepted.\nThe default behaviour is to only save exchange records while they are in pending state.\n\nFor a detailed technical specification of the credential issuing process, refer to the [Aries Issue Credential v2\nRFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0453-issue-credential-v2/README.md).\n\nRequest Body:\n---\n    credential: SendCredential\n        The payload for sending a credential\n\nReturns:\n---\n    CredentialExchange\n        A record of this credential exchange",
+        "description": "Create and send a credential, automating the issuer-side flow\n---\nNB: Only a tenant with the issuer role can send credentials.\nTo send Indy credentials, the issuer requires an \"askar\" wallet type.\nTo send AnonCreds, the \"askar-anoncreds\" wallet type is required.\n\nWhen sending a credential, the credential type must be one of `indy`, `anoncreds` or `ld_proof`.\n```json\n{\n    \"type\": \"indy\", \"anoncreds\" or \"ld_proof\",\n    \"indy_credential_detail\": {...}, <-- Required if type is indy\n    \"anoncreds_credential_detail\": {...}, <-- Required if type is anoncreds\n    \"ld_credential_detail\": {...}, <-- Required if type is ld_proof\n    \"save_exchange_record\": true, <-- Whether the credential exchange record should be saved on completion.\n    \"connection_id\": \"string\", <-- The issuer's reference to the connection they want to submit the credential to.\n}\n```\nSetting the `save_exchange_record` field to True will save the exchange record after the credential is accepted.\nThe default behaviour is to only save exchange records while they are in pending state.\n\nFor a detailed technical specification of the credential issuing process, refer to the [Aries Issue Credential v2\nRFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0453-issue-credential-v2/README.md).\n\nRequest Body:\n---\n    credential: SendCredential\n        The payload for sending a credential\n\nReturns:\n---\n    CredentialExchange\n        A record of this credential exchange",
         "operationId": "send_credential_v1_issuer_credentials_post",
         "security": [
           {
@@ -1496,7 +1480,7 @@
           "issuer"
         ],
         "summary": "Create a Credential Offer (not bound to a connection)",
-        "description": "Create a credential offer, not bound to any connection\n---\nNB: Only a tenant with the issuer role can create credential offers.\n\nThis endpoint takes the same body as the send credential endpoint, but without a connection id. This\nmeans the credential will not be sent, but it will do the initial step of creating a credential exchange record,\nwhich the issuer can then use in the out of band (OOB) protocol.\n\nThe OOB protocol allows credentials to be sent over alternative channels, such as email or QR code, where a\nconnection does not yet exist between holder and issuer.\n\nThe credential type must be one of indy or ld_proof.\n```json\n{\n    \"type\": \"indy\" or \"ld_proof\",\n    \"indy_credential_detail\": {...}, <-- Required if type is indy\n    \"ld_credential_detail\": {...}, <-- Required if type is ld_proof\n    \"save_exchange_record\": true, <-- Whether the credential exchange record should be saved on completion.\n}\n```\nFor a detailed technical specification of the credential issuing process, refer to the [Aries Issue Credential v2\nRFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0453-issue-credential-v2/README.md).\n\nRequest Body:\n---\n    credential: CreateOffer\n        The payload for creating a credential offer\n\nReturns:\n---\n    CredentialExchange\n        A record of this credential exchange",
+        "description": "Create a credential offer, not bound to any connection\n---\nNB: Only a tenant with the issuer role can send credentials.\nTo send Indy credentials, the issuer requires an \"askar\" wallet type.\nTo send AnonCreds, the \"askar-anoncreds\" wallet type is required.\n\nThis endpoint takes the same body as the send credential endpoint, but without a connection id. This\nmeans the credential will not be sent, but it will do the initial step of creating a credential exchange record,\nwhich the issuer can then use in the out of band (OOB) protocol.\n\nThe OOB protocol allows credentials to be sent over alternative channels, such as email or QR code, where a\nconnection does not yet exist between holder and issuer.\n\nThe credential type must be one of indy, anoncreds or ld_proof.\n```json\n{\n    \"type\": \"indy\", \"anoncreds\" or \"ld_proof\",\n    \"indy_credential_detail\": {...}, <-- Required if type is indy\n    \"anoncreds_credential_detail\": {...}, <-- Required if type is anoncreds\n    \"ld_credential_detail\": {...}, <-- Required if type is ld_proof\n    \"save_exchange_record\": true, <-- Whether the credential exchange record should be saved on completion.\n}\n```\nFor a detailed technical specification of the credential issuing process, refer to the [Aries Issue Credential v2\nRFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0453-issue-credential-v2/README.md).\n\nRequest Body:\n---\n    credential: CreateOffer\n        The payload for creating a credential offer\n\nReturns:\n---\n    CredentialExchange\n        A record of this credential exchange",
         "operationId": "create_offer_v1_issuer_credentials_create_offer_post",
         "requestBody": {
           "content": {
@@ -1926,7 +1910,7 @@
           "revocation"
         ],
         "summary": "Clear Pending Revocations",
-        "description": "Clear pending revocations\n---\nRevocations that are in a pending state can be cleared, such that they are no longer set to be revoked.\n\nThe endpoint accepts a `revocation_registry_credential_map`, which provides a dictionary of\nrevocation registry IDs to credential revocation IDs, to allow clearing individual credentials.\n\nIf no revocation registry id is provided (i.e. an empty map `revocation_registry_credential_map: {}`),\nthen all pending revocations will be cleared.\n\nIf no credential revocation id is provided under a given revocation registry id, then all pending revocations for\nthe given revocation registry id will be cleared.\n\nWhere to find the revocation registry id and credential revocation id:\nWhen issuing a credential, against a credential definition that supports revocation,\nthe issuer will receive a webhook event on the topic 'issuer_cred_rev'. This event will contain\nthe credential exchange id (cred_ex_id), the credential revocation id (cred_rev_id) and\nthe revocation registry id (rev_reg_id).\n\nRequest Body:\n---\n    clear_pending_request: ClearPendingRevocationsRequest\n        An instance of `ClearPendingRevocationsRequest` containing a `revocation_registry_credential_map`. This map\n        is a dictionary where each key is a revocation registry ID and its value is a list of credential\n        revocation IDs to be cleared. Providing an empty list for a registry ID instructs the system to\n        clear all pending revocations for that ID. An empty dictionary signifies that all pending\n        revocations across all registry IDs should be cleared.\n\nReturns:\n---\n    ClearPendingRevocationsResult\n        The revocations that are still pending after the clear request is performed",
+        "description": "Clear pending revocations\n---\n\nNote: This endpoint is not supported for the 'askar-anoncreds' wallet type.\n\nRevocations that are in a pending state can be cleared, such that they are no longer set to be revoked.\n\nThe endpoint accepts a `revocation_registry_credential_map`, which provides a dictionary of\nrevocation registry IDs to credential revocation IDs, to allow clearing individual credentials.\n\nIf no revocation registry id is provided (i.e. an empty map `revocation_registry_credential_map: {}`),\nthen all pending revocations will be cleared.\n\nIf no credential revocation id is provided under a given revocation registry id, then all pending revocations for\nthe given revocation registry id will be cleared.\n\nWhere to find the revocation registry id and credential revocation id:\nWhen issuing a credential, against a credential definition that supports revocation,\nthe issuer will receive a webhook event on the topic 'issuer_cred_rev'. This event will contain\nthe credential exchange id (cred_ex_id), the credential revocation id (cred_rev_id) and\nthe revocation registry id (rev_reg_id).\n\nRequest Body:\n---\n    clear_pending_request: ClearPendingRevocationsRequest\n        An instance of `ClearPendingRevocationsRequest` containing a `revocation_registry_credential_map`. This map\n        is a dictionary where each key is a revocation registry ID and its value is a list of credential\n        revocation IDs to be cleared. Providing an empty list for a registry ID instructs the system to\n        clear all pending revocations for that ID. An empty dictionary signifies that all pending\n        revocations across all registry IDs should be cleared.\n\nReturns:\n---\n    ClearPendingRevocationsResult\n        The revocations that are still pending after the clear request is performed",
         "operationId": "clear_pending_revocations_v1_issuer_credentials_clear_pending_revocations_post",
         "requestBody": {
           "content": {
@@ -2406,7 +2390,7 @@
           "verifier"
         ],
         "summary": "Send a Proof Request to a connection",
-        "description": "Send proof request\n---\nNB: Only a tenant with the verifier role can send a proof request.\n\nThe verifier uses this endpoint to send a proof request to a specific connection, by providing the connection ID.\n\nThe proof request type must be one of indy or ld_proof.\n```json\n    {\n        \"type\": \"indy\" or \"ld_proof\",\n        \"indy_proof_request\": {...}, <-- Required if type is \"indy\"\n        \"dif_proof_request\": {...}, <-- Required if type is \"ld_proof\"\n        \"save_exchange_record\": true <-- Whether the proof exchange record should be preserved after completion.\n        \"comment\": \"string\", <-- This comment will appear in the proof record for the recipient as well\n        \"connection_id\": \"string\", <-- The verifier's reference to the connection to send this proof request to\n    }\n```\nFor a detailed technical specification and informative diagrams\nrelated to the present proof process, refer to the [Aries Present Proof v2\nRFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0454-present-proof-v2/README.md) and the [LD Proof\nAttachment RFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0510-dif-pres-exch-attach/README.md).\n\nRequest Body:\n---\n    body: SendProofRequest\n        The proof request object\n\nReturns:\n---\n    PresentationExchange\n        The presentation exchange record for this request",
+        "description": "Send proof request\n---\nNB: Only a tenant with the verifier role can send a proof request.\n\nThe verifier uses this endpoint to send a proof request to a specific connection, by providing the connection ID.\n\nThe proof request type must be one of indy, anoncreds or ld_proof.\n```json\n    {\n        \"type\": \"indy\", \"anoncreds\" or \"ld_proof\",\n        \"indy_proof_request\": {...}, <-- Required if type is \"indy\"\n        \"anoncreds_proof_request\": {...}, <-- Required if type is \"anoncreds\"\n        \"dif_proof_request\": {...}, <-- Required if type is \"ld_proof\"\n        \"save_exchange_record\": true <-- Whether the proof exchange record should be preserved after completion.\n        \"comment\": \"string\", <-- This comment will appear in the proof record for the recipient as well\n        \"connection_id\": \"string\", <-- The verifier's reference to the connection to send this proof request to\n    }\n```\nFor a detailed technical specification and informative diagrams\nrelated to the present proof process, refer to the [Aries Present Proof v2\nRFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0454-present-proof-v2/README.md) and the [LD Proof\nAttachment RFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0510-dif-pres-exch-attach/README.md).\n\nRequest Body:\n---\n    body: SendProofRequest\n        The proof request object\n\nReturns:\n---\n    PresentationExchange\n        The presentation exchange record for this request",
         "operationId": "send_proof_request_v1_verifier_send_request_post",
         "requestBody": {
           "content": {
@@ -2453,7 +2437,7 @@
           "verifier"
         ],
         "summary": "Create a Proof Request (not bound to a connection)",
-        "description": "Creates a presentation request that is not bound to any specific proposal or connection\n---\nThis endpoint is used to create a proof request that is not bound to a connection. This means the proof request is\nnot sent directly, but it will do the initial step of creating a proof exchange record,\nwhich the verifier can then use in the out of band (OOB) protocol.\n\nThe OOB protocol allows proof requests to be sent over alternative channels, such as email or QR code, where a\nconnection does not yet exist between holder and verifier.\n\nThe proof request type must be one of indy or ld_proof.\n```json\n    {\n        \"type\": \"indy\" or \"ld_proof\",\n        \"indy_proof_request\": {...}, <-- Required if type is \"indy\"\n        \"dif_proof_request\": {...}, <-- Required if type is \"ld_proof\"\n        \"save_exchange_record\": true <-- Whether the proof exchange record should be preserved after completion.\n        \"comment\": \"string\", <-- This comment will appear in the proof record for the recipient as well\n    }\n```\nFor a detailed technical specification and informative diagrams\nrelated to the present proof process, refer to the [Aries Present Proof v2\nRFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0454-present-proof-v2/README.md) and the [LD Proof\nAttachment RFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0510-dif-pres-exch-attach/README.md).\n\nRequest Body:\n---\n    body: CreateProofRequest\n        The proof request object\n\nReturns:\n---\n    PresentationExchange\n        The presentation exchange record for this request",
+        "description": "Creates a presentation request that is not bound to any specific proposal or connection\n---\nThis endpoint is used to create a proof request that is not bound to a connection. This means the proof request is\nnot sent directly, but it will do the initial step of creating a proof exchange record,\nwhich the verifier can then use in the out of band (OOB) protocol.\n\nThe OOB protocol allows proof requests to be sent over alternative channels, such as email or QR code, where a\nconnection does not yet exist between holder and verifier.\n\nThe proof request type must be one of indy, anoncreds or ld_proof.\n```json\n    {\n        \"type\": \"indy\", \"anoncreds\" or \"ld_proof\",\n        \"indy_proof_request\": {...}, <-- Required if type is \"indy\"\n        \"anoncreds_proof_request\": {...}, <-- Required if type is \"anoncreds\"\n        \"dif_proof_request\": {...}, <-- Required if type is \"ld_proof\"\n        \"save_exchange_record\": true <-- Whether the proof exchange record should be preserved after completion.\n        \"comment\": \"string\", <-- This comment will appear in the proof record for the recipient as well\n    }\n```\nFor a detailed technical specification and informative diagrams\nrelated to the present proof process, refer to the [Aries Present Proof v2\nRFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0454-present-proof-v2/README.md) and the [LD Proof\nAttachment RFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0510-dif-pres-exch-attach/README.md).\n\nRequest Body:\n---\n    body: CreateProofRequest\n        The proof request object\n\nReturns:\n---\n    PresentationExchange\n        The presentation exchange record for this request",
         "operationId": "create_proof_request_v1_verifier_create_request_post",
         "requestBody": {
           "content": {
@@ -2500,7 +2484,7 @@
           "verifier"
         ],
         "summary": "Accept a Proof Request",
-        "description": "Accept proof request\n---\nA prover uses this endpoint to respond to a proof request, by sending a presentation to the verifier.\n\nAn Indy presentation contains a mapping of the requested attributes to the wallet credential id of the prover.\n\nExample:\n```json\n{\n    \"indy_presentation_spec\": {\n        \"requested_attributes\": {\n            \"surname\": {\n                \"cred_id\": \"10e6b03f-2b60-431a-9634-731594423120\",\n                \"revealed\": true\n            },\n            \"name\": {\n                \"cred_id\": \"10e6b03f-2b60-431a-9634-731594423120\",\n                \"revealed\": true\n            },\n            \"age\": {\n                \"cred_id\": \"10e6b03f-2b60-431a-9634-731594423120\",\n                \"revealed\": true\n            }\n        }\n    }\n}\n```\n\nIn the context of the holder's wallet, the `cred_id` is called the `referent`.\n\nThe `revealed` parameter indicates whether the holder wants to reveal the attribute value to the verifier or not.\n\nRequest Body:\n---\n    body: AcceptProofRequest\n        The proof request object\n\nReturns:\n---\n    PresentationExchange\n        The prover's updated presentation exchange record after responding to the proof request.",
+        "description": "Accept proof request\n---\nA prover uses this endpoint to respond to a proof request, by sending a presentation to the verifier.\n\nAn Indy presentation contains a mapping of the requested attributes to the wallet credential id of the prover.\n\nThe prover must provide the proof ID of the request that they are responding to, and the presentation object.\n```json\n{\n    \"proof_id\": \"string\", <-- The proof ID of the presentation request that is being accepted\n    \"indy_presentation_spec\": {...}, <-- Required if type is \"indy\"\n    \"dif_presentation_spec\": {...}, <-- Required if type is \"ld_proof\"\n    \"anoncreds_presentation_spec\": {...}, <-- Required if type is \"anoncreds\"\n}\n```\n\nExample of an Indy presentation object:\n```json\n{\n    \"indy_presentation_spec\": {\n        \"requested_attributes\": {\n            \"surname\": {\n                \"cred_id\": \"10e6b03f-2b60-431a-9634-731594423120\",\n                \"revealed\": true\n            },\n            \"name\": {\n                \"cred_id\": \"10e6b03f-2b60-431a-9634-731594423120\",\n                \"revealed\": true\n            },\n            \"age\": {\n                \"cred_id\": \"10e6b03f-2b60-431a-9634-731594423120\",\n                \"revealed\": true\n            }\n        }\n    }\n}\n```\n\nIn the context of the holder's wallet, the `cred_id` is called the `referent`.\n\nThe `revealed` parameter indicates whether the holder wants to reveal the attribute value to the verifier or not.\n\nRequest Body:\n---\n    body: AcceptProofRequest\n        The proof request object\n\nReturns:\n---\n    PresentationExchange\n        The prover's updated presentation exchange record after responding to the proof request.",
         "operationId": "accept_proof_request_v1_verifier_accept_request_post",
         "requestBody": {
           "content": {
@@ -4121,6 +4105,16 @@
                 "type": "null"
               }
             ]
+          },
+          "anoncreds_presentation_spec": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/IndyPresSpec"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -4128,6 +4122,334 @@
           "proof_id"
         ],
         "title": "AcceptProofRequest"
+      },
+      "AnonCredsCredential": {
+        "properties": {
+          "credential_definition_id": {
+            "type": "string",
+            "title": "Credential Definition Id"
+          },
+          "issuer_did": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issuer Did",
+            "description": "The DID to use as the issuer of the credential. If not provided, the public DID of the issuer wallet will be used."
+          },
+          "attributes": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Attributes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "credential_definition_id",
+          "attributes"
+        ],
+        "title": "AnonCredsCredential"
+      },
+      "AnoncredsPresentationReqAttrSpec": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Attribute name"
+          },
+          "names": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Names",
+            "description": "Attribute name group"
+          },
+          "non_revoked": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnoncredsPresentationReqAttrSpecNonRevoked"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "restrictions": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Restrictions",
+            "description": "If present, credential must satisfy one of given restrictions: specify schema_id, schema_issuer_did, schema_name, schema_version, issuer_did, cred_def_id, and/or attr::<attribute-name>::value where <attribute-name> represents a credential attribute name"
+          }
+        },
+        "type": "object",
+        "title": "AnoncredsPresentationReqAttrSpec",
+        "description": "AnoncredsPresentationReqAttrSpec"
+      },
+      "AnoncredsPresentationReqAttrSpecNonRevoked": {
+        "properties": {
+          "from": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 18446744073709552000,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From",
+            "description": "Earliest time of interest in non-revocation interval"
+          },
+          "to": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 18446744073709552000,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To",
+            "description": "Latest time of interest in non-revocation interval"
+          }
+        },
+        "type": "object",
+        "title": "AnoncredsPresentationReqAttrSpecNonRevoked",
+        "description": "AnoncredsPresentationReqAttrSpecNonRevoked"
+      },
+      "AnoncredsPresentationReqPredSpec": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Attribute name"
+          },
+          "non_revoked": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnoncredsPresentationReqPredSpecNonRevoked"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "p_type": {
+            "type": "string",
+            "title": "P Type",
+            "description": "Predicate type ('<', '<=', '>=', or '>')"
+          },
+          "p_value": {
+            "type": "integer",
+            "title": "P Value",
+            "description": "Threshold value"
+          },
+          "restrictions": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Restrictions",
+            "description": "If present, credential must satisfy one of given restrictions: specify schema_id, schema_issuer_did, schema_name, schema_version, issuer_did, cred_def_id, and/or attr::<attribute-name>::value where <attribute-name> represents a credential attribute name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "p_type",
+          "p_value"
+        ],
+        "title": "AnoncredsPresentationReqPredSpec",
+        "description": "AnoncredsPresentationReqPredSpec"
+      },
+      "AnoncredsPresentationReqPredSpecNonRevoked": {
+        "properties": {
+          "from": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 18446744073709552000,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From",
+            "description": "Earliest time of interest in non-revocation interval"
+          },
+          "to": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 18446744073709552000,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To",
+            "description": "Latest time of interest in non-revocation interval"
+          }
+        },
+        "type": "object",
+        "title": "AnoncredsPresentationReqPredSpecNonRevoked",
+        "description": "AnoncredsPresentationReqPredSpecNonRevoked"
+      },
+      "AnoncredsPresentationRequest": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Proof request name"
+          },
+          "non_revoked": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnoncredsPresentationRequestNonRevoked"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "nonce": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nonce",
+            "description": "Nonce"
+          },
+          "requested_attributes": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AnoncredsPresentationReqAttrSpec"
+            },
+            "type": "object",
+            "title": "Requested Attributes",
+            "description": "Requested attribute specifications of proof request"
+          },
+          "requested_predicates": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AnoncredsPresentationReqPredSpec"
+            },
+            "type": "object",
+            "title": "Requested Predicates",
+            "description": "Requested predicate specifications of proof request"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version",
+            "description": "Proof request version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "requested_attributes",
+          "requested_predicates"
+        ],
+        "title": "AnoncredsPresentationRequest",
+        "description": "AnoncredsPresentationRequest"
+      },
+      "AnoncredsPresentationRequestNonRevoked": {
+        "properties": {
+          "from": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 18446744073709552000,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From",
+            "description": "Earliest time of interest in non-revocation interval"
+          },
+          "to": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 18446744073709552000,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To",
+            "description": "Latest time of interest in non-revocation interval"
+          }
+        },
+        "type": "object",
+        "title": "AnoncredsPresentationRequestNonRevoked",
+        "description": "AnoncredsPresentationRequestNonRevoked"
       },
       "AttachDecorator-Input": {
         "properties": {
@@ -5274,6 +5596,16 @@
                 "type": "null"
               }
             ]
+          },
+          "anoncreds_credential_detail": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnonCredsCredential"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -5391,6 +5723,16 @@
                 "type": "null"
               }
             ]
+          },
+          "anoncreds_proof_request": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnoncredsPresentationRequest"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -5398,6 +5740,11 @@
       },
       "CreateSchema": {
         "properties": {
+          "schema_type": {
+            "$ref": "#/components/schemas/SchemaType",
+            "description": "The type of schema to create. Supported values are 'indy' and 'anoncreds'.",
+            "default": "indy"
+          },
           "name": {
             "type": "string",
             "title": "Name",
@@ -5962,7 +6309,8 @@
         "enum": [
           "indy",
           "jwt",
-          "ld_proof"
+          "ld_proof",
+          "anoncreds"
         ],
         "title": "CredentialType"
       },
@@ -6993,8 +7341,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 1.8446744073709552E+19,
-                "minimum": 0.0
+                "maximum": 18446744073709552000,
+                "minimum": 0
               },
               {
                 "type": "null"
@@ -7007,8 +7355,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 1.8446744073709552E+19,
-                "minimum": 0.0
+                "maximum": 18446744073709552000,
+                "minimum": 0
               },
               {
                 "type": "null"
@@ -7189,8 +7537,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 1.8446744073709552E+19,
-                "minimum": 0.0
+                "maximum": 18446744073709552000,
+                "minimum": 0
               },
               {
                 "type": "null"
@@ -7371,8 +7719,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 1.8446744073709552E+19,
-                "minimum": 0.0
+                "maximum": 18446744073709552000,
+                "minimum": 0
               },
               {
                 "type": "null"
@@ -7385,8 +7733,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 1.8446744073709552E+19,
-                "minimum": 0.0
+                "maximum": 18446744073709552000,
+                "minimum": 0
               },
               {
                 "type": "null"
@@ -7461,8 +7809,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 1.8446744073709552E+19,
-                "minimum": 0.0
+                "maximum": 18446744073709552000,
+                "minimum": 0
               },
               {
                 "type": "null"
@@ -7475,8 +7823,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 1.8446744073709552E+19,
-                "minimum": 0.0
+                "maximum": 18446744073709552000,
+                "minimum": 0
               },
               {
                 "type": "null"
@@ -7629,8 +7977,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 1.8446744073709552E+19,
-                "minimum": 0.0
+                "maximum": 18446744073709552000,
+                "minimum": 0
               },
               {
                 "type": "null"
@@ -7643,8 +7991,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 1.8446744073709552E+19,
-                "minimum": 0.0
+                "maximum": 18446744073709552000,
+                "minimum": 0
               },
               {
                 "type": "null"
@@ -7868,8 +8216,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 1.8446744073709552E+19,
-                "minimum": 0.0
+                "maximum": 18446744073709552000,
+                "minimum": 0
               },
               {
                 "type": "null"
@@ -9386,7 +9734,8 @@
         "enum": [
           "indy",
           "jwt",
-          "ld_proof"
+          "ld_proof",
+          "anoncreds"
         ],
         "title": "ProofRequestType"
       },
@@ -9914,6 +10263,14 @@
         "title": "SchemaInputDescriptor",
         "description": "SchemaInputDescriptor"
       },
+      "SchemaType": {
+        "type": "string",
+        "enum": [
+          "indy",
+          "anoncreds"
+        ],
+        "title": "SchemaType"
+      },
       "SchemasInputDescriptorFilter": {
         "properties": {
           "oneof_filter": {
@@ -9988,6 +10345,16 @@
               }
             ]
           },
+          "anoncreds_credential_detail": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnonCredsCredential"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "connection_id": {
             "type": "string",
             "title": "Connection Id"
@@ -10042,6 +10409,16 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/DIFProofRequest"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "anoncreds_proof_request": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnoncredsPresentationRequest"
               },
               {
                 "type": "null"

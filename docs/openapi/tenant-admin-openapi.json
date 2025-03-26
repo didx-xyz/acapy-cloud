@@ -3,7 +3,7 @@
   "info": {
     "title": "CloudAPI Multitenant Admin",
     "description": "\nWelcome to CloudAPI Multitenant Admin!\n\nFor detailed guidance on using the API, please visit our official documentation:\nhttps://www.didx.co.za/acapy-cloud/index.html\n",
-    "version": "4.3.0"
+    "version": "5.0.0rc0"
   },
   "paths": {
     "/v1/tenants": {
@@ -12,7 +12,7 @@
           "admin: tenants"
         ],
         "summary": "Create New Tenant",
-        "description": "Create a New Tenant\n---\n\nUse this endpoint to create a new Tenant, which is the same as creating a new Wallet.\n\nThe `wallet_label` is a required field that allows you to assign an alias to the Tenant.\nThis label is used as the default alias in connections (i.e. the other party will see this name in their records).\n\nIf roles (issuer and/or verifier) are specified, the Tenant will be onboarded with these roles and added to the\ntrust registry. An issuer or a verifier is referred to as an 'actor' in the trust registry, and the `wallet_label`\nwill be used as the name for this actor.\n\nIf no roles are provided, then the created wallet represents a regular tenant\n(also referred to as a 'user', 'wallet', 'holder', or 'prover', depending on the context).\n\nThe `wallet_label` does not have to be unique for regular tenants, but it may not match the name of an existing\nactor in the trust registry, and will be blocked. Conversely, an issuer or verifier may not use a label that is\nalready in use by another tenant, and will also be blocked.\n\nThe `wallet_name` is an optional field that allows you to assign an additional identifier to the wallet, and is\nuseful with `get_tenants` to fetch Wallets by name. Wallet names must be unique.\n\nThe `image_url` is an optional field for assigning an image to the Wallet. For actors, this will also be added to\nthe trust registry.\n\n`extra_settings` is an optional field intended for advanced users, which allows configuring wallet behaviour.\n\nRequest body:\n---\n    body: CreateTenantRequest\n        wallet_label: str\n            A required alias for the Tenant.\n        wallet_name: Optional[str]\n            An optional wallet name.\n        roles: Optional[List[str]]\n            A list of roles to assign to the Tenant.\n        image_url: Optional[str]\n            An optional image URL for the Tenant.\n        extra_settings: Optional[dict]]\n            Optional per-tenant settings to configure wallet behaviour for advanced users.\n\nResponse body:\n---\n    CreateTenantResponse\n        wallet_id: str\n        wallet_label: str\n        wallet_name: str\n        created_at: str\n        image_url: Optional[str]\n        group_id: Optional[str]\n        updated_at: str\n        access_token: str",
+        "description": "Create a New Tenant\n---\n\nUse this endpoint to create a new Tenant, which is the same as creating a new Wallet.\n\nNB: To work with AnonCreds, the `askar-anoncreds` wallet type is required. i.e. To issue, verify, or\nhold AnonCreds, the issuer, verifier, or holder, requires the anoncreds wallet type.\n\nIndy credentials are compatible with `askar-anoncreds` wallets for holders or verifiers:\ni.e. an anoncreds wallet can hold or verify Indy credentials.\n\nHowever, issuers are restricted: an issuer with `askar` wallet type can only issue Indy credentials,\nand an issuer with `askar-anoncreds` wallet type can only issue AnonCreds.\n\nThe `wallet_label` is a required field that allows you to assign an alias to the Tenant.\nThis label is used as the default alias in connections (i.e. the other party will see this name in their records).\n\nIf roles (issuer and/or verifier) are specified, the Tenant will be onboarded with these roles and added to the\ntrust registry. An issuer or a verifier is referred to as an 'actor' in the trust registry, and the `wallet_label`\nwill be used as the name for this actor.\n\nIf no roles are provided, then the created wallet represents a regular tenant\n(also referred to as a 'user', 'wallet', 'holder', or 'prover', depending on the context).\n\nThe `wallet_label` does not have to be unique for regular tenants, but it may not match the name of an existing\nactor in the trust registry, and will be blocked. Conversely, an issuer or verifier may not use a label that is\nalready in use by another tenant, and will also be blocked.\n\nThe `wallet_name` is an optional field that allows you to assign an additional identifier to the wallet, and is\nuseful with `get_tenants` to fetch Wallets by name. Wallet names must be unique.\n\nThe `image_url` is an optional field for assigning an image to the Wallet. For actors, this will also be added to\nthe trust registry.\n\n`extra_settings` is an optional field intended for advanced users, which allows configuring wallet behaviour.\n\nRequest body:\n---\n    body: CreateTenantRequest\n        wallet_label: str\n            A required alias for the Tenant.\n        wallet_name: Optional[str]\n            An optional wallet name.\n        roles: Optional[List[str]]\n            A list of roles to assign to the Tenant.\n        image_url: Optional[str]\n            An optional image URL for the Tenant.\n        wallet_type: Optional[Literal[\"askar\", \"askar-anoncreds\"]]\n            The type of wallet to create. 'askar' or 'askar-anoncreds' are supported, with 'askar' as the default.\n        extra_settings: Optional[dict]\n            Optional per-tenant settings to configure wallet behaviour for advanced users.\n\nResponse body:\n---\n    CreateTenantResponse\n        wallet_id: str\n        wallet_label: str\n        wallet_name: str\n        created_at: str\n        image_url: Optional[str]\n        group_id: Optional[str]\n        updated_at: str\n        access_token: str",
         "operationId": "create_tenant_v1_tenants_post",
         "security": [
           {
@@ -604,6 +604,23 @@
                 "ACAPY_AUTO_ACCEPT_INVITES": false
               }
             ]
+          },
+          "wallet_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "askar",
+                  "askar-anoncreds"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wallet Type",
+            "description": "The type of wallet to create. 'askar' or 'askar-anoncreds' are supported.",
+            "default": "askar"
           }
         },
         "type": "object",
