@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timezone
 from typing import Any, AsyncGenerator
 
@@ -18,8 +19,14 @@ from shared.log_config import get_logger
 logger = get_logger(__name__)
 
 # State tracking for connection issues
-RECONNECT_THRESHOLD = 5  # Seconds for quick reconnect (restart)
-MAX_ATTEMPTS_BEFORE_ERROR = 2  # Attempts before escalating to error
+RECONNECT_THRESHOLD = int(
+    os.getenv("NATS_RECONNECT_THRESHOLD", "5")  # Seconds for quick reconnect (restart)
+)
+MAX_ATTEMPTS_BEFORE_ERROR = int(
+    os.getenv(
+        "NATS_MAX_ATTEMPTS_BEFORE_ERROR", "2"  # Attempts before escalating to error
+    )
+)
 
 
 class NATSStatus:
