@@ -16,7 +16,7 @@ dependency-injector = "^4.46.0"
 fastapi = "~0.115.10"
 httpx = "~0.28.0"
 loguru = "~0.7.2"
-nats-py = { extras = ["nkeys"], version = "^2.9.0" }
+nats-py = { extras = ["nkeys"], version = "^2.10.0" }
 orjson = "~3.10.7"
 pydantic = "~2.10.1"
 scalar-fastapi = "^1.0.3"
