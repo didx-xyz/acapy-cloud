@@ -3,6 +3,7 @@ from typing import Optional, Union
 
 from aries_cloudcontroller import (
     AnoncredsPresentationRequest,
+    AnoncredsPresSpec,
     DIFPresSpec,
     DIFProofRequest,
     IndyNonRevocationInterval,
@@ -106,8 +107,7 @@ class AcceptProofRequest(ProofId, SaveExchangeRecordField):
     type: ProofRequestType = ProofRequestType.INDY
     indy_presentation_spec: Optional[IndyPresSpec] = None
     dif_presentation_spec: Optional[DIFPresSpec] = None
-    # Controller uses IndyPresSpec for anoncreds
-    anoncreds_presentation_spec: Optional[IndyPresSpec] = None
+    anoncreds_presentation_spec: Optional[AnoncredsPresSpec] = None
 
     @field_validator("indy_presentation_spec", mode="before")
     @classmethod
