@@ -47,9 +47,6 @@ pgpool:
   reservedConnections: 5
   maxPool: 15             # Maximum cached connections per child process
   childMaxConnections: 30 # Maximum client connections per child process
-  childLifeTime: 300      # Terminate idle pgpool child processes after 5 minutes
-  clientIdleLimit: 180    # Disconnect idle clients after 3 minutes
-  connectionLifeTime: 600 # Terminate cached connections after 10 minutes
   # https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   resourcesPreset: none
   tls:
