@@ -13,8 +13,8 @@ python = "~3.12.8"
 
 aiohttp = "~3.11.7"
 aiocache = "~0.12.0"
-# aries-cloudcontroller = "==1.2.1.post20250319"
-aries-cloudcontroller = { git = "https://github.com/didx-xyz/aries-cloudcontroller-python.git", rev = "release-1.2.1-20250327" }
+aries-cloudcontroller = "==1.2.1.post20250327"
+# aries-cloudcontroller = { git = "https://github.com/didx-xyz/aries-cloudcontroller-python.git", rev = "release-1.2.1-20250327" }
 base58 = "~2.1.1"
 fastapi = "~0.115.10"
 httpx = "~0.28.0"
