@@ -733,7 +733,6 @@ async def test_regression_proof_valid_anoncreds_credential(
                 "requested_predicates": {},
                 "self_attested_attributes": {},
             },
-            "dif_presentation_spec": {},
         },
     )
 

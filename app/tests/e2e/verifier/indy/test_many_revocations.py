@@ -87,7 +87,6 @@ async def test_revoke_many_credentials(
                 "requested_predicates": {},
                 "self_attested_attributes": {},
             },
-            "dif_presentation_spec": {},
         },
     )
 

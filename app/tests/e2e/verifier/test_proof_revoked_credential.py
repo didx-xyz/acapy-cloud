@@ -266,7 +266,6 @@ async def regression_proof_revoked_credential(
                 "requested_predicates": {},
                 "self_attested_attributes": {},
             },
-            "dif_presentation_spec": {},
         },
     )
 
