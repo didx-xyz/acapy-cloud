@@ -3,13 +3,14 @@ from typing import Optional, Union
 
 from aries_cloudcontroller import (
     AnoncredsPresentationRequest,
+    AnoncredsPresSpec,
     DIFPresSpec,
     DIFProofRequest,
     IndyNonRevocationInterval,
     IndyPresSpec,
 )
 from aries_cloudcontroller import IndyProofRequest as AcaPyIndyProofRequest
-from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.util.save_exchange_record import SaveExchangeRecordField
 from shared.exceptions import CloudApiValueError
@@ -106,35 +107,50 @@ class AcceptProofRequest(ProofId, SaveExchangeRecordField):
     type: ProofRequestType = ProofRequestType.INDY
     indy_presentation_spec: Optional[IndyPresSpec] = None
     dif_presentation_spec: Optional[DIFPresSpec] = None
-    # Controller uses IndyPresSpec for anoncreds
-    anoncreds_presentation_spec: Optional[IndyPresSpec] = None
+    anoncreds_presentation_spec: Optional[AnoncredsPresSpec] = None
 
-    @field_validator("indy_presentation_spec", mode="before")
-    @classmethod
-    def check_indy_presentation_spec(cls, value, values: ValidationInfo):
-        if values.data.get("type") == ProofRequestType.INDY and value is None:
-            raise CloudApiValueError(
-                "indy_presentation_spec must be populated if `indy` type is selected"
-            )
-        return value
+    @model_validator(mode="after")
+    def validate_specs(self) -> "AcceptProofRequest":
+        if self.type == ProofRequestType.INDY:
+            if self.indy_presentation_spec is None:
+                raise CloudApiValueError(
+                    "indy_presentation_spec must be populated if `indy` type is selected"
+                )
+            if (
+                self.dif_presentation_spec is not None
+                or self.anoncreds_presentation_spec is not None
+            ):
+                raise CloudApiValueError(
+                    "Only indy_presentation_spec should be provided for `indy` type"
+                )
 
-    @field_validator("dif_presentation_spec", mode="before")
-    @classmethod
-    def check_dif_presentation_spec(cls, value, values: ValidationInfo):
-        if values.data.get("type") == ProofRequestType.LD_PROOF and value is None:
-            raise CloudApiValueError(
-                "dif_presentation_spec must be populated if `ld_proof` type is selected"
-            )
-        return value
+        elif self.type == ProofRequestType.LD_PROOF:
+            if self.dif_presentation_spec is None:
+                raise CloudApiValueError(
+                    "dif_presentation_spec must be populated if `ld_proof` type is selected"
+                )
+            if (
+                self.indy_presentation_spec is not None
+                or self.anoncreds_presentation_spec is not None
+            ):
+                raise CloudApiValueError(
+                    "Only dif_presentation_spec should be provided for `ld_proof` type"
+                )
 
-    @field_validator("anoncreds_presentation_spec", mode="before")
-    @classmethod
-    def check_anoncreds_proof_request(cls, value, values: ValidationInfo):
-        if values.data.get("type") == ProofRequestType.ANONCREDS and value is None:
-            raise CloudApiValueError(
-                "anoncreds_proof_request must be populated if `anoncreds` type is selected"
-            )
-        return value
+        elif self.type == ProofRequestType.ANONCREDS:
+            if self.anoncreds_presentation_spec is None:
+                raise CloudApiValueError(
+                    "anoncreds_presentation_spec must be populated if `anoncreds` type is selected"
+                )
+            if (
+                self.indy_presentation_spec is not None
+                or self.dif_presentation_spec is not None
+            ):
+                raise CloudApiValueError(
+                    "Only anoncreds_presentation_spec should be provided for `anoncreds` type"
+                )
+
+        return self
 
 
 class RejectProofRequest(ProofId):

@@ -4,6 +4,7 @@ from aries_cloudcontroller import DIFProofRequest, PresentationDefinition
 from app.models.verifier import (
     AcceptProofRequest,
     AnoncredsPresentationRequest,
+    AnoncredsPresSpec,
     DIFPresSpec,
     IndyPresSpec,
     IndyProofRequest,
@@ -99,8 +100,9 @@ def test_accept_proof_request_model():
     )
 
     AcceptProofRequest(
+        type=ProofRequestType.ANONCREDS,
         proof_id="abc",
-        anoncreds_presentation_spec=IndyPresSpec(
+        anoncreds_presentation_spec=AnoncredsPresSpec(
             requested_attributes={},
             requested_predicates={},
             self_attested_attributes={},
@@ -108,21 +110,31 @@ def test_accept_proof_request_model():
     )
 
     with pytest.raises(CloudApiValueError) as exc:
-        AcceptProofRequest(type=ProofRequestType.INDY, indy_presentation_spec=None)
+        AcceptProofRequest(
+            type=ProofRequestType.INDY,
+            indy_presentation_spec=None,
+            proof_id="abc",
+        )
     assert exc.value.detail == (
         "indy_presentation_spec must be populated if `indy` type is selected"
     )
     with pytest.raises(CloudApiValueError) as exc:
-        AcceptProofRequest(type=ProofRequestType.LD_PROOF, dif_presentation_spec=None)
+        AcceptProofRequest(
+            type=ProofRequestType.LD_PROOF,
+            dif_presentation_spec=None,
+            proof_id="abc",
+        )
     assert exc.value.detail == (
         "dif_presentation_spec must be populated if `ld_proof` type is selected"
     )
     with pytest.raises(CloudApiValueError) as exc:
         AcceptProofRequest(
-            type=ProofRequestType.ANONCREDS, anoncreds_presentation_spec=None
+            type=ProofRequestType.ANONCREDS,
+            anoncreds_presentation_spec=None,
+            proof_id="abc",
         )
     assert exc.value.detail == (
-        "anoncreds_proof_request must be populated if `anoncreds` type is selected"
+        "anoncreds_presentation_spec must be populated if `anoncreds` type is selected"
     )
 
 

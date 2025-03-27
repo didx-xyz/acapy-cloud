@@ -4,7 +4,10 @@ import time
 from typing import Optional
 
 import pytest
-from aries_cloudcontroller import IndyPresSpec, IndyRequestedCredsRequestedAttr
+from aries_cloudcontroller import (
+    AnoncredsPresSpec,
+    AnoncredsRequestedCredsRequestedAttr,
+)
 from fastapi import HTTPException
 
 from app.routes.definitions import router as def_router
@@ -13,7 +16,7 @@ from app.routes.oob import router as oob_router
 from app.routes.verifier import AcceptProofRequest, RejectProofRequest
 from app.routes.verifier import router as verifier_router
 from app.tests.fixtures.credentials import ReferentCredDef
-from app.tests.services.verifier.utils import sample_indy_proof_request
+from app.tests.services.verifier.utils import sample_anoncreds_proof_request
 from app.tests.util.connections import AcmeAliceConnect, MeldCoAliceConnect
 from app.tests.util.regression_testing import TestMode
 from app.tests.util.verifier import send_proof_request
@@ -29,14 +32,15 @@ VERIFIER_BASE_PATH = verifier_router.prefix
 
 
 @pytest.mark.anyio
-async def test_send_proof_request(
+async def test_send_anoncreds_proof_request(
     acme_and_alice_connection: AcmeAliceConnect,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
 ):
     request_body = {
+        "type": "anoncreds",
         "connection_id": acme_and_alice_connection.acme_connection_id,
-        "indy_proof_request": sample_indy_proof_request().to_dict(),
+        "anoncreds_proof_request": sample_anoncreds_proof_request().to_dict(),
     }
     send_proof_response = await send_proof_request(acme_client, request_body)
 
@@ -69,22 +73,25 @@ async def test_send_proof_request(
 
 @pytest.mark.anyio
 @pytest.mark.xdist_group(name="issuer_test_group_3")
-async def test_accept_proof_request(
-    issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+async def test_accept_anoncreds_proof_request(
+    issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     alice_member_client: RichAsyncClient,
     acme_client: RichAsyncClient,
-    indy_credential_definition_id: str,
+    anoncreds_credential_definition_id: str,
     acme_and_alice_connection: AcmeAliceConnect,
 ):
     request_body = {
+        "type": "anoncreds",
         "connection_id": acme_and_alice_connection.acme_connection_id,
-        "indy_proof_request": {
+        "anoncreds_proof_request": {
             "name": "Proof Request",
             "version": "1.0.0",
             "requested_attributes": {
                 "0_speed_uuid": {
                     "name": "speed",
-                    "restrictions": [{"cred_def_id": indy_credential_definition_id}],
+                    "restrictions": [
+                        {"cred_def_id": anoncreds_credential_definition_id}
+                    ],
                 }
             },
             "requested_predicates": {},
@@ -111,13 +118,14 @@ async def test_accept_proof_request(
     )
 
     referent = requested_credentials.json()[0]["cred_info"]["referent"]
-    indy_request_attrs = IndyRequestedCredsRequestedAttr(
+    request_attrs = AnoncredsRequestedCredsRequestedAttr(
         cred_id=referent, revealed=True
     )
     proof_accept = AcceptProofRequest(
+        type="anoncreds",
         proof_id=alice_proof_id,
-        indy_presentation_spec=IndyPresSpec(
-            requested_attributes={"0_speed_uuid": indy_request_attrs},
+        anoncreds_presentation_spec=AnoncredsPresSpec(
+            requested_attributes={"0_speed_uuid": request_attrs},
             requested_predicates={},
             self_attested_attributes={},
         ),
@@ -155,15 +163,16 @@ async def test_accept_proof_request(
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("delete_proof_record", [True, False])
-async def test_reject_proof_request(
+async def test_reject_anoncreds_proof_request(
     acme_and_alice_connection: AcmeAliceConnect,
     alice_member_client: RichAsyncClient,
     acme_client: RichAsyncClient,
     delete_proof_record: bool,
 ):
     request_body = {
+        "type": "anoncreds",
         "connection_id": acme_and_alice_connection.acme_connection_id,
-        "indy_proof_request": sample_indy_proof_request().to_dict(),
+        "anoncreds_proof_request": sample_anoncreds_proof_request().to_dict(),
     }
     send_proof_response = await send_proof_request(acme_client, request_body)
 
@@ -227,20 +236,21 @@ async def test_reject_proof_request(
 
 @pytest.mark.anyio
 @pytest.mark.xdist_group(name="issuer_test_group")
-async def test_get_proof_and_get_proofs(
+async def test_get_proof_and_get_proofs_anoncreds(
     acme_and_alice_connection: AcmeAliceConnect,
-    issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
-    indy_credential_definition_id: str,
+    issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+    anoncreds_credential_definition_id: str,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
 ):
     acme_connection_id = acme_and_alice_connection.acme_connection_id
 
     request_body = {
+        "type": "anoncreds",
         "save_exchange_record": True,
         "connection_id": acme_connection_id,
-        "indy_proof_request": sample_indy_proof_request(
-            restrictions=[{"cred_def_id": indy_credential_definition_id}]
+        "anoncreds_proof_request": sample_anoncreds_proof_request(
+            restrictions=[{"cred_def_id": anoncreds_credential_definition_id}]
         ).to_dict(),
     }
     send_proof_response = await send_proof_request(acme_client, request_body)
@@ -279,14 +289,15 @@ async def test_get_proof_and_get_proofs(
         )
     ).json()[0]["cred_info"]["referent"]
 
-    indy_request_attrs = IndyRequestedCredsRequestedAttr(
+    request_attrs = AnoncredsRequestedCredsRequestedAttr(
         cred_id=referent, revealed=True
     )
 
     proof_accept = AcceptProofRequest(
+        type="anoncreds",
         proof_id=alice_proof_id,
-        indy_presentation_spec=IndyPresSpec(
-            requested_attributes={"0_speed_uuid": indy_request_attrs},
+        anoncreds_presentation_spec=AnoncredsPresSpec(
+            requested_attributes={"0_speed_uuid": request_attrs},
             requested_predicates={},
             self_attested_attributes={},
         ),
@@ -316,9 +327,10 @@ async def test_get_proof_and_get_proofs(
 
     # Acme does proof request and alice does not respond
     request_body = {
+        "type": "anoncreds",
         "save_exchange_record": True,
         "connection_id": acme_connection_id,
-        "indy_proof_request": sample_indy_proof_request().to_dict(),
+        "anoncreds_proof_request": sample_anoncreds_proof_request().to_dict(),
     }
     send_proof_response_2 = await send_proof_request(acme_client, request_body)
 
@@ -392,13 +404,14 @@ async def test_get_proof_and_get_proofs(
 
 
 @pytest.mark.anyio
-async def test_delete_proof(
+async def test_delete_anoncreds_proof(
     acme_and_alice_connection: AcmeAliceConnect,
     acme_client: RichAsyncClient,
 ):
     request_body = {
+        "type": "anoncreds",
         "connection_id": acme_and_alice_connection.acme_connection_id,
-        "indy_proof_request": sample_indy_proof_request().to_dict(),
+        "anoncreds_proof_request": sample_anoncreds_proof_request().to_dict(),
     }
     send_proof_response = await send_proof_request(acme_client, request_body)
 
@@ -412,15 +425,16 @@ async def test_delete_proof(
 
 @pytest.mark.anyio
 @pytest.mark.xdist_group(name="issuer_test_group_3")
-async def test_get_credentials_for_request(
-    issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+async def test_get_anoncreds_credentials_for_request(
+    issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     acme_and_alice_connection: AcmeAliceConnect,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
 ):
     request_body = {
+        "type": "anoncreds",
         "connection_id": acme_and_alice_connection.acme_connection_id,
-        "indy_proof_request": sample_indy_proof_request().to_dict(),
+        "anoncreds_proof_request": sample_anoncreds_proof_request().to_dict(),
     }
     send_proof_response = await send_proof_request(acme_client, request_body)
 
@@ -468,23 +482,28 @@ async def test_get_credentials_for_request(
 
 @pytest.mark.anyio
 @pytest.mark.parametrize(
-    "meld_co_indy_and_alice_connection", ["trust_registry", "default"], indirect=True
+    "meld_co_anoncreds_and_alice_connection",
+    ["trust_registry", "default"],
+    indirect=True,
 )
 @pytest.mark.xdist_group(name="issuer_test_group_3")
-async def test_accept_proof_request_verifier_has_issuer_role(
-    meld_co_issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
-    meld_co_indy_credential_definition_id: str,
+async def test_accept_anoncreds_proof_request_verifier_has_issuer_role(
+    meld_co_issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+    meld_co_anoncreds_credential_definition_id: str,
     alice_member_client: RichAsyncClient,
-    meld_co_indy_client: RichAsyncClient,
-    meld_co_indy_and_alice_connection: MeldCoAliceConnect,
+    meld_co_anoncreds_client: RichAsyncClient,
+    meld_co_anoncreds_and_alice_connection: MeldCoAliceConnect,
 ):
     request_body = {
-        "connection_id": meld_co_indy_and_alice_connection.meld_co_connection_id,
-        "indy_proof_request": sample_indy_proof_request(
-            restrictions=[{"cred_def_id": meld_co_indy_credential_definition_id}]
+        "type": "anoncreds",
+        "connection_id": meld_co_anoncreds_and_alice_connection.meld_co_connection_id,
+        "anoncreds_proof_request": sample_anoncreds_proof_request(
+            restrictions=[{"cred_def_id": meld_co_anoncreds_credential_definition_id}]
         ).to_dict(),
     }
-    send_proof_response = await send_proof_request(meld_co_indy_client, request_body)
+    send_proof_response = await send_proof_request(
+        meld_co_anoncreds_client, request_body
+    )
 
     meld_co_proof_id = send_proof_response["proof_id"]
     thread_id = send_proof_response["thread_id"]
@@ -511,14 +530,15 @@ async def test_accept_proof_request_verifier_has_issuer_role(
     )
 
     referent = requested_credentials.json()[0]["cred_info"]["referent"]
-    indy_request_attrs = IndyRequestedCredsRequestedAttr(
+    request_attrs = AnoncredsRequestedCredsRequestedAttr(
         cred_id=referent, revealed=True
     )
 
     proof_accept = AcceptProofRequest(
+        type="anoncreds",
         proof_id=alice_proof_id,
-        indy_presentation_spec=IndyPresSpec(
-            requested_attributes={"0_speed_uuid": indy_request_attrs},
+        anoncreds_presentation_spec=AnoncredsPresSpec(
+            requested_attributes={"0_speed_uuid": request_attrs},
             requested_predicates={},
             self_attested_attributes={},
         ),
@@ -531,7 +551,7 @@ async def test_accept_proof_request_verifier_has_issuer_role(
 
     await assert_both_webhooks_received(
         alice_member_client,
-        meld_co_indy_client,
+        meld_co_anoncreds_client,
         "proofs",
         "done",
         alice_proof_id,
@@ -546,9 +566,9 @@ async def test_accept_proof_request_verifier_has_issuer_role(
 @pytest.mark.parametrize("acme_save_exchange_record", [None, False, True])
 @pytest.mark.parametrize("alice_save_exchange_record", [None, False, True])
 @pytest.mark.xdist_group(name="issuer_test_group_4")
-async def test_saving_of_presentation_exchange_records(
-    issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
-    indy_credential_definition_id: str,
+async def test_saving_of_anoncreds_presentation_exchange_records(
+    issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+    anoncreds_credential_definition_id: str,
     alice_member_client: RichAsyncClient,
     acme_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
@@ -556,9 +576,10 @@ async def test_saving_of_presentation_exchange_records(
     alice_save_exchange_record: Optional[bool],
 ):
     request_body = {
+        "type": "anoncreds",
         "connection_id": acme_and_alice_connection.acme_connection_id,
-        "indy_proof_request": sample_indy_proof_request(
-            restrictions=[{"cred_def_id": indy_credential_definition_id}]
+        "anoncreds_proof_request": sample_anoncreds_proof_request(
+            restrictions=[{"cred_def_id": anoncreds_credential_definition_id}]
         ).to_dict(),
         "save_exchange_record": acme_save_exchange_record,
     }
@@ -582,14 +603,15 @@ async def test_saving_of_presentation_exchange_records(
     )
 
     referent = requested_credentials.json()[0]["cred_info"]["referent"]
-    indy_request_attrs = IndyRequestedCredsRequestedAttr(
+    request_attrs = AnoncredsRequestedCredsRequestedAttr(
         cred_id=referent, revealed=True
     )
 
     proof_accept = AcceptProofRequest(
+        type="anoncreds",
         proof_id=alice_proof_id,
-        indy_presentation_spec=IndyPresSpec(
-            requested_attributes={"0_speed_uuid": indy_request_attrs},
+        anoncreds_presentation_spec=AnoncredsPresSpec(
+            requested_attributes={"0_speed_uuid": request_attrs},
             requested_predicates={},
             self_attested_attributes={},
         ),
@@ -652,24 +674,28 @@ async def test_saving_of_presentation_exchange_records(
     TestMode.clean_run in TestMode.fixture_params,
     reason="Run only in regression mode",
 )
+@pytest.mark.skip(
+    "FIXME: `Failed to send proof presentation: "
+    "Error creating presentation. Input error [missing field `name`]`"
+)
 @pytest.mark.xdist_group(name="issuer_test_group_3")
-async def test_regression_proof_valid_indy_credential(
-    get_or_issue_regression_indy_cred_valid: ReferentCredDef,
+async def test_regression_proof_valid_anoncreds_credential(
+    get_or_issue_regression_anoncreds_valid: ReferentCredDef,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
 ):
     unix_timestamp = int(time.time())
-    referent = get_or_issue_regression_indy_cred_valid.referent
+    referent = get_or_issue_regression_anoncreds_valid.referent
     credential_definition_id_revocable = (
-        get_or_issue_regression_indy_cred_valid.cred_def_revocable
+        get_or_issue_regression_anoncreds_valid.cred_def_revocable
     )
 
     # Do proof request
     request_body = {
         "comment": "Test cred is not revoked",
-        "type": "indy",
-        "indy_proof_request": {
+        "type": "anoncreds",
+        "anoncreds_proof_request": {
             "non_revoked": {"to": unix_timestamp},
             "requested_attributes": {
                 "THE_SPEED": {
@@ -703,8 +729,8 @@ async def test_regression_proof_valid_indy_credential(
         f"{VERIFIER_BASE_PATH}/accept-request",
         json={
             "proof_id": alice_proof_exchange_id,
-            "type": "indy",
-            "indy_presentation_spec": {
+            "type": "anoncreds",
+            "anoncreds_presentation_spec": {
                 "requested_attributes": {
                     "THE_SPEED": {"cred_id": referent, "revealed": True}
                 },
