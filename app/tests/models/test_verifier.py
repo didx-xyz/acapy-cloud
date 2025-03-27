@@ -4,6 +4,7 @@ from aries_cloudcontroller import DIFProofRequest, PresentationDefinition
 from app.models.verifier import (
     AcceptProofRequest,
     AnoncredsPresentationRequest,
+    AnoncredsPresSpec,
     DIFPresSpec,
     IndyPresSpec,
     IndyProofRequest,
@@ -100,7 +101,7 @@ def test_accept_proof_request_model():
 
     AcceptProofRequest(
         proof_id="abc",
-        anoncreds_presentation_spec=IndyPresSpec(
+        anoncreds_presentation_spec=AnoncredsPresSpec(
             requested_attributes={},
             requested_predicates={},
             self_attested_attributes={},
