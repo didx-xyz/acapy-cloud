@@ -1,6 +1,5 @@
 from aries_cloudcontroller import (
     AnoncredsPresentationReqAttrSpec,
-    AnoncredsPresentationRequest,
     AnoncredsPresentationRequestNonRevoked,
     AttachDecorator,
     AttachDecoratorData,
@@ -21,7 +20,7 @@ from aries_cloudcontroller import (
     V20PresProposal,
 )
 
-from app.models.verifier import IndyProofRequest
+from app.models.verifier import AnoncredsPresentationRequest, IndyProofRequest
 
 indy_proof = IndyProof(
     identifiers=[],
