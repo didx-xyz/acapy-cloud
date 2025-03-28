@@ -2,7 +2,9 @@ from enum import Enum
 from typing import Optional, Union
 
 from aries_cloudcontroller import (
-    AnoncredsPresentationRequest,
+    AnoncredsPresentationRequest as AcaPyAnoncredsPresentationRequest,
+)
+from aries_cloudcontroller import (
     AnoncredsPresSpec,
     DIFPresSpec,
     DIFProofRequest,
@@ -21,6 +23,11 @@ class ProofRequestType(str, Enum):
     JWT: str = "jwt"
     LD_PROOF: str = "ld_proof"
     ANONCREDS: str = "anoncreds"
+
+
+class AnoncredsPresentationRequest(AcaPyAnoncredsPresentationRequest):
+    name: str = Field(default="Proof", description="Proof request name")
+    version: str = Field(default="1.0", description="Proof request version")
 
 
 class IndyProofRequest(AcaPyIndyProofRequest):
