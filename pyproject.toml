@@ -35,7 +35,7 @@ uuid_utils = "^0.10.0"
 [tool.poetry.group.endorser.dependencies]
 aries-cloudcontroller = { git = "https://github.com/didx-xyz/aries-cloudcontroller-python.git", branch = "main" }
 dependency-injector = "^4.46.0"
-nats-py = { extras = ["nkeys"], version = "^2.10.0" }
+nats-py = { git = "https://github.com/ff137/nats.py", branch = "feat-661-uuid", extras = ["nkeys", "orjson", "uuid_utils"] }
 tenacity = "^9.1.0"
 
 [tool.poetry.group.trust-registry.dependencies]
@@ -46,7 +46,7 @@ sqlalchemy = "~2.0.40"
 [tool.poetry.group.waypoint.dependencies]
 aiohttp = "~3.11.7"
 dependency-injector = "^4.46.0"
-nats-py = { extras = ["nkeys"], version = "^2.10.0" }
+nats-py = { git = "https://github.com/ff137/nats.py", branch = "feat-661-uuid", extras = ["nkeys", "orjson", "uuid_utils"] }
 sse-starlette = "~2.3.3"
 tenacity = "^9.1.0"
 uuid_utils = "^0.10.0"
