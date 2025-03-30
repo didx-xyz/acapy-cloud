@@ -1012,17 +1012,26 @@ description = "NATS client for Python"
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
-files = [
-    {file = "nats_py-2.10.0.tar.gz", hash = "sha256:9d44265a097edb30d40e214c1dd1a7405c1451d33480ce714c041fb73bb66a10"},
-]
+files = []
+develop = false
 
 [package.dependencies]
 nkeys = {version = "*", optional = true, markers = "extra == \"nkeys\""}
+orjson = {version = "*", optional = true, markers = "extra == \"orjson\""}
+uuid_utils = {version = "*", optional = true, markers = "extra == \"uuid-utils\""}
 
 [package.extras]
 aiohttp = ["aiohttp"]
 fast-parse = ["fast-mail-parser"]
 nkeys = ["nkeys"]
+orjson = ["orjson"]
+uuid-utils = ["uuid_utils"]
+
+[package.source]
+type = "git"
+url = "https://github.com/ff137/nats.py"
+reference = "feat-661-uuid"
+resolved_reference = "4ccea6506e8c4895ff808773a89d0282b79da9ce"
 
 [[package]]
 name = "nkeys"
@@ -2014,4 +2023,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.12.8"
-content-hash = "ad234f2c562127bfeb0c910d848000163e8287c58c09de704f97ee0f8ef39807"
+content-hash = "7aeebb69df08a5c412501e8396f5af6ed3e0186a10bd3fb056a8438cc396e864"
