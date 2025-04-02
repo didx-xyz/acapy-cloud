@@ -376,7 +376,7 @@ def setup_ledger(namespace, build_enabled, ingress_domain):
         if not os.path.exists(von_dir):
             print(color.yellow("von-network not found, cloning von-network repo"))
             local(
-                "git clone https://github.com/bcgov/von-network.git -b v1.8.0 "
+                "git clone https://github.com/bcgov/von-network.git -b v1.9.0 "
                 + von_dir,
                 quiet=True,
             )
