@@ -182,7 +182,7 @@ jobs:
             file: dockerfiles/tests/Dockerfile
             platforms: linux/amd64,linux/arm64
           - image: acapy-cloud/tails-server
-            context: https://github.com/bcgov/indy-tails-server.git#v1.1.0
+            context: https://github.com/bcgov/indy-tails-server.git#v1.1.2
             file: docker/Dockerfile.tails-server
             platforms: linux/amd64,linux/arm64
           - image: acapy-cloud/trust-registry
