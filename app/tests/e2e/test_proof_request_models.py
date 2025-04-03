@@ -96,7 +96,6 @@ async def test_proof_model_failures(
                         "requested_predicates": {},
                         "self_attested_attributes": {},
                     },
-                    "dif_presentation_spec": {},
                 },
             )
             assert exc.value.status_code == 422
