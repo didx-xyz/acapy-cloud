@@ -1,4 +1,4 @@
-FROM ghcr.io/didx-xyz/acapy-agent:py3.12-1.2.1-20250327
+FROM ghcr.io/didx-xyz/acapy-agent:py3.12-test-revocation-logging
 
 USER root
 
