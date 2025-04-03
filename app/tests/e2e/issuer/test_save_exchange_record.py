@@ -17,18 +17,18 @@ CREDENTIALS_BASE_PATH = router.prefix
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("save_exchange_record", [None, False, True])
-@pytest.mark.xdist_group(name="issuer_test_group_3")
+@pytest.mark.xdist_group(name="issuer_test_group")
 async def test_issue_credential_with_save_exchange_record(
-    faber_indy_client: RichAsyncClient,
-    indy_credential_definition_id: str,
-    faber_indy_and_alice_connection: FaberAliceConnect,
+    faber_anoncreds_client: RichAsyncClient,
+    anoncreds_credential_definition_id: str,
+    faber_anoncreds_and_alice_connection: FaberAliceConnect,
     alice_member_client: RichAsyncClient,
     save_exchange_record: Optional[bool],
 ) -> CredentialExchange:
     credential = {
-        "connection_id": faber_indy_and_alice_connection.faber_connection_id,
-        "indy_credential_detail": {
-            "credential_definition_id": indy_credential_definition_id,
+        "connection_id": faber_anoncreds_and_alice_connection.faber_connection_id,
+        "anoncreds_credential_detail": {
+            "credential_definition_id": anoncreds_credential_definition_id,
             "attributes": sample_credential_attributes,
         },
         "save_exchange_record": save_exchange_record,
@@ -36,7 +36,7 @@ async def test_issue_credential_with_save_exchange_record(
 
     # create and send credential offer- issuer
     faber_send_response = (
-        await faber_indy_client.post(
+        await faber_anoncreds_client.post(
             CREDENTIALS_BASE_PATH,
             json=credential,
         )
@@ -84,7 +84,7 @@ async def test_issue_credential_with_save_exchange_record(
         if save_exchange_record:
             # get exchange records from faber side:
             faber_cred_ex_record = (
-                await faber_indy_client.get(
+                await faber_anoncreds_client.get(
                     f"{CREDENTIALS_BASE_PATH}/{faber_credential_exchange_id}"
                 )
             ).json()
@@ -97,7 +97,7 @@ async def test_issue_credential_with_save_exchange_record(
         else:
             # If save_exchange_record was not set, credential should not exist
             with pytest.raises(HTTPException) as exc:
-                await faber_indy_client.get(
+                await faber_anoncreds_client.get(
                     f"{CREDENTIALS_BASE_PATH}/{faber_credential_exchange_id}"
                 )
             assert exc.value.status_code == 404
@@ -105,26 +105,26 @@ async def test_issue_credential_with_save_exchange_record(
     finally:
         # Clean up
         if save_exchange_record:
-            await faber_indy_client.delete(
+            await faber_anoncreds_client.delete(
                 f"{CREDENTIALS_BASE_PATH}/{faber_credential_exchange_id}"
             )
 
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("save_exchange_record", [None, False, True])
-@pytest.mark.xdist_group(name="issuer_test_group_4")
+@pytest.mark.xdist_group(name="issuer_test_group")
 async def test_request_credential_with_save_exchange_record(
-    faber_indy_client: RichAsyncClient,
-    indy_credential_definition_id: str,
-    faber_indy_and_alice_connection: FaberAliceConnect,
+    faber_anoncreds_client: RichAsyncClient,
+    anoncreds_credential_definition_id: str,
+    faber_anoncreds_and_alice_connection: FaberAliceConnect,
     alice_member_client: RichAsyncClient,
     save_exchange_record: bool,
 ):
     # This test asserts that the holder can control `save_exchange_records` behaviour
     credential = {
-        "connection_id": faber_indy_and_alice_connection.faber_connection_id,
-        "indy_credential_detail": {
-            "credential_definition_id": indy_credential_definition_id,
+        "connection_id": faber_anoncreds_and_alice_connection.faber_connection_id,
+        "anoncreds_credential_detail": {
+            "credential_definition_id": anoncreds_credential_definition_id,
             "attributes": {"speed": "20", "name": "Alice", "age": "44"},
         },
         "save_exchange_record": True,  # so we can safely delete faber cred ex record in finally block
@@ -132,7 +132,7 @@ async def test_request_credential_with_save_exchange_record(
 
     # Create and send credential offer - issuer
     faber_send_response = (
-        await faber_indy_client.post(
+        await faber_anoncreds_client.post(
             CREDENTIALS_BASE_PATH,
             json=credential,
         )
@@ -201,17 +201,17 @@ async def test_request_credential_with_save_exchange_record(
             await alice_member_client.delete(
                 f"{CREDENTIALS_BASE_PATH}/{alice_credential_exchange_id}"
             )
-        await faber_indy_client.delete(
+        await faber_anoncreds_client.delete(
             f"{CREDENTIALS_BASE_PATH}/{faber_credential_exchange_id}"
         )
 
 
 @pytest.mark.anyio
-@pytest.mark.xdist_group(name="issuer_test_group_3")
+@pytest.mark.xdist_group(name="issuer_test_group")
 async def test_get_cred_exchange_records(
-    faber_indy_client: RichAsyncClient,
-    indy_credential_definition_id: str,
-    faber_indy_and_alice_connection: FaberAliceConnect,
+    faber_anoncreds_client: RichAsyncClient,
+    anoncreds_credential_definition_id: str,
+    faber_anoncreds_and_alice_connection: FaberAliceConnect,
     alice_member_client: RichAsyncClient,
 ):
     # Fetch existing records so we can filter to exclude them. Necessary to cater for long running / regression tests
@@ -220,18 +220,18 @@ async def test_get_cred_exchange_records(
     ).json()
 
     credential = {
-        "connection_id": faber_indy_and_alice_connection.faber_connection_id,
-        "indy_credential_detail": {
-            "credential_definition_id": indy_credential_definition_id,
+        "connection_id": faber_anoncreds_and_alice_connection.faber_connection_id,
+        "anoncreds_credential_detail": {
+            "credential_definition_id": anoncreds_credential_definition_id,
             "attributes": {"speed": "20", "name": "Alice", "age": "44"},
         },
         "save_exchange_record": True,
     }
 
-    faber_send_response_1 = await faber_indy_client.post(
+    faber_send_response_1 = await faber_anoncreds_client.post(
         CREDENTIALS_BASE_PATH, json=credential
     )
-    faber_send_response_2 = await faber_indy_client.post(
+    faber_send_response_2 = await faber_anoncreds_client.post(
         CREDENTIALS_BASE_PATH, json=credential
     )
 
@@ -283,10 +283,10 @@ async def test_get_cred_exchange_records(
         )
 
     await asyncio.sleep(1)  # short sleep to allow records to update
-    faber_records = (await faber_indy_client.get(CREDENTIALS_BASE_PATH)).json()
+    faber_records = (await faber_anoncreds_client.get(CREDENTIALS_BASE_PATH)).json()
 
     faber_cred_ex_response = (
-        await faber_indy_client.get(CREDENTIALS_BASE_PATH + "?state=done")
+        await faber_anoncreds_client.get(CREDENTIALS_BASE_PATH + "?state=done")
     ).json()
     filtered_cred_ex_records = [
         record
@@ -296,7 +296,7 @@ async def test_get_cred_exchange_records(
     assert len(filtered_cred_ex_records) == 2
 
     faber_cred_ex_response = (
-        await faber_indy_client.get(CREDENTIALS_BASE_PATH + "?role=issuer")
+        await faber_anoncreds_client.get(CREDENTIALS_BASE_PATH + "?role=issuer")
     ).json()
     filtered_cred_ex_records = [
         record
@@ -306,14 +306,14 @@ async def test_get_cred_exchange_records(
     assert len(filtered_cred_ex_records) == 2
 
     faber_cred_ex_response = (
-        await faber_indy_client.get(
+        await faber_anoncreds_client.get(
             f"{CREDENTIALS_BASE_PATH}?thread_id={faber_records[0]['thread_id']}"
         )
     ).json()
     assert len(faber_cred_ex_response) == 1
 
     with pytest.raises(HTTPException) as exc:
-        await faber_indy_client.get(
+        await faber_anoncreds_client.get(
             f"{CREDENTIALS_BASE_PATH}?connection_id=123&thread_id=123&role=asf&state=asd"
         )
     assert exc.value.status_code == 422

@@ -54,16 +54,17 @@ signed_doc = {
 @pytest.mark.anyio
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_sign_jsonld(
-    faber_indy_acapy_client: AcaPyClient,
-    faber_indy_client: RichAsyncClient,
-    issue_indy_credential_to_alice: CredentialExchange,
+    faber_anoncreds_acapy_client: AcaPyClient,
+    faber_anoncreds_client: RichAsyncClient,
+    issue_anoncreds_credential_to_alice: CredentialExchange,
 ):
     # First assert 422 error for providing both pub_did and verkey:
+    credential_id = issue_anoncreds_credential_to_alice["credential_exchange_id"][3:]
     with pytest.raises(CloudApiValueError) as exc:
         JsonLdSignRequest(
             verkey="abcde",
             pub_did="abcde",
-            credential_id=issue_indy_credential_to_alice["credential_exchange_id"][3:],
+            credential_id=credential_id,
             signature_options=SignatureOptions(
                 proof_purpose="test", verification_method="ed25519"
             ).model_dump(),
@@ -72,7 +73,9 @@ async def test_sign_jsonld(
     assert "Please provide either or neither, but not both" in exc.value.detail
 
     # Success pub_did
-    faber_pub_did = (await faber_indy_acapy_client.wallet.get_public_did()).result.did
+    faber_pub_did = (
+        await faber_anoncreds_acapy_client.wallet.get_public_did()
+    ).result.did
 
     json_ld_req = JsonLdSignRequest(
         verkey=None,
@@ -84,7 +87,7 @@ async def test_sign_jsonld(
         ),
     )
 
-    jsonld_sign_response = await faber_indy_client.post(
+    jsonld_sign_response = await faber_anoncreds_client.post(
         JSONLD_BASE_PATH + "/sign", json=json_ld_req.model_dump()
     )
     assert jsonld_sign_response.status_code == 200
@@ -94,14 +97,14 @@ async def test_sign_jsonld(
     assert all(item in jsonld_sign_response["signed_doc"] for item in jsonld_credential)
 
     # # Success verkey
-    pub_did = (await faber_indy_acapy_client.wallet.get_public_did()).result.did
+    pub_did = (await faber_anoncreds_acapy_client.wallet.get_public_did()).result.did
     faber_verkey = (
-        await faber_indy_acapy_client.ledger.get_did_verkey(did=pub_did)
+        await faber_anoncreds_acapy_client.ledger.get_did_verkey(did=pub_did)
     ).verkey
     json_ld_req.pub_did = None
     json_ld_req.verkey = faber_verkey
 
-    jsonld_sign_response = await faber_indy_client.post(
+    jsonld_sign_response = await faber_anoncreds_client.post(
         JSONLD_BASE_PATH + "/sign", json=json_ld_req.model_dump()
     )
 
@@ -114,7 +117,7 @@ async def test_sign_jsonld(
     json_ld_req.pub_did = None
     json_ld_req.verkey = None
 
-    jsonld_sign_response = await faber_indy_client.post(
+    jsonld_sign_response = await faber_anoncreds_client.post(
         JSONLD_BASE_PATH + "/sign", json=json_ld_req.model_dump()
     )
 
@@ -129,8 +132,8 @@ async def test_sign_jsonld(
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_verify_jsonld(
     alice_member_client: RichAsyncClient,
-    faber_indy_acapy_client: AcaPyClient,
-    faber_indy_client: RichAsyncClient,
+    faber_anoncreds_acapy_client: AcaPyClient,
+    faber_anoncreds_client: RichAsyncClient,
 ):
     jsonld_verify = JsonLdVerifyRequest(
         public_did="abcde",
@@ -150,11 +153,13 @@ async def test_verify_jsonld(
 
     # # Error invalid
     jsonld_verify.verkey = None
-    faber_pub_did = (await faber_indy_acapy_client.wallet.get_public_did()).result.did
+    faber_pub_did = (
+        await faber_anoncreds_acapy_client.wallet.get_public_did()
+    ).result.did
     jsonld_verify.public_did = faber_pub_did
 
     with pytest.raises(HTTPException) as exc:
-        await faber_indy_client.post(
+        await faber_anoncreds_client.post(
             JSONLD_BASE_PATH + "/verify", json=jsonld_verify.model_dump()
         )
 

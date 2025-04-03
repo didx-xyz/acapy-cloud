@@ -21,10 +21,10 @@ async def test_get_credentials(alice_member_client: RichAsyncClient):
     TestMode.regression_run in TestMode.fixture_params,
     reason="Don't delete credentials in regression run",
 )
-@pytest.mark.xdist_group(name="issuer_test_group_4")
+@pytest.mark.xdist_group(name="issuer_test_group")
 async def test_get_and_delete_credential_record(
     alice_member_client: RichAsyncClient,
-    issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+    issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
 ):
     credentials_response = await alice_member_client.get(WALLET_CREDENTIALS_PATH)
 
@@ -66,12 +66,12 @@ async def test_get_and_delete_credential_record(
     reason="Skipping due to regression run",
 )
 @pytest.mark.parametrize(
-    "issue_alice_many_indy_creds", [3], indirect=True
+    "issue_alice_many_anoncreds", [3], indirect=True
 )  # issue alice 3 creds
-@pytest.mark.xdist_group(name="issuer_test_group_4")
+@pytest.mark.xdist_group(name="issuer_test_group")
 async def test_get_credential_record_with_limit(
     alice_member_client: RichAsyncClient,
-    issue_alice_many_indy_creds,  # pylint: disable=unused-argument
+    issue_alice_many_anoncreds,  # pylint: disable=unused-argument
 ):
     valid_params = [
         {"limit": 1},
