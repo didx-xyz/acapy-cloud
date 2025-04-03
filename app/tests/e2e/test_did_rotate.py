@@ -19,12 +19,12 @@ CONNECTIONS_BASE_PATH = connections_router.prefix
 async def test_rotate_did(
     alice_member_client: RichAsyncClient,
     alice_acapy_client: AcaPyClient,
-    faber_indy_acapy_client: AcaPyClient,
+    faber_anoncreds_acapy_client: AcaPyClient,
     did_method: str,
 ):
     # First, create did-exchange connections between Alice and Faber:
     faber_public_did = await acapy_wallet.get_public_did(
-        controller=faber_indy_acapy_client
+        controller=faber_anoncreds_acapy_client
     )
 
     request_data = {"their_public_did": qualified_did_sov(faber_public_did.did)}
@@ -60,12 +60,12 @@ async def test_rotate_did(
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_hangup_did_rotation(
     alice_member_client: RichAsyncClient,
-    faber_indy_client: RichAsyncClient,
-    faber_indy_acapy_client: AcaPyClient,
+    faber_anoncreds_client: RichAsyncClient,
+    faber_anoncreds_acapy_client: AcaPyClient,
 ):
     # First, create did-exchange connections between Alice and Faber:
     faber_public_did = await acapy_wallet.get_public_did(
-        controller=faber_indy_acapy_client
+        controller=faber_anoncreds_acapy_client
     )
 
     request_data = {"their_public_did": qualified_did_sov(faber_public_did.did)}
@@ -84,7 +84,7 @@ async def test_hangup_did_rotation(
     )
 
     faber_event = await check_webhook_state(
-        faber_indy_client,
+        faber_anoncreds_client,
         topic="connections",
         state="completed",
         filter_map={"their_did": alice_did},
@@ -105,7 +105,7 @@ async def test_hangup_did_rotation(
         filter_map={"connection_id": alice_connection_id},
     )
     assert await check_webhook_state(
-        faber_indy_client,
+        faber_anoncreds_client,
         topic="connections",
         state="deleted",
         filter_map={"connection_id": faber_connection_id},
@@ -117,5 +117,7 @@ async def test_hangup_did_rotation(
     assert exc_info.value.status_code == 404
 
     with pytest.raises(HTTPException) as exc_info:
-        await faber_indy_client.get(f"{CONNECTIONS_BASE_PATH}/{faber_connection_id}")
+        await faber_anoncreds_client.get(
+            f"{CONNECTIONS_BASE_PATH}/{faber_connection_id}"
+        )
     assert exc_info.value.status_code == 404

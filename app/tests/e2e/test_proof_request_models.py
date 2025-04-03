@@ -26,7 +26,7 @@ VERIFIER_BASE_PATH = verifier_router.prefix
 )
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_proof_model_failures(
-    issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+    issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     acme_acapy_client: AcaPyClient,
     acme_and_alice_connection: AcmeAliceConnect,
     alice_member_client: RichAsyncClient,
@@ -41,7 +41,7 @@ async def test_proof_model_failures(
         connection_id=acme_connection_id,
         comment="Test proof",
         presentation_request=V20PresRequestByFormat(
-            indy={
+            anoncreds={
                 "name": name,
                 "version": version,
                 "requested_attributes": {
@@ -88,15 +88,14 @@ async def test_proof_model_failures(
                 f"{VERIFIER_BASE_PATH}/accept-request",
                 json={
                     "proof_id": alice_proof_exchange_id,
-                    "type": "indy",
-                    "indy_presentation_spec": {
+                    "type": "anoncreds",
+                    "anoncreds_presentation_spec": {
                         "requested_attributes": {
                             "THE_SPEED": {"cred_id": referent, "revealed": True}
                         },
                         "requested_predicates": {},
                         "self_attested_attributes": {},
                     },
-                    "dif_presentation_spec": {},
                 },
             )
             assert exc.value.status_code == 422

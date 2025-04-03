@@ -75,9 +75,9 @@ async def test_accept_invitation_oob(
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_oob_connect_via_public_did(
     bob_member_client: RichAsyncClient,
-    faber_indy_acapy_client: AcaPyClient,
+    faber_anoncreds_acapy_client: AcaPyClient,
 ):
-    faber_public_did = await faber_indy_acapy_client.wallet.get_public_did()
+    faber_public_did = await faber_anoncreds_acapy_client.wallet.get_public_did()
     connect_response = await bob_member_client.post(
         OOB_BASE_PATH + "/connect-public-did",
         json={"public_did": faber_public_did.result.did},
