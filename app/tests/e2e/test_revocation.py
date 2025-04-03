@@ -210,7 +210,6 @@ async def test_publish_all_revocations_for_rev_reg_id_indy(
     TestMode.regression_run in TestMode.fixture_params,
     reason=skip_regression_test_reason,
 )
-@pytest.mark.skip("TODO: Revocation record doesn't update to 'revoked' state")
 async def test_publish_all_revocations_for_rev_reg_id_anoncreds(
     faber_anoncreds_client: RichAsyncClient,
     revoke_alice_anoncreds: List[CredentialExchange],
@@ -243,7 +242,7 @@ async def publish_all_revocations_for_rev_reg_id(
 
     if credential_type == "anoncreds":
         # TODO: Remove this once anoncreds returns transaction id to be awaited
-        await asyncio.sleep(30)
+        await asyncio.sleep(10)
 
     await check_revocation_status(faber_client, revoke_alice_creds, "revoked")
 
