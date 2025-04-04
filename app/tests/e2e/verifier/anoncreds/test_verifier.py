@@ -755,7 +755,7 @@ async def test_regression_proof_valid_anoncreds_credential(
 
 @pytest.mark.anyio
 @pytest.mark.xdist_group(name="issuer_test_group_3")
-@pytest.mark.parametrize("value", ["44","99"])
+@pytest.mark.parametrize("value", ["44", "99"])
 async def test_restrictions_on_attr(
     issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     acme_and_alice_connection: AcmeAliceConnect,
@@ -770,9 +770,7 @@ async def test_restrictions_on_attr(
             "requested_attributes": {
                 "THE_SPEED": {
                     "name": "speed",
-                    "restrictions": [
-                        {"attr::age::value": value}
-                    ],
+                    "restrictions": [{"attr::age::value": value}],
                 }
             },
             "requested_predicates": {},
@@ -803,7 +801,9 @@ async def test_restrictions_on_attr(
             result = response.json()[0]
             print(result)
             assert "cred_info" in result
-            assert result["cred_info"]["referent"] == result["cred_info"]["credential_id"]
+            assert (
+                result["cred_info"]["referent"] == result["cred_info"]["credential_id"]
+            )
             assert [
                 attr
                 in [
