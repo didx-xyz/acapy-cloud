@@ -751,3 +751,79 @@ async def test_regression_proof_valid_anoncreds_credential(
     ).json()
 
     assert proof["verified"] is True
+
+
+@pytest.mark.anyio
+@pytest.mark.xdist_group(name="issuer_test_group_3")
+@pytest.mark.parametrize("value", ["44","99"])
+async def test_restrictions_on_attr(
+    issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+    acme_and_alice_connection: AcmeAliceConnect,
+    acme_client: RichAsyncClient,
+    alice_member_client: RichAsyncClient,
+    value: str,
+):
+    request_body = {
+        "type": "anoncreds",
+        "connection_id": acme_and_alice_connection.acme_connection_id,
+        "anoncreds_proof_request": {
+            "requested_attributes": {
+                "THE_SPEED": {
+                    "name": "speed",
+                    "restrictions": [
+                        {"attr::age::value": value}
+                    ],
+                }
+            },
+            "requested_predicates": {},
+        },
+    }
+    send_proof_response = await send_proof_request(acme_client, request_body)
+
+    try:
+        thread_id = send_proof_response["thread_id"]
+        assert thread_id
+
+        alice_exchange = await check_webhook_state(
+            client=alice_member_client,
+            topic="proofs",
+            state="request-received",
+            filter_map={
+                "thread_id": thread_id,
+            },
+        )
+
+        proof_id = alice_exchange["proof_id"]
+
+        response = await alice_member_client.get(
+            f"{VERIFIER_BASE_PATH}/proofs/{proof_id}/credentials",
+        )
+
+        if value == "44":
+            result = response.json()[0]
+            print(result)
+            assert "cred_info" in result
+            assert result["cred_info"]["referent"] == result["cred_info"]["credential_id"]
+            assert [
+                attr
+                in [
+                    "attrs",
+                    "cred_def_info",
+                    "referent",
+                    "credential_id",
+                    "interval",
+                    "presentation_referents",
+                ]
+                for attr in result["cred_info"]
+            ]
+            assert result["cred_info"]["attrs"]["age"] == value
+
+        else:
+            assert response.json() == []
+            # No credentials should be found with this restriction
+
+    finally:
+        # Clean up:
+        await acme_client.delete(
+            VERIFIER_BASE_PATH + f"/proofs/{send_proof_response['proof_id']}",
+        )
