@@ -18,7 +18,7 @@ httpx = "~0.28.0"
 loguru = "~0.7.2"
 nats-py = { extras = ["nkeys"], version = "^2.10.0" }
 orjson = "~3.10.7"
-pydantic = "~2.11.1"
+pydantic = "~2.11.2"
 scalar-fastapi = "^1.0.3"
 sse-starlette = "~2.2.1"
 tenacity = "^9.0.0"
