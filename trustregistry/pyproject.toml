@@ -30,7 +30,7 @@ isort = "~6.0.0"
 pre-commit = "~4.2.0"
 pylint = "~3.3.0"
 pytest = "~8.3.2"
-pytest-cov = "~6.0.0"
+pytest-cov = "~6.1.0"
 pytest-mock = "~3.14.0"
 
 [build-system]
