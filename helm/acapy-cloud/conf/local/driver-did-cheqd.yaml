@@ -27,5 +27,5 @@ startupProbe:
     port: 3000
 
 env:
-  FEE_PAYER_TESTNET_MNEMONIC: "testnet fee payer mnemonic"
-  # FEE_PAYER_MAINNET_MNEMONIC: "mainnet fee payer mnemonic"
+  FEE_PAYER_TESTNET_MNEMONIC: ""  # Cheqd did-registrar uses testnet faucet by default
+  # FEE_PAYER_MAINNET_MNEMONIC: "..."
