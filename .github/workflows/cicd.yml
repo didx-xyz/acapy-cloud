@@ -519,7 +519,7 @@ jobs:
     steps:
       - name: Log in to DIDx DevOps
         id: devops_login
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ secrets.DEVOPS_APP_ID }}
           private-key: ${{ secrets.DEVOPS_PRIVATE_KEY }}
