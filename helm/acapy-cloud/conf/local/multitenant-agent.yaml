@@ -191,8 +191,8 @@ env:
   ACAPY_WALLET_STORAGE_TYPE: postgres_storage
   ACAPY_AUTO_PROVISION: true
   # Ledger
-  # ACAPY_GENESIS_URL: http://ledger-browser:8000/genesis
-  ACAPY_NO_LEDGER: true
+  ACAPY_GENESIS_URL: http://ledger-browser:8000/genesis
+  # ACAPY_NO_LEDGER: true  # TODO: disable ledger when switching to did:cheqd
 
   # Multi-tenant Configuration
   ACAPY_MULTITENANT: true
