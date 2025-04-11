@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir poetry==${POETRY_VERSION}
 ENV POETRY_CACHE_DIR=/tmp/.cache/pypoetry
 RUN poetry config cache-dir "$POETRY_CACHE_DIR" && \
   poetry config virtualenvs.path "$POETRY_CACHE_DIR/virtualenvs" && \
-  poetry install --only waypoint
+  poetry install --only main,waypoint
 
 COPY waypoint /waypoint
 COPY shared /shared
