@@ -3,8 +3,8 @@ FROM python:3.12-slim
 WORKDIR /cloudapi-tests
 
 # Copy the pyproject.toml and lock file
-COPY pyproject.toml app/
-COPY poetry.lock app/
+COPY pyproject.toml cloudapi-tests/
+COPY poetry.lock cloudapi-tests/
 
 # Install all dependencies
 ARG POETRY_VERSION=2.1.1
