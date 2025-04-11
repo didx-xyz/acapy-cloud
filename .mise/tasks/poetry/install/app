@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-# mise description="Poetry Install App dependencies"
-
-echo "Installing App dependencies"
-
-cd ./app
-poetry install

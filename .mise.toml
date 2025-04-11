@@ -34,12 +34,12 @@ POETRY_VIRTUALENVS_CREATE = "false"
 _.python.venv = { path = ".venv", create = true }
 
 [tasks."poetry:install"]
-description = "Poetry Install dependencies for all submodules"
-depends = ["poetry:install:*"]
+description = "Poetry Install all dependencies"
+run = "poetry install"
 
 [tasks."poetry:update"]
-description = "Poetry Update lockfiles for all submodules"
-depends = ["poetry:update:*"]
+description = "Poetry Update lock file"
+run = "poetry lock --regenerate"
 
 [tasks."tilt:up"]
 description = "Start Tilt"

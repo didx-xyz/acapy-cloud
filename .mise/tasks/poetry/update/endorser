@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-# mise description="Poetry Update Endorser lockfile"
-
-echo "Updating Endorser lockfile"
-
-cd ./endorser
-poetry lock

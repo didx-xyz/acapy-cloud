@@ -3,6 +3,7 @@
 
 # Except the following
 !pyproject.toml
+!poetry.lock
 !app/
 !shared/
 !endorser/

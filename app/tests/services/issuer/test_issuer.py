@@ -269,10 +269,7 @@ async def test_request_credential(
 
 
 @pytest.mark.anyio
-async def test_request_credential_x_no_schema_cred_def(
-    mock_agent_controller: AcaPyClient,
-    mock_tenant_auth: AcaPyAuth,
-):
+async def test_request_credential_x_no_schema_cred_def(mock_tenant_auth: AcaPyAuth):
     v2_record = MagicMock(spec=CredentialExchange)
 
     v2_record.credential_definition_id = None
