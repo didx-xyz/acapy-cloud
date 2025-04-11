@@ -1,15 +1,79 @@
-[tool.poetry]
+[project]
 name = "acapy-cloud"
-version = "4.2.0"
+version = "5.0.0rc0"
 description = "Main project configuration for acapy-cloud"
 authors = [
-  "Mourits de Beer <mourits.debeer@didx.co.za>",
-  "Cloete du Preez <cloete.dupreez@didx.co.za>",
+  { name = "Mourits de Beer", email = "mourits.debeer@didx.co.za" },
+  { name = "Cloete du Preez", email = "cloete.dupreez@didx.co.za" },
 ]
+readme = "README.md"
+
+[tool.poetry]
 package-mode = false
+
+[tool.poetry.dependencies]
+python = "~3.12.8"
+
+fastapi = "~0.115.10"
+httpx = "~0.28.0"
+loguru = "~0.7.2"
+orjson = "~3.10.7"
+pydantic = "~2.11.1"
+scalar-fastapi = "^1.0.3"
+uvicorn = "~0.34.0"
+uvloop = "^0.21.0"
+
+[tool.poetry.group.app.dependencies]
+aiohttp = "~3.11.7"
+aiocache = "~0.12.0"
+aries-cloudcontroller = "==1.2.1.post20250327"
+# aries-cloudcontroller = { git = "https://github.com/didx-xyz/aries-cloudcontroller-python.git", rev = "release-1.2.1-20250327" }
+base58 = "~2.1.1"
+pyjwt = "~2.10.0"
+PyYAML = "~6.0.2"
+uuid_utils = "^0.10.0"
+
+[tool.poetry.group.endorser.dependencies]
+aries-cloudcontroller = "==1.2.1.post20250327"
+# aries-cloudcontroller = { git = "https://github.com/didx-xyz/aries-cloudcontroller-python.git", rev = "release-1.2.1-20250327" }
+dependency-injector = "^4.46.0"
+nats-py = { extras = ["nkeys"], version = "^2.10.0" }
+tenacity = "^9.1.0"
+
+[tool.poetry.group.trust-registry.dependencies]
+alembic = "~1.15.0"
+psycopg2-binary = "~2.9.6"
+sqlalchemy = "~2.0.40"
+
+[tool.poetry.group.waypoint.dependencies]
+aiohttp = "~3.11.7"
+dependency-injector = "^4.46.0"
+nats-py = { extras = ["nkeys"], version = "^2.10.0" }
+sse-starlette = "~2.2.1"
+tenacity = "^9.1.0"
+uuid_utils = "^0.10.0"
+
+[tool.poetry.group.dev.dependencies]
+anyio = "~4.9.0"
+black = "~25.1.0"
+isort = "~6.0.0"
+pre-commit = "~4.2.0"
+pylint = "~3.3.0"
+pytest = "~8.3.2"
+pytest-cov = "~6.1.0"
+pytest-mock = "~3.14.0"
+pytest-xdist = "^3.6.1"
 
 [tool.coverage.run]
 omit = ["*/tests/*"]
 
 [tool.isort]
 profile = "black"
+
+[tool.pytest.ini_options]
+addopts = "--junitxml=junit.xml -p no:cacheprovider --cov-report=xml --cov-report=term"
+junit_family = "xunit2"
+
+[build-system]
+requires = ["poetry-core>=2.1"]
+build-backend = "poetry.core.masonry.api"
