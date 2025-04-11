@@ -3,7 +3,6 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from aries_cloudcontroller import AcaPyClient, ConnRecord, IndyCredInfo, IndyCredPrecis
 from fastapi.testclient import TestClient
-from mockito import verify, when
 from pytest_mock import MockerFixture
 
 import app.routes.verifier as test_module
@@ -14,7 +13,6 @@ from app.models.verifier import CredInfo, CredPrecis
 from app.routes.verifier import acapy_auth_from_header, get_credentials_by_proof_id
 from app.services.verifier.acapy_verifier_v2 import VerifierV2
 from app.tests.services.verifier.utils import indy_pres_spec, sample_indy_proof_request
-from app.tests.util.mock import to_async
 from app.util import acapy_verifier_utils
 from shared.models.presentation_exchange import PresentationExchange
 from shared.models.trustregistry import Actor
@@ -51,22 +49,11 @@ async def test_send_proof_request_v2(
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
 ):
-    # V2
-    when(VerifierV2).send_proof_request(...).thenReturn(
-        to_async(presentation_exchange_record_2)
-    )
+    mock_agent_controller.connection.get_connection.return_value = conn_record
 
-    when(mock_agent_controller.connection).get_connection(conn_id="abcde").thenReturn(
-        to_async(conn_record)
+    mock_agent_controller.wallet.get_public_did.side_effect = CloudApiException(
+        "No did"
     )
-
-    when(mock_agent_controller.wallet).get_public_did().thenRaise(
-        CloudApiException("No did")
-    )
-
-    when(acapy_verifier_utils).get_actor(
-        did="did:key:z6MkvVT4kkAmhTb9srDHScsL1q7pVKt9cpUJUah2pKuYh4As"
-    ).thenReturn(to_async(actor))
 
     send_proof_request = test_module.SendProofRequest(
         connection_id="abcde",
@@ -78,6 +65,10 @@ async def test_send_proof_request_v2(
         "client_from_auth",
         return_value=mock_context_managed_controller(mock_agent_controller),
     )
+    mocker.patch.object(
+        VerifierV2, "send_proof_request", return_value=presentation_exchange_record_2
+    )
+    mocker.patch.object(acapy_verifier_utils, "get_actor", return_value=actor)
 
     result = await test_module.send_proof_request(
         body=send_proof_request,
@@ -85,7 +76,7 @@ async def test_send_proof_request_v2(
     )
 
     assert result is presentation_exchange_record_2
-    verify(VerifierV2).send_proof_request(
+    VerifierV2.send_proof_request.assert_called_once_with(
         controller=mock_agent_controller, send_proof_request=send_proof_request
     )
 
@@ -97,8 +88,9 @@ async def test_send_proof_request_v2_exception(
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
 ):
-    # V2
-    when(VerifierV2).send_proof_request(...).thenRaise(CloudApiException("ERROR"))
+    mocker.patch.object(
+        VerifierV2, "send_proof_request", side_effect=CloudApiException("ERROR")
+    )
     mocker.patch.object(test_module, "assert_valid_verifier", return_value=None)
 
     send_proof_request = test_module.SendProofRequest(
@@ -127,8 +119,7 @@ async def test_send_proof_request_v2_no_response(
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
 ):
-    # V2
-    when(VerifierV2).send_proof_request(...).thenReturn(to_async(None))
+    mocker.patch.object(VerifierV2, "send_proof_request", return_value=None)
 
     mocker.patch.object(
         test_module,
@@ -152,15 +143,18 @@ async def test_send_proof_request_v2_no_response(
     )
 
     assert result is None
-    verify(VerifierV2).send_proof_request(
+    VerifierV2.send_proof_request.assert_called_once_with(
         controller=mock_agent_controller, send_proof_request=send_proof_request
     )
 
 
 @pytest.mark.anyio
-async def test_create_proof_request(mock_tenant_auth: AcaPyAuth):
-    when(VerifierV2).create_proof_request(...).thenReturn(
-        to_async(presentation_exchange_record_2)
+async def test_create_proof_request(
+    mock_tenant_auth: AcaPyAuth,
+    mocker: MockerFixture,
+):
+    mocker.patch.object(
+        VerifierV2, "create_proof_request", return_value=presentation_exchange_record_2
     )
     result = await test_module.create_proof_request(
         body=test_module.CreateProofRequest(
@@ -173,8 +167,13 @@ async def test_create_proof_request(mock_tenant_auth: AcaPyAuth):
 
 
 @pytest.mark.anyio
-async def test_create_proof_request_exception(mock_tenant_auth: AcaPyAuth):
-    when(VerifierV2).create_proof_request(...).thenRaise(CloudApiException("ERROR"))
+async def test_create_proof_request_exception(
+    mock_tenant_auth: AcaPyAuth,
+    mocker: MockerFixture,
+):
+    mocker.patch.object(
+        VerifierV2, "create_proof_request", side_effect=CloudApiException("ERROR")
+    )
     with pytest.raises(CloudApiException, match="500: ERROR") as exc:
         await test_module.create_proof_request(
             body=test_module.CreateProofRequest(
@@ -187,8 +186,10 @@ async def test_create_proof_request_exception(mock_tenant_auth: AcaPyAuth):
 
 
 @pytest.mark.anyio
-async def test_create_proof_request_no_result(mock_tenant_auth: AcaPyAuth):
-    when(VerifierV2).create_proof_request(...).thenReturn(to_async(None))
+async def test_create_proof_request_no_result(
+    mock_tenant_auth: AcaPyAuth, mocker: MockerFixture
+):
+    mocker.patch.object(VerifierV2, "create_proof_request", return_value=None)
     result = await test_module.create_proof_request(
         body=test_module.CreateProofRequest(
             indy_proof_request=sample_indy_proof_request(),
@@ -206,12 +207,11 @@ async def test_accept_proof_request_v2(
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
 ):
-    # V2
-    when(VerifierV2).accept_proof_request(...).thenReturn(
-        to_async(presentation_exchange_record_2)
+    mocker.patch.object(
+        VerifierV2, "accept_proof_request", return_value=presentation_exchange_record_2
     )
-    when(VerifierV2).get_proof_record(...).thenReturn(
-        to_async(presentation_exchange_record_2)
+    mocker.patch.object(
+        VerifierV2, "get_proof_record", return_value=presentation_exchange_record_2
     )
 
     presentation = test_module.AcceptProofRequest(
@@ -233,7 +233,7 @@ async def test_accept_proof_request_v2(
     )
 
     assert result is presentation_exchange_record_2
-    verify(VerifierV2).accept_proof_request(...)
+    VerifierV2.accept_proof_request.assert_called_once()
 
 
 @pytest.mark.anyio
@@ -243,10 +243,11 @@ async def test_accept_proof_request_v2_exception(
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
 ):
-    # V2
-    when(VerifierV2).accept_proof_request(...).thenRaise(CloudApiException("ERROR"))
-    when(VerifierV2).get_proof_record(...).thenReturn(
-        to_async(presentation_exchange_record_2)
+    mocker.patch.object(
+        VerifierV2, "accept_proof_request", side_effect=CloudApiException("ERROR")
+    )
+    mocker.patch.object(
+        VerifierV2, "get_proof_record", return_value=presentation_exchange_record_2
     )
 
     presentation = test_module.AcceptProofRequest(
@@ -279,10 +280,9 @@ async def test_accept_proof_request_v2_no_result(
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
 ):
-    # V2
-    when(VerifierV2).accept_proof_request(...).thenReturn(to_async(None))
-    when(VerifierV2).get_proof_record(...).thenReturn(
-        to_async(presentation_exchange_record_2)
+    mocker.patch.object(VerifierV2, "accept_proof_request", return_value=None)
+    mocker.patch.object(
+        VerifierV2, "get_proof_record", return_value=presentation_exchange_record_2
     )
 
     presentation = test_module.AcceptProofRequest(
@@ -309,7 +309,7 @@ async def test_accept_proof_request_v2_no_result(
     )
 
     assert result is None
-    verify(VerifierV2).accept_proof_request(...)
+    VerifierV2.accept_proof_request.assert_called_once()
 
 
 @pytest.mark.anyio
@@ -321,12 +321,16 @@ async def test_accept_proof_request_v2_no_connection(
 ):
     presentation_exchange_record_no_conn = presentation_exchange_record_2.model_copy()
     presentation_exchange_record_no_conn.connection_id = None
-    # V2
-    when(VerifierV2).accept_proof_request(...).thenReturn(
-        to_async(presentation_exchange_record_no_conn)
+
+    mocker.patch.object(
+        VerifierV2,
+        "accept_proof_request",
+        return_value=presentation_exchange_record_no_conn,
     )
-    when(VerifierV2).get_proof_record(...).thenReturn(
-        to_async(presentation_exchange_record_no_conn)
+    mocker.patch.object(
+        VerifierV2,
+        "get_proof_record",
+        return_value=presentation_exchange_record_no_conn,
     )
 
     presentation = test_module.AcceptProofRequest(
@@ -349,7 +353,7 @@ async def test_accept_proof_request_v2_no_connection(
     )
 
     assert result is presentation_exchange_record_no_conn
-    verify(VerifierV2).accept_proof_request(...)
+    VerifierV2.accept_proof_request.assert_called_once()
 
 
 @pytest.mark.anyio
@@ -369,13 +373,14 @@ async def test_reject_proof_request(
         proof_id="v2-1234", problem_report="rejected"
     )
 
-    when(VerifierV2).reject_proof_request(
-        controller=mock_agent_controller, reject_proof_request=proof_request_v2
-    ).thenReturn(to_async(None))
+    mocker.patch.object(
+        VerifierV2, "reject_proof_request", return_value=proof_request_v2
+    )
     presentation_exchange_record_2.state = "request-received"
-    when(VerifierV2).get_proof_record(
-        controller=mock_agent_controller, proof_id=proof_request_v2.proof_id
-    ).thenReturn(to_async(presentation_exchange_record_2))
+
+    mocker.patch.object(
+        VerifierV2, "get_proof_record", return_value=presentation_exchange_record_2
+    )
 
     result = await test_module.reject_proof_request(
         body=test_module.RejectProofRequest(
@@ -385,10 +390,10 @@ async def test_reject_proof_request(
     )
 
     assert result is None
-    verify(VerifierV2).reject_proof_request(
+    VerifierV2.reject_proof_request.assert_called_once_with(
         controller=mock_agent_controller, reject_proof_request=proof_request_v2
     )
-    verify(VerifierV2).get_proof_record(
+    VerifierV2.get_proof_record.assert_called_once_with(
         controller=mock_agent_controller, proof_id=proof_request_v2.proof_id
     )
 
@@ -411,13 +416,16 @@ async def test_reject_proof_request_bad_state(
     )
 
     presentation_exchange_record_2.state = "done"
-    when(VerifierV2).get_proof_record(
-        controller=mock_agent_controller, proof_id=proof_request_v2.proof_id
-    ).thenReturn(to_async(presentation_exchange_record_2))
+    mocker.patch.object(
+        VerifierV2, "get_proof_record", return_value=presentation_exchange_record_2
+    )
 
     with pytest.raises(
         CloudApiException,
-        match="400: Proof record must be in state `request-received` to reject; record has state: `done`.",
+        match=(
+            "400: Proof record must be in state `request-received` to reject; "
+            "record has state: `done`."
+        ),
     ):
         await test_module.reject_proof_request(
             body=test_module.RejectProofRequest(
@@ -426,7 +434,7 @@ async def test_reject_proof_request_bad_state(
             auth=mock_tenant_auth,
         )
 
-    verify(VerifierV2).get_proof_record(
+    VerifierV2.get_proof_record.assert_called_once_with(
         controller=mock_agent_controller, proof_id=proof_request_v2.proof_id
     )
 
@@ -444,14 +452,12 @@ async def test_delete_proof(
         return_value=mock_context_managed_controller(mock_agent_controller),
     )
 
-    when(VerifierV2).delete_proof(
-        controller=mock_agent_controller, proof_id="v2-1234"
-    ).thenReturn(to_async())
+    mocker.patch.object(VerifierV2, "delete_proof", return_value=None)
 
     result = await test_module.delete_proof(proof_id="v2-1234", auth=mock_tenant_auth)
 
     assert result is None
-    verify(VerifierV2).delete_proof(
+    VerifierV2.delete_proof.assert_called_once_with(
         controller=mock_agent_controller, proof_id="v2-1234"
     )
 
@@ -469,9 +475,9 @@ async def test_delete_proof_exception(
         return_value=mock_context_managed_controller(mock_agent_controller),
     )
 
-    when(VerifierV2).delete_proof(
-        controller=mock_agent_controller, proof_id="v2-1234"
-    ).thenRaise(CloudApiException("ERROR"))
+    mocker.patch.object(
+        VerifierV2, "delete_proof", side_effect=CloudApiException("ERROR")
+    )
 
     with pytest.raises(CloudApiException, match="500: ERROR") as exc:
         await test_module.delete_proof(proof_id="v2-1234", auth=mock_tenant_auth)
@@ -492,18 +498,16 @@ async def test_get_proof_record(
         return_value=mock_context_managed_controller(mock_agent_controller),
     )
 
-    # V2
-    when(VerifierV2).get_proof_record(
-        controller=mock_agent_controller,
-        proof_id="v2-abcd",
-    ).thenReturn(to_async(presentation_exchange_record_2))
+    mocker.patch.object(
+        VerifierV2, "get_proof_record", return_value=presentation_exchange_record_2
+    )
 
     result = await test_module.get_proof_record(
         proof_id="v2-abcd", auth=mock_tenant_auth
     )
 
     assert result == presentation_exchange_record_2
-    verify(VerifierV2).get_proof_record(
+    VerifierV2.get_proof_record.assert_called_once_with(
         controller=mock_agent_controller, proof_id="v2-abcd"
     )
 
@@ -521,10 +525,9 @@ async def test_get_proof_record_exception(
         return_value=mock_context_managed_controller(mock_agent_controller),
     )
 
-    # V2
-    when(VerifierV2).get_proof_record(
-        controller=mock_agent_controller, proof_id="v2-abcd"
-    ).thenRaise(CloudApiException("ERROR"))
+    mocker.patch.object(
+        VerifierV2, "get_proof_record", side_effect=CloudApiException("ERROR")
+    )
 
     with pytest.raises(CloudApiException, match="500: ERROR") as exc:
         await test_module.get_proof_record(proof_id="v2-abcd", auth=mock_tenant_auth)
@@ -545,11 +548,7 @@ async def test_get_proof_record_no_result(
         return_value=mock_context_managed_controller(mock_agent_controller),
     )
 
-    # V2
-    when(VerifierV2).get_proof_record(
-        controller=mock_agent_controller,
-        proof_id="v2-abcd",
-    ).thenReturn(to_async(None))
+    mocker.patch.object(VerifierV2, "get_proof_record", return_value=None)
 
     result = await test_module.get_proof_record(
         proof_id="v2-abcd",
@@ -557,7 +556,7 @@ async def test_get_proof_record_no_result(
     )
 
     assert result is None
-    verify(VerifierV2).get_proof_record(
+    VerifierV2.get_proof_record.assert_called_once_with(
         controller=mock_agent_controller, proof_id="v2-abcd"
     )
 
@@ -574,7 +573,27 @@ async def test_get_proof_records(
         "client_from_auth",
         return_value=mock_context_managed_controller(mock_agent_controller),
     )
-    with when(VerifierV2).get_proof_records(
+
+    mocker.patch.object(
+        VerifierV2, "get_proof_records", return_value=[presentation_exchange_record_2]
+    )
+
+    result = await test_module.get_proof_records(
+        auth=mock_tenant_auth,
+        limit=100,
+        offset=0,
+        order_by="id",
+        descending=True,
+        connection_id=None,
+        role=None,
+        state=None,
+        thread_id=None,
+    )
+
+    assert result == [
+        presentation_exchange_record_2,
+    ]
+    VerifierV2.get_proof_records.assert_called_once_with(
         controller=mock_agent_controller,
         limit=100,
         offset=0,
@@ -584,33 +603,7 @@ async def test_get_proof_records(
         role=None,
         state=None,
         thread_id=None,
-    ).thenReturn(to_async([presentation_exchange_record_2])):
-        result = await test_module.get_proof_records(
-            auth=mock_tenant_auth,
-            limit=100,
-            offset=0,
-            order_by="id",
-            descending=True,
-            connection_id=None,
-            role=None,
-            state=None,
-            thread_id=None,
-        )
-
-        assert result == [
-            presentation_exchange_record_2,
-        ]
-        verify(VerifierV2).get_proof_records(
-            controller=mock_agent_controller,
-            limit=100,
-            offset=0,
-            order_by="id",
-            descending=True,
-            connection_id=None,
-            role=None,
-            state=None,
-            thread_id=None,
-        )
+    )
 
 
 @pytest.mark.anyio
@@ -625,29 +618,23 @@ async def test_get_proof_records_exception(
         "client_from_auth",
         return_value=mock_context_managed_controller(mock_agent_controller),
     )
-    with when(VerifierV2).get_proof_records(
-        controller=mock_agent_controller,
-        limit=50,
-        offset=0,
-        order_by="id",
-        descending=True,
-        connection_id=None,
-        role=None,
-        state=None,
-        thread_id=None,
-    ).thenRaise(CloudApiException("ERROR")):
-        with pytest.raises(CloudApiException, match="500: ERROR"):
-            await test_module.get_proof_records(
-                auth=mock_tenant_auth,
-                limit=50,
-                offset=0,
-                order_by="id",
-                descending=True,
-                connection_id=None,
-                role=None,
-                state=None,
-                thread_id=None,
-            )
+
+    mocker.patch.object(
+        VerifierV2, "get_proof_records", side_effect=CloudApiException("ERROR")
+    )
+
+    with pytest.raises(CloudApiException, match="500: ERROR"):
+        await test_module.get_proof_records(
+            auth=mock_tenant_auth,
+            limit=50,
+            offset=0,
+            order_by="id",
+            descending=True,
+            connection_id=None,
+            role=None,
+            state=None,
+            thread_id=None,
+        )
 
 
 @pytest.mark.anyio
@@ -662,7 +649,23 @@ async def test_get_proof_records_no_result(
         "client_from_auth",
         return_value=mock_context_managed_controller(mock_agent_controller),
     )
-    with when(VerifierV2).get_proof_records(
+
+    mocker.patch.object(VerifierV2, "get_proof_records", return_value=None)
+
+    result = await test_module.get_proof_records(
+        auth=mock_tenant_auth,
+        limit=100,
+        offset=0,
+        order_by="id",
+        descending=True,
+        connection_id=None,
+        role=None,
+        state=None,
+        thread_id=None,
+    )
+
+    assert result is None
+    VerifierV2.get_proof_records.assert_called_once_with(
         controller=mock_agent_controller,
         limit=100,
         offset=0,
@@ -672,31 +675,7 @@ async def test_get_proof_records_no_result(
         role=None,
         state=None,
         thread_id=None,
-    ).thenReturn(to_async(None)):
-        result = await test_module.get_proof_records(
-            auth=mock_tenant_auth,
-            limit=100,
-            offset=0,
-            order_by="id",
-            descending=True,
-            connection_id=None,
-            role=None,
-            state=None,
-            thread_id=None,
-        )
-
-        assert result is None
-        verify(VerifierV2).get_proof_records(
-            controller=mock_agent_controller,
-            limit=100,
-            offset=0,
-            order_by="id",
-            descending=True,
-            connection_id=None,
-            role=None,
-            state=None,
-            thread_id=None,
-        )
+    )
 
 
 @pytest.mark.anyio
@@ -731,14 +710,9 @@ async def test_get_credentials_by_proof_id(
         for cred in cred_precis
     ]
 
-    # V2
-    when(VerifierV2).get_credentials_by_proof_id(
-        controller=mock_agent_controller,
-        proof_id="v2-abcd",
-        referent=None,
-        limit=100,
-        offset=0,
-    ).thenReturn(to_async(cred_precis))
+    mocker.patch.object(
+        VerifierV2, "get_credentials_by_proof_id", return_value=cred_precis
+    )
 
     result = await test_module.get_credentials_by_proof_id(
         proof_id="v2-abcd",
@@ -749,7 +723,7 @@ async def test_get_credentials_by_proof_id(
     )
 
     assert result == returned_cred_precis
-    verify(VerifierV2).get_credentials_by_proof_id(
+    VerifierV2.get_credentials_by_proof_id.assert_called_once_with(
         controller=mock_agent_controller,
         proof_id="v2-abcd",
         referent=None,
@@ -771,14 +745,11 @@ async def test_get_credentials_by_proof_id_exception(
         return_value=mock_context_managed_controller(mock_agent_controller),
     )
 
-    # V2
-    when(VerifierV2).get_credentials_by_proof_id(
-        controller=mock_agent_controller,
-        proof_id="v2-abcd",
-        referent=None,
-        limit=100,
-        offset=0,
-    ).thenRaise(CloudApiException("ERROR"))
+    mocker.patch.object(
+        VerifierV2,
+        "get_credentials_by_proof_id",
+        side_effect=CloudApiException("ERROR"),
+    )
 
     with pytest.raises(CloudApiException, match="500: ERROR"):
         await test_module.get_credentials_by_proof_id(
@@ -837,7 +808,8 @@ async def test_get_credentials_by_proof_id_with_limit_offset():
             offset=1,
         )
 
-        mock_aries_controller.present_proof_v2_0.get_matching_credentials.assert_called_once_with(
+        present_proof_v2_0 = mock_aries_controller.present_proof_v2_0
+        present_proof_v2_0.get_matching_credentials.assert_called_once_with(
             pres_ex_id="abcd",
             referent=None,
             limit=2,
