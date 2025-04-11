@@ -1,105 +1,18 @@
 import asyncio
-import re
-from typing import List, Optional
+from typing import List
 
 import pytest
 from fastapi import HTTPException
 
-from app.models.connections import AcceptInvitation, CreateInvitation
 from app.routes.connections import router
 from app.tests.util.connections import BobAliceConnect, create_bob_alice_connection
 from app.tests.util.regression_testing import TestMode
-from app.tests.util.webhooks import check_webhook_state
 from shared import RichAsyncClient
 
 CONNECTIONS_BASE_PATH = router.prefix
 
 
-@pytest.mark.anyio
-@pytest.mark.parametrize(
-    "alias,multi_use,use_public_did",
-    [
-        (None, False, False),
-        ("alias", False, False),
-        ("alias", True, False),
-        ("alias", False, True),
-        ("alias", True, True),
-    ],
-)
-async def test_create_invitation_no_public_did(
-    bob_member_client: RichAsyncClient,  # bob has no public did
-    alias: Optional[str],
-    multi_use: bool,
-    use_public_did: bool,
-):
-    invite_json = CreateInvitation(
-        alias=alias, multi_use=multi_use, use_public_did=use_public_did
-    ).model_dump()
-
-    if use_public_did:
-        with pytest.raises(HTTPException) as exc_info:
-            # regular holders cannot `use_public_did` as they do not have a public did
-            await bob_member_client.post(
-                f"{CONNECTIONS_BASE_PATH}/create-invitation", json=invite_json
-            )
-        assert exc_info.value.status_code == 400
-        assert (
-            exc_info.value.detail
-            == """{"detail":"Cannot create public invitation with no public DID."}"""
-        )
-    else:
-        response = await bob_member_client.post(
-            f"{CONNECTIONS_BASE_PATH}/create-invitation", json=invite_json
-        )
-        assert response.status_code == 200
-
-        invitation = response.json()
-
-        assert invitation["connection_id"] is not None
-        assert isinstance(invitation["invitation"], dict)
-        for key in ["@id", "@type", "recipientKeys", "serviceEndpoint"]:
-            assert key in invitation["invitation"]
-        assert re.match(r"^http(s)?://", invitation["invitation_url"])
-
-
 expected_keys = ("connection_id", "state", "created_at", "updated_at", "invitation_key")
-
-
-@pytest.mark.anyio
-async def test_accept_invitation(
-    bob_member_client: RichAsyncClient,
-    alice_member_client: RichAsyncClient,
-):
-    alias = "test_alias"
-    invitation_response = await bob_member_client.post(
-        f"{CONNECTIONS_BASE_PATH}/create-invitation"
-    )
-    invitation = invitation_response.json()
-
-    accept_invite_json = AcceptInvitation(
-        alias=alias,
-        invitation=invitation["invitation"],
-    ).model_dump()
-
-    accept_response = await alice_member_client.post(
-        f"{CONNECTIONS_BASE_PATH}/accept-invitation",
-        json=accept_invite_json,
-    )
-    connection_record = accept_response.json()
-
-    for key in expected_keys:
-        assert key in connection_record
-    assert connection_record["state"] == "request-sent"
-    assert connection_record["alias"] == alias
-
-    assert await check_webhook_state(
-        client=alice_member_client,
-        topic="connections",
-        state="completed",
-        filter_map={
-            "connection_id": connection_record["connection_id"],
-        },
-    )
 
 
 @pytest.mark.anyio

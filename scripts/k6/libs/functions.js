@@ -204,7 +204,7 @@ export function createIssuerTenant(bearerToken, walletName) {
 }
 
 export function createInvitation(bearerToken, issuerAccessToken) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/connections/create-invitation`;
+  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/oob/create-invitation`;
   const params = {
     headers: {
       Authorization: `Bearer ${bearerToken}`,
@@ -272,7 +272,7 @@ export function getIssuerConnectionId(issuerAccessToken, holderDid) {
 }
 
 export function acceptInvitation(holderAccessToken, invitationObj) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/connections/accept-invitation`;
+  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/oob/accept-invitation`;
   const params = {
     headers: {
       "x-api-key": holderAccessToken,
