@@ -3,5 +3,4 @@
 
 echo "Installing Endorser dependencies"
 
-cd ./endorser
-poetry install
+poetry install --with endorser,dev

@@ -3,5 +3,4 @@
 
 echo "Installing App dependencies"
 
-cd ./app
-poetry install
+poetry install --with app,dev

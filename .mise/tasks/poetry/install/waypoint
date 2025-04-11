@@ -3,5 +3,4 @@
 
 echo "Installing Waypoint dependencies"
 
-cd ./waypoint
-poetry install
+poetry install --with waypoint,dev

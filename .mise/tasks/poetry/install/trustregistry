@@ -3,5 +3,4 @@
 
 echo "Installing Trust Registry dependencies"
 
-cd ./trustregistry
-poetry install
+poetry install --with trust-registry,dev
