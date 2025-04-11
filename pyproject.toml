@@ -19,6 +19,7 @@ httpx = "~0.28.0"
 loguru = "~0.7.2"
 orjson = "~3.10.7"
 pydantic = "~2.11.1"
+PyYAML = "~6.0.2"
 scalar-fastapi = "^1.0.3"
 uvicorn = "~0.34.0"
 uvloop = "^0.21.0"
@@ -30,7 +31,6 @@ aries-cloudcontroller = "==1.2.1.post20250327"
 # aries-cloudcontroller = { git = "https://github.com/didx-xyz/aries-cloudcontroller-python.git", rev = "release-1.2.1-20250327" }
 base58 = "~2.1.1"
 pyjwt = "~2.10.0"
-PyYAML = "~6.0.2"
 uuid_utils = "^0.10.0"
 
 [tool.poetry.group.endorser.dependencies]
