@@ -70,8 +70,8 @@ jobs:
           _.python.venv = { path = ".venv", create = true }
 
           [tasks."poetry:install"]
-          description = "Poetry Install dependencies for all submodules"
-          depends = ["poetry:install:*"]
+          description = "Poetry Install dependencies"
+          run = "poetry install"
           EOF
 
       - name: Cache Python venv
