@@ -67,34 +67,38 @@ def mock_context_managed_controller():
 
 @pytest.fixture(scope="session")
 def mock_governance_auth() -> AcaPyAuthVerified:
-    auth = Mock(spec=AcaPyAuthVerified)
-    auth.role = Role.GOVERNANCE
-    auth.token = GOVERNANCE_AGENT_API_KEY
-    auth.wallet_id = GOVERNANCE_LABEL
+    auth = AcaPyAuthVerified(
+        role=Role.GOVERNANCE,
+        token=GOVERNANCE_AGENT_API_KEY,
+        wallet_id=GOVERNANCE_LABEL,
+    )
     return auth
 
 
 @pytest.fixture
 def mock_admin_auth() -> AcaPyAuthVerified:
-    auth = Mock(spec=AcaPyAuthVerified)
-    auth.role = Role.TENANT_ADMIN
-    auth.token = GOVERNANCE_AGENT_API_KEY
-    auth.wallet_id = "admin"
+    auth = AcaPyAuthVerified(
+        role=Role.TENANT_ADMIN,
+        token=GOVERNANCE_AGENT_API_KEY,
+        wallet_id="admin",
+    )
     return auth
 
 
 @pytest.fixture
 def mock_tenant_auth() -> AcaPyAuth:
-    auth = Mock(spec=AcaPyAuth)
-    auth.role = Role.TENANT
-    auth.token = "tenant.test_token"
+    auth = AcaPyAuth(
+        role=Role.TENANT,
+        token="tenant.test_token",
+    )
     return auth
 
 
 @pytest.fixture
 def mock_tenant_auth_verified() -> AcaPyAuthVerified:
-    auth = Mock(spec=AcaPyAuthVerified)
-    auth.role = Role.TENANT
-    auth.token = "tenant.test_token"
-    auth.wallet_id = "tenant_wallet_id"
+    auth = AcaPyAuthVerified(
+        role=Role.TENANT,
+        token="tenant.test_token",
+        wallet_id="tenant_wallet_id",
+    )
     return auth
