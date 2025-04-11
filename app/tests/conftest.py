@@ -1,6 +1,5 @@
 # flake8: noqa
 # pylint: disable=unused-import
-import mockito
 import pytest
 
 from app.tests.fixtures.dids import register_issuer_key_ed25519
@@ -70,21 +69,3 @@ from shared.util.mock_agent_controller import (
 @pytest.fixture(scope="session")
 def anyio_backend():
     return ("asyncio", {"use_uvloop": True})
-
-
-@pytest.fixture(autouse=True)
-def unstub_mockito():
-    """
-    Automatically unstub all stubbed methods after each test.
-
-    The 'yield' statement is used to split the fixture function into two parts: the setup
-    part that runs before the test, and the teardown part that runs after the test. In this
-    case, there is no setup code, so the 'yield' statement directly indicates the end of
-    the setup phase and the beginning of the teardown phase.
-    """
-    # Setup phase: No setup needed in this fixture
-
-    yield
-
-    # Teardown phase: After each test, unstub all stubbed methods
-    mockito.unstub()
