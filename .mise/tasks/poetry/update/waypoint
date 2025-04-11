@@ -3,5 +3,4 @@
 
 echo "Updating Waypoint lockfile"
 
-cd ./waypoint
 poetry lock --regenerate

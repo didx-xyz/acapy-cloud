@@ -3,5 +3,4 @@
 
 echo "Updating App lockfile"
 
-cd ./app
 poetry lock --regenerate

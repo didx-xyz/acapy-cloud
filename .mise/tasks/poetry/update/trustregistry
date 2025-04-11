@@ -3,5 +3,4 @@
 
 echo "Updating Trust Registry lockfile"
 
-cd ./trustregistry
 poetry lock --regenerate
