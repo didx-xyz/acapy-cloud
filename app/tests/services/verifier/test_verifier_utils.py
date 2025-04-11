@@ -10,13 +10,10 @@ from aries_cloudcontroller import (
     IndyRequestedCredsRequestedPred,
 )
 from httpx import Response
-from mockito import when
 
 from app.exceptions import CloudApiException
 from app.routes.verifier import AcceptProofRequest, SendProofRequest
-from app.services.verifier.acapy_verifier_v2 import VerifierV2
 from app.tests.services.verifier.utils import indy_pres_spec, sample_indy_proof_request
-from app.tests.util.mock import to_async
 from app.util.acapy_verifier_utils import (
     are_valid_schemas,
     assert_valid_prover,
@@ -108,23 +105,22 @@ async def test_get_schema_ids(mock_agent_controller: AcaPyClient):
         },
     )
 
-    with when(mock_agent_controller.credentials).get_record(
-        credential_id="first-revealed-cred-id"
-    ).thenReturn(to_async(first_cred_record)), when(
-        mock_agent_controller.credentials
-    ).get_record(
-        credential_id="first-revealed-pred-cred-id"
-    ).thenReturn(
-        to_async(second_cred_record)
-    ):
-        got_schema_ids = await get_schema_ids(
-            aries_controller=mock_agent_controller, presentation=presentation
-        )
+    # Configure the mock to return different values based on the credential_id
+    credentials = mock_agent_controller.credentials
+    credentials.get_record.side_effect = lambda credential_id, **_: {
+        "first-revealed-cred-id": first_cred_record,
+        "first-revealed-pred-cred-id": second_cred_record,
+        # Unrevealed won't be called
+    }[credential_id]
 
-        # Should only contain these two schema ids
-        assert len(got_schema_ids) == 2
-        assert "NR6Y28AiZ893utPSfoQRrz:2:test_schema:0.3" in got_schema_ids
-        assert "NR6Y28AiZ893utPSfoQRrz:2:another_schema:0.3" in got_schema_ids
+    got_schema_ids = await get_schema_ids(
+        aries_controller=mock_agent_controller, presentation=presentation
+    )
+
+    # Should only contain these two schema ids
+    assert len(got_schema_ids) == 2
+    assert "NR6Y28AiZ893utPSfoQRrz:2:test_schema:0.3" in got_schema_ids
+    assert "NR6Y28AiZ893utPSfoQRrz:2:another_schema:0.3" in got_schema_ids
 
 
 @pytest.mark.anyio
@@ -193,14 +189,12 @@ async def test_assert_valid_prover_invitation_key(
         },
     )
 
-    when(VerifierV2).get_proof_record(
-        controller=mock_agent_controller, proof_id=pres_exchange.proof_id
-    ).thenReturn(to_async(pres_exchange))
-    when(mock_agent_controller.connection).get_connection(
-        conn_id=pres_exchange.connection_id
-    ).thenReturn(to_async(conn_record))
+    mock_agent_controller.connection.get_connection.return_value = conn_record
 
     with patch(
+        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+        return_value=pres_exchange,
+    ), patch(
         "app.util.acapy_verifier_utils.get_actor", return_value=sample_actor
     ), patch(
         "app.util.acapy_verifier_utils.get_schema_ids",
@@ -244,14 +238,12 @@ async def test_assert_valid_prover_public_did(
         },
     )
 
-    when(VerifierV2).get_proof_record(
-        controller=mock_agent_controller, proof_id=pres_exchange.proof_id
-    ).thenReturn(to_async(pres_exchange))
-    when(mock_agent_controller.connection).get_connection(
-        conn_id=pres_exchange.connection_id
-    ).thenReturn(to_async(conn_record))
+    mock_agent_controller.connection.get_connection.return_value = conn_record
 
     with patch(
+        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+        return_value=pres_exchange,
+    ), patch(
         "app.util.acapy_verifier_utils.get_actor", return_value=sample_actor
     ), patch(
         "app.util.acapy_verifier_utils.get_schema_ids",
@@ -276,14 +268,12 @@ async def test_assert_valid_prover_x_no_public_did_no_invitation_key(
 ):
     conn_record = ConnRecord(connection_id=pres_exchange.connection_id)
 
-    when(VerifierV2).get_proof_record(
-        controller=mock_agent_controller, proof_id=pres_exchange.proof_id
-    ).thenReturn(to_async(pres_exchange))
-    when(mock_agent_controller.connection).get_connection(
-        conn_id=pres_exchange.connection_id
-    ).thenReturn(to_async(conn_record))
+    mock_agent_controller.connection.get_connection.return_value = conn_record
 
-    with pytest.raises(
+    with patch(
+        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+        return_value=pres_exchange,
+    ), pytest.raises(
         CloudApiException, match="Could not determine did of the verifier"
     ):
         await assert_valid_prover(
@@ -305,15 +295,13 @@ async def test_assert_valid_prover_x_actor_invalid_role(
         connection_id=pres_exchange.connection_id, their_public_did="xxx"
     )
 
-    when(VerifierV2).get_proof_record(
-        controller=mock_agent_controller, proof_id=pres_exchange.proof_id
-    ).thenReturn(to_async(pres_exchange))
-    when(mock_agent_controller.connection).get_connection(
-        conn_id=pres_exchange.connection_id
-    ).thenReturn(to_async(conn_record))
+    mock_agent_controller.connection.get_connection.return_value = conn_record
 
     # valid
     with patch(
+        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+        return_value=pres_exchange,
+    ), patch(
         "app.util.acapy_verifier_utils.get_actor",
         return_value=actor,
     ):
@@ -339,15 +327,13 @@ async def test_assert_valid_prover_could_not_fetch_actor_recover_label(
         their_label="some_label",
     )
 
-    when(VerifierV2).get_proof_record(
-        controller=mock_agent_controller, proof_id=pres_exchange.proof_id
-    ).thenReturn(to_async(pres_exchange))
-    when(mock_agent_controller.connection).get_connection(
-        conn_id=pres_exchange.connection_id
-    ).thenReturn(to_async(conn_record))
+    mock_agent_controller.connection.get_connection.return_value = conn_record
 
     # valid
     with patch(
+        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+        return_value=pres_exchange,
+    ), patch(
         "app.util.acapy_verifier_utils.fetch_actor_by_did",
         return_value=None,
     ), patch(
@@ -379,15 +365,13 @@ async def test_assert_valid_prover_x_could_not_fetch_actor_exc(
         their_label="some_label",
     )
 
-    when(VerifierV2).get_proof_record(
-        controller=mock_agent_controller, proof_id=pres_exchange.proof_id
-    ).thenReturn(to_async(pres_exchange))
-    when(mock_agent_controller.connection).get_connection(
-        conn_id=pres_exchange.connection_id
-    ).thenReturn(to_async(conn_record))
+    mock_agent_controller.connection.get_connection.return_value = conn_record
 
     # valid
     with patch(
+        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+        return_value=pres_exchange,
+    ), patch(
         "app.util.acapy_verifier_utils.get_actor",
         side_effect=CloudApiException("Error", 500),
     ):
@@ -414,15 +398,13 @@ async def test_assert_valid_prover_x_could_not_fetch_actor_exc2(
         their_label="some_label",
     )
 
-    when(VerifierV2).get_proof_record(
-        controller=mock_agent_controller, proof_id=pres_exchange.proof_id
-    ).thenReturn(to_async(pres_exchange))
-    when(mock_agent_controller.connection).get_connection(
-        conn_id=pres_exchange.connection_id
-    ).thenReturn(to_async(conn_record))
+    mock_agent_controller.connection.get_connection.return_value = conn_record
 
     # valid
     with patch(
+        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+        return_value=pres_exchange,
+    ), patch(
         "app.util.acapy_verifier_utils.get_actor",
         side_effect=Exception("Error."),
     ):
@@ -444,14 +426,12 @@ async def test_assert_valid_prover_x_invalid_schemas(
         connection_id=pres_exchange.connection_id, their_public_did="xxx"
     )
 
-    when(VerifierV2).get_proof_record(
-        controller=mock_agent_controller, proof_id=pres_exchange.proof_id
-    ).thenReturn(to_async(pres_exchange))
-    when(mock_agent_controller.connection).get_connection(
-        conn_id=pres_exchange.connection_id
-    ).thenReturn(to_async(conn_record))
+    mock_agent_controller.connection.get_connection.return_value = conn_record
 
     with patch(
+        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+        return_value=pres_exchange,
+    ), patch(
         "app.util.acapy_verifier_utils.get_actor", return_value=sample_actor
     ), patch(
         "app.util.acapy_verifier_utils.get_schema_ids",
@@ -481,14 +461,12 @@ async def test_assert_valid_prover_x_no_schemas(
         connection_id=pres_exchange.connection_id, their_public_did="xxx"
     )
 
-    when(VerifierV2).get_proof_record(
-        controller=mock_agent_controller, proof_id=pres_exchange.proof_id
-    ).thenReturn(to_async(pres_exchange))
-    when(mock_agent_controller.connection).get_connection(
-        conn_id=pres_exchange.connection_id
-    ).thenReturn(to_async(conn_record))
+    mock_agent_controller.connection.get_connection.return_value = conn_record
 
     with patch(
+        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+        return_value=pres_exchange,
+    ), patch(
         "app.util.acapy_verifier_utils.get_actor", return_value=sample_actor
     ), patch(
         "app.util.acapy_verifier_utils.get_schema_ids",
@@ -512,11 +490,11 @@ async def test_assert_valid_prover_x_no_connection_id(
     mock_agent_controller: AcaPyClient,
 ):
     test_pres_exchange = pres_exchange.model_copy(update={"connection_id": None})
-    when(VerifierV2).get_proof_record(
-        controller=mock_agent_controller, proof_id=test_pres_exchange.proof_id
-    ).thenReturn(to_async(test_pres_exchange))
 
-    with pytest.raises(
+    with patch(
+        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+        return_value=test_pres_exchange,
+    ), pytest.raises(
         CloudApiException, match="No connection id associated with proof request."
     ):
         await assert_valid_prover(
@@ -538,15 +516,14 @@ async def test_assert_valid_prover_x_no_connection_id2(
         }
     )
 
-    when(VerifierV2).get_proof_record(
-        controller=mock_agent_controller, proof_id=test_pres_exchange.proof_id
-    ).thenReturn(to_async(test_pres_exchange))
+    mock_agent_controller.connection.get_connection.return_value = ConnRecord(
+        connection_id=""
+    )
 
-    when(mock_agent_controller.connection).get_connection(
-        conn_id="a-connection-id"
-    ).thenReturn(to_async(ConnRecord(connection_id="")))
-
-    with pytest.raises(CloudApiException, match="Cannot proceed. No connection id."):
+    with patch(
+        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+        return_value=test_pres_exchange,
+    ), pytest.raises(CloudApiException, match="Cannot proceed. No connection id."):
         await assert_valid_prover(
             aries_controller=mock_agent_controller,
             presentation=AcceptProofRequest(
@@ -563,9 +540,7 @@ async def test_assert_valid_verifier_invitation_key(mock_agent_controller: AcaPy
         invitation_key="H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV",
     )
 
-    when(mock_agent_controller.connection).get_connection(
-        conn_id="a-connection-id"
-    ).thenReturn(to_async(conn))
+    mock_agent_controller.connection.get_connection.return_value = conn
 
     # valid
     with patch(
@@ -605,9 +580,7 @@ async def test_assert_valid_verifier_x_no_public_did_no_invitation_key(
         connection_id="a-connection-id",
     )
 
-    when(mock_agent_controller.connection).get_connection(
-        conn_id="a-connection-id"
-    ).thenReturn(to_async(conn))
+    mock_agent_controller.connection.get_connection.return_value = conn
 
     # valid
     with patch(
@@ -633,9 +606,7 @@ async def test_assert_valid_verifier_x_not_verifier(mock_agent_controller: AcaPy
         invitation_key="H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV",
     )
 
-    when(mock_agent_controller.connection).get_connection(
-        conn_id="a-connection-id"
-    ).thenReturn(to_async(conn))
+    mock_agent_controller.connection.get_connection.return_value = conn
 
     # valid
     with patch(

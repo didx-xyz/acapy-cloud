@@ -9,7 +9,6 @@ from aries_cloudcontroller import (
     IndyPresSpec,
     V20PresExRecordList,
 )
-from mockito import when
 from pydantic import ValidationError
 
 from app.exceptions.cloudapi_exception import CloudApiException
@@ -27,7 +26,6 @@ from app.tests.services.verifier.utils import (
     sample_indy_proof_request,
     v20_presentation_exchange_records,
 )
-from app.tests.util.mock import to_async
 from shared.models.presentation_exchange import (
     PresentationExchange,
 )
@@ -48,9 +46,10 @@ from shared.models.presentation_exchange import (
 )
 async def test_create_proof_request(mock_agent_controller: AcaPyClient, proof_type):
     if proof_type != ProofRequestType.JWT:
-        when(mock_agent_controller.present_proof_v2_0).create_proof_request(
-            ...
-        ).thenReturn(to_async(v20_presentation_exchange_records[0]))
+        present_proof_v2_0 = mock_agent_controller.present_proof_v2_0
+        present_proof_v2_0.create_proof_request.return_value = (
+            v20_presentation_exchange_records[0]
+        )
 
         create_proof_request = CreateProofRequest(
             indy_proof_request=(
@@ -93,7 +92,7 @@ async def test_create_proof_request(mock_agent_controller: AcaPyClient, proof_ty
 async def test_create_proof_request_exception(
     mock_agent_controller: AcaPyClient, status_code: int, error_detail: str
 ):
-    when(mock_agent_controller.present_proof_v2_0).create_proof_request(...).thenRaise(
+    mock_agent_controller.present_proof_v2_0.create_proof_request.side_effect = (
         ApiException(reason=error_detail, status=status_code)
     )
 
@@ -123,9 +122,9 @@ async def test_create_proof_request_exception(
 )
 async def test_send_proof_request(mock_agent_controller: AcaPyClient, proof_type):
     if proof_type != ProofRequestType.JWT:
-        when(mock_agent_controller.present_proof_v2_0).send_request_free(
-            ...
-        ).thenReturn(to_async(v20_presentation_exchange_records[0]))
+        mock_agent_controller.present_proof_v2_0.send_request_free.return_value = (
+            v20_presentation_exchange_records[0]
+        )
 
         send_proof_request = SendProofRequest(
             type=proof_type,
@@ -177,7 +176,7 @@ async def test_send_proof_request_exception(
             send_proof_request=SendProofRequest(indy_proof_request="I am invalid"),
         )
 
-    when(mock_agent_controller.present_proof_v2_0).send_request_free(...).thenRaise(
+    mock_agent_controller.present_proof_v2_0.send_request_free.side_effect = (
         ApiException(reason=error_detail, status=status_code)
     )
 
@@ -208,9 +207,9 @@ async def test_send_proof_request_exception(
 )
 async def test_accept_proof_request(mock_agent_controller: AcaPyClient, proof_type):
     if proof_type != ProofRequestType.JWT:
-        when(mock_agent_controller.present_proof_v2_0).send_presentation(
-            ...
-        ).thenReturn(to_async(v20_presentation_exchange_records[0]))
+        mock_agent_controller.present_proof_v2_0.send_presentation.return_value = (
+            v20_presentation_exchange_records[0]
+        )
 
         accept_proof_request = AcceptProofRequest(
             type=proof_type,
@@ -270,7 +269,7 @@ async def test_accept_proof_request(mock_agent_controller: AcaPyClient, proof_ty
 async def test_accept_proof_request_exception(
     mock_agent_controller: AcaPyClient, status_code: int, error_detail: str
 ):
-    when(mock_agent_controller.present_proof_v2_0).send_presentation(...).thenRaise(
+    mock_agent_controller.present_proof_v2_0.send_presentation.side_effect = (
         ApiException(reason=error_detail, status=status_code)
     )
 
@@ -295,12 +294,8 @@ async def test_accept_proof_request_exception(
 
 @pytest.mark.anyio
 async def test_reject_proof_reject(mock_agent_controller: AcaPyClient):
-    when(mock_agent_controller.present_proof_v2_0).delete_record(...).thenReturn(
-        to_async({})
-    )
-    when(mock_agent_controller.present_proof_v2_0).report_problem(...).thenReturn(
-        to_async({})
-    )
+    mock_agent_controller.present_proof_v2_0.delete_record.return_value = {}
+    mock_agent_controller.present_proof_v2_0.report_problem.return_value = {}
 
     deleted_proof_request = await VerifierV2.reject_proof_request(
         controller=mock_agent_controller,
@@ -318,8 +313,8 @@ async def test_reject_proof_reject(mock_agent_controller: AcaPyClient):
 async def test_reject_proof_reject_exception_report(
     mock_agent_controller: AcaPyClient, status_code: int, error_detail: str
 ):
-    when(mock_agent_controller.present_proof_v2_0).report_problem(...).thenRaise(
-        ApiException(reason=error_detail, status=status_code)
+    mock_agent_controller.present_proof_v2_0.report_problem.side_effect = ApiException(
+        reason=error_detail, status=status_code
     )
 
     with pytest.raises(
@@ -342,11 +337,9 @@ async def test_reject_proof_reject_exception_report(
 async def test_reject_proof_reject_exception_delete(
     mock_agent_controller: AcaPyClient, status_code: int, error_detail: str
 ):
-    when(mock_agent_controller.present_proof_v2_0).report_problem(...).thenReturn(
-        to_async({})
-    )
-    when(mock_agent_controller.present_proof_v2_0).delete_record(...).thenRaise(
-        ApiException(reason=error_detail, status=status_code)
+    mock_agent_controller.present_proof_v2_0.report_problem.return_value = {}
+    mock_agent_controller.present_proof_v2_0.delete_record.side_effect = ApiException(
+        reason=error_detail, status=status_code
     )
 
     with pytest.raises(
@@ -365,8 +358,8 @@ async def test_reject_proof_reject_exception_delete(
 
 @pytest.mark.anyio
 async def test_get_proof_records(mock_agent_controller: AcaPyClient):
-    when(mock_agent_controller.present_proof_v2_0).get_records(...).thenReturn(
-        to_async(V20PresExRecordList(results=v20_presentation_exchange_records))
+    mock_agent_controller.present_proof_v2_0.get_records.return_value = (
+        V20PresExRecordList(results=v20_presentation_exchange_records)
     )
 
     proof_records = await VerifierV2.get_proof_records(
@@ -385,8 +378,8 @@ async def test_get_proof_records(mock_agent_controller: AcaPyClient):
 async def test_get_proof_records_exception(
     mock_agent_controller: AcaPyClient, status_code: int, error_detail: str
 ):
-    when(mock_agent_controller.present_proof_v2_0).get_records(...).thenRaise(
-        ApiException(reason=error_detail, status=status_code)
+    mock_agent_controller.present_proof_v2_0.get_records.side_effect = ApiException(
+        reason=error_detail, status=status_code
     )
 
     with pytest.raises(
@@ -402,8 +395,8 @@ async def test_get_proof_records_exception(
 
 @pytest.mark.anyio
 async def test_get_proof_record(mock_agent_controller: AcaPyClient):
-    when(mock_agent_controller.present_proof_v2_0).get_record(...).thenReturn(
-        to_async(v20_presentation_exchange_records[0])
+    mock_agent_controller.present_proof_v2_0.get_record.return_value = (
+        v20_presentation_exchange_records[0]
     )
 
     proof_record = await VerifierV2.get_proof_record(
@@ -420,8 +413,8 @@ async def test_get_proof_record(mock_agent_controller: AcaPyClient):
 async def test_get_proof_record_exception(
     mock_agent_controller: AcaPyClient, status_code: int, error_detail: str
 ):
-    when(mock_agent_controller.present_proof_v2_0).get_record(...).thenRaise(
-        ApiException(reason=error_detail, status=status_code)
+    mock_agent_controller.present_proof_v2_0.get_record.side_effect = ApiException(
+        reason=error_detail, status=status_code
     )
     proof_id = "v2-abc"
     with pytest.raises(
@@ -437,9 +430,7 @@ async def test_get_proof_record_exception(
 
 @pytest.mark.anyio
 async def test_delete_proof(mock_agent_controller: AcaPyClient):
-    when(mock_agent_controller.present_proof_v2_0).delete_record(...).thenReturn(
-        to_async()
-    )
+    mock_agent_controller.present_proof_v2_0.delete_record.return_value = None
     result = await VerifierV2.delete_proof(
         controller=mock_agent_controller, proof_id="v2-abc"
     )
@@ -452,8 +443,8 @@ async def test_delete_proof(mock_agent_controller: AcaPyClient):
 async def test_delete_proof_exception(
     mock_agent_controller: AcaPyClient, status_code: int, error_detail: str
 ):
-    when(mock_agent_controller.present_proof_v2_0).delete_record(...).thenRaise(
-        ApiException(reason=error_detail, status=status_code)
+    mock_agent_controller.present_proof_v2_0.delete_record.side_effect = ApiException(
+        reason=error_detail, status=status_code
     )
     proof_id = "v2-abc"
     with pytest.raises(
@@ -472,10 +463,8 @@ async def test_delete_proof_exception(
 async def test_get_credentials_by_proof_id(
     mock_agent_controller: AcaPyClient, empty_result: bool
 ):
-    when(mock_agent_controller.present_proof_v2_0).get_matching_credentials(
-        ...
-    ).thenReturn(
-        to_async([] if empty_result else [IndyCredPrecis(cred_info=IndyCredInfo())])
+    mock_agent_controller.present_proof_v2_0.get_matching_credentials.return_value = (
+        [] if empty_result else [IndyCredPrecis(cred_info=IndyCredInfo())]
     )
 
     creds = await VerifierV2.get_credentials_by_proof_id(
@@ -494,9 +483,9 @@ async def test_get_credentials_by_proof_id(
 async def test_get_credentials_by_proof_id_exception(
     mock_agent_controller: AcaPyClient, status_code: int, error_detail: str
 ):
-    when(mock_agent_controller.present_proof_v2_0).get_matching_credentials(
-        ...
-    ).thenRaise(ApiException(reason=error_detail, status=status_code))
+    mock_agent_controller.present_proof_v2_0.get_matching_credentials.side_effect = (
+        ApiException(reason=error_detail, status=status_code)
+    )
     proof_id = "v2-abc"
     with pytest.raises(
         CloudApiException,
