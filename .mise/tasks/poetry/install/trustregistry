@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-# mise description="Poetry Install Trust Registry dependencies"
-
-echo "Installing Trust Registry dependencies"
-
-poetry install --with trust-registry,dev

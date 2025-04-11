@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-# mise description="Poetry Update Waypoint lockfile"
-
-echo "Updating Waypoint lockfile"
-
-poetry lock --regenerate

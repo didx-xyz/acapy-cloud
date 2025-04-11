@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-# mise description="Poetry Update Trust Registry lockfile"
-
-echo "Updating Trust Registry lockfile"
-
-poetry lock --regenerate

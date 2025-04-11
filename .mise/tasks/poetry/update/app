@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-# mise description="Poetry Update App lockfile"
-
-echo "Updating App lockfile"
-
-poetry lock --regenerate

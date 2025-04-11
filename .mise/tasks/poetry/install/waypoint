@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-# mise description="Poetry Install Waypoint dependencies"
-
-echo "Installing Waypoint dependencies"
-
-poetry install --with waypoint,dev
