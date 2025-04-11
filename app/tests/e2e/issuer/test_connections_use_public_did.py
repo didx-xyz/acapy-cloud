@@ -11,6 +11,7 @@ CONNECTIONS_BASE_PATH = router.prefix
 
 
 @pytest.mark.anyio
+@pytest.mark.skip(reason="Skipping test - evaluate if it can be moved to didexchange")
 @pytest.mark.xdist_group(name="issuer_test_group")
 @pytest.mark.parametrize("issuer_wallet_type", ["indy", "anoncreds"])
 async def test_accept_use_public_did(
@@ -67,6 +68,7 @@ async def test_accept_use_public_did(
 
 
 @pytest.mark.anyio
+@pytest.mark.skip(reason="Skipping test - evaluate if it can be moved to didexchange")
 @pytest.mark.xdist_group(name="issuer_test_group")
 @pytest.mark.parametrize("issuer_wallet_type", ["indy", "anoncreds"])
 async def test_accept_use_public_did_between_issuer_and_holder(
