@@ -4,4 +4,4 @@
 echo "Updating Endorser lockfile"
 
 cd ./endorser
-poetry lock
+poetry lock --regenerate

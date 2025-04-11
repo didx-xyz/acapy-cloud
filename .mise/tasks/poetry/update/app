@@ -4,4 +4,4 @@
 echo "Updating App lockfile"
 
 cd ./app
-poetry lock
+poetry lock --regenerate
