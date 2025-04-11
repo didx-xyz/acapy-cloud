@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock, Mock
+
 import pytest
 from aries_cloudcontroller import (
     AcaPyClient,
@@ -14,7 +16,6 @@ from aries_cloudcontroller import (
     SchemaApi,
     WalletApi,
 )
-from mockito import mock
 
 from app.dependencies.auth import AcaPyAuth, AcaPyAuthVerified
 from app.dependencies.role import Role
@@ -26,20 +27,20 @@ async def noop():
 
 
 def get_mock_agent_controller() -> AcaPyClient:
-    controller = mock(AcaPyClient)
-    controller.__aexit__ = noop
-    controller.anoncreds_revocation = mock(AnoncredsRevocationApi)
-    controller.anoncreds_schemas = mock(AnoncredsSchemasApi)
-    controller.connection = mock(ConnectionApi)
-    controller.credentials = mock(CredentialsApi)
-    controller.endorse_transaction = mock(EndorseTransactionApi)
-    controller.issue_credential_v2_0 = mock(IssueCredentialV20Api)
-    controller.ledger = mock(LedgerApi)
-    controller.out_of_band = mock(OutOfBandApi)
-    controller.present_proof_v2_0 = mock(PresentProofV20Api)
-    controller.revocation = mock(RevocationApi)
-    controller.schema = mock(SchemaApi)
-    controller.wallet = mock(WalletApi)
+    controller = Mock(spec=AcaPyClient)
+    controller.__aexit__ = AsyncMock(return_value=None)
+    controller.anoncreds_revocation = Mock(spec=AnoncredsRevocationApi)
+    controller.anoncreds_schemas = Mock(spec=AnoncredsSchemasApi)
+    controller.connection = Mock(spec=ConnectionApi)
+    controller.credentials = Mock(spec=CredentialsApi)
+    controller.endorse_transaction = Mock(spec=EndorseTransactionApi)
+    controller.issue_credential_v2_0 = Mock(spec=IssueCredentialV20Api)
+    controller.ledger = Mock(spec=LedgerApi)
+    controller.out_of_band = Mock(spec=OutOfBandApi)
+    controller.present_proof_v2_0 = Mock(spec=PresentProofV20Api)
+    controller.revocation = Mock(spec=RevocationApi)
+    controller.schema = Mock(spec=SchemaApi)
+    controller.wallet = Mock(spec=WalletApi)
     return controller
 
 
@@ -66,7 +67,7 @@ def mock_context_managed_controller():
 
 @pytest.fixture(scope="session")
 def mock_governance_auth() -> AcaPyAuthVerified:
-    auth = mock(AcaPyAuthVerified)
+    auth = Mock(spec=AcaPyAuthVerified)
     auth.role = Role.GOVERNANCE
     auth.token = GOVERNANCE_AGENT_API_KEY
     auth.wallet_id = GOVERNANCE_LABEL
@@ -75,7 +76,7 @@ def mock_governance_auth() -> AcaPyAuthVerified:
 
 @pytest.fixture
 def mock_admin_auth() -> AcaPyAuthVerified:
-    auth = mock(AcaPyAuthVerified)
+    auth = Mock(spec=AcaPyAuthVerified)
     auth.role = Role.TENANT_ADMIN
     auth.token = GOVERNANCE_AGENT_API_KEY
     auth.wallet_id = "admin"
@@ -84,7 +85,7 @@ def mock_admin_auth() -> AcaPyAuthVerified:
 
 @pytest.fixture
 def mock_tenant_auth() -> AcaPyAuth:
-    auth = mock(AcaPyAuth)
+    auth = Mock(spec=AcaPyAuth)
     auth.role = Role.TENANT
     auth.token = "tenant.test_token"
     return auth
@@ -92,7 +93,7 @@ def mock_tenant_auth() -> AcaPyAuth:
 
 @pytest.fixture
 def mock_tenant_auth_verified() -> AcaPyAuthVerified:
-    auth = mock(AcaPyAuthVerified)
+    auth = Mock(spec=AcaPyAuthVerified)
     auth.role = Role.TENANT
     auth.token = "tenant.test_token"
     auth.wallet_id = "tenant_wallet_id"
