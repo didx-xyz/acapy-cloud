@@ -258,12 +258,12 @@ async def create_tenant(
     await publisher.publish(
         logger=bound_logger,
         event=TenantEvent(
-            subject="",  # TODO: Add a subject for the event
+            subject=f"cloudapi.aries.events.{body.group_id}.{wallet_response.wallet_id}",
             data={
                 "wallet_id": wallet_response.wallet_id,
                 "wallet_label": wallet_label,
                 "wallet_name": wallet_name,
-                "roles": roles,
+                "roles": roles if roles else [],
                 "created_at": wallet_response.created_at,
                 "updated_at": wallet_response.updated_at,
                 "image_url": body.image_url,
