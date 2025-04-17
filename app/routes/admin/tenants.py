@@ -254,6 +254,25 @@ async def create_tenant(
         access_token=tenant_api_key(wallet_response.token),
         group_id=body.group_id,
     )
+
+    await publisher.publish(
+        logger=bound_logger,
+        event=TenantEvent(
+            subject="",  # TODO: Add a subject for the event
+            data={
+                "wallet_id": wallet_response.wallet_id,
+                "wallet_label": wallet_label,
+                "wallet_name": wallet_name,
+                "roles": roles,
+                "created_at": wallet_response.created_at,
+                "updated_at": wallet_response.updated_at,
+                "image_url": body.image_url,
+                "group_id": body.group_id,
+                # payload TODO: Add payload??
+            },
+        ),
+    )
+
     bound_logger.debug("Successfully created tenant.")
     return response
 
