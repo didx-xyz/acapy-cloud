@@ -26,14 +26,16 @@ class TenantEvent(BaseEvent):
     """
     Event for tenant-related actions.
     """
-    pass # TODO: Add specific fields and methods for tenant events
+
+    pass  # TODO: Add specific fields and methods for tenant events
+
 
 class SchemaEvent(BaseEvent):
     """
     Event for schema-related actions.
     """
-    pass # TODO: Add specific fields and methods for schema events
 
+    pass  # TODO: Add specific fields and methods for schema events
 
 
 class NatsJetstreamPublish:
