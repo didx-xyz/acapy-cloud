@@ -35,7 +35,6 @@ async def test_create_oob_invitation_success(body):
     )
     handshake_protocols = [
         "https://didcomm.org/didexchange/1.0",
-        "https://didcomm.org/connections/1.0",
     ]
     if body and body.attachments:
         handshake_protocols = None
