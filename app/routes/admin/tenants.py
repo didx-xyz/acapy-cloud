@@ -3,6 +3,7 @@ from typing import List, Optional
 
 import base58
 from aries_cloudcontroller import CreateWalletTokenRequest
+from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, HTTPException, Query
 from uuid_utils import uuid4
 
@@ -12,6 +13,7 @@ from app.dependencies.auth import (
     acapy_auth_tenant_admin,
     tenant_api_key,
 )
+from app.dependencies.container import Container
 from app.exceptions import (
     CloudApiException,
     TrustRegistryException,
@@ -45,6 +47,7 @@ from app.util.tenants import (
 )
 from shared.log_config import get_logger
 from shared.models.trustregistry import Actor
+from shared.services.nats_jetstream_publish import NatsJetstreamPublish, TenantEvent
 
 logger = get_logger(__name__)
 
@@ -58,9 +61,13 @@ group_id_query: Optional[str] = Query(
 )
 
 
+@inject
 @router.post("", response_model=CreateTenantResponse, summary="Create New Tenant")
 async def create_tenant(
     body: CreateTenantRequest,
+    publisher: NatsJetstreamPublish = Depends(
+        Provide[Container.nats_jetstream_publisher()]
+    ),
     admin_auth: AcaPyAuthVerified = Depends(acapy_auth_tenant_admin),
 ) -> CreateTenantResponse:
     """
