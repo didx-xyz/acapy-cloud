@@ -41,10 +41,9 @@ async def test_delete_connection_by_id_success():
         mock_aries_controller.connection.get_connection.assert_awaited_once_with(
             conn_id=connection_id,
         )
-        mock_aries_controller.connection.delete_connection.assert_awaited_once_with(
-            conn_id=connection_id,
+        mock_aries_controller.did_rotate.hangup.assert_awaited_once_with(
+            conn_id=connection_id
         )
-        mock_aries_controller.did_rotate.hangup.assert_not_called()
 
 
 @pytest.mark.anyio
