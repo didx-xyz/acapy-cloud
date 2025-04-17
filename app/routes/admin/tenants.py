@@ -268,7 +268,7 @@ async def create_tenant(
                 "updated_at": wallet_response.updated_at,
                 "image_url": body.image_url,
                 "group_id": body.group_id,
-                # payload TODO: Add payload??
+                # payload TODO: Add payload?? Add headers??
             },
         ),
     )
