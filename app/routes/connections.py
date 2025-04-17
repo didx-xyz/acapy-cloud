@@ -62,7 +62,7 @@ async def get_connections(  # pylint: disable=R0913,R0917
         offset: int - The offset to start retrieving records from
         descending: bool - Whether to return results in descending order. Results are ordered by record created time.
         alias: str
-        connection_protocol: Protocol: "connections/1.0", "didexchange/1.0"
+        connection_protocol: Protocol: "didexchange/1.0", "didexchange/1.1"
         invitation_key: str
         invitation_msg_id: str
         my_did: str
