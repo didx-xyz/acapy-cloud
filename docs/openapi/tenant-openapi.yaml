@@ -3090,7 +3090,7 @@ components:
       - credential_definition_id
       - attributes
       title: AnonCredsCredential
-    AnoncredsPresentationReqAttrSpec:
+    AnonCredsPresentationReqAttrSpec:
       properties:
         name:
           anyOf:
@@ -3108,7 +3108,7 @@ components:
           description: Attribute name group
         non_revoked:
           anyOf:
-          - $ref: '#/components/schemas/AnoncredsPresentationReqAttrSpecNonRevoked'
+          - $ref: '#/components/schemas/AnonCredsPresentationReqAttrSpecNonRevoked'
           - type: 'null'
         restrictions:
           anyOf:
@@ -3124,9 +3124,9 @@ components:
             cred_def_id, and/or attr::<attribute-name>::value where <attribute-name>
             represents a credential attribute name'
       type: object
-      title: AnoncredsPresentationReqAttrSpec
-      description: AnoncredsPresentationReqAttrSpec
-    AnoncredsPresentationReqAttrSpecNonRevoked:
+      title: AnonCredsPresentationReqAttrSpec
+      description: AnonCredsPresentationReqAttrSpec
+    AnonCredsPresentationReqAttrSpecNonRevoked:
       properties:
         from:
           anyOf:
@@ -3145,9 +3145,9 @@ components:
           title: To
           description: Latest time of interest in non-revocation interval
       type: object
-      title: AnoncredsPresentationReqAttrSpecNonRevoked
-      description: AnoncredsPresentationReqAttrSpecNonRevoked
-    AnoncredsPresentationReqPredSpec:
+      title: AnonCredsPresentationReqAttrSpecNonRevoked
+      description: AnonCredsPresentationReqAttrSpecNonRevoked
+    AnonCredsPresentationReqPredSpec:
       properties:
         name:
           type: string
@@ -3155,7 +3155,7 @@ components:
           description: Attribute name
         non_revoked:
           anyOf:
-          - $ref: '#/components/schemas/AnoncredsPresentationReqPredSpecNonRevoked'
+          - $ref: '#/components/schemas/AnonCredsPresentationReqPredSpecNonRevoked'
           - type: 'null'
         p_type:
           type: string
@@ -3183,9 +3183,9 @@ components:
       - name
       - p_type
       - p_value
-      title: AnoncredsPresentationReqPredSpec
-      description: AnoncredsPresentationReqPredSpec
-    AnoncredsPresentationReqPredSpecNonRevoked:
+      title: AnonCredsPresentationReqPredSpec
+      description: AnonCredsPresentationReqPredSpec
+    AnonCredsPresentationReqPredSpecNonRevoked:
       properties:
         from:
           anyOf:
@@ -3204,9 +3204,9 @@ components:
           title: To
           description: Latest time of interest in non-revocation interval
       type: object
-      title: AnoncredsPresentationReqPredSpecNonRevoked
-      description: AnoncredsPresentationReqPredSpecNonRevoked
-    AnoncredsPresentationRequest:
+      title: AnonCredsPresentationReqPredSpecNonRevoked
+      description: AnonCredsPresentationReqPredSpecNonRevoked
+    AnonCredsPresentationRequest:
       properties:
         name:
           anyOf:
@@ -3216,7 +3216,7 @@ components:
           description: Proof request name
         non_revoked:
           anyOf:
-          - $ref: '#/components/schemas/AnoncredsPresentationRequestNonRevoked'
+          - $ref: '#/components/schemas/AnonCredsPresentationRequestNonRevoked'
           - type: 'null'
         nonce:
           anyOf:
@@ -3226,13 +3226,13 @@ components:
           description: Nonce
         requested_attributes:
           additionalProperties:
-            $ref: '#/components/schemas/AnoncredsPresentationReqAttrSpec'
+            $ref: '#/components/schemas/AnonCredsPresentationReqAttrSpec'
           type: object
           title: Requested Attributes
           description: Requested attribute specifications of proof request
         requested_predicates:
           additionalProperties:
-            $ref: '#/components/schemas/AnoncredsPresentationReqPredSpec'
+            $ref: '#/components/schemas/AnonCredsPresentationReqPredSpec'
           type: object
           title: Requested Predicates
           description: Requested predicate specifications of proof request
@@ -3246,9 +3246,9 @@ components:
       required:
       - requested_attributes
       - requested_predicates
-      title: AnoncredsPresentationRequest
-      description: AnoncredsPresentationRequest
-    AnoncredsPresentationRequestNonRevoked:
+      title: AnonCredsPresentationRequest
+      description: AnonCredsPresentationRequest
+    AnonCredsPresentationRequestNonRevoked:
       properties:
         from:
           anyOf:
@@ -3267,8 +3267,8 @@ components:
           title: To
           description: Latest time of interest in non-revocation interval
       type: object
-      title: AnoncredsPresentationRequestNonRevoked
-      description: AnoncredsPresentationRequestNonRevoked
+      title: AnonCredsPresentationRequestNonRevoked
+      description: AnonCredsPresentationRequestNonRevoked
     AttachDecorator-Input:
       properties:
         '@id':
@@ -3954,7 +3954,7 @@ components:
           - type: 'null'
         anoncreds_proof_request:
           anyOf:
-          - $ref: '#/components/schemas/AnoncredsPresentationRequest'
+          - $ref: '#/components/schemas/AnonCredsPresentationRequest'
           - type: 'null'
       type: object
       title: CreateProofRequest
@@ -6678,7 +6678,7 @@ components:
           - type: 'null'
         anoncreds_proof_request:
           anyOf:
-          - $ref: '#/components/schemas/AnoncredsPresentationRequest'
+          - $ref: '#/components/schemas/AnonCredsPresentationRequest'
           - type: 'null'
         connection_id:
           type: string

@@ -3,8 +3,8 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 from aries_cloudcontroller import (
     AcaPyClient,
-    AnoncredsRevocationApi,
-    AnoncredsSchemasApi,
+    AnonCredsRevocationApi,
+    AnonCredsSchemasApi,
     ConnectionApi,
     CredentialsApi,
     EndorseTransactionApi,
@@ -29,8 +29,8 @@ async def noop():
 def get_mock_agent_controller() -> AcaPyClient:
     controller = Mock(spec=AcaPyClient)
     controller.__aexit__ = AsyncMock(return_value=None)
-    controller.anoncreds_revocation = Mock(spec=AnoncredsRevocationApi)
-    controller.anoncreds_schemas = Mock(spec=AnoncredsSchemasApi)
+    controller.anoncreds_revocation = Mock(spec=AnonCredsRevocationApi)
+    controller.anoncreds_schemas = Mock(spec=AnonCredsSchemasApi)
     controller.connection = Mock(spec=ConnectionApi)
     controller.credentials = Mock(spec=CredentialsApi)
     controller.endorse_transaction = Mock(spec=EndorseTransactionApi)

@@ -19,7 +19,7 @@ End-points not tested:
   - delete exchange records
 
 - Verifier
-  - create request (Anoncreds is tested by Bob??)
+  - create request (AnonCreds is tested by Bob??)
   - No proofs for dif_proof/json_ld type
 
 - Wallet
@@ -55,7 +55,7 @@ See breakdown of tests [here](/app/tests/e2e/docs/connections.md)
 
 Schemas
 
-- Anoncreds
+- AnonCreds
   - create* &#x2611;
   - get schemas &#x2612;
   - get schema by id &#x2611;
@@ -67,7 +67,7 @@ Schemas
 
 Cred-defs
 
-- Anoncreds
+- AnonCreds
   - Create* &#x2611;
   - get cred_defs &#x2612;
   - get cred_def by id &#x2612;
@@ -86,7 +86,7 @@ See breakdown of tests [here](/app/tests/e2e/docs/schema_definitions.md)
   - Send offer &#x2611;
   - Accept offer &#x2611;
 
-- Anoncreds
+- AnonCreds
   - Create offer &#x2611;
   - Send offer &#x2611;
   - Accept offer &#x2611;
@@ -113,7 +113,7 @@ See breakdown of tests [here](/app/tests/e2e/docs/issuer.md)
   - Get pending revocations &#x2611;
   - Fix rev_reg &#x2611;
 
-- Anoncreds
+- AnonCreds
   - Revoke &#x2611;
   - Clear pending &#x2611;
   - Publish pending &#x2611;
@@ -135,7 +135,7 @@ See breakdown of tests [here](/app/tests/e2e/docs/revocation.md)
   - delete proofs &#x2611;
   - get credentials for proof &#x2611;
 
-- Anoncreds
+- AnonCreds
   - create-request &#x2611; (tested by Bob??)
   - get exchange record by id &#x2611;
   - get exchange records &#x2611;

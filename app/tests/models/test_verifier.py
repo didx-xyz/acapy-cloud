@@ -3,8 +3,8 @@ from aries_cloudcontroller import DIFProofRequest, PresentationDefinition
 
 from app.models.verifier import (
     AcceptProofRequest,
-    AnoncredsPresentationRequest,
-    AnoncredsPresSpec,
+    AnonCredsPresentationRequest,
+    AnonCredsPresSpec,
     DIFPresSpec,
     IndyPresSpec,
     IndyProofRequest,
@@ -57,7 +57,7 @@ def test_proof_request_base_model():
     with pytest.raises(CloudApiValueError) as exc:
         ProofRequestBase(
             type=ProofRequestType.ANONCREDS,
-            anoncreds_proof_request=AnoncredsPresentationRequest(
+            anoncreds_proof_request=AnonCredsPresentationRequest(
                 requested_attributes={}, requested_predicates={}
             ),
             dif_proof_request=DIFProofRequest(
@@ -102,7 +102,7 @@ def test_accept_proof_request_model():
     AcceptProofRequest(
         type=ProofRequestType.ANONCREDS,
         proof_id="abc",
-        anoncreds_presentation_spec=AnoncredsPresSpec(
+        anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={},
             requested_predicates={},
             self_attested_attributes={},

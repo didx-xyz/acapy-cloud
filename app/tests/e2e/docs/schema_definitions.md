@@ -4,7 +4,7 @@
 
 Schemas
 
-- Anoncreds
+- AnonCreds
   - create* &#x2611;
   - get schemas &#x2612;
   - get schema by id &#x2611;
@@ -18,7 +18,7 @@ There is no test for getting all schemas.
 
 Cred-defs
 
-- Anoncreds
+- AnonCreds
   - Create* &#x2611;
   - get cred_defs &#x2612;
   - get cred_def by id &#x2612;
@@ -43,7 +43,7 @@ Governance creates Indy schema, assert expected fields on returned schema.
 
 ### test_create_anoncreds_schema
 
-Faber_anoncreds creates Anoncreds schema, assert expected fields on returned schema.
+Faber_anoncreds creates AnonCreds schema, assert expected fields on returned schema.
 
 ### test_get_schema (Skipped in regression run)
 
@@ -51,7 +51,7 @@ Governance creates Indy schema. Assert Governance, Faber_indy and Faber_anoncred
 
 ### test_get_anoncreds_schema
 
-Faber_anoncreds creates Anoncreds schema. Assert Faber_anoncreds,
+Faber_anoncreds creates AnonCreds schema. Assert Faber_anoncreds,
 
 Faber_indy and Meld_co_anoncreds can get schema by id.
 

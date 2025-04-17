@@ -7,7 +7,7 @@
   - Send offer &#x2611;
   - request offer &#x2611;
 
-- Anoncreds
+- AnonCreds
   - Create offer &#x2611;
   - Send offer &#x2611;
   - request offer &#x2611;
@@ -119,7 +119,7 @@ Faber sends credentials to Alice, Alice never requests credentials.
 Faber gets exchange records with `limit`, `offset` and `descending: true/false`,
 assert expected length/order of response
 
-## Anoncreds credentials
+## AnonCreds credentials
 
 Find test file [here](/app/tests/e2e/issuer/test_anoncreds_credentials.py)
 

@@ -70,10 +70,10 @@ If Indy: call `clear_pending` and assert there is no more pending
 
 Call `get_pending` with bad `rev_reg_id`. If Indy: assert `422`.
 
-If Anoncreds: assert `404` (anoncreds does not validate `rev_reg_id`)
+If AnonCreds: assert `404` (anoncreds does not validate `rev_reg_id`)
 
 ### test_fix_rev_reg_bad_id_indy/anoncreds (Skipped in regression run)
 
 Call `fix_rev_reg` with bad ids. Assert `422` for id with bad format and `404` for ids that don't exist.
 
-Anoncreds test skipped bc no validation on `rev_reg_ids` for Anoncreds.
+AnonCreds test skipped bc no validation on `rev_reg_ids` for AnonCreds.

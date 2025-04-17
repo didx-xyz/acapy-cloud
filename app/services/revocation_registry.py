@@ -5,15 +5,15 @@ from aries_cloudcontroller import (
     AcaPyClient,
     ClearPendingRevocationsRequest,
     CredRevRecordResult,
-    CredRevRecordResultSchemaAnoncreds,
+    CredRevRecordResultSchemaAnonCreds,
     IssuerCredRevRecord,
     IssuerRevRegRecord,
     PublishRevocations,
     PublishRevocationsOptions,
-    PublishRevocationsResultSchemaAnoncreds,
-    PublishRevocationsSchemaAnoncreds,
+    PublishRevocationsResultSchemaAnonCreds,
+    PublishRevocationsSchemaAnonCreds,
     RevokeRequest,
-    RevokeRequestSchemaAnoncreds,
+    RevokeRequestSchemaAnonCreds,
     RevRegResult,
     TxnOrPublishRevocationsResult,
 )
@@ -107,7 +107,7 @@ async def revoke_credential(
     if wallet_type == "askar-anoncreds":
         request_body = handle_model_with_validation(
             logger=bound_logger,
-            model_class=RevokeRequestSchemaAnoncreds,
+            model_class=RevokeRequestSchemaAnonCreds,
             cred_ex_id=strip_protocol_prefix(credential_exchange_id),
             publish=auto_publish_to_ledger,
         )
@@ -227,7 +227,7 @@ async def publish_pending_revocations(
     try:
         if wallet_type == "askar-anoncreds":
             acapy_call = controller.anoncreds_revocation.publish_revocations
-            body = PublishRevocationsSchemaAnoncreds(
+            body = PublishRevocationsSchemaAnonCreds(
                 rrid2crid=revocation_registry_credential_map,
                 options=PublishRevocationsOptions(create_transaction_for_endorser=True),
             )
@@ -258,7 +258,7 @@ async def publish_pending_revocations(
             [txn.transaction_id for txn in result.txn],
         )
         return result
-    elif isinstance(result, PublishRevocationsResultSchemaAnoncreds):
+    elif isinstance(result, PublishRevocationsResultSchemaAnonCreds):
         bound_logger.info(
             "Successfully published pending AnonCreds revocations: {}.", result
         )
@@ -373,7 +373,7 @@ async def get_credential_revocation_record(
         ) from e
 
     if not isinstance(
-        result, (CredRevRecordResultSchemaAnoncreds, CredRevRecordResult)
+        result, (CredRevRecordResultSchemaAnonCreds, CredRevRecordResult)
     ):
         bound_logger.error(
             "Unexpected type returned from get_revocation_status: `{}`.", result

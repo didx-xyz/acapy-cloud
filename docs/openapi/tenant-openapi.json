@@ -4156,7 +4156,7 @@
         ],
         "title": "AnonCredsCredential"
       },
-      "AnoncredsPresentationReqAttrSpec": {
+      "AnonCredsPresentationReqAttrSpec": {
         "properties": {
           "name": {
             "anyOf": [
@@ -4188,7 +4188,7 @@
           "non_revoked": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/AnoncredsPresentationReqAttrSpecNonRevoked"
+                "$ref": "#/components/schemas/AnonCredsPresentationReqAttrSpecNonRevoked"
               },
               {
                 "type": "null"
@@ -4215,10 +4215,10 @@
           }
         },
         "type": "object",
-        "title": "AnoncredsPresentationReqAttrSpec",
-        "description": "AnoncredsPresentationReqAttrSpec"
+        "title": "AnonCredsPresentationReqAttrSpec",
+        "description": "AnonCredsPresentationReqAttrSpec"
       },
-      "AnoncredsPresentationReqAttrSpecNonRevoked": {
+      "AnonCredsPresentationReqAttrSpecNonRevoked": {
         "properties": {
           "from": {
             "anyOf": [
@@ -4250,10 +4250,10 @@
           }
         },
         "type": "object",
-        "title": "AnoncredsPresentationReqAttrSpecNonRevoked",
-        "description": "AnoncredsPresentationReqAttrSpecNonRevoked"
+        "title": "AnonCredsPresentationReqAttrSpecNonRevoked",
+        "description": "AnonCredsPresentationReqAttrSpecNonRevoked"
       },
-      "AnoncredsPresentationReqPredSpec": {
+      "AnonCredsPresentationReqPredSpec": {
         "properties": {
           "name": {
             "type": "string",
@@ -4263,7 +4263,7 @@
           "non_revoked": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/AnoncredsPresentationReqPredSpecNonRevoked"
+                "$ref": "#/components/schemas/AnonCredsPresentationReqPredSpecNonRevoked"
               },
               {
                 "type": "null"
@@ -4305,10 +4305,10 @@
           "p_type",
           "p_value"
         ],
-        "title": "AnoncredsPresentationReqPredSpec",
-        "description": "AnoncredsPresentationReqPredSpec"
+        "title": "AnonCredsPresentationReqPredSpec",
+        "description": "AnonCredsPresentationReqPredSpec"
       },
-      "AnoncredsPresentationReqPredSpecNonRevoked": {
+      "AnonCredsPresentationReqPredSpecNonRevoked": {
         "properties": {
           "from": {
             "anyOf": [
@@ -4340,10 +4340,10 @@
           }
         },
         "type": "object",
-        "title": "AnoncredsPresentationReqPredSpecNonRevoked",
-        "description": "AnoncredsPresentationReqPredSpecNonRevoked"
+        "title": "AnonCredsPresentationReqPredSpecNonRevoked",
+        "description": "AnonCredsPresentationReqPredSpecNonRevoked"
       },
-      "AnoncredsPresentationRequest": {
+      "AnonCredsPresentationRequest": {
         "properties": {
           "name": {
             "anyOf": [
@@ -4360,7 +4360,7 @@
           "non_revoked": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/AnoncredsPresentationRequestNonRevoked"
+                "$ref": "#/components/schemas/AnonCredsPresentationRequestNonRevoked"
               },
               {
                 "type": "null"
@@ -4381,7 +4381,7 @@
           },
           "requested_attributes": {
             "additionalProperties": {
-              "$ref": "#/components/schemas/AnoncredsPresentationReqAttrSpec"
+              "$ref": "#/components/schemas/AnonCredsPresentationReqAttrSpec"
             },
             "type": "object",
             "title": "Requested Attributes",
@@ -4389,7 +4389,7 @@
           },
           "requested_predicates": {
             "additionalProperties": {
-              "$ref": "#/components/schemas/AnoncredsPresentationReqPredSpec"
+              "$ref": "#/components/schemas/AnonCredsPresentationReqPredSpec"
             },
             "type": "object",
             "title": "Requested Predicates",
@@ -4413,10 +4413,10 @@
           "requested_attributes",
           "requested_predicates"
         ],
-        "title": "AnoncredsPresentationRequest",
-        "description": "AnoncredsPresentationRequest"
+        "title": "AnonCredsPresentationRequest",
+        "description": "AnonCredsPresentationRequest"
       },
-      "AnoncredsPresentationRequestNonRevoked": {
+      "AnonCredsPresentationRequestNonRevoked": {
         "properties": {
           "from": {
             "anyOf": [
@@ -4448,8 +4448,8 @@
           }
         },
         "type": "object",
-        "title": "AnoncredsPresentationRequestNonRevoked",
-        "description": "AnoncredsPresentationRequestNonRevoked"
+        "title": "AnonCredsPresentationRequestNonRevoked",
+        "description": "AnonCredsPresentationRequestNonRevoked"
       },
       "AttachDecorator-Input": {
         "properties": {
@@ -5727,7 +5727,7 @@
           "anoncreds_proof_request": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/AnoncredsPresentationRequest"
+                "$ref": "#/components/schemas/AnonCredsPresentationRequest"
               },
               {
                 "type": "null"
@@ -10418,7 +10418,7 @@
           "anoncreds_proof_request": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/AnoncredsPresentationRequest"
+                "$ref": "#/components/schemas/AnonCredsPresentationRequest"
               },
               {
                 "type": "null"
