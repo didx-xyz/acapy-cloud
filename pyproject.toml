@@ -21,7 +21,7 @@ orjson = "~3.10.7"
 pydantic = "~2.11.1"
 PyYAML = "~6.0.2"
 scalar-fastapi = "^1.0.3"
-uvicorn = "~0.34.0"
+uvicorn = "~0.34.2"
 uvloop = "^0.21.0"
 
 [tool.poetry.group.app.dependencies]
