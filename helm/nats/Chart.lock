@@ -4,6 +4,6 @@ dependencies:
   version: 2.30.0
 - name: nats
   repository: oci://registry-1.docker.io/bitnamicharts
-  version: 9.0.7
-digest: sha256:a69d90a255ea1bddf4dd3ffde74805d464189d5b9d73b19e6d4b48bb328fe9f5
-generated: "2025-03-24T13:15:30.092161+02:00"
+  version: 9.0.11
+digest: sha256:34de0b35f95d30cbf51ffc96dbe27b71783fad08595e537011f0ef0fadd4adc5
+generated: "2025-04-23T15:00:34.612323+02:00"

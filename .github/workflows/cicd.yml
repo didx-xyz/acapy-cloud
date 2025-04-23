@@ -46,8 +46,8 @@ permissions: {}
 env:
   TAILSCALE_VERSION: latest
   HELMFILE_VERSION: v0.171.0
-  HELM_VERSION: v3.17.2
-  MISE_VERSION: 2025.3.7
+  HELM_VERSION: v3.17.3
+  MISE_VERSION: 2025.4.7
 
 jobs:
   format:

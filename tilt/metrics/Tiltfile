@@ -22,7 +22,7 @@ def setup_metrics_server():
             "--set",
             "extraArgs[1]=--kubelet-insecure-tls",
             "--version",
-            "7.4.1",
+            "7.4.2",
             "--wait",
         ],
         labels=["30-monitoring"],
