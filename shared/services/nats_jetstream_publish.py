@@ -135,7 +135,10 @@ class NatsJetstreamPublish:
         Publish a message to a NATS JetStream subject.
         """
         attempt = 0
-        dict_bytes = orjson.dumps(event.data)
+        payload_dict = event.payload.model_dump()
+        dict_bytes = orjson.dumps(payload_dict)
+        hashed_payload = xxhash.xxh64(dict_bytes).intdigest()
+
         while attempt < retries:
             try:
 
