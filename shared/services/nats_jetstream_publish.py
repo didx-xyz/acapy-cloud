@@ -187,3 +187,13 @@ class NatsJetstreamPublish:
                 else:
                     logger.error("Failed to publish message after {} attempts", retries)
                     raise e
+
+    def convert_timestamp(self, timestamp: str) -> str:
+        """
+        Convert a timestamp string to a Unix timestamp in nanoseconds.
+        """
+        try:
+            dt = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+            return str(int(dt.timestamp() * 1_000_000))
+        except ValueError as e:
+            raise ValueError(f"Invalid timestamp format: {timestamp}") from e
