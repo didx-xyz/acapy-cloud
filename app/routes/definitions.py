@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, HTTPException
 
 import app.services.definitions.credential_definitions as cred_def_service
@@ -11,6 +12,7 @@ from app.dependencies.auth import (
     acapy_auth_from_header,
     acapy_auth_verified,
 )
+from app.dependencies.container import Container
 from app.dependencies.role import Role
 from app.exceptions import handle_acapy_call
 from app.exceptions.cloudapi_exception import CloudApiException
@@ -32,6 +34,7 @@ from app.util.retry_method import coroutine_with_retry
 from app.util.valid_issuer import assert_public_did_and_wallet_type
 from app.util.wallet_type_checks import get_wallet_type
 from shared.log_config import get_logger
+from shared.services.nats_jetstream_publish import EventFactory, NatsJetstreamPublish
 
 logger = get_logger(__name__)
 
@@ -42,8 +45,12 @@ router = APIRouter(
 
 
 @router.post("/schemas", summary="Create a new Schema", response_model=CredentialSchema)
+@inject
 async def create_schema(
     schema: CreateSchema,
+    publisher: NatsJetstreamPublish = Depends(
+        Provide[Container.nats_jetstream_publisher]
+    ),
     auth: AcaPyAuthVerified = Depends(acapy_auth_verified),
 ) -> CredentialSchema:
     """
