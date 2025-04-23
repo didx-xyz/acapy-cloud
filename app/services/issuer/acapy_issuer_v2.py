@@ -7,7 +7,7 @@ from aries_cloudcontroller import (
     V20CredExFree,
     V20CredExRecord,
     V20CredFilter,
-    V20CredFilterAnoncreds,
+    V20CredFilterAnonCreds,
     V20CredFilterIndy,
     V20CredOfferConnFreeRequest,
     V20CredPreview,
@@ -123,7 +123,7 @@ class IssuerV2(Issuer):
             )
             anon_model = handle_model_with_validation(
                 logger=bound_logger,
-                model_class=V20CredFilterAnoncreds,
+                model_class=V20CredFilterAnonCreds,
                 cred_def_id=credential.anoncreds_credential_detail.credential_definition_id,
                 issuer_id=strip_qualified_did_sov(
                     credential.anoncreds_credential_detail.issuer_did

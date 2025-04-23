@@ -1,7 +1,7 @@
 import pytest
 from aries_cloudcontroller import (
     AcaPyClient,
-    AnoncredsPresSpec,
+    AnonCredsPresSpec,
     ApiException,
     DIFPresSpec,
     IndyCredInfo,
@@ -226,7 +226,7 @@ async def test_accept_proof_request(mock_agent_controller: AcaPyClient, proof_ty
                 DIFPresSpec() if proof_type.value == "ld_proof" else None
             ),
             anoncreds_presentation_spec=(
-                AnoncredsPresSpec(
+                AnonCredsPresSpec(
                     requested_attributes={},
                     requested_predicates={},
                     self_attested_attributes={},

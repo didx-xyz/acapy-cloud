@@ -5,8 +5,8 @@ from typing import Optional
 
 import pytest
 from aries_cloudcontroller import (
-    AnoncredsPresSpec,
-    AnoncredsRequestedCredsRequestedAttr,
+    AnonCredsPresSpec,
+    AnonCredsRequestedCredsRequestedAttr,
 )
 from fastapi import HTTPException
 
@@ -118,13 +118,13 @@ async def test_accept_anoncreds_proof_request(
     )
 
     referent = requested_credentials.json()[0]["cred_info"]["referent"]
-    request_attrs = AnoncredsRequestedCredsRequestedAttr(
+    request_attrs = AnonCredsRequestedCredsRequestedAttr(
         cred_id=referent, revealed=True
     )
     proof_accept = AcceptProofRequest(
         type="anoncreds",
         proof_id=alice_proof_id,
-        anoncreds_presentation_spec=AnoncredsPresSpec(
+        anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={"0_speed_uuid": request_attrs},
             requested_predicates={},
             self_attested_attributes={},
@@ -289,14 +289,14 @@ async def test_get_proof_and_get_proofs_anoncreds(
         )
     ).json()[0]["cred_info"]["referent"]
 
-    request_attrs = AnoncredsRequestedCredsRequestedAttr(
+    request_attrs = AnonCredsRequestedCredsRequestedAttr(
         cred_id=referent, revealed=True
     )
 
     proof_accept = AcceptProofRequest(
         type="anoncreds",
         proof_id=alice_proof_id,
-        anoncreds_presentation_spec=AnoncredsPresSpec(
+        anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={"0_speed_uuid": request_attrs},
             requested_predicates={},
             self_attested_attributes={},
@@ -530,14 +530,14 @@ async def test_accept_anoncreds_proof_request_verifier_has_issuer_role(
     )
 
     referent = requested_credentials.json()[0]["cred_info"]["referent"]
-    request_attrs = AnoncredsRequestedCredsRequestedAttr(
+    request_attrs = AnonCredsRequestedCredsRequestedAttr(
         cred_id=referent, revealed=True
     )
 
     proof_accept = AcceptProofRequest(
         type="anoncreds",
         proof_id=alice_proof_id,
-        anoncreds_presentation_spec=AnoncredsPresSpec(
+        anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={"0_speed_uuid": request_attrs},
             requested_predicates={},
             self_attested_attributes={},
@@ -603,14 +603,14 @@ async def test_saving_of_anoncreds_presentation_exchange_records(
     )
 
     referent = requested_credentials.json()[0]["cred_info"]["referent"]
-    request_attrs = AnoncredsRequestedCredsRequestedAttr(
+    request_attrs = AnonCredsRequestedCredsRequestedAttr(
         cred_id=referent, revealed=True
     )
 
     proof_accept = AcceptProofRequest(
         type="anoncreds",
         proof_id=alice_proof_id,
-        anoncreds_presentation_spec=AnoncredsPresSpec(
+        anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={"0_speed_uuid": request_attrs},
             requested_predicates={},
             self_attested_attributes={},

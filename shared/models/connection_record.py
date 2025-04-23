@@ -17,7 +17,7 @@ State = Literal[
 
 Role = Literal["invitee", "requester", "inviter", "responder"]
 
-Protocol = Literal["connections/1.0", "didexchange/1.0"]
+Protocol = Literal["didexchange/1.0", "didexchange/1.1"]
 
 
 class Connection(BaseModel):

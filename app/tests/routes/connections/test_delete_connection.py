@@ -21,7 +21,7 @@ async def test_delete_connection_by_id_success():
     # Mock to return a connection that uses the deprecated connections protocol
     mock_aries_controller.connection.get_connection = AsyncMock(
         return_value=ConnRecord(
-            connection_id=connection_id, connection_protocol="connections/1.0"
+            connection_id=connection_id, connection_protocol="didexchange/1.0"
         )
     )
     mock_aries_controller.connection.delete_connection = AsyncMock()
@@ -41,10 +41,9 @@ async def test_delete_connection_by_id_success():
         mock_aries_controller.connection.get_connection.assert_awaited_once_with(
             conn_id=connection_id,
         )
-        mock_aries_controller.connection.delete_connection.assert_awaited_once_with(
-            conn_id=connection_id,
+        mock_aries_controller.did_rotate.hangup.assert_awaited_once_with(
+            conn_id=connection_id
         )
-        mock_aries_controller.did_rotate.hangup.assert_not_called()
 
 
 @pytest.mark.anyio

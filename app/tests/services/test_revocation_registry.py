@@ -6,18 +6,18 @@ from aries_cloudcontroller import (
     ApiException,
     ClearPendingRevocationsRequest,
     CredRevRecordResult,
-    CredRevRecordResultSchemaAnoncreds,
+    CredRevRecordResultSchemaAnonCreds,
     IssuerCredRevRecord,
-    IssuerCredRevRecordSchemaAnoncreds,
+    IssuerCredRevRecordSchemaAnonCreds,
     IssuerRevRegRecord,
     PublishRevocations,
     PublishRevocationsOptions,
-    PublishRevocationsResultSchemaAnoncreds,
-    PublishRevocationsSchemaAnoncreds,
+    PublishRevocationsResultSchemaAnonCreds,
+    PublishRevocationsSchemaAnonCreds,
     RevRegResult,
-    RevRegResultSchemaAnoncreds,
+    RevRegResultSchemaAnonCreds,
     RevRegsCreated,
-    RevRegsCreatedSchemaAnoncreds,
+    RevRegsCreatedSchemaAnonCreds,
     TransactionRecord,
     TxnOrPublishRevocationsResult,
     V20CredExRecordDetail,
@@ -162,7 +162,7 @@ async def test_publish_pending_revocations_success(
         elif wallet_type == "askar-anoncreds":
             anoncreds_revocation = mock_agent_controller.anoncreds_revocation
             anoncreds_revocation.publish_revocations.return_value = (
-                PublishRevocationsResultSchemaAnoncreds(
+                PublishRevocationsResultSchemaAnonCreds(
                     rrid2crid=revocation_registry_credential_map_output
                 )
             )
@@ -182,7 +182,7 @@ async def test_publish_pending_revocations_success(
         elif wallet_type == "askar-anoncreds":
             anoncreds_revocation = mock_agent_controller.anoncreds_revocation
             anoncreds_revocation.publish_revocations.assert_called_once_with(
-                body=PublishRevocationsSchemaAnoncreds(
+                body=PublishRevocationsSchemaAnonCreds(
                     rrid2crid=revocation_registry_credential_map_input,
                     options=PublishRevocationsOptions(
                         create_transaction_for_endorser=True
@@ -221,7 +221,7 @@ async def test_publish_pending_revocations_empty_response(
         assert result is None  # We still publish, but no result is returned
         anoncreds_revocation = mock_agent_controller.anoncreds_revocation
         anoncreds_revocation.publish_revocations.assert_called_once_with(
-            body=PublishRevocationsSchemaAnoncreds(
+            body=PublishRevocationsSchemaAnonCreds(
                 rrid2crid=revocation_registry_credential_map_input,
                 options=PublishRevocationsOptions(create_transaction_for_endorser=True),
             )
@@ -347,7 +347,7 @@ async def test_clear_pending_revocations_failure(mock_agent_controller: AcaPyCli
     "wallet_type, schema",
     [
         ("askar", IssuerCredRevRecord),
-        ("askar-anoncreds", IssuerCredRevRecordSchemaAnoncreds),
+        ("askar-anoncreds", IssuerCredRevRecordSchemaAnonCreds),
     ],
 )
 async def test_get_credential_revocation_record_success(
@@ -378,7 +378,7 @@ async def test_get_credential_revocation_record_success(
         else:  # wallet_type == "askar-anoncreds"
             anoncreds_revocation = mock_agent_controller.anoncreds_revocation
             anoncreds_revocation.get_cred_rev_record.return_value = (
-                CredRevRecordResultSchemaAnoncreds(result=expected_result)
+                CredRevRecordResultSchemaAnonCreds(result=expected_result)
             )
 
             result = await test_module.get_credential_revocation_record(
@@ -510,7 +510,7 @@ async def test_validate_rev_reg_ids_success(
         elif wallet_type == "askar-anoncreds":
             anoncreds_revocation = mock_agent_controller.anoncreds_revocation
             anoncreds_revocation.get_revocation_registry.return_value = (
-                RevRegResultSchemaAnoncreds(
+                RevRegResultSchemaAnonCreds(
                     result=IssuerRevRegRecord(
                         pending_pub=revocation_registry_credential_map_input.get(
                             "rev_reg_id1"
@@ -657,7 +657,7 @@ async def test_get_pending_revocations_success(
         elif wallet_type == "askar-anoncreds":
             anoncreds_revocation = mock_agent_controller.anoncreds_revocation
             anoncreds_revocation.get_revocation_registry.return_value = (
-                RevRegResultSchemaAnoncreds(
+                RevRegResultSchemaAnonCreds(
                     result=IssuerRevRegRecord(
                         rev_reg_id=rev_reg_id, max_cred_num=max_cred_num
                     )
@@ -707,7 +707,7 @@ async def test_get_pending_revocations_result_none(
         mock_get_wallet_type.return_value = "askar"
         # Mock ApiException from ACA-Py
         mock_agent_controller.revocation.get_registry.return_value = (
-            RevRegResultSchemaAnoncreds(result=None)
+            RevRegResultSchemaAnonCreds(result=None)
         )
 
         with pytest.raises(
@@ -740,7 +740,7 @@ async def test_get_created_active_registries(
         elif wallet_type == "askar-anoncreds":
             anoncreds_revocation = mock_agent_controller.anoncreds_revocation
             anoncreds_revocation.get_revocation_registries.return_value = (
-                RevRegsCreatedSchemaAnoncreds(rev_reg_ids=active_registries)
+                RevRegsCreatedSchemaAnonCreds(rev_reg_ids=active_registries)
             )
 
         result = await test_module.get_created_active_registries(

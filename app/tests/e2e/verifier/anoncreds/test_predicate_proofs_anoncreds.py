@@ -1,5 +1,5 @@
 import pytest
-from aries_cloudcontroller import AnoncredsPresSpec
+from aries_cloudcontroller import AnonCredsPresSpec
 from fastapi import HTTPException
 
 from app.routes.verifier import AcceptProofRequest, router
@@ -61,7 +61,7 @@ async def test_predicate_proofs_anoncreds(
     proof_accept = AcceptProofRequest(
         proof_id=alice_proof_id,
         type="anoncreds",
-        anoncreds_presentation_spec=AnoncredsPresSpec(
+        anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={},
             requested_predicates={
                 "over_18": {

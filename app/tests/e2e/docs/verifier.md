@@ -11,7 +11,7 @@
   - delete proofs &#x2611;
   - get credentials for proof &#x2611;
 
-- Anoncreds
+- AnonCreds
   - get exchange record by id &#x2611;
   - get exchange records &#x2611;
   - send proof &#x2611;

@@ -4,7 +4,7 @@ The JSON_LD sign and verify end-points are deprecated, should we drop support th
 
 ## JSON_LD sign and verify endpoints
 
-- Anoncreds
+- AnonCreds
   - Sign &#x2611;
   - Verify &#x2611;
 
@@ -61,7 +61,7 @@ I think we need to connect the wires for these messages.
 
 ## OOB end-points
 
-- Anoncreds
+- AnonCreds
   - Create invitation &#x2611;
   - Accept invitation &#x2611;
   - Connect via pud_did &#x2611;

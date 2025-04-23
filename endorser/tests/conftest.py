@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from aries_cloudcontroller import (
     AcaPyClient,
-    AnoncredsSchemasApi,
+    AnonCredsSchemasApi,
     EndorseTransactionApi,
     SchemaApi,
     ServerApi,
@@ -18,7 +18,7 @@ def anyio_backend():
 @pytest.fixture
 def mock_acapy_client():
     client = MagicMock(spec=AcaPyClient)
-    client.anoncreds_schemas = MagicMock(spec=AnoncredsSchemasApi)
+    client.anoncreds_schemas = MagicMock(spec=AnonCredsSchemasApi)
     client.endorse_transaction = MagicMock(spec=EndorseTransactionApi)
     client.schema = MagicMock(spec=SchemaApi)
     client.server = MagicMock(spec=ServerApi)

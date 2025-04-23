@@ -1,5 +1,5 @@
 import pytest
-from aries_cloudcontroller import AnoncredsPresSpec
+from aries_cloudcontroller import AnonCredsPresSpec
 
 from app.routes.verifier import AcceptProofRequest, router
 from app.tests.util.connections import AcmeAliceConnect
@@ -61,7 +61,7 @@ async def test_self_attested_attributes_anoncreds(
     proof_accept = AcceptProofRequest(
         proof_id=alice_proof_id,
         type="anoncreds",
-        anoncreds_presentation_spec=AnoncredsPresSpec(
+        anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={
                 "name_attribute": {
                     "cred_id": referent,

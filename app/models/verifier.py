@@ -2,10 +2,10 @@ from enum import Enum
 from typing import Optional, Union
 
 from aries_cloudcontroller import (
-    AnoncredsPresentationRequest as AcaPyAnoncredsPresentationRequest,
+    AnonCredsPresentationRequest as AcaPyAnonCredsPresentationRequest,
 )
 from aries_cloudcontroller import (
-    AnoncredsPresSpec,
+    AnonCredsPresSpec,
     DIFPresSpec,
     DIFProofRequest,
     IndyNonRevocationInterval,
@@ -25,7 +25,7 @@ class ProofRequestType(str, Enum):
     ANONCREDS: str = "anoncreds"
 
 
-class AnoncredsPresentationRequest(AcaPyAnoncredsPresentationRequest):
+class AnonCredsPresentationRequest(AcaPyAnonCredsPresentationRequest):
     name: str = Field(default="Proof", description="Proof request name")
     version: str = Field(default="1.0", description="Proof request version")
 
@@ -39,7 +39,7 @@ class ProofRequestBase(BaseModel):
     type: ProofRequestType = ProofRequestType.INDY
     indy_proof_request: Optional[IndyProofRequest] = None
     dif_proof_request: Optional[DIFProofRequest] = None
-    anoncreds_proof_request: Optional[AnoncredsPresentationRequest] = None
+    anoncreds_proof_request: Optional[AnonCredsPresentationRequest] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -114,7 +114,7 @@ class AcceptProofRequest(ProofId, SaveExchangeRecordField):
     type: ProofRequestType = ProofRequestType.INDY
     indy_presentation_spec: Optional[IndyPresSpec] = None
     dif_presentation_spec: Optional[DIFPresSpec] = None
-    anoncreds_presentation_spec: Optional[AnoncredsPresSpec] = None
+    anoncreds_presentation_spec: Optional[AnonCredsPresSpec] = None
 
     @model_validator(mode="after")
     def validate_specs(self) -> "AcceptProofRequest":

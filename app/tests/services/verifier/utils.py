@@ -1,6 +1,6 @@
 from aries_cloudcontroller import (
-    AnoncredsPresentationReqAttrSpec,
-    AnoncredsPresentationRequestNonRevoked,
+    AnonCredsPresentationReqAttrSpec,
+    AnonCredsPresentationRequestNonRevoked,
     AttachDecorator,
     AttachDecoratorData,
     DIFProofRequest,
@@ -20,7 +20,7 @@ from aries_cloudcontroller import (
     V20PresProposal,
 )
 
-from app.models.verifier import AnoncredsPresentationRequest, IndyProofRequest
+from app.models.verifier import AnonCredsPresentationRequest, IndyProofRequest
 
 indy_proof = IndyProof(
     identifiers=[],
@@ -52,13 +52,13 @@ def sample_indy_proof_request(restrictions=None) -> IndyProofRequest:
     )
 
 
-def sample_anoncreds_proof_request(restrictions=None) -> AnoncredsPresentationRequest:
-    return AnoncredsPresentationRequest(
+def sample_anoncreds_proof_request(restrictions=None) -> AnonCredsPresentationRequest:
+    return AnonCredsPresentationRequest(
         name="string",
-        non_revoked=AnoncredsPresentationRequestNonRevoked(),
+        non_revoked=AnonCredsPresentationRequestNonRevoked(),
         nonce="12345",
         requested_attributes={
-            "0_speed_uuid": AnoncredsPresentationReqAttrSpec(
+            "0_speed_uuid": AnonCredsPresentationReqAttrSpec(
                 name="speed",
                 restrictions=restrictions,
             )

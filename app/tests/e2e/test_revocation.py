@@ -520,7 +520,7 @@ async def get_pending_revocations_bad_payload(
 
     if credential_type == "indy":
         assert exc.value.status_code == 422
-    else:  # TODO: Anoncreds endpoint doesn't validate rev_reg_id
+    else:  # TODO: AnonCreds endpoint doesn't validate rev_reg_id
         assert exc.value.status_code == 404
 
 
@@ -546,7 +546,7 @@ async def test_fix_rev_reg_bad_id_indy(
 
 
 @pytest.mark.anyio
-@pytest.mark.skip("TODO: Anoncreds endpoint doesn't validate rev_reg_id")
+@pytest.mark.skip("TODO: AnonCreds endpoint doesn't validate rev_reg_id")
 @pytest.mark.skipif(
     TestMode.regression_run in TestMode.fixture_params,
     reason=skip_regression_test_reason,
