@@ -107,7 +107,7 @@ async def app_lifespan(_: FastAPI):
     container = Container()
     await container.init_resources()
 
-    container.wire(modules=[__name__, tenant_admin_routes, tenant_routes])
+    container.wire(modules=[__name__, tenants, definitions])
     await container.nats_jetstream_publisher()
 
     yield
@@ -123,6 +123,7 @@ def create_app() -> FastAPI:
         title=OPENAPI_NAME,
         version=PROJECT_VERSION,
         description=acapy_cloud_description(ROLE),
+        lifespan=app_lifespan,
         debug=debug,
         redoc_url=None,
         docs_url=None,
