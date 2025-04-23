@@ -160,6 +160,13 @@ class NatsJetstreamPublish:
                     ),
                 }
 
+                ack = await self.js_context.publish(
+                    event.subject,
+                    dict_bytes,
+                    stream="cloudapi_aries_events",
+                    headers=headers,
+                )
+
                 if ack.duplicate:
                     logger.warning("Duplicate message detected: {}", ack)
                 else:
