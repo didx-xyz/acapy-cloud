@@ -19,33 +19,15 @@ updates:
       day: saturday
       time: "07:00"
 
-  # Maintain dependencies for the App submodule
-  - package-ecosystem: pip
-    directory: /app
-    schedule:
-      interval: weekly
-      day: saturday
-      time: "07:00"
-
-  # Maintain dependencies for the Endorser submodule
-  - package-ecosystem: pip
-    directory: /endorser
-    schedule:
-      interval: weekly
-      day: saturday
-      time: "07:00"
-
-  # Maintain dependencies for the Trust Registry submodule
-  - package-ecosystem: pip
-    directory: /trustregistry
-    schedule:
-      interval: weekly
-      day: saturday
-      time: "07:00"
-
-  # Maintain dependencies for the Waypoint submodule
-  - package-ecosystem: pip
-    directory: /waypoint
+  # Maintain dependencies for Docker
+  - package-ecosystem: docker
+    directories:
+      - /dockerfiles/agent
+      - /dockerfiles/app
+      - /dockerfiles/endorser
+      - /dockerfiles/tests
+      - /dockerfiles/trustregistry
+      - /dockerfiles/waypoint
     schedule:
       interval: weekly
       day: saturday
