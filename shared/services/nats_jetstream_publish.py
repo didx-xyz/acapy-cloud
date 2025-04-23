@@ -13,29 +13,39 @@ from nats.js.client import JetStreamContext
 from pydantic import BaseModel
 
 
-class BaseEvent(BaseModel):
-    """
-    Base class for events.
-    """
+class TenantEventPayload(BaseModel):
+    """Payload for tenant-related events"""
+
+    wallet_id: str
+    wallet_label: str
+    wallet_name: str
+    roles: List[str]
+    image_url: str
+    group_id: str
+    topic: str
+    state: str
+    created_at: str
+    updated_at: str
+
+
+class SchemaEventPayload(BaseModel):
+    """Payload for schema-related events"""
+
+    schema_id: str
+    name: str
+    version: str
+    attributes: List[str]
+    topic: str
+    state: str
+    created_at: str
+    updated_at: str
+
+
+class Event(BaseModel):
+    """Base class for all events"""
 
     subject: str
-    data: dict
-
-
-class TenantEvent(BaseEvent):
-    """
-    Event for tenant-related actions.
-    """
-
-    # TODO: Add specific fields and methods for tenant events
-
-
-class SchemaEvent(BaseEvent):
-    """
-    Event for schema-related actions.
-    """
-
-    # TODO: Add specific fields and methods for schema events
+    payload: Union[TenantEventPayload, SchemaEventPayload]
 
 
 class NatsJetstreamPublish:
