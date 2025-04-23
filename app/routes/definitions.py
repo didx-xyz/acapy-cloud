@@ -117,6 +117,22 @@ async def create_schema(
             schema=schema,
             public_did=public_did,
         )
+
+    event = EventFactory.create_schema_event(
+        subject=f"cloudapi.aries.events.no_group.Governance",  # TODO update based on cheqd
+        schema_id=schema_response.id,
+        name=schema_response.name,
+        version=schema_response.version,
+        attributes=schema_response.attribute_names,
+        topic="schema",
+        state="created",
+    )
+
+    await publisher.publish(
+        logger=bound_logger,
+        event=event,
+    )
+
     return schema_response
 
 
