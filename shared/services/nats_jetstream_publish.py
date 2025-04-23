@@ -129,7 +129,7 @@ class NatsJetstreamPublish:
         self.js_context = jetstream
 
     async def publish(
-        self, logger: Logger, event: BaseEvent, retries: int = 3, delay: int = 5
+        self, logger: Logger, event: Event, retries: int = 3, delay: int = 5
     ) -> None:
         """
         Publish a message to a NATS JetStream subject.
