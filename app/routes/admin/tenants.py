@@ -47,7 +47,7 @@ from app.util.tenants import (
 )
 from shared.log_config import get_logger
 from shared.models.trustregistry import Actor
-from shared.services.nats_jetstream_publish import NatsJetstreamPublish, TenantEvent
+from shared.services.nats_jetstream_publish import EventFactory, NatsJetstreamPublish
 
 logger = get_logger(__name__)
 
