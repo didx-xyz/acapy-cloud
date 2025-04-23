@@ -255,22 +255,23 @@ async def create_tenant(
         group_id=body.group_id,
     )
 
+    event = EventFactory.create_tenant_event(
+        subject=f"cloudapi.aries.events.{body.group_id}.{wallet_response.wallet_id}",
+        wallet_id=wallet_response.wallet_id,
+        wallet_label=wallet_label,
+        wallet_name=wallet_name,
+        roles=roles if roles else [],
+        state="created",
+        group_id=body.group_id,
+        topic="tenant",
+        image_url=body.image_url,
+        created_at=wallet_response.created_at,
+        updated_at=wallet_response.updated_at,
+    )
+
     await publisher.publish(
         logger=bound_logger,
-        event=TenantEvent(
-            subject=f"cloudapi.aries.events.{body.group_id}.{wallet_response.wallet_id}",
-            data={
-                "wallet_id": wallet_response.wallet_id,
-                "wallet_label": wallet_label,
-                "wallet_name": wallet_name,
-                "roles": roles if roles else [],
-                "created_at": wallet_response.created_at,
-                "updated_at": wallet_response.updated_at,
-                "image_url": body.image_url,
-                "group_id": body.group_id,
-                # payload TODO: Add payload?? Add headers??
-            },
-        ),
+        event=event,
     )
 
     bound_logger.debug("Successfully created tenant.")
