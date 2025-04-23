@@ -52,6 +52,74 @@ class Event(BaseModel):
     payload: Union[TenantEventPayload, SchemaEventPayload]
 
 
+class EventFactory:
+    """Factory for creating events"""
+
+    @staticmethod
+    def create_tenant_event(
+        subject: str,
+        wallet_id: str,
+        wallet_label: str,
+        wallet_name: str,
+        roles: List[str],
+        state: str,
+        group_id: str,
+        topic: str,
+        image_url: str = "",
+        created_at: str = None,
+        updated_at: str = None,
+    ) -> Event:
+        """Create a tenant event"""
+        if created_at is None:
+            created_at = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
+        if updated_at is None:
+            updated_at = created_at
+
+        payload = TenantEventPayload(
+            wallet_id=wallet_id,
+            wallet_label=wallet_label,
+            wallet_name=wallet_name,
+            roles=roles,
+            topic=topic,
+            state=state,
+            group_id=group_id,
+            image_url=image_url,
+            created_at=created_at,
+            updated_at=updated_at,
+        )
+        return Event(subject=subject, payload=payload)
+
+    @staticmethod
+    def create_schema_event(
+        subject: str,
+        schema_id: str,
+        name: str,
+        version: str,
+        attributes: List[str],
+        state: str,
+        topic: str,
+        created_at: str = None,
+        updated_at: str = None,
+    ) -> Event:
+        """Create a schema event"""
+        if created_at is None:
+            created_at = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
+        if updated_at is None:
+            updated_at = created_at
+
+        payload = SchemaEventPayload(
+            schema_id=schema_id,
+            name=name,
+            version=version,
+            attributes=attributes,
+            topic=topic,
+            state=state,
+            created_at=created_at,
+            updated_at=updated_at,
+        )
+        return Event(subject=subject, payload=payload)
+
+
 class NatsJetstreamPublish:
     """
     Publish messages to NATS JetStream.
