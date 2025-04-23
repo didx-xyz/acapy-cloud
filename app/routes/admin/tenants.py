@@ -61,12 +61,12 @@ group_id_query: Optional[str] = Query(
 )
 
 
-@inject
 @router.post("", response_model=CreateTenantResponse, summary="Create New Tenant")
+@inject
 async def create_tenant(
     body: CreateTenantRequest,
     publisher: NatsJetstreamPublish = Depends(
-        Provide[Container.nats_jetstream_publisher()]
+        Provide[Container.nats_jetstream_publisher]
     ),
     admin_auth: AcaPyAuthVerified = Depends(acapy_auth_tenant_admin),
 ) -> CreateTenantResponse:
