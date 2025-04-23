@@ -473,7 +473,7 @@ jobs:
           version: ${{ env.TAILSCALE_VERSION }}
 
       - name: Deploy to EKS
-        uses: ./.github/actions/deploy-eks
+        uses: ./.github/workflows/actions/deploy-eks
         with:
           aws-region: af-south-1
           aws-role-arn: arn:aws:iam::402177810328:role/cicd
@@ -488,7 +488,7 @@ jobs:
           namespace: acapy-cloud-dev
 
       - name: Run Tests
-        uses: ./.github/actions/test-eks
+        uses: ./.github/workflows/actions/test-eks
         with:
           clean-start: ${{ github.event.inputs.reset-deployments || false }}
           environment: ${{ vars.ENVIRONMENT }}
