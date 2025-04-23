@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 # Copy the pyproject.toml and lock file
 COPY pyproject.toml cloudapi-tests/
