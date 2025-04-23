@@ -196,6 +196,7 @@ See breakdown of tests [here](/app/tests/e2e/docs/wallet.md)
 ## JSON_LD endpoints
 
 - Sign &#x2611;
+  - Note: failures are ignored, because json-ld.org is sometimes unresolvable, leading to 500 error in ACA-Py
 - Verify &#x2611;
 
 See breakdown of tests [here](/app/tests/e2e/docs/oob_message_json_ld.md)
