@@ -52,6 +52,9 @@ signed_doc = {
 
 
 @pytest.mark.anyio
+@pytest.mark.xfail(
+    reason="json-ld.org can be unresolvable, causing test failure.", strict=False
+)
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_sign_jsonld(
     faber_anoncreds_acapy_client: AcaPyClient,
