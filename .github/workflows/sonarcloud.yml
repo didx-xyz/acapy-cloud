@@ -47,7 +47,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0 # Required for proper blame data in SonarCloud
           persist-credentials: false
@@ -75,13 +75,13 @@ jobs:
           EOF
 
       - name: Cache Python venv
-        uses: actions/cache@v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .venv
           key: python-${{ hashFiles('**/poetry.lock', '.mise.toml') }}
 
       - name: Set up Mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.2.1
         with:
           cache: true
           experimental: true
@@ -105,7 +105,7 @@ jobs:
 
       # Analyze with SonarCloud
       - name: Analyze with SonarCloud
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarqube-scan-action@aa494459d7c39c106cc77b166de8b4250a32bb97 # v5.1.0
         env:
           GITHUB_TOKEN: ${{ github.token }} # Needed to get PR information
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Generate a token on Sonarcloud.io, add it to the secrets of this repo with the name SONAR_TOKEN (Settings > Secrets > Actions > add new repository secret)
