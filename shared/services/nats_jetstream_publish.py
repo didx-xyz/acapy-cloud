@@ -141,8 +141,24 @@ class NatsJetstreamPublish:
 
         while attempt < retries:
             try:
-
-                ack = await self.js_context.publish(event.subject, dict_bytes)
+                headers = {
+                    "Content-Type": "application/json",
+                    "Nats-Msg-Id": str(hashed_payload),
+                    "event_origin": (
+                        event.payload.wallet_label
+                        if hasattr(event.payload, "wallet_label")
+                        else None
+                    ),
+                    "event_topic": event.payload.topic,
+                    "event_payload_state": event.payload.state,
+                    "event_processed_at": str(time.time_ns()),
+                    "event_payload_created_at": (
+                        self.convert_timestamp(event.payload.created_at)
+                    ),
+                    "event_payload_updated_at": (
+                        self.convert_timestamp(event.payload.updated_at)
+                    ),
+                }
 
                 if ack.duplicate:
                     logger.warning("Duplicate message detected: {}", ack)
