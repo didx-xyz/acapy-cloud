@@ -128,10 +128,15 @@ async def create_schema(
         state="created",
     )
 
-    await publisher.publish(
-        logger=bound_logger,
-        event=event,
-    )
+    try:
+        await publisher.publish(
+            logger=bound_logger,
+            event=event,
+        )
+    except Exception as e:
+        bound_logger.error(
+            "Failed to publish schema event to NATS: {}. Event: {}", e, event
+        )
 
     return schema_response
 
