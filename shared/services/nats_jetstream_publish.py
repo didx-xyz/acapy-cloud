@@ -153,10 +153,10 @@ class NatsJetstreamPublish:
                     "event_payload_state": event.payload.state,
                     "event_processed_at": str(time.time_ns()),
                     "event_payload_created_at": (
-                        self.convert_timestamp(event.payload.created_at)
+                        self._convert_timestamp(event.payload.created_at)
                     ),
                     "event_payload_updated_at": (
-                        self.convert_timestamp(event.payload.updated_at)
+                        self._convert_timestamp(event.payload.updated_at)
                     ),
                 }
 
@@ -196,7 +196,7 @@ class NatsJetstreamPublish:
                     logger.error("Failed to publish message after {} attempts", retries)
                     raise e
 
-    def convert_timestamp(self, timestamp: str) -> str:
+    def _convert_timestamp(self, timestamp: str) -> str:
         """
         Convert a timestamp string to a Unix timestamp in nanoseconds.
         """
