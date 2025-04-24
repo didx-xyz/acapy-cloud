@@ -467,7 +467,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: tailscale/github-action@5d536117a7378beffcd6d8523ce73c50fa98684d # main
+      - uses: tailscale/github-action@5d536117a7378beffcd6d8523ce73c50fa98684d # v3.2.1
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
           version: ${{ env.TAILSCALE_VERSION }}
