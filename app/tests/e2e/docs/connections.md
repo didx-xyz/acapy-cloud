@@ -2,17 +2,17 @@
 
 ## Connections end-points
 
-- Create invitation &#x2611;
-- Accept Invitation &#x2611;
-- get connections &#x2611;
-- get by id &#x2611;
-- get connections paginated &#x2611;
-- delete connections &#x2611;
-- did-exchange create request &#x2611;
-- did-exchange accept request &#x2611;
-- did-exchange rotate &#x2611;
-- did-exchange hang-up &#x2611;
-- reject did_exchange request &#x2612;
+- Create invitation ✅
+- Accept Invitation ✅
+- get connections ✅
+- get by id ✅
+- get connections paginated ✅
+- delete connections ✅
+- did-exchange create request ✅
+- did-exchange accept request ✅
+- did-exchange rotate ✅
+- did-exchange hang-up ✅
+- reject did_exchange request ❌
 
 The `reject did_exchange request` end-point is not tested.
 

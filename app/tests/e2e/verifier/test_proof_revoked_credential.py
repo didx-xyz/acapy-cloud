@@ -20,35 +20,6 @@ VERIFIER_BASE_PATH = verifier_router.prefix
 
 @pytest.mark.anyio
 @pytest.mark.parametrize(
-    "revoke_alice_indy_creds_and_publish",
-    ["auto_publish_true", "default"],
-    indirect=True,
-)
-@pytest.mark.skipif(
-    TestMode.regression_run in TestMode.fixture_params,
-    reason="Proving revoked credentials is currently non-deterministic",
-)
-@pytest.mark.xdist_group(name="issuer_test_group")
-async def test_proof_revoked_credential_indy(
-    revoke_alice_indy_creds_and_publish: List[  # pylint: disable=unused-argument
-        CredentialExchange
-    ],
-    indy_credential_definition_id_revocable: str,
-    acme_client: RichAsyncClient,
-    alice_member_client: RichAsyncClient,
-    acme_and_alice_connection: AcmeAliceConnect,
-):
-    await proof_revoked_credential(
-        proof_type="indy",
-        credential_definition_id=indy_credential_definition_id_revocable,
-        acme_client=acme_client,
-        alice_member_client=alice_member_client,
-        acme_and_alice_connection=acme_and_alice_connection,
-    )
-
-
-@pytest.mark.anyio
-@pytest.mark.parametrize(
     "revoke_alice_anoncreds_and_publish",
     ["auto_publish_true", "default"],
     indirect=True,
@@ -77,7 +48,7 @@ async def test_proof_revoked_credential_anoncreds(
 
 
 async def proof_revoked_credential(
-    proof_type: Literal["indy", "anoncreds"],
+    proof_type: Literal["anoncreds"],
     credential_definition_id: str,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
@@ -165,27 +136,6 @@ async def proof_revoked_credential(
     reason="Run only in regression mode",
 )
 @pytest.mark.xdist_group(name="issuer_test_group")
-async def test_regression_proof_revoked_indy_credential(
-    get_or_issue_regression_indy_cred_revoked: ReferentCredDef,
-    acme_client: RichAsyncClient,
-    alice_member_client: RichAsyncClient,
-    acme_and_alice_connection: AcmeAliceConnect,
-):
-    await regression_proof_revoked_credential(
-        "indy",
-        get_or_issue_regression_indy_cred_revoked,
-        acme_client,
-        alice_member_client,
-        acme_and_alice_connection,
-    )
-
-
-@pytest.mark.anyio
-@pytest.mark.skipif(
-    TestMode.clean_run in TestMode.fixture_params,
-    reason="Run only in regression mode",
-)
-@pytest.mark.xdist_group(name="issuer_test_group")
 async def test_regression_proof_revoked_anoncreds_credential(
     get_or_issue_regression_anoncreds_revoked: ReferentCredDef,
     acme_client: RichAsyncClient,
@@ -202,7 +152,7 @@ async def test_regression_proof_revoked_anoncreds_credential(
 
 
 async def regression_proof_revoked_credential(
-    proof_type: Literal["indy", "anoncreds"],
+    proof_type: Literal["anoncreds"],
     get_or_issue_regression_cred_revoked: ReferentCredDef,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,

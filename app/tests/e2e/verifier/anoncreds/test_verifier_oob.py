@@ -1,8 +1,8 @@
 import pytest
 from aries_cloudcontroller import (
+    AnonCredsPresSpec,
+    AnonCredsRequestedCredsRequestedAttr,
     AttachmentDef,
-    IndyPresSpec,
-    IndyRequestedCredsRequestedAttr,
 )
 
 from app.routes.connections import router as connections_router
@@ -11,7 +11,7 @@ from app.routes.oob import router as oob_router
 from app.routes.verifier import AcceptProofRequest, CreateProofRequest
 from app.routes.verifier import router as verifier_router
 from app.services.trust_registry.actors import fetch_actor_by_id
-from app.tests.services.verifier.utils import sample_indy_proof_request
+from app.tests.services.verifier.utils import sample_anoncreds_proof_request
 from app.tests.util.regression_testing import TestMode
 from app.tests.util.verifier import send_proof_request
 from app.tests.util.webhooks import check_webhook_state, get_wallet_id_from_async_client
@@ -29,13 +29,14 @@ CONNECTIONS_BASE_PATH = connections_router.prefix
 
 @pytest.mark.anyio
 async def test_accept_proof_request_oob(
-    issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+    issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     alice_member_client: RichAsyncClient,
     bob_member_client: RichAsyncClient,
 ):
     # Create the proof request against aca-py
     create_proof_request = CreateProofRequest(
-        indy_proof_request=sample_indy_proof_request(),
+        type="anoncreds",
+        anoncreds_proof_request=sample_anoncreds_proof_request(),
         comment="some comment",
     )
     create_proof_response = await bob_member_client.post(
@@ -83,13 +84,14 @@ async def test_accept_proof_request_oob(
     referent = requested_credentials.json()[0]["cred_info"]["referent"]
     assert referent
 
-    indy_request_attrs = IndyRequestedCredsRequestedAttr(
+    anoncreds_request_attrs = AnonCredsRequestedCredsRequestedAttr(
         cred_id=referent, revealed=True
     )
     proof_accept = AcceptProofRequest(
+        type="anoncreds",
         proof_id=alice_proof_id,
-        indy_presentation_spec=IndyPresSpec(
-            requested_attributes={"0_speed_uuid": indy_request_attrs},
+        anoncreds_presentation_spec=AnonCredsPresSpec(
+            requested_attributes={"0_speed_uuid": anoncreds_request_attrs},
             requested_predicates={},
             self_attested_attributes={},
         ),
@@ -127,8 +129,8 @@ async def test_accept_proof_request_oob(
     reason="Verifier trust registry OOB connection already tested in test_verifier",
 )
 async def test_accept_proof_request_verifier_oob_connection(
-    indy_credential_definition_id: str,
-    issue_indy_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+    anoncreds_credential_definition_id: str,
+    issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
 ):
@@ -167,14 +169,15 @@ async def test_accept_proof_request_verifier_oob_connection(
         # Present proof from holder to verifier
         request_body = {
             "connection_id": verifier_holder_connection_id,
-            "indy_proof_request": {
+            "type": "anoncreds",
+            "anoncreds_proof_request": {
                 "name": "Age Check",
                 "version": "1.0",
                 "requested_attributes": {
                     "name": {
                         "name": "name",
                         "restrictions": [
-                            {"cred_def_id": indy_credential_definition_id}
+                            {"cred_def_id": anoncreds_credential_definition_id}
                         ],
                     }
                 },
@@ -184,7 +187,7 @@ async def test_accept_proof_request_verifier_oob_connection(
                         "p_type": ">=",
                         "p_value": 21,
                         "restrictions": [
-                            {"cred_def_id": indy_credential_definition_id}
+                            {"cred_def_id": anoncreds_credential_definition_id}
                         ],
                     }
                 },
@@ -216,7 +219,8 @@ async def test_accept_proof_request_verifier_oob_connection(
             VERIFIER_BASE_PATH + "/accept-request",
             json={
                 "proof_id": holder_proof_exchange_id,
-                "indy_presentation_spec": {
+                "type": "anoncreds",
+                "anoncreds_presentation_spec": {
                     "requested_attributes": {
                         "name": {
                             "cred_id": cred_id,

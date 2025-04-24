@@ -5,8 +5,8 @@ The JSON_LD sign and verify end-points are deprecated, should we drop support th
 ## JSON_LD sign and verify endpoints
 
 - AnonCreds
-  - Sign &#x2611;
-  - Verify &#x2611;
+  - Sign ✅
+  - Verify ✅
 
 ## Json_LD sign/verify end-points
 
@@ -35,8 +35,8 @@ Third: assert `204` when verifying with verkey.
 
 ## Messaging end-points
 
-- send trust ping &#x2611;
-- send message &#x2612;
+- send trust ping ✅
+- send message ❌
   - never check if bob receives message
 
 ## Messaging tests
@@ -62,9 +62,9 @@ I think we need to connect the wires for these messages.
 ## OOB end-points
 
 - AnonCreds
-  - Create invitation &#x2611;
-  - Accept invitation &#x2611;
-  - Connect via pud_did &#x2611;
+  - Create invitation ✅
+  - Accept invitation ✅
+  - Connect via pud_did ✅
 
 ## OOB tests
 

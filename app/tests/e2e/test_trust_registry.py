@@ -13,8 +13,8 @@ CLOUDAPI_TRUST_REGISTRY_PATH = router.prefix
 @pytest.mark.anyio
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_get_schemas(
-    indy_schema_definition: CredentialSchema,  # pylint: disable=unused-argument
-    indy_schema_definition_alt: CredentialSchema,  # pylint: disable=unused-argument
+    anoncreds_schema_definition: CredentialSchema,  # pylint: disable=unused-argument
+    anoncreds_schema_definition_alt,  # pylint: disable=unused-argument
     trust_registry_client: RichAsyncClient,
 ):
     schemas_response = await trust_registry_client.get(
@@ -29,10 +29,11 @@ async def test_get_schemas(
 @pytest.mark.anyio
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_get_schema_by_id(
-    indy_schema_definition: CredentialSchema, trust_registry_client: RichAsyncClient
+    anoncreds_schema_definition: CredentialSchema,
+    trust_registry_client: RichAsyncClient,
 ):
     schema_response = await trust_registry_client.get(
-        f"{CLOUDAPI_TRUST_REGISTRY_PATH}/schemas/{indy_schema_definition.id}"
+        f"{CLOUDAPI_TRUST_REGISTRY_PATH}/schemas/{anoncreds_schema_definition.id}"
     )
 
     assert schema_response.status_code == 200
@@ -53,8 +54,8 @@ async def test_get_schema_by_id(
 @pytest.mark.anyio
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_get_actors(
-    faber_indy_issuer: CreateTenantResponse,
-    faber_indy_acapy_client: AcaPyClient,
+    faber_anoncreds_issuer: CreateTenantResponse,
+    faber_anoncreds_acapy_client: AcaPyClient,
     trust_registry_client: RichAsyncClient,
 ):
     # Test getting all actors
@@ -76,19 +77,19 @@ async def test_get_actors(
 
     # Test getting actors by ID
     actors_by_id = await trust_registry_client.get(
-        f"{CLOUDAPI_TRUST_REGISTRY_PATH}/actors?actor_id={faber_indy_issuer.wallet_id}"
+        f"{CLOUDAPI_TRUST_REGISTRY_PATH}/actors?actor_id={faber_anoncreds_issuer.wallet_id}"
     )
     assert actors_by_id.status_code == 200
     actor = actors_by_id.json()[0]
 
     # Verify actor DID matches the expected value
     actor_did = actor["did"]
-    did_result = await faber_indy_acapy_client.wallet.get_public_did()
+    did_result = await faber_anoncreds_acapy_client.wallet.get_public_did()
     assert actor_did == f"did:sov:{did_result.result.did}"
 
     # Verify actor name matches the expected value
     actor_name = actor["name"]
-    assert actor_name == faber_indy_issuer.wallet_label
+    assert actor_name == faber_anoncreds_issuer.wallet_label
 
     # Verify actor structure
     verify_actor_structure(actor)
@@ -101,7 +102,7 @@ async def test_get_actors(
 
     # Test getting actors by name
     actors_by_name = await trust_registry_client.get(
-        f"{CLOUDAPI_TRUST_REGISTRY_PATH}/actors?actor_name={faber_indy_issuer.wallet_label}"
+        f"{CLOUDAPI_TRUST_REGISTRY_PATH}/actors?actor_name={faber_anoncreds_issuer.wallet_label}"
     )
     assert actors_by_name.status_code == 200
 
@@ -140,7 +141,7 @@ async def test_get_actors_x(trust_registry_client: RichAsyncClient):
 @pytest.mark.anyio
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_get_issuers(
-    faber_indy_issuer: CreateTenantResponse,  # pylint: disable=unused-argument
+    faber_anoncreds_issuer: CreateTenantResponse,  # pylint: disable=unused-argument
     trust_registry_client: RichAsyncClient,
 ):
     actors = await trust_registry_client.get(

@@ -4,7 +4,7 @@ import pytest
 from fastapi import HTTPException
 
 from app.routes.verifier import router
-from app.tests.services.verifier.utils import sample_indy_proof_request
+from app.tests.services.verifier.utils import sample_anoncreds_proof_request
 from app.tests.util.connections import AcmeAliceConnect
 from app.tests.util.regression_testing import TestMode
 from app.tests.util.verifier import send_proof_request
@@ -22,7 +22,7 @@ VERIFIER_BASE_PATH = router.prefix
 async def test_get_presentation_exchange_records_paginated(
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-    indy_credential_definition_id: str,
+    anoncreds_credential_definition_id: str,
     acme_and_alice_connection: AcmeAliceConnect,
 ):
     num_presentation_requests_to_test = 5
@@ -33,10 +33,11 @@ async def test_get_presentation_exchange_records_paginated(
         # Create multiple presentation requests
         for _ in range(num_presentation_requests_to_test):
             request_body = {
+                "type": "anoncreds",
                 "save_exchange_record": True,
                 "connection_id": acme_and_alice_connection.acme_connection_id,
-                "indy_proof_request": sample_indy_proof_request(
-                    restrictions=[{"cred_def_id": indy_credential_definition_id}]
+                "anoncreds_proof_request": sample_anoncreds_proof_request(
+                    restrictions=[{"cred_def_id": anoncreds_credential_definition_id}]
                 ).to_dict(),
             }
             response = await send_proof_request(acme_client, request_body)

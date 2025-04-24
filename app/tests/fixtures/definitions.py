@@ -73,32 +73,6 @@ async def get_clean_or_regression_test_schema(
 
 
 @pytest.fixture(scope="session", params=TestMode.fixture_params)
-async def indy_schema_definition(
-    request,
-    mock_governance_auth: AcaPyAuthVerified,
-) -> CredentialSchema:
-    return await get_clean_or_regression_test_schema(
-        name="test_schema",
-        auth=mock_governance_auth,
-        test_mode=request.param,
-        schema_type=SchemaType.INDY,
-    )
-
-
-@pytest.fixture(scope="session", params=TestMode.fixture_params)
-async def indy_schema_definition_alt(
-    request,
-    mock_governance_auth: AcaPyAuthVerified,
-) -> CredentialSchema:
-    return await get_clean_or_regression_test_schema(
-        name="test_schema_alt",
-        auth=mock_governance_auth,
-        test_mode=request.param,
-        schema_type=SchemaType.INDY,
-    )
-
-
-@pytest.fixture(scope="session", params=TestMode.fixture_params)
 async def anoncreds_schema_definition(
     request,
     faber_anoncreds_client: RichAsyncClient,
@@ -187,60 +161,6 @@ async def get_clean_or_regression_test_cred_def(
             auth=auth, schema=schema, support_revocation=support_revocation
         )
     return result  # pylint: disable=possibly-used-before-assignment
-
-
-@pytest.fixture(scope="session", params=TestMode.fixture_params)
-async def indy_credential_definition_id(
-    request,
-    indy_schema_definition: CredentialSchema,  # pylint: disable=redefined-outer-name
-    faber_indy_client: RichAsyncClient,
-) -> str:
-    auth = acapy_auth_verified(
-        acapy_auth_from_header(faber_indy_client.headers["x-api-key"])
-    )
-    result = await get_clean_or_regression_test_cred_def(
-        test_mode=request.param,
-        auth=auth,
-        schema=indy_schema_definition,
-        support_revocation=False,
-    )
-    return result.id
-
-
-@pytest.fixture(scope="session", params=TestMode.fixture_params)
-async def indy_credential_definition_id_revocable(
-    request,
-    indy_schema_definition_alt: CredentialSchema,  # pylint: disable=redefined-outer-name
-    faber_indy_client: RichAsyncClient,
-) -> str:
-    auth = acapy_auth_verified(
-        acapy_auth_from_header(faber_indy_client.headers["x-api-key"])
-    )
-    result = await get_clean_or_regression_test_cred_def(
-        test_mode=request.param,
-        auth=auth,
-        schema=indy_schema_definition_alt,
-        support_revocation=True,
-    )
-    return result.id
-
-
-@pytest.fixture(scope="session", params=TestMode.fixture_params)
-async def meld_co_indy_credential_definition_id(
-    request,
-    indy_schema_definition: CredentialSchema,  # pylint: disable=redefined-outer-name
-    meld_co_indy_client: RichAsyncClient,
-) -> str:
-    auth = acapy_auth_verified(
-        acapy_auth_from_header(meld_co_indy_client.headers["x-api-key"])
-    )
-    result = await get_clean_or_regression_test_cred_def(
-        test_mode=request.param,
-        auth=auth,
-        schema=indy_schema_definition,
-        support_revocation=False,
-    )
-    return result.id
 
 
 @pytest.fixture(scope="session", params=TestMode.fixture_params)

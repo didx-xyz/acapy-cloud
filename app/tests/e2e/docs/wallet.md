@@ -3,15 +3,15 @@
 ## Wallet credentials end-points
 
 - Credentials
-  - get credentials &#x2611;
-  - get credential by id &#x2611;
-  - delete credentials &#x2611;
-  - get credentials with limit &#x2611;
-  - get MIME type &#x2612;
-  - get revocation status &#x2612;
-  - get all w3c credentials &#x2612;
-  - get w3c credentials by id &#x2612;
-  - delete w3c credential &#x2612;
+  - get credentials ✅
+  - get credential by id ✅
+  - delete credentials ✅
+  - get credentials with limit ✅
+  - get MIME type ❌
+  - get revocation status ❌
+  - get all w3c credentials ❌
+  - get w3c credentials by id ❌
+  - delete w3c credential ❌
 
 ## Credential test
 
@@ -37,12 +37,12 @@ Alice calls get credentials with pagination params and assert expected response 
 Also assert `422` response if invalid params are used.
 
 - DIDs
-  - List dids &#x2611;
-  - create local did &#x2611;
-  - get pub did &#x2611;
-  - get did endpoint &#x2611;
-  - set pub did &#x2611;
-  - set did endpoint* &#x2611;
+  - List dids ✅
+  - create local did ✅
+  - get pub did ✅
+  - get did endpoint ✅
+  - set pub did ✅
+  - set did endpoint* ✅
 
 `*` api endpoint not called
 No test for rotate key pair
@@ -98,8 +98,8 @@ Governance sets endpoint of created did to new endpoint.
 Governance call get did endpoint on created did and assert it is new endpoint.
 
 - JWS
-  - Sign &#x2611;
-  - verify &#x2611;
+  - Sign ✅
+  - verify ✅
 
 ## JWS test
 
@@ -132,8 +132,8 @@ Alice calls verify on response, asserts `200` response and `valid` field is `tru
 Assert `422` response code when trying to verify bad payload.
 
 - SD-JWT
-  - Sign &#x2611;
-  - verify &#x2611;
+  - Sign ✅
+  - verify ✅
 
 ## SD-JWS test
 

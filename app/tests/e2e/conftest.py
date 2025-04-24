@@ -15,32 +15,19 @@ from app.services.trust_registry.actors import (
 from app.tests.fixtures.credentials import (
     get_or_issue_regression_anoncreds_revoked,
     get_or_issue_regression_anoncreds_valid,
-    get_or_issue_regression_indy_cred_revoked,
-    get_or_issue_regression_indy_cred_valid,
     issue_alice_anoncreds,
-    issue_alice_indy_creds,
     issue_alice_many_anoncreds,
-    issue_alice_many_indy_creds,
     issue_anoncreds_credential_to_alice,
-    issue_indy_credential_to_alice,
     meld_co_issue_anoncreds_credential_to_alice,
-    meld_co_issue_indy_credential_to_alice,
     revoke_alice_anoncreds,
     revoke_alice_anoncreds_and_publish,
-    revoke_alice_indy_creds,
-    revoke_alice_indy_creds_and_publish,
 )
 from app.tests.fixtures.definitions import (
     anoncreds_credential_definition_id,
     anoncreds_credential_definition_id_revocable,
     anoncreds_schema_definition,
     anoncreds_schema_definition_alt,
-    indy_credential_definition_id,
-    indy_credential_definition_id_revocable,
-    indy_schema_definition,
-    indy_schema_definition_alt,
     meld_co_anoncreds_credential_definition_id,
-    meld_co_indy_credential_definition_id,
 )
 from app.tests.util.ledger import create_public_did
 from shared.log_config import get_logger

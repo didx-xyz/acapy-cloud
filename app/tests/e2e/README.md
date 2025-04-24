@@ -9,7 +9,6 @@ End-points not tested:
 
 - Schemas
   - get schemas (missing for anoncreds)
-  - get schemas by id (missing for indy)
 
 - Cred_defs
   - get cred-defs
@@ -60,11 +59,6 @@ Schemas
   - get schemas ❌
   - get schema by id ✅
 
-- Indy
-  - create* ✅
-  - get schema* ✅
-  - get schema by id ❌
-
 Cred-defs
 
 - AnonCreds
@@ -72,19 +66,9 @@ Cred-defs
   - get cred_defs ❌
   - get cred_def by id ❌
 
-- Indy
-  - Create* ✅
-  - get cred_defs ❌
-  - get cred_def by id ❌
-
 See breakdown of tests [here](/app/tests/e2e/docs/schema_definitions.md)
 
 ## Issuer end-points
-
-- Indy
-  - Create offer ✅
-  - Send offer ✅
-  - Accept offer ✅
 
 - AnonCreds
   - Create offer ✅
@@ -105,14 +89,6 @@ See breakdown of tests [here](/app/tests/e2e/docs/issuer.md)
 
 ## Revocation end-points
 
-- Indy
-  - Revoke ✅
-  - Clear pending ✅
-  - publish pending revocations ✅
-  - Fetch revocation record ✅
-  - Get pending revocations ✅
-  - Fix rev_reg ✅
-
 - AnonCreds
   - Revoke ✅
   - Clear pending ✅
@@ -124,16 +100,6 @@ See breakdown of tests [here](/app/tests/e2e/docs/issuer.md)
 See breakdown of tests [here](/app/tests/e2e/docs/revocation.md)
 
 ## Verifying end-points
-
-- Indy
-  - create-request ❌
-  - get exchange record by id ✅
-  - get exchange records ✅
-  - send proof ✅
-  - accept proof ✅
-  - reject proof ✅
-  - delete proofs ✅
-  - get credentials for proof ✅
 
 - AnonCreds
   - create-request ✅ (tested by Bob??)
