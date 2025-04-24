@@ -269,10 +269,15 @@ async def create_tenant(
         updated_at=wallet_response.updated_at,
     )
 
-    await publisher.publish(
-        logger=bound_logger,
-        event=event,
-    )
+    try:
+        await publisher.publish(
+            logger=bound_logger,
+            event=event,
+        )
+    except Exception as e:
+        bound_logger.error(
+            "Failed to publish tenant event to NATS: {}. Event: {}", e, event
+        )
 
     bound_logger.debug("Successfully created tenant.")
     return response
