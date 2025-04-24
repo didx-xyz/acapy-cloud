@@ -101,15 +101,8 @@ async def clear_pending_revokes(
 async def test_clear_pending_revokes_bad_payload_anoncreds(
     faber_anoncreds_client: RichAsyncClient,
 ):
-    await clear_pending_revokes_bad_payload("anoncreds", faber_anoncreds_client)
-
-
-async def clear_pending_revokes_bad_payload(
-    credential_type: Literal["anoncreds"],
-    faber_client: RichAsyncClient,
-):
     with pytest.raises(HTTPException) as exc:
-        await faber_client.post(
+        await faber_anoncreds_client.post(
             f"{REVOCATION_BASE_PATH}/clear-pending-revocations",
             json={"revocation_registry_credential_map": "bad"},
         )
@@ -117,7 +110,7 @@ async def clear_pending_revokes_bad_payload(
     assert exc.value.status_code == 422
 
     with pytest.raises(HTTPException) as exc:
-        await faber_client.post(
+        await faber_anoncreds_client.post(
             f"{REVOCATION_BASE_PATH}/clear-pending-revocations",
             json={"revocation_registry_credential_map": {"bad": "bad"}},
         )
@@ -318,27 +311,16 @@ async def test_get_pending_revocations_anoncreds(
     faber_anoncreds_client: RichAsyncClient,
     revoke_alice_anoncreds: List[CredentialExchange],
 ):
-    await get_pending_revocations(
-        "anoncreds", faber_anoncreds_client, revoke_alice_anoncreds
-    )
-
-
-async def get_pending_revocations(
-    credential_type: Literal["anoncreds"],
-    faber_client: RichAsyncClient,
-    revoke_alice_creds: List[CredentialExchange],
-):
-    faber_cred_ex_id = revoke_alice_creds[0].credential_exchange_id
-    revocation_record_response = await faber_client.get(
+    faber_cred_ex_id = revoke_alice_anoncreds[0].credential_exchange_id
+    revocation_record_response = await faber_anoncreds_client.get(
         f"{REVOCATION_BASE_PATH}/revocation/record"
-        + "?credential_exchange_id="
-        + faber_cred_ex_id
+        f"?credential_exchange_id={faber_cred_ex_id}"
     )
 
     rev_reg_id = revocation_record_response.json()["rev_reg_id"]
 
     pending_revocations = (
-        await faber_client.get(
+        await faber_anoncreds_client.get(
             f"{REVOCATION_BASE_PATH}/get-pending-revocations/{rev_reg_id}"
         )
     ).json()["pending_cred_rev_ids"]
