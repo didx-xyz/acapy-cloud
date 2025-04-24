@@ -187,6 +187,14 @@ class NatsJetstreamPublish:
                 else:
                     logger.error("Failed to publish message after {} attempts", retries)
                     raise e
+            except Exception as e:
+                logger.error("Unexpected error: {}", e)
+                attempt += 1
+                if attempt < retries:
+                    await asyncio.sleep(delay)
+                else:
+                    logger.error("Failed to publish message after {} attempts", retries)
+                    raise e
 
     def convert_timestamp(self, timestamp: str) -> str:
         """
