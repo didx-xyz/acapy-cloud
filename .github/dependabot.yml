@@ -22,7 +22,7 @@ updates:
       day: saturday
       time: "07:00"
 
-  # Maintain dependencies for Docker
+  # Maintain dependencies for Docker (Python)
   - package-ecosystem: docker
     directories:
       - /dockerfiles/agents
@@ -31,7 +31,6 @@ updates:
       - /dockerfiles/tests
       - /dockerfiles/trustregistry
       - /dockerfiles/waypoint
-      - /scripts/k6
     schedule:
       interval: weekly
       day: saturday
@@ -40,10 +39,20 @@ updates:
       docker-python:
         patterns:
           - "python*"
+    ignore:
+      - dependency-name: python
+        # Ignore Python updates like 3.12 -> 3.13
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+
+  # Maintain dependencies for Docker (Golang)
+  - package-ecosystem: docker
+    directories:
+      - /scripts/k6
+    schedule:
+      interval: weekly
+      day: saturday
+      time: "07:00"
+    groups:
       docker-golang:
         patterns:
           - "golang*"
-    ignore:
-      - dependency-name: python
-        # Ignore minor updates like 3.12 -> 3.13
-        update-types: ["version-update:semver-minor"]
