@@ -47,7 +47,7 @@ sqlalchemy = "~2.0.40"
 aiohttp = "~3.11.7"
 dependency-injector = "^4.46.0"
 nats-py = { extras = ["nkeys"], version = "^2.10.0" }
-sse-starlette = "~2.2.1"
+sse-starlette = "~2.3.3"
 tenacity = "^9.1.0"
 uuid_utils = "^0.10.0"
 
