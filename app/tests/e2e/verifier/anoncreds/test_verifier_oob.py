@@ -88,6 +88,7 @@ async def test_accept_proof_request_oob(
         cred_id=referent, revealed=True
     )
     proof_accept = AcceptProofRequest(
+        type="anoncreds",
         proof_id=alice_proof_id,
         anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={"0_speed_uuid": anoncreds_request_attrs},
@@ -218,6 +219,7 @@ async def test_accept_proof_request_verifier_oob_connection(
             VERIFIER_BASE_PATH + "/accept-request",
             json={
                 "proof_id": holder_proof_exchange_id,
+                "type": "anoncreds",
                 "anoncreds_presentation_spec": {
                     "requested_attributes": {
                         "name": {
