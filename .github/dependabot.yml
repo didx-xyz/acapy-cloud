@@ -36,3 +36,10 @@ updates:
       interval: weekly
       day: saturday
       time: "07:00"
+    groups:
+      docker-python:
+        patterns:
+          - "python*"
+      docker-golang:
+        patterns:
+          - "golang*"
