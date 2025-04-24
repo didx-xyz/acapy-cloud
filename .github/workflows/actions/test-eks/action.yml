@@ -53,7 +53,7 @@ runs:
       if: inputs.regression-tests == 'true'
       id: pytest-regression
       # https://github.com/helmfile/helmfile-action
-      uses: helmfile/helmfile-action@v2
+      uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
       with:
         helmfile-args: |
           apply \
@@ -76,7 +76,7 @@ runs:
       if: inputs.run-tests != 'false'
       id: pytest
       # https://github.com/helmfile/helmfile-action
-      uses: helmfile/helmfile-action@v2
+      uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
       with:
         helmfile-args: |
           apply \
@@ -225,7 +225,7 @@ runs:
     - name: Pytest coverage comment
       if: steps.pytest.outcome == 'success'
       # https://github.com/MishaKav/pytest-coverage-comment
-      uses: MishaKav/pytest-coverage-comment@v1
+      uses: MishaKav/pytest-coverage-comment@81882822c5b22af01f91bd3eacb1cefb6ad73dc2 # v1.1.53
       with:
         pytest-coverage-path: ./pytest/test_coverage.txt
         junitxml-path: ./pytest/test_output.xml
@@ -238,7 +238,7 @@ runs:
     - name: Pytest regression coverage comment
       if: steps.pytest-regression.outcome == 'success'
       # https://github.com/MishaKav/pytest-coverage-comment
-      uses: MishaKav/pytest-coverage-comment@v1
+      uses: MishaKav/pytest-coverage-comment@81882822c5b22af01f91bd3eacb1cefb6ad73dc2 # v1.1.53
       with:
         pytest-coverage-path: ./pytest-regression/test_coverage.txt
         junitxml-path: ./pytest-regression/test_output.xml
@@ -250,7 +250,7 @@ runs:
 
     - name: Publish Pytest Report
       # https://github.com/mikepenz/action-junit-report
-      uses: mikepenz/action-junit-report@v5
+      uses: mikepenz/action-junit-report@cf701569b05ccdd861a76b8607a66d76f6fd4857 # v5.5.1
       if: steps.pytest.outcome == 'success'
       with:
         check_name: JUnit Test Report
@@ -260,7 +260,7 @@ runs:
         require_passed_tests: true
 
     - name: Publish Pytest Regression Report
-      uses: mikepenz/action-junit-report@v5
+      uses: mikepenz/action-junit-report@cf701569b05ccdd861a76b8607a66d76f6fd4857 # v5.5.1
       if: steps.pytest-regression.outcome == 'success'
       with:
         check_name: JUnit Test Report Regression
@@ -271,7 +271,7 @@ runs:
 
     - name: Helmfile destroy pytest
       # https://github.com/helmfile/helmfile-action
-      uses: helmfile/helmfile-action@v2
+      uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
       if: always()
       with:
         helmfile-args: |
@@ -285,7 +285,7 @@ runs:
 
     - name: Helmfile destroy pytest regression
       # https://github.com/helmfile/helmfile-action
-      uses: helmfile/helmfile-action@v2
+      uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
       if: always()
       with:
         helmfile-args: |

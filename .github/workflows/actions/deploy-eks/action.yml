@@ -52,7 +52,7 @@ runs:
   steps:
     - name: Configure AWS credentials
       # https://github.com/aws-actions/configure-aws-credentials
-      uses: aws-actions/configure-aws-credentials@v4
+      uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
       with:
         aws-region: ${{ inputs.aws-region }}
         role-to-assume: ${{ inputs.aws-role-arn }}
@@ -68,7 +68,7 @@ runs:
     - name: Helmfile Destroy
       if: inputs.clean-start == 'true'
       # https://github.com/helmfile/helmfile-action
-      uses: helmfile/helmfile-action@v2
+      uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
       with:
         helmfile-args: |
           destroy \
@@ -99,7 +99,7 @@ runs:
         CONFIGS_DIR: ${{ inputs.connect-configs-dir }}
     - name: Helmfile Apply
       # https://github.com/helmfile/helmfile-action
-      uses: helmfile/helmfile-action@v2
+      uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
       with:
         helmfile-args: |
           apply \
