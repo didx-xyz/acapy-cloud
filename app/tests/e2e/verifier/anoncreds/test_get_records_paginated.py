@@ -33,6 +33,7 @@ async def test_get_presentation_exchange_records_paginated(
         # Create multiple presentation requests
         for _ in range(num_presentation_requests_to_test):
             request_body = {
+                "type": "anoncreds",
                 "save_exchange_record": True,
                 "connection_id": acme_and_alice_connection.acme_connection_id,
                 "anoncreds_proof_request": sample_anoncreds_proof_request(

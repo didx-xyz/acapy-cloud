@@ -35,6 +35,7 @@ async def test_accept_proof_request_oob(
 ):
     # Create the proof request against aca-py
     create_proof_request = CreateProofRequest(
+        type="anoncreds",
         anoncreds_proof_request=sample_anoncreds_proof_request(),
         comment="some comment",
     )
@@ -167,6 +168,7 @@ async def test_accept_proof_request_verifier_oob_connection(
         # Present proof from holder to verifier
         request_body = {
             "connection_id": verifier_holder_connection_id,
+            "type": "anoncreds",
             "anoncreds_proof_request": {
                 "name": "Age Check",
                 "version": "1.0",
