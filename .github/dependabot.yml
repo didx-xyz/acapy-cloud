@@ -43,3 +43,7 @@ updates:
       docker-golang:
         patterns:
           - "golang*"
+    ignore:
+      - dependency-name: python
+        # Ignore minor updates like 3.12 -> 3.13
+        update-types: ["version-update:semver-minor"]
