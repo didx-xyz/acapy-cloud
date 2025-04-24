@@ -5,18 +5,18 @@
 Schemas
 
 - AnonCreds
-  - create* &#x2611;
-  - get schemas &#x2612;
-  - get schema by id &#x2611;
+  - create* ✅
+  - get schemas ❌
+  - get schema by id ✅
 
 There is no test for getting all schemas.
 
 Cred-defs
 
 - AnonCreds
-  - Create* &#x2611;
-  - get cred_defs &#x2612;
-  - get cred_def by id &#x2612;
+  - Create* ✅
+  - get cred_defs ❌
+  - get cred_def by id ❌
 
 `*` These tests are not calling the api directly but import the functions into the pytest environment and executing them
 there.

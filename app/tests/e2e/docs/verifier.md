@@ -3,13 +3,13 @@
 ## Verifying end-points
 
 - AnonCreds
-  - get exchange record by id &#x2611;
-  - get exchange records &#x2611;
-  - send proof &#x2611;
-  - accept proof &#x2611;
-  - reject proof &#x2611;
-  - delete proofs &#x2611;
-  - get credentials for proof &#x2611;
+  - get exchange record by id ✅
+  - get exchange records ✅
+  - send proof ✅
+  - accept proof ✅
+  - reject proof ✅
+  - delete proofs ✅
+  - get credentials for proof ✅
 
 - JSON-LD/dif_proofs
   - no tests

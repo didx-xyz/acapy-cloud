@@ -2,12 +2,12 @@
 
 ## Revocation end-points
 
-- Revoke &#x2611;
-- Clear pending &#x2611;
-- publish pending revocations &#x2611;
-- Fetch revocation record &#x2611;
-- Get pending revocations &#x2611;
-- Fix rev_reg &#x2611;
+- Revoke ✅
+- Clear pending ✅
+- publish pending revocations ✅
+- Fetch revocation record ✅
+- Get pending revocations ✅
+- Fix rev_reg ✅
 
 ## Revocation test
 

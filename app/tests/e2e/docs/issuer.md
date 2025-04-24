@@ -3,19 +3,19 @@
 ## Issuer end-points
 
 - AnonCreds
-  - Create offer &#x2611;
-  - Send offer &#x2611;
-  - request offer &#x2611;
+  - Create offer ✅
+  - Send offer ✅
+  - request offer ✅
 
 - Json_ld/dif_proof
-  - Create offer &#x2611;
-  - Send offer &#x2611;
-  - request offer &#x2611;
+  - Create offer ✅
+  - Send offer ✅
+  - request offer ✅
 
 - All
-  - get exchange record by id &#x2611;
-  - get exchange records &#x2611;
-  - delete (clean-up only) &#x2612;
+  - get exchange record by id ✅
+  - get exchange records ✅
+  - delete (clean-up only) ❌
 
 Saving exchange records and pagination on exchange records are tested.
 

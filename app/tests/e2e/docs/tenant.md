@@ -2,12 +2,12 @@
 
 ## Tenants end-points
 
-- create tenant &#x2611;
-- get access-token &#x2611;
-- update tenant &#x2611;
-- get tenant by id &#x2611;
-- get tenants &#x2611;
-- delete tenant &#x2611;
+- create tenant ✅
+- get access-token ✅
+- update tenant ✅
+- get tenant by id ✅
+- get tenants ✅
+- delete tenant ✅
 
 ## Tenant test
 
