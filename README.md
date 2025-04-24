@@ -6,7 +6,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/ceca5ac566f74a3a8bfb3095074117ad)](https://app.codacy.com/gh/didx-xyz/acapy-cloud/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/ceca5ac566f74a3a8bfb3095074117ad)](https://app.codacy.com/gh/didx-xyz/acapy-cloud/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![DIDx GitHub](https://img.shields.io/badge/GitHub-DIDx-181717.svg?style=flat&logo=github)](https://github.com/didx-xyz)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/didx-xyz/acapy-cloud/badge)](https://scorecard.dev/viewer/?uri=github.com/didx-xyz/acapy-cloud)
 
 🚧 This project is currently under development. If you would like to use this in
 production, please [contact us](mailto:info@didx.co.za) first to discuss your use case.
