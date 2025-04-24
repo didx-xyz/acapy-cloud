@@ -139,11 +139,11 @@ pipeline:
         meta event_topic = this.topic
         meta event_payload_state = this.payload.state.or("deleted?")
         meta event_payload_connection_id = this.payload.connection_id.or("None")
-        meta event_payload_created_at = if event.payload.created_at != null {
-          event.payload.created_at.ts_unix_nano()
+        meta event_payload_created_at = if this.payload.created_at != null {
+          this.payload.created_at.ts_unix_micro()
         }
-        meta event_payload_updated_at = if event.payload.updated_at != null {
-          event.payload.updated_at.ts_unix_nano()
+        meta event_payload_updated_at = if this.payload.updated_at != null {
+          this.payload.updated_at.ts_unix_micro()
         }
 
         root = this
