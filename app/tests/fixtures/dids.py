@@ -8,7 +8,7 @@ from shared import RichAsyncClient
 
 @pytest.fixture(scope="function")
 async def register_issuer_key_ed25519(
-    faber_indy_client: RichAsyncClient,
+    faber_anoncreds_client: RichAsyncClient,
 ) -> AsyncGenerator[str, None]:
-    async with register_issuer_key(faber_indy_client, "ed25519") as did:
+    async with register_issuer_key(faber_anoncreds_client, "ed25519") as did:
         yield did

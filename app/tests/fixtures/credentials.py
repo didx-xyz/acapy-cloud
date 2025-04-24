@@ -20,9 +20,9 @@ sample_credential_attributes = {"speed": "10", "name": "Alice", "age": "44"}
 
 
 async def issue_credential_to_alice(
-    credential_type: Literal["indy", "anoncreds"],
+    credential_type: Literal["anoncreds"],
     faber_client: RichAsyncClient,
-    indy_credential_definition_id: str,
+    credential_definition_id: str,
     faber_and_alice_connection: FaberAliceConnect,
     alice_member_client: RichAsyncClient,
 ) -> CredentialExchange:
@@ -30,7 +30,7 @@ async def issue_credential_to_alice(
         "type": credential_type,
         "connection_id": faber_and_alice_connection.faber_connection_id,
         f"{credential_type}_credential_detail": {
-            "credential_definition_id": indy_credential_definition_id,
+            "credential_definition_id": credential_definition_id,
             "attributes": sample_credential_attributes,
         },
     }
@@ -80,30 +80,14 @@ async def issue_anoncreds_credential_to_alice(
     return await issue_credential_to_alice(
         credential_type="anoncreds",
         faber_client=faber_anoncreds_client,
-        indy_credential_definition_id=anoncreds_credential_definition_id,
+        credential_definition_id=anoncreds_credential_definition_id,
         faber_and_alice_connection=faber_anoncreds_and_alice_connection,
         alice_member_client=alice_member_client,
     )
 
 
-@pytest.fixture(scope="function")
-async def issue_indy_credential_to_alice(
-    faber_indy_client: RichAsyncClient,
-    indy_credential_definition_id: str,
-    faber_indy_and_alice_connection: FaberAliceConnect,
-    alice_member_client: RichAsyncClient,
-) -> CredentialExchange:
-    return await issue_credential_to_alice(
-        credential_type="indy",
-        faber_client=faber_indy_client,
-        indy_credential_definition_id=indy_credential_definition_id,
-        faber_and_alice_connection=faber_indy_and_alice_connection,
-        alice_member_client=alice_member_client,
-    )
-
-
 async def meld_co_issue_credential_to_alice(
-    credential_type: Literal["indy", "anoncreds"],
+    credential_type: Literal["anoncreds"],
     meld_co_client: RichAsyncClient,
     meld_co_credential_definition_id: str,
     meld_co_and_alice_connection: MeldCoAliceConnect,
@@ -169,24 +153,8 @@ async def meld_co_issue_anoncreds_credential_to_alice(
     )
 
 
-@pytest.fixture(scope="function")
-async def meld_co_issue_indy_credential_to_alice(
-    meld_co_indy_client: RichAsyncClient,
-    meld_co_indy_credential_definition_id: str,
-    meld_co_indy_and_alice_connection: MeldCoAliceConnect,
-    alice_member_client: RichAsyncClient,
-) -> CredentialExchange:
-    return await meld_co_issue_credential_to_alice(
-        credential_type="indy",
-        meld_co_client=meld_co_indy_client,
-        meld_co_credential_definition_id=meld_co_indy_credential_definition_id,
-        meld_co_and_alice_connection=meld_co_indy_and_alice_connection,
-        alice_member_client=alice_member_client,
-    )
-
-
 async def issue_alice_creds(
-    credential_type: Literal["indy", "anoncreds"],
+    credential_type: Literal["anoncreds"],
     faber_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     credential_definition_id: str,
@@ -287,22 +255,6 @@ async def issue_alice_anoncreds(
     )
 
 
-@pytest.fixture(scope="function")
-async def issue_alice_indy_creds(
-    faber_indy_client: RichAsyncClient,
-    alice_member_client: RichAsyncClient,
-    indy_credential_definition_id_revocable: str,
-    faber_indy_and_alice_connection: FaberAliceConnect,
-) -> List[CredentialExchange]:
-    return await issue_alice_creds(
-        credential_type="indy",
-        faber_client=faber_indy_client,
-        alice_member_client=alice_member_client,
-        credential_definition_id=indy_credential_definition_id_revocable,
-        faber_and_alice_connection=faber_indy_and_alice_connection,
-    )
-
-
 async def revoke_alice_creds(
     faber_client: RichAsyncClient,
     alice_issued_creds: List[CredentialExchange],
@@ -327,17 +279,6 @@ async def revoke_alice_anoncreds(
     return await revoke_alice_creds(
         faber_client=faber_anoncreds_client,
         alice_issued_creds=issue_alice_anoncreds,
-    )
-
-
-@pytest.fixture(scope="function")
-async def revoke_alice_indy_creds(
-    faber_indy_client: RichAsyncClient,
-    issue_alice_indy_creds,  # pylint: disable=redefined-outer-name
-) -> List[CredentialExchange]:
-    return await revoke_alice_creds(
-        faber_client=faber_indy_client,
-        alice_issued_creds=issue_alice_indy_creds,
     )
 
 
@@ -385,26 +326,13 @@ async def revoke_alice_anoncreds_and_publish(
     )
 
 
-@pytest.fixture(scope="function")
-async def revoke_alice_indy_creds_and_publish(
-    request,
-    faber_indy_client: RichAsyncClient,
-    issue_alice_indy_creds,  # pylint: disable=redefined-outer-name
-) -> List[CredentialExchange]:
-    return await revoke_creds_and_publish(
-        request,
-        faber_client=faber_indy_client,
-        issued_creds=issue_alice_indy_creds,
-    )
-
-
 class ReferentCredDef(BaseModel):
     referent: str
     cred_def_revocable: str
 
 
 async def get_or_issue_regression_cred_revoked(
-    credential_type: Literal["indy", "anoncreds"],
+    credential_type: Literal["anoncreds"],
     faber_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     credential_definition_id: str,
@@ -517,24 +445,8 @@ async def get_or_issue_regression_anoncreds_revoked(
     )
 
 
-@pytest.fixture(scope="function")
-async def get_or_issue_regression_indy_cred_revoked(
-    faber_indy_client: RichAsyncClient,
-    alice_member_client: RichAsyncClient,
-    indy_credential_definition_id_revocable: str,
-    faber_indy_and_alice_connection: FaberAliceConnect,
-) -> ReferentCredDef:
-    return await get_or_issue_regression_cred_revoked(
-        credential_type="indy",
-        faber_client=faber_indy_client,
-        alice_member_client=alice_member_client,
-        credential_definition_id=indy_credential_definition_id_revocable,
-        faber_and_alice_connection=faber_indy_and_alice_connection,
-    )
-
-
 async def get_or_issue_regression_cred_valid(
-    credential_type: Literal["indy", "anoncreds"],
+    credential_type: Literal["anoncreds"],
     faber_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     credential_definition_id_revocable: str,
@@ -637,24 +549,8 @@ async def get_or_issue_regression_anoncreds_valid(
     )
 
 
-@pytest.fixture(scope="function")
-async def get_or_issue_regression_indy_cred_valid(
-    faber_indy_client: RichAsyncClient,
-    alice_member_client: RichAsyncClient,
-    indy_credential_definition_id_revocable: str,
-    faber_indy_and_alice_connection: FaberAliceConnect,
-):
-    return await get_or_issue_regression_cred_valid(
-        credential_type="indy",
-        faber_client=faber_indy_client,
-        alice_member_client=alice_member_client,
-        credential_definition_id_revocable=indy_credential_definition_id_revocable,
-        faber_and_alice_connection=faber_indy_and_alice_connection,
-    )
-
-
 async def issue_alice_many_creds(
-    credential_type: Literal["indy", "anoncreds"],
+    credential_type: Literal["anoncreds"],
     request,
     faber_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
@@ -743,22 +639,4 @@ async def issue_alice_many_anoncreds(
         alice_member_client=alice_member_client,
         credential_definition_id=anoncreds_credential_definition_id,
         faber_and_alice_connection=faber_anoncreds_and_alice_connection,
-    )
-
-
-@pytest.fixture(scope="function")
-async def issue_alice_many_indy_creds(
-    request,
-    faber_indy_client: RichAsyncClient,
-    alice_member_client: RichAsyncClient,
-    indy_credential_definition_id: str,
-    faber_indy_and_alice_connection: FaberAliceConnect,
-) -> List[CredentialExchange]:
-    return await issue_alice_many_creds(
-        credential_type="indy",
-        request=request,
-        faber_client=faber_indy_client,
-        alice_member_client=alice_member_client,
-        credential_definition_id=indy_credential_definition_id,
-        faber_and_alice_connection=faber_indy_and_alice_connection,
     )

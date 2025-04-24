@@ -92,31 +92,6 @@ async def acme_verifier(request) -> AsyncGenerator[CreateTenantResponse, Any]:
 
 
 @pytest.fixture(scope="session", params=TestMode.fixture_params)
-async def faber_indy_issuer(request) -> AsyncGenerator[CreateTenantResponse, Any]:
-    test_mode = request.param
-
-    async with get_tenant_admin_client() as admin_client:
-        if test_mode == TestMode.clean_run:
-            issuer_tenant = await create_issuer_tenant(
-                admin_client, name="faber_indy", wallet_type="askar"
-            )
-
-            yield issuer_tenant
-
-            await delete_tenant(admin_client, issuer_tenant.wallet_id)
-
-        elif test_mode == TestMode.regression_run:
-            issuer_tenant = await get_or_create_tenant(
-                admin_client=admin_client,
-                name="RegressionIndyIssuer",
-                roles=["issuer"],
-                wallet_type="askar",
-            )
-
-            yield issuer_tenant
-
-
-@pytest.fixture(scope="session", params=TestMode.fixture_params)
 async def faber_anoncreds_issuer(request) -> AsyncGenerator[CreateTenantResponse, Any]:
     test_mode = request.param
 
@@ -136,33 +111,6 @@ async def faber_anoncreds_issuer(request) -> AsyncGenerator[CreateTenantResponse
                 name="RegressionAnonCredsIssuer",
                 roles=["issuer"],
                 wallet_type="askar-anoncreds",
-            )
-
-            yield issuer_tenant
-
-
-@pytest.fixture(scope="session", params=TestMode.fixture_params)
-async def meld_co_indy_issuer_verifier(
-    request,
-) -> AsyncGenerator[CreateTenantResponse, Any]:
-    test_mode = request.param
-
-    async with get_tenant_admin_client() as admin_client:
-        if test_mode == TestMode.clean_run:
-            issuer_and_verifier_tenant = await create_issuer_and_verifier_tenant(
-                admin_client, name="meldCo_indy", wallet_type="askar"
-            )
-
-            yield issuer_and_verifier_tenant
-
-            await delete_tenant(admin_client, issuer_and_verifier_tenant.wallet_id)
-
-        elif test_mode == TestMode.regression_run:
-            issuer_tenant = await get_or_create_tenant(
-                admin_client=admin_client,
-                name="RegressionIndyIssuerVerifier",
-                roles=["issuer", "verifier"],
-                wallet_type="askar",
             )
 
             yield issuer_tenant

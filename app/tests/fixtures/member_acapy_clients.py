@@ -51,16 +51,6 @@ async def bob_acapy_client(
 
 
 @pytest.fixture(scope="function")
-async def faber_indy_acapy_client(
-    faber_indy_client: RichAsyncClient,
-) -> AsyncGenerator[AcaPyClient, Any]:
-    async with get_tenant_acapy_client(
-        token=get_token(faber_indy_client)
-    ) as acapy_client:
-        yield acapy_client
-
-
-@pytest.fixture(scope="function")
 async def faber_anoncreds_acapy_client(
     faber_anoncreds_client: RichAsyncClient,
 ) -> AsyncGenerator[AcaPyClient, Any]:
@@ -75,16 +65,6 @@ async def acme_acapy_client(
     acme_client: RichAsyncClient,
 ) -> AsyncGenerator[AcaPyClient, Any]:
     async with get_tenant_acapy_client(token=get_token(acme_client)) as acapy_client:
-        yield acapy_client
-
-
-@pytest.fixture(scope="module")
-async def meld_co_indy_acapy_client(
-    meld_co_indy_client: RichAsyncClient,
-) -> AsyncGenerator[AcaPyClient, Any]:
-    async with get_tenant_acapy_client(
-        token=get_token(meld_co_indy_client)
-    ) as acapy_client:
         yield acapy_client
 
 
