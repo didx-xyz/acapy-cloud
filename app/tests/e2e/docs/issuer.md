@@ -2,11 +2,6 @@
 
 ## Issuer end-points
 
-- Indy
-  - Create offer &#x2611;
-  - Send offer &#x2611;
-  - request offer &#x2611;
-
 - AnonCreds
   - Create offer &#x2611;
   - Send offer &#x2611;
@@ -25,21 +20,7 @@
 Saving exchange records and pagination on exchange records are tested.
 
 There are no explicit `delete exchange records` tests for exchange records. Only being called for clean-up.
-The offer send via OOB attachment is never accepted by holder for all scenarios (indy/anoncreds/dif_proof)
-
-## Indy credentials
-
-Find test file [here](/app/tests/e2e/issuer/test_indy_credentials.py)
-
-`app/tests/e2e/issuer/test_indy_credentials.py`
-
-### test_send_credential_oob (indy)
-
-Faber `creates_offer` and sends offer to Alice via OOB attachment (Create `connection:false`).
-
-Alice accepts OOB invitation, receives credential offer. Then Faber deletes credential exchange record.
-
-Never accepts offer.
+The offer send via OOB attachment is never accepted by holder for all scenarios (anoncreds/dif_proof)
 
 ### test_send_credential
 
@@ -60,12 +41,6 @@ Faber sends credential offer to Alice. Alice wait for `offer-received`.
 Alice requests credential offer.
 
 Wait for `request-sent` state for Alice and `request-received` state for faber.
-
-### test_revoke_credential (indy)
-
-Faber issues credential to Alice. Wait for credential issuance `state:done`.
-
-Faber revokes with `auto_publish: true` assert `200` response and assert length of `cred_rev_ids_published` is 1.
 
 ## Save exchange record
 
@@ -112,7 +87,7 @@ Find test file [here](/app/tests/e2e/issuer/test_get_records_paginated.py)
 
 ### test_get_credential_exchange_records_paginated (Skipped in regression run)
 
-For `indy` and `anoncreds` credential type:
+For `anoncreds` credential type:
 
 Faber sends credentials to Alice, Alice never requests credentials.
 
