@@ -55,9 +55,10 @@ def test_proof_request_base_model():
 
     ProofRequestBase.check_proof_request(
         values=ProofRequestBase(
+            type=ProofRequestType.ANONCREDS,
             anoncreds_proof_request=AnonCredsPresentationRequest(
                 requested_attributes={}, requested_predicates={}
-            )
+            ),
         )
     )
 
