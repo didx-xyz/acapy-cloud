@@ -33,7 +33,7 @@ Faber_anoncreds creates AnonCreds schema, assert expected fields on returned sch
 
 ### test_get_anoncreds_schema
 
-Faber_anoncreds creates AnonCreds schema. Assert Faber_anoncreds,
+Faber_anoncreds creates AnonCreds schema. Assert Faber_anoncreds and Meld_co_anoncreds can get schema by id.
 
 ### test_create_anoncreds_credential_definition
 
