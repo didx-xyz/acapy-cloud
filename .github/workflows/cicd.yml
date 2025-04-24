@@ -28,6 +28,7 @@ on:
       - "**"
       - "!docs/**" # Ignore changes in the docs folder
       - "!**.md" # Ignore changes to any markdown file
+      - "!.github/dependabot.yml" # Ignore changes to Dependabot config
   pull_request:
     branches:
       - master
@@ -40,6 +41,7 @@ on:
       - "**"
       - "!docs/**" # Ignore changes in the docs folder
       - "!**.md" # Ignore changes to any markdown file
+      - "!.github/dependabot.yml" # Ignore changes to Dependabot config
 
 permissions: {}
 
