@@ -20,14 +20,16 @@ VERIFIER_BASE_PATH = router.prefix
 )
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_limit_and_offset(
-    issue_alice_indy_creds: List[CredentialExchange],  # pylint: disable=unused-argument
+    issue_alice_anoncreds_creds: List[  # pylint: disable=unused-argument
+        CredentialExchange
+    ],
     acme_and_alice_connection: AcmeAliceConnect,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
 ):
     request_body = {
         "connection_id": acme_and_alice_connection.acme_connection_id,
-        "indy_proof_request": {
+        "anoncreds_proof_request": {
             "name": "Proof Request",
             "version": "1.0.0",
             "requested_attributes": {

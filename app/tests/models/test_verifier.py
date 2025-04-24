@@ -6,8 +6,6 @@ from app.models.verifier import (
     AnonCredsPresentationRequest,
     AnonCredsPresSpec,
     DIFPresSpec,
-    IndyPresSpec,
-    IndyProofRequest,
     ProofRequestBase,
     ProofRequestType,
     RejectProofRequest,
@@ -17,11 +15,6 @@ from shared.exceptions.cloudapi_value_error import CloudApiValueError
 
 def test_proof_request_base_model():
     with pytest.raises(CloudApiValueError) as exc:
-        ProofRequestBase(type=ProofRequestType.INDY, indy_proof_request=None)
-    assert exc.value.detail == (
-        "indy_proof_request must be populated if `indy` type is selected"
-    )
-    with pytest.raises(CloudApiValueError) as exc:
         ProofRequestBase(type=ProofRequestType.ANONCREDS, anoncreds_proof_request=None)
     assert exc.value.detail == (
         "anoncreds_proof_request must be populated if `anoncreds` type is selected"
@@ -29,7 +22,7 @@ def test_proof_request_base_model():
     with pytest.raises(CloudApiValueError) as exc:
         ProofRequestBase(
             type=ProofRequestType.LD_PROOF,
-            indy_proof_request=IndyProofRequest(
+            anoncreds_proof_request=AnonCredsPresentationRequest(
                 requested_attributes={}, requested_predicates={}
             ),
             dif_proof_request=DIFProofRequest(
@@ -38,20 +31,6 @@ def test_proof_request_base_model():
         )
     assert exc.value.detail == (
         "Only dif_proof_request must be populated if `ld_proof` type is selected"
-    )
-
-    with pytest.raises(CloudApiValueError) as exc:
-        ProofRequestBase(
-            type=ProofRequestType.INDY,
-            indy_proof_request=IndyProofRequest(
-                requested_attributes={}, requested_predicates={}
-            ),
-            dif_proof_request=DIFProofRequest(
-                presentation_definition=PresentationDefinition()
-            ),
-        )
-    assert exc.value.detail == (
-        "Only indy_proof_request must be populated if `indy` type is selected"
     )
 
     with pytest.raises(CloudApiValueError) as exc:
@@ -76,7 +55,7 @@ def test_proof_request_base_model():
 
     ProofRequestBase.check_proof_request(
         values=ProofRequestBase(
-            indy_proof_request=IndyProofRequest(
+            anoncreds_proof_request=AnonCredsPresentationRequest(
                 requested_attributes={}, requested_predicates={}
             )
         )
@@ -84,15 +63,6 @@ def test_proof_request_base_model():
 
 
 def test_accept_proof_request_model():
-    AcceptProofRequest(
-        proof_id="abc",
-        indy_presentation_spec=IndyPresSpec(
-            requested_attributes={},
-            requested_predicates={},
-            self_attested_attributes={},
-        ),
-    )
-
     AcceptProofRequest(
         proof_id="abc",
         type=ProofRequestType.LD_PROOF,
@@ -109,15 +79,6 @@ def test_accept_proof_request_model():
         ),
     )
 
-    with pytest.raises(CloudApiValueError) as exc:
-        AcceptProofRequest(
-            type=ProofRequestType.INDY,
-            indy_presentation_spec=None,
-            proof_id="abc",
-        )
-    assert exc.value.detail == (
-        "indy_presentation_spec must be populated if `indy` type is selected"
-    )
     with pytest.raises(CloudApiValueError) as exc:
         AcceptProofRequest(
             type=ProofRequestType.LD_PROOF,
