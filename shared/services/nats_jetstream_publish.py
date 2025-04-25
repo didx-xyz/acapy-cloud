@@ -190,7 +190,7 @@ class NatsJetstreamPublish:
                 else:
                     logger.error("Failed to publish message after {} attempts", retries)
                     raise e
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 logger.error("Unexpected error: {}", e)
                 attempt += 1
                 if attempt < retries:
