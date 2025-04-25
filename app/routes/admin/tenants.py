@@ -274,7 +274,7 @@ async def create_tenant(
             logger=bound_logger,
             event=event,
         )
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         bound_logger.error(
             "Failed to publish tenant event to NATS: {}. Event: {}", e, event
         )

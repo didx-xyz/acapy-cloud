@@ -119,7 +119,7 @@ async def create_schema(
         )
 
     event = EventFactory.create_schema_event(
-        subject=f"cloudapi.aries.events.no_group.Governance",  # TODO update based on cheqd
+        subject="cloudapi.aries.events.no_group.Governance",  # TODO update based on cheqd
         schema_id=schema_response.id,
         name=schema_response.name,
         version=schema_response.version,
@@ -134,7 +134,7 @@ async def create_schema(
             logger=bound_logger,
             event=event,
         )
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         bound_logger.error(
             "Failed to publish schema event to NATS: {}. Event: {}", e, event
         )
