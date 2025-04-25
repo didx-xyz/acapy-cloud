@@ -312,9 +312,7 @@ jobs:
             --dist loadgroup \
             --durations=25 \
             --ignore ./tilt \
-            --cov \
-            --skip-covered \
-            | tee test_output.txt
+            --cov | tee test_output.txt
 
           EXIT_CODE=${PIPESTATUS[0]}
           set -e

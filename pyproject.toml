@@ -69,7 +69,7 @@ omit = ["*/tests/*"]
 profile = "black"
 
 [tool.pytest.ini_options]
-addopts = "--junitxml=junit.xml -p no:cacheprovider --cov-report=xml --cov-report=term"
+addopts = "--junitxml=junit.xml -p no:cacheprovider --cov-report=xml --cov-report=term:skip-covered"
 junit_family = "xunit2"
 
 [build-system]
