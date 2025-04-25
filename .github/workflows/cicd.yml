@@ -310,9 +310,11 @@ jobs:
           poetry run pytest \
             --numprocesses 4 \
             --dist loadgroup \
-            --durations=0 \
+            --durations=25 \
             --ignore ./tilt \
-            --cov | tee test_output.txt
+            --cov \
+            --skip-covered \
+            | tee test_output.txt
 
           EXIT_CODE=${PIPESTATUS[0]}
           set -e
