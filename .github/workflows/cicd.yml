@@ -310,7 +310,7 @@ jobs:
           poetry run pytest \
             --numprocesses 4 \
             --dist loadgroup \
-            --durations=0 \
+            --durations=25 \
             --ignore ./tilt \
             --cov | tee test_output.txt
 
