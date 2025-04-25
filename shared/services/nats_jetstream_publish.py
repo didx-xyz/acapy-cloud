@@ -41,6 +41,7 @@ class SchemaEventPayload(BaseModel):
     attributes: List[str]
     topic: str
     state: str
+    wallet_label: str
     created_at: str
     updated_at: str
 
@@ -96,6 +97,7 @@ class EventFactory:
         name: str,
         version: str,
         attributes: List[str],
+        wallet_label: str,
         state: str,
         topic: str,
         created_at: str = None,
@@ -112,6 +114,7 @@ class EventFactory:
             name=name,
             version=version,
             attributes=attributes,
+            wallet_label=wallet_label,
             topic=topic,
             state=state,
             created_at=created_at,
