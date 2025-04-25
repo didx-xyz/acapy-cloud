@@ -9,7 +9,7 @@ image:
   registry: docker.io
   name: universalregistrar/uni-registrar-web
   pullPolicy: Always
-  tag: d02207a156
+  digest: sha256:d02207a156cb97dd79d3515bc90a963d12660c4ca82382f77ae6b5d32351267f
 
 service:
   appProtocol: http
