@@ -124,6 +124,7 @@ async def create_schema(
         name=schema_response.name,
         version=schema_response.version,
         attributes=schema_response.attribute_names,
+        wallet_label="Endorser",
         topic="schema",
         state="created",
     )
