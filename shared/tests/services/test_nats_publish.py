@@ -213,7 +213,9 @@ async def mock_nats_client():
 
 
 @pytest.mark.anyio
-async def test_nats_jetstream_publish_success(mock_nats_client):
+async def test_nats_jetstream_publish_success(
+    mock_nats_client,  # pylint: disable=redefined-outer-name
+):
 
     # Create NatsJetstreamPublish instance
     publisher = NatsJetstreamPublish(jetstream=mock_nats_client)
@@ -239,7 +241,9 @@ async def test_nats_jetstream_publish_success(mock_nats_client):
 
 
 @pytest.mark.anyio
-async def test_nats_jetstream_publish_duplicate(mock_nats_client):
+async def test_nats_jetstream_publish_duplicate(
+    mock_nats_client,  # pylint: disable=redefined-outer-name
+):
 
     # Create NatsJetstreamPublish instance
     publisher = NatsJetstreamPublish(jetstream=mock_nats_client)
@@ -265,7 +269,7 @@ async def test_nats_jetstream_publish_duplicate(mock_nats_client):
 
 
 @pytest.mark.anyio
-async def test_nats_jetstream_publish_failure(mock_nats_client):
+async def test_nats_jetstream_publish_failure():
 
     # Create NatsJetstreamPublish instance
     publisher = AsyncMock(spec=NatsJetstreamPublish)
