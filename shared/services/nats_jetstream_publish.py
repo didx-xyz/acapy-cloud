@@ -2,7 +2,7 @@ import asyncio
 import time
 from datetime import datetime
 from logging import Logger
-from typing import List, Union
+from typing import List, Optional, Union
 
 import orjson
 import xxhash
@@ -24,8 +24,8 @@ class TenantEventPayload(BaseModel):
     wallet_label: str
     wallet_name: str
     roles: List[str]
-    image_url: str
-    group_id: str
+    image_url: Optional[str]
+    group_id: Optional[str]
     topic: str
     state: str
     created_at: str
@@ -64,9 +64,9 @@ class EventFactory:
         wallet_name: str,
         roles: List[str],
         state: str,
-        group_id: str,
         topic: str,
-        image_url: str = "",
+        group_id: str = "noGroup",
+        image_url: str = None,
         created_at: str = None,
         updated_at: str = None,
     ) -> Event:
