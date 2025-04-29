@@ -65,10 +65,10 @@ group_id_query: Optional[str] = Query(
 @inject
 async def create_tenant(
     body: CreateTenantRequest,
+    admin_auth: AcaPyAuthVerified = Depends(acapy_auth_tenant_admin),
     publisher: NatsJetstreamPublish = Depends(
         Provide[Container.nats_jetstream_publisher]
     ),
-    admin_auth: AcaPyAuthVerified = Depends(acapy_auth_tenant_admin),
 ) -> CreateTenantResponse:
     """
     Create a New Tenant

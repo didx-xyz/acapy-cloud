@@ -48,10 +48,10 @@ router = APIRouter(
 @inject
 async def create_schema(
     schema: CreateSchema,
+    auth: AcaPyAuthVerified = Depends(acapy_auth_verified),
     publisher: NatsJetstreamPublish = Depends(
         Provide[Container.nats_jetstream_publisher]
     ),
-    auth: AcaPyAuthVerified = Depends(acapy_auth_verified),
 ) -> CredentialSchema:
     """
     Create and publish a new schema to the ledger
