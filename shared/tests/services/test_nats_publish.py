@@ -26,7 +26,7 @@ def test_event_factory_create_tenant_event():
         state="active",
         group_id="group123",
         topic="tenant.created",
-        image_url="http://example.com/image.png",
+        image_url="https://example.com/image.png",
         created_at="2025-04-23T07:29:08.401017Z",
         updated_at="2025-04-23T07:29:08.401017Z",
     )
@@ -38,7 +38,7 @@ def test_event_factory_create_tenant_event():
     assert event.payload.state == "active"
     assert event.payload.group_id == "group123"
     assert event.payload.topic == "tenant.created"
-    assert event.payload.image_url == "http://example.com/image.png"
+    assert event.payload.image_url == "https://example.com/image.png"
     assert event.payload.created_at == "2025-04-23T07:29:08.401017Z"
     assert event.payload.updated_at == "2025-04-23T07:29:08.401017Z"
 
@@ -76,7 +76,7 @@ def test_tenant_event_payload():
         wallet_label="Test Wallet",
         wallet_name="Test Wallet Name",
         roles=["admin", "user"],
-        image_url="http://example.com/image.png",
+        image_url="https://example.com/image.png",
         group_id="group123",
         topic="tenant.created",
         state="active",
@@ -91,7 +91,7 @@ def test_tenant_event_payload():
             wallet_label="Test Wallet",
             # Missing required field `wallet_name`
             roles=["admin", "user"],
-            image_url="http://example.com/image.png",
+            image_url="https://example.com/image.png",
             group_id="group123",
             topic="tenant.created",
             state="active",
@@ -136,7 +136,7 @@ def test_event_model():
         wallet_label="Test Wallet",
         wallet_name="Test Wallet Name",
         roles=["admin", "user"],
-        image_url="http://example.com/image.png",
+        image_url="https://example.com/image.png",
         group_id="group123",
         topic="tenant.created",
         state="active",
@@ -178,7 +178,7 @@ def test_event_factory_create_tenant_event_without_timestamps():
         state="active",
         group_id="group123",
         topic="tenant.created",
-        image_url="http://example.com/image.png",
+        image_url="https://example.com/image.png",
     )
     assert event.subject == "tenant.subject"
     assert event.payload.created_at is not None
@@ -231,7 +231,7 @@ async def test_nats_jetstream_publish_success(mock_nats_client):
         state="active",
         group_id="group123",
         topic="tenant.created",
-        image_url="http://example.com/image.png",
+        image_url="https://example.com/image.png",
     )
 
     # Call the publish method
@@ -257,7 +257,7 @@ async def test_nats_jetstream_publish_duplicate(mock_nats_client):
         state="active",
         group_id="group123",
         topic="tenant.created",
-        image_url="http://example.com/image.png",
+        image_url="https://example.com/image.png",
     )
 
     # Call the publish method
@@ -284,7 +284,7 @@ async def test_nats_jetstream_publish_failure(mock_nats_client):
         state="active",
         group_id="group123",
         topic="tenant.created",
-        image_url="http://example.com/image.png",
+        image_url="https://example.com/image.png",
     )
 
     # Call the publish method and expect an exception
