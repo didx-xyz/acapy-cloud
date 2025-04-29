@@ -119,7 +119,7 @@ async def create_schema(
         )
 
     event = EventFactory.create_schema_event(
-        subject="cloudapi.aries.events.no_group.Governance",  # TODO update based on cheqd
+        subject="cloudapi.aries.events.no_group.Governance",  # todo update based on cheqd
         schema_id=schema_response.id,
         name=schema_response.name,
         version=schema_response.version,
