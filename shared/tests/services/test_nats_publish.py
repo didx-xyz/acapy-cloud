@@ -1,17 +1,18 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from shared.services.nats_jetstream_publish import (
-    TenantEventPayload,
-    SchemaEventPayload,
-    Event,
-)
-from shared.services.nats_jetstream_publish import EventFactory
-from shared.services.nats_jetstream_publish import NatsJetstreamPublish
-from pydantic import ValidationError
-from nats import NATS
-from nats.js import JetStreamContext
-from nats.errors import TimeoutError
 
+import pytest
+from nats import NATS
+from nats.errors import TimeoutError
+from nats.js import JetStreamContext
+from pydantic import ValidationError
+
+from shared.services.nats_jetstream_publish import (
+    Event,
+    EventFactory,
+    NatsJetstreamPublish,
+    SchemaEventPayload,
+    TenantEventPayload,
+)
 
 
 def test_event_factory_create_tenant_event():
