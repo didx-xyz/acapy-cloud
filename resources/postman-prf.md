@@ -29,7 +29,7 @@ graph TD
  VerifyIssuerRegistry[Verify issuer/verifier on trust-registry]:::publicEndpoint
  VerifySchemaRegistry[Verify schema on trust-registry]:::publicEndpoint
  %% Issuer Tenant actions
- CreateInvitation[Create invitation]:::issuerTenant
+ GetIssuerPublicDid[Get issuer public did]:::issuerTenant
  GetCredDef[Get Cred Def]:::issuerTenant
  CreateCredDef[Create Cred Def]:::issuerTenant
  CreateCredential[Create Credential]:::issuerTenant
@@ -38,8 +38,9 @@ graph TD
  GetProof[Get Proof]:::issuerTenant
  RevokeCredential[Revoke Credential]:::issuerTenant
  CheckRevoked[Check Revoked]:::issuerTenant
+ GetIssuerConnectionId[Get issuer connection ID]:::issuerTenant
  %% Holder Tenant actions
- AcceptInvitation[Accept invitation]:::holderTenant
+ CreateDidExchangeRequest[Create DID exchange request]:::holderTenant
  WaitOfferReceived[Wait for SSE offer-received]:::sseHolder
  GetCredentialsID[Get Credentials ID]:::holderTenant
  AcceptCredential[Accept Credential]:::holderTenant
@@ -48,9 +49,8 @@ graph TD
  GetReferent[Get Referent]:::holderTenant
  AcceptProofRequest[Accept Proof Request]:::holderTenant
  %% Shared or system actions
- WaitConnectionReady[Wait for SSE connection-ready]:::sseHolder
+ WaitForSseCompleted[Wait for SSE completed]:::sseHolder
  WaitProofDone[Wait for SSE proof done]:::sseIssuer
- WaitInvitationSent[Wait for SSE invitation-sent]:::sseIssuer
  WaitForSSERevoked[Wait for SSE revoked]:::sseIssuer
  %% Assertions
  AssertVerifiedTrue>Assert: verified = true]:::assertion
@@ -61,8 +61,9 @@ graph TD
  GetIssuerTenant -->|Issuer doesn't exist| CreateIssuer --> VerifyIssuerRegistry --> GetHolderTenant
  GetIssuerToken --> GetHolderTenant
  GetHolderTenant -->|Holder exists| GetHolderToken
- GetHolderTenant -->|Holder doesn't exist| CreateHolder --> CreateInvitation
- GetHolderToken --> CreateInvitation --> WaitInvitationSent --> AcceptInvitation --> WaitConnectionReady --> GetSchema
+ GetHolderTenant -->|Holder doesn't exist| CreateHolder --> GetIssuerPublicDid
+ GetHolderToken --> GetIssuerPublicDid --> CreateDidExchangeRequest
+ CreateDidExchangeRequest --> WaitForSseCompleted --> GetIssuerConnectionId --> GetSchema
  GetSchema -->|Schema exists| VerifySchemaRegistry
  GetSchema -->|Schema doesn't exist| CreateSchema --> VerifySchemaRegistry
  VerifySchemaRegistry --> GetCredDef
