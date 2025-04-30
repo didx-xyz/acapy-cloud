@@ -85,13 +85,9 @@ async def create_schema(
             public_did = await assert_public_did(aries_controller)
         except CloudApiException as e:
             bound_logger.error(
-                "Failed to assert {} has public DID: {}",
-                auth.wallet_id,
-                e,
+                "Failed to assert {} has public DID: {}", auth.wallet_id, e
             )
-            raise CloudApiException(
-                "Failed to fetch public DID for agent {}", 500
-            ) from e
+            raise CloudApiException("Failed to fetch public DID for agent", 500) from e
 
     async with client_from_auth(auth) as aries_controller:
         schema_response = await schemas_service.create_schema(
