@@ -24,6 +24,7 @@ export function createTenant(bearerToken, wallet) {
   const payload = JSON.stringify({
     wallet_label: wallet.wallet_label,
     wallet_name: wallet.wallet_name,
+    wallet_type: "askar-anoncreds",
     group_id: "Some Group Id",
     image_url:
       "https://upload.wikimedia.org/wikipedia/commons/7/70/Example.png",
