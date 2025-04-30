@@ -176,6 +176,7 @@ export function createIssuerTenant(bearerToken, walletName) {
   const payload = JSON.stringify({
     wallet_label: walletName,
     wallet_name: walletName,
+    wallet_type: "askar-anoncreds",
     roles: ["issuer", "verifier"],
     group_id: "Group A",
     image_url:
