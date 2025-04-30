@@ -6,13 +6,6 @@ from app.exceptions import CloudApiException
 from app.models.definitions import CreateSchema, CredentialSchema
 from app.routes.definitions import create_schema
 
-create_indy_schema_body = CreateSchema(
-    schema_type="indy",
-    name="Test_Indy_Schema_1",
-    version="0.1.0",
-    attribute_names=["attr1", "attr2"],
-)
-
 create_anoncreds_schema_body = CreateSchema(
     schema_type="anoncreds",
     name="Test_AnonCreds_Schema_1",
@@ -34,9 +27,7 @@ create_anoncreds_schema_response = CredentialSchema(
 
 
 @pytest.mark.anyio
-@pytest.mark.parametrize(
-    "request_body", [create_anoncreds_schema_body, create_indy_schema_body]
-)
+@pytest.mark.parametrize("request_body", [create_anoncreds_schema_body])
 async def test_create_schema_success(
     mock_tenant_auth_verified, mock_governance_auth, request_body
 ):
