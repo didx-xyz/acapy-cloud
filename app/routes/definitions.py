@@ -2,7 +2,6 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.services.acapy_wallet import assert_public_did
 import app.services.definitions.credential_definitions as cred_def_service
 import app.services.definitions.schemas as schemas_service
 from app.dependencies.acapy_clients import client_from_auth
@@ -21,6 +20,7 @@ from app.models.definitions import (
     CredentialDefinition,
     CredentialSchema,
 )
+from app.services.acapy_wallet import assert_public_did
 from app.util.definitions import (
     anoncreds_schema_from_acapy,
     credential_definition_from_acapy,
@@ -87,7 +87,7 @@ async def create_schema(
             public_did = await assert_public_did(aries_controller)
         except CloudApiException as e:
             bound_logger.error(
-                "Failed to assert wallet_id {} has public DID: {}",
+                "Failed to assert {} has public DID: {}",
                 auth.wallet_id,
                 e,
             )
