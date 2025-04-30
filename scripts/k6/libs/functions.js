@@ -695,6 +695,7 @@ export function createSchema(bearerToken, schemaName, schemaVersion) {
     const requestBody = JSON.stringify({
       name: schemaName,
       version: schemaVersion,
+      schema_type: "anoncreds",
       attribute_names: [
         "date_of_birth",
         "id_number",
