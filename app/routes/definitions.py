@@ -76,9 +76,7 @@ async def create_schema(
 
     if auth.role != Role.GOVERNANCE:
         # Prevent issuers from creating schemas
-        bound_logger.info(
-            "Unauthorized request to create schema from {}", auth.wallet_id
-        )
+        bound_logger.info("Unauthorized request to create schema from {}", auth.role)
         raise CloudApiException("Unauthorized", 403)
 
     # Fetch public DID for agent
