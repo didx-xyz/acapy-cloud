@@ -317,8 +317,8 @@ export function createCredential(
   try {
     // Construct the request body including the invitation object
     const requestBody = JSON.stringify({
-      type: "indy",
-      indy_credential_detail: {
+      type: "anoncreds",
+      anoncreds_credential_detail: {
         credential_definition_id: credentialDefinitionId,
         attributes: {
           date_of_birth: "1986-09-29",
