@@ -496,8 +496,8 @@ export function sendProofRequest(issuerAccessToken, issuerConnectionId) {
 
     // Construct the request body including the invitation object
     const requestBody = {
-      type: "indy",
-      indy_proof_request: {
+      type: "anoncreds",
+      anoncreds_proof_request: {
         non_revoked: {
           to: currentEpochTimeSeconds, // Current epoch time in seconds
         },
@@ -605,9 +605,9 @@ export function acceptProofRequest(holderAccessToken, proofId, referent) {
   try {
     // Construct the request body including the invitation object
     const requestBody = {
-      type: "indy",
+      type: "anoncreds",
       proof_id: proofId,
-      indy_presentation_spec: {
+      anoncreds_presentation_spec: {
         requested_attributes: {
           get_id_number: {
             cred_id: referent,
