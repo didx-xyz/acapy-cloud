@@ -309,7 +309,7 @@ services:
     #     aca-py start \
     #       -it http "0.0.0.0" "3020" \
     #       -e http://governance-multitenant-agent:3020 \
-    #       --wallet-type askar --auto-promote-author-did --plugin acapy_wallet_groups_plugin \
+    #       --wallet-type askar-anoncreds --auto-promote-author-did --plugin acapy_wallet_groups_plugin \
     #       --plugin nats_events.v1_0.nats_queue.events --plugin-config-value nats_queue.connection.connection_url="nats://nats-1:4222"
     env_file:
       - environments/governance-multitenant/aca-py-agent.default.env

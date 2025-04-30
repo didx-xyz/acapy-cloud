@@ -109,7 +109,7 @@ configureEnvironment() {
   # global
   export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:controller}"
   export GENESIS_URL="http://localhost:9000/genesis"
-  export WALLET_TYPE="askar"
+  export WALLET_TYPE="askar-anoncreds"
 
   export REGISTRY="${REGISTRY}"
   export IMAGE_TAG="${IMAGE_TAG}"
