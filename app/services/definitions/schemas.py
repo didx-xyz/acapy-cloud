@@ -62,7 +62,7 @@ async def create_schema(
             logger=bound_logger,
             model_class=SchemaPostRequest,
             var_schema=anoncreds_schema,
-            options=SchemaPostOption(create_transaction_for_endorser=True),
+            options=SchemaPostOption(create_transaction_for_endorser=False),
         )
 
         result = await publisher.publish_anoncreds_schema(schema_request)
