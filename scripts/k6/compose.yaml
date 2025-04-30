@@ -23,7 +23,6 @@ services:
       - TOTAL_BATCHES=5
       - VERSION=4.3.1
       - ISSUERS=issuer13
-      - USE_DID_EXCHANGE=true
       - SCHEMA_NAME="model_pop7"
       - SCHEMA_VERSION=0.1.0
       - DENOMINATOR=1
