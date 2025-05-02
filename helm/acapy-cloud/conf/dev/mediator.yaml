@@ -19,7 +19,7 @@ image:
   registry: ghcr.io/openwallet-foundation
   name: acapy-agent
   pullPolicy: Always
-  tag: py3.12-1.2.2
+  tag: py3.12-1.3.0
 
 podLabels:
   admission.datadoghq.com/enabled: "false"

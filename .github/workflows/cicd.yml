@@ -47,9 +47,9 @@ permissions: {}
 
 env:
   TAILSCALE_VERSION: latest
-  HELMFILE_VERSION: v0.171.0
+  HELMFILE_VERSION: v1.0.0
   HELM_VERSION: v3.17.3
-  MISE_VERSION: 2025.4.7
+  MISE_VERSION: 2025.4.12
 
 jobs:
   format:
@@ -71,7 +71,7 @@ jobs:
           [tools]
           "pipx:black" = "25.1"
           "pipx:isort" = "6.0"
-          python = "3.12"
+          python = "3.13"
           EOF
 
       - name: Set up Mise

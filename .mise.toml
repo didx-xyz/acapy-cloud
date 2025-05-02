@@ -2,13 +2,13 @@
 [tools]
 "aqua:nats-io/natscli" = "0.2"
 helm = "3"
-helmfile = "0.171"
+helmfile = "1.0.0"
 istioctl = "1.25"
 kind = "0.27"
 kubectl = "1.32"
 poetry = "2.1"
 pre-commit = "4.2"
-python = "3.12"
+python = "3.13"
 tilt = "0.34"
 usage = "latest"
 
