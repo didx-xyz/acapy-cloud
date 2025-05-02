@@ -3,7 +3,7 @@
   "info": {
     "title": "CloudAPI Tenant",
     "description": "\nWelcome to CloudAPI Tenant!\n\nFor detailed guidance on using the API, please visit our official documentation:\nhttps://www.didx.co.za/acapy-cloud/index.html\n",
-    "version": "5.0.0rc0"
+    "version": "5.0.0rc1"
   },
   "servers": [
     {
@@ -11,116 +11,13 @@
     }
   ],
   "paths": {
-    "/v1/connections/create-invitation": {
-      "post": {
-        "tags": [
-          "connections"
-        ],
-        "summary": "Create a Connection Invitation",
-        "description": "Create connection invitation\n---\nThis endpoint creates an invitation object for establishing a connection with another tenant.\n\nFor every invitation that is created, there will be a corresponding connection record with a state\n`invitation-sent`. Once this invitation is accepted, the connection record will transition to a state `completed`.\n\nIf `multi_use` is set to true, the invitation can be re-used and accepted by multiple tenants.\n\nCreating a multi-use invitation will create a connection record with `invitation_mode: \"multi\"`\n(instead of `\"once\"`), and this connection record will remain in a state `invitation-sent`, until it is deleted.\nEvery time a multi-use invitation is accepted, a new connection record will be created with state `completed`.\n\nThe `use_public_did` parameter determines whether to create an invitation using your public DID.\nThis of course requires that you have a public DID in your wallet, which by default is only true for issuers.\nIf `use_public_did` is set to False (default behaviour), then a random DID will be generated for this invite.\n\nRequest Body:\n---\n    body: CreateInvitation\n        alias: str (Optional)\n            An alias for the connection invitation, which will appear as the alias in the connection record.\n        multi_use: bool (default: False)\n            Whether the invitation can be used multiple times.\n        use_public_did: bool (default: False)\n            Whether to use a public did for the invitation.\n\nReturns:\n---\n    InvitationResult\n        Contains an invitation object, an invitation url, and a connection id for this invite.",
-        "operationId": "create_invitation_v1_connections_create_invitation_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/CreateInvitation"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Body"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InvitationResult"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true,
-        "security": [
-          {
-            "APIKeyHeader": []
-          }
-        ]
-      }
-    },
-    "/v1/connections/accept-invitation": {
-      "post": {
-        "tags": [
-          "connections"
-        ],
-        "summary": "Accept a Connection Invitation",
-        "description": "Accept connection invitation\n---\nTenants can use this endpoint to accept a connection invitation.\n\nThe invitation object is obtained from an InvitationResult (the response from creating a connection invitation).\n\nThe `invitation_url` in the InvitationResult can also be used to obtain an invitation; there is a base64 encoded\nstring after the \"?oob=\" parameter in the url, and this can be decoded to obtain the invitation object.\n\nA webhook event will be emitted for the other party, on topic `connections`.\nTheir record for the connection will now be in state `completed`.\n\nRequest Body:\n---\n    body: AcceptInvitation\n        alias: str (Optional)\n            Alias for the connection invitation.\n        invitation: ConnectionInvitation\n            The invitation object obtained from an InvitationResult, or decoded from an invitation_url.\n\nReturns:\n---\n    Connection\n        The record of your new connection",
-        "operationId": "accept_invitation_v1_connections_accept_invitation_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AcceptInvitation"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Connection"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true,
-        "security": [
-          {
-            "APIKeyHeader": []
-          }
-        ]
-      }
-    },
     "/v1/connections": {
       "get": {
         "tags": [
           "connections"
         ],
         "summary": "Fetch Connection Records",
-        "description": "Fetch a list of connection records\n---\nThe records contain information about connections with other tenants, such as the state of the connection,\nthe alias of the connection, the label and the did of the other party, and other metadata.\n\nThe following query parameters can be used to filter the connection records to fetch.\n\nParameters (Optional):\n---\n    limit: int - The maximum number of records to retrieve\n    offset: int - The offset to start retrieving records from\n    descending: bool - Whether to return results in descending order. Results are ordered by record created time.\n    alias: str\n    connection_protocol: Protocol: \"connections/1.0\", \"didexchange/1.0\"\n    invitation_key: str\n    invitation_msg_id: str\n    my_did: str\n    state: State: \"active\", \"response\", \"request\", \"start\", \"completed\", \"init\", \"error\", \"invitation\", \"abandoned\"\n    their_did: str\n    their_public_did: str\n    their_role: Role: \"invitee\", \"requester\", \"inviter\", \"responder\"\n\nReturns:\n---\n    List[Connection]\n        A list of connection records",
+        "description": "Fetch a list of connection records\n---\nThe records contain information about connections with other tenants, such as the state of the connection,\nthe alias of the connection, the label and the did of the other party, and other metadata.\n\nThe following query parameters can be used to filter the connection records to fetch.\n\nParameters (Optional):\n---\n    limit: int - The maximum number of records to retrieve\n    offset: int - The offset to start retrieving records from\n    descending: bool - Whether to return results in descending order. Results are ordered by record created time.\n    alias: str\n    connection_protocol: Protocol: \"didexchange/1.0\", \"didexchange/1.1\"\n    invitation_key: str\n    invitation_msg_id: str\n    my_did: str\n    state: State: \"active\", \"response\", \"request\", \"start\", \"completed\", \"init\", \"error\", \"invitation\", \"abandoned\"\n    their_did: str\n    their_public_did: str\n    their_role: Role: \"invitee\", \"requester\", \"inviter\", \"responder\"\n\nReturns:\n---\n    List[Connection]\n        A list of connection records",
         "operationId": "get_connections_v1_connections_get",
         "security": [
           {
@@ -205,8 +102,8 @@
               "anyOf": [
                 {
                   "enum": [
-                    "connections/1.0",
-                    "didexchange/1.0"
+                    "didexchange/1.0",
+                    "didexchange/1.1"
                   ],
                   "type": "string"
                 },
@@ -427,7 +324,7 @@
           "connections"
         ],
         "summary": "Delete a Connection Record",
-        "description": "Delete connection record by id\n---\nThis endpoint deletes a connection record by id.\n\nIf the connection uses the didexchange protocol, then we hangup the connection, such that the other party also has\ntheir record deleted.\n\nIf the connection uses the deprecated connections protocol, then we just delete the record. The other party will\nstill have their record of the connection, but it will become unusable.\n\nParameters:\n---\n    connection_id: str\n        The identifier of the connection record that you want to delete\n\nReturns:\n---\n    status_code: 204",
+        "description": "Delete connection record by id\n---\nThis endpoint deletes a connection record by id.\n\nIf the connection uses the didexchange protocol, then we hangup the connection, such that the other party also has\ntheir record deleted.\n\nParameters:\n---\n    connection_id: str\n        The identifier of the connection record that you want to delete\n\nReturns:\n---\n    status_code: 204",
         "operationId": "delete_connection_by_id_v1_connections__connection_id__delete",
         "security": [
           {
@@ -840,7 +737,7 @@
           "definitions"
         ],
         "summary": "Create a new Schema",
-        "description": "Create and publish a new schema to the ledger\n---\n**NB**: Only governance can create Indy schemas.\nIssuers can create AnonCreds schemas if they have an 'askar-anoncreds' wallet type.\n\nA schema is used to create credential definitions, which is used for issuing credentials.\nThe schema defines the attributes that can exist in that credential.\n\nWhen a schema is created, it is published to the ledger and written to our public trust registry,\nso that everyone in the ecosystem can view schemas that are valid and available.\n\nRequest Body:\n---\n    body: CreateSchema\n        schema_type: SchemaType\n            The type of schema to create.\n        name: str\n            The name of the schema.\n        version: str\n            The version of the schema.\n        attribute_names: List[str]\n            The attribute names of the schema.\n\nReturns:\n---\n    CredentialSchema\n        The created schema object",
+        "description": "Create and publish a new schema to the ledger\n---\n**NB**: Only governance can create schemas.\n\nA schema is used to create credential definitions, which is used for issuing credentials.\nThe schema defines the attributes that can exist in that credential.\n\nWhen a schema is created, it is published to the ledger and written to our public trust registry,\nso that everyone in the ecosystem can view schemas that are valid and available.\n\nRequest Body:\n---\n    body: CreateSchema\n        schema_type: SchemaType\n            The type of schema to create.\n        name: str\n            The name of the schema.\n        version: str\n            The version of the schema.\n        attribute_names: List[str]\n            The attribute names of the schema.\n\nReturns:\n---\n    CredentialSchema\n        The created schema object",
         "operationId": "create_schema_v1_definitions_schemas_post",
         "security": [
           {
@@ -4007,29 +3904,6 @@
   },
   "components": {
     "schemas": {
-      "AcceptInvitation": {
-        "properties": {
-          "alias": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Alias"
-          },
-          "invitation": {
-            "$ref": "#/components/schemas/ReceiveInvitationRequest"
-          }
-        },
-        "type": "object",
-        "required": [
-          "invitation"
-        ],
-        "title": "AcceptInvitation"
-      },
       "AcceptOobInvitation": {
         "properties": {
           "alias": {
@@ -4109,7 +3983,7 @@
           "anoncreds_presentation_spec": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/IndyPresSpec"
+                "$ref": "#/components/schemas/AnonCredsPresSpec"
               },
               {
                 "type": "null"
@@ -4155,6 +4029,54 @@
           "attributes"
         ],
         "title": "AnonCredsCredential"
+      },
+      "AnonCredsPresSpec": {
+        "properties": {
+          "requested_attributes": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AnonCredsRequestedCredsRequestedAttr"
+            },
+            "type": "object",
+            "title": "Requested Attributes",
+            "description": "Nested object mapping proof request attribute referents to requested-attribute specifiers"
+          },
+          "requested_predicates": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AnonCredsRequestedCredsRequestedPred"
+            },
+            "type": "object",
+            "title": "Requested Predicates",
+            "description": "Nested object mapping proof request predicate referents to requested-predicate specifiers"
+          },
+          "self_attested_attributes": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Self Attested Attributes",
+            "description": "Self-attested attributes to build into proof"
+          },
+          "trace": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trace",
+            "description": "Whether to trace event (default false)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "requested_attributes",
+          "requested_predicates",
+          "self_attested_attributes"
+        ],
+        "title": "AnonCredsPresSpec",
+        "description": "AnonCredsPresSpec"
       },
       "AnonCredsPresentationReqAttrSpec": {
         "properties": {
@@ -4346,16 +4268,10 @@
       "AnonCredsPresentationRequest": {
         "properties": {
           "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
             "title": "Name",
-            "description": "Proof request name"
+            "description": "Proof request name",
+            "default": "Proof"
           },
           "non_revoked": {
             "anyOf": [
@@ -4396,16 +4312,10 @@
             "description": "Requested predicate specifications of proof request"
           },
           "version": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
             "title": "Version",
-            "description": "Proof request version"
+            "description": "Proof request version",
+            "default": "1.0"
           }
         },
         "type": "object",
@@ -4413,8 +4323,7 @@
           "requested_attributes",
           "requested_predicates"
         ],
-        "title": "AnonCredsPresentationRequest",
-        "description": "AnonCredsPresentationRequest"
+        "title": "AnonCredsPresentationRequest"
       },
       "AnonCredsPresentationRequestNonRevoked": {
         "properties": {
@@ -4450,6 +4359,62 @@
         "type": "object",
         "title": "AnonCredsPresentationRequestNonRevoked",
         "description": "AnonCredsPresentationRequestNonRevoked"
+      },
+      "AnonCredsRequestedCredsRequestedAttr": {
+        "properties": {
+          "cred_id": {
+            "type": "string",
+            "title": "Cred Id",
+            "description": "Wallet credential identifier (typically but not necessarily a UUID)"
+          },
+          "revealed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revealed",
+            "description": "Whether to reveal attribute in proof (default true)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cred_id"
+        ],
+        "title": "AnonCredsRequestedCredsRequestedAttr",
+        "description": "AnonCredsRequestedCredsRequestedAttr"
+      },
+      "AnonCredsRequestedCredsRequestedPred": {
+        "properties": {
+          "cred_id": {
+            "type": "string",
+            "title": "Cred Id",
+            "description": "Wallet credential identifier (typically but not necessarily a UUID)"
+          },
+          "timestamp": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 18446744073709552000,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timestamp",
+            "description": "Epoch timestamp of interest for non-revocation proof"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cred_id"
+        ],
+        "title": "AnonCredsRequestedCredsRequestedPred",
+        "description": "AnonCredsRequestedCredsRequestedPred"
       },
       "AttachDecorator-Input": {
         "properties": {
@@ -4638,10 +4603,12 @@
           "json": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
                 "items": {
+                  "additionalProperties": true,
                   "type": "object"
                 },
                 "type": "array"
@@ -4713,10 +4680,12 @@
           "json": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
                 "items": {
+                  "additionalProperties": true,
                   "type": "object"
                 },
                 "type": "array"
@@ -4986,6 +4955,7 @@
           "di_vc": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -4997,6 +4967,7 @@
           "jwt": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -5008,6 +4979,7 @@
           "jwt_vc": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -5019,6 +4991,7 @@
           "jwt_vp": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -5030,6 +5003,7 @@
           "ldp": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -5041,6 +5015,7 @@
           "ldp_vc": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -5052,6 +5027,7 @@
           "ldp_vp": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -5145,8 +5121,8 @@
               {
                 "type": "string",
                 "enum": [
-                  "connections/1.0",
-                  "didexchange/1.0"
+                  "didexchange/1.0",
+                  "didexchange/1.1"
                 ]
               },
               {
@@ -5302,115 +5278,6 @@
         "type": "object",
         "title": "Connection"
       },
-      "ConnectionInvitation": {
-        "properties": {
-          "@id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "@Id",
-            "description": "Message identifier"
-          },
-          "@type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "@Type",
-            "description": "Message type"
-          },
-          "did": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Did",
-            "description": "DID for connection invitation"
-          },
-          "imageUrl": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Imageurl",
-            "description": "Optional image URL for connection invitation"
-          },
-          "label": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Label",
-            "description": "Optional label for connection invitation"
-          },
-          "recipientKeys": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Recipientkeys",
-            "description": "List of recipient keys"
-          },
-          "routingKeys": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Routingkeys",
-            "description": "List of routing keys"
-          },
-          "serviceEndpoint": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Serviceendpoint",
-            "description": "Service endpoint at which to reach this agent"
-          }
-        },
-        "type": "object",
-        "title": "ConnectionInvitation",
-        "description": "ConnectionInvitation"
-      },
       "Constraints": {
         "properties": {
           "fields": {
@@ -5531,33 +5398,6 @@
           "tag"
         ],
         "title": "CreateCredentialDefinition"
-      },
-      "CreateInvitation": {
-        "properties": {
-          "alias": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Alias"
-          },
-          "multi_use": {
-            "type": "boolean",
-            "title": "Multi Use",
-            "default": false
-          },
-          "use_public_did": {
-            "type": "boolean",
-            "title": "Use Public Did",
-            "default": false
-          }
-        },
-        "type": "object",
-        "title": "CreateInvitation"
       },
       "CreateOffer": {
         "properties": {
@@ -5742,8 +5582,8 @@
         "properties": {
           "schema_type": {
             "$ref": "#/components/schemas/SchemaType",
-            "description": "The type of schema to create. Supported values are 'indy' and 'anoncreds'.",
-            "default": "indy"
+            "description": "The type of schema to create. Currently only 'anoncreds' is supported.",
+            "default": "anoncreds"
           },
           "name": {
             "type": "string",
@@ -5784,6 +5624,7 @@
       "CredInfo": {
         "properties": {
           "attrs": {
+            "additionalProperties": true,
             "type": "object",
             "title": "Attrs",
             "description": "Attribute names and value"
@@ -5928,6 +5769,7 @@
                   "type": "string"
                 },
                 {
+                  "additionalProperties": true,
                   "type": "object"
                 }
               ]
@@ -5939,6 +5781,7 @@
           "credentialStatus": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -5948,6 +5791,7 @@
             "title": "Credentialstatus"
           },
           "credentialSubject": {
+            "additionalProperties": true,
             "type": "object",
             "title": "Credentialsubject"
           },
@@ -5993,6 +5837,7 @@
                 "type": "string"
               },
               {
+                "additionalProperties": true,
                 "type": "object"
               }
             ],
@@ -6043,6 +5888,7 @@
             "description": "The valid until date"
           },
           "additional_properties": {
+            "additionalProperties": true,
             "type": "object",
             "title": "Additional Properties",
             "default": {}
@@ -6292,6 +6138,7 @@
             "description": "Credential status method type to use for the credential. Should match status method registered in the Verifiable Credential Extension Registry"
           },
           "additional_properties": {
+            "additionalProperties": true,
             "type": "object",
             "title": "Additional Properties",
             "default": {}
@@ -6336,6 +6183,7 @@
           "metadata": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -6701,6 +6549,7 @@
           "record_ids": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -6713,6 +6562,7 @@
           "reveal_doc": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -6743,6 +6593,7 @@
             "$ref": "#/components/schemas/PresentationDefinition"
           },
           "additional_properties": {
+            "additionalProperties": true,
             "type": "object",
             "title": "Additional Properties",
             "default": {}
@@ -8056,6 +7907,7 @@
           "self_attested_attrs": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -8068,6 +7920,7 @@
           "unrevealed_attrs": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -8275,6 +8128,7 @@
           "metadata": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -8451,6 +8305,7 @@
                       "type": "string"
                     },
                     {
+                      "additionalProperties": true,
                       "type": "object"
                     }
                   ]
@@ -8595,6 +8450,7 @@
                       "type": "string"
                     },
                     {
+                      "additionalProperties": true,
                       "type": "object"
                     }
                   ]
@@ -8725,31 +8581,6 @@
         "type": "object",
         "title": "InvitationRecord",
         "description": "InvitationRecord"
-      },
-      "InvitationResult": {
-        "properties": {
-          "connection_id": {
-            "type": "string",
-            "title": "Connection Id",
-            "description": "Connection identifier"
-          },
-          "invitation": {
-            "$ref": "#/components/schemas/ConnectionInvitation"
-          },
-          "invitation_url": {
-            "type": "string",
-            "title": "Invitation Url",
-            "description": "Invitation URL"
-          }
-        },
-        "type": "object",
-        "required": [
-          "connection_id",
-          "invitation",
-          "invitation_url"
-        ],
-        "title": "InvitationResult",
-        "description": "InvitationResult"
       },
       "IssuerCredRevRecord": {
         "properties": {
@@ -8883,11 +8714,13 @@
             ]
           },
           "headers": {
+            "additionalProperties": true,
             "type": "object",
             "title": "Headers",
             "default": {}
           },
           "payload": {
+            "additionalProperties": true,
             "type": "object",
             "title": "Payload",
             "description": "Payload to sign"
@@ -8961,6 +8794,7 @@
             "description": "Error text"
           },
           "headers": {
+            "additionalProperties": true,
             "type": "object",
             "title": "Headers",
             "description": "Headers from verified JWT.",
@@ -8981,6 +8815,7 @@
             ]
           },
           "payload": {
+            "additionalProperties": true,
             "type": "object",
             "title": "Payload",
             "description": "Payload from verified JWT"
@@ -9015,6 +8850,7 @@
           "credential": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -9062,6 +8898,7 @@
       "JsonLdVerifyRequest": {
         "properties": {
           "doc": {
+            "additionalProperties": true,
             "type": "object",
             "title": "Doc"
           },
@@ -9105,6 +8942,7 @@
             "description": "Options for specifying how the linked data proof is created."
           },
           "additional_properties": {
+            "additionalProperties": true,
             "type": "object",
             "title": "Additional Properties",
             "default": {}
@@ -9204,6 +9042,7 @@
             "description": "The verification method to use for the proof. Should match a verification method in the wallet"
           },
           "additional_properties": {
+            "additionalProperties": true,
             "type": "object",
             "title": "Additional Properties",
             "default": {}
@@ -9303,6 +9142,7 @@
             "description": "Information used for proof verification"
           },
           "additional_properties": {
+            "additionalProperties": true,
             "type": "object",
             "title": "Additional Properties",
             "default": {}
@@ -9788,115 +9628,6 @@
         "title": "RawEncoded",
         "description": "RawEncoded"
       },
-      "ReceiveInvitationRequest": {
-        "properties": {
-          "@id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "@Id",
-            "description": "Message identifier"
-          },
-          "@type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "@Type",
-            "description": "Message type"
-          },
-          "did": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Did",
-            "description": "DID for connection invitation"
-          },
-          "imageUrl": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Imageurl",
-            "description": "Optional image URL for connection invitation"
-          },
-          "label": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Label",
-            "description": "Optional label for connection invitation"
-          },
-          "recipientKeys": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Recipientkeys",
-            "description": "List of recipient keys"
-          },
-          "routingKeys": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Routingkeys",
-            "description": "List of routing keys"
-          },
-          "serviceEndpoint": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Serviceendpoint",
-            "description": "Service endpoint at which to reach this agent"
-          }
-        },
-        "type": "object",
-        "title": "ReceiveInvitationRequest",
-        "description": "ReceiveInvitationRequest"
-      },
       "RejectProofRequest": {
         "properties": {
           "proof_id": {
@@ -9927,6 +9658,7 @@
           "accum_calculated": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -9939,6 +9671,7 @@
           "accum_fixed": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -9951,6 +9684,7 @@
           "rev_reg_delta": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -10056,11 +9790,13 @@
             ]
           },
           "headers": {
+            "additionalProperties": true,
             "type": "object",
             "title": "Headers",
             "default": {}
           },
           "payload": {
+            "additionalProperties": true,
             "type": "object",
             "title": "Payload",
             "description": "Payload to sign"
@@ -10157,6 +9893,7 @@
             "description": "Error text"
           },
           "headers": {
+            "additionalProperties": true,
             "type": "object",
             "title": "Headers",
             "description": "Headers from verified JWT.",
@@ -10177,6 +9914,7 @@
             ]
           },
           "payload": {
+            "additionalProperties": true,
             "type": "object",
             "title": "Payload",
             "description": "Payload from verified JWT"
@@ -10193,6 +9931,7 @@
                     "type": "string"
                   },
                   {
+                    "additionalProperties": true,
                     "type": "object"
                   }
                 ]
@@ -10266,7 +10005,6 @@
       "SchemaType": {
         "type": "string",
         "enum": [
-          "indy",
           "anoncreds"
         ],
         "title": "SchemaType"
@@ -10505,6 +10243,7 @@
           "signed_doc": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -10727,6 +10466,7 @@
           "cred_value": {
             "anyOf": [
               {
+                "additionalProperties": true,
                 "type": "object"
               },
               {
