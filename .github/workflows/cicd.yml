@@ -96,6 +96,8 @@ jobs:
     with:
       image-version: ${{ needs.build.outputs.image_version }}
       mise-version: ${{ inputs.mise-version }}
+    secrets:
+      codacy-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
     concurrency:
       group: local-tests-${{ github.ref_name }}
       cancel-in-progress: true
