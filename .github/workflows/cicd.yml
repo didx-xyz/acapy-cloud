@@ -109,7 +109,6 @@ jobs:
     needs:
       - build
     with:
-      environment: dev
       helm-version: ${{ inputs.helm-version }}
       helmfile-version: ${{ inputs.helmfile-version }}
       image-version: ${{ needs.build.outputs.image_version }}

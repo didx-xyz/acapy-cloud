@@ -1,10 +1,29 @@
 name: Deploy EKS
 on:
+  workflow_dispatch:
+    inputs:
+      helm-version:
+        description: Helm version to use
+        required: false
+        default: 3.17.3
+        type: string
+      helmfile-version:
+        description: Helmfile version to use
+        required: false
+        default: 1.0.0
+        type: string
+      image-version:
+        description: Image version to deploy
+        required: false
+        default: latest
+        type: string
+      mise-version:
+        description: Mise version to use
+        required: false
+        default: 2025.4.12
+        type: string
   workflow_call:
     inputs:
-      environment:
-        required: true
-        type: string
       helm-version:
         required: true
         type: string
@@ -35,7 +54,7 @@ jobs:
     timeout-minutes: 30
 
     environment:
-      name: ${{ inputs.environment }}
+      name: dev
 
     permissions:
       id-token: write # Required to authenticate with AWS
