@@ -19,17 +19,14 @@ from app.models.definitions import (
     CreateSchema,
     CredentialDefinition,
     CredentialSchema,
-    SchemaType,
 )
-from app.models.issuer import CredentialType
-from app.services.trust_registry.util.issuer import assert_valid_issuer
+from app.services.acapy_wallet import assert_public_did
 from app.util.definitions import (
     anoncreds_schema_from_acapy,
     credential_definition_from_acapy,
     credential_schema_from_acapy,
 )
 from app.util.retry_method import coroutine_with_retry
-from app.util.valid_issuer import assert_public_did_and_wallet_type
 from app.util.wallet_type_checks import get_wallet_type
 from shared.log_config import get_logger
 
@@ -49,8 +46,7 @@ async def create_schema(
     """
     Create and publish a new schema to the ledger
     ---
-    **NB**: Only governance can create Indy schemas.
-    Issuers can create AnonCreds schemas if they have an 'askar-anoncreds' wallet type.
+    **NB**: Only governance can create schemas.
 
     A schema is used to create credential definitions, which is used for issuing credentials.
     The schema defines the attributes that can exist in that credential.
@@ -78,31 +74,20 @@ async def create_schema(
     bound_logger = logger.bind(body=schema)
     bound_logger.debug("POST request received: Create schema (publish and register)")
 
-    if schema.schema_type == SchemaType.INDY and auth.role != Role.GOVERNANCE:
-        # Prevent issuers from creating indy schemas
-        bound_logger.info(
-            "Unauthorized request to create Indy schema from {}", auth.wallet_id
-        )
+    if auth.role != Role.GOVERNANCE:
+        # Prevent issuers from creating schemas
+        bound_logger.info("Unauthorized request to create schema from {}", auth.role)
         raise CloudApiException("Unauthorized", 403)
 
-    public_did = None
-    if schema.schema_type == SchemaType.ANONCREDS:
-        # Assert request is from valid issuer, with anoncreds wallet type
-        async with client_from_auth(auth) as aries_controller:
-            try:
-                public_did, _ = await assert_public_did_and_wallet_type(
-                    aries_controller, CredentialType.ANONCREDS, bound_logger
-                )
-            except CloudApiException as e:
-                bound_logger.info(
-                    "Failed to assert wallet_id {} is valid issuer to create AnonCreds schema request: {}",
-                    auth.wallet_id,
-                    e,
-                )
-                raise CloudApiException(
-                    "Only valid AnonCreds issuers can create AnonCreds schemas", 403
-                ) from e
-        await assert_valid_issuer(public_did)
+    # Fetch public DID for agent
+    async with client_from_auth(auth) as aries_controller:
+        try:
+            public_did = await assert_public_did(aries_controller)
+        except CloudApiException as e:
+            bound_logger.error(
+                "Failed to assert {} has public DID: {}", auth.wallet_id, e
+            )
+            raise CloudApiException("Failed to fetch public DID for agent", 500) from e
 
     async with client_from_auth(auth) as aries_controller:
         schema_response = await schemas_service.create_schema(

@@ -40,8 +40,7 @@ async def create_schema(
     Create a schema and register it in the trust registry
 
     NB: Auth is handled in the route, so we assume the request is valid:
-    - Indy schemas are only created by governance agents
-    - AnonCreds schemas are only created by valid issuers with the correct wallet type
+    - AnonCreds schemas are only created by governance agents
     """
     bound_logger = logger.bind(body=schema)
     publisher = SchemaPublisher(controller=aries_controller, logger=logger)
@@ -63,20 +62,12 @@ async def create_schema(
             logger=bound_logger,
             model_class=SchemaPostRequest,
             var_schema=anoncreds_schema,
-            options=SchemaPostOption(create_transaction_for_endorser=True),
+            options=SchemaPostOption(create_transaction_for_endorser=False),
         )
 
         result = await publisher.publish_anoncreds_schema(schema_request)
-    else:  # schema.schema_type == SchemaType.INDY
-        schema_request = handle_model_with_validation(
-            logger=bound_logger,
-            model_class=SchemaSendRequest,
-            attributes=schema.attribute_names,
-            schema_name=schema.name,
-            schema_version=schema.version,
-        )
-
-        result = await publisher.publish_schema(schema_request)
+    else:
+        raise NotImplementedError("Only AnonCreds schemas are supported")
 
     bound_logger.debug("Successfully published and registered schema.")
     return result

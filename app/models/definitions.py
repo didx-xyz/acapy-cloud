@@ -12,7 +12,6 @@ sample_attribute_names = ["name", "age"]
 
 
 class SchemaType(str, Enum):
-    INDY: str = "indy"
     ANONCREDS: str = "anoncreds"
 
 
@@ -30,8 +29,8 @@ class CredentialDefinition(BaseModel):
 
 class CreateSchema(BaseModel):
     schema_type: SchemaType = Field(
-        default=SchemaType.INDY,
-        description="The type of schema to create. Supported values are 'indy' and 'anoncreds'.",
+        default=SchemaType.ANONCREDS,
+        description="The type of schema to create. Currently only 'anoncreds' is supported.",
     )
     name: str = Field(..., examples=[sample_name])
     version: str = Field(..., examples=[sample_version])

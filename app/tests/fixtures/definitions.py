@@ -24,7 +24,9 @@ from shared import RichAsyncClient
 
 
 async def fetch_or_create_regression_test_schema_definition(
-    name: str, auth: AcaPyAuthVerified, schema_type: SchemaType = SchemaType.INDY
+    name: str,
+    auth: AcaPyAuthVerified,  # Used for fetching the schema
+    gov_auth: AcaPyAuthVerified,  # Used for creating the schema
 ) -> CredentialSchema:
     regression_test_schema_name = "Regression_" + name
 
@@ -40,33 +42,34 @@ async def fetch_or_create_regression_test_schema_definition(
         # Schema not created yet
         assert_fail_on_recreating_fixtures()
         definition = CreateSchema(
-            schema_type=schema_type,
             name=regression_test_schema_name,
             version="1.0.0",
             attribute_names=["speed", "name", "age"],
         )
 
-        schema_definition_result = await create_schema(definition, auth)
+        schema_definition_result = await create_schema(definition, gov_auth)
 
     return schema_definition_result
 
 
 async def get_clean_or_regression_test_schema(
-    name: str, auth: AcaPyAuthVerified, test_mode: str, schema_type: SchemaType
+    name: str,
+    auth: AcaPyAuthVerified,
+    test_mode: str,
+    gov_auth: AcaPyAuthVerified,
 ):
     if test_mode == TestMode.clean_run:
         definition = CreateSchema(
-            schema_type=schema_type,
             name=name,
             version=random_version(),
             attribute_names=["speed", "name", "age"],
         )
 
-        schema_definition_result = await create_schema(definition, auth)
+        schema_definition_result = await create_schema(definition, gov_auth)
     elif test_mode == TestMode.regression_run:
         schema_definition_result = (
             await fetch_or_create_regression_test_schema_definition(
-                name, auth, schema_type
+                name, auth, gov_auth
             )
         )
     return schema_definition_result  # pylint: disable=possibly-used-before-assignment
@@ -76,6 +79,7 @@ async def get_clean_or_regression_test_schema(
 async def anoncreds_schema_definition(
     request,
     faber_anoncreds_client: RichAsyncClient,
+    mock_governance_auth: AcaPyAuthVerified,
 ) -> CredentialSchema:
     auth = acapy_auth_verified(
         acapy_auth_from_header(faber_anoncreds_client.headers["x-api-key"])
@@ -83,8 +87,8 @@ async def anoncreds_schema_definition(
     return await get_clean_or_regression_test_schema(
         name="test_anoncreds_schema",
         auth=auth,
+        gov_auth=mock_governance_auth,
         test_mode=request.param,
-        schema_type=SchemaType.ANONCREDS,
     )
 
 
@@ -92,6 +96,7 @@ async def anoncreds_schema_definition(
 async def anoncreds_schema_definition_alt(
     request,
     faber_anoncreds_client: RichAsyncClient,
+    mock_governance_auth: AcaPyAuthVerified,
 ) -> CredentialSchema:
     auth = acapy_auth_verified(
         acapy_auth_from_header(faber_anoncreds_client.headers["x-api-key"])
@@ -99,8 +104,8 @@ async def anoncreds_schema_definition_alt(
     return await get_clean_or_regression_test_schema(
         name="test_anoncreds_schema_alt",
         auth=auth,
+        gov_auth=mock_governance_auth,
         test_mode=request.param,
-        schema_type=SchemaType.ANONCREDS,
     )
 
 
