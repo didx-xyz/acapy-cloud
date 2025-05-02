@@ -3,6 +3,7 @@ from typing import List, Optional
 
 import base58
 from aries_cloudcontroller import CreateWalletTokenRequest
+from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, HTTPException, Query
 from uuid_utils import uuid4
 
@@ -12,6 +13,7 @@ from app.dependencies.auth import (
     acapy_auth_tenant_admin,
     tenant_api_key,
 )
+from app.dependencies.container import Container
 from app.exceptions import (
     CloudApiException,
     TrustRegistryException,
@@ -45,6 +47,7 @@ from app.util.tenants import (
 )
 from shared.log_config import get_logger
 from shared.models.trustregistry import Actor
+from shared.services.nats_jetstream_publish import EventFactory, NatsJetstreamPublish
 
 logger = get_logger(__name__)
 
@@ -59,9 +62,13 @@ group_id_query: Optional[str] = Query(
 
 
 @router.post("", response_model=CreateTenantResponse, summary="Create New Tenant")
+@inject
 async def create_tenant(
     body: CreateTenantRequest,
     admin_auth: AcaPyAuthVerified = Depends(acapy_auth_tenant_admin),
+    publisher: NatsJetstreamPublish = Depends(
+        Provide[Container.nats_jetstream_publisher]
+    ),
 ) -> CreateTenantResponse:
     """
     Create a New Tenant
@@ -247,6 +254,31 @@ async def create_tenant(
         access_token=tenant_api_key(wallet_response.token),
         group_id=body.group_id,
     )
+
+    event = EventFactory.create_tenant_event(
+        subject=f"cloudapi.aries.events.{body.group_id}.{wallet_response.wallet_id}",
+        wallet_id=wallet_response.wallet_id,
+        wallet_label=wallet_label,
+        wallet_name=wallet_name,
+        roles=roles if roles else [],
+        state="created",
+        group_id=body.group_id,
+        topic="tenant",
+        image_url=body.image_url,
+        created_at=wallet_response.created_at,
+        updated_at=wallet_response.updated_at,
+    )
+
+    try:
+        await publisher.publish(
+            logger=bound_logger,
+            event=event,
+        )
+    except Exception as e:  # pylint: disable=broad-except
+        bound_logger.error(
+            "Failed to publish tenant event to NATS: {}. Event: {}", e, event
+        )
+
     bound_logger.debug("Successfully created tenant.")
     return response
 

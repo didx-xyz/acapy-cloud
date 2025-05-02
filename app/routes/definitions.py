@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, HTTPException
 
 import app.services.definitions.credential_definitions as cred_def_service
@@ -11,6 +12,7 @@ from app.dependencies.auth import (
     acapy_auth_from_header,
     acapy_auth_verified,
 )
+from app.dependencies.container import Container
 from app.dependencies.role import Role
 from app.exceptions import handle_acapy_call
 from app.exceptions.cloudapi_exception import CloudApiException
@@ -29,6 +31,7 @@ from app.util.definitions import (
 from app.util.retry_method import coroutine_with_retry
 from app.util.wallet_type_checks import get_wallet_type
 from shared.log_config import get_logger
+from shared.services.nats_jetstream_publish import EventFactory, NatsJetstreamPublish
 
 logger = get_logger(__name__)
 
@@ -39,9 +42,13 @@ router = APIRouter(
 
 
 @router.post("/schemas", summary="Create a new Schema", response_model=CredentialSchema)
+@inject
 async def create_schema(
     schema: CreateSchema,
     auth: AcaPyAuthVerified = Depends(acapy_auth_verified),
+    publisher: NatsJetstreamPublish = Depends(
+        Provide[Container.nats_jetstream_publisher]
+    ),
 ) -> CredentialSchema:
     """
     Create and publish a new schema to the ledger
@@ -95,6 +102,28 @@ async def create_schema(
             schema=schema,
             public_did=public_did,
         )
+
+    event = EventFactory.create_schema_event(
+        subject="cloudapi.aries.events.no_group.Governance",  # update based on cheqd
+        schema_id=schema_response.id,
+        name=schema_response.name,
+        version=schema_response.version,
+        attributes=schema_response.attribute_names,
+        wallet_label="Endorser",
+        topic="schema",
+        state="created",
+    )
+
+    try:
+        await publisher.publish(
+            logger=bound_logger,
+            event=event,
+        )
+    except Exception as e:  # pylint: disable=broad-except
+        bound_logger.error(
+            "Failed to publish schema event to NATS: {}. Event: {}", e, event
+        )
+
     return schema_response
 
 

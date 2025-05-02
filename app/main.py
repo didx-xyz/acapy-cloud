@@ -1,6 +1,7 @@
 import io
 import os
 import traceback
+from contextlib import asynccontextmanager
 
 import pydantic
 import yaml
@@ -10,6 +11,7 @@ from fastapi.exceptions import HTTPException
 from fastapi.responses import ORJSONResponse
 from scalar_fastapi import get_scalar_api_reference
 
+from app.dependencies.container import Container
 from app.exceptions import CloudApiException
 from app.routes import (
     connections,
@@ -94,12 +96,34 @@ def acapy_cloud_description(role: str) -> str:
         return default_docs_description
 
 
+@asynccontextmanager
+async def app_lifespan(_: FastAPI):
+    """
+    Lifespan event handler for the FastAPI application.
+    Initializes and shuts down resources.
+    """
+    logger.info("Starting up application...")
+
+    container = Container()
+    await container.init_resources()
+
+    container.wire(modules=[__name__, tenants, definitions])
+    await container.nats_jetstream_publisher()
+
+    yield
+
+    logger.debug("Shutting down application...")
+    await container.shutdown_resources()
+    logger.info("Application shutdown complete.")
+
+
 def create_app() -> FastAPI:
     application = FastAPI(
         root_path=ROOT_PATH,
         title=OPENAPI_NAME,
         version=PROJECT_VERSION,
         description=acapy_cloud_description(ROLE),
+        lifespan=app_lifespan,
         debug=debug,
         redoc_url=None,
         docs_url=None,
