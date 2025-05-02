@@ -24,6 +24,7 @@ export function createTenant(bearerToken, wallet) {
   const payload = JSON.stringify({
     wallet_label: wallet.wallet_label,
     wallet_name: wallet.wallet_name,
+    wallet_type: "askar-anoncreds",
     group_id: "Some Group Id",
     image_url:
       "https://upload.wikimedia.org/wikipedia/commons/7/70/Example.png",
@@ -176,6 +177,7 @@ export function createIssuerTenant(bearerToken, walletName) {
   const payload = JSON.stringify({
     wallet_label: walletName,
     wallet_name: walletName,
+    wallet_type: "askar-anoncreds",
     roles: ["issuer", "verifier"],
     group_id: "Group A",
     image_url:
@@ -315,8 +317,8 @@ export function createCredential(
   try {
     // Construct the request body including the invitation object
     const requestBody = JSON.stringify({
-      type: "indy",
-      indy_credential_detail: {
+      type: "anoncreds",
+      anoncreds_credential_detail: {
         credential_definition_id: credentialDefinitionId,
         attributes: {
           date_of_birth: "1986-09-29",
@@ -494,8 +496,8 @@ export function sendProofRequest(issuerAccessToken, issuerConnectionId) {
 
     // Construct the request body including the invitation object
     const requestBody = {
-      type: "indy",
-      indy_proof_request: {
+      type: "anoncreds",
+      anoncreds_proof_request: {
         non_revoked: {
           to: currentEpochTimeSeconds, // Current epoch time in seconds
         },
@@ -603,9 +605,9 @@ export function acceptProofRequest(holderAccessToken, proofId, referent) {
   try {
     // Construct the request body including the invitation object
     const requestBody = {
-      type: "indy",
+      type: "anoncreds",
       proof_id: proofId,
-      indy_presentation_spec: {
+      anoncreds_presentation_spec: {
         requested_attributes: {
           get_id_number: {
             cred_id: referent,
@@ -694,6 +696,7 @@ export function createSchema(bearerToken, schemaName, schemaVersion) {
     const requestBody = JSON.stringify({
       name: schemaName,
       version: schemaVersion,
+      schema_type: "anoncreds",
       attribute_names: [
         "date_of_birth",
         "id_number",
