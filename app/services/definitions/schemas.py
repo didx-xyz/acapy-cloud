@@ -8,7 +8,6 @@ from aries_cloudcontroller import (
     SchemaGetResult,
     SchemaPostOption,
     SchemaPostRequest,
-    SchemaSendRequest,
 )
 
 from app.exceptions import (

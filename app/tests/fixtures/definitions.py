@@ -5,7 +5,7 @@ from app.dependencies.auth import (
     acapy_auth_from_header,
     acapy_auth_verified,
 )
-from app.models.definitions import CredentialDefinition, SchemaType
+from app.models.definitions import CredentialDefinition
 from app.routes.definitions import (
     CreateCredentialDefinition,
     CreateSchema,
