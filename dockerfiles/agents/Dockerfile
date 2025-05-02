@@ -2,8 +2,6 @@ FROM ghcr.io/didx-xyz/acapy-agent:py3.12-1.3.0rc1-20250417@sha256:cf02cef079bccd
 
 USER root
 
-RUN echo "Installing plugins"
-
 # Install Google Protobuf and Plugins
 ARG PROTOBUF_VERSION=5.29.3
 RUN pip install --no-cache-dir protobuf==${PROTOBUF_VERSION} \
