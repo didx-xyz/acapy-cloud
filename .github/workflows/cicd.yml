@@ -85,68 +85,8 @@ jobs:
     needs:
       - format
       - unit
-    with:
-      image: ${{ matrix.image }}
-      context: ${{ matrix.context }}
-      dockerfile: ${{ matrix.file }}
-      platforms: ${{ matrix.platforms }}
-
-    concurrency:
-      group: docker-build-${{ matrix.image }}-${{ github.ref_name }}
-      cancel-in-progress: true
     permissions:
       packages: write
-
-    strategy:
-      fail-fast: false
-      matrix:
-        image:
-          - acapy-cloud/agent
-          - acapy-cloud/app
-          - acapy-cloud/endorser
-          - acapy-cloud/ledger-nodes
-          - acapy-cloud/pytest
-          - acapy-cloud/tails-server
-          - acapy-cloud/trust-registry
-          - acapy-cloud/waypoint
-          - acapy-cloud/xk6
-        include:
-          - image: acapy-cloud/agent
-            context: .
-            file: dockerfiles/agents/Dockerfile
-            platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/app
-            context: .
-            file: dockerfiles/app/Dockerfile
-            platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/endorser
-            context: .
-            file: dockerfiles/endorser/Dockerfile
-            platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/ledger-nodes
-            context: https://github.com/bcgov/von-network.git#v1.9.0
-            file: Dockerfile
-            platforms: linux/amd64
-          - image: acapy-cloud/pytest
-            context: .
-            file: dockerfiles/tests/Dockerfile
-            platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/tails-server
-            context: https://github.com/bcgov/indy-tails-server.git#v1.1.2
-            file: docker/Dockerfile.tails-server
-            platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/trust-registry
-            context: .
-            file: dockerfiles/trustregistry/Dockerfile
-            platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/waypoint
-            context: .
-            file: dockerfiles/waypoint/Dockerfile
-            platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/xk6
-            context: ./scripts/k6
-            file: ./scripts/k6/Dockerfile
-            platforms: linux/amd64
 
   test:
     name: Local Test
