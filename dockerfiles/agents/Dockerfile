@@ -1,13 +1,13 @@
-FROM ghcr.io/didx-xyz/acapy-agent:py3.12-1.3.0rc1-20250417@sha256:cf02cef079bccd66a14a959a1c17e3f0e6e8cb3c859c90d01e5a5312af0b60b7
+FROM ghcr.io/didx-xyz/acapy-agent:py3.12-test-1.3.0rc2-20250502
 
 USER root
 
 # Install Google Protobuf and Plugins
 ARG PROTOBUF_VERSION=5.29.3
 RUN pip install --no-cache-dir protobuf==${PROTOBUF_VERSION} \
-  acapy-wallet-groups-plugin==1.3.0rc1.post20250417 \
-  # git+https://github.com/didx-xyz/acapy-wallet-groups-plugin@release-1.3.0rc1-20250417 \
-  git+https://github.com/didx-xyz/aries-acapy-plugins@1.3.0rc1-20250417#subdirectory=nats_events
+  # acapy-wallet-groups-plugin==1.3.0rc1.post20250417 \
+  git+https://github.com/didx-xyz/acapy-wallet-groups-plugin@make-acapy-optional \
+  git+https://github.com/didx-xyz/aries-acapy-plugins@make-acapy-optional#subdirectory=nats_events
 
 COPY scripts/startup.sh startup.sh
 RUN chmod +x ./startup.sh
