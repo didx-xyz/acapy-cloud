@@ -72,8 +72,6 @@ async def test_issue_credential_with_save_exchange_record(
             },
         )
 
-        await asyncio.sleep(1)  # short sleep before fetching; allow records to update
-
         # faber requesting auto_remove only removes their cred ex records
         # get exchange record from alice side -- should not exist after complete
         with pytest.raises(HTTPException) as exc:
@@ -174,8 +172,6 @@ async def test_request_credential_with_save_exchange_record(
                 "credential_exchange_id": alice_credential_exchange_id,
             },
         )
-
-        await asyncio.sleep(1)  # short sleep before fetching; allow records to update
 
         if save_exchange_record:
             # Get exchange record from alice side - should exist if save_exchange_record=True
@@ -285,7 +281,6 @@ async def test_get_cred_exchange_records(
             },
         )
 
-    await asyncio.sleep(1)  # short sleep to allow records to update
     faber_records = (await faber_anoncreds_client.get(CREDENTIALS_BASE_PATH)).json()
 
     faber_cred_ex_response = (
