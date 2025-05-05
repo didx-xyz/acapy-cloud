@@ -71,6 +71,7 @@ async def test_issue_credential_with_save_exchange_record(
                 "credential_exchange_id": alice_credential_exchange_id,
             },
         )
+        await asyncio.sleep(1)  # short sleep to allow records to delete. See #957
 
         # faber requesting auto_remove only removes their cred ex records
         # get exchange record from alice side -- should not exist after complete
@@ -95,14 +96,6 @@ async def test_issue_credential_with_save_exchange_record(
             )
         else:
             # If save_exchange_record was not set, exchange record should not exist for Faber
-            await check_webhook_state(  # Wait for Faber records to be updated
-                client=faber_anoncreds_client,
-                topic="credentials",
-                state="done",
-                filter_map={
-                    "credential_exchange_id": faber_credential_exchange_id,
-                },
-            )
             with pytest.raises(HTTPException) as exc:
                 await faber_anoncreds_client.get(
                     f"{CREDENTIALS_BASE_PATH}/{faber_credential_exchange_id}"
@@ -195,6 +188,7 @@ async def test_request_credential_with_save_exchange_record(
             )
         else:
             # If save_exchange_record was False, credential should not exist for holder
+            await asyncio.sleep(1)  # short sleep to allow records to delete. See #957
             with pytest.raises(HTTPException) as exc:
                 await alice_member_client.get(
                     f"{CREDENTIALS_BASE_PATH}/{alice_credential_exchange_id}"
