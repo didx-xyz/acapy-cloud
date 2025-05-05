@@ -26,7 +26,6 @@ jobs:
           - 8080:8000
         env:
           OPENAPI_NAME: CloudAPI Multitenant Admin
-          PYTHONPATH: /
           ROLE: tenant-admin
           ROOT_PATH: /tenant-admin
       tenant:
@@ -35,7 +34,6 @@ jobs:
           - 8181:8000
         env:
           OPENAPI_NAME: CloudAPI Tenant
-          PYTHONPATH: /
           ROLE: tenant
           ROOT_PATH: /tenant
 
