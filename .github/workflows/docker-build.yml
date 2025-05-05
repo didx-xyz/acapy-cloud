@@ -1,0 +1,207 @@
+name: Docker Build
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    outputs:
+      image_version:
+        description: The version of the image built
+        value: ${{ jobs.push.outputs.image_version }}
+
+permissions: {}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.runs-on }}
+
+    concurrency:
+      group: docker-build-${{ matrix.image }}-${{ matrix.arch }}-${{ github.ref_name }}
+      cancel-in-progress: true
+
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - acapy-cloud/agent
+          - acapy-cloud/app
+          - acapy-cloud/endorser
+          # - acapy-cloud/ledger-nodes # AMD64 only
+          - acapy-cloud/pytest
+          - acapy-cloud/tails-server
+          - acapy-cloud/trust-registry
+          - acapy-cloud/waypoint
+          - acapy-cloud/xk6
+        arch: [amd64, arm64]
+        include:
+          - arch: amd64
+            runs-on: ubuntu-24.04
+          - arch: arm64
+            runs-on: ubuntu-24.04-arm
+          - image: acapy-cloud/agent
+            context: .
+            file: dockerfiles/agents/Dockerfile
+          - image: acapy-cloud/app
+            context: .
+            file: dockerfiles/app/Dockerfile
+          - image: acapy-cloud/endorser
+            context: .
+            file: dockerfiles/endorser/Dockerfile
+          - image: acapy-cloud/pytest
+            context: .
+            file: dockerfiles/tests/Dockerfile
+          - image: acapy-cloud/tails-server
+            context: https://github.com/bcgov/indy-tails-server.git#v1.1.2
+            file: docker/Dockerfile.tails-server
+          - image: acapy-cloud/trust-registry
+            context: .
+            file: dockerfiles/trustregistry/Dockerfile
+          - image: acapy-cloud/waypoint
+            context: .
+            file: dockerfiles/waypoint/Dockerfile
+          - image: acapy-cloud/xk6
+            context: ./scripts/k6
+            file: ./scripts/k6/Dockerfile
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+        with:
+          cache-binary: false
+          install: true
+          version: latest
+
+      - name: Build and cache Docker images
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          push: false
+          cache-from: |
+            type=gha,scope=build-${{ matrix.image }}-${{ matrix.arch }}
+            type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:latest
+          cache-to: |
+            type=gha,mode=max,scope=build-${{ matrix.image }}-${{ matrix.arch }}
+          platforms: linux/${{ matrix.arch }}
+
+  push:
+    name: Push
+    runs-on: ubuntu-24.04
+
+    permissions:
+      packages: write
+
+    concurrency:
+      group: docker-push-${{ matrix.image }}-${{ github.ref_name }}
+      cancel-in-progress: true
+
+    needs: build
+
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - acapy-cloud/agent
+          - acapy-cloud/app
+          - acapy-cloud/endorser
+          - acapy-cloud/ledger-nodes
+          - acapy-cloud/pytest
+          - acapy-cloud/tails-server
+          - acapy-cloud/trust-registry
+          - acapy-cloud/waypoint
+          - acapy-cloud/xk6
+        include:
+          - image: acapy-cloud/agent
+            context: .
+            file: dockerfiles/agents/Dockerfile
+            platforms: linux/amd64,linux/arm64
+          - image: acapy-cloud/app
+            context: .
+            file: dockerfiles/app/Dockerfile
+            platforms: linux/amd64,linux/arm64
+          - image: acapy-cloud/endorser
+            context: .
+            file: dockerfiles/endorser/Dockerfile
+            platforms: linux/amd64,linux/arm64
+          - image: acapy-cloud/ledger-nodes
+            context: https://github.com/bcgov/von-network.git#v1.9.0
+            file: Dockerfile
+            platforms: linux/amd64
+          - image: acapy-cloud/pytest
+            context: .
+            file: dockerfiles/tests/Dockerfile
+            platforms: linux/amd64,linux/arm64
+          - image: acapy-cloud/tails-server
+            context: https://github.com/bcgov/indy-tails-server.git#v1.1.2
+            file: docker/Dockerfile.tails-server
+            platforms: linux/amd64,linux/arm64
+          - image: acapy-cloud/trust-registry
+            context: .
+            file: dockerfiles/trustregistry/Dockerfile
+            platforms: linux/amd64,linux/arm64
+          - image: acapy-cloud/waypoint
+            context: .
+            file: dockerfiles/waypoint/Dockerfile
+            platforms: linux/amd64,linux/arm64
+          - image: acapy-cloud/xk6
+            context: ./scripts/k6
+            file: ./scripts/k6/Dockerfile
+            platforms: linux/amd64,linux/arm64
+
+    outputs:
+      image_version: ${{ steps.meta.outputs.version }}
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+        with:
+          cache-binary: false
+          install: true
+          version: latest
+
+      - uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ github.token }}
+
+      - name: Docker Metadata
+        id: meta
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.event.repository.default_branch == github.ref_name }}
+            type=sha,prefix=pr-${{ github.event.pull_request.number }}-,priority=601,enable=${{ github.event_name == 'pull_request' }}
+            type=sha,prefix={{branch}}-,priority=601,enable=${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref_type == 'branch' }}
+            type=ref,event=branch,priority=600
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{version}}-{{sha}},priority=901
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: |
+            type=gha,scope=build-${{ matrix.image }}-arm64
+            type=gha,scope=build-${{ matrix.image }}-amd64
+            type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:latest
+          cache-to: |
+            ${{ matrix.image == 'acapy-cloud/ledger-nodes' && 'type=gha,mode=max,scope=build-${{ matrix.image }}-amd64' || '' }}
+          platforms: ${{ matrix.platforms }}

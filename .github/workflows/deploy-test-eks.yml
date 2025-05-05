@@ -1,0 +1,138 @@
+name: Deploy EKS
+
+on:
+  workflow_dispatch:
+    inputs:
+      helm-version:
+        description: Helm version to use
+        required: false
+        default: v3.17.3
+        type: string
+      helmfile-version:
+        description: Helmfile version to use
+        required: false
+        default: v1.0.0
+        type: string
+      image-version:
+        description: Image version to deploy
+        required: false
+        default: latest
+        type: string
+      mise-version:
+        description: Mise version to use
+        required: false
+        default: 2025.5.0
+        type: string
+      regression-tests:
+        description: Run regression tests step
+        required: false
+        default: true
+        type: boolean
+      reset-deployments:
+        description: Reset deployment - Clean start
+        required: false
+        default: false
+        type: boolean
+      run-tests:
+        description: Run tests step
+        required: false
+        default: true
+        type: boolean
+  workflow_call:
+    inputs:
+      helm-version:
+        description: Helm version to use
+        required: true
+        type: string
+      helmfile-version:
+        description: Helmfile version to use
+        required: true
+        type: string
+      image-version:
+        description: Image version to deploy
+        required: true
+        type: string
+      mise-version:
+        description: Mise version to use
+        required: true
+        type: string
+      regression-tests:
+        description: Run regression tests step
+        required: false
+        default: true
+        type: boolean
+      reset-deployments:
+        description: Reset deployment - Clean start
+        required: false
+        default: false
+        type: boolean
+      run-tests:
+        description: Run tests step
+        required: false
+        default: true
+        type: boolean
+    secrets:
+      tailscale-authkey:
+        required: true
+
+permissions: {}
+
+concurrency:
+  group: deploy-test-eks
+  cancel-in-progress: false
+
+jobs:
+  deploy-test-eks:
+    name: Deploy and Test EKS
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 30
+
+    environment:
+      name: dev
+
+    permissions:
+      id-token: write # Required to authenticate with AWS
+      checks: write # Required for action-junit-report
+      pull-requests: write # Required to comment on PRs for Pytest coverage comment
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - uses: tailscale/github-action@5d536117a7378beffcd6d8523ce73c50fa98684d # v3.2.1
+        with:
+          authkey: ${{ secrets.tailscale-authkey }}
+          version: latest
+
+      - name: Deploy to EKS
+        uses: ./.github/workflows/actions/deploy-eks
+        with:
+          aws-region: af-south-1
+          aws-role-arn: arn:aws:iam::402177810328:role/cicd
+          aws-role-session-name: github-cicd
+          clean-start: ${{ inputs.reset-deployments  }}
+          cluster-name: cloudapi-dev
+          environment: ${{ vars.ENVIRONMENT }}
+          helm-version: ${{ inputs.helm-version }}
+          helmfile-plugins: https://github.com/databus23/helm-diff
+          helmfile-version: ${{ inputs.helmfile-version }}
+          image-tag: ${{ inputs.image-version }}
+          namespace: acapy-cloud-dev
+
+      - name: Run Tests
+        uses: ./.github/workflows/actions/test-eks
+        with:
+          clean-start: ${{ inputs.reset-deployments  }}
+          environment: ${{ vars.ENVIRONMENT }}
+          helm-version: ${{ inputs.helm-version }}
+          helmfile-plugins: https://github.com/databus23/helm-diff
+          helmfile-version: ${{ inputs.helmfile-version }}
+          image-tag: ${{ inputs.image-version }}
+          mise-version: ${{ inputs.mise-version }}
+          namespace: acapy-cloud-dev
+          pytest-completions: 1
+          regression-tests: ${{ inputs.regression-tests }}
+          run-tests: ${{ inputs.run-tests }}

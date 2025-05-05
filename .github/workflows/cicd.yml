@@ -3,6 +3,21 @@ name: CICD
 on:
   workflow_dispatch:
     inputs:
+      helm-version:
+        description: Helm version
+        required: false
+        default: v3.17.3
+        type: string
+      helmfile-version:
+        description: Helmfile version
+        required: false
+        default: v1.0.0
+        type: string
+      mise-version:
+        description: Mise version
+        required: false
+        default: 2025.5.0
+        type: string
       reset-deployments:
         description: Reset deployment - Clean start
         required: false
@@ -46,520 +61,124 @@ on:
 permissions: {}
 
 env:
-  TAILSCALE_VERSION: latest
-  HELMFILE_VERSION: v1.0.0
   HELM_VERSION: v3.17.3
-  MISE_VERSION: 2025.4.12
+  HELMFILE_VERSION: v1.0.0
+  MISE_VERSION: 2025.5.0
 
 jobs:
-  format:
-    name: Format
+  export-versions:
+    name: Export tool versions
     runs-on: ubuntu-latest
 
+    ###
+    # Needed because we can't pass env vars (`${{ env.HELM_VERSION }}`) to `workflow_call`
+    ###
+
+    outputs:
+      HELM_VERSION: ${{ steps.export.outputs.HELM_VERSION }}
+      HELMFILE_VERSION: ${{ steps.export.outputs.HELMFILE_VERSION }}
+      MISE_VERSION: ${{ steps.export.outputs.MISE_VERSION }}
+
+    steps:
+      - name: Export tool versions
+        id: export
+        run: |
+          echo "HELM_VERSION=${HELM_VERSION}" >> $GITHUB_OUTPUT
+          echo "HELMFILE_VERSION=${HELMFILE_VERSION}" >> $GITHUB_OUTPUT
+          echo "MISE_VERSION=${MISE_VERSION}" >> $GITHUB_OUTPUT
+        env:
+          HELM_VERSION: ${{ inputs.helm-version || env.HELM_VERSION }}
+          HELMFILE_VERSION: ${{ inputs.helmfile-version || env.HELMFILE_VERSION }}
+          MISE_VERSION: ${{ inputs.mise-version || env.MISE_VERSION }}
+
+  format:
+    name: Format Check
+    needs: export-versions
+    uses: ./.github/workflows/format.yml
+    with:
+      mise-version: ${{ needs.export-versions.outputs.MISE_VERSION }}
     concurrency:
       group: format-check-${{ github.ref_name }}
       cancel-in-progress: true
 
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          persist-credentials: false
-
-      - name: Overwrite .mise.toml # It's not needed in this workflow
-        run: |
-          cat <<EOF > .mise.toml
-          [tools]
-          "pipx:black" = "25.1"
-          "pipx:isort" = "6.0"
-          python = "3.13"
-          EOF
-
-      - name: Set up Mise
-        uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.2.1
-        with:
-          version: ${{ env.MISE_VERSION }}
-          cache: true
-          experimental: true
-          install: true
-
-      - name: Check import style with isort
-        run: isort . --check --profile black --diff
-
-      - name: Check code style with Black
-        run: black . --check --diff
-
-      - name: Check Tiltfiles with Black
-        run: |
-          find . -type f -name "Tiltfile" | while read -r file; do
-            black --check --diff "$file"
-          done
-
   unit:
     name: Unit Tests
-    runs-on: ubuntu-latest
-
+    needs: export-versions
+    uses: ./.github/workflows/unit.yml
+    with:
+      mise-version: ${{ needs.export-versions.outputs.MISE_VERSION }}
     concurrency:
       group: unit-test-${{ github.ref_name }}
       cancel-in-progress: true
 
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          persist-credentials: false
-
-      - name: Cache Python venv
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-        with:
-          path: .venv
-          key: python-${{ hashFiles('**/poetry.lock', '.mise.toml') }}
-
-      - name: Set up Mise
-        uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.2.1
-        with:
-          version: ${{ env.MISE_VERSION }}
-          cache: true
-          experimental: true
-          install: true
-        env:
-          MISE_JOBS: 4
-      - name: Load Mise env
-        run: |
-          mise env -s bash \
-              | grep -v 'export PATH=' \
-              | cut -d' ' -f2 \
-              >> "$GITHUB_ENV"
-
-      - name: Run unit tests
-        run: mise run tests:unit
-
-  build:
-    name: Build
-    permissions:
-      packages: write # To push to GHCR.io
-    runs-on: ubuntu-latest
-
+  docker:
+    name: Docker
+    uses: ./.github/workflows/docker-build.yml
     needs:
       - format
       - unit
-
-    concurrency:
-      group: docker-build-${{ matrix.image }}-${{ github.ref_name }}
-      cancel-in-progress: true
-
-    outputs:
-      image_version: ${{ steps.meta.outputs.version }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        image:
-          - acapy-cloud/agent
-          - acapy-cloud/app
-          - acapy-cloud/endorser
-          - acapy-cloud/ledger-nodes
-          - acapy-cloud/pytest
-          - acapy-cloud/tails-server
-          - acapy-cloud/trust-registry
-          - acapy-cloud/waypoint
-          - acapy-cloud/xk6
-        include:
-          - image: acapy-cloud/agent
-            context: .
-            file: dockerfiles/agents/Dockerfile
-            platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/app
-            context: .
-            file: dockerfiles/app/Dockerfile
-            platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/endorser
-            context: .
-            file: dockerfiles/endorser/Dockerfile
-            platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/ledger-nodes
-            context: https://github.com/bcgov/von-network.git#v1.9.0
-            file: Dockerfile
-            platforms: linux/amd64
-          - image: acapy-cloud/pytest
-            context: .
-            file: dockerfiles/tests/Dockerfile
-            platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/tails-server
-            context: https://github.com/bcgov/indy-tails-server.git#v1.1.2
-            file: docker/Dockerfile.tails-server
-            platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/trust-registry
-            context: .
-            file: dockerfiles/trustregistry/Dockerfile
-            platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/waypoint
-            context: .
-            file: dockerfiles/waypoint/Dockerfile
-            platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/xk6
-            context: ./scripts/k6
-            file: ./scripts/k6/Dockerfile
-            platforms: linux/amd64
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          persist-credentials: false
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
-        with:
-          cache-binary: false
-
-      - uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ github.token }}
-
-      - name: Docker Metadata
-        id: meta
-        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
-        with:
-          images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
-          tags: |
-            type=raw,value=latest,enable=${{ github.event.repository.default_branch == github.ref_name }}
-            type=sha,prefix=pr-${{ github.event.pull_request.number }}-,priority=601,enable=${{ github.event_name == 'pull_request' }}
-            type=sha,prefix={{branch}}-,priority=601,enable=${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref_type == 'branch' }}
-            type=ref,event=branch,priority=600
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{version}}-{{sha}},priority=901
-
-      - name: Build and push Docker images
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
-        with:
-          context: ${{ matrix.context }}
-          file: ${{ matrix.file }}
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: |
-            type=gha,scope=build-${{ matrix.image }}
-            type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:latest
-          cache-to: type=gha,mode=max,scope=build-${{ matrix.image }}
-          platforms: ${{ matrix.platforms }}
+    permissions:
+      packages: write
 
   test:
     name: Local Test
     needs:
-      - build
-    runs-on: ubuntu-latest
-
+      - docker
+      - export-versions
+    uses: ./.github/workflows/local-tests.yml
+    with:
+      image-version: ${{ needs.docker.outputs.image_version }}
+      mise-version: ${{ needs.export-versions.outputs.MISE_VERSION }}
+    secrets:
+      codacy-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
     concurrency:
-      group: local-test-${{ github.ref_name }}
+      group: local-tests-${{ github.ref_name }}
       cancel-in-progress: true
-
-    timeout-minutes: 30
-
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          persist-credentials: false
-
-      - name: Cache Python venv
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-        with:
-          path: .venv
-          key: python-${{ hashFiles('**/poetry.lock', '.mise.toml') }}
-
-      - name: Set up Mise
-        uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.2.1
-        with:
-          version: ${{ env.MISE_VERSION }}
-          cache: true
-          experimental: true # Required for mise tasks
-          install: true
-        env:
-          MISE_JOBS: 4
-      - name: Load Mise env
-        run: |
-          mise env -s bash \
-              | grep -v 'export PATH=' \
-              | cut -d' ' -f2 \
-              >> "$GITHUB_ENV"
-      - name: Install dependencies with Poetry
-        run: mise run poetry:install
-        env:
-          MISE_JOBS: 1
-
-      - name: Start Test Harness
-        run: mise run tilt:ci
-        shell: bash
-        env:
-          REGISTRY: ghcr.io/${{ github.repository_owner }}
-          IMAGE_TAG: ${{ needs.build.outputs.image_version }}
-
-      - name: Test with pytest
-        run: |
-          source .venv/bin/activate
-          set +e
-
-          cp .env.example .env
-          source .env
-
-          # Any port forwards will not be active after `tilt ci` has exited.
-          kubectl port-forward svc/ledger-browser 9000:8000 -n cloudapi &
-
-          poetry run pytest \
-            --numprocesses 4 \
-            --dist loadgroup \
-            --durations=25 \
-            --ignore ./tilt \
-            --cov | tee test_output.txt
-
-          EXIT_CODE=${PIPESTATUS[0]}
-          set -e
-          echo "Exit code: $EXIT_CODE"
-
-          # very hacky way to get around the fact that teardown fails even if tests pass
-          TEARDOWN_ERROR=false
-          SINGLE_ERROR=false
-          TEST_FAILURES=0
-
-          if grep -q "ERROR at teardown" test_output.txt; then
-              echo "ERROR at teardown"
-              TEARDOWN_ERROR=true
-          fi
-
-          if grep -q ", 1 error in" test_output.txt; then
-              echo "Only 1 error total"
-              SINGLE_ERROR=true
-          fi
-
-          # Count the number of test failures
-          TEST_FAILURES=$(grep -c "^FAILED" test_output.txt || true)
-          echo "Number of test failures: $TEST_FAILURES"
-
-          if [ "$TEARDOWN_ERROR" = true ] && [ "$SINGLE_ERROR" = true ] && [ "$TEST_FAILURES" -eq 0 ]; then
-              echo "Tests passed with teardown error"
-              exit 0
-          else
-              if [ "$EXIT_CODE" -ne 0 ]; then
-                echo "test_success=false" >> $GITHUB_OUTPUT
-              else
-                echo "test_success=true" >> $GITHUB_OUTPUT
-              fi
-              exit $EXIT_CODE
-          fi
-
-      - name: Install coverage and generate report
-        run: |
-          source .venv/bin/activate
-          pip install coverage
-          coverage report
-          coverage xml
-          sudo rm -rf tilt/docker
-      - name: Upload coverage to Codacy
-        run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.xml
-        env:
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
-      - name: Upload coverage file as artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: coverage
-          path: .coverage
-          include-hidden-files: true
-
-      - name: Get Docker Containers
-        if: always()
-        run: docker ps -a
-      - name: Get Pods
-        if: always()
-        run: kubectl get pods --all-namespaces
-      - name: Get Helm Releases
-        if: always()
-        run: helm list --all-namespaces
-      - name: Connect Cloud Logs
-        # Connect Cloud can generate a lot of logs...
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=connect-cloud --tail 10000
-      - name: Docker Cache Logs
-        if: always()
-        run: docker logs docker-cache
-      - name: Endorser Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=endorser --tail 10000
-      - name: Governance Agent Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=governance-agent --tail 10000
-      - name: Governance Web Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=governance-web --tail 10000
-      - name: Ingress Nginx Logs
-        if: always()
-        run: kubectl logs -n ingress-system -l app.kubernetes.io/instance=ingress-nginx --tail 10000
-      - name: Ledger Browser Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=ledger-browser --tail 10000
-      - name: Ledger Nodes Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=ledger-nodes --tail 10000
-      - name: Mediator Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=mediator --tail 10000
-      - name: Multitenant Agent Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=multitenant-agent --tail 10000
-      - name: Multitenant Web Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=multitenant-web --tail 10000
-      - name: NATS Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=nats --tail 10000
-      - name: PGPool Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=postgres,app.kubernetes.io/component=pgpool --tail 10000
-      - name: PostgreSQL Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=postgres,app.kubernetes.io/component=postgresql --tail 10000
-      - name: Public Web Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=public-web --tail 10000
-      - name: Tails Server Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=tails-server --tail 10000
-      - name: Tenant Web Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=tenant-web --tail 10000
-      - name: Trust Registry Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=trust-registry --tail 10000
-      - name: Waypoint Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=waypoint --tail 10000
-
-      - name: Tilt Down Destroy
-        if: always()
-        run: mise run tilt:down:destroy
 
   deploy-test-eks:
     if: github.actor != 'dependabot[bot]' && github.event.pull_request.draft == false
     name: Deploy and Test EKS
-    runs-on: ubuntu-latest
-
-    environment:
-      name: dev
-
+    uses: ./.github/workflows/deploy-test-eks.yml
     needs:
-      - build
-    outputs:
-      image_version: ${{ needs.build.outputs.image_version }}
+      - docker
+      - export-versions
+    with:
+      helm-version: ${{ needs.export-versions.outputs.HELM_VERSION }}
+      helmfile-version: ${{ needs.export-versions.outputs.HELMFILE_VERSION }}
+      image-version: ${{ needs.docker.outputs.image_version }}
+      mise-version: ${{ needs.export-versions.outputs.MISE_VERSION }}
+      regression-tests: ${{ inputs.regression-tests || true }}
+      reset-deployments: ${{ inputs.reset-deployments || false }}
+      run-tests: ${{ inputs.run-tests || true }}
+    secrets:
+      tailscale-authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
 
     permissions:
       id-token: write # Required to authenticate with AWS
       checks: write # Required for action-junit-report
       pull-requests: write # Required to comment on PRs for Pytest coverage comment
 
-    concurrency:
-      group: deploy-test-eks
-      cancel-in-progress: false
-
-    timeout-minutes: 30
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          persist-credentials: false
-
-      - uses: tailscale/github-action@5d536117a7378beffcd6d8523ce73c50fa98684d # v3.2.1
-        with:
-          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-          version: ${{ env.TAILSCALE_VERSION }}
-
-      - name: Deploy to EKS
-        uses: ./.github/workflows/actions/deploy-eks
-        with:
-          aws-region: af-south-1
-          aws-role-arn: arn:aws:iam::402177810328:role/cicd
-          aws-role-session-name: github-cicd
-          clean-start: ${{ github.event.inputs.reset-deployments || false }}
-          cluster-name: cloudapi-dev
-          environment: ${{ vars.ENVIRONMENT }}
-          helm-version: ${{ env.HELM_VERSION }}
-          helmfile-plugins: https://github.com/databus23/helm-diff
-          helmfile-version: ${{ env.HELMFILE_VERSION }}
-          image-tag: ${{ needs.build.outputs.image_version }}
-          namespace: acapy-cloud-dev
-
-      - name: Run Tests
-        uses: ./.github/workflows/actions/test-eks
-        with:
-          clean-start: ${{ github.event.inputs.reset-deployments || false }}
-          environment: ${{ vars.ENVIRONMENT }}
-          helm-version: ${{ env.HELM_VERSION }}
-          helmfile-plugins: https://github.com/databus23/helm-diff
-          helmfile-version: ${{ env.HELMFILE_VERSION }}
-          image-tag: ${{ needs.build.outputs.image_version }}
-          mise-version: ${{ env.MISE_VERSION }}
-          namespace: acapy-cloud-dev
-          pytest-completions: 1
-          regression-tests: ${{ github.event.inputs.regression-tests || true }}
-          run-tests: ${{ github.event.inputs.run-tests || true }}
-
   notify-didx-cloud:
     name: Notify didx-cloud
-    runs-on: ubuntu-latest
 
     if: github.actor != 'dependabot[bot]' && github.event_name != 'pull_request'
 
     needs:
+      - docker
       - deploy-test-eks
+      - export-versions
       - test
 
-    env:
-      REPO_OWNER: ${{ github.repository_owner }}
-      REPO_NAME: didx-cloud
-
-    steps:
-      - name: Log in to DIDx DevOps
-        id: devops_login
-        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
-        with:
-          app-id: ${{ secrets.DEVOPS_APP_ID }}
-          private-key: ${{ secrets.DEVOPS_PRIVATE_KEY }}
-          owner: ${{ env.REPO_OWNER }}
-          repositories: ${{ env.REPO_NAME }}
-
-      - name: Notify didx:cloud
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
-        with:
-          github-token: ${{ steps.devops_login.outputs.token }}
-          script: >-
-            try {
-              const result = await github.rest.actions.createWorkflowDispatch({
-                owner: process.env.REPO_OWNER,
-                repo: process.env.REPO_NAME,
-                workflow_id: 'notify.yml',
-                ref: 'master',
-                inputs: {
-                  'helm-version': process.env.HELM_VERSION,
-                  'helmfile-version': process.env.HELMFILE_VERSION,
-                  'mise-version': process.env.MISE_VERSION,
-                  'tailscale-version': process.env.TAILSCALE_VERSION,
-
-                  'acapy-cloud-ref': process.env.ACAPY_CLOUD_REF,
-                  'image-tag': process.env.IMAGE_TAG,
-                  'reset-deployments': process.env.RESET_DEPLOYMENTS,
-                  'regression-tests': process.env.REGRESSION_TESTS,
-                  'run-tests': process.env.RUN_TESTS,
-                }
-              })
-              console.log(result)
-            } catch (error) {
-              console.error(error);
-              core.setFailed(error.message);
-            }
-        env:
-          ACAPY_CLOUD_REF: ${{ github.sha }}
-          IMAGE_TAG: ${{ needs.deploy-test-eks.outputs.image_version }}
-          REGRESSION_TESTS: ${{ github.event.inputs.regression-tests || true }}
-          RESET_DEPLOYMENTS: ${{ github.event.inputs.reset-deployments || false }}
-          RUN_TESTS: ${{ github.event.inputs.run-tests || true }}
+    uses: ./.github/workflows/notify.yml
+    with:
+      acapy-cloud-ref: ${{ github.sha }}
+      helm-version: ${{ needs.export-versions.outputs.HELM_VERSION }}
+      helmfile-version: ${{ needs.export-versions.outputs.HELMFILE_VERSION }}
+      image-version: ${{ needs.docker.outputs.image_version }}
+      mise-version: ${{ needs.export-versions.outputs.MISE_VERSION }}
+      regression-tests: ${{ inputs.regression-tests || true }}
+      reset-deployments: ${{ inputs.reset-deployments || false }}
+      run-tests: ${{ inputs.run-tests || true }}
+    secrets:
+      devops-app-id: ${{ secrets.DEVOPS_APP_ID }}
+      devops-private-key: ${{ secrets.DEVOPS_PRIVATE_KEY }}

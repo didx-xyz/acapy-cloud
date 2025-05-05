@@ -1,0 +1,102 @@
+on:
+  workflow_call:
+    inputs:
+      acapy-cloud-ref:
+        required: true
+        type: string
+        description: The git reference (branch, tag, or commit) to use for the acapy-cloud repo.
+      helm-version:
+        required: true
+        type: string
+        description: The version of Helm used.
+      helmfile-version:
+        required: true
+        type: string
+        description: The version of Helmfile used.
+      image-version:
+        required: true
+        type: string
+        description: The version of the image built.
+      mise-version:
+        required: true
+        type: string
+        description: The version of Mise used.
+      regression-tests:
+        required: false
+        type: boolean
+        default: true
+        description: Run regression tests step.
+      reset-deployments:
+        required: false
+        type: boolean
+        default: false
+        description: Reset deployment - Clean start.
+      run-tests:
+        required: false
+        type: boolean
+        default: true
+        description: Run tests step.
+    secrets:
+      devops-app-id:
+        required: true
+      devops-private-key:
+        required: true
+
+permissions: {}
+
+jobs:
+  notify-didx-cloud:
+    name: Notify didx-cloud
+    runs-on: ubuntu-latest
+
+    env:
+      REPO_OWNER: ${{ github.repository_owner }}
+      REPO_NAME: didx-cloud
+
+    steps:
+      - name: Log in to DIDx DevOps
+        id: devops_login
+        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
+        with:
+          app-id: ${{ secrets.devops-app-id }}
+          private-key: ${{ secrets.devops-private-key }}
+          owner: ${{ env.REPO_OWNER }}
+          repositories: ${{ env.REPO_NAME }}
+
+      - name: Notify didx:cloud
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          github-token: ${{ steps.devops_login.outputs.token }}
+          script: >-
+            try {
+              const result = await github.rest.actions.createWorkflowDispatch({
+                owner: process.env.REPO_OWNER,
+                repo: process.env.REPO_NAME,
+                workflow_id: 'notify.yml',
+                ref: 'master',
+                inputs: {
+                  'helm-version': process.env.HELM_VERSION,
+                  'helmfile-version': process.env.HELMFILE_VERSION,
+                  'mise-version': process.env.MISE_VERSION,
+
+                  'acapy-cloud-ref': process.env.ACAPY_CLOUD_REF,
+                  'image-tag': process.env.IMAGE_TAG,
+                  'reset-deployments': process.env.RESET_DEPLOYMENTS,
+                  'regression-tests': process.env.REGRESSION_TESTS,
+                  'run-tests': process.env.RUN_TESTS,
+                }
+              })
+              console.log(result)
+            } catch (error) {
+              console.error(error);
+              core.setFailed(error.message);
+            }
+        env:
+          ACAPY_CLOUD_REF: ${{ inputs.acapy-cloud-ref }}
+          HELM_VERSION: ${{ inputs.helm-version }}
+          HELMFILE_VERSION: ${{ inputs.helmfile-version }}
+          IMAGE_TAG: ${{ inputs.image-version }}
+          MISE_VERSION: ${{ inputs.mise-version }}
+          REGRESSION_TESTS: ${{ inputs.regression-tests }}
+          RESET_DEPLOYMENTS: ${{ inputs.reset-deployments }}
+          RUN_TESTS: ${{ inputs.run-tests }}
