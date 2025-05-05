@@ -6,12 +6,12 @@ on:
       helm-version:
         description: Helm version to use
         required: false
-        default: 3.17.3
+        default: v3.17.3
         type: string
       helmfile-version:
         description: Helmfile version to use
         required: false
-        default: 1.0.0
+        default: v1.0.0
         type: string
       image-version:
         description: Image version to deploy
@@ -23,20 +23,54 @@ on:
         required: false
         default: 2025.5.0
         type: string
+      regression-tests:
+        description: Run regression tests step
+        required: false
+        default: true
+        type: boolean
+      reset-deployments:
+        description: Reset deployment - Clean start
+        required: false
+        default: false
+        type: boolean
+      run-tests:
+        description: Run tests step
+        required: false
+        default: true
+        type: boolean
   workflow_call:
     inputs:
       helm-version:
+        description: Helm version to use
         required: true
         type: string
       helmfile-version:
+        description: Helmfile version to use
         required: true
         type: string
       image-version:
+        description: Image version to deploy
         required: true
         type: string
       mise-version:
+        description: Mise version to use
         required: true
         type: string
+      regression-tests:
+        description: Run regression tests step
+        required: false
+        default: true
+        type: boolean
+      reset-deployments:
+        description: Reset deployment - Clean start
+        required: false
+        default: false
+        type: boolean
+      run-tests:
+        description: Run tests step
+        required: false
+        default: true
+        type: boolean
     secrets:
       tailscale-authkey:
         required: true
@@ -79,26 +113,26 @@ jobs:
           aws-region: af-south-1
           aws-role-arn: arn:aws:iam::402177810328:role/cicd
           aws-role-session-name: github-cicd
-          clean-start: ${{ github.event.inputs.reset-deployments || false }}
+          clean-start: ${{ inputs.reset-deployments || github.event.inputs.reset-deployments  }}
           cluster-name: cloudapi-dev
           environment: ${{ vars.ENVIRONMENT }}
-          helm-version: ${{ inputs.helm-version}}
+          helm-version: ${{ inputs.helm-version || github.event.inputs.helm-version }}
           helmfile-plugins: https://github.com/databus23/helm-diff
-          helmfile-version: ${{ inputs.helmfile-version }}
-          image-tag: ${{ inputs.image-version }}
+          helmfile-version: ${{ inputs.helmfile-version || github.event.inputs.helmfile-version }}
+          image-tag: ${{ inputs.image-version || github.event.inputs.image-version }}
           namespace: acapy-cloud-dev
 
       - name: Run Tests
         uses: ./.github/workflows/actions/test-eks
         with:
-          clean-start: ${{ github.event.inputs.reset-deployments || false }}
+          clean-start: ${{ inputs.reset-deployments || github.event.inputs.reset-deployments  }}
           environment: ${{ vars.ENVIRONMENT }}
-          helm-version: ${{ inputs.helm-version}}
+          helm-version: ${{ inputs.helm-version || github.event.inputs.helm-version }}
           helmfile-plugins: https://github.com/databus23/helm-diff
-          helmfile-version: ${{ inputs.helmfile-version }}
-          image-tag: ${{ inputs.image-version }}
-          mise-version: ${{ inputs.mise-version }}
+          helmfile-version: ${{ inputs.helmfile-version || github.event.inputs.helmfile-version }}
+          image-tag: ${{ inputs.image-version || github.event.inputs.image-version }}
+          mise-version: ${{ inputs.mise-version || github.event.inputs.mise-version }}
           namespace: acapy-cloud-dev
           pytest-completions: 1
-          regression-tests: ${{ github.event.inputs.regression-tests || true }}
-          run-tests: ${{ github.event.inputs.run-tests || true }}
+          regression-tests: ${{ inputs.regression-tests || github.event.inputs.regression-tests }}
+          run-tests: ${{ inputs.run-tests || github.event.inputs.run-tests }}

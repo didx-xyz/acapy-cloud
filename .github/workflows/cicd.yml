@@ -6,12 +6,12 @@ on:
       helm-version:
         description: Helm version
         required: false
-        default: 3.17.3
+        default: v3.17.3
         type: string
       helmfile-version:
         description: Helmfile version
         required: false
-        default: 1.0.0
+        default: v1.0.0
         type: string
       mise-version:
         description: Mise version
@@ -60,21 +60,45 @@ on:
 
 permissions: {}
 
+env:
+  HELM_VERSION: 3.17.3
+  HELMFILE_VERSION: 1.0.0
+  MISE_VERSION: 2025.5.0
+
 jobs:
+  export-versions:
+    name: Export versions
+    runs-on: ubuntu-latest
+
+    outputs:
+      HELM_VERSION: ${{ steps.export.outputs.HELM_VERSION }}
+      HELMFILE_VERSION: ${{ steps.export.outputs.HELMFILE_VERSION }}
+      MISE_VERSION: ${{ steps.export.outputs.MISE_VERSION }}
+
+    steps:
+      - name: Export versions
+        id: export
+        run: |
+          echo "HELM_VERSION=${{ github.event.inputs.helm-version || env.HELM_VERSION }}" >> $GITHUB_OUTPUT
+          echo "HELMFILE_VERSION=${{ github.event.inputs.helmfile-version || env.HELMFILE_VERSION }}" >> $GITHUB_OUTPUT
+          echo "MISE_VERSION=${{ github.event.inputs.mise-version || env.MISE_VERSION }}" >> $GITHUB_OUTPUT
+
   format:
     name: Format Check
+    needs: export-versions
     uses: ./.github/workflows/format.yml
     with:
-      mise-version: ${{ inputs.mise-version }}
+      mise-version: ${{ needs.export-versions.outputs.MISE_VERSION }}
     concurrency:
       group: format-check-${{ github.ref_name }}
       cancel-in-progress: true
 
   unit:
     name: Unit Tests
+    needs: export-versions
     uses: ./.github/workflows/unit.yml
     with:
-      mise-version: ${{ inputs.mise-version }}
+      mise-version: ${{ needs.export-versions.outputs.MISE_VERSION }}
     concurrency:
       group: unit-test-${{ github.ref_name }}
       cancel-in-progress: true
@@ -92,10 +116,11 @@ jobs:
     name: Local Test
     needs:
       - build
+      - export-versions
     uses: ./.github/workflows/local-tests.yml
     with:
       image-version: ${{ needs.build.outputs.image_version }}
-      mise-version: ${{ inputs.mise-version }}
+      mise-version: ${{ needs.export-versions.outputs.MISE_VERSION }}
     secrets:
       codacy-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
     concurrency:
@@ -108,11 +133,15 @@ jobs:
     uses: ./.github/workflows/deploy-test-eks.yml
     needs:
       - build
+      - export-versions
     with:
-      helm-version: ${{ inputs.helm-version }}
-      helmfile-version: ${{ inputs.helmfile-version }}
+      helm-version: ${{ needs.export-versions.outputs.HELM_VERSION }}
+      helmfile-version: ${{ needs.export-versions.outputs.HELMFILE_VERSION }}
       image-version: ${{ needs.build.outputs.image_version }}
-      mise-version: ${{ inputs.mise-version }}
+      mise-version: ${{ needs.export-versions.outputs.MISE_VERSION }}
+      regression-tests: ${{ inputs.regression-tests || true }}
+      reset-deployments: ${{ inputs.reset-deployments || false }}
+      run-tests: ${{ inputs.run-tests || true }}
     secrets:
       tailscale-authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
 
@@ -129,15 +158,19 @@ jobs:
     needs:
       - build
       - deploy-test-eks
+      - export-versions
       - test
 
     uses: ./.github/workflows/notify.yml
     with:
       acapy-cloud-ref: ${{ github.sha }}
+      helm-version: ${{ needs.export-versions.outputs.HELM_VERSION }}
+      helmfile-version: ${{ needs.export-versions.outputs.HELMFILE_VERSION }}
       image-version: ${{ needs.build.outputs.image_version }}
-      regression-tests: ${{ inputs.regression-tests }}
-      reset-deployments: ${{ inputs.reset-deployments }}
-      run-tests: ${{ inputs.run-tests }}
+      mise-version: ${{ needs.export-versions.outputs.MISE_VERSION }}
+      regression-tests: ${{ inputs.regression-tests || true }}
+      reset-deployments: ${{ inputs.reset-deployments || false }}
+      run-tests: ${{ inputs.run-tests || true }}
     secrets:
       devops-app-id: ${{ secrets.DEVOPS_APP_ID }}
       devops-private-key: ${{ secrets.DEVOPS_PRIVATE_KEY }}

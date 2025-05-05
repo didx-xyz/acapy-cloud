@@ -4,21 +4,38 @@ on:
       acapy-cloud-ref:
         required: true
         type: string
+        description: The git reference (branch, tag, or commit) to use for the acapy-cloud repo.
+      helm-version:
+        required: true
+        type: string
+        description: The version of Helm used.
+      helmfile-version:
+        required: true
+        type: string
+        description: The version of Helmfile used.
       image-version:
         required: true
         type: string
+        description: The version of the image built.
+      mise-version:
+        required: true
+        type: string
+        description: The version of Mise used.
       regression-tests:
         required: false
         type: boolean
         default: true
+        description: Run regression tests step.
       reset-deployments:
         required: false
         type: boolean
         default: false
+        description: Reset deployment - Clean start.
       run-tests:
         required: false
         type: boolean
         default: true
+        description: Run tests step.
     secrets:
       devops-app-id:
         required: true
