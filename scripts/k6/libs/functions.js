@@ -1144,7 +1144,7 @@ export function genericWaitForSSEEvent({
   return false;
 }
 
-export function retry(fn, retries = 3, delay = 2000) {
+export function retry(fn, retries = 3, delay = 2000, operation = 'Undefined') {
   let attempts = 0;
 
   while (attempts < retries) {
@@ -1155,17 +1155,17 @@ export function retry(fn, retries = 3, delay = 2000) {
         return result;
       }
       // For subsequent successful attempts, log the success
-      console.log(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent Succeeded on attempt ${attempts + 1}`);
+      console.log(`VU ${__VU}: Iteration ${__ITER}: Operation ${operation}: Succeeded on attempt ${attempts + 1}`);
       return result;
     } catch (e) {
       attempts++;
       // Only log from second attempt onwards
       if (attempts > 1) {
-        console.warn(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent Attempt ${attempts} failed: ${e.message}`);
+        console.warn(`VU ${__VU}: Iteration ${__ITER}: Operation ${operation}: Attempt ${attempts} failed: ${e.message}`);
       }
 
       if (attempts >= retries) {
-        console.error(`VU ${__VU}: Iteration ${__ITER}: genericWaitForSSEEvent All ${retries} attempts failed`);
+        console.error(`VU ${__VU}: Iteration ${__ITER}: Operation ${operation}: All ${retries} attempts failed`);
         throw e;
       }
 

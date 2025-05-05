@@ -150,7 +150,21 @@ export default function (data) {
   // TODO: return object and add check for the response
   const proofId = getProofIdByThreadId(wallet.access_token, threadId);
   // console.log(`Proof ID: ${proofId}`);
-  const referent = getProofIdCredentials(wallet.access_token, proofId);
+
+  let referent;
+  try {
+    referent = retry(() => {
+      const response = getProofIdCredentials(wallet.access_token, proofId);
+      if (response.length === 0) {
+        console.log('Referrent:', response);
+        throw new Error('No referrent returned');
+      }
+      return response;
+    }, 5, 2000, 'Get referrent');
+  } catch (error) {
+    console.error(`Failed to get proof credentials after retries: ${error.message}`);
+    throw error; // Re-throw as this is required for the next steps
+  }
 
   let acceptProofResponse;
   try {
