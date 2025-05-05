@@ -123,6 +123,19 @@ jobs:
       group: docker-${{ github.ref_name }}
       cancel-in-progress: true
 
+  openapi:
+    name: OpenAPI
+    needs: docker
+    uses: ./.github/workflows/update-openapi.yml
+    with:
+      image-version: ${{ needs.docker.outputs.image_version }}
+    concurrency:
+      group: update-openapi-${{ github.ref_name }}
+      cancel-in-progress: true
+    permissions:
+      contents: write # Required to push changes to the repository
+      pull-requests: write # Required to comment on PRs about OpenAPI spec changes
+
   local-test:
     name: Tests
     needs:

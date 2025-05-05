@@ -1,0 +1,84 @@
+name: Update OpenAPI
+
+on:
+  workflow_call:
+    inputs:
+      image-version:
+        description: Image version to run
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  update-openapi:
+    name: Update OpenAPI
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    services:
+      tenant-admin:
+        image: ghcr.io/didx-xyz/acapy-cloud/app:${{ inputs.image-version }}
+        ports:
+          - 8080:8000
+        env:
+          OPENAPI_NAME: CloudAPI Multitenant Admin
+          PYTHONPATH: /
+          ROLE: tenant-admin
+          ROOT_PATH: /tenant-admin
+      tenant:
+        image: ghcr.io/didx-xyz/acapy-cloud/app:${{ inputs.image-version }}
+        ports:
+          - 8181:8000
+        env:
+          OPENAPI_NAME: CloudAPI Tenant
+          PYTHONPATH: /
+          ROLE: tenant
+          ROOT_PATH: /tenant
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Check if services are up
+        run: |
+          for i in {1..10}; do
+            if curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/tenant-admin/openapi.json; then
+              echo "Tenant Admin service is up"
+              break
+            fi
+            sleep 5
+          done
+
+          for i in {1..10}; do
+            if curl -s -o /dev/null -w "%{http_code}" http://localhost:8181/tenant/openapi.json; then
+              echo "Tenant service is up"
+              break
+            fi
+            sleep 5
+          done
+
+      - name: Download OpenAPI Specs
+        run: |
+          mkdir -p ./docs/openapi
+
+          curl -s http://localhost:8080/tenant-admin/openapi.json | jq . > ./docs/openapi/tenant-admin-openapi.json
+          curl -s http://localhost:8080/tenant-admin/openapi.yaml | yq . > ./docs/openapi/tenant-admin-openapi.yaml
+
+          curl -s http://localhost:8181/tenant/openapi.json | jq . > ./docs/openapi/tenant-openapi.json
+          curl -s http://localhost:8181/tenant/openapi.yaml | yq . > ./docs/openapi/tenant-openapi.yaml
+
+      - name: Check for diff
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin master
+          git diff --exit-code origin/master -- ./docs/openapi || {
+            echo "OpenAPI specs have changed. Please update the PR."
+            exit 1
+          }
+          echo "No changes in OpenAPI specs."
