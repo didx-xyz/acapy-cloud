@@ -17,7 +17,7 @@ RUN chmod +x ./startup.sh
 USER aries
 
 ENTRYPOINT [ "./startup.sh" ]
-CMD [ "--wallet-type", "askar", \
+CMD [ "--wallet-type", "askar-anoncreds", \
   ## Setting for Governance Agent and Multitenant Agent
   "--plugin", "nats_events.v1_0.nats_queue.events", \
   ## Additional settings for Multitenant Agent only
