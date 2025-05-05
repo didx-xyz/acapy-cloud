@@ -13,6 +13,8 @@ updates:
       - /.github/workflows/actions/test-eks
     schedule:
       interval: weekly
+      day: saturday
+      time: "07:00"
 
   # Maintain dependencies for Python
   - package-ecosystem: pip
