@@ -67,8 +67,12 @@ env:
 
 jobs:
   export-versions:
-    name: Export versions
+    name: Export tool versions
     runs-on: ubuntu-latest
+
+    ###
+    # Needed because we can't pass env vars (`${{ env.HELM_VERSION }}`) to `workflow_call`
+    ###
 
     outputs:
       HELM_VERSION: ${{ steps.export.outputs.HELM_VERSION }}
@@ -76,12 +80,16 @@ jobs:
       MISE_VERSION: ${{ steps.export.outputs.MISE_VERSION }}
 
     steps:
-      - name: Export versions
+      - name: Export tool versions
         id: export
         run: |
-          echo "HELM_VERSION=${{ github.event.inputs.helm-version || env.HELM_VERSION }}" >> $GITHUB_OUTPUT
-          echo "HELMFILE_VERSION=${{ github.event.inputs.helmfile-version || env.HELMFILE_VERSION }}" >> $GITHUB_OUTPUT
-          echo "MISE_VERSION=${{ github.event.inputs.mise-version || env.MISE_VERSION }}" >> $GITHUB_OUTPUT
+          echo "HELM_VERSION=${HELM_VERSION}" >> $GITHUB_OUTPUT
+          echo "HELMFILE_VERSION=${HELMFILE_VERSION}" >> $GITHUB_OUTPUT
+          echo "MISE_VERSION=${MISE_VERSION}" >> $GITHUB_OUTPUT
+        env:
+          HELM_VERSION: ${{ github.event.inputs.helm-version || env.HELM_VERSION }}
+          HELMFILE_VERSION: ${{ github.event.inputs.helmfile-version || env.HELMFILE_VERSION }}
+          MISE_VERSION: ${{ github.event.inputs.mise-version || env.MISE_VERSION }}
 
   format:
     name: Format Check
@@ -103,8 +111,8 @@ jobs:
       group: unit-test-${{ github.ref_name }}
       cancel-in-progress: true
 
-  build:
-    name: Docker Build
+  docker:
+    name: Docker
     uses: ./.github/workflows/docker-build.yml
     needs:
       - format
@@ -115,11 +123,11 @@ jobs:
   test:
     name: Local Test
     needs:
-      - build
+      - docker
       - export-versions
     uses: ./.github/workflows/local-tests.yml
     with:
-      image-version: ${{ needs.build.outputs.image_version }}
+      image-version: ${{ needs.docker.outputs.image_version }}
       mise-version: ${{ needs.export-versions.outputs.MISE_VERSION }}
     secrets:
       codacy-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
@@ -132,12 +140,12 @@ jobs:
     name: Deploy and Test EKS
     uses: ./.github/workflows/deploy-test-eks.yml
     needs:
-      - build
+      - docker
       - export-versions
     with:
       helm-version: ${{ needs.export-versions.outputs.HELM_VERSION }}
       helmfile-version: ${{ needs.export-versions.outputs.HELMFILE_VERSION }}
-      image-version: ${{ needs.build.outputs.image_version }}
+      image-version: ${{ needs.docker.outputs.image_version }}
       mise-version: ${{ needs.export-versions.outputs.MISE_VERSION }}
       regression-tests: ${{ inputs.regression-tests || true }}
       reset-deployments: ${{ inputs.reset-deployments || false }}
@@ -156,7 +164,7 @@ jobs:
     if: github.actor != 'dependabot[bot]' && github.event_name != 'pull_request'
 
     needs:
-      - build
+      - docker
       - deploy-test-eks
       - export-versions
       - test
@@ -166,7 +174,7 @@ jobs:
       acapy-cloud-ref: ${{ github.sha }}
       helm-version: ${{ needs.export-versions.outputs.HELM_VERSION }}
       helmfile-version: ${{ needs.export-versions.outputs.HELMFILE_VERSION }}
-      image-version: ${{ needs.build.outputs.image_version }}
+      image-version: ${{ needs.docker.outputs.image_version }}
       mise-version: ${{ needs.export-versions.outputs.MISE_VERSION }}
       regression-tests: ${{ inputs.regression-tests || true }}
       reset-deployments: ${{ inputs.reset-deployments || false }}
