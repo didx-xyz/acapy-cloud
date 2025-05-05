@@ -113,26 +113,26 @@ jobs:
           aws-region: af-south-1
           aws-role-arn: arn:aws:iam::402177810328:role/cicd
           aws-role-session-name: github-cicd
-          clean-start: ${{ inputs.reset-deployments || github.event.inputs.reset-deployments  }}
+          clean-start: ${{ inputs.reset-deployments  }}
           cluster-name: cloudapi-dev
           environment: ${{ vars.ENVIRONMENT }}
-          helm-version: ${{ inputs.helm-version || github.event.inputs.helm-version }}
+          helm-version: ${{ inputs.helm-version }}
           helmfile-plugins: https://github.com/databus23/helm-diff
-          helmfile-version: ${{ inputs.helmfile-version || github.event.inputs.helmfile-version }}
-          image-tag: ${{ inputs.image-version || github.event.inputs.image-version }}
+          helmfile-version: ${{ inputs.helmfile-version }}
+          image-tag: ${{ inputs.image-version }}
           namespace: acapy-cloud-dev
 
       - name: Run Tests
         uses: ./.github/workflows/actions/test-eks
         with:
-          clean-start: ${{ inputs.reset-deployments || github.event.inputs.reset-deployments  }}
+          clean-start: ${{ inputs.reset-deployments  }}
           environment: ${{ vars.ENVIRONMENT }}
-          helm-version: ${{ inputs.helm-version || github.event.inputs.helm-version }}
+          helm-version: ${{ inputs.helm-version }}
           helmfile-plugins: https://github.com/databus23/helm-diff
-          helmfile-version: ${{ inputs.helmfile-version || github.event.inputs.helmfile-version }}
-          image-tag: ${{ inputs.image-version || github.event.inputs.image-version }}
-          mise-version: ${{ inputs.mise-version || github.event.inputs.mise-version }}
+          helmfile-version: ${{ inputs.helmfile-version }}
+          image-tag: ${{ inputs.image-version }}
+          mise-version: ${{ inputs.mise-version }}
           namespace: acapy-cloud-dev
           pytest-completions: 1
-          regression-tests: ${{ inputs.regression-tests || github.event.inputs.regression-tests }}
-          run-tests: ${{ inputs.run-tests || github.event.inputs.run-tests }}
+          regression-tests: ${{ inputs.regression-tests }}
+          run-tests: ${{ inputs.run-tests }}

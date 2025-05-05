@@ -60,11 +60,6 @@ on:
 
 permissions: {}
 
-env:
-  HELM_VERSION: 3.17.3
-  HELMFILE_VERSION: 1.0.0
-  MISE_VERSION: 2025.5.0
-
 jobs:
   export-versions:
     name: Export tool versions
@@ -87,9 +82,9 @@ jobs:
           echo "HELMFILE_VERSION=${HELMFILE_VERSION}" >> $GITHUB_OUTPUT
           echo "MISE_VERSION=${MISE_VERSION}" >> $GITHUB_OUTPUT
         env:
-          HELM_VERSION: ${{ github.event.inputs.helm-version || env.HELM_VERSION }}
-          HELMFILE_VERSION: ${{ github.event.inputs.helmfile-version || env.HELMFILE_VERSION }}
-          MISE_VERSION: ${{ github.event.inputs.mise-version || env.MISE_VERSION }}
+          HELM_VERSION: ${{ inputs.helm-version }}
+          HELMFILE_VERSION: ${{ inputs.helmfile-version }}
+          MISE_VERSION: ${{ inputs.mise-version }}
 
   format:
     name: Format Check
