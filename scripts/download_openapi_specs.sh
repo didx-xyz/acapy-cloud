@@ -34,6 +34,12 @@ for ENDPOINT in "${!ENDPOINTS[@]}"; do
       echo "Formatted JSON: $FILEPATH"
     fi
 
+    # Format YAML files
+    if [[ "$FILENAME" == *.yaml ]]; then
+      yq . "$FILEPATH" > "$TEMPFILE" && mv "$TEMPFILE" "$FILEPATH"
+      echo "Formatted JSON: $FILEPATH"
+    fi
+
     # Remove temporary file if it exists
     if [[ -f "$TEMPFILE" ]]; then
       rm "$TEMPFILE"

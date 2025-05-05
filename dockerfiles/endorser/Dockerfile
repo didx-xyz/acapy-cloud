@@ -20,4 +20,6 @@ EXPOSE 3009
 
 USER nobody
 
+ENV PYTHONPATH=/
+
 CMD ["poetry", "run", "uvicorn", "endorser.main:app", "--reload", "--host", "0.0.0.0", "--port", "3009"]
