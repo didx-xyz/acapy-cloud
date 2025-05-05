@@ -81,25 +81,29 @@ jobs:
         with:
           base: ./docs/openapi/tenant-admin-openapi.json
           revision: ./tmp/tenant-admin-openapi.json
-          format: json
+          format: markdown
+          include-path-params: true
 
       - name: Running OpenAPI Spec diff action (Tenant Admin YAML)
         uses: oasdiff/oasdiff-action/diff@d68e4d01cb0ba24b6811df1e190f2a640169ea6d # main
         with:
           base: ./docs/openapi/tenant-admin-openapi.yaml
           revision: ./tmp/tenant-admin-openapi.yaml
-          format: yaml
+          format: markdown
+          include-path-params: true
 
       - name: Running OpenAPI Spec diff action (Tenant JSON)
         uses: oasdiff/oasdiff-action/diff@d68e4d01cb0ba24b6811df1e190f2a640169ea6d # main
         with:
           base: ./docs/openapi/tenant-openapi.json
           revision: ./tmp/tenant-openapi.json
-          format: json
+          format: markdown
+          include-path-params: true
 
       - name: Running OpenAPI Spec diff action (Tenant YAML)
         uses: oasdiff/oasdiff-action/diff@d68e4d01cb0ba24b6811df1e190f2a640169ea6d # main
         with:
           base: ./docs/openapi/tenant-openapi.yaml
           revision: ./tmp/tenant-openapi.yaml
-          format: yaml
+          format: markdown
+          include-path-params: true
