@@ -71,6 +71,11 @@ jobs:
           curl -s http://localhost:8181/tenant/openapi.json | jq . > ./tmp/tenant-openapi.json
           curl -s http://localhost:8181/tenant/openapi.yaml | yq . > ./tmp/tenant-openapi.yaml
 
+      - name: Debug
+        run: |
+          ls -la ./tmp
+          ls -la ./docs/openapi
+
       - name: Running OpenAPI Spec diff action (Tenant Admin JSON)
         uses: oasdiff/oasdiff-action/diff@d68e4d01cb0ba24b6811df1e190f2a640169ea6d # main
         with:
