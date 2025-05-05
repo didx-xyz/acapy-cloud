@@ -21,7 +21,7 @@ on:
       mise-version:
         description: Mise version to use
         required: false
-        default: 2025.4.12
+        default: 2025.5.0
         type: string
   workflow_call:
     inputs:
