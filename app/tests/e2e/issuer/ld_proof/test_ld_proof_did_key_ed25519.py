@@ -62,7 +62,6 @@ async def test_send_jsonld_key_ed25519(
         )
 
         # Check if Alice received the credential
-        await asyncio.sleep(0.5)  # credential may take moment to reflect after webhook
         response = await alice_member_client.get(
             CREDENTIALS_BASE_PATH,
             params={"thread_id": thread_id},
@@ -121,8 +120,6 @@ async def test_send_jsonld_oob(
             "connection_id": alice_connection_id,
         },
     )
-
-    await asyncio.sleep(0.5)  # connection may take moment to reflect
 
     faber_connections_response = await faber_anoncreds_client.get(
         CONNECTIONS_BASE_PATH, params={"invitation_msg_id": invitation["@id"]}
@@ -210,7 +207,6 @@ async def test_send_jsonld_request(
     )
     assert all(result), "An expected webhook event was not returned"
 
-    await asyncio.sleep(0.5)  # credential may take moment to reflect after webhook
     response = await alice_member_client.get(
         CREDENTIALS_BASE_PATH,
         params={"thread_id": thread_id},
@@ -278,7 +274,6 @@ async def test_issue_jsonld_ed(
     )
     assert all(result), "An expected webhook event was not returned"
 
-    await asyncio.sleep(0.5)  # credential may take moment to reflect after webhook
     response = await alice_member_client.get(
         CREDENTIALS_BASE_PATH,
         params={"thread_id": thread_id},

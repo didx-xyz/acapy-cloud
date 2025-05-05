@@ -119,7 +119,6 @@ async def test_send_credential_and_request(
         },
     )
 
-    await asyncio.sleep(0.5)  # credential may take moment to reflect after webhook
     response = await alice_member_client.get(
         CREDENTIALS_BASE_PATH, params={"thread_id": thread_id}
     )

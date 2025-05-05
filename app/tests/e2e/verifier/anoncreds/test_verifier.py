@@ -269,8 +269,6 @@ async def test_get_proof_and_get_proofs_anoncreds(
     assert "presentation" in result
     assert "presentation_request" in result
 
-    await asyncio.sleep(0.3)  # allow moment for alice records to update
-
     # Fetch proofs for alice
     alice_payload = await check_webhook_state(
         client=alice_member_client,
@@ -637,7 +635,6 @@ async def test_saving_of_anoncreds_presentation_exchange_records(
         acme_proof_id,
     )
 
-    await asyncio.sleep(1)  # short sleep before fetching records; allow them to update
     # get exchange records from alice side
     if alice_save_exchange_record:
         # Save record is True, should be 1 record

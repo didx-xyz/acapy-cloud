@@ -71,8 +71,7 @@ async def test_issue_credential_with_save_exchange_record(
                 "credential_exchange_id": alice_credential_exchange_id,
             },
         )
-
-        await asyncio.sleep(1)  # short sleep before fetching; allow records to update
+        await asyncio.sleep(1)  # short sleep to allow records to delete. See #957
 
         # faber requesting auto_remove only removes their cred ex records
         # get exchange record from alice side -- should not exist after complete
@@ -96,7 +95,7 @@ async def test_issue_credential_with_save_exchange_record(
                 == faber_credential_exchange_id
             )
         else:
-            # If save_exchange_record was not set, credential should not exist
+            # If save_exchange_record was not set, exchange record should not exist for Faber
             with pytest.raises(HTTPException) as exc:
                 await faber_anoncreds_client.get(
                     f"{CREDENTIALS_BASE_PATH}/{faber_credential_exchange_id}"
@@ -175,8 +174,6 @@ async def test_request_credential_with_save_exchange_record(
             },
         )
 
-        await asyncio.sleep(1)  # short sleep before fetching; allow records to update
-
         if save_exchange_record:
             # Get exchange record from alice side - should exist if save_exchange_record=True
             alice_cred_ex_record = (
@@ -191,6 +188,7 @@ async def test_request_credential_with_save_exchange_record(
             )
         else:
             # If save_exchange_record was False, credential should not exist for holder
+            await asyncio.sleep(1)  # short sleep to allow records to delete. See #957
             with pytest.raises(HTTPException) as exc:
                 await alice_member_client.get(
                     f"{CREDENTIALS_BASE_PATH}/{alice_credential_exchange_id}"
@@ -285,7 +283,6 @@ async def test_get_cred_exchange_records(
             },
         )
 
-    await asyncio.sleep(1)  # short sleep to allow records to update
     faber_records = (await faber_anoncreds_client.get(CREDENTIALS_BASE_PATH)).json()
 
     faber_cred_ex_response = (
