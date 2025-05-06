@@ -4146,8 +4146,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 18446744073709552000,
-                "minimum": 0
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -4160,8 +4160,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 18446744073709552000,
-                "minimum": 0
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -4236,8 +4236,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 18446744073709552000,
-                "minimum": 0
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -4250,8 +4250,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 18446744073709552000,
-                "minimum": 0
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -4331,8 +4331,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 18446744073709552000,
-                "minimum": 0
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -4345,8 +4345,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 18446744073709552000,
-                "minimum": 0
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -4398,8 +4398,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 18446744073709552000,
-                "minimum": 0
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -7192,8 +7192,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 18446744073709552000,
-                "minimum": 0
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -7206,8 +7206,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 18446744073709552000,
-                "minimum": 0
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -7388,8 +7388,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 18446744073709552000,
-                "minimum": 0
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -7570,8 +7570,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 18446744073709552000,
-                "minimum": 0
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -7584,8 +7584,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 18446744073709552000,
-                "minimum": 0
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -7660,8 +7660,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 18446744073709552000,
-                "minimum": 0
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -7674,8 +7674,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 18446744073709552000,
-                "minimum": 0
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -7828,8 +7828,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 18446744073709552000,
-                "minimum": 0
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -7842,8 +7842,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 18446744073709552000,
-                "minimum": 0
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -8069,8 +8069,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 18446744073709552000,
-                "minimum": 0
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
               },
               {
                 "type": "null"
