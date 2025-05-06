@@ -18,7 +18,6 @@ connection_id = "test_connection_id"
 async def test_delete_connection_by_id_success():
     mock_aries_controller = AsyncMock()
 
-    # Mock to return a connection that uses the deprecated connections protocol
     mock_aries_controller.connection.get_connection = AsyncMock(
         return_value=ConnRecord(
             connection_id=connection_id, connection_protocol="didexchange/1.0"
