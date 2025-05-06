@@ -323,8 +323,8 @@ async def revoke_alice_anoncreds_and_publish(
     )
 
 
-class ReferentCredDef(BaseModel):
-    referent: str
+class CredentialIdCredDef(BaseModel):
+    credential_id: str
     cred_def_revocable: str
 
 
