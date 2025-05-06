@@ -1,7 +1,6 @@
 import re
 from typing import Dict, List, Literal, Optional
 
-from aries_cloudcontroller import CreateWalletRequest, UpdateWalletRequest
 from pydantic import BaseModel, Field, field_validator
 
 from shared.exceptions import CloudApiValueError
@@ -47,10 +46,6 @@ ExtraSettings_field = Field(
     description="Optional per-tenant settings to configure wallet behaviour for advanced users.",
     examples=[{"ACAPY_AUTO_ACCEPT_INVITES": False}],
 )
-
-
-class CreateWalletRequestWithGroups(CreateWalletRequest):
-    group_id: Optional[str] = group_id_field
 
 
 class CreateTenantRequest(BaseModel):
@@ -138,12 +133,6 @@ class UpdateTenantRequest(BaseModel):
                 f"spaces, and the following special characters are allowed: {allowable_special_chars}"
             )
         return v
-
-
-class UpdateWalletRequestWithGroupId(UpdateWalletRequest):
-    """Adds group_id to the default UpdateWalletRequest body"""
-
-    group_id: Optional[str] = Field(default=None, examples=["some_group_id"])
 
 
 class Tenant(BaseModel):

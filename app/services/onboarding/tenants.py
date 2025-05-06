@@ -1,6 +1,10 @@
 from typing import List
 
-from aries_cloudcontroller import AcaPyClient, UpdateWalletRequest, WalletRecord
+from aries_cloudcontroller import (
+    AcaPyClient,
+    UpdateWalletRequestWithGroupId,
+    WalletRecordWithGroupId,
+)
 from fastapi.exceptions import HTTPException
 
 from app.dependencies.acapy_clients import (
@@ -26,7 +30,7 @@ async def handle_tenant_update(
     admin_controller: AcaPyClient,
     wallet_id: str,
     update_request: UpdateTenantRequest,
-) -> WalletRecord:
+) -> WalletRecordWithGroupId:
     bound_logger = logger.bind(body={"wallet_id": wallet_id})
     bound_logger.bind(body=update_request).debug("Handling tenant update")
 
@@ -88,7 +92,7 @@ async def handle_tenant_update(
     bound_logger.debug("Updating wallet")
     request_body = handle_model_with_validation(
         logger=bound_logger,
-        model_class=UpdateWalletRequest,
+        model_class=UpdateWalletRequestWithGroupId,
         label=new_label,
         image_url=update_request.image_url,
         extra_settings=update_request.extra_settings,

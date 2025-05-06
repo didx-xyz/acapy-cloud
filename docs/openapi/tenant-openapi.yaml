@@ -3627,6 +3627,7 @@ components:
             - web
             - did:peer:2
             - did:peer:4
+            - cheqd
           title: Method
           description: Did method associated with the DID
         posture:
