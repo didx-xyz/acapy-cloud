@@ -202,7 +202,7 @@ jobs:
 
             if (specsWithChanges.length > 0) {
               // Add details for specs with changes
-              commentBody += `### ⚠️ The following OpenAPI specifications have differences that need to be addressed:\n\n`;
+              commentBody += `### ⚠️ Merging this PR will result in the following changes to the OpenAPI Specification:\n\n`;
 
               specsWithChanges.forEach(spec => {
                 commentBody += `<details>\n<summary><strong>🔍 ${spec.name}</strong> - Changes detected</summary>\n\n`;
