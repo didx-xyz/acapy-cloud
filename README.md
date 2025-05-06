@@ -1,6 +1,6 @@
 # acapy-cloud
 
-![Python](https://img.shields.io/badge/python-3.13-blue.svg)
+![Python](https://img.shields.io/badge/python-3.12-blue.svg)
 [![Toolset: Mise](https://img.shields.io/badge/toolset-Mise-orange.svg?style=flat)](https://mise.jdx.dev/)
 [![Dev Experience: Tilt](https://img.shields.io/badge/devex-Tilt-blue.svg?style=flat)](https://tilt.dev)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/ceca5ac566f74a3a8bfb3095074117ad)](https://app.codacy.com/gh/didx-xyz/acapy-cloud/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)

@@ -57,7 +57,7 @@ jobs:
           cat <<EOF > .mise.toml
           [tools]
           poetry = "2.1"
-          python = "3.13"
+          python = "3.12"
 
           [settings]
           experimental = true
