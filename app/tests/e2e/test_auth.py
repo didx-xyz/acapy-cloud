@@ -122,7 +122,7 @@ async def test_invalid_token_error_after_rotation(tenant_admin_client: RichAsync
 
     try:
         # Step 2: Rotate the token once
-        rotate_response = await tenant_admin_client.get(
+        rotate_response = await tenant_admin_client.post(
             f"{TENANTS_BASE_PATH}/{wallet_id}/access-token?group_id={group_id}"
         )
         assert rotate_response.status_code == 200
@@ -130,7 +130,7 @@ async def test_invalid_token_error_after_rotation(tenant_admin_client: RichAsync
         await asyncio.sleep(1)  # short sleep, because this test is very flaky
 
         # Rotate the token again
-        rotate_response = await tenant_admin_client.get(
+        rotate_response = await tenant_admin_client.post(
             f"{TENANTS_BASE_PATH}/{wallet_id}/access-token?group_id={group_id}"
         )
         assert rotate_response.status_code == 200

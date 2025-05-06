@@ -416,7 +416,7 @@ async def test_update_tenant_verifier_to_issuer(
 
         acapy_token = (
             (
-                await tenant_admin_client.get(
+                await tenant_admin_client.post(
                     f"{TENANTS_BASE_PATH}/{verifier_wallet_id}/access-token"
                 )
             )
