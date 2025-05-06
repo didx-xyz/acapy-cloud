@@ -5,7 +5,8 @@ USER root
 # Install Google Protobuf and Plugins
 ARG PROTOBUF_VERSION=5.29.3
 RUN pip install --no-cache-dir protobuf==${PROTOBUF_VERSION} \
-  acapy-wallet-groups-plugin==1.3.0.post20250505 \
+  # acapy-wallet-groups-plugin==1.3.0.post20250505 \
+  git+https://github.com/didx-xyz/acapy-wallet-groups-plugin@update-models \
   git+https://github.com/didx-xyz/aries-acapy-plugins@1.3.0-20250505#subdirectory=nats_events
 
 COPY scripts/startup.sh startup.sh
