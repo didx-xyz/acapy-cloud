@@ -80,11 +80,11 @@ async def test_accept_proof_request_oob(
         f"{VERIFIER_BASE_PATH}/proofs/{alice_proof_id}/credentials"
     )
 
-    referent = requested_credentials.json()[0]["cred_info"]["referent"]
-    assert referent
+    credential_id = requested_credentials.json()[0]["cred_info"]["credential_id"]
+    assert credential_id
 
     anoncreds_request_attrs = AnonCredsRequestedCredsRequestedAttr(
-        cred_id=referent, revealed=True
+        cred_id=credential_id, revealed=True
     )
     proof_accept = AcceptProofRequest(
         proof_id=alice_proof_id,
@@ -210,7 +210,7 @@ async def test_accept_proof_request_verifier_oob_connection(
             )
         ).json()
 
-        cred_id = available_credentials[0]["cred_info"]["referent"]
+        cred_id = available_credentials[0]["cred_info"]["credential_id"]
 
         await alice_member_client.post(
             VERIFIER_BASE_PATH + "/accept-request",

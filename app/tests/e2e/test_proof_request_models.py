@@ -73,12 +73,12 @@ async def test_proof_model_failures(
             await alice_member_client.get(f"{VERIFIER_BASE_PATH}/proofs")
         ).json()[0]["proof_id"]
 
-        # Get referent
-        referent = (
+        # Get credential_id
+        credential_id = (
             await alice_member_client.get(
                 f"{VERIFIER_BASE_PATH}/proofs/{alice_proof_exchange_id}/credentials"
             )
-        ).json()[0]["cred_info"]["referent"]
+        ).json()[0]["cred_info"]["credential_id"]
 
         # Accept proof request. This call will fail because the proof request is missing
         # the required fields (name and version). The send proof request call are missing
@@ -90,7 +90,7 @@ async def test_proof_model_failures(
                     "proof_id": alice_proof_exchange_id,
                     "anoncreds_presentation_spec": {
                         "requested_attributes": {
-                            "THE_SPEED": {"cred_id": referent, "revealed": True}
+                            "THE_SPEED": {"cred_id": credential_id, "revealed": True}
                         },
                         "requested_predicates": {},
                         "self_attested_attributes": {},

@@ -31,7 +31,7 @@ async def test_get_and_delete_credential_record(
     assert credentials_response.status_code == 200
     credentials_response = credentials_response.json()["results"]
 
-    credential_id = credentials_response[0]["referent"]
+    credential_id = credentials_response[0]["credential_id"]
     # While in the broader context of Aries and credentials, referent can refer to specific attributes,
     # when dealing with the wallet's stored credentials, the referent becomes synonymous with a credential_id
     # specific to the wallet. It's how the wallet references and retrieves that particular credential record.
@@ -52,7 +52,7 @@ async def test_get_and_delete_credential_record(
         await alice_member_client.get(WALLET_CREDENTIALS_PATH)
     ).json()["results"]
     for cred in credentials_response:
-        assert cred["referent"] != credential_id
+        assert cred["credential_id"] != credential_id
 
     # Assert fetching deleted credential yields 404
     with pytest.raises(HTTPException) as exc:
