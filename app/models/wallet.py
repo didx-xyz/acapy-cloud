@@ -1,7 +1,7 @@
 from typing import List, Optional
 
-from aries_cloudcontroller.models.did_create_options import DIDCreateOptions
 from aries_cloudcontroller.models.did_create import DIDCreate as DIDCreateAcaPy
+from aries_cloudcontroller.models.did_create_options import DIDCreateOptions
 from aries_cloudcontroller.models.indy_cred_info import (
     IndyCredInfo as IndyCredInfoAcaPy,
 )
