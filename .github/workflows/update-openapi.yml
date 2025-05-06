@@ -126,11 +126,11 @@ jobs:
             const tenantJsonDiff = `${{ steps.tenant-json.outputs.diff }}`;
             const tenantYamlDiff = `${{ steps.tenant-yaml.outputs.diff }}`;
 
-            // Unique identifier for our bot's comments
-            const BOT_COMMENT_IDENTIFIER = "<!-- openapi-diff-check -->";
+            // Unique identifier for our comment
+            const COMMENT_IDENTIFIER = "<!-- openapi-diff-check -->";
 
-            // Map for spec information
-            const specChanges = [
+            // Spec information
+            const specs = [
               {
                 name: 'Tenant Admin API (JSON)',
                 path: 'docs/openapi/tenant-admin-openapi.json',
@@ -157,85 +157,83 @@ jobs:
               }
             ];
 
-            const hasAnyChanges = specChanges.some(spec => spec.hasChanges);
-
             // Always create a step summary
             const fs = require('fs');
             let summaryContent = '## OpenAPI Specification Changes\n\n';
 
-            specChanges.forEach(spec => {
+            // Count changed and resolved specs
+            const specsWithChanges = specs.filter(spec => spec.hasChanges);
+
+            // Generate detailed summary
+            specs.forEach(spec => {
               if (spec.hasChanges) {
                 summaryContent += `### ${spec.name}\n\n${spec.diff}\n\n`;
               }
             });
 
-            if (!hasAnyChanges) {
+            if (specsWithChanges.length === 0) {
               summaryContent += 'No changes detected in any OpenAPI specification.\n';
             }
 
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summaryContent);
             console.log('Added OpenAPI diff results to the step summary');
 
-            // Get PR number
+            // Check if PR number is provided
             const prNumber = parseInt('${{ inputs.pr-number }}', 10);
+            if (!prNumber) {
+              console.log('PR number not provided, skipping PR comment creation');
+              return;
+            }
 
-            // List existing comments on the PR
+            // Get existing comments
             const comments = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: prNumber
             });
 
-            // Find our bot's existing comment if it exists
-            const botComment = comments.data.find(comment =>
-              comment.body.includes(BOT_COMMENT_IDENTIFIER)
+            // Find our existing comment
+            const existingComment = comments.data.find(comment =>
+              comment.body.includes(COMMENT_IDENTIFIER)
             );
 
             // Create comment body
-            let commentBody = `${BOT_COMMENT_IDENTIFIER}\n## OpenAPI Specification Changes\n\n`;
+            let commentBody = `${COMMENT_IDENTIFIER}\n## OpenAPI Specification Changes\n\n`;
 
-            // Track if any specs still have changes
-            let specsWithChanges = [];
-            let specsNowResolved = [];
+            if (specsWithChanges.length > 0) {
+              // Add details for specs with changes
+              commentBody += `### ⚠️ The following OpenAPI specifications have differences that need to be addressed:\n\n`;
 
-            specChanges.forEach(spec => {
-              if (spec.hasChanges) {
-                specsWithChanges.push(spec);
-                commentBody += `### ${spec.name}\n\n${spec.diff}\n\n`;
-              } else {
-                specsNowResolved.push(spec.name);
-              }
-            });
-
-            // Add section about resolved specs if there were any
-            if (specsNowResolved.length > 0 && botComment) {
-              commentBody += `### 🎉 Resolved Changes\n\nThese specs no longer have differences:\n\n`;
-              specsNowResolved.forEach(name => {
-                commentBody += `- ✅ ${name}\n`;
+              specsWithChanges.forEach(spec => {
+                commentBody += `<details>\n<summary><strong>🔍 ${spec.name}</strong> - Changes detected</summary>\n\n`;
+                commentBody += `${spec.diff}\n\n`;
+                commentBody += `</details>\n\n`;
               });
-              commentBody += `\n`;
-            }
 
-            // Add a notice if all specs are now in sync
-            if (specsWithChanges.length === 0) {
-              if (botComment) {
-                commentBody = `${BOT_COMMENT_IDENTIFIER}\n## ✅ All OpenAPI Specifications are in sync\n\nPrevious differences have been resolved. You can now close this PR or continue with other changes.`;
+              commentBody += `\nPlease update the OpenAPI specifications to resolve these differences.\n`;
+            } else {
+              // All specs are in sync
+              commentBody = `${COMMENT_IDENTIFIER}\n## ✅ All OpenAPI Specifications are in sync\n\n`;
+
+              if (existingComment) {
+                commentBody += `Previous differences have been resolved. This conversation can now be considered resolved.\n\n`;
+                commentBody += `<details>\n<summary>View previous differences (resolved)</summary>\n\n`;
+                commentBody += `~~${existingComment.body.replace(COMMENT_IDENTIFIER, '').replace(/^## OpenAPI Specification Changes/, '').trim()}~~\n\n`;
+                commentBody += `</details>`;
               } else {
-                // No previous comment and no changes - no need to comment
-                console.log('No OpenAPI spec changes detected and no previous comment exists. No comment needed.');
-                return;
+                commentBody += `No differences were detected between the current OpenAPI specifications.`;
               }
             }
 
             // Either update the existing comment or create a new one
-            if (botComment) {
+            if (existingComment) {
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                comment_id: botComment.id,
+                comment_id: existingComment.id,
                 body: commentBody
               });
-              console.log('Updated existing OpenAPI diff comment on PR');
+              console.log('Updated existing OpenAPI diff comment');
             } else if (specsWithChanges.length > 0) {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
