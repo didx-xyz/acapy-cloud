@@ -7,12 +7,16 @@ on:
         description: Image version to run
         required: true
         type: string
+      pr_number:
+        description: Pull request number (if triggered by a PR)
+        required: false
+        type: number
 
 permissions: {}
 
 jobs:
-  update-openapi:
-    name: Update OpenAPI
+  diff:
+    name: Diff
     runs-on: ubuntu-latest
 
     permissions:
@@ -112,13 +116,142 @@ jobs:
           format: markdown
           include-path-params: true
 
-      - name: Debug - Print diffs
-        run: |
-          echo Tenant Admin JSON Diff
-          echo ${{ steps.tenant-admin-json.outputs.diff }}
-          echo Tenant Admin YAML Diff
-          echo ${{ steps.tenant-admin-yaml.outputs.diff }}
-          echo Tenant JSON Diff
-          echo ${{ steps.tenant-json.outputs.diff }}
-          echo Tenant YAML Diff
-          echo ${{ steps.tenant-yaml.outputs.diff }}
+      - name: Create OpenAPI diff PR review
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        if: inputs.pr_number != ''
+        with:
+          script: |
+            const tenantAdminJsonDiff = `${{ steps.tenant-admin-json.outputs.diff }}`;
+            const tenantAdminYamlDiff = `${{ steps.tenant-admin-yaml.outputs.diff }}`;
+            const tenantJsonDiff = `${{ steps.tenant-json.outputs.diff }}`;
+            const tenantYamlDiff = `${{ steps.tenant-yaml.outputs.diff }}`;
+
+            // Unique identifier for our bot's review comments
+            const BOT_COMMENT_IDENTIFIER = "<!-- openapi-diff-reviewer -->";
+
+            // Map for spec information
+            const specChanges = [
+              {
+                name: 'Tenant Admin API (JSON)',
+                path: 'docs/openapi/tenant-admin-openapi.json',
+                diff: tenantAdminJsonDiff,
+                hasChanges: tenantAdminJsonDiff !== 'No changes'
+              },
+              {
+                name: 'Tenant Admin API (YAML)',
+                path: 'docs/openapi/tenant-admin-openapi.yaml',
+                diff: tenantAdminYamlDiff,
+                hasChanges: tenantAdminYamlDiff !== 'No changes'
+              },
+              {
+                name: 'Tenant API (JSON)',
+                path: 'docs/openapi/tenant-openapi.json',
+                diff: tenantJsonDiff,
+                hasChanges: tenantJsonDiff !== 'No changes'
+              },
+              {
+                name: 'Tenant API (YAML)',
+                path: 'docs/openapi/tenant-openapi.yaml',
+                diff: tenantYamlDiff,
+                hasChanges: tenantYamlDiff !== 'No changes'
+              }
+            ];
+
+            const hasAnyChanges = specChanges.some(spec => spec.hasChanges);
+
+            // Always create a step summary
+            const fs = require('fs');
+            let summaryContent = '## OpenAPI Specification Changes\n\n';
+
+            specChanges.forEach(spec => {
+              if (spec.hasChanges) {
+                summaryContent += `### ${spec.name}\n\n${spec.diff}\n\n`;
+              }
+            });
+
+            if (!hasAnyChanges) {
+              summaryContent += 'No changes detected in any OpenAPI specification.\n';
+            }
+
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summaryContent);
+            console.log('Added OpenAPI diff results to the step summary');
+
+            // Get PR number
+            const prNumber = parseInt('${{ inputs.pr_number }}', 10);
+
+            // List existing review comments
+            const reviewComments = await github.rest.pulls.listReviewComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            // Filter for comments that contain our identifier
+            const botReviewComments = reviewComments.data.filter(comment =>
+              comment.body.includes(BOT_COMMENT_IDENTIFIER)
+            );
+
+            // Map spec names to existing comment IDs
+            const existingComments = new Map();
+
+            for (const comment of botReviewComments) {
+              for (const spec of specChanges) {
+                if (comment.body.includes(spec.name) && comment.path === spec.path) {
+                  existingComments.set(spec.name, comment);
+                  break;
+                }
+              }
+            }
+
+            // Process each spec
+            const newComments = [];
+
+            for (const spec of specChanges) {
+              const existingComment = existingComments.get(spec.name);
+
+              if (spec.hasChanges) {
+                // Format comment body
+                const commentBody = `${BOT_COMMENT_IDENTIFIER}\n## ${spec.name}\n\n${spec.diff}`;
+
+                if (existingComment) {
+                  // Update existing comment
+                  await github.rest.pulls.updateReviewComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    comment_id: existingComment.id,
+                    body: commentBody
+                  });
+                  console.log(`Updated existing review comment for ${spec.name}`);
+                } else {
+                  // Create new comment in next review
+                  newComments.push({
+                    path: spec.path,
+                    line: 1,
+                    body: commentBody
+                  });
+                }
+              } else if (existingComment) {
+                // Spec no longer has changes, update comment to indicate issue is fixed
+                const resolvedComment = `${BOT_COMMENT_IDENTIFIER}\n## ${spec.name}\n\n~~Previous changes~~\n\n**✅ Changes have been addressed. You can now resolve this conversation.**`;
+
+                await github.rest.pulls.updateReviewComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existingComment.id,
+                  body: resolvedComment
+                });
+                console.log(`Marked comment for ${spec.name} as resolved`);
+              }
+            }
+
+            // Submit new review with comments if there are any new comments
+            if (newComments.length > 0) {
+              await github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                comments: newComments,
+                event: 'COMMENT'
+              });
+              console.log(`Created review with ${newComments.length} new comments on PR #${prNumber}`);
+            }
