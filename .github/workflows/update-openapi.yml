@@ -235,3 +235,23 @@ jobs:
               });
               console.log(`Created OpenAPI diff comment on PR #${prNumber}`);
             }
+
+      - name: Update OpenAPI specs on default branch
+        # if: inputs.pr-number == '' && github.ref_name == github.event.repository.default_branch
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
+
+          # Move new specs to the docs directory
+          mv ./tmp/* ./docs/openapi/
+
+          # Check if there are any changes
+          if [[ -n "$(git status --porcelain)" ]]; then
+            # Commit and push changes
+            git add ./docs/openapi/
+            git commit -m ":memo: Update OpenAPI Specification"
+            git push
+            echo "OpenAPI specs updated and pushed to repository"
+          else
+            echo "No changes to OpenAPI specs detected"
+          fi
