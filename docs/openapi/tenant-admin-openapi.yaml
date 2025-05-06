@@ -12,6 +12,8 @@ info:
 
     '
   version: 5.0.0rc1
+servers:
+  - url: /tenant-admin
 paths:
   /v1/tenants:
     post:
@@ -496,7 +498,7 @@ components:
           title: Wallet Type
           description: The type of wallet to create. 'askar' or 'askar-anoncreds'
             are supported.
-          default: askar
+          default: askar-anoncreds
       type: object
       required:
       - wallet_label
