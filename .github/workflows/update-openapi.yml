@@ -126,8 +126,8 @@ jobs:
             const tenantJsonDiff = `${{ steps.tenant-json.outputs.diff }}`;
             const tenantYamlDiff = `${{ steps.tenant-yaml.outputs.diff }}`;
 
-            // Unique identifier for our bot's review comments
-            const BOT_COMMENT_IDENTIFIER = "<!-- openapi-diff-reviewer -->";
+            // Unique identifier for our bot's comments
+            const BOT_COMMENT_IDENTIFIER = "<!-- openapi-diff-check -->";
 
             // Map for spec information
             const specChanges = [
@@ -179,79 +179,69 @@ jobs:
             // Get PR number
             const prNumber = parseInt('${{ inputs.pr-number }}', 10);
 
-            // List existing review comments
-            const reviewComments = await github.rest.pulls.listReviewComments({
+            // List existing comments on the PR
+            const comments = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: prNumber
+              issue_number: prNumber
             });
 
-            // Filter for comments that contain our identifier
-            const botReviewComments = reviewComments.data.filter(comment =>
+            // Find our bot's existing comment if it exists
+            const botComment = comments.data.find(comment =>
               comment.body.includes(BOT_COMMENT_IDENTIFIER)
             );
 
-            // Map spec names to existing comment IDs
-            const existingComments = new Map();
+            // Create comment body
+            let commentBody = `${BOT_COMMENT_IDENTIFIER}\n## OpenAPI Specification Changes\n\n`;
 
-            for (const comment of botReviewComments) {
-              for (const spec of specChanges) {
-                if (comment.body.includes(spec.name) && comment.path === spec.path) {
-                  existingComments.set(spec.name, comment);
-                  break;
-                }
-              }
-            }
+            // Track if any specs still have changes
+            let specsWithChanges = [];
+            let specsNowResolved = [];
 
-            // Process each spec
-            const newComments = [];
-
-            for (const spec of specChanges) {
-              const existingComment = existingComments.get(spec.name);
-
+            specChanges.forEach(spec => {
               if (spec.hasChanges) {
-                // Format comment body
-                const commentBody = `${BOT_COMMENT_IDENTIFIER}\n## ${spec.name}\n\n${spec.diff}`;
+                specsWithChanges.push(spec);
+                commentBody += `### ${spec.name}\n\n${spec.diff}\n\n`;
+              } else {
+                specsNowResolved.push(spec.name);
+              }
+            });
 
-                if (existingComment) {
-                  // Update existing comment
-                  await github.rest.pulls.updateReviewComment({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    comment_id: existingComment.id,
-                    body: commentBody
-                  });
-                  console.log(`Updated existing review comment for ${spec.name}`);
-                } else {
-                  // Create new comment in next review
-                  newComments.push({
-                    path: spec.path,
-                    line: 1,
-                    body: commentBody
-                  });
-                }
-              } else if (existingComment) {
-                // Spec no longer has changes, update comment to indicate issue is fixed
-                const resolvedComment = `${BOT_COMMENT_IDENTIFIER}\n## ${spec.name}\n\n~~Previous changes~~\n\n**✅ Changes have been addressed. You can now resolve this conversation.**`;
+            // Add section about resolved specs if there were any
+            if (specsNowResolved.length > 0 && botComment) {
+              commentBody += `### 🎉 Resolved Changes\n\nThese specs no longer have differences:\n\n`;
+              specsNowResolved.forEach(name => {
+                commentBody += `- ✅ ${name}\n`;
+              });
+              commentBody += `\n`;
+            }
 
-                await github.rest.pulls.updateReviewComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  comment_id: existingComment.id,
-                  body: resolvedComment
-                });
-                console.log(`Marked comment for ${spec.name} as resolved`);
+            // Add a notice if all specs are now in sync
+            if (specsWithChanges.length === 0) {
+              if (botComment) {
+                commentBody = `${BOT_COMMENT_IDENTIFIER}\n## ✅ All OpenAPI Specifications are in sync\n\nPrevious differences have been resolved. You can now close this PR or continue with other changes.`;
+              } else {
+                // No previous comment and no changes - no need to comment
+                console.log('No OpenAPI spec changes detected and no previous comment exists. No comment needed.');
+                return;
               }
             }
 
-            // Submit new review with comments if there are any new comments
-            if (newComments.length > 0) {
-              await github.rest.pulls.createReview({
+            // Either update the existing comment or create a new one
+            if (botComment) {
+              await github.rest.issues.updateComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                pull_number: prNumber,
-                comments: newComments,
-                event: 'COMMENT'
+                comment_id: botComment.id,
+                body: commentBody
               });
-              console.log(`Created review with ${newComments.length} new comments on PR #${prNumber}`);
+              console.log('Updated existing OpenAPI diff comment on PR');
+            } else if (specsWithChanges.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: commentBody
+              });
+              console.log(`Created OpenAPI diff comment on PR #${prNumber}`);
             }
