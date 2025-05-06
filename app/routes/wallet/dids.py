@@ -34,15 +34,10 @@ async def create_did(
     The `method` parameter is optional and can be set to
     'sov', 'key', 'web', 'did:peer:2', or 'did:peer:4'.
 
-    The `options` field is deprecated and has been flattened, such that `did` and
-    `key_type` are now top-level fields. The `options` field will still
-    take precedence over the top-level fields if it is present.
-
     Request Body:
     ---
         DIDCreate (Optional):
             method (str, optional): Method for the requested DID.
-            options (DIDCreateOptions, optional): Deprecated.
             seed (str, optional): Optional seed for DID.
             key_type (str, optional): Key type for the DID.
             did (str, optional): Specific DID value.
