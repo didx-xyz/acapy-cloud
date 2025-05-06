@@ -214,15 +214,7 @@ jobs:
             } else {
               // All specs are in sync
               commentBody = `${COMMENT_IDENTIFIER}\n## ✅ All OpenAPI Specifications are in sync\n\n`;
-
-              if (existingComment) {
-                commentBody += `Previous differences have been resolved. This conversation can now be considered resolved.\n\n`;
-                commentBody += `<details>\n<summary>View previous differences (resolved)</summary>\n\n`;
-                commentBody += `~~${existingComment.body.replace(COMMENT_IDENTIFIER, '').replace(/^## OpenAPI Specification Changes/, '').trim()}~~\n\n`;
-                commentBody += `</details>`;
-              } else {
-                commentBody += `No differences were detected between the current OpenAPI specifications.`;
-              }
+              commentBody += `No differences were detected in the OpenAPI specifications.`;
             }
 
             // Either update the existing comment or create a new one
