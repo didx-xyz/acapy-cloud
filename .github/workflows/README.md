@@ -8,21 +8,23 @@ title: CI/CD Pipeline
 ---
 flowchart LR
     ExportVersions(Export tool versions)
-    Format(Format Check)
-    Unit(Unit Tests)
-    Docker(Docker Build/Push)
-    Test(Local Tests)
-    DeployTest(Deploy and Test EKS)
-    Notify(Notify didx-cloud)
+    Lint(Lint / Format)
+    TestsUnit(Tests / Unit)
+    Docker(Docker / Build/Push)
+    TestsLocal(Tests / Local)
+    EKS(EKS / Deploy and Test)
+    Notify(Notify / didx-cloud)
+    OpenAPI(OpenAPI / Diff)
 
-    ExportVersions --> Format
-    ExportVersions --> Unit
-    Format --> Docker
-    Unit --> Docker
-    Docker --> Test
-    Docker --> DeployTest
-    DeployTest --> Notify
-    Test --> Notify
+    ExportVersions --> Lint
+    ExportVersions --> TestsUnit
+    Lint --> Docker
+    TestsUnit --> Docker
+    Docker --> TestsLocal
+    Docker --> EKS
+    EKS --> Notify
+    TestsLocal --> Notify
+    Docker --> OpenAPI
 ```
 
 Refer to the [helm](../../helm) directory for the Helm charts and Helmfile
