@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from aries_cloudcontroller.models.did_create_options import DIDCreateOptions
+from aries_cloudcontroller.models.did_create import DIDCreate as DIDCreateAcaPy
 from aries_cloudcontroller.models.indy_cred_info import (
     IndyCredInfo as IndyCredInfoAcaPy,
 )
@@ -80,3 +81,10 @@ class DIDCreate(BaseModel):
             An instance of `DIDCreateOptions` populated with `key_type` and `did`.
         """
         return DIDCreateOptions(key_type=self.key_type, did=self.did)
+
+    def to_acapy_request(self) -> DIDCreateAcaPy:
+        return DIDCreateAcaPy(
+            method=self.method,
+            did=self.did,
+            options=self.to_acapy_options(),
+        )
