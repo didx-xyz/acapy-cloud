@@ -1,3 +1,5 @@
+name: Notify
+
 on:
   workflow_call:
     inputs:
@@ -45,8 +47,8 @@ on:
 permissions: {}
 
 jobs:
-  notify-didx-cloud:
-    name: Notify didx-cloud
+  didx-cloud:
+    name: didx-cloud
     runs-on: ubuntu-latest
 
     env:

@@ -1,4 +1,4 @@
-name: Deploy EKS
+name: Deploy and Test EKS
 
 on:
   workflow_dispatch:
@@ -82,8 +82,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy-test-eks:
-    name: Deploy and Test EKS
+  deploy-test:
+    name: Deploy and Test
     runs-on: ubuntu-latest
 
     timeout-minutes: 30

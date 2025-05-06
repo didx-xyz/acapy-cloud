@@ -15,51 +15,47 @@ jobs:
     name: Build
     runs-on: ${{ matrix.runs-on }}
 
-    concurrency:
-      group: docker-build-${{ matrix.image }}-${{ matrix.arch }}-${{ github.ref_name }}
-      cancel-in-progress: true
-
     strategy:
       fail-fast: false
       matrix:
         image:
-          - acapy-cloud/agent
-          - acapy-cloud/app
-          - acapy-cloud/endorser
-          # - acapy-cloud/ledger-nodes # AMD64 only
-          - acapy-cloud/pytest
-          - acapy-cloud/tails-server
-          - acapy-cloud/trust-registry
-          - acapy-cloud/waypoint
-          - acapy-cloud/xk6
+          - agent
+          - app
+          - endorser
+          # - ledger-nodes # AMD64 only
+          - pytest
+          - tails-server
+          - trust-registry
+          - waypoint
+          - xk6
         arch: [amd64, arm64]
         include:
           - arch: amd64
             runs-on: ubuntu-24.04
           - arch: arm64
             runs-on: ubuntu-24.04-arm
-          - image: acapy-cloud/agent
+          - image: agent
             context: .
             file: dockerfiles/agents/Dockerfile
-          - image: acapy-cloud/app
+          - image: app
             context: .
             file: dockerfiles/app/Dockerfile
-          - image: acapy-cloud/endorser
+          - image: endorser
             context: .
             file: dockerfiles/endorser/Dockerfile
-          - image: acapy-cloud/pytest
+          - image: pytest
             context: .
             file: dockerfiles/tests/Dockerfile
-          - image: acapy-cloud/tails-server
+          - image: tails-server
             context: https://github.com/bcgov/indy-tails-server.git#v1.1.2
             file: docker/Dockerfile.tails-server
-          - image: acapy-cloud/trust-registry
+          - image: trust-registry
             context: .
             file: dockerfiles/trustregistry/Dockerfile
-          - image: acapy-cloud/waypoint
+          - image: waypoint
             context: .
             file: dockerfiles/waypoint/Dockerfile
-          - image: acapy-cloud/xk6
+          - image: xk6
             context: ./scripts/k6
             file: ./scripts/k6/Dockerfile
 
@@ -96,59 +92,55 @@ jobs:
     permissions:
       packages: write
 
-    concurrency:
-      group: docker-push-${{ matrix.image }}-${{ github.ref_name }}
-      cancel-in-progress: true
-
     needs: build
 
     strategy:
       fail-fast: false
       matrix:
         image:
-          - acapy-cloud/agent
-          - acapy-cloud/app
-          - acapy-cloud/endorser
-          - acapy-cloud/ledger-nodes
-          - acapy-cloud/pytest
-          - acapy-cloud/tails-server
-          - acapy-cloud/trust-registry
-          - acapy-cloud/waypoint
-          - acapy-cloud/xk6
+          - agent
+          - app
+          - endorser
+          - ledger-nodes
+          - pytest
+          - tails-server
+          - trust-registry
+          - waypoint
+          - xk6
         include:
-          - image: acapy-cloud/agent
+          - image: agent
             context: .
             file: dockerfiles/agents/Dockerfile
             platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/app
+          - image: app
             context: .
             file: dockerfiles/app/Dockerfile
             platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/endorser
+          - image: endorser
             context: .
             file: dockerfiles/endorser/Dockerfile
             platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/ledger-nodes
+          - image: ledger-nodes
             context: https://github.com/bcgov/von-network.git#v1.9.0
             file: Dockerfile
             platforms: linux/amd64
-          - image: acapy-cloud/pytest
+          - image: pytest
             context: .
             file: dockerfiles/tests/Dockerfile
             platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/tails-server
+          - image: tails-server
             context: https://github.com/bcgov/indy-tails-server.git#v1.1.2
             file: docker/Dockerfile.tails-server
             platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/trust-registry
+          - image: trust-registry
             context: .
             file: dockerfiles/trustregistry/Dockerfile
             platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/waypoint
+          - image: waypoint
             context: .
             file: dockerfiles/waypoint/Dockerfile
             platforms: linux/amd64,linux/arm64
-          - image: acapy-cloud/xk6
+          - image: xk6
             context: ./scripts/k6
             file: ./scripts/k6/Dockerfile
             platforms: linux/amd64,linux/arm64
@@ -179,7 +171,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
         with:
-          images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
+          images: ghcr.io/${{ github.repository_owner }}/acapy-cloud/${{ matrix.image }}
           tags: |
             type=raw,value=latest,enable=${{ github.event.repository.default_branch == github.ref_name }}
             type=sha,prefix=pr-${{ github.event.pull_request.number }}-,priority=601,enable=${{ github.event_name == 'pull_request' }}
@@ -203,5 +195,5 @@ jobs:
             type=gha,scope=build-${{ matrix.image }}-amd64
             type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:latest
           cache-to: |
-            ${{ matrix.image == 'acapy-cloud/ledger-nodes' && 'type=gha,mode=max,scope=build-${{ matrix.image }}-amd64' || '' }}
+            ${{ matrix.image == 'ledger-nodes' && 'type=gha,mode=max,scope=build-${{ matrix.image }}-amd64' || '' }}
           platforms: ${{ matrix.platforms }}
