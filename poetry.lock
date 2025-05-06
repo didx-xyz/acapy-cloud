@@ -216,14 +216,16 @@ test = ["anyio[trio]", "blockbuster (>=1.5.23)", "coverage[toml] (>=7)", "except
 trio = ["trio (>=0.26.1)"]
 
 [[package]]
-name = "aries_cloudcontroller"
+name = "aries-cloudcontroller"
 version = "1.3.0.post20250506"
 description = "A simple python client for controlling an ACA-Py agent"
 optional = false
 python-versions = ">=3.9"
 groups = ["app", "endorser"]
-files = []
-develop = false
+files = [
+    {file = "aries_cloudcontroller-1.3.0.post20250506-py3-none-any.whl", hash = "sha256:cedbd3051a00d7da1d10fded510464b4d5b362b48679fba1b68756fcf21ff875"},
+    {file = "aries_cloudcontroller-1.3.0.post20250506.tar.gz", hash = "sha256:a3e308b062667fc8c88c5ec82f4bc3225414d5d6cb52696ef9c848e32f72ce63"},
+]
 
 [package.dependencies]
 aiohttp = ">=3.9.4,<4.0"
@@ -233,12 +235,6 @@ pydantic = ">=2.6,<3.0"
 python-dateutil = ">=2"
 typing-extensions = ">=4,<5.0"
 urllib3 = ">=2.1,<3"
-
-[package.source]
-type = "git"
-url = "https://github.com/didx-xyz/aries-cloudcontroller-python.git"
-reference = "release-1.3.0-20250505"
-resolved_reference = "447c07f6d20e24b6d72722efdfd891317439a3a2"
 
 [[package]]
 name = "astroid"
@@ -2540,4 +2536,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.13.3"
-content-hash = "4e37a374842f72c788f2490a9f610b3a2cc913a1b56c0b14e027bf4bdeeed88c"
+content-hash = "a219ae1d76db6624f8bcf9370e1deb3eda9e82f0a6109ccf69d1a72a66807c7c"
