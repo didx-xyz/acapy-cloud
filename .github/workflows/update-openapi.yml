@@ -167,22 +167,31 @@ jobs:
               }
             ];
 
+            // Count changed and resolved specs
+            const specsWithChanges = specs.filter(spec => spec.hasChanges);
+
             // Always create a step summary
             const fs = require('fs');
             let summaryContent = '## OpenAPI Specification Changes\n\n';
 
-            // Count changed and resolved specs
-            const specsWithChanges = specs.filter(spec => spec.hasChanges);
+            if (specsWithChanges.length > 0) {
+              // Add warning header for specs with changes
+              summaryContent += `### ⚠️ Changes detected in the following specifications:\n\n`;
 
-            // Generate detailed summary
-            specs.forEach(spec => {
-              if (spec.hasChanges) {
-                summaryContent += `### ${spec.name}\n\n${spec.diff}\n\n`;
-              }
-            });
+              // Generate detailed summary using details/summary tags
+              specs.forEach(spec => {
+                if (spec.hasChanges) {
+                  summaryContent += `<details>\n<summary><strong>🔍 ${spec.name}</strong> - Changes detected</summary>\n\n`;
+                  summaryContent += `${spec.diff}\n\n`;
+                  summaryContent += `</details>\n\n`;
+                }
+              });
 
-            if (specsWithChanges.length === 0) {
-              summaryContent += 'No changes detected in any OpenAPI specification.\n';
+              summaryContent += `\nPlease update the OpenAPI specifications to resolve these differences.\n`;
+            } else {
+              // All specs are in sync
+              summaryContent += `## ✅ All OpenAPI Specifications are in sync\n\n`;
+              summaryContent += `No differences were detected in the OpenAPI specifications.`;
             }
 
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summaryContent);
