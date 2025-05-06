@@ -91,8 +91,8 @@ jobs:
           HELMFILE_VERSION: ${{ inputs.helmfile-version || env.HELMFILE_VERSION }}
           MISE_VERSION: ${{ inputs.mise-version || env.MISE_VERSION }}
 
-  format:
-    name: Format Check
+  lint:
+    name: Lint
     needs: export-versions
     uses: ./.github/workflows/format.yml
     with:
@@ -102,7 +102,7 @@ jobs:
       cancel-in-progress: true
 
   unit:
-    name: Unit Tests
+    name: Tests
     needs: export-versions
     uses: ./.github/workflows/unit.yml
     with:
@@ -115,13 +115,16 @@ jobs:
     name: Docker
     uses: ./.github/workflows/docker-build.yml
     needs:
-      - format
+      - lint
       - unit
     permissions:
       packages: write
+    concurrency:
+      group: docker-${{ github.ref_name }}
+      cancel-in-progress: true
 
-  test:
-    name: Local Test
+  local-test:
+    name: Tests
     needs:
       - docker
       - export-versions
@@ -135,9 +138,9 @@ jobs:
       group: local-tests-${{ github.ref_name }}
       cancel-in-progress: true
 
-  deploy-test-eks:
+  eks:
     if: github.actor != 'dependabot[bot]' && github.event.pull_request.draft == false
-    name: Deploy and Test EKS
+    name: EKS
     uses: ./.github/workflows/deploy-test-eks.yml
     needs:
       - docker
@@ -158,16 +161,16 @@ jobs:
       checks: write # Required for action-junit-report
       pull-requests: write # Required to comment on PRs for Pytest coverage comment
 
-  notify-didx-cloud:
-    name: Notify didx-cloud
+  notify:
+    name: Notify
 
     if: github.actor != 'dependabot[bot]' && github.event_name != 'pull_request'
 
     needs:
       - docker
-      - deploy-test-eks
+      - eks
       - export-versions
-      - test
+      - local-test
 
     uses: ./.github/workflows/notify.yml
     with:

@@ -15,10 +15,6 @@ jobs:
     name: Build
     runs-on: ${{ matrix.runs-on }}
 
-    concurrency:
-      group: docker-build-${{ matrix.image }}-${{ matrix.arch }}-${{ github.ref_name }}
-      cancel-in-progress: true
-
     strategy:
       fail-fast: false
       matrix:
@@ -95,10 +91,6 @@ jobs:
 
     permissions:
       packages: write
-
-    concurrency:
-      group: docker-push-${{ matrix.image }}-${{ github.ref_name }}
-      cancel-in-progress: true
 
     needs: build
 

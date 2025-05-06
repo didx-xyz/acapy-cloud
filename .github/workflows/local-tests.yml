@@ -16,8 +16,8 @@ on:
 permissions: {}
 
 jobs:
-  test:
-    name: Local Tests
+  local:
+    name: Local
     runs-on: ubuntu-latest
 
     timeout-minutes: 30
