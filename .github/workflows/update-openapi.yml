@@ -7,7 +7,7 @@ on:
         description: Image version to run
         required: true
         type: string
-      pr_number:
+      pr-number:
         description: Pull request number (if triggered by a PR)
         required: false
         type: number
@@ -118,7 +118,7 @@ jobs:
 
       - name: Create OpenAPI diff PR review
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
-        if: inputs.pr_number != ''
+        if: inputs.pr-number != ''
         with:
           script: |
             const tenantAdminJsonDiff = `${{ steps.tenant-admin-json.outputs.diff }}`;
@@ -177,7 +177,7 @@ jobs:
             console.log('Added OpenAPI diff results to the step summary');
 
             // Get PR number
-            const prNumber = parseInt('${{ inputs.pr_number }}', 10);
+            const prNumber = parseInt('${{ inputs.pr-number }}', 10);
 
             // List existing review comments
             const reviewComments = await github.rest.pulls.listReviewComments({
