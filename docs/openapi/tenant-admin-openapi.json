@@ -5,11 +5,6 @@
     "description": "\nWelcome to CloudAPI Multitenant Admin!\n\nFor detailed guidance on using the API, please visit our official documentation:\nhttps://www.didx.co.za/acapy-cloud/index.html\n",
     "version": "5.0.0rc1"
   },
-  "servers": [
-    {
-      "url": "/tenant-admin"
-    }
-  ],
   "paths": {
     "/v1/tenants": {
       "post": {
@@ -625,7 +620,7 @@
             ],
             "title": "Wallet Type",
             "description": "The type of wallet to create. 'askar' or 'askar-anoncreds' are supported.",
-            "default": "askar-anoncreds"
+            "default": "askar"
           }
         },
         "type": "object",
