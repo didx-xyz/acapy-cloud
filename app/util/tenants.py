@@ -3,7 +3,7 @@ import json
 from logging import Logger
 from typing import Optional
 
-from aries_cloudcontroller import AcaPyClient, WalletRecordWithGroups
+from aries_cloudcontroller import AcaPyClient, WalletRecordWithGroupId
 from fastapi import HTTPException
 
 from app.dependencies.acapy_clients import get_tenant_admin_controller
@@ -20,7 +20,7 @@ class WalletNotFoundException(HTTPException):
         )
 
 
-def tenant_from_wallet_record(wallet_record: WalletRecordWithGroups) -> Tenant:
+def tenant_from_wallet_record(wallet_record: WalletRecordWithGroupId) -> Tenant:
     label: str = wallet_record.settings.get("default_label") or ""
     wallet_name: str = wallet_record.settings.get("wallet.name") or ""
     image_url: Optional[str] = wallet_record.settings.get("image_url")
@@ -64,7 +64,7 @@ async def get_wallet_and_assert_valid_group(
     wallet_id: str,
     group_id: Optional[str],
     logger: Logger,
-) -> WalletRecordWithGroups:
+) -> WalletRecordWithGroupId:
     """Fetch the wallet record for wallet_id, and assert it exists and belongs to group.
 
     Args:
@@ -77,7 +77,7 @@ async def get_wallet_and_assert_valid_group(
         HTTPException: If the wallet does not exist or does not belong to group
 
     Returns:
-        WalletRecordWithGroups: When assertions pass, returns the wallet record.
+        WalletRecordWithGroupId: When assertions pass, returns the wallet record.
     """
     logger.debug("Retrieving the wallet record for {}", wallet_id)
     wallet = await handle_acapy_call(
@@ -98,7 +98,7 @@ async def get_wallet_and_assert_valid_group(
 
 
 def assert_valid_group(
-    wallet: WalletRecordWithGroups,
+    wallet: WalletRecordWithGroupId,
     wallet_id: str,
     group_id: Optional[str],
     logger: Logger,
@@ -106,7 +106,7 @@ def assert_valid_group(
     """Assert that wallet record belongs to group, and raise exception if not.
 
     Args:
-        wallet (WalletRecordWithGroups): The wallet record to check.
+        wallet (WalletRecordWithGroupId): The wallet record to check.
         wallet_id (str): The wallet id for the wallet record.
         group_id (Optional[str]): The group to validate against.
         logger (Logger): A logger object.

@@ -3,14 +3,13 @@ from unittest.mock import AsyncMock, patch
 
 import base58
 import pytest
-from aries_cloudcontroller import CreateWalletResponse
+from aries_cloudcontroller import CreateWalletRequestWithGroupId, CreateWalletResponse
 from fastapi import HTTPException
 
 from app.dependencies.acapy_clients import TENANT_ADMIN_AUTHED
 from app.exceptions import CloudApiException, TrustRegistryException
 from app.models.tenants import (
     CreateTenantRequest,
-    CreateWalletRequestWithGroups,
     OnboardResult,
 )
 from app.routes.admin.tenants import create_tenant
@@ -60,7 +59,7 @@ async def test_create_tenant_success(roles):
 
     mock_register_actor = AsyncMock()
 
-    expected_wallet_body = CreateWalletRequestWithGroups(
+    expected_wallet_body = CreateWalletRequestWithGroupId(
         image_url=body.image_url,
         key_management_mode="managed",
         label=wallet_label,

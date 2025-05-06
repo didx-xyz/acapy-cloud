@@ -2,7 +2,10 @@ from secrets import token_urlsafe
 from typing import List, Optional
 
 import base58
-from aries_cloudcontroller import CreateWalletTokenRequest
+from aries_cloudcontroller import (
+    CreateWalletRequestWithGroupId,
+    CreateWalletTokenRequest,
+)
 from fastapi import APIRouter, Depends, HTTPException, Query
 from uuid_utils import uuid4
 
@@ -21,7 +24,6 @@ from app.exceptions import (
 from app.models.tenants import (
     CreateTenantRequest,
     CreateTenantResponse,
-    CreateWalletRequestWithGroups,
     Tenant,
     TenantAuth,
     UpdateTenantRequest,
@@ -155,7 +157,7 @@ async def create_tenant(
     wallet_response = None
     body_request = handle_model_with_validation(
         logger=bound_logger,
-        model_class=CreateWalletRequestWithGroups,
+        model_class=CreateWalletRequestWithGroupId,
         image_url=body.image_url,
         key_management_mode="managed",
         label=wallet_label,
