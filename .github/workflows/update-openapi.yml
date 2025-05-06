@@ -47,10 +47,19 @@ jobs:
           ROOT_PATH: /tenant
 
     steps:
+      - name: Log in to DIDx DevOps
+        id: devops_login
+        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
+        with:
+          app-id: ${{ secrets.devops-app-id }}
+          private-key: ${{ secrets.devops-private-key }}
+
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          persist-credentials: false
+          persist-credentials: true
+          token: ${{ steps.devops_login.outputs.token }}
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Check if services are up
         run: |
@@ -79,11 +88,6 @@ jobs:
 
           curl -s http://localhost:8181/tenant/openapi.json | jq . > ./tmp/tenant-openapi.json
           curl -s http://localhost:8181/tenant/openapi.yaml | yq . > ./tmp/tenant-openapi.yaml
-
-      - name: Debug
-        run: |
-          ls -la ./tmp
-          ls -la ./docs/openapi
 
       - name: Detecting diffs in OpenAPI Spec - Tenant Admin JSON
         uses: oasdiff/oasdiff-action/diff@d68e4d01cb0ba24b6811df1e190f2a640169ea6d # main
@@ -120,13 +124,6 @@ jobs:
           revision: ./tmp/tenant-openapi.yaml
           format: markdown
           include-path-params: true
-
-      - name: Log in to DIDx DevOps
-        id: devops_login
-        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
-        with:
-          app-id: ${{ secrets.devops-app-id }}
-          private-key: ${{ secrets.devops-private-key }}
 
       - name: Comment on PR
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
@@ -248,3 +245,49 @@ jobs:
               });
               console.log(`Created OpenAPI diff comment on PR #${prNumber}`);
             }
+
+      - name: Commit and open PR for OpenAPI spec changes
+        # if: inputs.pr-number == '' && github.ref_name == github.event.repository.default_branch
+        env:
+          HEAD_BRANCH: devops/sync-openapi
+          BASE_BRANCH: ci/automate-openapi
+          GITHUB_TOKEN: ${{ steps.devops_login.outputs.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          git config --global user.name "DIDx DevOps"
+          git config --global user.email "devops@didx.co.za"
+
+          # Ensure we are on the correct branch
+          git checkout -b ${HEAD_BRANCH}
+
+          # Move new specs to the docs directory
+          mv ./tmp/* ./docs/openapi/
+
+          # Check if there are any changes
+          if [[ -n "$(git status --porcelain ./docs/openapi)" ]]; then
+            echo "Changes detected in OpenAPI specs, preparing to commit and push"
+
+            # Commit and push changes
+            git add ./docs/openapi/
+            git commit -m ":memo: Sync OpenAPI Spec"
+            git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO}.git
+            git push --set-upstream origin ${HEAD_BRANCH} --force
+            echo "OpenAPI specs updated and pushed to repository"
+
+            # Check if PR already exists
+            pr_exists=$(gh pr list --repo ${REPO} --base ${BASE_BRANCH} --head ${HEAD_BRANCH} --json number --jq '.[0].number')
+            if [[ -n "${pr_exists}" ]]; then
+              echo "Pull request #${pr_exists} already exists for syncing OpenAPI Spec"
+            else
+              gh pr create \
+                --repo ${REPO} \
+                --base ${BASE_BRANCH} \
+                --head ${HEAD_BRANCH} \
+                --title ":memo: Sync OpenAPI Spec" \
+                --body "This PR syncs the OpenAPI Spec with the latest code changes.\n\nPlease review and merge." \
+                --label documentation
+              echo "Pull request created for OpenAPI spec changes"
+            fi
+          else
+            echo "No changes to OpenAPI specs detected"
+          fi
