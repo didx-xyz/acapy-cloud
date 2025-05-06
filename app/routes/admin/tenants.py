@@ -308,58 +308,6 @@ async def delete_tenant_by_id(
         bound_logger.debug("Successfully deleted tenant.")
 
 
-@router.get(
-    "/{wallet_id}/access-token",
-    response_model=TenantAuth,
-    summary="(Deprecated) Rotate and Get New Access Token for Wallet",
-    deprecated=True,
-)
-async def get_wallet_auth_token(
-    wallet_id: str,
-    group_id: Optional[str] = group_id_query,
-    admin_auth: AcaPyAuthVerified = Depends(acapy_auth_tenant_admin),
-) -> TenantAuth:
-    """
-    (Deprecated) Rotate and get access token for Wallet
-    ---
-
-    Calling this endpoint will invalidate the previous access token for the Wallet, and return a new one.
-
-    Request Parameters:
-    ---
-        wallet_id: str
-            The Wallet ID of the tenant for which the access token will be rotated.
-
-    Response Body:
-    ---
-        TenantAuth
-            access_token: str
-                The new access token for the Wallet.
-    """
-    bound_logger = logger.bind(body={"wallet_id": wallet_id})
-    bound_logger.debug("GET request received: Access token for tenant")
-
-    async with get_tenant_admin_controller(admin_auth) as admin_controller:
-        await get_wallet_and_assert_valid_group(
-            admin_controller=admin_controller,
-            wallet_id=wallet_id,
-            group_id=group_id,
-            logger=bound_logger,
-        )
-
-        bound_logger.debug("Getting auth token for wallet")
-        response = await handle_acapy_call(
-            logger=bound_logger,
-            acapy_call=admin_controller.multitenancy.get_auth_token,
-            wallet_id=wallet_id,
-            body=CreateWalletTokenRequest(),
-        )
-
-    response = TenantAuth(access_token=tenant_api_key(response.token))
-    bound_logger.debug("Successfully retrieved access token.")
-    return response
-
-
 @router.post(
     "/{wallet_id}/access-token",
     response_model=TenantAuth,
