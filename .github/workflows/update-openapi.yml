@@ -11,6 +11,11 @@ on:
         description: Pull request number (if triggered by a PR)
         required: false
         type: number
+    secrets:
+      devops-app-id:
+        required: true
+      devops-private-key:
+        required: true
 
 permissions: {}
 
@@ -42,10 +47,18 @@ jobs:
           ROOT_PATH: /tenant
 
     steps:
+      - name: Log in to DIDx DevOps
+        id: devops_login
+        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
+        with:
+          app-id: ${{ secrets.devops-app-id }}
+          private-key: ${{ secrets.devops-private-key }}
+
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: true
+          token: ${{ steps.devops_login.outputs.token }}
 
       - name: Check if services are up
         run: |
@@ -120,6 +133,7 @@ jobs:
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         if: inputs.pr-number != ''
         with:
+          github-token: ${{ steps.devops_login.outputs.token }}
           script: |
             const tenantAdminJsonDiff = `${{ steps.tenant-admin-json.outputs.diff }}`;
             const tenantAdminYamlDiff = `${{ steps.tenant-admin-yaml.outputs.diff }}`;
@@ -239,8 +253,8 @@ jobs:
       - name: Update OpenAPI specs on default branch
         # if: inputs.pr-number == '' && github.ref_name == github.event.repository.default_branch
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "github-actions@github.com"
+          git config --global user.name "DIDx DevOps"
+          git config --global user.email "devops@didx.co.za"
 
           # Ensure we are on a branch
           git fetch origin
