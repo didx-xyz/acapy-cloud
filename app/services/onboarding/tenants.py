@@ -2,7 +2,7 @@ from typing import List
 
 from aries_cloudcontroller import (
     AcaPyClient,
-    UpdateWalletRequest,
+    UpdateWalletRequestWithGroupId,
     WalletRecordWithGroupId,
 )
 from fastapi.exceptions import HTTPException
@@ -92,7 +92,7 @@ async def handle_tenant_update(
     bound_logger.debug("Updating wallet")
     request_body = handle_model_with_validation(
         logger=bound_logger,
-        model_class=UpdateWalletRequest,
+        model_class=UpdateWalletRequestWithGroupId,
         label=new_label,
         image_url=update_request.image_url,
         extra_settings=update_request.extra_settings,
