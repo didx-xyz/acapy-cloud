@@ -23,7 +23,7 @@ group_id = "TestGroup"
     TestMode.regression_run in TestMode.fixture_params,
     reason=skip_regression_test_reason,
 )
-async def test_get_wallet_auth_token(tenant_admin_client: RichAsyncClient):
+async def test_post_wallet_auth_token(tenant_admin_client: RichAsyncClient):
     response = await tenant_admin_client.post(
         TENANTS_BASE_PATH,
         json={
@@ -41,20 +41,20 @@ async def test_get_wallet_auth_token(tenant_admin_client: RichAsyncClient):
     try:
         # Attempting to access with incorrect wallet_id will fail with 404
         with pytest.raises(HTTPException) as exc:
-            await tenant_admin_client.get(
+            await tenant_admin_client.post(
                 f"{TENANTS_BASE_PATH}/bad_wallet_id/access-token"
             )
         assert exc.value.status_code == 404
 
         # Attempting to access with incorrect group_id will fail with 404
         with pytest.raises(HTTPException) as exc:
-            await tenant_admin_client.get(
+            await tenant_admin_client.post(
                 f"{TENANTS_BASE_PATH}/{wallet_id}/access-token?group_id=wrong_group"
             )
         assert exc.value.status_code == 404
 
         # Successfully get access-token with correct group_id
-        response = await tenant_admin_client.get(
+        response = await tenant_admin_client.post(
             f"{TENANTS_BASE_PATH}/{wallet_id}/access-token?group_id={group_id}"
         )
         assert response.status_code == 200

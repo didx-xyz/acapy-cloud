@@ -15,7 +15,7 @@ Find test file [here](/app/tests/e2e/test_tenants.py)
 
 `app/tests/e2e/test_tenants.py`
 
-### test_get_wallet_auth_token (Skipped in regression run)
+### test_post_wallet_auth_token (Skipped in regression run)
 
 Tenant-admin role creates tenant.
 
