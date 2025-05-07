@@ -130,11 +130,11 @@ class RejectProofRequest(ProofId):
 
 
 class CredInfo(BaseModel):
-    attrs: dict = Field(default=None, description="Attribute names and value")
-    cred_def_id: str = Field(
-        default=None, description="Credential definition identifier"
+    attrs: dict = Field(..., description="Attribute names and value")
+    cred_def_id: str = Field(..., description="Credential definition identifier")
+    credential_id: str = Field(
+        ..., description="Credential identifier", alias="referent"
     )
-    credential_id: str = Field(default=None, description="Credential identifier", alias="referent")
     cred_rev_id: Optional[str] = Field(
         default=None, description="Credential revocation identifier"
     )
