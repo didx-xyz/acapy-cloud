@@ -119,7 +119,6 @@ async def test_accept_anoncreds_proof_request(
         cred_id=referent, revealed=True
     )
     proof_accept = AcceptProofRequest(
-        type="anoncreds",
         proof_id=alice_proof_id,
         anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={"0_speed_uuid": request_attrs},
@@ -287,7 +286,6 @@ async def test_get_proof_and_get_proofs_anoncreds(
     )
 
     proof_accept = AcceptProofRequest(
-        type="anoncreds",
         proof_id=alice_proof_id,
         anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={"0_speed_uuid": request_attrs},
@@ -524,7 +522,6 @@ async def test_accept_anoncreds_proof_request_verifier_has_issuer_role(
     )
 
     proof_accept = AcceptProofRequest(
-        type="anoncreds",
         proof_id=alice_proof_id,
         anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={"0_speed_uuid": request_attrs},
@@ -596,7 +593,6 @@ async def test_saving_of_anoncreds_presentation_exchange_records(
     )
 
     proof_accept = AcceptProofRequest(
-        type="anoncreds",
         proof_id=alice_proof_id,
         anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={"0_speed_uuid": request_attrs},

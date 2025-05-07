@@ -59,7 +59,6 @@ async def test_self_attested_attributes_anoncreds(
 
     proof_accept = AcceptProofRequest(
         proof_id=alice_proof_id,
-        type="anoncreds",
         anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={
                 "name_attribute": {

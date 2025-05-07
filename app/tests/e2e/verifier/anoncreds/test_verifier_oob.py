@@ -35,7 +35,6 @@ async def test_accept_proof_request_oob(
 ):
     # Create the proof request against aca-py
     create_proof_request = CreateProofRequest(
-        type="anoncreds",
         anoncreds_proof_request=sample_anoncreds_proof_request(),
         comment="some comment",
     )
@@ -88,7 +87,6 @@ async def test_accept_proof_request_oob(
         cred_id=referent, revealed=True
     )
     proof_accept = AcceptProofRequest(
-        type="anoncreds",
         proof_id=alice_proof_id,
         anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={"0_speed_uuid": anoncreds_request_attrs},
