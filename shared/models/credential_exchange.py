@@ -56,7 +56,8 @@ def credential_record_to_model_v2(record: V20CredExRecord) -> CredentialExchange
     )
 
     issuer_did = None
-    if record.by_format:  # Attempt to retrieve issuer did from record
+    # Attempt to retrieve issuer did from record, which is different for anoncreds vs ld_proof
+    if record.by_format and record.by_format.cred_proposal:
         cred_proposal = record.by_format.cred_proposal.get(credential_type, {})
 
         if credential_type == "anoncreds":
@@ -66,7 +67,7 @@ def credential_record_to_model_v2(record: V20CredExRecord) -> CredentialExchange
             issuer_did = credential.get("issuer")
 
     if issuer_did and not issuer_did.startswith("did:"):
-        issuer_did = f"did:sov:{issuer_did}"  # anoncreds doesn't qualify did
+        issuer_did = f"did:sov:{issuer_did}"  # anoncreds provides unqualified did:sov
 
     return CredentialExchange(
         attributes=attributes,
