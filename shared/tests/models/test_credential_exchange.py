@@ -1,4 +1,3 @@
-import pytest
 from aries_cloudcontroller import (
     V20CredAttrSpec,
     V20CredExRecord,
@@ -16,7 +15,6 @@ from shared.models.credential_exchange import (
 )
 
 
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")  # credential_id is deprecated
 def test_credential_exchange_model():
     # Test creating a CredentialExchange instance
     exchange = CredentialExchange(
@@ -24,7 +22,6 @@ def test_credential_exchange_model():
         connection_id="conn-id",
         created_at="2023-01-01T00:00:00Z",
         credential_definition_id="cred-def-id",
-        credential_id="cred-id",
         credential_exchange_id="cred-ex-id",
         did="did:sov:123",
         error_msg=None,
@@ -40,7 +37,6 @@ def test_credential_exchange_model():
     assert exchange.connection_id == "conn-id"
     assert exchange.created_at == "2023-01-01T00:00:00Z"
     assert exchange.credential_definition_id == "cred-def-id"
-    assert exchange.credential_id == "cred-id"
     assert exchange.credential_exchange_id == "cred-ex-id"
     assert exchange.did == "did:sov:123"
     assert exchange.error_msg is None

@@ -14,7 +14,7 @@ WALLET_BASE_PATH = wallet_router.prefix
 async def register_issuer_key(
     faber_client: RichAsyncClient, key_type: str
 ) -> AsyncGenerator[str, None]:
-    did_create_options = {"method": "key", "options": {"key_type": key_type}}
+    did_create_options = {"method": "key", "key_type": key_type}
 
     wallet_response = (
         await faber_client.post(WALLET_BASE_PATH, json=did_create_options)

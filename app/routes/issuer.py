@@ -284,22 +284,20 @@ async def request_credential(
     "/{credential_exchange_id}/store",
     summary="Store a Received Credential in Wallet",
     response_model=CredentialExchange,
-    deprecated=True,
 )
 async def store_credential(
     credential_exchange_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> CredentialExchange:
     """
-    NB: Deprecated because credentials are automatically stored in wallet after they are accepted
+    Store a received credential in wallet
     ---
+    Store a received credential in wallet by providing the credential exchange id.
 
-    Store a credential
-    ---
-    Store a credential by providing the credential exchange id.
-    The credential exchange id is the id of the credential exchange record, not the credential itself.
+    `credential_exchange_id` is the id of the exchange record, not the credential itself.
 
-    The holder only needs to call this endpoint if the holder receives a credential out of band
+    The holder only needs to call this endpoint if the holder receives a credential out of band, since, typically,
+    credentials are automatically stored in wallet after they are accepted.
 
     The holder can store the credential in their wallet after receiving it from the issuer.
 

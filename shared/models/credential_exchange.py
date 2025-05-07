@@ -26,7 +26,6 @@ class CredentialExchange(BaseModel):
     # auto_offer: Optional[str] = None
     # auto_remove: Optional[str] = None
     # initiator: Optional[str] = None
-    # credential_exchange_id stored as credential_id instead
 
     # Attributes can be None in proposed state
     attributes: Optional[Dict[str, str]] = None
@@ -34,7 +33,6 @@ class CredentialExchange(BaseModel):
     connection_id: Optional[str] = None
     created_at: str
     credential_definition_id: Optional[str] = None
-    credential_id: str = Field(..., deprecated=True)
     credential_exchange_id: str = Field(...)
     did: Optional[str] = None
     error_msg: Optional[str] = None
@@ -58,7 +56,6 @@ def credential_record_to_model_v2(record: V20CredExRecord) -> CredentialExchange
         connection_id=record.connection_id,
         created_at=record.created_at,
         credential_definition_id=credential_definition_id,
-        credential_id=credential_exchange_id,
         credential_exchange_id=credential_exchange_id,
         did=(
             record.by_format.cred_offer["ld_proof"]["credential"]["issuer"]

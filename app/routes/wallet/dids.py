@@ -1,8 +1,6 @@
 from typing import List, Optional
 
-from aries_cloudcontroller import DID
-from aries_cloudcontroller import DIDCreate as DIDCreateAcaPy
-from aries_cloudcontroller import DIDEndpoint, DIDEndpointWithType
+from aries_cloudcontroller import DID, DIDEndpoint, DIDEndpointWithType
 from fastapi import APIRouter, Depends
 
 from app.dependencies.acapy_clients import client_from_auth
@@ -34,15 +32,10 @@ async def create_did(
     The `method` parameter is optional and can be set to
     'sov', 'key', 'web', 'did:peer:2', or 'did:peer:4'.
 
-    The `options` field is deprecated and has been flattened, such that `did` and
-    `key_type` are now top-level fields. The `options` field will still
-    take precedence over the top-level fields if it is present.
-
     Request Body:
     ---
         DIDCreate (Optional):
             method (str, optional): Method for the requested DID.
-            options (DIDCreateOptions, optional): Deprecated.
             seed (str, optional): Optional seed for DID.
             key_type (str, optional): Key type for the DID.
             did (str, optional): Specific DID value.
@@ -56,18 +49,13 @@ async def create_did(
     if not did_create:
         did_create = DIDCreate()
 
-    # Convert the custom DIDCreate model to Acapy's DIDCreateOptions
-    did_create_options = did_create.to_acapy_options()
-
-    # Initialize the Acapy DIDCreate model with necessary fields
-    acapy_did_create = DIDCreateAcaPy(
-        method=did_create.method, options=did_create_options, seed=did_create.seed
-    )
+    # Convert our custom DIDCreate model to ACA-Py's DIDCreate model
+    acapy_did_create_request = did_create.to_acapy_request()
 
     async with client_from_auth(auth) as aries_controller:
-        logger.debug("Creating DID with request: {}", acapy_did_create)
+        logger.debug("Creating DID with request: {}", acapy_did_create_request)
         result = await acapy_wallet.create_did(
-            did_create=acapy_did_create, controller=aries_controller
+            controller=aries_controller, did_create=acapy_did_create_request
         )
 
     logger.debug("Successfully created DID.")

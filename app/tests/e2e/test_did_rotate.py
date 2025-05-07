@@ -15,7 +15,6 @@ CONNECTIONS_BASE_PATH = connections_router.prefix
 @pytest.mark.anyio
 @pytest.mark.parametrize("did_method", ["did:peer:2", "did:peer:4"])
 @pytest.mark.xdist_group(name="issuer_test_group")
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")  # options is deprecated
 async def test_rotate_did(
     alice_member_client: RichAsyncClient,
     alice_acapy_client: AcaPyClient,
@@ -42,8 +41,10 @@ async def test_rotate_did(
     )
 
     # Create a new did for Alice and rotate
+    did_create_request = DIDCreate(method=did_method)
+    acapy_did_create_request = did_create_request.to_acapy_request()
     new_did = await acapy_wallet.create_did(
-        controller=alice_acapy_client, did_create=DIDCreate(method=did_method)
+        controller=alice_acapy_client, did_create=acapy_did_create_request
     )
     alice_new_did = new_did.did
 
