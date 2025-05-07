@@ -651,7 +651,7 @@ export function getProof(issuerAccessToken, issuerConnectionId, proofThreadId) {
         },
         requested_predicates: {},
       },
-      save_exchange_record: true,
+      save_exchange_record: false,
       comment: "string",
       connection_id: issuerConnectionId,
     };
