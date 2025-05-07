@@ -114,7 +114,7 @@ async def create_tenant(
             image_url: Optional[str]
                 An optional image URL for the Tenant.
             wallet_type: Optional[Literal["askar", "askar-anoncreds"]]
-                The type of wallet to create. 'askar' or 'askar-anoncreds' are supported, with 'askar' as the default.
+                The type of wallet to create. Can be 'askar' or 'askar-anoncreds', with 'askar-anoncreds' as default.
             extra_settings: Optional[dict]
                 Optional per-tenant settings to configure wallet behaviour for advanced users.
 
