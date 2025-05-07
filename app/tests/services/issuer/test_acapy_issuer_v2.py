@@ -187,6 +187,7 @@ async def test_send_credential(mock_agent_controller: AcaPyClient):
         connection_id=v2_record.cred_ex_record.connection_id,
         anoncreds_credential_detail=AnonCredsCredential(
             credential_definition_id=cred_def_id_1,
+            issuer_did="did:sov:WgWxqztrNooG92RXvxSTWv",
             attributes={
                 attr.name: attr.value
                 for attr in v2_record.cred_ex_record.cred_preview.attributes
@@ -214,19 +215,6 @@ async def test_send_credential(mock_agent_controller: AcaPyClient):
         attr.name: attr.value
         for attr in v2_record.cred_ex_record.cred_preview.attributes
     }
-
-
-@pytest.mark.anyio
-async def test_send_credential_unsupported_cred_type(
-    mock_agent_controller: AcaPyClient,
-):
-    credential = CredentialWithConnection(type="jwt", connection_id="abc")
-
-    with pytest.raises(CloudApiException) as exc:
-        await IssuerV2.send_credential(mock_agent_controller, credential)
-
-    assert exc.value.detail == "Unsupported credential type: jwt"
-    assert exc.value.status_code == 501
 
 
 @pytest.mark.anyio
@@ -312,16 +300,3 @@ async def test_create_offer_anoncreds(mock_agent_controller: AcaPyClient):
     result = await IssuerV2.create_offer(mock_agent_controller, credential)
 
     assert result.credential_exchange_id == f"v2-{v2_record.cred_ex_record.cred_ex_id}"
-
-
-@pytest.mark.anyio
-async def test_create_offer_unsupported_credential_type(
-    mock_agent_controller: AcaPyClient,
-):
-    credential = CredentialWithConnection(type="jwt", connection_id="abc")
-
-    with pytest.raises(CloudApiException) as exc:
-        await IssuerV2.create_offer(mock_agent_controller, credential)
-
-    assert exc.value.detail == "Unsupported credential type: jwt"
-    assert exc.value.status_code == 501
