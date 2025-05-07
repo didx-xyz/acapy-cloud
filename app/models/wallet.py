@@ -20,7 +20,7 @@ class VCRecord(VCRecordAcaPy):
     record_id: str = Field(
         ...,
         description="removed - renamed to credential_id",
-        deprecated=True,
+        exclude=True,
     )
 
 
@@ -35,7 +35,7 @@ class CredInfo(IndyCredInfoAcaPy):
     referent: str = Field(
         ...,
         description="removed - renamed to credential_id",
-        deprecated=True,
+        exclude=True,
     )
 
 
