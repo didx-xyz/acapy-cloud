@@ -206,8 +206,8 @@ jobs:
           GITHUB_TOKEN: ${{ steps.devops_login.outputs.token }}
           REPO: ${{ github.repository }}
         run: |
-          git config --global user.name "didx-devops[bot]"
-          git config --global user.email "didx-devops[bot]@users.noreply.github.com"
+          git config --local user.name "didx-devops[bot]"
+          git config --local user.email "didx-devops[bot]@users.noreply.github.com"
 
           # Create a new branch for the changes
           git checkout -b ${HEAD_BRANCH}
