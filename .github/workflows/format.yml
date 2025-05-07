@@ -25,7 +25,7 @@ jobs:
           [tools]
           "pipx:black" = "25.1"
           "pipx:isort" = "6.0"
-          python = "3.13"
+          python = "3.12"
           EOF
 
       - name: Set up Mise
