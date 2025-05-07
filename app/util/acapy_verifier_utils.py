@@ -1,6 +1,6 @@
 from typing import List, Optional, Set
 
-from aries_cloudcontroller import AcaPyClient, IndyPresSpec
+from aries_cloudcontroller import AcaPyClient, AnonCredsPresSpec
 
 from app.exceptions import CloudApiException, handle_acapy_call
 from app.models.verifier import AcceptProofRequest, SendProofRequest
@@ -200,7 +200,7 @@ async def get_actor_by_name(name: str) -> Actor:
 
 
 async def get_schema_ids(
-    aries_controller: AcaPyClient, presentation: IndyPresSpec
+    aries_controller: AcaPyClient, presentation: AnonCredsPresSpec
 ) -> List[str]:
     """Get schema ids from credentials that will be revealed in the presentation"""
     bound_logger = logger.bind(body=presentation)
