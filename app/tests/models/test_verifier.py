@@ -16,7 +16,7 @@ def test_proof_request_base_model():
     with pytest.raises(CloudApiValueError) as exc:
         ProofRequestBase(anoncreds_proof_request=None)
     assert exc.value.detail == (
-        "anoncreds_proof_request must be populated if `anoncreds` type is selected"
+        "One of anoncreds_proof_request or dif_proof_request must be populated"
     )
     with pytest.raises(CloudApiValueError) as exc:
         ProofRequestBase(
@@ -28,26 +28,7 @@ def test_proof_request_base_model():
             ),
         )
     assert exc.value.detail == (
-        "Only dif_proof_request must be populated if `ld_proof` type is selected"
-    )
-
-    with pytest.raises(CloudApiValueError) as exc:
-        ProofRequestBase(
-            anoncreds_proof_request=AnonCredsPresentationRequest(
-                requested_attributes={}, requested_predicates={}
-            ),
-            dif_proof_request=DIFProofRequest(
-                presentation_definition=PresentationDefinition()
-            ),
-        )
-    assert exc.value.detail == (
-        "Only anoncreds_proof_request must be populated if `anoncreds` type is selected"
-    )
-
-    with pytest.raises(CloudApiValueError) as exc:
-        ProofRequestBase(dif_proof_request=None)
-    assert exc.value.detail == (
-        "dif_proof_request must be populated if `ld_proof` type is selected"
+        "Only one of dif_proof_request or anoncreds_proof_request must be populated"
     )
 
     ProofRequestBase.check_proof_request(
