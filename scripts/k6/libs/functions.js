@@ -575,9 +575,9 @@ export function getProofIdCredentials(holderAccessToken, proofId) {
     for (let i = 0; i < responseData.length; i++) {
       const obj = responseData[i];
       // Check if the current object has a matching thread_id
-      const referent = obj.cred_info.referent;
-      // TODO: this will always return the first referent - fix this
-      return referent;
+      const credentialId = obj.cred_info.credential_id;
+      // TODO: this will always return the first credentialId - fix this
+      return credentialId;
     }
     // Throw an error if no match is found
     // console.log(`Log of the request made: ${JSON.stringify(response.request)}`);

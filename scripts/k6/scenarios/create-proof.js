@@ -151,16 +151,16 @@ export default function (data) {
   const proofId = getProofIdByThreadId(wallet.access_token, threadId);
   // console.log(`Proof ID: ${proofId}`);
 
-  let referent;
+  let credentialId;
   try {
-    referent = retry(() => {
+    credentialId = retry(() => {
       const response = getProofIdCredentials(wallet.access_token, proofId);
       if (response.length === 0) {
-        console.log('Referrent:', response);
-        throw new Error('No referrent returned');
+        console.log('Credential ID:', response);
+        throw new Error('No credential ID returned');
       }
       return response;
-    }, 5, 2000, 'Get referrent');
+    }, 5, 2000, 'Get credential ID');
   } catch (error) {
     console.error(`Failed to get proof credentials after retries: ${error.message}`);
     throw error; // Re-throw as this is required for the next steps
@@ -172,7 +172,7 @@ export default function (data) {
       const response = acceptProofRequest(
         wallet.access_token,
         proofId,
-        referent
+        credentialId
       );
       if (response.status !== 200) {
         throw new Error(`Non-200 status: ${response.status}`);
