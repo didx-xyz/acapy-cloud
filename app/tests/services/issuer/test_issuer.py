@@ -8,7 +8,7 @@ from pytest_mock import MockerFixture
 import app.routes.issuer as test_module
 from app.dependencies.auth import AcaPyAuth
 from app.exceptions import CloudApiException
-from app.models.issuer import CredentialBase, IndyCredential
+from app.models.issuer import AnonCredsCredential, CredentialBase
 from app.services.issuer.acapy_issuer_v2 import IssuerV2
 from shared.models.credential_exchange import CredentialExchange
 from shared.util.mock_agent_controller import MockContextManagedController
@@ -49,7 +49,7 @@ async def test_send_credential(
 
         credential = test_module.SendCredential(
             connection_id="conn_id",
-            indy_credential_detail=IndyCredential(
+            anoncreds_credential_detail=AnonCredsCredential(
                 credential_definition_id=cred_def_id,
                 attributes={"name": "John", "age": "23"},
             ),
@@ -231,7 +231,7 @@ async def test_request_credential(
 
     v2_record.credential_definition_id = "WgWxqztrNooG92RXvxSTWv:other:parts"
     v2_record.schema_id = "schema_id2"
-    v2_record.type = "indy"
+    v2_record.type = "anoncreds"
 
     ld_record.type = "ld_proof"
     ld_record.did = did
@@ -274,8 +274,7 @@ async def test_request_credential_x_no_schema_cred_def(mock_tenant_auth: AcaPyAu
 
     v2_record.credential_definition_id = None
     v2_record.schema_id = None
-    v2_record.type = "indy"
-
+    v2_record.type = "anoncreds"
     IssuerV2.get_record = AsyncMock(return_value=v2_record)
 
     with pytest.raises(
@@ -327,7 +326,6 @@ async def test_create_offer(
             return_value=mock_context_managed_controller(mock_agent_controller),
         )
         v2_credential = MagicMock(spec=CredentialBase)
-        v2_credential.type = "Indy"
 
         v2_record = MagicMock(spec=CredentialExchange)
         IssuerV2.create_offer = AsyncMock(return_value=v2_record)

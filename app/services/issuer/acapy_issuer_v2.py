@@ -8,7 +8,6 @@ from aries_cloudcontroller import (
     V20CredExRecord,
     V20CredFilter,
     V20CredFilterAnonCreds,
-    V20CredFilterIndy,
     V20CredOfferConnFreeRequest,
     V20CredPreview,
     V20CredRequestRequest,
@@ -20,7 +19,7 @@ from app.exceptions import (
     handle_acapy_call,
     handle_model_with_validation,
 )
-from app.models.issuer import CredentialBase, CredentialType, CredentialWithConnection
+from app.models.issuer import CredentialBase, CredentialWithConnection
 from app.services.issuer.acapy_issuer import Issuer
 from app.util.credentials import cred_ex_id_no_version
 from app.util.did import strip_qualified_did_sov
@@ -42,7 +41,7 @@ class IssuerV2(Issuer):
             body={
                 # Do not log credential attributes:
                 "connection_id": credential.connection_id,
-                "credential_type": credential.type,
+                "credential_type": credential.get_credential_type(),
             }
         )
 
@@ -73,7 +72,7 @@ class IssuerV2(Issuer):
         bound_logger = logger.bind(
             body={
                 # Do not log credential attributes:
-                "credential_type": credential.type,
+                "credential_type": credential.get_credential_type(),
             }
         )
 
@@ -101,22 +100,11 @@ class IssuerV2(Issuer):
         cls, credential: CredentialBase, bound_logger: Logger
     ):
         credential_preview = None
-        if credential.type == CredentialType.INDY:
-            bound_logger.debug("Getting credential preview from attributes")
-            credential_preview = cls.__preview_from_attributes(
-                attributes=credential.indy_credential_detail.attributes
-            )
-            indy_model = handle_model_with_validation(
-                logger=bound_logger,
-                model_class=V20CredFilterIndy,
-                cred_def_id=credential.indy_credential_detail.credential_definition_id,
-            )
-            cred_filter = V20CredFilter(indy=indy_model)
-
-        elif credential.type == CredentialType.LD_PROOF:
+        credential_type = credential.get_credential_type()
+        if credential_type == "ld_proof":
             cred_filter = V20CredFilter(ld_proof=credential.ld_credential_detail)
 
-        elif credential.type == CredentialType.ANONCREDS:
+        elif credential_type == "anoncreds":
             bound_logger.debug("Getting credential preview from attributes")
             credential_preview = cls.__preview_from_attributes(
                 attributes=credential.anoncreds_credential_detail.attributes
@@ -133,7 +121,8 @@ class IssuerV2(Issuer):
 
         else:
             raise CloudApiException(
-                f"Unsupported credential type: {credential.type.value}", status_code=501
+                "Unsupported credential. One of ld_credential_detail or anoncreds_credential_detail must be provided.",
+                status_code=501,
             )
 
         return credential_preview, cred_filter

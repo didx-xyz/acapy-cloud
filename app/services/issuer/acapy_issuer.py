@@ -16,7 +16,7 @@ class Issuer(ABC):
         cls, controller: AcaPyClient, credential: CredentialWithConnection
     ) -> CredentialExchange:
         """
-        Create and send indy credential using Issue Credential protocol. Automating the entire flow.
+        Create and send credential using Issue Credential protocol. Automating the entire flow.
 
         Parameters:
         -----------

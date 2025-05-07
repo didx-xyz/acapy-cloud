@@ -10,17 +10,9 @@ from aries_cloudcontroller.exceptions import (
 from fastapi import HTTPException
 
 from app.exceptions.cloudapi_exception import CloudApiException
-from app.models.issuer import (
-    AnonCredsCredential,
-    CreateOffer,
-    CredentialType,
-    IndyCredential,
-)
+from app.models.issuer import AnonCredsCredential, CreateOffer
 from app.routes.issuer import create_offer
 
-indy_cred = IndyCredential(
-    credential_definition_id="WgWxqztrNooG92RXvxSTWv:3:CL:20:tag", attributes={}
-)
 ld_cred = LDProofVCDetail(
     credential=Credential(
         context=[
@@ -52,20 +44,14 @@ anoncreds_cred = AnonCredsCredential(
     "credential",
     [
         CreateOffer(
-            type=CredentialType.INDY,
-            indy_credential_detail=indy_cred,
-        ),
-        CreateOffer(
-            type=CredentialType.LD_PROOF,
             ld_credential_detail=ld_cred,
         ),
         CreateOffer(
-            type=CredentialType.ANONCREDS,
             anoncreds_credential_detail=anoncreds_cred,
         ),
     ],
 )
-@pytest.mark.parametrize("wallet_type", ["askar", "askar-anoncreds"])
+@pytest.mark.parametrize("wallet_type", ["askar-anoncreds"])
 async def test_create_offer_success(credential, wallet_type):
     mock_aries_controller = AsyncMock()
     issuer = Mock()
@@ -88,7 +74,7 @@ async def test_create_offer_success(credential, wallet_type):
         )
 
         if (
-            credential.type is CredentialType.ANONCREDS
+            credential.get_credential_type() == "anoncreds"
             and wallet_type != "askar-anoncreds"
         ):
             with pytest.raises(CloudApiException) as exc:
@@ -97,16 +83,6 @@ async def test_create_offer_success(credential, wallet_type):
             assert (
                 exc.value.detail
                 == "AnonCreds credentials can only be issued by an askar-anoncreds wallet"
-            )
-        elif (
-            credential.type == CredentialType.INDY and wallet_type == "askar-anoncreds"
-        ):
-            with pytest.raises(CloudApiException) as exc:
-                await create_offer(credential=credential, auth="mocked_auth")
-            assert exc.value.status_code == 400
-            assert (
-                exc.value.detail
-                == "Indy credentials can only be issued by an askar wallet"
             )
         else:
             await create_offer(credential=credential, auth="mocked_auth")
@@ -153,7 +129,6 @@ async def test_create_offer_fail_acapy_error(
 
         await create_offer(
             credential=CreateOffer(
-                type=CredentialType.LD_PROOF,
                 ld_credential_detail=ld_cred,
             ),
             auth="mocked_auth",
@@ -164,10 +139,7 @@ async def test_create_offer_fail_acapy_error(
 
 @pytest.mark.anyio
 async def test_create_offer_fail_bad_public_did():
-    credential = CreateOffer(
-        type=CredentialType.INDY,
-        indy_credential_detail=indy_cred,
-    )
+    credential = CreateOffer(anoncreds_credential_detail=anoncreds_cred)
 
     mock_aries_controller = AsyncMock()
     mock_aries_controller.issue_credential_v2_0.issue_credential_automated = AsyncMock()

@@ -3,20 +3,15 @@ from aries_cloudcontroller import (
     AcaPyClient,
     V20CredAttrSpec,
     V20CredExRecord,
+    V20CredExRecordAnonCreds,
     V20CredExRecordByFormat,
     V20CredExRecordDetail,
-    V20CredExRecordIndy,
     V20CredExRecordListResult,
     V20CredPreview,
 )
 
 from app.exceptions.cloudapi_exception import CloudApiException
-from app.models.issuer import (
-    AnonCredsCredential,
-    CredentialType,
-    CredentialWithConnection,
-    IndyCredential,
-)
+from app.models.issuer import AnonCredsCredential, CredentialWithConnection
 from app.services.issuer.acapy_issuer_v2 import IssuerV2
 from app.tests.routes.issuer.test_create_offer import ld_cred
 
@@ -41,14 +36,14 @@ v2_credential_exchange_records = [
             cred_ex_id="db9d7025-b276-4c32-ae38-fbad41864112",
             by_format=V20CredExRecordByFormat(
                 cred_offer={
-                    "indy": {
+                    "anoncreds": {
                         "cred_def_id": cred_def_id_1,
                         "schema_id": schema_id_1,
                     }
                 }
             ),
         ),
-        indy=V20CredExRecordIndy(
+        anoncreds=V20CredExRecordAnonCreds(
             created_at="2021-09-15 14:41:47Z",
             updated_at="2021-09-15 14:49:47Z",
             cred_ex_id="db9d7025-b276-4c32-ae38-fbad41864112",
@@ -67,14 +62,14 @@ v2_credential_exchange_records = [
             cred_ex_id="db9d7025-b276-4c32-ae38-fbad41864133",
             by_format=V20CredExRecordByFormat(
                 cred_offer={
-                    "indy": {
+                    "anoncreds": {
                         "cred_def_id": cred_def_id_2,
                         "schema_id": schema_id_2,
                     }
                 }
             ),
         ),
-        indy=V20CredExRecordIndy(
+        anoncreds=V20CredExRecordAnonCreds(
             created_at="2021-09-15 14:41:47Z",
             updated_at="2021-09-15 14:49:47Z",
             cred_ex_id="db9d7025-b276-4c32-ae38-fbad41864112",
@@ -190,8 +185,9 @@ async def test_delete_credential_exchange(
 async def test_send_credential(mock_agent_controller: AcaPyClient):
     credential = CredentialWithConnection(
         connection_id=v2_record.cred_ex_record.connection_id,
-        indy_credential_detail=IndyCredential(
+        anoncreds_credential_detail=AnonCredsCredential(
             credential_definition_id=cred_def_id_1,
+            issuer_did="did:sov:WgWxqztrNooG92RXvxSTWv",
             attributes={
                 attr.name: attr.value
                 for attr in v2_record.cred_ex_record.cred_preview.attributes
@@ -219,19 +215,6 @@ async def test_send_credential(mock_agent_controller: AcaPyClient):
         attr.name: attr.value
         for attr in v2_record.cred_ex_record.cred_preview.attributes
     }
-
-
-@pytest.mark.anyio
-async def test_send_credential_unsupported_cred_type(
-    mock_agent_controller: AcaPyClient,
-):
-    credential = CredentialWithConnection(type="jwt", connection_id="abc")
-
-    with pytest.raises(CloudApiException) as exc:
-        await IssuerV2.send_credential(mock_agent_controller, credential)
-
-    assert exc.value.detail == "Unsupported credential type: jwt"
-    assert exc.value.status_code == 501
 
 
 @pytest.mark.anyio
@@ -285,28 +268,8 @@ async def test_request_credential(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_create_offer_indy(mock_agent_controller: AcaPyClient):
-    credential = CredentialWithConnection(
-        type=CredentialType.INDY,
-        indy_credential_detail=IndyCredential(
-            credential_definition_id="WgWxqztrNooG92RXvxSTWv:3:CL:20:tag",
-            attributes={"name": "Alice", "age": "30"},
-        ),
-        connection_id="abc",
-    )
-
-    mock_agent_controller.issue_credential_v2_0.create_offer.return_value = (
-        v2_record.cred_ex_record
-    )
-    result = await IssuerV2.create_offer(mock_agent_controller, credential)
-
-    assert result.credential_exchange_id == f"v2-{v2_record.cred_ex_record.cred_ex_id}"
-
-
-@pytest.mark.anyio
 async def test_create_offer_ld_proof(mock_agent_controller: AcaPyClient):
     credential = CredentialWithConnection(
-        type=CredentialType.LD_PROOF,
         ld_credential_detail=ld_cred,
         connection_id="abc",
     )
@@ -322,7 +285,6 @@ async def test_create_offer_ld_proof(mock_agent_controller: AcaPyClient):
 @pytest.mark.anyio
 async def test_create_offer_anoncreds(mock_agent_controller: AcaPyClient):
     credential = CredentialWithConnection(
-        type=CredentialType.ANONCREDS,
         anoncreds_credential_detail=AnonCredsCredential(
             credential_definition_id="WgWxqztrNooG92RXvxSTWv:3:CL:20:tag",
             issuer_did="WgWxqztrNooG92RXvxSTWv",
@@ -338,16 +300,3 @@ async def test_create_offer_anoncreds(mock_agent_controller: AcaPyClient):
     result = await IssuerV2.create_offer(mock_agent_controller, credential)
 
     assert result.credential_exchange_id == f"v2-{v2_record.cred_ex_record.cred_ex_id}"
-
-
-@pytest.mark.anyio
-async def test_create_offer_unsupported_credential_type(
-    mock_agent_controller: AcaPyClient,
-):
-    credential = CredentialWithConnection(type="jwt", connection_id="abc")
-
-    with pytest.raises(CloudApiException) as exc:
-        await IssuerV2.create_offer(mock_agent_controller, credential)
-
-    assert exc.value.detail == "Unsupported credential type: jwt"
-    assert exc.value.status_code == 501

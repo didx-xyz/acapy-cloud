@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Query
 from app.dependencies.acapy_clients import client_from_auth
 from app.dependencies.auth import AcaPyAuth, acapy_auth_from_header
 from app.exceptions import CloudApiException
-from app.models.issuer import CreateOffer, CredentialType, SendCredential
+from app.models.issuer import CreateOffer, SendCredential
 from app.services.acapy_ledger import schema_id_from_credential_definition_id
 from app.services.issuer.acapy_issuer_v2 import IssuerV2
 from app.services.trust_registry.util.issuer import assert_valid_issuer
@@ -36,16 +36,12 @@ async def send_credential(
     Create and send a credential, automating the issuer-side flow
     ---
     NB: Only a tenant with the issuer role can send credentials.
-    To send Indy credentials, the issuer requires an "askar" wallet type.
-    To send AnonCreds, the "askar-anoncreds" wallet type is required.
 
-    When sending a credential, the credential type must be one of `indy`, `anoncreds` or `ld_proof`.
+    When sending a credential, the credential type must be one of `anoncreds` or `ld_proof`.
     ```json
     {
-        "type": "indy", "anoncreds" or "ld_proof",
-        "indy_credential_detail": {...}, <-- Required if type is indy
-        "anoncreds_credential_detail": {...}, <-- Required if type is anoncreds
-        "ld_credential_detail": {...}, <-- Required if type is ld_proof
+        "anoncreds_credential_detail": {...},
+        "ld_credential_detail": {...},
         "save_exchange_record": true, <-- Whether the credential exchange record should be saved on completion.
         "connection_id": "string", <-- The issuer's reference to the connection they want to submit the credential to.
     }
@@ -66,11 +62,12 @@ async def send_credential(
         CredentialExchange
             A record of this credential exchange
     """
+    credential_type = credential.get_credential_type()
     bound_logger = logger.bind(
         body={
             # Do not log credential attributes:
             "connection_id": credential.connection_id,
-            "credential_type": credential.type,
+            "credential_type": credential_type,
         }
     )
     bound_logger.debug("POST request received: Send credential")
@@ -78,18 +75,11 @@ async def send_credential(
     async with client_from_auth(auth) as aries_controller:
         # Assert the agent has a public did, and using valid wallet type
         public_did, wallet_type = await assert_public_did_and_wallet_type(
-            aries_controller, credential.type, bound_logger
+            aries_controller, bound_logger
         )
 
         schema_id = None
-        if credential.type == CredentialType.INDY:
-            # Retrieve the schema_id based on the credential definition id
-            schema_id = await schema_id_from_credential_definition_id(
-                aries_controller,
-                credential.indy_credential_detail.credential_definition_id,
-                wallet_type,
-            )
-        if credential.type == CredentialType.ANONCREDS:
+        if credential_type == "anoncreds":
             schema_id = await schema_id_from_credential_definition_id(
                 aries_controller,
                 credential.anoncreds_credential_detail.credential_definition_id,
@@ -128,8 +118,6 @@ async def create_offer(
     Create a credential offer, not bound to any connection
     ---
     NB: Only a tenant with the issuer role can send credentials.
-    To send Indy credentials, the issuer requires an "askar" wallet type.
-    To send AnonCreds, the "askar-anoncreds" wallet type is required.
 
     This endpoint takes the same body as the send credential endpoint, but without a connection id. This
     means the credential will not be sent, but it will do the initial step of creating a credential exchange record,
@@ -138,13 +126,11 @@ async def create_offer(
     The OOB protocol allows credentials to be sent over alternative channels, such as email or QR code, where a
     connection does not yet exist between holder and issuer.
 
-    The credential type must be one of indy, anoncreds or ld_proof.
+    The credential type must be one of `anoncreds` or `ld_proof`.
     ```json
     {
-        "type": "indy", "anoncreds" or "ld_proof",
-        "indy_credential_detail": {...}, <-- Required if type is indy
-        "anoncreds_credential_detail": {...}, <-- Required if type is anoncreds
-        "ld_credential_detail": {...}, <-- Required if type is ld_proof
+        "anoncreds_credential_detail": {...},
+        "ld_credential_detail": {...},
         "save_exchange_record": true, <-- Whether the credential exchange record should be saved on completion.
     }
     ```
@@ -161,10 +147,11 @@ async def create_offer(
         CredentialExchange
             A record of this credential exchange
     """
+    credential_type = credential.get_credential_type()
     bound_logger = logger.bind(
         body={
             # Do not log credential attributes:
-            "credential_type": credential.type,
+            "credential_type": credential_type,
         }
     )
     bound_logger.debug("POST request received: Create credential offer")
@@ -172,19 +159,11 @@ async def create_offer(
     async with client_from_auth(auth) as aries_controller:
         # Assert the agent has a public did, and using valid wallet type
         public_did, wallet_type = await assert_public_did_and_wallet_type(
-            aries_controller, credential.type, bound_logger
+            aries_controller, bound_logger
         )
 
         schema_id = None
-        if credential.type == CredentialType.INDY:
-            # Retrieve the schema_id based on the credential definition id
-            schema_id = await schema_id_from_credential_definition_id(
-                aries_controller,
-                credential.indy_credential_detail.credential_definition_id,
-                wallet_type,
-            )
-
-        if credential.type == CredentialType.ANONCREDS:
+        if credential_type == "anoncreds":
             schema_id = await schema_id_from_credential_definition_id(
                 aries_controller,
                 credential.anoncreds_credential_detail.credential_definition_id,
@@ -245,7 +224,7 @@ async def request_credential(
         record = await IssuerV2.get_record(aries_controller, credential_exchange_id)
 
         schema_id = None
-        if record.type in ["indy", "anoncreds"]:
+        if record.type == "anoncreds":
             if not record.credential_definition_id or not record.schema_id:
                 raise CloudApiException(
                     "Record has no credential definition or schema associated. "
@@ -260,7 +239,7 @@ async def request_credential(
         elif record.type == "ld_proof":
             issuer_did = record.did
         else:
-            raise CloudApiException("Could not resolve record type")
+            raise CloudApiException(f"Unsupported credential type: {record.type}")
 
         await assert_valid_issuer(issuer_did, schema_id)
         # Make sure the issuer is allowed to issue this credential according to trust registry rules
