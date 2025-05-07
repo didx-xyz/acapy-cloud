@@ -434,7 +434,7 @@ export function getCredentialIdByThreadId(holderAccessToken, threadId) {
       // Check if the current object has a matching thread_id
       if (obj.thread_id === threadId) {
         // Return the credential_id if a match is found
-        return obj.credential_id;
+        return obj.credential_exchange_id;
       }
     }
     // Throw an error if no match is found

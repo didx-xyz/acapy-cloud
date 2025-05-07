@@ -120,7 +120,7 @@ export default function (data) {
     },
   });
 
-  const { thread_id: threadId, credential_exchange_id: credentialExchangeId } =
+  const { thread_id: threadId, credential_exchange_id: issuerCredentialExchangeId } =
     JSON.parse(createCredentialResponse.body);
 
   // console.log(`Thread ID: ${threadId}`);
@@ -149,12 +149,12 @@ export default function (data) {
 
   // console.log(`VU ${__VU}: Iteration ${__ITER}: Accepting credential for thread ID: ${threadId}`);
 
-  const credentialId = getCredentialIdByThreadId(wallet.access_token, threadId);
+  const holderCredentialExchangeId = getCredentialIdByThreadId(wallet.access_token, threadId);
 
   let acceptCredentialResponse;
   try {
     acceptCredentialResponse = retry(() => {
-      const response = acceptCredential(wallet.access_token, credentialId);
+      const response = acceptCredential(wallet.access_token, holderCredentialExchangeId);
       if (response.status !== 200) {
         throw new Error(`Non-200 status: ${response.status}`);
       }
@@ -177,7 +177,7 @@ export default function (data) {
   });
 
   const issuerData = JSON.stringify({
-    credential_exchange_id: credentialExchangeId,
+    credential_exchange_id: issuerCredentialExchangeId,
     issuer_access_token: wallet.issuer_access_token,
     issuer_credential_definition_id: wallet.issuer_credential_definition_id,
     issuer_connection_id: wallet.issuer_connection_id,
