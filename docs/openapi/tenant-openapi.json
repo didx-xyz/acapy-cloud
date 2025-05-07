@@ -1153,7 +1153,7 @@
           "issuer"
         ],
         "summary": "Send Holder a Credential",
-        "description": "Create and send a credential, automating the issuer-side flow\n---\nNB: Only a tenant with the issuer role can send credentials.\nTo send Indy credentials, the issuer requires an \"askar\" wallet type.\nTo send AnonCreds, the \"askar-anoncreds\" wallet type is required.\n\nWhen sending a credential, the credential type must be one of `indy`, `anoncreds` or `ld_proof`.\n```json\n{\n    \"type\": \"indy\", \"anoncreds\" or \"ld_proof\",\n    \"indy_credential_detail\": {...}, <-- Required if type is indy\n    \"anoncreds_credential_detail\": {...}, <-- Required if type is anoncreds\n    \"ld_credential_detail\": {...}, <-- Required if type is ld_proof\n    \"save_exchange_record\": true, <-- Whether the credential exchange record should be saved on completion.\n    \"connection_id\": \"string\", <-- The issuer's reference to the connection they want to submit the credential to.\n}\n```\nSetting the `save_exchange_record` field to True will save the exchange record after the credential is accepted.\nThe default behaviour is to only save exchange records while they are in pending state.\n\nFor a detailed technical specification of the credential issuing process, refer to the [Aries Issue Credential v2\nRFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0453-issue-credential-v2/README.md).\n\nRequest Body:\n---\n    credential: SendCredential\n        The payload for sending a credential\n\nReturns:\n---\n    CredentialExchange\n        A record of this credential exchange",
+        "description": "Create and send a credential, automating the issuer-side flow\n---\nNB: Only a tenant with the issuer role can send credentials.\n\nWhen sending a credential, the credential type must be one of `anoncreds` or `ld_proof`.\n```json\n{\n    \"anoncreds_credential_detail\": {...},\n    \"ld_credential_detail\": {...},\n    \"save_exchange_record\": true, <-- Whether the credential exchange record should be saved on completion.\n    \"connection_id\": \"string\", <-- The issuer's reference to the connection they want to submit the credential to.\n}\n```\nSetting the `save_exchange_record` field to True will save the exchange record after the credential is accepted.\nThe default behaviour is to only save exchange records while they are in pending state.\n\nFor a detailed technical specification of the credential issuing process, refer to the [Aries Issue Credential v2\nRFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0453-issue-credential-v2/README.md).\n\nRequest Body:\n---\n    credential: SendCredential\n        The payload for sending a credential\n\nReturns:\n---\n    CredentialExchange\n        A record of this credential exchange",
         "operationId": "send_credential_v1_issuer_credentials_post",
         "security": [
           {
@@ -1377,7 +1377,7 @@
           "issuer"
         ],
         "summary": "Create a Credential Offer (not bound to a connection)",
-        "description": "Create a credential offer, not bound to any connection\n---\nNB: Only a tenant with the issuer role can send credentials.\nTo send Indy credentials, the issuer requires an \"askar\" wallet type.\nTo send AnonCreds, the \"askar-anoncreds\" wallet type is required.\n\nThis endpoint takes the same body as the send credential endpoint, but without a connection id. This\nmeans the credential will not be sent, but it will do the initial step of creating a credential exchange record,\nwhich the issuer can then use in the out of band (OOB) protocol.\n\nThe OOB protocol allows credentials to be sent over alternative channels, such as email or QR code, where a\nconnection does not yet exist between holder and issuer.\n\nThe credential type must be one of indy, anoncreds or ld_proof.\n```json\n{\n    \"type\": \"indy\", \"anoncreds\" or \"ld_proof\",\n    \"indy_credential_detail\": {...}, <-- Required if type is indy\n    \"anoncreds_credential_detail\": {...}, <-- Required if type is anoncreds\n    \"ld_credential_detail\": {...}, <-- Required if type is ld_proof\n    \"save_exchange_record\": true, <-- Whether the credential exchange record should be saved on completion.\n}\n```\nFor a detailed technical specification of the credential issuing process, refer to the [Aries Issue Credential v2\nRFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0453-issue-credential-v2/README.md).\n\nRequest Body:\n---\n    credential: CreateOffer\n        The payload for creating a credential offer\n\nReturns:\n---\n    CredentialExchange\n        A record of this credential exchange",
+        "description": "Create a credential offer, not bound to any connection\n---\nNB: Only a tenant with the issuer role can send credentials.\n\nThis endpoint takes the same body as the send credential endpoint, but without a connection id. This\nmeans the credential will not be sent, but it will do the initial step of creating a credential exchange record,\nwhich the issuer can then use in the out of band (OOB) protocol.\n\nThe OOB protocol allows credentials to be sent over alternative channels, such as email or QR code, where a\nconnection does not yet exist between holder and issuer.\n\nThe credential type must be one of `anoncreds` or `ld_proof`.\n```json\n{\n    \"anoncreds_credential_detail\": {...},\n    \"ld_credential_detail\": {...},\n    \"save_exchange_record\": true, <-- Whether the credential exchange record should be saved on completion.\n}\n```\nFor a detailed technical specification of the credential issuing process, refer to the [Aries Issue Credential v2\nRFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0453-issue-credential-v2/README.md).\n\nRequest Body:\n---\n    credential: CreateOffer\n        The payload for creating a credential offer\n\nReturns:\n---\n    CredentialExchange\n        A record of this credential exchange",
         "operationId": "create_offer_v1_issuer_credentials_create_offer_post",
         "requestBody": {
           "content": {
@@ -1490,9 +1490,8 @@
           "issuer"
         ],
         "summary": "Store a Received Credential in Wallet",
-        "description": "NB: Deprecated because credentials are automatically stored in wallet after they are accepted\n---\n\nStore a credential\n---\nStore a credential by providing the credential exchange id.\nThe credential exchange id is the id of the credential exchange record, not the credential itself.\n\nThe holder only needs to call this endpoint if the holder receives a credential out of band\n\nThe holder can store the credential in their wallet after receiving it from the issuer.\n\nParameters:\n---\n    credential_exchange_id: str\n        credential exchange record identifier\n\nReturns:\n---\n    CredentialExchange\n        An updated record of this credential exchange",
+        "description": "Store a received credential in wallet\n---\nStore a received credential in wallet by providing the credential exchange id.\n\n`credential_exchange_id` is the id of the exchange record, not the credential itself.\n\nThe holder only needs to call this endpoint if the holder receives a credential out of band, since, typically,\ncredentials are automatically stored in wallet after they are accepted.\n\nThe holder can store the credential in their wallet after receiving it from the issuer.\n\nParameters:\n---\n    credential_exchange_id: str\n        credential exchange record identifier\n\nReturns:\n---\n    CredentialExchange\n        An updated record of this credential exchange",
         "operationId": "store_credential_v1_issuer_credentials__credential_exchange_id__store_post",
-        "deprecated": true,
         "security": [
           {
             "APIKeyHeader": []
@@ -3358,7 +3357,7 @@
           "wallet"
         ],
         "summary": "Create Local DID",
-        "description": "Create Local DID\n---\n\nThis endpoint allows you to create a new DID in the wallet.\nThe `method` parameter is optional and can be set to\n'sov', 'key', 'web', 'did:peer:2', or 'did:peer:4'.\n\nThe `options` field is deprecated and has been flattened, such that `did` and\n`key_type` are now top-level fields. The `options` field will still\ntake precedence over the top-level fields if it is present.\n\nRequest Body:\n---\n    DIDCreate (Optional):\n        method (str, optional): Method for the requested DID.\n        options (DIDCreateOptions, optional): Deprecated.\n        seed (str, optional): Optional seed for DID.\n        key_type (str, optional): Key type for the DID.\n        did (str, optional): Specific DID value.\n\nResponse:\n---\n    Returns the created DID object.",
+        "description": "Create Local DID\n---\n\nThis endpoint allows you to create a new DID in the wallet.\nThe `method` parameter is optional and can be set to\n'sov', 'key', 'web', 'did:peer:2', or 'did:peer:4'.\n\nRequest Body:\n---\n    DIDCreate (Optional):\n        method (str, optional): Method for the requested DID.\n        seed (str, optional): Optional seed for DID.\n        key_type (str, optional): Key type for the DID.\n        did (str, optional): Specific DID value.\n\nResponse:\n---\n    Returns the created DID object.",
         "operationId": "create_did_v1_wallet_dids_post",
         "requestBody": {
           "content": {
@@ -5413,20 +5412,6 @@
             "title": "Save Exchange Record",
             "description": "Controls exchange record retention after exchange is complete. None uses wallet default (typically to delete), true forces save, false forces delete."
           },
-          "type": {
-            "$ref": "#/components/schemas/CredentialType",
-            "default": "indy"
-          },
-          "indy_credential_detail": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/IndyCredential"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "ld_credential_detail": {
             "anyOf": [
               {
@@ -5978,11 +5963,6 @@
             ],
             "title": "Credential Definition Id"
           },
-          "credential_id": {
-            "type": "string",
-            "title": "Credential Id",
-            "deprecated": true
-          },
           "credential_exchange_id": {
             "type": "string",
             "title": "Credential Exchange Id"
@@ -6067,7 +6047,7 @@
           "type": {
             "type": "string",
             "title": "Type",
-            "default": "indy"
+            "default": "anoncreds"
           },
           "updated_at": {
             "type": "string",
@@ -6077,7 +6057,6 @@
         "type": "object",
         "required": [
           "created_at",
-          "credential_id",
           "credential_exchange_id",
           "role",
           "updated_at"
@@ -6150,16 +6129,6 @@
         ],
         "title": "CredentialStatusOptions",
         "description": "CredentialStatusOptions"
-      },
-      "CredentialType": {
-        "type": "string",
-        "enum": [
-          "indy",
-          "jwt",
-          "ld_proof",
-          "anoncreds"
-        ],
-        "title": "CredentialType"
       },
       "DID": {
         "properties": {
@@ -6255,24 +6224,6 @@
               "did:peer:4"
             ]
           },
-          "options": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DIDCreateOptions"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "(Deprecated) Define a key type and/or a DID depending on the chosen DID method.",
-            "deprecated": true,
-            "examples": [
-              {
-                "did": "did:peer:2...",
-                "key_type": "ed25519"
-              }
-            ]
-          },
           "seed": {
             "anyOf": [
               {
@@ -6316,35 +6267,7 @@
           }
         },
         "type": "object",
-        "title": "DIDCreate",
-        "description": "Extends the AcapyDIDCreate model with smart defaults and a simplified interface.\nHandles deprecated `options` field from client requests by populating `key_type` and `did`.\nDownstream processes should use the appropriate `options` structure based on the model's fields."
-      },
-      "DIDCreateOptions": {
-        "properties": {
-          "did": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Did",
-            "description": "Specify final value of the did (including did:<method>: prefix)if the method supports or requires so."
-          },
-          "key_type": {
-            "type": "string",
-            "title": "Key Type",
-            "description": "Key type to use for the DID keypair. Validated with the chosen DID method's supported key types."
-          }
-        },
-        "type": "object",
-        "required": [
-          "key_type"
-        ],
-        "title": "DIDCreateOptions",
-        "description": "DIDCreateOptions"
+        "title": "DIDCreate"
       },
       "DIDEndpoint": {
         "properties": {
@@ -6885,12 +6808,6 @@
             "title": "Cred Rev Id",
             "description": "Credential revocation identifier"
           },
-          "credential_id": {
-            "type": "string",
-            "title": "Credential Id",
-            "description": "(deprecated - renamed to credential_id) Credential identifier",
-            "deprecated": true
-          },
           "rev_reg_id": {
             "anyOf": [
               {
@@ -6923,31 +6840,9 @@
         },
         "type": "object",
         "required": [
-          "credential_id",
           "referent"
         ],
         "title": "IndyCredInfo"
-      },
-      "IndyCredential": {
-        "properties": {
-          "credential_definition_id": {
-            "type": "string",
-            "title": "Credential Definition Id"
-          },
-          "attributes": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "type": "object",
-            "title": "Attributes"
-          }
-        },
-        "type": "object",
-        "required": [
-          "credential_definition_id",
-          "attributes"
-        ],
-        "title": "IndyCredential"
       },
       "IndyEQProof": {
         "properties": {
@@ -10060,20 +9955,6 @@
             "title": "Save Exchange Record",
             "description": "Controls exchange record retention after exchange is complete. None uses wallet default (typically to delete), true forces save, false forces delete."
           },
-          "type": {
-            "$ref": "#/components/schemas/CredentialType",
-            "default": "indy"
-          },
-          "indy_credential_detail": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/IndyCredential"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "ld_credential_detail": {
             "anyOf": [
               {
@@ -10529,12 +10410,6 @@
             ],
             "title": "Proof Types"
           },
-          "credential_id": {
-            "type": "string",
-            "title": "Credential Id",
-            "description": "(deprecated - renamed to credential_id) Credential identifier",
-            "deprecated": true
-          },
           "schema_ids": {
             "anyOf": [
               {
@@ -10571,7 +10446,6 @@
         },
         "type": "object",
         "required": [
-          "credential_id",
           "record_id"
         ],
         "title": "VCRecord"
