@@ -44,33 +44,13 @@ class PresentationExchange(BaseModel):
 
 
 def presentation_record_to_model(record: V20PresExRecord) -> PresentationExchange:
-    presentation = None
-    presentation_request = None
-
-    if not record.by_format:
-        logger.info("Presentation record has no by_format attribute: {}", record)
-    else:
-        if isinstance(record.by_format.pres, dict):
-            # Get first key (we assume there is only one)
-            key = list(record.by_format.pres.keys())[0]
-            presentation = record.by_format.pres[key]
-        else:
-            logger.debug("Presentation record has no presentation: {}", record)
-
-        if isinstance(record.by_format.pres_request, dict):
-            # Get first key (we assume there is only one)
-            key = list(record.by_format.pres_request.keys())[0]
-            presentation_request = record.by_format.pres_request[key]
-        else:
-            logger.debug("Presentation record has no presentation request: {}", record)
-
     return PresentationExchange(
         connection_id=record.connection_id,
         created_at=record.created_at,
         error_msg=record.error_msg,
         parent_thread_id=record.pres_request.id if record.pres_request else None,
-        presentation=presentation,
-        presentation_request=presentation_request,
+        presentation=record.pres,
+        presentation_request=record.pres_request,
         proof_id="v2-" + str(record.pres_ex_id),
         role=record.role,
         state=record.state,
