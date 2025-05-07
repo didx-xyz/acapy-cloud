@@ -15,13 +15,12 @@ class SetDidEndpointRequest(BaseModel):
 
 class VCRecord(VCRecordAcaPy):
     credential_id: str = Field(
-        ..., alias="record_id", description="Credential identifier"
+        ..., validation_alias="record_id", description="Credential identifier"
     )
     record_id: str = Field(
         ...,
-        alias="credential_id",
-        description="Removed - renamed to credential_id",
-        exclude=True,
+        description="removed - renamed to credential_id",
+        deprecated=True,
     )
 
 
@@ -29,20 +28,19 @@ class VCRecordList(BaseModel):
     results: Optional[List[VCRecord]] = None
 
 
-class IndyCredInfo(IndyCredInfoAcaPy):
+class CredInfo(IndyCredInfoAcaPy):
     credential_id: str = Field(
-        ..., alias="referent", description="Credential identifier"
+        ..., validation_alias="referent", description="Credential identifier"
     )
     referent: str = Field(
         ...,
-        alias="credential_id",
-        description="Removed - renamed to credential_id",
-        exclude=True,
+        description="removed - renamed to credential_id",
+        deprecated=True,
     )
 
 
 class CredInfoList(BaseModel):
-    results: Optional[List[IndyCredInfo]] = None
+    results: Optional[List[CredInfo]] = None
 
 
 class DIDCreate(BaseModel):
