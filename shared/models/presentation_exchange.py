@@ -1,6 +1,6 @@
 from typing import Literal, Optional
 
-from aries_cloudcontroller import IndyProof, IndyProofRequest, V20PresExRecord
+from aries_cloudcontroller import V20Pres, V20PresExRecord, V20PresRequest
 from pydantic import BaseModel
 
 from shared.log_config import get_logger
@@ -33,8 +33,8 @@ class PresentationExchange(BaseModel):
     created_at: str
     error_msg: Optional[str] = None
     parent_thread_id: Optional[str] = None
-    presentation: Optional[IndyProof] = None
-    presentation_request: Optional[IndyProofRequest] = None
+    presentation: Optional[V20Pres] = None
+    presentation_request: Optional[V20PresRequest] = None
     proof_id: str
     role: Role
     state: Optional[State] = None
