@@ -51,28 +51,37 @@ def credential_record_to_model_v2(record: V20CredExRecord) -> CredentialExchange
     schema_id, credential_definition_id = schema_cred_def_from_record(record)
     credential_exchange_id = f"v2-{record.cred_ex_id}"
 
+    credential_type = (
+        list(record.by_format.cred_offer.keys())[0] if record.by_format else "anoncreds"
+    )
+
+    issuer_did = None
+    if record.by_format:  # Attempt to retrieve issuer did from record
+        cred_proposal = record.by_format.cred_proposal.get(credential_type, {})
+
+        if credential_type == "anoncreds":
+            issuer_did = cred_proposal.get("issuer_id")
+        elif credential_type == "ld_proof":
+            credential = cred_proposal.get("credential", {})
+            issuer_did = credential.get("issuer")
+
+    if issuer_did and not issuer_did.startswith("did:"):
+        issuer_did = f"did:sov:{issuer_did}"  # anoncreds doesn't qualify did
+
     return CredentialExchange(
         attributes=attributes,
         connection_id=record.connection_id,
         created_at=record.created_at,
         credential_definition_id=credential_definition_id,
         credential_exchange_id=credential_exchange_id,
-        did=(
-            record.by_format.cred_offer["ld_proof"]["credential"]["issuer"]
-            if record.by_format and "ld_proof" in record.by_format.cred_offer
-            else None
-        ),
+        did=issuer_did,
         error_msg=record.error_msg,
         role=record.role,
         schema_id=schema_id,
         state=record.state,
         thread_id=record.thread_id,
         updated_at=record.updated_at,
-        type=(
-            list(record.by_format.cred_offer.keys())[0]
-            if record.by_format
-            else "anoncreds"
-        ),
+        type=credential_type,
     )
 
 
