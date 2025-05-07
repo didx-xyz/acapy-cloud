@@ -14,7 +14,6 @@ from app.exceptions import CloudApiException, handle_acapy_call
 from app.models.verifier import (
     AcceptProofRequest,
     CreateProofRequest,
-    ProofRequestType,
     RejectProofRequest,
     SendProofRequest,
 )
