@@ -46,11 +46,9 @@ class CredInfoList(BaseModel):
 
 
 class DIDCreate(BaseModel):
-    """
-    Extends the AcapyDIDCreate model with smart defaults and a simplified interface.
-    Downstream processes should use the `to_acapy_options` method to convert the model's fields
-    into the `DIDCreateOptions` structure expected by ACA-Py.
-    """
+    # Extends the AcapyDIDCreate model with smart defaults and a simplified interface.
+    # Downstream processes should use the `to_acapy_options` method to convert the model's fields
+    # into the `DIDCreateOptions` structure expected by ACA-Py.
 
     method: Optional[StrictStr] = Field(
         default="sov",
