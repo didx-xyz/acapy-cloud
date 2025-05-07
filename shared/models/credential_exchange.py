@@ -42,7 +42,7 @@ class CredentialExchange(BaseModel):
     state: Optional[State] = None
     # Thread id can be None in connectionless exchanges
     thread_id: Optional[str] = None
-    type: str = "anoncreds"  # TODO: should come from the record
+    type: str = "anoncreds"
     updated_at: str
 
 
@@ -51,23 +51,35 @@ def credential_record_to_model_v2(record: V20CredExRecord) -> CredentialExchange
     schema_id, credential_definition_id = schema_cred_def_from_record(record)
     credential_exchange_id = f"v2-{record.cred_ex_id}"
 
-    credential_type = (
-        list(record.by_format.cred_offer.keys())[0] if record.by_format else "anoncreds"
+    # Assume there is one credential type in the record
+    cred_type = (
+        list(record.by_format.cred_offer.keys())[0]
+        if record.by_format and record.by_format.cred_offer
+        else "anoncreds"  # TODO: Fallback if cred_offer is not present
     )
 
     issuer_did = None
     # Attempt to retrieve issuer did from record, which is different for anoncreds vs ld_proof
-    if record.by_format and record.by_format.cred_proposal:
-        cred_proposal = record.by_format.cred_proposal.get(credential_type, {})
+    if record.by_format:
+        match cred_type:
+            case "anoncreds":  # In anoncreds, read issuer id from proposal
+                if record.by_format.cred_proposal:  # Key safety check
+                    cred_proposal = record.by_format.cred_proposal.get(cred_type, {})
+                    issuer_did = cred_proposal.get("issuer_id")
+            case "ld_proof":  # In ld_proofs, read issuer from credential offer
+                if record.by_format.cred_offer:  # Key safety check
+                    cred_offer = record.by_format.cred_offer.get(cred_type, {})
+                    credential = cred_offer.get("credential", {})
+                    issuer_did = credential.get("issuer")
 
-        if credential_type == "anoncreds":
-            issuer_did = cred_proposal.get("issuer_id")
-        elif credential_type == "ld_proof":
-            credential = cred_proposal.get("credential", {})
+        if cred_type == "ld_proof" and record.by_format and record.by_format.cred_offer:
+            cred_offer = record.by_format.cred_offer.get(cred_type, {})
+            credential = cred_offer.get("credential", {})
             issuer_did = credential.get("issuer")
 
-    if issuer_did and not issuer_did.startswith("did:"):
-        issuer_did = f"did:sov:{issuer_did}"  # anoncreds provides unqualified did:sov
+        if issuer_did and not issuer_did.startswith("did:"):
+            # anoncreds module provides did:sov's in unqualified form
+            issuer_did = f"did:sov:{issuer_did}"
 
     return CredentialExchange(
         attributes=attributes,
@@ -82,7 +94,7 @@ def credential_record_to_model_v2(record: V20CredExRecord) -> CredentialExchange
         state=record.state,
         thread_id=record.thread_id,
         updated_at=record.updated_at,
-        type=credential_type,
+        type=cred_type,
     )
 
 
