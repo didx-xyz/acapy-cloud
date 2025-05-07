@@ -25,8 +25,7 @@ async def assert_issuer_public_did(
 
 
 async def assert_public_did_and_wallet_type(
-    aries_controller: AcaPyClient,
-    bound_logger: Logger,
+    aries_controller: AcaPyClient, bound_logger: Logger
 ) -> Tuple[str, str]:
     public_did = await assert_issuer_public_did(aries_controller, bound_logger)
     wallet_type = await get_wallet_type(aries_controller, bound_logger)
