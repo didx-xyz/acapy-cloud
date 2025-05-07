@@ -32,38 +32,24 @@ from shared.models.presentation_exchange import (
 
 
 @pytest.mark.anyio
-@pytest.mark.parametrize("proof_type", ["ld_proof", "jwt", "anoncreds"])
+@pytest.mark.parametrize("proof_type", ["ld_proof", "anoncreds"])
 async def test_create_proof_request(mock_agent_controller: AcaPyClient, proof_type):
-    if proof_type != "jwt":
-        present_proof_v2_0 = mock_agent_controller.present_proof_v2_0
-        present_proof_v2_0.create_proof_request.return_value = (
-            v20_presentation_exchange_records[0]
-        )
+    present_proof_v2_0 = mock_agent_controller.present_proof_v2_0
+    present_proof_v2_0.create_proof_request.return_value = (
+        v20_presentation_exchange_records[0]
+    )
+    create_proof_request = CreateProofRequest(
+        dif_proof_request=(dif_proof_request if proof_type == "ld_proof" else None),
+        anoncreds_proof_request=(
+            sample_anoncreds_proof_request() if proof_type == "anoncreds" else None
+        ),
+    )
 
-        create_proof_request = CreateProofRequest(
-            dif_proof_request=(dif_proof_request if proof_type == "ld_proof" else None),
-            anoncreds_proof_request=(
-                sample_anoncreds_proof_request() if proof_type == "anoncreds" else None
-            ),
-        )
-
-        created_proof_request = await VerifierV2.create_proof_request(
-            controller=mock_agent_controller,
-            create_proof_request=create_proof_request,
-        )
-        assert isinstance(created_proof_request, PresentationExchange)
-    else:
-        with pytest.raises(
-            CloudApiException, match="Unsupported credential type: jwt"
-        ) as exc:
-
-            await VerifierV2.create_proof_request(
-                controller=mock_agent_controller,
-                create_proof_request=CreateProofRequest(
-                    anoncreds_proof_request=sample_anoncreds_proof_request(),
-                ),
-            )
-        assert exc.value.status_code == 501
+    created_proof_request = await VerifierV2.create_proof_request(
+        controller=mock_agent_controller,
+        create_proof_request=create_proof_request,
+    )
+    assert isinstance(created_proof_request, PresentationExchange)
 
 
 @pytest.mark.anyio
@@ -91,40 +77,25 @@ async def test_create_proof_request_exception(
 
 
 @pytest.mark.anyio
-@pytest.mark.parametrize("proof_type", ["ld_proof", "jwt", "anoncreds"])
+@pytest.mark.parametrize("proof_type", ["ld_proof", "anoncreds"])
 async def test_send_proof_request(mock_agent_controller: AcaPyClient, proof_type):
-    if proof_type != "jwt":
-        mock_agent_controller.present_proof_v2_0.send_request_free.return_value = (
-            v20_presentation_exchange_records[0]
-        )
+    mock_agent_controller.present_proof_v2_0.send_request_free.return_value = (
+        v20_presentation_exchange_records[0]
+    )
+    send_proof_request = SendProofRequest(
+        dif_proof_request=(dif_proof_request if proof_type == "ld_proof" else None),
+        anoncreds_proof_request=(
+            sample_anoncreds_proof_request() if proof_type == "anoncreds" else None
+        ),
+        connection_id="abcde",
+    )
 
-        send_proof_request = SendProofRequest(
-            dif_proof_request=(dif_proof_request if proof_type == "ld_proof" else None),
-            anoncreds_proof_request=(
-                sample_anoncreds_proof_request() if proof_type == "anoncreds" else None
-            ),
-            connection_id="abcde",
-        )
+    created_proof_send_proposal = await VerifierV2.send_proof_request(
+        controller=mock_agent_controller,
+        send_proof_request=send_proof_request,
+    )
 
-        created_proof_send_proposal = await VerifierV2.send_proof_request(
-            controller=mock_agent_controller,
-            send_proof_request=send_proof_request,
-        )
-
-        assert isinstance(created_proof_send_proposal, PresentationExchange)
-
-    else:
-        with pytest.raises(
-            CloudApiException, match="Unsupported credential type: jwt"
-        ) as exc:
-            await VerifierV2.send_proof_request(
-                controller=mock_agent_controller,
-                send_proof_request=SendProofRequest(
-                    anoncreds_proof_request=sample_anoncreds_proof_request(),
-                    connection_id="abcde",
-                ),
-            )
-        assert exc.value.status_code == 501
+    assert isinstance(created_proof_send_proposal, PresentationExchange)
 
 
 @pytest.mark.anyio
@@ -159,50 +130,31 @@ async def test_send_proof_request_exception(
 
 
 @pytest.mark.anyio
-@pytest.mark.parametrize("proof_type", ["ld_proof", "jwt", "anoncreds"])
+@pytest.mark.parametrize("proof_type", ["ld_proof", "anoncreds"])
 async def test_accept_proof_request(mock_agent_controller: AcaPyClient, proof_type):
-    if proof_type != "jwt":
-        mock_agent_controller.present_proof_v2_0.send_presentation.return_value = (
-            v20_presentation_exchange_records[0]
-        )
-
-        accept_proof_request = AcceptProofRequest(
-            dif_presentation_spec=(DIFPresSpec() if proof_type == "ld_proof" else None),
-            anoncreds_presentation_spec=(
-                AnonCredsPresSpec(
-                    requested_attributes={},
-                    requested_predicates={},
-                    self_attested_attributes={},
-                )
-                if proof_type == "anoncreds"
-                else None
-            ),
-            proof_id="v2-123",
-        )
-
-        accepted_proof_request = await VerifierV2.accept_proof_request(
-            mock_agent_controller,
-            accept_proof_request=accept_proof_request,
-        )
-
-        assert isinstance(accepted_proof_request, PresentationExchange)
-
-    else:
-        with pytest.raises(
-            CloudApiException, match="Unsupported credential type: jwt"
-        ) as exc:
-            await VerifierV2.accept_proof_request(
-                mock_agent_controller,
-                accept_proof_request=AcceptProofRequest(
-                    proof_id="v2-123",
-                    anoncreds_presentation_spec=AnonCredsPresSpec(
-                        requested_attributes={},
-                        requested_predicates={},
-                        self_attested_attributes={},
-                    ),
-                ),
+    mock_agent_controller.present_proof_v2_0.send_presentation.return_value = (
+        v20_presentation_exchange_records[0]
+    )
+    accept_proof_request = AcceptProofRequest(
+        dif_presentation_spec=DIFPresSpec() if proof_type == "ld_proof" else None,
+        anoncreds_presentation_spec=(
+            AnonCredsPresSpec(
+                requested_attributes={},
+                requested_predicates={},
+                self_attested_attributes={},
             )
-        assert exc.value.status_code == 501
+            if proof_type == "anoncreds"
+            else None
+        ),
+        proof_id="v2-123",
+    )
+
+    accepted_proof_request = await VerifierV2.accept_proof_request(
+        mock_agent_controller,
+        accept_proof_request=accept_proof_request,
+    )
+
+    assert isinstance(accepted_proof_request, PresentationExchange)
 
 
 @pytest.mark.anyio

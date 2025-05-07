@@ -50,16 +50,16 @@ def presentation_record_to_model(record: V20PresExRecord) -> PresentationExchang
     if not record.by_format:
         logger.info("Presentation record has no by_format attribute: {}", record)
     else:
-        if record.by_format.pres:
+        if isinstance(record.by_format.pres, dict):
             # Get first key (we assume there is only one)
-            key = next(iter(record.by_format.pres))
+            key = list(record.by_format.pres.keys())[0]
             presentation = record.by_format.pres[key]
         else:
             logger.debug("Presentation record has no presentation: {}", record)
 
-        if record.by_format.pres_request:
+        if isinstance(record.by_format.pres_request, dict):
             # Get first key (we assume there is only one)
-            key = next(iter(record.by_format.pres_request))
+            key = list(record.by_format.pres_request.keys())[0]
             presentation_request = record.by_format.pres_request[key]
         else:
             logger.debug("Presentation record has no presentation request: {}", record)

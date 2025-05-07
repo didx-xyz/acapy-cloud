@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 from aries_cloudcontroller import (
     AnonCredsPresentationRequest as AcaPyAnonCredsPresentationRequest,
@@ -8,9 +8,7 @@ from aries_cloudcontroller import (
     DIFPresSpec,
     DIFProofRequest,
     IndyNonRevocationInterval,
-    IndyPresSpec,
 )
-from aries_cloudcontroller import IndyProofRequest as AcaPyIndyProofRequest
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.util.save_exchange_record import SaveExchangeRecordField
@@ -43,10 +41,18 @@ class ProofRequestBase(BaseModel):
 
         if anoncreds_proof is not None and dif_proof is not None:
             raise CloudApiValueError(
-                "Only one of dif_proof_request or anoncreds_proof_request must be populated"
+                "Only one of anoncreds_proof_request or dif_proof_request must be populated"
             )
 
         return values
+
+    def get_proof_type(self) -> Literal["anoncreds", "dif"]:
+        if self.anoncreds_proof_request is not None:
+            return "anoncreds"
+        elif self.dif_proof_request is not None:
+            return "dif"
+        else:
+            raise CloudApiValueError("No proof type provided")
 
 
 class ProofRequestMetadata(BaseModel):
@@ -71,25 +77,35 @@ class AcceptProofRequest(ProofId, SaveExchangeRecordField):
     anoncreds_presentation_spec: Optional[AnonCredsPresSpec] = None
     dif_presentation_spec: Optional[DIFPresSpec] = None
 
-    @model_validator(mode="after")
-    def validate_specs(self) -> "AcceptProofRequest":
-        if (
-            self.anoncreds_presentation_spec is None
-            and self.dif_presentation_spec is None
-        ):
+    @model_validator(mode="before")
+    @classmethod
+    def validate_specs(cls, values: Union[dict, "ProofRequestBase"]):
+        # pydantic v2 removed safe way to get key, because `values` can be a dict or this type
+        if not isinstance(values, dict):
+            values = values.__dict__
+
+        dif_pres_spec = values.get("dif_presentation_spec")
+        anoncreds_pres_spec = values.get("anoncreds_presentation_spec")
+
+        if anoncreds_pres_spec is None and dif_pres_spec is None:
             raise CloudApiValueError(
-                "One of anoncreds_presentation_spec or dif_presentation_spec should be provided"
+                "One of anoncreds_presentation_spec or dif_presentation_spec must be populated"
             )
 
-        if (
-            self.anoncreds_presentation_spec is not None
-            and self.dif_presentation_spec is not None
-        ):
+        if anoncreds_pres_spec is not None and dif_pres_spec is not None:
             raise CloudApiValueError(
-                "Only one of anoncreds_presentation_spec or dif_presentation_spec should be provided"
+                "Only one of anoncreds_presentation_spec or dif_presentation_spec must be populated"
             )
 
-        return self
+        return values
+
+    def get_proof_type(self) -> Literal["anoncreds", "dif"]:
+        if self.anoncreds_presentation_spec is not None:
+            return "anoncreds"
+        elif self.dif_presentation_spec is not None:
+            return "dif"
+        else:
+            raise CloudApiValueError("No proof type provided")
 
 
 class RejectProofRequest(ProofId):

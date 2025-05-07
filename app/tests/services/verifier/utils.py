@@ -16,6 +16,17 @@ from aries_cloudcontroller import (
 )
 
 from app.models.verifier import AnonCredsPresentationRequest
+from shared.tests.models.test_presentation_exchange import (
+    anoncreds_pres,
+    anoncreds_pres_proposal,
+    anoncreds_pres_request,
+)
+
+anoncreds_by_format = V20PresExRecordByFormat(
+    pres={"anoncreds": anoncreds_pres},
+    pres_proposal={"anoncreds": anoncreds_pres_proposal},
+    pres_request={"anoncreds": anoncreds_pres_request},
+)
 
 
 def sample_anoncreds_proof_request(restrictions=None) -> AnonCredsPresentationRequest:
@@ -41,11 +52,7 @@ dif_proof_request = DIFProofRequest(
 v20_presentation_exchange_records = [
     V20PresExRecord(
         auto_present=False,
-        by_format=V20PresExRecordByFormat(
-            pres={"anoncreds": {"hello": "world"}},
-            pres_proposal={"anoncreds": {"hello": "world"}},
-            pres_request={"anoncreds": sample_anoncreds_proof_request().to_dict()},
-        ),
+        by_format=anoncreds_by_format,
         connection_id="abc",
         created_at="2021-09-15 13:49:47Z",
         error_msg=None,

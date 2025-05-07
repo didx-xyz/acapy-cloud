@@ -21,12 +21,12 @@ from shared.models.presentation_exchange import PresentationExchange
 from shared.models.trustregistry import Actor
 from shared.util.mock_agent_controller import MockContextManagedController
 
-presentation_exchange_record_2 = PresentationExchange(
+presentation_exchange_record = PresentationExchange(
     connection_id="abcde",
     created_at="2021-11-22 11:37:45.179595Z",
     updated_at="2021-11-22 11:37:45.179595Z",
     proof_id="abcde",
-    presentation={},
+    presentation=None,
     role="prover",
     state="presentation-sent",
     verified=False,
@@ -69,7 +69,7 @@ async def test_send_proof_request_v2(
         return_value=mock_context_managed_controller(mock_agent_controller),
     )
     mocker.patch.object(
-        VerifierV2, "send_proof_request", return_value=presentation_exchange_record_2
+        VerifierV2, "send_proof_request", return_value=presentation_exchange_record
     )
     mocker.patch.object(acapy_verifier_utils, "get_actor", return_value=actor)
 
@@ -78,7 +78,7 @@ async def test_send_proof_request_v2(
         auth=mock_tenant_auth,
     )
 
-    assert result is presentation_exchange_record_2
+    assert result is presentation_exchange_record
     VerifierV2.send_proof_request.assert_called_once_with(
         controller=mock_agent_controller, send_proof_request=send_proof_request
     )
@@ -157,7 +157,7 @@ async def test_create_proof_request(
     mocker: MockerFixture,
 ):
     mocker.patch.object(
-        VerifierV2, "create_proof_request", return_value=presentation_exchange_record_2
+        VerifierV2, "create_proof_request", return_value=presentation_exchange_record
     )
     result = await test_module.create_proof_request(
         body=test_module.CreateProofRequest(
@@ -166,7 +166,7 @@ async def test_create_proof_request(
         ),
         auth=mock_tenant_auth,
     )
-    assert result is presentation_exchange_record_2
+    assert result is presentation_exchange_record
 
 
 @pytest.mark.anyio
@@ -211,10 +211,10 @@ async def test_accept_proof_request_v2(
     mocker: MockerFixture,
 ):
     mocker.patch.object(
-        VerifierV2, "accept_proof_request", return_value=presentation_exchange_record_2
+        VerifierV2, "accept_proof_request", return_value=presentation_exchange_record
     )
     mocker.patch.object(
-        VerifierV2, "get_proof_record", return_value=presentation_exchange_record_2
+        VerifierV2, "get_proof_record", return_value=presentation_exchange_record
     )
 
     presentation = test_module.AcceptProofRequest(
@@ -235,7 +235,7 @@ async def test_accept_proof_request_v2(
         body=presentation, auth=mock_tenant_auth
     )
 
-    assert result is presentation_exchange_record_2
+    assert result is presentation_exchange_record
     VerifierV2.accept_proof_request.assert_called_once()
 
 
@@ -250,7 +250,7 @@ async def test_accept_proof_request_v2_exception(
         VerifierV2, "accept_proof_request", side_effect=CloudApiException("ERROR")
     )
     mocker.patch.object(
-        VerifierV2, "get_proof_record", return_value=presentation_exchange_record_2
+        VerifierV2, "get_proof_record", return_value=presentation_exchange_record
     )
 
     presentation = test_module.AcceptProofRequest(
@@ -285,7 +285,7 @@ async def test_accept_proof_request_v2_no_result(
 ):
     mocker.patch.object(VerifierV2, "accept_proof_request", return_value=None)
     mocker.patch.object(
-        VerifierV2, "get_proof_record", return_value=presentation_exchange_record_2
+        VerifierV2, "get_proof_record", return_value=presentation_exchange_record
     )
 
     presentation = test_module.AcceptProofRequest(
@@ -322,7 +322,7 @@ async def test_accept_proof_request_v2_no_connection(
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
 ):
-    presentation_exchange_record_no_conn = presentation_exchange_record_2.model_copy()
+    presentation_exchange_record_no_conn = presentation_exchange_record.model_copy()
     presentation_exchange_record_no_conn.connection_id = None
 
     mocker.patch.object(
@@ -379,10 +379,10 @@ async def test_reject_proof_request(
     mocker.patch.object(
         VerifierV2, "reject_proof_request", return_value=proof_request_v2
     )
-    presentation_exchange_record_2.state = "request-received"
+    presentation_exchange_record.state = "request-received"
 
     mocker.patch.object(
-        VerifierV2, "get_proof_record", return_value=presentation_exchange_record_2
+        VerifierV2, "get_proof_record", return_value=presentation_exchange_record
     )
 
     result = await test_module.reject_proof_request(
@@ -418,9 +418,9 @@ async def test_reject_proof_request_bad_state(
         proof_id="v2-1234", problem_report="rejected"
     )
 
-    presentation_exchange_record_2.state = "done"
+    presentation_exchange_record.state = "done"
     mocker.patch.object(
-        VerifierV2, "get_proof_record", return_value=presentation_exchange_record_2
+        VerifierV2, "get_proof_record", return_value=presentation_exchange_record
     )
 
     with pytest.raises(
@@ -502,14 +502,14 @@ async def test_get_proof_record(
     )
 
     mocker.patch.object(
-        VerifierV2, "get_proof_record", return_value=presentation_exchange_record_2
+        VerifierV2, "get_proof_record", return_value=presentation_exchange_record
     )
 
     result = await test_module.get_proof_record(
         proof_id="v2-abcd", auth=mock_tenant_auth
     )
 
-    assert result == presentation_exchange_record_2
+    assert result == presentation_exchange_record
     VerifierV2.get_proof_record.assert_called_once_with(
         controller=mock_agent_controller, proof_id="v2-abcd"
     )
@@ -578,7 +578,7 @@ async def test_get_proof_records(
     )
 
     mocker.patch.object(
-        VerifierV2, "get_proof_records", return_value=[presentation_exchange_record_2]
+        VerifierV2, "get_proof_records", return_value=[presentation_exchange_record]
     )
 
     result = await test_module.get_proof_records(
@@ -594,7 +594,7 @@ async def test_get_proof_records(
     )
 
     assert result == [
-        presentation_exchange_record_2,
+        presentation_exchange_record,
     ]
     VerifierV2.get_proof_records.assert_called_once_with(
         controller=mock_agent_controller,

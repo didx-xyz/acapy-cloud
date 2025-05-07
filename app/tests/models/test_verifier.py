@@ -28,15 +28,13 @@ def test_proof_request_base_model():
             ),
         )
     assert exc.value.detail == (
-        "Only one of dif_proof_request or anoncreds_proof_request must be populated"
+        "Only one of anoncreds_proof_request or dif_proof_request must be populated"
     )
 
-    ProofRequestBase.check_proof_request(
-        values=ProofRequestBase(
-            anoncreds_proof_request=AnonCredsPresentationRequest(
-                requested_attributes={}, requested_predicates={}
-            ),
-        )
+    ProofRequestBase(
+        anoncreds_proof_request=AnonCredsPresentationRequest(
+            requested_attributes={}, requested_predicates={}
+        ),
     )
 
 
@@ -61,15 +59,22 @@ def test_accept_proof_request_model():
             proof_id="abc",
         )
     assert exc.value.detail == (
-        "dif_presentation_spec must be populated if `ld_proof` type is selected"
+        "One of anoncreds_presentation_spec or dif_presentation_spec must be populated"
     )
     with pytest.raises(CloudApiValueError) as exc:
         AcceptProofRequest(
-            anoncreds_presentation_spec=None,
+            anoncreds_presentation_spec=AnonCredsPresSpec(
+                name="abc",
+                version="1.0",
+                requested_attributes={},
+                requested_predicates={},
+                self_attested_attributes={},
+            ),
+            dif_presentation_spec=DIFPresSpec(),
             proof_id="abc",
         )
     assert exc.value.detail == (
-        "anoncreds_presentation_spec must be populated if `anoncreds` type is selected"
+        "Only one of anoncreds_presentation_spec or dif_presentation_spec must be populated"
     )
 
 

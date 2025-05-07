@@ -5,6 +5,7 @@ from aries_cloudcontroller import (
     V20PresExRecord,
     V20PresExRecordByFormat,
     V20PresFormat,
+    V20PresProposal,
     V20PresRequest,
 )
 
@@ -14,11 +15,17 @@ from shared.models.presentation_exchange import (
     string_to_bool,
 )
 
-format = V20PresFormat(format="anoncreds", attach_id="abc")
+anoncreds_format = V20PresFormat(format="anoncreds", attach_id="abc")
 attach_decorator = AttachDecorator(data=AttachDecoratorData())
-pres = V20Pres(formats=[format], presentationsattach=[attach_decorator])
-pres_request = V20PresRequest(
-    formats=[format], request_presentationsattach=[attach_decorator]
+anoncreds_pres = V20Pres(
+    formats=[anoncreds_format], presentationsattach=[attach_decorator]
+)
+
+anoncreds_pres_proposal = V20PresProposal(
+    formats=[anoncreds_format], proposalsattach=[attach_decorator]
+)
+anoncreds_pres_request = V20PresRequest(
+    formats=[anoncreds_format], request_presentationsattach=[attach_decorator]
 )
 
 
@@ -29,8 +36,8 @@ def test_presentation_exchange_model():
         created_at="2023-01-01T00:00:00Z",
         error_msg=None,
         parent_thread_id="parent-thread-id",
-        presentation=pres,
-        presentation_request=pres_request,
+        presentation=anoncreds_pres,
+        presentation_request=anoncreds_pres_request,
         proof_id="proof-id",
         role="prover",
         state="presentation-received",
@@ -43,8 +50,8 @@ def test_presentation_exchange_model():
     assert exchange.created_at == "2023-01-01T00:00:00Z"
     assert exchange.error_msg is None
     assert exchange.parent_thread_id == "parent-thread-id"
-    assert exchange.presentation == pres
-    assert exchange.presentation_request == pres_request
+    assert exchange.presentation == anoncreds_pres
+    assert exchange.presentation_request == anoncreds_pres_request
     assert exchange.proof_id == "proof-id"
     assert exchange.role == "prover"
     assert exchange.state == "presentation-received"
@@ -65,16 +72,16 @@ def test_presentation_record_to_model():
         updated_at="2023-01-01T01:00:00Z",
         verified="true",
         by_format={
-            "pres": {"anoncreds": pres.to_dict()},
-            "pres_request": {"anoncreds": pres_request.to_dict()},
+            "pres": {"anoncreds": anoncreds_pres.to_dict()},
+            "pres_request": {"anoncreds": anoncreds_pres_request.to_dict()},
         },
     )
 
     model = presentation_record_to_model(record)
 
     assert model.proof_id == "v2-pres-ex-id"
-    assert model.presentation == pres
-    assert model.presentation_request == pres_request
+    assert model.presentation == anoncreds_pres
+    assert model.presentation_request == anoncreds_pres_request
     assert model.connection_id == "conn-id"
     assert model.created_at == "2023-01-01T00:00:00Z"
     assert model.role == "prover"
