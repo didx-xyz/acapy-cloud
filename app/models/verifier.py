@@ -134,8 +134,7 @@ class CredInfo(BaseModel):
     cred_def_id: str = Field(
         default=None, description="Credential definition identifier"
     )
-    referent: str = Field(default=None, description="Credential identifier")
-    credential_id: str = Field(default=None, description="Credential identifier")
+    credential_id: str = Field(default=None, description="Credential identifier", alias="referent")
     cred_rev_id: Optional[str] = Field(
         default=None, description="Credential revocation identifier"
     )
