@@ -48,7 +48,8 @@ class VerifierV2(Verifier):
             )
         else:
             raise CloudApiException(
-                "Unsupported credential request. One of anoncreds_proof_request or dif_proof_request must be populated.",
+                "Unsupported credential request. One of anoncreds_proof_request "
+                "or dif_proof_request must be populated.",
                 status_code=501,
             )
 
@@ -93,7 +94,8 @@ class VerifierV2(Verifier):
             )
         else:
             raise CloudApiException(
-                "Unsupported credential request. One of anoncreds_proof_request or dif_proof_request must be populated.",
+                "Unsupported credential request. One of anoncreds_proof_request "
+                "or dif_proof_request must be populated.",
                 status_code=501,
             )
 
@@ -139,7 +141,8 @@ class VerifierV2(Verifier):
             )
         else:
             raise CloudApiException(
-                "Unsupported credential. One of anoncreds_presentation_spec or dif_presentation_spec must be populated.",
+                "Unsupported credential. One of anoncreds_presentation_spec "
+                "or dif_presentation_spec must be populated.",
                 status_code=501,
             )
 
