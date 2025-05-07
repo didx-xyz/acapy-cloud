@@ -6,13 +6,11 @@ from aries_cloudcontroller import (
     DIFPresSpec,
     IndyCredInfo,
     IndyCredPrecis,
-    IndyPresSpec,
     V20PresExRecordList,
 )
 from pydantic import ValidationError
 
 from app.exceptions.cloudapi_exception import CloudApiException
-from app.models.verifier import ProofRequestType
 from app.routes.verifier import (
     AcceptProofRequest,
     CreateProofRequest,
@@ -23,7 +21,6 @@ from app.services.verifier.acapy_verifier_v2 import VerifierV2
 from app.tests.services.verifier.utils import (
     dif_proof_request,
     sample_anoncreds_proof_request,
-    sample_indy_proof_request,
     v20_presentation_exchange_records,
 )
 from shared.models.presentation_exchange import (
@@ -35,35 +32,19 @@ from shared.models.presentation_exchange import (
 
 
 @pytest.mark.anyio
-@pytest.mark.parametrize(
-    "proof_type",
-    [
-        ProofRequestType.INDY,
-        ProofRequestType.LD_PROOF,
-        ProofRequestType.JWT,
-        ProofRequestType.ANONCREDS,
-    ],
-)
+@pytest.mark.parametrize("proof_type", ["ld_proof", "jwt", "anoncreds"])
 async def test_create_proof_request(mock_agent_controller: AcaPyClient, proof_type):
-    if proof_type != ProofRequestType.JWT:
+    if proof_type != "jwt":
         present_proof_v2_0 = mock_agent_controller.present_proof_v2_0
         present_proof_v2_0.create_proof_request.return_value = (
             v20_presentation_exchange_records[0]
         )
 
         create_proof_request = CreateProofRequest(
-            indy_proof_request=(
-                sample_indy_proof_request() if proof_type.value == "indy" else None
-            ),
-            dif_proof_request=(
-                dif_proof_request if proof_type.value == "ld_proof" else None
-            ),
+            dif_proof_request=(dif_proof_request if proof_type == "ld_proof" else None),
             anoncreds_proof_request=(
-                sample_anoncreds_proof_request()
-                if proof_type.value == "anoncreds"
-                else None
+                sample_anoncreds_proof_request() if proof_type == "anoncreds" else None
             ),
-            type=proof_type,
         )
 
         created_proof_request = await VerifierV2.create_proof_request(
@@ -79,8 +60,7 @@ async def test_create_proof_request(mock_agent_controller: AcaPyClient, proof_ty
             await VerifierV2.create_proof_request(
                 controller=mock_agent_controller,
                 create_proof_request=CreateProofRequest(
-                    indy_proof_request=sample_indy_proof_request(),
-                    type=proof_type,
+                    anoncreds_proof_request=sample_anoncreds_proof_request(),
                 ),
             )
         assert exc.value.status_code == 501
@@ -103,7 +83,7 @@ async def test_create_proof_request_exception(
         await VerifierV2.create_proof_request(
             controller=mock_agent_controller,
             create_proof_request=CreateProofRequest(
-                indy_proof_request=sample_indy_proof_request(),
+                anoncreds_proof_request=sample_anoncreds_proof_request(),
             ),
         )
 
@@ -111,33 +91,17 @@ async def test_create_proof_request_exception(
 
 
 @pytest.mark.anyio
-@pytest.mark.parametrize(
-    "proof_type",
-    [
-        ProofRequestType.INDY,
-        ProofRequestType.LD_PROOF,
-        ProofRequestType.JWT,
-        ProofRequestType.ANONCREDS,
-    ],
-)
+@pytest.mark.parametrize("proof_type", ["ld_proof", "jwt", "anoncreds"])
 async def test_send_proof_request(mock_agent_controller: AcaPyClient, proof_type):
-    if proof_type != ProofRequestType.JWT:
+    if proof_type != "jwt":
         mock_agent_controller.present_proof_v2_0.send_request_free.return_value = (
             v20_presentation_exchange_records[0]
         )
 
         send_proof_request = SendProofRequest(
-            type=proof_type,
-            indy_proof_request=(
-                sample_indy_proof_request() if proof_type.value == "indy" else None
-            ),
-            dif_proof_request=(
-                dif_proof_request if proof_type.value == "ld_proof" else None
-            ),
+            dif_proof_request=(dif_proof_request if proof_type == "ld_proof" else None),
             anoncreds_proof_request=(
-                sample_anoncreds_proof_request()
-                if proof_type.value == "anoncreds"
-                else None
+                sample_anoncreds_proof_request() if proof_type == "anoncreds" else None
             ),
             connection_id="abcde",
         )
@@ -156,9 +120,8 @@ async def test_send_proof_request(mock_agent_controller: AcaPyClient, proof_type
             await VerifierV2.send_proof_request(
                 controller=mock_agent_controller,
                 send_proof_request=SendProofRequest(
-                    type=proof_type,
+                    anoncreds_proof_request=sample_anoncreds_proof_request(),
                     connection_id="abcde",
-                    indy_proof_request=sample_indy_proof_request(),
                 ),
             )
         assert exc.value.status_code == 501
@@ -173,7 +136,7 @@ async def test_send_proof_request_exception(
     with pytest.raises(ValidationError):
         await VerifierV2.send_proof_request(
             mock_agent_controller,
-            send_proof_request=SendProofRequest(indy_proof_request="I am invalid"),
+            send_proof_request=SendProofRequest(anoncreds_proof_request="I am invalid"),
         )
 
     mock_agent_controller.present_proof_v2_0.send_request_free.side_effect = (
@@ -187,7 +150,7 @@ async def test_send_proof_request_exception(
         await VerifierV2.send_proof_request(
             controller=mock_agent_controller,
             send_proof_request=SendProofRequest(
-                indy_proof_request=sample_indy_proof_request(),
+                anoncreds_proof_request=sample_anoncreds_proof_request(),
                 connection_id="abc",
             ),
         )
@@ -196,42 +159,22 @@ async def test_send_proof_request_exception(
 
 
 @pytest.mark.anyio
-@pytest.mark.parametrize(
-    "proof_type",
-    [
-        ProofRequestType.INDY,
-        ProofRequestType.LD_PROOF,
-        ProofRequestType.JWT,
-        ProofRequestType.ANONCREDS,
-    ],
-)
+@pytest.mark.parametrize("proof_type", ["ld_proof", "jwt", "anoncreds"])
 async def test_accept_proof_request(mock_agent_controller: AcaPyClient, proof_type):
-    if proof_type != ProofRequestType.JWT:
+    if proof_type != "jwt":
         mock_agent_controller.present_proof_v2_0.send_presentation.return_value = (
             v20_presentation_exchange_records[0]
         )
 
         accept_proof_request = AcceptProofRequest(
-            type=proof_type,
-            indy_presentation_spec=(
-                IndyPresSpec(
-                    requested_attributes={},
-                    requested_predicates={},
-                    self_attested_attributes={},
-                )
-                if proof_type.value == "indy"
-                else None
-            ),
-            dif_presentation_spec=(
-                DIFPresSpec() if proof_type.value == "ld_proof" else None
-            ),
+            dif_presentation_spec=(DIFPresSpec() if proof_type == "ld_proof" else None),
             anoncreds_presentation_spec=(
                 AnonCredsPresSpec(
                     requested_attributes={},
                     requested_predicates={},
                     self_attested_attributes={},
                 )
-                if proof_type.value == "anoncreds"
+                if proof_type == "anoncreds"
                 else None
             ),
             proof_id="v2-123",
@@ -251,9 +194,8 @@ async def test_accept_proof_request(mock_agent_controller: AcaPyClient, proof_ty
             await VerifierV2.accept_proof_request(
                 mock_agent_controller,
                 accept_proof_request=AcceptProofRequest(
-                    type=proof_type,
                     proof_id="v2-123",
-                    indy_presentation_spec=IndyPresSpec(
+                    anoncreds_presentation_spec=AnonCredsPresSpec(
                         requested_attributes={},
                         requested_predicates={},
                         self_attested_attributes={},
@@ -281,7 +223,7 @@ async def test_accept_proof_request_exception(
             controller=mock_agent_controller,
             accept_proof_request=AcceptProofRequest(
                 proof_id="v2-123",
-                indy_presentation_spec=IndyPresSpec(
+                anoncreds_presentation_spec=AnonCredsPresSpec(
                     requested_attributes={},
                     requested_predicates={},
                     self_attested_attributes={},

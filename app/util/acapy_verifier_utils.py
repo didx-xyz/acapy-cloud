@@ -3,7 +3,7 @@ from typing import List, Optional, Set
 from aries_cloudcontroller import AcaPyClient, IndyPresSpec
 
 from app.exceptions import CloudApiException, handle_acapy_call
-from app.models.verifier import AcceptProofRequest, ProofRequestType, SendProofRequest
+from app.models.verifier import AcceptProofRequest, SendProofRequest
 from app.services.acapy_wallet import assert_public_did
 from app.services.trust_registry.actors import fetch_actor_by_did, fetch_actor_by_name
 from app.services.trust_registry.schemas import fetch_schemas

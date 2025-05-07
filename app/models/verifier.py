@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import Optional, Union
 
 from aries_cloudcontroller import (
@@ -18,28 +17,14 @@ from app.util.save_exchange_record import SaveExchangeRecordField
 from shared.exceptions import CloudApiValueError
 
 
-class ProofRequestType(str, Enum):
-    INDY: str = "indy"
-    JWT: str = "jwt"
-    LD_PROOF: str = "ld_proof"
-    ANONCREDS: str = "anoncreds"
-
-
 class AnonCredsPresentationRequest(AcaPyAnonCredsPresentationRequest):
     name: str = Field(default="Proof", description="Proof request name")
     version: str = Field(default="1.0", description="Proof request version")
 
 
-class IndyProofRequest(AcaPyIndyProofRequest):
-    name: str = Field(default="Proof", description="Proof request name")
-    version: str = Field(default="1.0", description="Proof request version")
-
-
 class ProofRequestBase(BaseModel):
-    type: ProofRequestType = ProofRequestType.INDY
-    indy_proof_request: Optional[IndyProofRequest] = None
-    dif_proof_request: Optional[DIFProofRequest] = None
     anoncreds_proof_request: Optional[AnonCredsPresentationRequest] = None
+    dif_proof_request: Optional[DIFProofRequest] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -48,45 +33,17 @@ class ProofRequestBase(BaseModel):
         if not isinstance(values, dict):
             values = values.__dict__
 
-        proof_type = values.get("type")
-        indy_proof = values.get("indy_proof_request")
         dif_proof = values.get("dif_proof_request")
         anoncreds_proof = values.get("anoncreds_proof_request")
 
-        if proof_type == ProofRequestType.ANONCREDS and anoncreds_proof is None:
+        if anoncreds_proof is None and dif_proof is None:
             raise CloudApiValueError(
-                "anoncreds_proof_request must be populated if `anoncreds` type is selected"
+                "One of anoncreds_proof_request or dif_proof_request must be populated"
             )
 
-        if proof_type == ProofRequestType.INDY and indy_proof is None:
+        if anoncreds_proof is not None and dif_proof is not None:
             raise CloudApiValueError(
-                "indy_proof_request must be populated if `indy` type is selected"
-            )
-
-        if proof_type == ProofRequestType.LD_PROOF and dif_proof is None:
-            raise CloudApiValueError(
-                "dif_proof_request must be populated if `ld_proof` type is selected"
-            )
-
-        if proof_type == ProofRequestType.INDY and (
-            dif_proof is not None or anoncreds_proof is not None
-        ):
-            raise CloudApiValueError(
-                "Only indy_proof_request must be populated if `indy` type is selected"
-            )
-
-        if proof_type == ProofRequestType.LD_PROOF and (
-            indy_proof is not None or anoncreds_proof is not None
-        ):
-            raise CloudApiValueError(
-                "Only dif_proof_request must be populated if `ld_proof` type is selected"
-            )
-
-        if proof_type == ProofRequestType.ANONCREDS and (
-            indy_proof is not None or dif_proof is not None
-        ):
-            raise CloudApiValueError(
-                "Only anoncreds_proof_request must be populated if `anoncreds` type is selected"
+                "Only one of dif_proof_request or anoncreds_proof_request must be populated"
             )
 
         return values
@@ -111,51 +68,26 @@ class ProofId(BaseModel):
 
 
 class AcceptProofRequest(ProofId, SaveExchangeRecordField):
-    type: ProofRequestType = ProofRequestType.INDY
-    indy_presentation_spec: Optional[IndyPresSpec] = None
-    dif_presentation_spec: Optional[DIFPresSpec] = None
     anoncreds_presentation_spec: Optional[AnonCredsPresSpec] = None
+    dif_presentation_spec: Optional[DIFPresSpec] = None
 
     @model_validator(mode="after")
     def validate_specs(self) -> "AcceptProofRequest":
-        if self.type == ProofRequestType.INDY:
-            if self.indy_presentation_spec is None:
-                raise CloudApiValueError(
-                    "indy_presentation_spec must be populated if `indy` type is selected"
-                )
-            if (
-                self.dif_presentation_spec is not None
-                or self.anoncreds_presentation_spec is not None
-            ):
-                raise CloudApiValueError(
-                    "Only indy_presentation_spec should be provided for `indy` type"
-                )
+        if (
+            self.anoncreds_presentation_spec is None
+            and self.dif_presentation_spec is None
+        ):
+            raise CloudApiValueError(
+                "One of anoncreds_presentation_spec or dif_presentation_spec should be provided"
+            )
 
-        elif self.type == ProofRequestType.LD_PROOF:
-            if self.dif_presentation_spec is None:
-                raise CloudApiValueError(
-                    "dif_presentation_spec must be populated if `ld_proof` type is selected"
-                )
-            if (
-                self.indy_presentation_spec is not None
-                or self.anoncreds_presentation_spec is not None
-            ):
-                raise CloudApiValueError(
-                    "Only dif_presentation_spec should be provided for `ld_proof` type"
-                )
-
-        elif self.type == ProofRequestType.ANONCREDS:
-            if self.anoncreds_presentation_spec is None:
-                raise CloudApiValueError(
-                    "anoncreds_presentation_spec must be populated if `anoncreds` type is selected"
-                )
-            if (
-                self.indy_presentation_spec is not None
-                or self.dif_presentation_spec is not None
-            ):
-                raise CloudApiValueError(
-                    "Only anoncreds_presentation_spec should be provided for `anoncreds` type"
-                )
+        if (
+            self.anoncreds_presentation_spec is not None
+            and self.dif_presentation_spec is not None
+        ):
+            raise CloudApiValueError(
+                "Only one of anoncreds_presentation_spec or dif_presentation_spec should be provided"
+            )
 
         return self
 

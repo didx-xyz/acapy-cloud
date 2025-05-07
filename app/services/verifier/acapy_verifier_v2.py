@@ -38,21 +38,17 @@ class VerifierV2(Verifier):
         controller: AcaPyClient,
         create_proof_request: CreateProofRequest,
     ) -> PresentationExchange:
-        if create_proof_request.type == ProofRequestType.INDY:
-            presentation_request = V20PresRequestByFormat(
-                indy=create_proof_request.indy_proof_request
-            )
-        elif create_proof_request.type == ProofRequestType.LD_PROOF:
-            presentation_request = V20PresRequestByFormat(
-                dif=create_proof_request.dif_proof_request
-            )
-        elif create_proof_request.type == ProofRequestType.ANONCREDS:
+        if create_proof_request.anoncreds_proof_request is not None:
             presentation_request = V20PresRequestByFormat(
                 anoncreds=create_proof_request.anoncreds_proof_request
             )
+        elif create_proof_request.dif_proof_request is not None:
+            presentation_request = V20PresRequestByFormat(
+                dif=create_proof_request.dif_proof_request
+            )
         else:
             raise CloudApiException(
-                f"Unsupported credential type: {create_proof_request.type.value}",
+                "Unsupported credential request. One of anoncreds_proof_request or dif_proof_request must be provided.",
                 status_code=501,
             )
 
@@ -85,21 +81,17 @@ class VerifierV2(Verifier):
         controller: AcaPyClient,
         send_proof_request: SendProofRequest,
     ) -> PresentationExchange:
-        if send_proof_request.type == ProofRequestType.INDY:
-            presentation_request = V20PresRequestByFormat(
-                indy=send_proof_request.indy_proof_request
-            )
-        elif send_proof_request.type == ProofRequestType.LD_PROOF:
-            presentation_request = V20PresRequestByFormat(
-                dif=send_proof_request.dif_proof_request
-            )
-        elif send_proof_request.type == ProofRequestType.ANONCREDS:
+        if send_proof_request.anoncreds_proof_request is not None:
             presentation_request = V20PresRequestByFormat(
                 anoncreds=send_proof_request.anoncreds_proof_request
             )
+        elif send_proof_request.dif_proof_request is not None:
+            presentation_request = V20PresRequestByFormat(
+                dif=send_proof_request.dif_proof_request
+            )
         else:
             raise CloudApiException(
-                f"Unsupported credential type: {send_proof_request.type.value}",
+                "Unsupported credential request. One of anoncreds_proof_request or dif_proof_request must be provided.",
                 status_code=501,
             )
 
@@ -133,23 +125,18 @@ class VerifierV2(Verifier):
     ) -> PresentationExchange:
         auto_remove = accept_proof_request.auto_remove
 
-        if accept_proof_request.type == ProofRequestType.INDY:
-            presentation_spec = V20PresSpecByFormatRequest(
-                auto_remove=auto_remove,
-                indy=accept_proof_request.indy_presentation_spec,
-            )
-        elif accept_proof_request.type == ProofRequestType.LD_PROOF:
-            presentation_spec = V20PresSpecByFormatRequest(
-                auto_remove=auto_remove, dif=accept_proof_request.dif_presentation_spec
-            )
-        elif accept_proof_request.type == ProofRequestType.ANONCREDS:
+        if accept_proof_request.anoncreds_presentation_spec is not None:
             presentation_spec = V20PresSpecByFormatRequest(
                 auto_remove=auto_remove,
                 anoncreds=accept_proof_request.anoncreds_presentation_spec,
             )
+        elif accept_proof_request.dif_presentation_spec is not None:
+            presentation_spec = V20PresSpecByFormatRequest(
+                auto_remove=auto_remove, dif=accept_proof_request.dif_presentation_spec
+            )
         else:
             raise CloudApiException(
-                f"Unsupported credential type: {accept_proof_request.type.value}",
+                "Unsupported credential. One of anoncreds_presentation_spec or dif_presentation_spec must be provided.",
                 status_code=501,
             )
 

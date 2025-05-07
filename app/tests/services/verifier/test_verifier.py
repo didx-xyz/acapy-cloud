@@ -12,7 +12,10 @@ from app.main import app
 from app.models.verifier import CredInfo, CredPrecis
 from app.routes.verifier import acapy_auth_from_header, get_credentials_by_proof_id
 from app.services.verifier.acapy_verifier_v2 import VerifierV2
-from app.tests.services.verifier.utils import indy_pres_spec, sample_indy_proof_request
+from app.tests.services.verifier.utils import (
+    anoncreds_pres_spec,
+    sample_anoncreds_proof_request,
+)
 from app.util import acapy_verifier_utils
 from shared.models.presentation_exchange import PresentationExchange
 from shared.models.trustregistry import Actor
@@ -57,7 +60,7 @@ async def test_send_proof_request_v2(
 
     send_proof_request = test_module.SendProofRequest(
         connection_id="abcde",
-        indy_proof_request=sample_indy_proof_request(),
+        anoncreds_proof_request=sample_anoncreds_proof_request(),
     )
 
     mocker.patch.object(
@@ -95,7 +98,7 @@ async def test_send_proof_request_v2_exception(
 
     send_proof_request = test_module.SendProofRequest(
         connection_id="abcde",
-        indy_proof_request=sample_indy_proof_request(),
+        anoncreds_proof_request=sample_anoncreds_proof_request(),
     )
 
     mocker.patch.object(
@@ -129,7 +132,7 @@ async def test_send_proof_request_v2_no_response(
 
     send_proof_request = test_module.SendProofRequest(
         connection_id="abcde",
-        indy_proof_request=sample_indy_proof_request(),
+        anoncreds_proof_request=sample_anoncreds_proof_request(),
     )
 
     mocker.patch.object(
@@ -158,7 +161,7 @@ async def test_create_proof_request(
     )
     result = await test_module.create_proof_request(
         body=test_module.CreateProofRequest(
-            indy_proof_request=sample_indy_proof_request(),
+            anoncreds_proof_request=sample_anoncreds_proof_request(),
             connection_id="abcde",
         ),
         auth=mock_tenant_auth,
@@ -177,7 +180,7 @@ async def test_create_proof_request_exception(
     with pytest.raises(CloudApiException, match="500: ERROR") as exc:
         await test_module.create_proof_request(
             body=test_module.CreateProofRequest(
-                indy_proof_request=sample_indy_proof_request(),
+                anoncreds_proof_request=sample_anoncreds_proof_request(),
                 connection_id="abcde",
             ),
             auth=mock_tenant_auth,
@@ -192,7 +195,7 @@ async def test_create_proof_request_no_result(
     mocker.patch.object(VerifierV2, "create_proof_request", return_value=None)
     result = await test_module.create_proof_request(
         body=test_module.CreateProofRequest(
-            indy_proof_request=sample_indy_proof_request(),
+            anoncreds_proof_request=sample_anoncreds_proof_request(),
             connection_id="abcde",
         ),
         auth=mock_tenant_auth,
@@ -215,7 +218,7 @@ async def test_accept_proof_request_v2(
     )
 
     presentation = test_module.AcceptProofRequest(
-        proof_id="v2-1234", indy_presentation_spec=indy_pres_spec
+        proof_id="v2-1234", anoncreds_presentation_spec=anoncreds_pres_spec
     )
 
     mocker.patch.object(
@@ -252,7 +255,7 @@ async def test_accept_proof_request_v2_exception(
 
     presentation = test_module.AcceptProofRequest(
         proof_id="v2-1234",
-        indy_presentation_spec=indy_pres_spec,
+        anoncreds_presentation_spec=anoncreds_pres_spec,
     )
 
     mocker.patch.object(
@@ -287,7 +290,7 @@ async def test_accept_proof_request_v2_no_result(
 
     presentation = test_module.AcceptProofRequest(
         proof_id="v2-1234",
-        indy_presentation_spec=indy_pres_spec,
+        anoncreds_presentation_spec=anoncreds_pres_spec,
     )
 
     mocker.patch.object(
@@ -334,7 +337,7 @@ async def test_accept_proof_request_v2_no_connection(
     )
 
     presentation = test_module.AcceptProofRequest(
-        proof_id="v2-1234", indy_presentation_spec=indy_pres_spec
+        proof_id="v2-1234", anoncreds_presentation_spec=anoncreds_pres_spec
     )
 
     mocker.patch.object(
