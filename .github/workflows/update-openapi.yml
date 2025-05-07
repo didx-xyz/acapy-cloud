@@ -82,125 +82,83 @@ jobs:
 
       - name: Download OpenAPI Specs
         run: |
-          mkdir -p ./tmp
+          curl -s http://localhost:8080/tenant-admin/openapi.json | jq . > ./docs/openapi/tenant-admin-openapi.json
+          curl -s http://localhost:8080/tenant-admin/openapi.yaml | yq . > ./docs/openapi/tenant-admin-openapi.yaml
 
-          curl -s http://localhost:8080/tenant-admin/openapi.json | jq . > ./tmp/tenant-admin-openapi.json
-          curl -s http://localhost:8080/tenant-admin/openapi.yaml | yq . > ./tmp/tenant-admin-openapi.yaml
+          curl -s http://localhost:8181/tenant/openapi.json | jq . > ./docs/openapi/tenant-openapi.json
+          curl -s http://localhost:8181/tenant/openapi.yaml | yq . > ./docs/openapi/tenant-openapi.yaml
 
-          curl -s http://localhost:8181/tenant/openapi.json | jq . > ./tmp/tenant-openapi.json
-          curl -s http://localhost:8181/tenant/openapi.yaml | yq . > ./tmp/tenant-openapi.yaml
+      - name: Generate diffs
+        if: github.event_name == 'pull_request'
+        run: |
+          mkdir -p ./diffs
 
-      - name: Detecting diffs in OpenAPI Spec - Tenant Admin JSON
-        uses: oasdiff/oasdiff-action/diff@d68e4d01cb0ba24b6811df1e190f2a640169ea6d # main
-        id: tenant-admin-json
-        with:
-          base: ./docs/openapi/tenant-admin-openapi.json
-          revision: ./tmp/tenant-admin-openapi.json
-          format: markdown
-          include-path-params: true
+          git diff ./docs/openapi/tenant-admin-openapi.json > ./diffs/tenant-admin-openapi.json.diff
+          git diff ./docs/openapi/tenant-admin-openapi.yaml > ./diffs/tenant-admin-openapi.yaml.diff
 
-      - name: Detecting diffs in OpenAPI Spec - Tenant Admin YAML
-        uses: oasdiff/oasdiff-action/diff@d68e4d01cb0ba24b6811df1e190f2a640169ea6d # main
-        id: tenant-admin-yaml
-        with:
-          base: ./docs/openapi/tenant-admin-openapi.yaml
-          revision: ./tmp/tenant-admin-openapi.yaml
-          format: markdown
-          include-path-params: true
-
-      - name: Detecting diffs in OpenAPI Spec - Tenant JSON
-        uses: oasdiff/oasdiff-action/diff@d68e4d01cb0ba24b6811df1e190f2a640169ea6d # main
-        id: tenant-json
-        with:
-          base: ./docs/openapi/tenant-openapi.json
-          revision: ./tmp/tenant-openapi.json
-          format: markdown
-          include-path-params: true
-
-      - name: Detecting diffs in OpenAPI Spec - Tenant YAML
-        uses: oasdiff/oasdiff-action/diff@d68e4d01cb0ba24b6811df1e190f2a640169ea6d # main
-        id: tenant-yaml
-        with:
-          base: ./docs/openapi/tenant-openapi.yaml
-          revision: ./tmp/tenant-openapi.yaml
-          format: markdown
-          include-path-params: true
+          git diff ./docs/openapi/tenant-openapi.json > ./diffs/tenant-openapi.json.diff
+          git diff ./docs/openapi/tenant-openapi.yaml > ./diffs/tenant-openapi.yaml.diff
 
       - name: Comment on PR
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         if: github.event_name == 'pull_request'
         env:
-          TENANT_ADMIN_JSON_DIFF: ${{ steps.tenant-admin-json.outputs.diff }}
-          TENANT_ADMIN_YAML_DIFF: ${{ steps.tenant-admin-yaml.outputs.diff }}
-          TENANT_JSON_DIFF: ${{ steps.tenant-json.outputs.diff }}
-          TENANT_YAML_DIFF: ${{ steps.tenant-yaml.outputs.diff }}
           PR_NUMBER: ${{ inputs.pr-number }}
         with:
           github-token: ${{ steps.devops_login.outputs.token }}
           script: |
-            const tenantAdminJsonDiff = process.env.TENANT_ADMIN_JSON_DIFF;
-            const tenantAdminYamlDiff = process.env.TENANT_ADMIN_YAML_DIFF;
-            const tenantJsonDiff = process.env.TENANT_JSON_DIFF;
-            const tenantYamlDiff = process.env.TENANT_YAML_DIFF;
-
-            // Unique identifier for our comment
-            const COMMENT_IDENTIFIER = "<!-- openapi-diff-check -->";
-
-            // Spec information
-            const specs = [
-              {
-                name: 'Tenant Admin API (JSON)',
-                path: 'docs/openapi/tenant-admin-openapi.json',
-                diff: tenantAdminJsonDiff,
-                hasChanges: tenantAdminJsonDiff !== 'No changes'
-              },
-              {
-                name: 'Tenant Admin API (YAML)',
-                path: 'docs/openapi/tenant-admin-openapi.yaml',
-                diff: tenantAdminYamlDiff,
-                hasChanges: tenantAdminYamlDiff !== 'No changes'
-              },
-              {
-                name: 'Tenant API (JSON)',
-                path: 'docs/openapi/tenant-openapi.json',
-                diff: tenantJsonDiff,
-                hasChanges: tenantJsonDiff !== 'No changes'
-              },
-              {
-                name: 'Tenant API (YAML)',
-                path: 'docs/openapi/tenant-openapi.yaml',
-                diff: tenantYamlDiff,
-                hasChanges: tenantYamlDiff !== 'No changes'
-              }
-            ];
-
-            // Count changed and resolved specs
-            const specsWithChanges = specs.filter(spec => spec.hasChanges);
-
-            // Always create a step summary
             const fs = require('fs');
-            let summaryContent = '## OpenAPI Specification Changes\n\n';
 
-            if (specsWithChanges.length > 0) {
-              // Add warning header for specs with changes
-              summaryContent += `### ⚠️ Changes detected in the following specifications:\n\n`;
-
-              // Generate detailed summary using details/summary tags
-              specs.forEach(spec => {
-                if (spec.hasChanges) {
-                  summaryContent += `<details>\n<summary><strong>🔍 ${spec.name}</strong> - Changes detected</summary>\n\n`;
-                  summaryContent += `${spec.diff}\n\n`;
-                  summaryContent += `</details>\n\n`;
-                }
-              });
-            } else {
-              // All specs are in sync
-              summaryContent += `## ✅ All OpenAPI Specifications are in sync\n\n`;
-              summaryContent += `No differences were detected in the OpenAPI specifications.`;
+            // Function to check if a file exists and has content
+            function hasContent(filePath) {
+              try {
+                return fs.existsSync(filePath) && fs.statSync(filePath).size > 0;
+              } catch (error) {
+                return false;
+              }
             }
 
-            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summaryContent);
-            console.log('Added OpenAPI diff results to the step summary');
+            // Read diff files and determine if there are changes
+            const specs = [
+              { file: 'tenant-admin-openapi.json.diff', name: 'Tenant Admin API (JSON)' },
+              { file: 'tenant-admin-openapi.yaml.diff', name: 'Tenant Admin API (YAML)' },
+              { file: 'tenant-openapi.json.diff', name: 'Tenant API (JSON)' },
+              { file: 'tenant-openapi.yaml.diff', name: 'Tenant API (YAML)' }
+            ];
+
+            // Track if we have changes
+            let hasChanges = false;
+
+            // Filter to specs with changes and read their content
+            const specsWithChanges = specs.filter(spec => {
+              const hasContentResult = hasContent(`./diffs/${spec.file}`);
+              if (hasContentResult) hasChanges = true;
+              return hasContentResult;
+            }).map(spec => {
+              return {
+                ...spec,
+                content: fs.readFileSync(`./diffs/${spec.file}`, 'utf8')
+              };
+            });
+
+            // Create the PR comment
+            const COMMENT_IDENTIFIER = "<!-- openapi-diff-check -->";
+            let commentBody = `${COMMENT_IDENTIFIER}\n## OpenAPI Specification Changes\n\n`;
+
+            if (hasChanges) {
+              commentBody += `### ⚠️ Merging this PR will result in the following changes to the OpenAPI Specification:\n\n`;
+
+              specsWithChanges.forEach(spec => {
+                commentBody += `<details>\n<summary><strong>🔍 ${spec.name}</strong> - Changes detected</summary>\n\n`;
+                commentBody += "```diff\n" + spec.content + "\n```\n\n";
+                commentBody += `</details>\n\n`;
+              });
+
+              commentBody += `\nPlease update the OpenAPI specifications to resolve these differences.\n`;
+            } else {
+              commentBody = `${COMMENT_IDENTIFIER}\n## ✅ All OpenAPI Specifications are in sync\n\n`;
+              commentBody += `No differences were detected in the OpenAPI specifications.`;
+            }
 
             // Check if PR number is provided
             const prNumber = parseInt(process.env.PR_NUMBER, 10);
@@ -221,26 +179,6 @@ jobs:
               comment.body.includes(COMMENT_IDENTIFIER)
             );
 
-            // Create comment body
-            let commentBody = `${COMMENT_IDENTIFIER}\n## OpenAPI Specification Changes\n\n`;
-
-            if (specsWithChanges.length > 0) {
-              // Add details for specs with changes
-              commentBody += `### ⚠️ Merging this PR will result in the following changes to the OpenAPI Specification:\n\n`;
-
-              specsWithChanges.forEach(spec => {
-                commentBody += `<details>\n<summary><strong>🔍 ${spec.name}</strong> - Changes detected</summary>\n\n`;
-                commentBody += `${spec.diff}\n\n`;
-                commentBody += `</details>\n\n`;
-              });
-
-              commentBody += `\nPlease update the OpenAPI specifications to resolve these differences.\n`;
-            } else {
-              // All specs are in sync
-              commentBody = `${COMMENT_IDENTIFIER}\n## ✅ All OpenAPI Specifications are in sync\n\n`;
-              commentBody += `No differences were detected in the OpenAPI specifications.`;
-            }
-
             // Either update the existing comment or create a new one
             if (existingComment) {
               await github.rest.issues.updateComment({
@@ -250,7 +188,7 @@ jobs:
                 body: commentBody
               });
               console.log('Updated existing OpenAPI diff comment');
-            } else if (specsWithChanges.length > 0) {
+            } else if (hasChanges) {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -268,11 +206,8 @@ jobs:
           GITHUB_TOKEN: ${{ steps.devops_login.outputs.token }}
           REPO: ${{ github.repository }}
         run: |
-          # Ensure we are on the correct branch
+          # Create a new branch for the changes
           git checkout -b ${HEAD_BRANCH}
-
-          # Move new specs to the docs directory
-          mv ./tmp/* ./docs/openapi/
 
           # Check if there are any changes
           if [[ -n "$(git status --porcelain ./docs/openapi)" ]]; then
