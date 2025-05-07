@@ -17,7 +17,7 @@ permissions: {}
 
 jobs:
   local:
-    name: Local
+    name: Local End-to-End
     runs-on: ubuntu-latest
 
     timeout-minutes: 30

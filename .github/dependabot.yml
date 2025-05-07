@@ -9,8 +9,7 @@ updates:
   - package-ecosystem: github-actions
     directories:
       - /
-      - /.github/workflows/actions/deploy-eks
-      - /.github/workflows/actions/test-eks
+      - /.github/workflows/actions/connect-eks
     schedule:
       interval: weekly
       day: saturday

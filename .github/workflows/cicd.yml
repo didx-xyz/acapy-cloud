@@ -3,33 +3,23 @@ name: CICD
 on:
   workflow_dispatch:
     inputs:
-      helm-version:
-        description: Helm version
+      regression-tests:
+        description: Run Regression Tests on EKS
         required: false
-        default: v3.17.3
-        type: string
-      helmfile-version:
-        description: Helmfile version
-        required: false
-        default: v1.0.0
-        type: string
-      mise-version:
-        description: Mise version
-        required: false
-        default: 2025.5.0
-        type: string
+        default: true
+        type: boolean
       reset-deployments:
         description: Reset deployment - Clean start
         required: false
         default: false
         type: boolean
-      regression-tests:
-        description: Run regression tests step
+      run-k6:
+        description: Run K6 Tests on EKS
         required: false
         default: true
         type: boolean
       run-tests:
-        description: Run tests step
+        description: Run End-to-End Tests on EKS
         required: false
         default: true
         type: boolean
@@ -86,10 +76,6 @@ jobs:
           echo "HELM_VERSION=${HELM_VERSION}" >> $GITHUB_OUTPUT
           echo "HELMFILE_VERSION=${HELMFILE_VERSION}" >> $GITHUB_OUTPUT
           echo "MISE_VERSION=${MISE_VERSION}" >> $GITHUB_OUTPUT
-        env:
-          HELM_VERSION: ${{ inputs.helm-version || env.HELM_VERSION }}
-          HELMFILE_VERSION: ${{ inputs.helmfile-version || env.HELMFILE_VERSION }}
-          MISE_VERSION: ${{ inputs.mise-version || env.MISE_VERSION }}
 
   lint:
     name: Lint
@@ -101,7 +87,7 @@ jobs:
       group: format-check-${{ github.ref_name }}
       cancel-in-progress: true
 
-  unit:
+  unit-test:
     name: Tests
     needs: export-versions
     uses: ./.github/workflows/unit.yml
@@ -116,7 +102,7 @@ jobs:
     uses: ./.github/workflows/docker-build.yml
     needs:
       - lint
-      - unit
+      - unit-test
     permissions:
       packages: write
     concurrency:
@@ -163,12 +149,17 @@ jobs:
       - docker
       - export-versions
     with:
+      acapy-helmfile-path: ./helm/acapy-cloud.yaml.gotmpl
+      acapy-test-helmfile-path: ./helm/acapy-test.yaml.gotmpl
+      connect-configs-dir: ./resources/connect-processors/cloud
+      helm-plugins: https://github.com/databus23/helm-diff
       helm-version: ${{ needs.export-versions.outputs.HELM_VERSION }}
       helmfile-version: ${{ needs.export-versions.outputs.HELMFILE_VERSION }}
       image-version: ${{ needs.docker.outputs.image_version }}
-      mise-version: ${{ needs.export-versions.outputs.MISE_VERSION }}
+      namespace: acapy-cloud-dev
       regression-tests: ${{ inputs.regression-tests || true }}
       reset-deployments: ${{ inputs.reset-deployments || false }}
+      run-k6: ${{ inputs.run-k6 || true }}
       run-tests: ${{ inputs.run-tests || true }}
     secrets:
       tailscale-authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
@@ -192,12 +183,10 @@ jobs:
     uses: ./.github/workflows/notify.yml
     with:
       acapy-cloud-ref: ${{ github.sha }}
-      helm-version: ${{ needs.export-versions.outputs.HELM_VERSION }}
-      helmfile-version: ${{ needs.export-versions.outputs.HELMFILE_VERSION }}
       image-version: ${{ needs.docker.outputs.image_version }}
-      mise-version: ${{ needs.export-versions.outputs.MISE_VERSION }}
       regression-tests: ${{ inputs.regression-tests || true }}
       reset-deployments: ${{ inputs.reset-deployments || false }}
+      run-k6: ${{ inputs.run-k6 || true }}
       run-tests: ${{ inputs.run-tests || true }}
     secrets:
       devops-app-id: ${{ secrets.DEVOPS_APP_ID }}
