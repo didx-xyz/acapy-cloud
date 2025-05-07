@@ -118,7 +118,8 @@ export function getAccessTokenByWalletId(bearerToken, walletId) {
     },
   };
 
-  const response = http.get(url, params);
+  const payload = JSON.stringify({});
+  const response = http.post(url, payload, params);
 
   if (response.status >= 200 && response.status < 300) {
     // Request was successful
