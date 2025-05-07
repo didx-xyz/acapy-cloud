@@ -71,6 +71,8 @@ def test_presentation_record_to_model():
         thread_id="thread-id",
         updated_at="2023-01-01T01:00:00Z",
         verified="true",
+        pres=anoncreds_pres,
+        pres_request=anoncreds_pres_request,
         by_format={
             "pres": {"anoncreds": anoncreds_pres.to_dict()},
             "pres_request": {"anoncreds": anoncreds_pres_request.to_dict()},
