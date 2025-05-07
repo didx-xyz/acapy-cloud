@@ -60,7 +60,6 @@ async def proof_revoked_credential(
     # Do proof request
     request_body = {
         "comment": "Test proof of revocation",
-        "type": proof_type,
         f"{proof_type}_proof_request": {
             "name": "Proof of SPEED",
             "version": "1.0",

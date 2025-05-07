@@ -169,7 +169,6 @@ async def test_accept_proof_request_verifier_oob_connection(
         # Present proof from holder to verifier
         request_body = {
             "connection_id": verifier_holder_connection_id,
-            "type": "anoncreds",
             "anoncreds_proof_request": {
                 "name": "Age Check",
                 "version": "1.0",
@@ -219,7 +218,6 @@ async def test_accept_proof_request_verifier_oob_connection(
             VERIFIER_BASE_PATH + "/accept-request",
             json={
                 "proof_id": holder_proof_exchange_id,
-                "type": "anoncreds",
                 "anoncreds_presentation_spec": {
                     "requested_attributes": {
                         "name": {

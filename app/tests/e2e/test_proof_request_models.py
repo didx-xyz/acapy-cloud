@@ -88,7 +88,6 @@ async def test_proof_model_failures(
                 f"{VERIFIER_BASE_PATH}/accept-request",
                 json={
                     "proof_id": alice_proof_exchange_id,
-                    "type": "anoncreds",
                     "anoncreds_presentation_spec": {
                         "requested_attributes": {
                             "THE_SPEED": {"cred_id": referent, "revealed": True}

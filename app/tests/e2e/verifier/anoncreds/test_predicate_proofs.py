@@ -24,7 +24,6 @@ async def test_predicate_proofs_anoncreds(
     predicate: str,
 ):
     request_body = {
-        "type": "anoncreds",
         "anoncreds_proof_request": {
             "requested_attributes": {},
             "requested_predicates": {

@@ -22,7 +22,6 @@ async def test_self_attested_attributes_anoncreds(
 ):
 
     request_body = {
-        "type": "anoncreds",
         "anoncreds_proof_request": {
             "requested_attributes": {
                 "name_attribute": {
