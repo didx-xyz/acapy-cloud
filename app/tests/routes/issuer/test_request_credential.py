@@ -14,7 +14,7 @@ from app.services.issuer.acapy_issuer_v2 import IssuerV2
 
 
 @pytest.mark.anyio
-@pytest.mark.parametrize("record_type", ["indy", "ld_proof", "bad"])
+@pytest.mark.parametrize("record_type", ["anoncreds", "ld_proof", "bad"])
 @pytest.mark.parametrize("save_exchange_record", [None, True, False])
 async def test_request_credential_success(record_type, save_exchange_record):
     mock_aries_controller = AsyncMock()
@@ -44,7 +44,7 @@ async def test_request_credential_success(record_type, save_exchange_record):
 
         if record_type == "bad":
             with pytest.raises(
-                HTTPException, match="Could not resolve record type"
+                HTTPException, match="Unsupported credential type: bad"
             ) as exc:
                 await request_credential(
                     credential_exchange_id="v2-test_id", auth="mocked_auth"
@@ -85,7 +85,7 @@ async def test_request_credential_fail_acapy_error(
     issuer.request_credential = IssuerV2.request_credential
 
     record = Mock()
-    record.type = "indy"
+    record.type = "anoncreds"
     issuer.get_record = AsyncMock(return_value=record)
 
     mock_aries_controller.issue_credential_v2_0.send_request = AsyncMock(
@@ -125,7 +125,7 @@ async def test_request_credential_fail_bad_record():
     issuer.request_credential = IssuerV2.request_credential
 
     record = Mock()
-    record.type = "indy"
+    record.type = "anoncreds"
     record.credential_definition_id = None
     issuer.get_record = AsyncMock(return_value=record)
 

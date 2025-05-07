@@ -77,7 +77,7 @@ def test_credential_record_to_model_v2():
     assert model.state == "offer-sent"
     assert model.thread_id == "thread-id"
     assert model.updated_at == "2023-01-01T01:00:00Z"
-    assert model.type == "indy"
+    assert model.type == "anoncreds"
 
 
 def test_schema_cred_def_from_record():

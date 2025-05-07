@@ -1,23 +1,10 @@
-from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from aries_cloudcontroller import LDProofVCDetail, TxnOrPublishRevocationsResult
-from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 from app.util.save_exchange_record import SaveExchangeRecordField
 from shared.exceptions import CloudApiValueError
-
-
-class CredentialType(str, Enum):
-    INDY: str = "indy"
-    JWT: str = "jwt"
-    LD_PROOF: str = "ld_proof"
-    ANONCREDS: str = "anoncreds"
-
-
-class IndyCredential(BaseModel):
-    credential_definition_id: str
-    attributes: Dict[str, str]
 
 
 class AnonCredsCredential(BaseModel):
@@ -33,37 +20,36 @@ class AnonCredsCredential(BaseModel):
 
 
 class CredentialBase(SaveExchangeRecordField):
-    type: CredentialType = CredentialType.INDY
-    indy_credential_detail: Optional[IndyCredential] = None
     ld_credential_detail: Optional[LDProofVCDetail] = None
     anoncreds_credential_detail: Optional[AnonCredsCredential] = None
 
-    @field_validator("indy_credential_detail", mode="before")
-    @classmethod
-    def check_indy_credential_detail(cls, value, values: ValidationInfo):
-        if values.data.get("type") == CredentialType.INDY and value is None:
+    @model_validator(mode="after")
+    def check_credential_detail(self):
+        if (
+            self.anoncreds_credential_detail is None
+            and self.ld_credential_detail is None
+        ):
             raise CloudApiValueError(
-                "indy_credential_detail must be populated if `indy` credential type is selected"
+                "One of anoncreds_credential_detail or ld_credential_detail must be populated"
             )
-        return value
 
-    @field_validator("ld_credential_detail", mode="before")
-    @classmethod
-    def check_ld_credential_detail(cls, value, values: ValidationInfo):
-        if values.data.get("type") == CredentialType.LD_PROOF and value is None:
+        if (
+            self.anoncreds_credential_detail is not None
+            and self.ld_credential_detail is not None
+        ):
             raise CloudApiValueError(
-                "ld_credential_detail must be populated if `ld_proof` credential type is selected"
+                "Only one of anoncreds_credential_detail or ld_credential_detail must be populated"
             )
-        return value
 
-    @field_validator("anoncreds_credential_detail", mode="before")
-    @classmethod
-    def check_anoncreds_credential_detail(cls, value, values: ValidationInfo):
-        if values.data.get("type") == CredentialType.ANONCREDS and value is None:
-            raise CloudApiValueError(
-                "anoncreds_credential_detail must be populated if `anoncreds` credential type is selected"
-            )
-        return value
+        return self
+
+    def get_credential_type(self) -> Literal["anoncreds", "ld_proof"]:
+        if self.anoncreds_credential_detail is not None:
+            return "anoncreds"
+        elif self.ld_credential_detail is not None:
+            return "ld_proof"
+        else:
+            raise CloudApiValueError("No credential detail provided")
 
 
 class CredentialWithConnection(CredentialBase):

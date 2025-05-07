@@ -4,9 +4,7 @@ import pytest
 from aries_cloudcontroller import AcaPyClient
 
 from app.exceptions import CloudApiException
-from app.models.issuer import CredentialType
 from app.util.wallet_type_checks import (
-    assert_wallet_type_for_credential,
     get_wallet_type,
 )
 
@@ -111,21 +109,3 @@ async def test_get_wallet_type_invalid_wallet_type():
                 await get_wallet_type(aries_controller, logger)
             assert exc.value.status_code == 401
             assert exc.value.detail == "Invalid wallet type."
-
-
-def test_assert_wallet_type_for_credential():
-    # Test valid combinations
-    assert_wallet_type_for_credential("askar-anoncreds", CredentialType.ANONCREDS)
-    assert_wallet_type_for_credential("askar", CredentialType.INDY)
-
-    # Test invalid combinations
-    with pytest.raises(CloudApiException) as exc:
-        assert_wallet_type_for_credential("askar", CredentialType.ANONCREDS)
-    assert (
-        "AnonCreds credentials can only be issued by an askar-anoncreds wallet"
-        in str(exc.value)
-    )
-
-    with pytest.raises(CloudApiException) as exc:
-        assert_wallet_type_for_credential("askar-anoncreds", CredentialType.INDY)
-    assert "Indy credentials can only be issued by an askar wallet" in str(exc.value)
