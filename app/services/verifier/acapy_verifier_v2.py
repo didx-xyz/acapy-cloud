@@ -60,6 +60,7 @@ class VerifierV2(Verifier):
             auto_verify=True,
             comment=create_proof_request.comment,
         )
+        bound_logger.debug("Sending create request: {}", request_body)
         try:
             presentation_exchange = await handle_acapy_call(
                 logger=bound_logger,
@@ -104,6 +105,7 @@ class VerifierV2(Verifier):
             auto_verify=True,
             comment=send_proof_request.comment,
         )
+        bound_logger.debug("Sending request: {}", request_body)
         try:
             bound_logger.debug("Send free v2 presentation request")
             presentation_exchange = await handle_acapy_call(
