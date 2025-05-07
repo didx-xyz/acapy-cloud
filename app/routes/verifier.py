@@ -518,7 +518,7 @@ async def get_credentials_by_proof_id(
     return [
         CredPrecis(
             cred_info=CredInfo(
-                **cred.cred_info.model_dump(), credential_id=cred.cred_info.referent
+                **cred.cred_info.model_dump(),
             ),
             interval=cred.interval,
             presentation_referents=cred.presentation_referents,
