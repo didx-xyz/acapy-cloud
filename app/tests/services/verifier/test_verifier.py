@@ -705,12 +705,13 @@ async def test_get_credentials_by_proof_id(
     returned_cred_precis = [
         CredPrecis(
             cred_info=CredInfo(
-                **cred.cred_info.model_dump(), credential_id=cred.cred_info.referent
+                cred_def_id="WgWxqztrNooG92RXvxSTWv:3:CL:20:tag",
+                referent="abcde",
+                attrs={"attr1": "value1"},
             ),
-            interval=cred.interval,
-            presentation_referents=cred.presentation_referents,
+            interval=None,
+            presentation_referents=None,
         )
-        for cred in cred_precis
     ]
 
     mocker.patch.object(
