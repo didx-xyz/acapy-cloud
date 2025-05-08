@@ -92,8 +92,23 @@ async def test_self_attested_attributes_anoncreds(
 
     assert acme_proof_event["verified"] is True
 
-    proof = (
-        await acme_client.get(f"{VERIFIER_BASE_PATH}/proofs/{acme_proof_id}")
-    ).json()["presentation"]["requested_proof"]["self_attested_attrs"]
+    proof_response = await acme_client.get(
+        f"{VERIFIER_BASE_PATH}/proofs/{acme_proof_id}"
+    )
+    proof = proof_response.json()
 
-    assert proof["self_attested_cell_nr"] == "1234567890"
+    assert "presentation" in proof, f"Proof should have presentation: {proof}"
+    presentation = proof["presentation"]
+
+    assert (
+        "requested_proof" in presentation
+    ), f"Presentation should have requested_proof: {presentation}"
+    req = presentation["requested_proof"]
+
+    assert (
+        "self_attested_attrs" in req
+    ), f"Requested_proof should have self_attested_attrs: {req}"
+
+    assert (
+        req["self_attested_attrs"]["self_attested_cell_nr"] == "1234567890"
+    ), f"self_attested_attrs should have expected cell nr: {req}"
