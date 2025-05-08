@@ -147,14 +147,9 @@ class CredInfo(BaseModel):
     schema_id: Optional[str] = Field(default=None, description="Schema identifier")
 
 
-class NonRevocationInterval(IndyNonRevocationInterval):
-    # We just rename the model to avoid confusion with AnonCreds using this
-    pass
-
-
 class CredPrecis(BaseModel):
     cred_info: CredInfo = Field(description="Credential info")
-    interval: Optional[NonRevocationInterval] = Field(
+    interval: Optional[IndyNonRevocationInterval] = Field(
         default=None, description="Non-revocation interval from presentation request"
     )
     presentation_referents: Optional[list[str]] = Field(
