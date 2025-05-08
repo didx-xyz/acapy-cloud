@@ -9,7 +9,6 @@ from aries_cloudcontroller import (
     SchemaGetResult,
 )
 
-from app.exceptions import CloudApiException
 from app.models.definitions import CredentialSchema
 from app.services.definitions.schemas import get_schemas_by_id
 
@@ -57,7 +56,7 @@ async def test_get_schemas_by_id_success():
     ):
 
         result = await get_schemas_by_id(
-            mock_aries_controller, mock_schema_ids, "askar"
+            mock_aries_controller, mock_schema_ids
         )
 
         assert len(result) == 2
@@ -78,7 +77,7 @@ async def test_get_schemas_by_id_success():
 async def test_get_schemas_by_id_empty_list():
     mock_aries_controller = AsyncMock(spec=AcaPyClient)
 
-    result = await get_schemas_by_id(mock_aries_controller, [], "askar")
+    result = await get_schemas_by_id(mock_aries_controller, [])
 
     assert len(result) == 0
 
@@ -94,7 +93,7 @@ async def test_get_schemas_by_id_error_handling():
         side_effect=Exception("Test error"),
     ):
         with pytest.raises(Exception) as exc_info:
-            await get_schemas_by_id(mock_aries_controller, mock_schema_ids, "askar")
+            await get_schemas_by_id(mock_aries_controller, mock_schema_ids)
 
         assert str(exc_info.value) == "Test error"
 
@@ -138,7 +137,7 @@ async def test_get_schemas_by_id_anoncreds_success():
     ):
 
         result = await get_schemas_by_id(
-            mock_aries_controller, mock_schema_ids, "askar-anoncreds"
+            mock_aries_controller, mock_schema_ids
         )
 
         assert len(result) == 2
@@ -156,18 +155,6 @@ async def test_get_schemas_by_id_anoncreds_success():
 
 
 @pytest.mark.anyio
-async def test_get_schemas_by_id_unsupported_wallet_type():
-    mock_aries_controller = AsyncMock()
-    mock_schema_ids = [schema_id_1, schema_id_2]
-
-    with pytest.raises(CloudApiException) as exc_info:
-        await get_schemas_by_id(mock_aries_controller, mock_schema_ids, "unsupported")
-
-    assert exc_info.value.status_code == 500
-    assert "Wallet type not supported. Cannot get schemas." in str(exc_info.value)
-
-
-@pytest.mark.anyio
 async def test_get_schemas_by_id_no_schemas_returned():
     mock_aries_controller = AsyncMock()
     mock_schema_ids = []
@@ -177,7 +164,7 @@ async def test_get_schemas_by_id_no_schemas_returned():
         return_value=None,
     ):
         result = await get_schemas_by_id(
-            mock_aries_controller, mock_schema_ids, "askar-anoncreds"
+            mock_aries_controller, mock_schema_ids
         )
 
         assert len(result) == 0

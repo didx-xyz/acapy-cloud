@@ -24,10 +24,8 @@ from app.services.acapy_wallet import assert_public_did
 from app.util.definitions import (
     anoncreds_schema_from_acapy,
     credential_definition_from_acapy,
-    credential_schema_from_acapy,
 )
 from app.util.retry_method import coroutine_with_retry
-from app.util.wallet_type_checks import get_wallet_type
 from shared.log_config import get_logger
 
 logger = get_logger(__name__)
@@ -202,44 +200,18 @@ async def get_schema(
     """
     bound_logger = logger.bind(body={"schema_id": schema_id})
     bound_logger.debug("GET request received: Get schema by id")
-    is_governance = auth.role == Role.GOVERNANCE
 
     async with client_from_auth(auth) as aries_controller:
-        if is_governance:
-            # Get the wallet type from the server config
-            server_config = await aries_controller.server.get_config()
-            wallet_type = server_config.config.get("wallet.type")
-        else:
-            wallet_type = await get_wallet_type(
-                aries_controller=aries_controller,
-                logger=bound_logger,
-            )
+        schema = await handle_acapy_call(
+            logger=bound_logger,
+            acapy_call=aries_controller.anoncreds_schemas.get_schema,
+            schema_id=schema_id,
+        )
 
-        if wallet_type == "askar-anoncreds":
-            schema = await handle_acapy_call(
-                logger=bound_logger,
-                acapy_call=aries_controller.anoncreds_schemas.get_schema,
-                schema_id=schema_id,
-            )
+        if not schema.var_schema:
+            raise HTTPException(404, f"Schema with id {schema_id} not found.")
 
-            if not schema.var_schema:
-                raise HTTPException(404, f"Schema with id {schema_id} not found.")
-
-            result = anoncreds_schema_from_acapy(schema)
-        elif wallet_type == "askar":
-            schema = await handle_acapy_call(
-                logger=bound_logger,
-                acapy_call=aries_controller.schema.get_schema,
-                schema_id=schema_id,
-            )
-
-            if not schema.var_schema:
-                raise HTTPException(404, f"Schema with id {schema_id} not found.")
-
-            result = credential_schema_from_acapy(schema.var_schema)
-        else:
-            # Should never happen
-            raise HTTPException(500, "Unknown wallet type")
+        result = anoncreds_schema_from_acapy(schema)
 
     bound_logger.debug("Successfully fetched schema by id.")
     return result
@@ -416,24 +388,13 @@ async def get_credential_definition_by_id(
     bound_logger.debug("GET request received: Get credential definition by id")
 
     async with client_from_auth(auth) as aries_controller:
-        wallet_type = await get_wallet_type(
-            aries_controller=aries_controller,
-            logger=bound_logger,
-        )
 
         bound_logger.debug("Getting credential definition")
-        if wallet_type == "askar-anoncreds":
-            credential_definition = await handle_acapy_call(
-                logger=bound_logger,
-                acapy_call=aries_controller.anoncreds_credential_definitions.get_credential_definition,
-                cred_def_id=credential_definition_id,
-            )
-        else:  # wallet_type == "askar"
-            credential_definition = await handle_acapy_call(
-                logger=bound_logger,
-                acapy_call=aries_controller.credential_definition.get_cred_def,
-                cred_def_id=credential_definition_id,
-            )
+        credential_definition = await handle_acapy_call(
+            logger=bound_logger,
+            acapy_call=aries_controller.anoncreds_credential_definitions.get_credential_definition,
+            cred_def_id=credential_definition_id,
+        )
 
         if not credential_definition:
             raise HTTPException(
@@ -444,8 +405,6 @@ async def get_credential_definition_by_id(
         bound_logger.debug("Cast credential definition response to model")
         cloudapi_credential_definition = credential_definition_from_acapy(
             credential_definition
-            if wallet_type == "askar-anoncreds"
-            else credential_definition.credential_definition
         )
 
         # We need to update the schema_id on the returned credential definition as

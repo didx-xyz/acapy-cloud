@@ -66,8 +66,6 @@ async def test_get_anoncreds_schema(
     schema_response = schema_response.json()
     assert_schema_response(schema_response)
 
-    # Note: Indy issuers can fetch AnonCreds schemas as well
-
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("support_revocation", [False, True])

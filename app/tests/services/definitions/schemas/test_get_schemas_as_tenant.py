@@ -41,10 +41,7 @@ async def test_get_schemas_as_tenant_all():
     ), patch(
         "app.services.definitions.schemas.get_schemas_by_id",
         return_value=mock_schemas,
-    ), patch(
-        "app.services.definitions.schemas.get_wallet_type"
-    ) as mock_get_wallet_type:
-        mock_get_wallet_type.return_value = "askar"
+    ):
         result = await get_schemas_as_tenant(mock_aries_controller)
 
         assert len(result) == 2
@@ -62,11 +59,7 @@ async def test_get_schemas_as_tenant_by_id():
         return_value=[mock_schema],
     ), patch(
         "app.services.definitions.schemas.get_schemas_by_id", return_value=[mock_schema]
-    ), patch(
-        "app.services.definitions.schemas.get_wallet_type"
-    ) as mock_get_wallet_type:
-        mock_get_wallet_type.return_value = "askar"
-
+    ):
         result = await get_schemas_as_tenant(
             mock_aries_controller, schema_name=schema_name_1
         )
@@ -85,11 +78,7 @@ async def test_get_schemas_as_tenant_filter_issuer_did():
         return_value=mock_schemas,
     ), patch(
         "app.services.definitions.schemas.get_schemas_by_id", return_value=mock_schemas
-    ), patch(
-        "app.services.definitions.schemas.get_wallet_type"
-    ) as mock_get_wallet_type:
-        mock_get_wallet_type.return_value = "askar"
-
+    ):
         result = await get_schemas_as_tenant(
             mock_aries_controller, schema_issuer_did=schema_1_issuer_did
         )
@@ -107,11 +96,7 @@ async def test_get_schemas_as_tenant_filter_name():
         return_value=mock_schemas,
     ), patch(
         "app.services.definitions.schemas.get_schemas_by_id", return_value=mock_schemas
-    ), patch(
-        "app.services.definitions.schemas.get_wallet_type"
-    ) as mock_get_wallet_type:
-        mock_get_wallet_type.return_value = "askar"
-
+    ):
         result = await get_schemas_as_tenant(
             mock_aries_controller, schema_name=schema_name_1
         )
@@ -129,54 +114,10 @@ async def test_get_schemas_as_tenant_filter_version():
         return_value=mock_schemas,
     ), patch(
         "app.services.definitions.schemas.get_schemas_by_id", return_value=mock_schemas
-    ), patch(
-        "app.services.definitions.schemas.get_wallet_type"
-    ) as mock_get_wallet_type:
-        mock_get_wallet_type.return_value = "askar"
-
+    ):
         result = await get_schemas_as_tenant(
             mock_aries_controller, schema_version=schema_version_2
         )
 
         assert len(result) == 1
         assert result[0].version == schema_version_2
-
-
-@pytest.mark.anyio
-async def test_get_schemas_as_tenant_anoncreds():
-    mock_aries_controller = AsyncMock(spec=AcaPyClient)
-
-    with patch(
-        "app.services.definitions.schemas.get_trust_registry_schemas",
-        return_value=mock_schemas,
-    ), patch(
-        "app.services.definitions.schemas.get_schemas_by_id",
-        return_value=mock_schemas,
-    ), patch(
-        "app.services.definitions.schemas.get_wallet_type"
-    ) as mock_get_wallet_type:
-        mock_get_wallet_type.return_value = "askar-anoncreds"
-        result = await get_schemas_as_tenant(mock_aries_controller)
-
-        assert len(result) == 2
-        assert all(isinstance(schema, CredentialSchema) for schema in result)
-        assert [schema.id for schema in result] == [schema_id_1, schema_id_2]
-
-
-@pytest.mark.anyio
-async def test_get_schemas_as_tenant_unsupported_wallet_type():
-    mock_aries_controller = AsyncMock(spec=AcaPyClient)
-
-    with patch(
-        "app.services.definitions.schemas.get_wallet_type"
-    ) as mock_get_wallet_type, patch(
-        "app.services.definitions.schemas.get_trust_registry_schemas",
-        return_value=[],
-    ):
-        mock_get_wallet_type.return_value = "unsupported"
-
-        with pytest.raises(CloudApiException) as exc_info:
-            await get_schemas_as_tenant(mock_aries_controller)
-
-        assert exc_info.value.status_code == 500
-        assert "Wallet type not supported. Cannot get schemas." in str(exc_info.value)

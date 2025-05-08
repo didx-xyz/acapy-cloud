@@ -233,7 +233,7 @@ async def set_did_endpoint(
         SetDidEndpointRequest:
             endpoint: str
     """
-    # "Endpoint" type is for making connections using public indy DIDs
+    # "Endpoint" type is for making connections using public DIDs
     bound_logger = logger.bind(body={"did": did, "body": body})
     bound_logger.debug("POST request received: Get endpoint for DID")
 

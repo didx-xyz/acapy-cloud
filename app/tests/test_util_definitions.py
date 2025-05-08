@@ -1,5 +1,4 @@
-from aries_cloudcontroller import CredentialDefinition as AcaPyCredentialDefinition
-from aries_cloudcontroller import ModelSchema
+from aries_cloudcontroller import CredDef, GetCredDefResult, ModelSchema
 
 from app.util.definitions import (
     credential_definition_from_acapy,
@@ -28,16 +27,18 @@ def test_credential_schema_from_acapy():
 
 
 def test_credential_definition_from_acapy():
-    acapy_cred_def = AcaPyCredentialDefinition(
-        schema_id="WgWxqztrNooG92RXvxSTWv:2:schema_name:1.1",
-        tag="the_tag",
-        id="WgWxqztrNooG92RXvxSTWv:3:CL:20:tag2",
+    acapy_cred_def = GetCredDefResult(
+        credential_definition_id="WgWxqztrNooG92RXvxSTWv:3:CL:20:tag2",
+        credential_definition=CredDef(
+            tag="the_tag",
+            schema_id="WgWxqztrNooG92RXvxSTWv:2:schema_name:1.1",
+        ),
     )
 
     cred_def = credential_definition_from_acapy(acapy_cred_def)
 
     assert cred_def.model_dump() == {
-        "id": acapy_cred_def.id,
-        "schema_id": acapy_cred_def.schema_id,
-        "tag": acapy_cred_def.tag,
+        "id": acapy_cred_def.credential_definition_id,
+        "schema_id": acapy_cred_def.credential_definition.schema_id,
+        "tag": acapy_cred_def.credential_definition.tag,
     }
