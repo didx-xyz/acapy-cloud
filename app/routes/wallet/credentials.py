@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends
 from app.dependencies.acapy_clients import client_from_auth
 from app.dependencies.auth import AcaPyAuth, acapy_auth_from_header
 from app.exceptions import handle_acapy_call
-from app.models.wallet import CredInfoList, IndyCredInfo, VCRecord, VCRecordList
+from app.models.wallet import CredInfo, CredInfoList, VCRecord, VCRecordList
 from app.util.pagination import limit_query_parameter, offset_query_parameter
 from shared.log_config import get_logger
 
@@ -72,13 +72,13 @@ async def list_credentials(
 
 @router.get(
     "/{credential_id}",
-    response_model=IndyCredInfo,
+    response_model=CredInfo,
     summary="Fetch a credential by ID",
 )
 async def get_credential_record(
     credential_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
-) -> IndyCredInfo:
+) -> CredInfo:
     """
     Fetch a specific credential by ID
     ---
@@ -90,7 +90,7 @@ async def get_credential_record(
 
     Returns:
     ---
-        IndyCredInfo
+        CredInfo
             The credential record.
     """
     bound_logger = logger.bind(credential_id=credential_id)

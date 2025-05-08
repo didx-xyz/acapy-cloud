@@ -2,7 +2,6 @@ from typing import List, Optional
 
 from aries_cloudcontroller import (
     AcaPyClient,
-    IndyCredPrecis,
     V20PresCreateRequestRequest,
     V20PresProblemReportRequest,
     V20PresRequestByFormat,
@@ -14,6 +13,7 @@ from app.exceptions import CloudApiException, handle_acapy_call
 from app.models.verifier import (
     AcceptProofRequest,
     CreateProofRequest,
+    CredPrecis,
     RejectProofRequest,
     SendProofRequest,
 )
@@ -294,7 +294,7 @@ class VerifierV2(Verifier):
         referent: Optional[str] = None,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
-    ) -> List[IndyCredPrecis]:
+    ) -> List[CredPrecis]:
         bound_logger = logger.bind(body={"proof_id": proof_id})
         pres_ex_id = pres_id_no_version(proof_id=proof_id)
 

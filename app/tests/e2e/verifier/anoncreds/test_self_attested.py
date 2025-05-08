@@ -55,14 +55,14 @@ async def test_self_attested_attributes_anoncreds(
         f"{VERIFIER_BASE_PATH}/proofs/{alice_proof_id}/credentials"
     )
 
-    referent = requested_credentials.json()[0]["cred_info"]["referent"]
+    credential_id = requested_credentials.json()[0]["cred_info"]["credential_id"]
 
     proof_accept = AcceptProofRequest(
         proof_id=alice_proof_id,
         anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={
                 "name_attribute": {
-                    "cred_id": referent,
+                    "cred_id": credential_id,
                     "revealed": True,
                 }
             },

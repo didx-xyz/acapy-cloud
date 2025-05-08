@@ -55,7 +55,7 @@ async def test_predicate_proofs_anoncreds(
         f"{VERIFIER_BASE_PATH}/proofs/{alice_proof_id}/credentials"
     )
 
-    referent = requested_credentials.json()[0]["cred_info"]["referent"]
+    credential_id = requested_credentials.json()[0]["cred_info"]["credential_id"]
 
     proof_accept = AcceptProofRequest(
         proof_id=alice_proof_id,
@@ -63,7 +63,7 @@ async def test_predicate_proofs_anoncreds(
             requested_attributes={},
             requested_predicates={
                 "over_18": {
-                    "cred_id": referent,
+                    "cred_id": credential_id,
                 }
             },
             self_attested_attributes={},

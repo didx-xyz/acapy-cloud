@@ -2,11 +2,10 @@ from typing import List, Optional
 
 from aries_cloudcontroller.models.did_create import DIDCreate as DIDCreateAcaPy
 from aries_cloudcontroller.models.did_create_options import DIDCreateOptions
-from aries_cloudcontroller.models.indy_cred_info import (
-    IndyCredInfo as IndyCredInfoAcaPy,
-)
 from aries_cloudcontroller.models.vc_record import VCRecord as VCRecordAcaPy
 from pydantic import BaseModel, Field, StrictStr
+
+from app.models.verifier import CredInfo
 
 
 class SetDidEndpointRequest(BaseModel):
@@ -15,12 +14,11 @@ class SetDidEndpointRequest(BaseModel):
 
 class VCRecord(VCRecordAcaPy):
     credential_id: str = Field(
-        ..., alias="record_id", description="Credential identifier"
+        ..., validation_alias="record_id", description="Credential identifier"
     )
     record_id: str = Field(
         ...,
-        alias="credential_id",
-        description="Removed - renamed to credential_id",
+        description="removed - renamed to credential_id",
         exclude=True,
     )
 
@@ -29,20 +27,8 @@ class VCRecordList(BaseModel):
     results: Optional[List[VCRecord]] = None
 
 
-class IndyCredInfo(IndyCredInfoAcaPy):
-    credential_id: str = Field(
-        ..., alias="referent", description="Credential identifier"
-    )
-    referent: str = Field(
-        ...,
-        alias="credential_id",
-        description="Removed - renamed to credential_id",
-        exclude=True,
-    )
-
-
 class CredInfoList(BaseModel):
-    results: Optional[List[IndyCredInfo]] = None
+    results: Optional[List[CredInfo]] = None
 
 
 class DIDCreate(BaseModel):

@@ -705,12 +705,14 @@ async def test_get_credentials_by_proof_id(
     returned_cred_precis = [
         CredPrecis(
             cred_info=CredInfo(
-                **cred.cred_info.model_dump(), credential_id=cred.cred_info.referent
+                cred_def_id="WgWxqztrNooG92RXvxSTWv:3:CL:20:tag",
+                credential_id="abcde",
+                referent="abcde",
+                attrs={"attr1": "value1"},
             ),
-            interval=cred.interval,
-            presentation_referents=cred.presentation_referents,
+            interval=None,
+            presentation_referents=None,
         )
-        for cred in cred_precis
     ]
 
     mocker.patch.object(
@@ -726,6 +728,10 @@ async def test_get_credentials_by_proof_id(
     )
 
     assert result == returned_cred_precis
+
+    # Assert "referent" is excluded from serialized model
+    assert "referent" not in result[0].cred_info.model_dump()
+
     VerifierV2.get_credentials_by_proof_id.assert_called_once_with(
         controller=mock_agent_controller,
         proof_id="v2-abcd",

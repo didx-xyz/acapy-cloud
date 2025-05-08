@@ -130,12 +130,14 @@ class RejectProofRequest(ProofId):
 
 
 class CredInfo(BaseModel):
-    attrs: dict = Field(default=None, description="Attribute names and value")
-    cred_def_id: str = Field(
-        default=None, description="Credential definition identifier"
+    attrs: dict = Field(..., description="Attribute names and value")
+    cred_def_id: str = Field(..., description="Credential definition identifier")
+    referent: str = Field(
+        ..., description="removed - renamed to credential_id", exclude=True
     )
-    referent: str = Field(default=None, description="Credential identifier")
-    credential_id: str = Field(default=None, description="Credential identifier")
+    credential_id: str = Field(
+        ..., description="Credential identifier", validation_alias="referent"
+    )
     cred_rev_id: Optional[str] = Field(
         default=None, description="Credential revocation identifier"
     )
@@ -150,6 +152,6 @@ class CredPrecis(BaseModel):
     interval: Optional[IndyNonRevocationInterval] = Field(
         default=None, description="Non-revocation interval from presentation request"
     )
-    presentation_referents: Optional[list] = Field(
+    presentation_referents: Optional[list[str]] = Field(
         default=None, description="Presentation referents"
     )

@@ -323,8 +323,8 @@ async def revoke_alice_anoncreds_and_publish(
     )
 
 
-class ReferentCredDef(BaseModel):
-    referent: str
+class CredentialIdCredDef(BaseModel):
+    credential_id: str
     cred_def_revocable: str
 
 
@@ -334,7 +334,7 @@ async def get_or_issue_regression_cred_revoked(
     alice_member_client: RichAsyncClient,
     credential_definition_id: str,
     faber_and_alice_connection: FaberAliceConnect,
-) -> ReferentCredDef:
+) -> CredentialIdCredDef:
     revoked_attribute_name = f"Alice-revoked-{credential_type}"
 
     # Wallet Query to fetch credential with this attribute name
@@ -419,8 +419,8 @@ async def get_or_issue_regression_cred_revoked(
         )
         revoked_credential = wallet_credentials.json()["results"][0]
 
-    return ReferentCredDef(
-        referent=revoked_credential["referent"],
+    return CredentialIdCredDef(
+        credential_id=revoked_credential["credential_id"],
         cred_def_revocable=revoked_credential["cred_def_id"],
     )
 
@@ -431,7 +431,7 @@ async def get_or_issue_regression_anoncreds_revoked(
     alice_member_client: RichAsyncClient,
     anoncreds_credential_definition_id_revocable: str,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
-) -> ReferentCredDef:
+) -> CredentialIdCredDef:
     return await get_or_issue_regression_cred_revoked(
         credential_type="anoncreds",
         faber_client=faber_anoncreds_client,
@@ -522,8 +522,8 @@ async def get_or_issue_regression_cred_valid(
         )
         valid_credential = wallet_credentials.json()["results"][0]
 
-    return ReferentCredDef(
-        referent=valid_credential["referent"],
+    return CredentialIdCredDef(
+        credential_id=valid_credential["credential_id"],
         cred_def_revocable=valid_credential["cred_def_id"],
     )
 

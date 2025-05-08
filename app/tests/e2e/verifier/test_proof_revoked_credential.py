@@ -6,7 +6,7 @@ import pytest
 
 from app.routes.issuer import router as issuer_router
 from app.routes.verifier import router as verifier_router
-from app.tests.fixtures.credentials import ReferentCredDef
+from app.tests.fixtures.credentials import CredentialIdCredDef
 from app.tests.util.connections import AcmeAliceConnect
 from app.tests.util.regression_testing import TestMode
 from app.tests.util.verifier import send_proof_request
@@ -89,12 +89,12 @@ async def proof_revoked_credential(
 
     alice_proof_exchange_id = alice_payload["proof_id"]
 
-    # Get referent
-    referent = (
+    # Get credential_id
+    credential_id = (
         await alice_member_client.get(
             f"{VERIFIER_BASE_PATH}/proofs/{alice_proof_exchange_id}/credentials"
         )
-    ).json()[0]["cred_info"]["referent"]
+    ).json()[0]["cred_info"]["credential_id"]
 
     # Send proof
     await alice_member_client.post(
@@ -103,7 +103,7 @@ async def proof_revoked_credential(
             "proof_id": alice_proof_exchange_id,
             f"{proof_type}_presentation_spec": {
                 "requested_attributes": {
-                    "THE_SPEED": {"cred_id": referent, "revealed": True}
+                    "THE_SPEED": {"cred_id": credential_id, "revealed": True}
                 },
                 "requested_predicates": {},
                 "self_attested_attributes": {},
@@ -135,7 +135,7 @@ async def proof_revoked_credential(
 )
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_regression_proof_revoked_anoncreds_credential(
-    get_or_issue_regression_anoncreds_revoked: ReferentCredDef,
+    get_or_issue_regression_anoncreds_revoked: CredentialIdCredDef,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
@@ -151,7 +151,7 @@ async def test_regression_proof_revoked_anoncreds_credential(
 
 async def regression_proof_revoked_credential(
     proof_type: Literal["anoncreds"],
-    get_or_issue_regression_cred_revoked: ReferentCredDef,
+    get_or_issue_regression_cred_revoked: CredentialIdCredDef,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
@@ -159,7 +159,7 @@ async def regression_proof_revoked_credential(
     await asyncio.sleep(14)  # moment for revocation registry to update
     # todo: remove sleep when issue resolved: https://github.com/openwallet-foundation/acapy/issues/3018
 
-    referent = get_or_issue_regression_cred_revoked.referent
+    credential_id = get_or_issue_regression_cred_revoked.credential_id
     credential_definition_id_revocable = (
         get_or_issue_regression_cred_revoked.cred_def_revocable
     )
@@ -203,7 +203,7 @@ async def regression_proof_revoked_credential(
             "proof_id": alice_proof_exchange_id,
             f"{proof_type}_presentation_spec": {
                 "requested_attributes": {
-                    "THE_SPEED": {"cred_id": referent, "revealed": True}
+                    "THE_SPEED": {"cred_id": credential_id, "revealed": True}
                 },
                 "requested_predicates": {},
                 "self_attested_attributes": {},

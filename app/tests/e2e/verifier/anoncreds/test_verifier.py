@@ -14,7 +14,7 @@ from app.routes.issuer import router as issuer_router
 from app.routes.oob import router as oob_router
 from app.routes.verifier import AcceptProofRequest, RejectProofRequest
 from app.routes.verifier import router as verifier_router
-from app.tests.fixtures.credentials import ReferentCredDef
+from app.tests.fixtures.credentials import CredentialIdCredDef
 from app.tests.services.verifier.utils import sample_anoncreds_proof_request
 from app.tests.util.connections import AcmeAliceConnect, MeldCoAliceConnect
 from app.tests.util.regression_testing import TestMode
@@ -114,9 +114,9 @@ async def test_accept_anoncreds_proof_request(
         f"{VERIFIER_BASE_PATH}/proofs/{alice_proof_id}/credentials"
     )
 
-    referent = requested_credentials.json()[0]["cred_info"]["referent"]
+    credential_id = requested_credentials.json()[0]["cred_info"]["credential_id"]
     request_attrs = AnonCredsRequestedCredsRequestedAttr(
-        cred_id=referent, revealed=True
+        cred_id=credential_id, revealed=True
     )
     proof_accept = AcceptProofRequest(
         proof_id=alice_proof_id,
@@ -275,14 +275,14 @@ async def test_get_proof_and_get_proofs_anoncreds(
     alice_proof_id = alice_payload["proof_id"]
 
     # Get credential referent for alice to accept request
-    referent = (
+    credential_id = (
         await alice_member_client.get(
             f"{VERIFIER_BASE_PATH}/proofs/{alice_proof_id}/credentials"
         )
-    ).json()[0]["cred_info"]["referent"]
+    ).json()[0]["cred_info"]["credential_id"]
 
     request_attrs = AnonCredsRequestedCredsRequestedAttr(
-        cred_id=referent, revealed=True
+        cred_id=credential_id, revealed=True
     )
 
     proof_accept = AcceptProofRequest(
@@ -447,13 +447,11 @@ async def test_get_anoncreds_credentials_for_request(
 
         result = response.json()[0]
         assert "cred_info" in result
-        assert result["cred_info"]["referent"] == result["cred_info"]["credential_id"]
         assert [
             attr
             in [
                 "attrs",
                 "cred_def_info",
-                "referent",
                 "credential_id",
                 "interval",
                 "presentation_referents",
@@ -516,9 +514,9 @@ async def test_accept_anoncreds_proof_request_verifier_has_issuer_role(
         },
     )
 
-    referent = requested_credentials.json()[0]["cred_info"]["referent"]
+    credential_id = requested_credentials.json()[0]["cred_info"]["credential_id"]
     request_attrs = AnonCredsRequestedCredsRequestedAttr(
-        cred_id=referent, revealed=True
+        cred_id=credential_id, revealed=True
     )
 
     proof_accept = AcceptProofRequest(
@@ -587,9 +585,9 @@ async def test_saving_of_anoncreds_presentation_exchange_records(
         f"{VERIFIER_BASE_PATH}/proofs/{alice_proof_id}/credentials"
     )
 
-    referent = requested_credentials.json()[0]["cred_info"]["referent"]
+    credential_id = requested_credentials.json()[0]["cred_info"]["credential_id"]
     request_attrs = AnonCredsRequestedCredsRequestedAttr(
-        cred_id=referent, revealed=True
+        cred_id=credential_id, revealed=True
     )
 
     proof_accept = AcceptProofRequest(
@@ -659,13 +657,13 @@ async def test_saving_of_anoncreds_presentation_exchange_records(
 )
 @pytest.mark.xdist_group(name="issuer_test_group_3")
 async def test_regression_proof_valid_anoncreds_credential(
-    get_or_issue_regression_anoncreds_valid: ReferentCredDef,
+    get_or_issue_regression_anoncreds_valid: CredentialIdCredDef,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
 ):
     unix_timestamp = int(time.time())
-    referent = get_or_issue_regression_anoncreds_valid.referent
+    credential_id = get_or_issue_regression_anoncreds_valid.credential_id
     credential_definition_id_revocable = (
         get_or_issue_regression_anoncreds_valid.cred_def_revocable
     )
@@ -709,7 +707,7 @@ async def test_regression_proof_valid_anoncreds_credential(
             "proof_id": alice_proof_exchange_id,
             "anoncreds_presentation_spec": {
                 "requested_attributes": {
-                    "THE_SPEED": {"cred_id": referent, "revealed": True}
+                    "THE_SPEED": {"cred_id": credential_id, "revealed": True}
                 },
                 "requested_predicates": {},
                 "self_attested_attributes": {},
@@ -781,15 +779,11 @@ async def test_restrictions_on_attr(
             result = response.json()[0]
             print(result)
             assert "cred_info" in result
-            assert (
-                result["cred_info"]["referent"] == result["cred_info"]["credential_id"]
-            )
             assert [
                 attr
                 in [
                     "attrs",
                     "cred_def_info",
-                    "referent",
                     "credential_id",
                     "interval",
                     "presentation_referents",

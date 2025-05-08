@@ -2380,7 +2380,7 @@
           "verifier"
         ],
         "summary": "Accept a Proof Request",
-        "description": "Accept proof request\n---\nA prover uses this endpoint to respond to a proof request, by sending a presentation to the verifier.\n\nAn AnonCreds presentation contains a mapping of the requested attributes to the wallet credential id of the prover.\n\nThe prover must provide the proof ID of the request that they are responding to, and the presentation object.\n```json\n{\n    \"proof_id\": \"string\", <-- The proof ID of the presentation request that is being accepted\n    \"anoncreds_presentation_spec\": {...},\n    \"dif_presentation_spec\": {...},\n}\n```\n\nExample of an AnonCreds presentation object:\n```json\n{\n    \"anoncreds_presentation_spec\": {\n        \"requested_attributes\": {\n            \"surname\": {\n                \"cred_id\": \"10e6b03f-2b60-431a-9634-731594423120\",\n                \"revealed\": true\n            },\n            \"name\": {\n                \"cred_id\": \"10e6b03f-2b60-431a-9634-731594423120\",\n                \"revealed\": true\n            },\n            \"age\": {\n                \"cred_id\": \"10e6b03f-2b60-431a-9634-731594423120\",\n                \"revealed\": true\n            }\n        }\n    }\n}\n```\n\nIn the context of the holder's wallet, the `cred_id` is called the `referent`.\n\nThe `revealed` parameter indicates whether the holder wants to reveal the attribute value to the verifier or not.\n\nRequest Body:\n---\n    body: AcceptProofRequest\n        The proof request object\n\nReturns:\n---\n    PresentationExchange\n        The prover's updated presentation exchange record after responding to the proof request.",
+        "description": "Accept proof request\n---\nA prover uses this endpoint to respond to a proof request, by sending a presentation to the verifier.\n\nAn AnonCreds presentation contains a mapping of the requested attributes to the wallet credential id of the prover.\n\nThe prover must provide the proof ID of the request that they are responding to, and the presentation object.\n```json\n{\n    \"proof_id\": \"string\", <-- The proof ID of the presentation request that is being accepted\n    \"anoncreds_presentation_spec\": {...},\n    \"dif_presentation_spec\": {...},\n}\n```\n\nExample of an AnonCreds presentation object:\n```json\n{\n    \"anoncreds_presentation_spec\": {\n        \"requested_attributes\": {\n            \"surname\": {\n                \"cred_id\": \"10e6b03f-2b60-431a-9634-731594423120\",\n                \"revealed\": true\n            },\n            \"name\": {\n                \"cred_id\": \"10e6b03f-2b60-431a-9634-731594423120\",\n                \"revealed\": true\n            },\n            \"age\": {\n                \"cred_id\": \"10e6b03f-2b60-431a-9634-731594423120\",\n                \"revealed\": true\n            }\n        }\n    }\n}\n```\n\nThe `revealed` parameter indicates whether the holder wants to reveal the attribute value to the verifier or not.\n\nRequest Body:\n---\n    body: AcceptProofRequest\n        The proof request object\n\nReturns:\n---\n    PresentationExchange\n        The prover's updated presentation exchange record after responding to the proof request.",
         "operationId": "accept_proof_request_v1_verifier_accept_request_post",
         "requestBody": {
           "content": {
@@ -2935,7 +2935,7 @@
           "wallet"
         ],
         "summary": "Fetch a credential by ID",
-        "description": "Fetch a specific credential by ID\n---\n\nParameters:\n---\n    credential_id: str\n        The ID of the credential to fetch.\n\nReturns:\n---\n    IndyCredInfo\n        The credential record.",
+        "description": "Fetch a specific credential by ID\n---\n\nParameters:\n---\n    credential_id: str\n        The ID of the credential to fetch.\n\nReturns:\n---\n    CredInfo\n        The credential record.",
         "operationId": "get_credential_record_v1_wallet_credentials__credential_id__get",
         "security": [
           {
@@ -2959,7 +2959,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IndyCredInfo"
+                  "$ref": "#/components/schemas/CredInfo"
                 }
               }
             }
@@ -5591,11 +5591,6 @@
             "title": "Cred Def Id",
             "description": "Credential definition identifier"
           },
-          "referent": {
-            "type": "string",
-            "title": "Referent",
-            "description": "Credential identifier"
-          },
           "credential_id": {
             "type": "string",
             "title": "Credential Id",
@@ -5639,6 +5634,11 @@
           }
         },
         "type": "object",
+        "required": [
+          "attrs",
+          "cred_def_id",
+          "credential_id"
+        ],
         "title": "CredInfo"
       },
       "CredInfoList": {
@@ -5647,7 +5647,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/IndyCredInfo"
+                  "$ref": "#/components/schemas/CredInfo"
                 },
                 "type": "array"
               },
@@ -5681,7 +5681,9 @@
           "presentation_referents": {
             "anyOf": [
               {
-                "items": {},
+                "items": {
+                  "type": "string"
+                },
                 "type": "array"
               },
               {
@@ -6938,83 +6940,6 @@
         "type": "object",
         "title": "Hangup",
         "description": "Hangup"
-      },
-      "IndyCredInfo": {
-        "properties": {
-          "attrs": {
-            "anyOf": [
-              {
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Attrs",
-            "description": "Attribute names and value"
-          },
-          "cred_def_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cred Def Id",
-            "description": "Credential definition identifier"
-          },
-          "cred_rev_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cred Rev Id",
-            "description": "Credential revocation identifier"
-          },
-          "rev_reg_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rev Reg Id",
-            "description": "Revocation registry identifier"
-          },
-          "schema_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Schema Id",
-            "description": "Schema identifier"
-          },
-          "referent": {
-            "type": "string",
-            "title": "Referent",
-            "description": "Credential identifier"
-          }
-        },
-        "type": "object",
-        "required": [
-          "referent"
-        ],
-        "title": "IndyCredInfo"
       },
       "IndyNonRevocationInterval": {
         "properties": {
@@ -10202,15 +10127,15 @@
             ],
             "title": "Subject Ids"
           },
-          "record_id": {
+          "credential_id": {
             "type": "string",
-            "title": "Record Id",
+            "title": "Credential Id",
             "description": "Credential identifier"
           }
         },
         "type": "object",
         "required": [
-          "record_id"
+          "credential_id"
         ],
         "title": "VCRecord"
       },
