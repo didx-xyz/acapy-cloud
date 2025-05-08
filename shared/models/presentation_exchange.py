@@ -75,10 +75,10 @@ class PrimaryProof(IndyPrimaryProof):
 
 class ProofProofProofsProof(IndyProofProofProofsProof):
     non_revoc_proof: Optional[NonRevocProof] = Field(
-        default=None, description="Indy non-revocation proof"
+        default=None, description="Non-revocation proof"
     )
     primary_proof: Optional[PrimaryProof] = Field(
-        default=None, description="Indy primary proof"
+        default=None, description="Primary proof"
     )
 
 
