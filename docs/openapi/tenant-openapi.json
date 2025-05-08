@@ -9290,7 +9290,7 @@
               }
             ],
             "title": "Rev Reg Delta",
-            "description": "Indy revocation registry delta"
+            "description": "Revocation registry delta"
           }
         },
         "type": "object",

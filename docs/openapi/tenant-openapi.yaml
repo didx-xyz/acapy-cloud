@@ -5314,7 +5314,7 @@ components:
               type: object
             - type: 'null'
           title: Rev Reg Delta
-          description: Indy revocation registry delta
+          description: Revocation registry delta
       type: object
       title: RevRegWalletUpdatedResult
       description: RevRegWalletUpdatedResult
