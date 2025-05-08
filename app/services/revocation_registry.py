@@ -245,20 +245,7 @@ async def publish_pending_revocations(
             f"Failed to publish pending revocations: {e.detail}", e.status_code
         ) from e
 
-    if isinstance(result, TxnOrPublishRevocationsResult):
-        if not result.txn or not result.txn[0].transaction_id:
-            bound_logger.warning(
-                "Published pending revocations but received no endorser transaction id. Got result: {}",
-                result,
-            )
-            return
-
-        bound_logger.debug(
-            "Successfully published pending Indy revocations. Endorser transaction ids: {}.",
-            [txn.transaction_id for txn in result.txn],
-        )
-        return result
-    elif isinstance(result, PublishRevocationsResultSchemaAnonCreds):
+    if isinstance(result, PublishRevocationsResultSchemaAnonCreds):
         bound_logger.info(
             "Successfully published pending AnonCreds revocations: {}.", result
         )
@@ -413,7 +400,7 @@ async def get_credential_definition_id_from_exchange_id(
             acapy_call=controller.issue_credential_v2_0.get_record,
             cred_ex_id=cred_ex_id,
         )
-        rev_reg_id = cred_ex_record.indy.rev_reg_id
+        rev_reg_id = cred_ex_record.anoncreds.rev_reg_id
         rev_reg_parts = rev_reg_id.split(":")
         credential_definition_id = ":".join(
             [
@@ -536,7 +523,6 @@ async def validate_rev_reg_ids(
 async def get_created_active_registries(
     controller: AcaPyClient,
     cred_def_id: str,
-    wallet_type: Literal["askar", "askar-anoncreds"],
 ) -> List[str]:
     """
     Get the active revocation registries for a credential definition with state active.
@@ -544,21 +530,13 @@ async def get_created_active_registries(
     """
     bound_logger = logger.bind(body={"cred_def_id": cred_def_id})
     try:
-        if wallet_type == "askar-anoncreds":
-            # Both will be in active state when created
-            reg = await handle_acapy_call(
-                logger=bound_logger,
-                acapy_call=controller.anoncreds_revocation.get_revocation_registries,
-                cred_def_id=cred_def_id,
-                state="finished",
-            )
-        elif wallet_type == "askar":
-            reg = await handle_acapy_call(
-                logger=bound_logger,
-                acapy_call=controller.revocation.get_created_registries,
-                cred_def_id=cred_def_id,
-                state="active",
-            )
+        # Both will be in active state when created
+        reg = await handle_acapy_call(
+            logger=bound_logger,
+            acapy_call=controller.anoncreds_revocation.get_revocation_registries,
+            cred_def_id=cred_def_id,
+            state="finished",
+        )
         return reg.rev_reg_ids
     except CloudApiException as e:
         detail = (
@@ -571,7 +549,6 @@ async def get_created_active_registries(
 async def wait_for_active_registry(
     controller: AcaPyClient,
     cred_def_id: str,
-    wallet_type: Literal["askar", "askar-anoncreds"],
 ) -> List[str]:
     active_registries = []
     sleep_duration = 0  # First sleep should be 0
@@ -579,9 +556,7 @@ async def wait_for_active_registry(
     # we want both active registries ready before trying to publish revocations to it
     while len(active_registries) < 2:
         await asyncio.sleep(sleep_duration)
-        active_registries = await get_created_active_registries(
-            controller, cred_def_id, wallet_type
-        )
+        active_registries = await get_created_active_registries(controller, cred_def_id)
         sleep_duration = 0.5  # Following sleeps should wait 0.5s before retry
 
     return active_registries

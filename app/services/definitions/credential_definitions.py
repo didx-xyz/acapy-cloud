@@ -52,58 +52,37 @@ async def create_credential_definition(
     if support_revocation:
         await publisher.check_endorser_connection()
 
-    wallet_type = await get_wallet_type(
-        aries_controller=aries_controller,
+    inner_cred_def = handle_model_with_validation(
         logger=bound_logger,
+        model_class=InnerCredDef,
+        issuer_id=strip_qualified_did_sov(public_did),
+        schema_id=credential_definition.schema_id,
+        tag=credential_definition.tag,
     )
-    if wallet_type == "askar-anoncreds":
-        inner_cred_def = handle_model_with_validation(
-            logger=bound_logger,
-            model_class=InnerCredDef,
-            issuer_id=strip_qualified_did_sov(public_did),
-            schema_id=credential_definition.schema_id,
-            tag=credential_definition.tag,
-        )
 
-        options = handle_model_with_validation(
-            logger=bound_logger,
-            model_class=CredDefPostOptions,
-            create_transaction_for_endorser=True,
-            revocation_registry_size=REGISTRY_SIZE,
-            support_revocation=support_revocation,
-        )
+    options = handle_model_with_validation(
+        logger=bound_logger,
+        model_class=CredDefPostOptions,
+        create_transaction_for_endorser=True,
+        revocation_registry_size=REGISTRY_SIZE,
+        support_revocation=support_revocation,
+    )
 
-        request_body = handle_model_with_validation(
-            logger=bound_logger,
-            model_class=CredDefPostRequest,
-            credential_definition=inner_cred_def,
-            options=options,
-        )
+    request_body = handle_model_with_validation(
+        logger=bound_logger,
+        model_class=CredDefPostRequest,
+        credential_definition=inner_cred_def,
+        options=options,
+    )
 
-        result = await publisher.publish_anoncreds_credential_definition(request_body)
-        credential_definition_id = (
-            result.credential_definition_state.credential_definition_id
-        )
+    result = await publisher.publish_anoncreds_credential_definition(request_body)
+    credential_definition_id = (
+        result.credential_definition_state.credential_definition_id
+    )
 
-        # Set AnonCreds transaction info if it exists
-        result_txn = result.registration_metadata.get("txn")
-        transaction_id = result_txn.get("transaction_id") if result_txn else None
-    else:  # wallet_type == "askar"
-        request_body = handle_model_with_validation(
-            logger=bound_logger,
-            model_class=CredentialDefinitionSendRequest,
-            schema_id=credential_definition.schema_id,
-            support_revocation=support_revocation,
-            tag=credential_definition.tag,
-            revocation_registry_size=REGISTRY_SIZE,
-        )
-
-        result = await publisher.publish_credential_definition(request_body)
-        credential_definition_id = result.sent.credential_definition_id
-
-        # Set Indy transaction info if it exists
-        result_txn = result.txn
-        transaction_id = result_txn.transaction_id if result_txn else None
+    # Set AnonCreds transaction info if it exists
+    result_txn = result.registration_metadata.get("txn")
+    transaction_id = result_txn.get("transaction_id") if result_txn else None
 
     if transaction_id:
         await wait_for_transaction_ack(
@@ -115,7 +94,7 @@ async def create_credential_definition(
 
     if support_revocation:
         await publisher.wait_for_revocation_registry(
-            credential_definition_id=credential_definition_id, wallet_type=wallet_type
+            credential_definition_id=credential_definition_id
         )
 
     return credential_definition_id

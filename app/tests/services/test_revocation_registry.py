@@ -20,8 +20,8 @@ from aries_cloudcontroller import (
     RevRegsCreatedSchemaAnonCreds,
     TransactionRecord,
     TxnOrPublishRevocationsResult,
+    V20CredExRecordAnonCreds,
     V20CredExRecordDetail,
-    V20CredExRecordIndy,
 )
 
 import app.services.revocation_registry as test_module
@@ -448,7 +448,7 @@ async def test_get_credential_definition_id_from_exchange_id(
     # Success v2
     mock_agent_controller.issue_credential_v2_0.get_record.return_value = (
         V20CredExRecordDetail(
-            indy=V20CredExRecordIndy(rev_reg_id=revocation_registry_id)
+            anoncreds=V20CredExRecordAnonCreds(rev_reg_id=revocation_registry_id)
         )
     )
 
@@ -477,7 +477,7 @@ async def test_get_credential_definition_id_from_exchange_id(
 
     # KeyError scenario
     mock_agent_controller.issue_credential_v2_0.get_record.return_value = (
-        V20CredExRecordDetail(indy=V20CredExRecordIndy(rev_reg_id=None))
+        V20CredExRecordDetail(anoncreds=V20CredExRecordAnonCreds(rev_reg_id=None))
     )
 
     cred_def_id_result = (
@@ -924,8 +924,6 @@ async def test_revoke_credential_with_transaction_result(
 
 @pytest.mark.anyio
 async def test_wait_for_active_registry(mock_agent_controller: AcaPyClient):
-    wallet_type = "askar"
-
     # Mock the get_created_active_registries function to return active registries
     with patch(
         "app.services.revocation_registry.get_created_active_registries",
@@ -942,7 +940,6 @@ async def test_wait_for_active_registry(mock_agent_controller: AcaPyClient):
             active_registries = await test_module.wait_for_active_registry(
                 controller=mock_agent_controller,
                 cred_def_id=cred_def_id,
-                wallet_type=wallet_type,
             )
 
             # Verify the result
