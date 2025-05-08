@@ -62,12 +62,12 @@ async def sign_jsonld(
             if body.credential_id:
                 # Can this ever be correct as in are there jsonLD credential potentially being returned?
                 bound_logger.debug("Fetching credential from wallet")
-                indy_cred_info = await handle_acapy_call(
+                cred_info = await handle_acapy_call(
                     logger=bound_logger,
                     acapy_call=aries_controller.credentials.get_record,
                     credential_id=body.credential_id,
                 )
-                credential = indy_cred_info.to_dict()
+                credential = cred_info.to_dict()
             else:
                 # This is already handled in JsonLdSignRequest model validation
                 raise CloudApiException(
