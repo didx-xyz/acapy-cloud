@@ -1,6 +1,6 @@
 from typing import Literal, Optional
 
-from aries_cloudcontroller import V20Pres, V20PresExRecord, V20PresRequest
+from aries_cloudcontroller import IndyProof, IndyProofRequest, V20PresExRecord
 from pydantic import BaseModel
 
 from shared.log_config import get_logger
@@ -33,8 +33,8 @@ class PresentationExchange(BaseModel):
     created_at: str
     error_msg: Optional[str] = None
     parent_thread_id: Optional[str] = None
-    presentation: Optional[V20Pres] = None
-    presentation_request: Optional[V20PresRequest] = None
+    presentation: Optional[IndyProof] = None
+    presentation_request: Optional[IndyProofRequest] = None
     proof_id: str
     role: Role
     state: Optional[State] = None
@@ -44,13 +44,33 @@ class PresentationExchange(BaseModel):
 
 
 def presentation_record_to_model(record: V20PresExRecord) -> PresentationExchange:
+    presentation = None
+    presentation_request = None
+
+    if not record.by_format:
+        logger.info("Presentation record has no by_format attribute: {}", record)
+    else:
+        if record.by_format.pres:
+            # Get first key (we assume there is only one)
+            key = next(iter(record.by_format.pres))
+            presentation = record.by_format.pres[key]
+        else:
+            logger.debug("Presentation record has no presentation: {}", record)
+
+        if record.by_format.pres_request:
+            # Get first key (we assume there is only one)
+            key = next(iter(record.by_format.pres_request))
+            presentation_request = record.by_format.pres_request[key]
+        else:
+            logger.debug("Presentation record has no presentation request: {}", record)
+
     return PresentationExchange(
         connection_id=record.connection_id,
         created_at=record.created_at,
         error_msg=record.error_msg,
         parent_thread_id=record.pres_request.id if record.pres_request else None,
-        presentation=record.pres,
-        presentation_request=record.pres_request,
+        presentation=presentation,
+        presentation_request=presentation_request,
         proof_id="v2-" + str(record.pres_ex_id),
         role=record.role,
         state=record.state,
