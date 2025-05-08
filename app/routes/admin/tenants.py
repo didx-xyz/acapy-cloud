@@ -71,15 +71,6 @@ async def create_tenant(
 
     Use this endpoint to create a new Tenant, which is the same as creating a new Wallet.
 
-    NB: To work with AnonCreds, the `askar-anoncreds` wallet type is required. i.e. To issue, verify, or
-    hold AnonCreds, the issuer, verifier, or holder, requires the anoncreds wallet type.
-
-    Indy credentials are compatible with `askar-anoncreds` wallets for holders or verifiers:
-    i.e. an anoncreds wallet can hold or verify Indy credentials.
-
-    However, issuers are restricted: an issuer with `askar` wallet type can only issue Indy credentials,
-    and an issuer with `askar-anoncreds` wallet type can only issue AnonCreds.
-
     The `wallet_label` is a required field that allows you to assign an alias to the Tenant.
     This label is used as the default alias in connections (i.e. the other party will see this name in their records).
 
@@ -113,8 +104,6 @@ async def create_tenant(
                 A list of roles to assign to the Tenant.
             image_url: Optional[str]
                 An optional image URL for the Tenant.
-            wallet_type: Optional[Literal["askar", "askar-anoncreds"]]
-                The type of wallet to create. Can be 'askar' or 'askar-anoncreds', with 'askar-anoncreds' as default.
             extra_settings: Optional[dict]
                 Optional per-tenant settings to configure wallet behaviour for advanced users.
 
@@ -163,7 +152,7 @@ async def create_tenant(
         label=wallet_label,
         wallet_key=base58.b58encode(token_urlsafe(48)).decode(),
         wallet_name=wallet_name,
-        wallet_type=body.wallet_type,
+        wallet_type="askar-anoncreds",
         group_id=body.group_id,
         extra_settings=body.extra_settings,
     )
