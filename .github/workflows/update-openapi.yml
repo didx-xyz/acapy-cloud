@@ -209,7 +209,7 @@ jobs:
 
           # Check if there are any changes
           if [[ -n "$(git status --porcelain ./docs/openapi)" ]]; then
-            echo "Changes detected in OpenAPI specs, preparing to commit and push"
+            echo "::warning:: OpenAPI specs have changed, committing and opening a PR to sync changes"
 
             # Commit and push changes
             git add ./docs/openapi/
