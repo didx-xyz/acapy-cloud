@@ -132,7 +132,9 @@ class RejectProofRequest(ProofId):
 class CredInfo(BaseModel):
     attrs: dict = Field(..., description="Attribute names and value")
     cred_def_id: str = Field(..., description="Credential definition identifier")
-    referent: str = Field(..., description="Credential identifier", exclude=True)
+    referent: str = Field(
+        ..., description="removed - renamed to credential_id", exclude=True
+    )
     credential_id: str = Field(
         ..., description="Credential identifier", validation_alias="referent"
     )
