@@ -693,7 +693,7 @@ async def test_get_credentials_by_proof_id(
         "client_from_auth",
         return_value=mock_context_managed_controller(mock_agent_controller),
     )
-    cred_precis = [
+    indy_cred_precis = [
         IndyCredPrecis(
             cred_info=IndyCredInfo(
                 cred_def_id="WgWxqztrNooG92RXvxSTWv:3:CL:20:tag",
@@ -715,8 +715,10 @@ async def test_get_credentials_by_proof_id(
         )
     ]
 
-    mocker.patch.object(
-        VerifierV2, "get_credentials_by_proof_id", return_value=cred_precis
+    # Get Indy models from acapy
+    mocker.patch(
+        "app.services.verifier.acapy_verifier_v2.handle_acapy_call",
+        return_value=indy_cred_precis,
     )
 
     result = await test_module.get_credentials_by_proof_id(
@@ -727,18 +729,11 @@ async def test_get_credentials_by_proof_id(
         offset=0,
     )
 
+    # Assert result is converted to CredPrecis
     assert result == returned_cred_precis
 
     # Assert "referent" is excluded from serialized model
     assert "referent" not in result[0].cred_info.model_dump()
-
-    VerifierV2.get_credentials_by_proof_id.assert_called_once_with(
-        controller=mock_agent_controller,
-        proof_id="v2-abcd",
-        referent=None,
-        limit=100,
-        offset=0,
-    )
 
 
 @pytest.mark.anyio

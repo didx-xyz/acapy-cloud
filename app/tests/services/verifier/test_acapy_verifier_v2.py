@@ -11,9 +11,11 @@ from aries_cloudcontroller import (
 from pydantic import ValidationError
 
 from app.exceptions.cloudapi_exception import CloudApiException
-from app.routes.verifier import (
+from app.models.verifier import (
     AcceptProofRequest,
     CreateProofRequest,
+    CredInfo,
+    CredPrecis,
     RejectProofRequest,
     SendProofRequest,
 )
@@ -368,7 +370,9 @@ async def test_get_credentials_by_proof_id(
     assert isinstance(creds, list)
 
     if not empty_result:
-        assert isinstance(creds[0], IndyCredPrecis)
+        cred = creds[0]
+        assert isinstance(cred, CredPrecis)
+        assert isinstance(cred.cred_info, CredInfo)
 
 
 @pytest.mark.anyio
