@@ -16,16 +16,13 @@ from aries_cloudcontroller import (
 )
 
 from app.models.verifier import AnonCredsPresentationRequest
-from shared.tests.models.test_presentation_exchange import (
-    anoncreds_pres,
-    anoncreds_pres_proposal,
-    anoncreds_pres_request,
-)
+from shared.models.presentation_exchange import Proof, ProofRequest
 
 anoncreds_by_format = V20PresExRecordByFormat(
-    pres={"anoncreds": anoncreds_pres},
-    pres_proposal={"anoncreds": anoncreds_pres_proposal},
-    pres_request={"anoncreds": anoncreds_pres_request},
+    pres={"anoncreds": Proof()},
+    pres_request={
+        "anoncreds": ProofRequest(requested_attributes={}, requested_predicates={}),
+    },
 )
 
 

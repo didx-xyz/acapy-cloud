@@ -11,6 +11,9 @@ from aries_cloudcontroller import (
 
 from shared.models.presentation_exchange import (
     PresentationExchange,
+    Proof,
+    ProofProof,
+    ProofRequest,
     presentation_record_to_model,
     string_to_bool,
 )
@@ -36,8 +39,12 @@ def test_presentation_exchange_model():
         created_at="2023-01-01T00:00:00Z",
         error_msg=None,
         parent_thread_id="parent-thread-id",
-        presentation=anoncreds_pres,
-        presentation_request=anoncreds_pres_request,
+        presentation=Proof(proof=ProofProof()),
+        presentation_request=ProofRequest(
+            name="request",
+            requested_attributes={},
+            requested_predicates={},
+        ),
         proof_id="proof-id",
         role="prover",
         state="presentation-received",
@@ -50,8 +57,12 @@ def test_presentation_exchange_model():
     assert exchange.created_at == "2023-01-01T00:00:00Z"
     assert exchange.error_msg is None
     assert exchange.parent_thread_id == "parent-thread-id"
-    assert exchange.presentation == anoncreds_pres
-    assert exchange.presentation_request == anoncreds_pres_request
+    assert exchange.presentation == Proof(proof=ProofProof())
+    assert exchange.presentation_request == ProofRequest(
+        name="request",
+        requested_attributes={},
+        requested_predicates={},
+    )
     assert exchange.proof_id == "proof-id"
     assert exchange.role == "prover"
     assert exchange.state == "presentation-received"
@@ -74,16 +85,26 @@ def test_presentation_record_to_model():
         pres=anoncreds_pres,
         pres_request=anoncreds_pres_request,
         by_format={
-            "pres": {"anoncreds": anoncreds_pres.to_dict()},
-            "pres_request": {"anoncreds": anoncreds_pres_request.to_dict()},
+            "pres": {"anoncreds": Proof(proof=ProofProof())},
+            "pres_request": {
+                "anoncreds": ProofRequest(
+                    name="request",
+                    requested_attributes={},
+                    requested_predicates={},
+                )
+            },
         },
     )
 
     model = presentation_record_to_model(record)
 
     assert model.proof_id == "v2-pres-ex-id"
-    assert model.presentation == anoncreds_pres
-    assert model.presentation_request == anoncreds_pres_request
+    assert model.presentation == Proof(proof=ProofProof())
+    assert model.presentation_request == ProofRequest(
+        name="request",
+        requested_attributes={},
+        requested_predicates={},
+    )
     assert model.connection_id == "conn-id"
     assert model.created_at == "2023-01-01T00:00:00Z"
     assert model.role == "prover"

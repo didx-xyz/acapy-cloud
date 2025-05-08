@@ -28,7 +28,6 @@ from app.util.acapy_verifier_utils import (
 )
 from shared.models.presentation_exchange import PresentationExchange
 from shared.models.trustregistry import Actor
-from shared.tests.models.test_presentation_exchange import anoncreds_pres_request
 
 sample_actor = Actor(
     id="abcde",
@@ -43,7 +42,7 @@ pres_exchange = PresentationExchange(
     created_at="2021-09-15 13:49:47Z",
     proof_id="v2-abcd",
     presentation=None,
-    presentation_request=anoncreds_pres_request,
+    presentation_request=sample_anoncreds_proof_request().to_dict(),
     role="prover",
     state="proposal-sent",
     updated_at=None,
