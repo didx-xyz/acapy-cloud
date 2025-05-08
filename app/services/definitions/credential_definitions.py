@@ -5,7 +5,6 @@ from aries_cloudcontroller import (
     AcaPyClient,
     CredDefPostOptions,
     CredDefPostRequest,
-    CredentialDefinitionSendRequest,
     InnerCredDef,
 )
 
@@ -19,7 +18,6 @@ from app.util.assert_public_did import assert_public_did
 from app.util.definitions import credential_definition_from_acapy
 from app.util.did import strip_qualified_did_sov
 from app.util.transaction_acked import wait_for_transaction_ack
-from app.util.wallet_type_checks import get_wallet_type
 from shared import CRED_DEF_ACK_TIMEOUT, REGISTRY_SIZE
 from shared.log_config import get_logger
 
@@ -123,53 +121,26 @@ async def get_credential_definitions(
         }
     )
     bound_logger.debug("Getting created credential definitions")
-    wallet_type = await get_wallet_type(
-        aries_controller=aries_controller,
+
+    response = await handle_acapy_call(
         logger=bound_logger,
+        acapy_call=aries_controller.anoncreds_credential_definitions.get_credential_definitions,
+        issuer_id=issuer_did,
+        schema_id=schema_id,
+        schema_name=schema_name,
+        schema_version=schema_version,
     )
 
-    if wallet_type == "askar-anoncreds":
-        response = await handle_acapy_call(
+    # Initiate retrieving all credential definitions
+    credential_definition_ids = response.credential_definition_ids or []
+    get_credential_definition_futures = [
+        handle_acapy_call(
             logger=bound_logger,
-            acapy_call=aries_controller.anoncreds_credential_definitions.get_credential_definitions,
-            issuer_id=issuer_did,
-            schema_id=schema_id,
-            schema_name=schema_name,
-            schema_version=schema_version,
-        )
-
-        # Initiate retrieving all credential definitions
-        credential_definition_ids = response.credential_definition_ids or []
-        get_credential_definition_futures = [
-            handle_acapy_call(
-                logger=bound_logger,
-                acapy_call=aries_controller.anoncreds_credential_definitions.get_credential_definition,
-                cred_def_id=credential_definition_id,
-            )
-            for credential_definition_id in credential_definition_ids
-        ]
-    else:  # wallet_type == "askar"
-        response = await handle_acapy_call(
-            logger=bound_logger,
-            acapy_call=aries_controller.credential_definition.get_created_cred_defs,
-            issuer_did=issuer_did,
+            acapy_call=aries_controller.anoncreds_credential_definitions.get_credential_definition,
             cred_def_id=credential_definition_id,
-            schema_id=schema_id,
-            schema_issuer_did=schema_issuer_did,
-            schema_name=schema_name,
-            schema_version=schema_version,
         )
-
-        # Initiate retrieving all credential definitions
-        credential_definition_ids = response.credential_definition_ids or []
-        get_credential_definition_futures = [
-            handle_acapy_call(
-                logger=bound_logger,
-                acapy_call=aries_controller.credential_definition.get_cred_def,
-                cred_def_id=credential_definition_id,
-            )
-            for credential_definition_id in credential_definition_ids
-        ]
+        for credential_definition_id in credential_definition_ids
+    ]
 
     # Wait for completion of retrieval and transform all credential definitions
     # into response model (if a credential definition was returned)
@@ -182,19 +153,10 @@ async def get_credential_definitions(
         bound_logger.debug("No definition ids returned")
         credential_definition_results = []
 
-    if wallet_type == "askar-anoncreds":
-        credential_definitions = [
-            credential_definition_from_acapy(credential_definition)
-            for credential_definition in credential_definition_results
-            if credential_definition.credential_definition
-        ]
-    else:  # wallet_type == "askar"
-        credential_definitions = [
-            credential_definition_from_acapy(
-                credential_definition.credential_definition
-            )
-            for credential_definition in credential_definition_results
-            if credential_definition.credential_definition
-        ]
+    credential_definitions = [
+        credential_definition_from_acapy(credential_definition)
+        for credential_definition in credential_definition_results
+        if credential_definition.credential_definition
+    ]
 
     return credential_definitions
