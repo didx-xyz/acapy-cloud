@@ -129,7 +129,6 @@ jobs:
     uses: ./.github/workflows/update-openapi.yml
     with:
       image-version: ${{ needs.docker.outputs.image_version }}
-      pr-number: ${{ github.event_name == 'pull_request' && github.event.pull_request.number || 0 }}
     secrets:
       devops-app-id: ${{ secrets.DEVOPS_APP_ID }}
       devops-private-key: ${{ secrets.DEVOPS_PRIVATE_KEY }}

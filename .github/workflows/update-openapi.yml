@@ -7,11 +7,6 @@ on:
         description: Image version to run
         required: true
         type: string
-      pr-number:
-        description: Pull request number (if triggered by a PR)
-        required: false
-        type: number
-        default: 0
     secrets:
       devops-app-id:
         required: true
@@ -103,7 +98,7 @@ jobs:
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         if: github.event_name == 'pull_request'
         env:
-          PR_NUMBER: ${{ inputs.pr-number }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         with:
           github-token: ${{ steps.devops_login.outputs.token }}
           script: |
