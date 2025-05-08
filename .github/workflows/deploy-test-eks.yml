@@ -487,5 +487,24 @@ jobs:
           cluster-name: cloudapi-dev
           tailscale-authkey: ${{ secrets.tailscale-authkey || secrets.TAILSCALE_AUTHKEY }}
 
-      - name: Soon™
-        run: echo "Soon™"
+      - name: Prepare output directory
+        run: mkdir -p ${{ github.workspace }}/scripts/k6/output && chmod 777 ${{ github.workspace }}/scripts/k6/output
+
+      - name: Run k6 tests
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}/scripts/k6:/scripts \
+            -e CLIENT_ID=${{ secrets.CLIENT_ID }} \
+            -e GOVERNANCE_CLIENT_ID=${{ secrets.GOVERNANCE_CLIENT_ID }} \
+            -e CLIENT_SECRET=${{ secrets.CLIENT_SECRET }} \
+            -e GOVERNANCE_CLIENT_SECRET=${{ secrets.GOVERNANCE_CLIENT_SECRET }} \
+            -e CLOUDAPI_URL=${{ secrets.CLOUDAPI_URL }} \
+            -e OAUTH_ENDPOINT=${{ secrets.OAUTH_ENDPOINT }} \
+            -e GOVERNANCE_OAUTH_ENDPOINT=${{ secrets.GOVERNANCE_OAUTH_ENDPOINT }} \
+            --workdir /scripts \
+            --entrypoint /bin/sh \
+            ghcr.io/${{ github.repository_owner }}/acapy-cloud/xk6:${VERSION} \
+            /scripts/run_tests.sh
+        shell: bash
+        env:
+          VERSION: ${{ inputs.image-version }}
