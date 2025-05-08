@@ -162,6 +162,7 @@ run_batch() {
   run_ha_iterations "${deployments}" scenario_create_invitations
   run_ha_iterations "${deployments}" scenario_create_credentials
   run_ha_iterations "${deployments}" scenario_create_proof_verified
+  # run_ha_iterations "${deployments}" scenario_revoke_credentials
 }
 
 run_collection() {

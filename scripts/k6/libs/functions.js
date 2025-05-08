@@ -118,7 +118,8 @@ export function getAccessTokenByWalletId(bearerToken, walletId) {
     },
   };
 
-  const response = http.get(url, params);
+  const payload = JSON.stringify({});
+  const response = http.post(url, payload, params);
 
   if (response.status >= 200 && response.status < 300) {
     // Request was successful
@@ -433,7 +434,7 @@ export function getCredentialIdByThreadId(holderAccessToken, threadId) {
       // Check if the current object has a matching thread_id
       if (obj.thread_id === threadId) {
         // Return the credential_id if a match is found
-        return obj.credential_id;
+        return obj.credential_exchange_id;
       }
     }
     // Throw an error if no match is found
@@ -574,9 +575,9 @@ export function getProofIdCredentials(holderAccessToken, proofId) {
     for (let i = 0; i < responseData.length; i++) {
       const obj = responseData[i];
       // Check if the current object has a matching thread_id
-      const referent = obj.cred_info.referent;
-      // TODO: this will always return the first referent - fix this
-      return referent;
+      const credentialId = obj.cred_info.credential_id;
+      // TODO: this will always return the first credentialId - fix this
+      return credentialId;
     }
     // Throw an error if no match is found
     // console.log(`Log of the request made: ${JSON.stringify(response.request)}`);
@@ -650,7 +651,7 @@ export function getProof(issuerAccessToken, issuerConnectionId, proofThreadId) {
         },
         requested_predicates: {},
       },
-      save_exchange_record: true,
+      save_exchange_record: false,
       comment: "string",
       connection_id: issuerConnectionId,
     };
