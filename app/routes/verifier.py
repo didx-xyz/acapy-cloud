@@ -9,7 +9,6 @@ from app.exceptions import CloudApiException
 from app.models.verifier import (
     AcceptProofRequest,
     CreateProofRequest,
-    CredInfo,
     CredPrecis,
     RejectProofRequest,
     SendProofRequest,
