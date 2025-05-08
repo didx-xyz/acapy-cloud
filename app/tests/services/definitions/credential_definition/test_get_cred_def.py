@@ -14,30 +14,13 @@ from app.models.definitions import CredentialDefinition as CredDefModel
 from app.services.definitions.credential_definitions import get_credential_definitions
 
 
-@pytest.mark.parametrize("wallet_type", ["askar", "askar-anoncreds"])
 @pytest.mark.anyio
-async def test_get_credential_definitions_success(wallet_type):
+async def test_get_credential_definitions_success():
     mock_aries_controller = AsyncMock()
 
     mock_cred_def_ids = [
         "5Q1Zz9foMeAA8Q7mrmzCfZ:3:CL:7:tag_1",
         "5Q1Zz9foMeAA8Q7mrmzCfZ:3:CL:7:tag_2",
-    ]
-    mock_indy_cred_def_results = [
-        CredentialDefinitionGetResult(
-            credential_definition=CredentialDefinition(
-                id="5Q1Zz9foMeAA8Q7mrmzCfZ:3:CL:7:tag_1",
-                schema_id="schema_1",
-                tag="tag_1",
-            )
-        ),
-        CredentialDefinitionGetResult(
-            credential_definition=CredentialDefinition(
-                id="5Q1Zz9foMeAA8Q7mrmzCfZ:3:CL:7:tag_2",
-                schema_id="schema_2",
-                tag="tag_2",
-            )
-        ),
     ]
     mock_anoncreds_cred_def_results = [
         GetCredDefResult(
@@ -58,23 +41,11 @@ async def test_get_credential_definitions_success(wallet_type):
 
     with patch(
         "app.services.definitions.credential_definitions.handle_acapy_call"
-    ) as mock_handle_acapy_call, patch(
-        "app.services.definitions.credential_definitions.get_wallet_type"
-    ) as mock_get_wallet_type:
-        mock_get_wallet_type.return_value = wallet_type
-
-        if wallet_type == "askar":
-            mock_handle_acapy_call.side_effect = [
-                CredentialDefinitionsCreatedResult(
-                    credential_definition_ids=mock_cred_def_ids
-                ),
-                *mock_indy_cred_def_results,
-            ]
-        else:  # wallet_type == "askar-anoncreds"
-            mock_handle_acapy_call.side_effect = [
-                GetCredDefsResponse(credential_definition_ids=mock_cred_def_ids),
-                *mock_anoncreds_cred_def_results,
-            ]
+    ) as mock_handle_acapy_call:
+        mock_handle_acapy_call.side_effect = [
+            GetCredDefsResponse(credential_definition_ids=mock_cred_def_ids),
+            *mock_anoncreds_cred_def_results,
+        ]
         result = await get_credential_definitions(mock_aries_controller)
 
         assert len(result) == 2
@@ -104,11 +75,7 @@ async def test_get_credential_definitions_with_filters():
     ) as mock_handle_acapy_call, patch(
         "app.services.definitions.credential_definitions.credential_definition_from_acapy",
         side_effect=lambda x: CredDefModel(id=x.id, schema_id=x.schema_id, tag=x.tag),
-    ), patch(
-        "app.services.definitions.credential_definitions.get_wallet_type"
-    ) as mock_get_wallet_type:
-        mock_get_wallet_type.return_value = "askar"
-
+    ):
         mock_handle_acapy_call.side_effect = [
             CredentialDefinitionsCreatedResult(
                 credential_definition_ids=mock_cred_def_ids
@@ -137,10 +104,7 @@ async def test_get_credential_definitions_no_results():
 
     with patch(
         "app.services.definitions.credential_definitions.handle_acapy_call"
-    ) as mock_handle_acapy_call, patch(
-        "app.services.definitions.credential_definitions.get_wallet_type"
-    ) as mock_get_wallet_type:
-        mock_get_wallet_type.return_value = "askar"
+    ) as mock_handle_acapy_call:
         mock_handle_acapy_call.return_value = CredentialDefinitionsCreatedResult(
             credential_definition_ids=None
         )
@@ -171,11 +135,7 @@ async def test_get_credential_definitions_some_missing():
     ) as mock_handle_acapy_call, patch(
         "app.services.definitions.credential_definitions.credential_definition_from_acapy",
         side_effect=lambda x: CredDefModel(id=x.id, schema_id=x.schema_id, tag=x.tag),
-    ), patch(
-        "app.services.definitions.credential_definitions.get_wallet_type"
-    ) as mock_get_wallet_type:
-        mock_get_wallet_type.return_value = "askar"
-
+    ):
         mock_handle_acapy_call.side_effect = [
             CredentialDefinitionsCreatedResult(
                 credential_definition_ids=mock_cred_def_ids

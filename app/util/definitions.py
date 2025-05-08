@@ -37,19 +37,10 @@ def anoncreds_schema_from_acapy(schema: GetSchemaResult):
 
 
 def credential_definition_from_acapy(
-    credential_definition: GetCredDefResult | AcaPyCredentialDefinition,
+    credential_definition: GetCredDefResult,
 ):
-    if isinstance(credential_definition, GetCredDefResult):
-        # AnonCreds Cred Def
-        return CredentialDefinition(
-            id=credential_definition.credential_definition_id,
-            tag=credential_definition.credential_definition.tag,
-            schema_id=credential_definition.credential_definition.schema_id,
-        )
-    else:
-        # Indy Cred Def
-        return CredentialDefinition(
-            id=credential_definition.id,
-            tag=credential_definition.tag,
-            schema_id=credential_definition.schema_id,
-        )
+    return CredentialDefinition(
+        id=credential_definition.credential_definition_id,
+        tag=credential_definition.credential_definition.tag,
+        schema_id=credential_definition.credential_definition.schema_id,
+    )
