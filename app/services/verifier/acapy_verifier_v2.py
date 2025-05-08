@@ -14,7 +14,6 @@ from app.models.verifier import (
     AcceptProofRequest,
     CreateProofRequest,
     CredPrecis,
-    ProofRequestType,
     RejectProofRequest,
     SendProofRequest,
 )
