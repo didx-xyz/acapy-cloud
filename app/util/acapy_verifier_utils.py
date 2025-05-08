@@ -1,9 +1,9 @@
 from typing import List, Optional, Set
 
-from aries_cloudcontroller import AcaPyClient, IndyPresSpec
+from aries_cloudcontroller import AcaPyClient, AnonCredsPresSpec
 
 from app.exceptions import CloudApiException, handle_acapy_call
-from app.models.verifier import AcceptProofRequest, ProofRequestType, SendProofRequest
+from app.models.verifier import AcceptProofRequest, SendProofRequest
 from app.services.acapy_wallet import assert_public_did
 from app.services.trust_registry.actors import fetch_actor_by_did, fetch_actor_by_name
 from app.services.trust_registry.schemas import fetch_schemas
@@ -83,12 +83,14 @@ async def assert_valid_prover(  # pylint: disable=R0912
     if not is_verifier(actor=actor):
         raise CloudApiException("Actor is missing required role 'verifier'.", 403)
 
-    if presentation.type == ProofRequestType.INDY:
+    if presentation.get_proof_type() == "anoncreds":
         # Get schema ids
-        bound_logger.debug("Getting schema ids from presentation for Indy presentation")
+        bound_logger.debug(
+            "Getting schema ids from presentation for AnonCreds presentation"
+        )
         schema_ids = await get_schema_ids(
             aries_controller=aries_controller,
-            presentation=presentation.indy_presentation_spec,
+            presentation=presentation.anoncreds_presentation_spec,
         )
 
         if not schema_ids:
@@ -198,7 +200,7 @@ async def get_actor_by_name(name: str) -> Actor:
 
 
 async def get_schema_ids(
-    aries_controller: AcaPyClient, presentation: IndyPresSpec
+    aries_controller: AcaPyClient, presentation: AnonCredsPresSpec
 ) -> List[str]:
     """Get schema ids from credentials that will be revealed in the presentation"""
     bound_logger = logger.bind(body=presentation)

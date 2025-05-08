@@ -1,17 +1,12 @@
 from aries_cloudcontroller import (
     AnonCredsPresentationReqAttrSpec,
     AnonCredsPresentationRequestNonRevoked,
+    AnonCredsPresSpec,
+    AnonCredsRequestedCredsRequestedAttr,
+    AnonCredsRequestedCredsRequestedPred,
     AttachDecorator,
     AttachDecoratorData,
     DIFProofRequest,
-    IndyPresSpec,
-    IndyProof,
-    IndyProofProof,
-    IndyProofReqAttrSpec,
-    IndyProofRequestedProof,
-    IndyProofRequestNonRevoked,
-    IndyRequestedCredsRequestedAttr,
-    IndyRequestedCredsRequestedPred,
     PresentationDefinition,
     V20Pres,
     V20PresExRecord,
@@ -20,36 +15,15 @@ from aries_cloudcontroller import (
     V20PresProposal,
 )
 
-from app.models.verifier import AnonCredsPresentationRequest, IndyProofRequest
+from app.models.verifier import AnonCredsPresentationRequest
+from shared.models.presentation_exchange import Proof, ProofRequest
 
-indy_proof = IndyProof(
-    identifiers=[],
-    proof=IndyProofProof(aggregated_proof=None, proofs=None),
-    requested_proof=IndyProofRequestedProof(),
+anoncreds_by_format = V20PresExRecordByFormat(
+    pres={"anoncreds": Proof()},
+    pres_request={
+        "anoncreds": ProofRequest(requested_attributes={}, requested_predicates={}),
+    },
 )
-
-indy_proof_request_empty = IndyProofRequest(
-    non_revoked=None,
-    nonce=None,
-    requested_attributes={},
-    requested_predicates={},
-)
-
-
-def sample_indy_proof_request(restrictions=None) -> IndyProofRequest:
-    return IndyProofRequest(
-        name="string",
-        non_revoked=IndyProofRequestNonRevoked(),
-        nonce="12345",
-        requested_attributes={
-            "0_speed_uuid": IndyProofReqAttrSpec(
-                name="speed",
-                restrictions=restrictions,
-            )
-        },
-        requested_predicates={},
-        version="1.0",
-    )
 
 
 def sample_anoncreds_proof_request(restrictions=None) -> AnonCredsPresentationRequest:
@@ -75,17 +49,13 @@ dif_proof_request = DIFProofRequest(
 v20_presentation_exchange_records = [
     V20PresExRecord(
         auto_present=False,
-        by_format=V20PresExRecordByFormat(
-            pres={"indy": {"hello": "world"}},
-            pres_proposal={"indy": {"hello": "world"}},
-            pres_request={"indy": sample_indy_proof_request().to_dict()},
-        ),
+        by_format=anoncreds_by_format,
         connection_id="abc",
         created_at="2021-09-15 13:49:47Z",
         error_msg=None,
         initiator="self",
         pres=V20Pres(
-            formats=[V20PresFormat(attach_id="1234", format="indy")],
+            formats=[V20PresFormat(attach_id="1234", format="anoncreds")],
             presentationsattach=[
                 AttachDecorator(
                     data=AttachDecoratorData(base64="asdf"),
@@ -93,7 +63,7 @@ v20_presentation_exchange_records = [
             ],
             pres_ex_id="abcd",
             pres_proposal=V20PresProposal(
-                formats=[V20PresFormat(attach_id="1234", format="indy")],
+                formats=[V20PresFormat(attach_id="1234", format="anoncreds")],
                 proposalsattach=[
                     AttachDecorator(
                         data=AttachDecoratorData(base64="asdf"),
@@ -112,12 +82,14 @@ v20_presentation_exchange_records = [
 ]
 
 
-indy_pres_spec = IndyPresSpec(
+anoncreds_pres_spec = AnonCredsPresSpec(
     requested_attributes={
-        "0_string_uuid": IndyRequestedCredsRequestedAttr(cred_id="0_string_uuid")
+        "0_string_uuid": AnonCredsRequestedCredsRequestedAttr(cred_id="0_string_uuid")
     },
     requested_predicates={
-        "0_string_GE_uuid": IndyRequestedCredsRequestedPred(cred_id="0_string_GE_uuid")
+        "0_string_GE_uuid": AnonCredsRequestedCredsRequestedPred(
+            cred_id="0_string_GE_uuid"
+        )
     },
     self_attested_attributes={"sth": "sth_else"},
 )

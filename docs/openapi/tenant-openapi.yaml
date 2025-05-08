@@ -1347,7 +1347,7 @@ paths:
       tags:
         - verifier
       summary: Send a Proof Request to a connection
-      description: "Send proof request\n---\nNB: Only a tenant with the verifier role can send a proof request.\n\nThe verifier uses this endpoint to send a proof request to a specific connection, by providing the connection ID.\n\nThe proof request type must be one of indy, anoncreds or ld_proof.\n```json\n    {\n        \"type\": \"indy\", \"anoncreds\" or \"ld_proof\",\n        \"indy_proof_request\": {...}, <-- Required if type is \"indy\"\n        \"anoncreds_proof_request\": {...}, <-- Required if type is \"anoncreds\"\n        \"dif_proof_request\": {...}, <-- Required if type is \"ld_proof\"\n        \"save_exchange_record\": true <-- Whether the proof exchange record should be preserved after completion.\n        \"comment\": \"string\", <-- This comment will appear in the proof record for the recipient as well\n        \"connection_id\": \"string\", <-- The verifier's reference to the connection to send this proof request to\n    }\n```\nFor a detailed technical specification and informative diagrams\nrelated to the present proof process, refer to the [Aries Present Proof v2\nRFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0454-present-proof-v2/README.md) and the [LD Proof\nAttachment RFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0510-dif-pres-exch-attach/README.md).\n\nRequest Body:\n---\n    body: SendProofRequest\n        The proof request object\n\nReturns:\n---\n    PresentationExchange\n        The presentation exchange record for this request"
+      description: "Send proof request\n---\nNB: Only a tenant with the verifier role can send a proof request.\n\nThe verifier uses this endpoint to send a proof request to a specific connection, by providing the connection ID.\n\nThe proof request type must be one of anoncreds or ld_proof.\n```json\n    {\n        \"anoncreds_proof_request\": {...},\n        \"dif_proof_request\": {...},\n        \"save_exchange_record\": true <-- Whether the proof exchange record should be preserved after completion.\n        \"comment\": \"string\", <-- This comment will appear in the proof record for the recipient as well\n        \"connection_id\": \"string\", <-- The verifier's reference to the connection to send this proof request to\n    }\n```\nFor a detailed technical specification and informative diagrams\nrelated to the present proof process, refer to the [Aries Present Proof v2\nRFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0454-present-proof-v2/README.md) and the [LD Proof\nAttachment RFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0510-dif-pres-exch-attach/README.md).\n\nRequest Body:\n---\n    body: SendProofRequest\n        The proof request object\n\nReturns:\n---\n    PresentationExchange\n        The presentation exchange record for this request"
       operationId: send_proof_request_v1_verifier_send_request_post
       requestBody:
         content:
@@ -1375,7 +1375,7 @@ paths:
       tags:
         - verifier
       summary: Create a Proof Request (not bound to a connection)
-      description: "Creates a presentation request that is not bound to any specific proposal or connection\n---\nThis endpoint is used to create a proof request that is not bound to a connection. This means the proof request is\nnot sent directly, but it will do the initial step of creating a proof exchange record,\nwhich the verifier can then use in the out of band (OOB) protocol.\n\nThe OOB protocol allows proof requests to be sent over alternative channels, such as email or QR code, where a\nconnection does not yet exist between holder and verifier.\n\nThe proof request type must be one of indy, anoncreds or ld_proof.\n```json\n    {\n        \"type\": \"indy\", \"anoncreds\" or \"ld_proof\",\n        \"indy_proof_request\": {...}, <-- Required if type is \"indy\"\n        \"anoncreds_proof_request\": {...}, <-- Required if type is \"anoncreds\"\n        \"dif_proof_request\": {...}, <-- Required if type is \"ld_proof\"\n        \"save_exchange_record\": true <-- Whether the proof exchange record should be preserved after completion.\n        \"comment\": \"string\", <-- This comment will appear in the proof record for the recipient as well\n    }\n```\nFor a detailed technical specification and informative diagrams\nrelated to the present proof process, refer to the [Aries Present Proof v2\nRFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0454-present-proof-v2/README.md) and the [LD Proof\nAttachment RFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0510-dif-pres-exch-attach/README.md).\n\nRequest Body:\n---\n    body: CreateProofRequest\n        The proof request object\n\nReturns:\n---\n    PresentationExchange\n        The presentation exchange record for this request"
+      description: "Creates a presentation request that is not bound to any specific proposal or connection\n---\nThis endpoint is used to create a proof request that is not bound to a connection. This means the proof request is\nnot sent directly, but it will do the initial step of creating a proof exchange record,\nwhich the verifier can then use in the out of band (OOB) protocol.\n\nThe OOB protocol allows proof requests to be sent over alternative channels, such as email or QR code, where a\nconnection does not yet exist between holder and verifier.\n\nThe proof request type must be one of anoncreds or ld_proof.\n```json\n    {\n        \"anoncreds_proof_request\": {...},\n        \"dif_proof_request\": {...},\n        \"save_exchange_record\": true <-- Whether the proof exchange record should be preserved after completion.\n        \"comment\": \"string\", <-- This comment will appear in the proof record for the recipient as well\n    }\n```\nFor a detailed technical specification and informative diagrams\nrelated to the present proof process, refer to the [Aries Present Proof v2\nRFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0454-present-proof-v2/README.md) and the [LD Proof\nAttachment RFC](https://github.com/hyperledger/aries-rfcs/blob/main/features/0510-dif-pres-exch-attach/README.md).\n\nRequest Body:\n---\n    body: CreateProofRequest\n        The proof request object\n\nReturns:\n---\n    PresentationExchange\n        The presentation exchange record for this request"
       operationId: create_proof_request_v1_verifier_create_request_post
       requestBody:
         content:
@@ -1403,7 +1403,7 @@ paths:
       tags:
         - verifier
       summary: Accept a Proof Request
-      description: "Accept proof request\n---\nA prover uses this endpoint to respond to a proof request, by sending a presentation to the verifier.\n\nAn Indy presentation contains a mapping of the requested attributes to the wallet credential id of the prover.\n\nThe prover must provide the proof ID of the request that they are responding to, and the presentation object.\n```json\n{\n    \"proof_id\": \"string\", <-- The proof ID of the presentation request that is being accepted\n    \"indy_presentation_spec\": {...}, <-- Required if type is \"indy\"\n    \"dif_presentation_spec\": {...}, <-- Required if type is \"ld_proof\"\n    \"anoncreds_presentation_spec\": {...}, <-- Required if type is \"anoncreds\"\n}\n```\n\nExample of an Indy presentation object:\n```json\n{\n    \"indy_presentation_spec\": {\n        \"requested_attributes\": {\n            \"surname\": {\n                \"cred_id\": \"10e6b03f-2b60-431a-9634-731594423120\",\n                \"revealed\": true\n            },\n            \"name\": {\n                \"cred_id\": \"10e6b03f-2b60-431a-9634-731594423120\",\n                \"revealed\": true\n            },\n            \"age\": {\n                \"cred_id\": \"10e6b03f-2b60-431a-9634-731594423120\",\n                \"revealed\": true\n            }\n        }\n    }\n}\n```\n\nIn the context of the holder's wallet, the `cred_id` is called the `referent`.\n\nThe `revealed` parameter indicates whether the holder wants to reveal the attribute value to the verifier or not.\n\nRequest Body:\n---\n    body: AcceptProofRequest\n        The proof request object\n\nReturns:\n---\n    PresentationExchange\n        The prover's updated presentation exchange record after responding to the proof request."
+      description: "Accept proof request\n---\nA prover uses this endpoint to respond to a proof request, by sending a presentation to the verifier.\n\nAn AnonCreds presentation contains a mapping of the requested attributes to the wallet credential id of the prover.\n\nThe prover must provide the proof ID of the request that they are responding to, and the presentation object.\n```json\n{\n    \"proof_id\": \"string\", <-- The proof ID of the presentation request that is being accepted\n    \"anoncreds_presentation_spec\": {...},\n    \"dif_presentation_spec\": {...},\n}\n```\n\nExample of an AnonCreds presentation object:\n```json\n{\n    \"anoncreds_presentation_spec\": {\n        \"requested_attributes\": {\n            \"surname\": {\n                \"cred_id\": \"10e6b03f-2b60-431a-9634-731594423120\",\n                \"revealed\": true\n            },\n            \"name\": {\n                \"cred_id\": \"10e6b03f-2b60-431a-9634-731594423120\",\n                \"revealed\": true\n            },\n            \"age\": {\n                \"cred_id\": \"10e6b03f-2b60-431a-9634-731594423120\",\n                \"revealed\": true\n            }\n        }\n    }\n}\n```\n\nIn the context of the holder's wallet, the `cred_id` is called the `referent`.\n\nThe `revealed` parameter indicates whether the holder wants to reveal the attribute value to the verifier or not.\n\nRequest Body:\n---\n    body: AcceptProofRequest\n        The proof request object\n\nReturns:\n---\n    PresentationExchange\n        The prover's updated presentation exchange record after responding to the proof request."
       operationId: accept_proof_request_v1_verifier_accept_request_post
       requestBody:
         content:
@@ -2338,20 +2338,13 @@ components:
         proof_id:
           type: string
           title: Proof Id
-        type:
-          $ref: '#/components/schemas/ProofRequestType'
-          default: indy
-        indy_presentation_spec:
+        anoncreds_presentation_spec:
           anyOf:
-            - $ref: '#/components/schemas/IndyPresSpec'
+            - $ref: '#/components/schemas/AnonCredsPresSpec'
             - type: 'null'
         dif_presentation_spec:
           anyOf:
             - $ref: '#/components/schemas/DIFPresSpec'
-            - type: 'null'
-        anoncreds_presentation_spec:
-          anyOf:
-            - $ref: '#/components/schemas/AnonCredsPresSpec'
             - type: 'null'
       type: object
       required:
@@ -3210,20 +3203,13 @@ components:
             - type: string
             - type: 'null'
           title: Comment
-        type:
-          $ref: '#/components/schemas/ProofRequestType'
-          default: indy
-        indy_proof_request:
+        anoncreds_proof_request:
           anyOf:
-            - $ref: '#/components/schemas/IndyProofRequest-Input'
+            - $ref: '#/components/schemas/AnonCredsPresentationRequest'
             - type: 'null'
         dif_proof_request:
           anyOf:
             - $ref: '#/components/schemas/DIFProofRequest'
-            - type: 'null'
-        anoncreds_proof_request:
-          anyOf:
-            - $ref: '#/components/schemas/AnonCredsPresentationRequest'
             - type: 'null'
       type: object
       title: CreateProofRequest
@@ -3813,6 +3799,44 @@ components:
         - presentation_definition
       title: DIFProofRequest
       description: DIFProofRequest
+    EQProof:
+      properties:
+        a_prime:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: A Prime
+        e:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: E
+        m:
+          anyOf:
+            - additionalProperties:
+                type: string
+              type: object
+            - type: 'null'
+          title: M
+        m2:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: M2
+        revealed_attrs:
+          anyOf:
+            - additionalProperties:
+                type: string
+              type: object
+            - type: 'null'
+          title: Revealed Attrs
+        v:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: V
+      type: object
+      title: EQProof
     Filter:
       properties:
         const:
@@ -3904,6 +3928,67 @@ components:
       type: object
       title: Filter
       description: Filter
+    GEProof:
+      properties:
+        alpha:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Alpha
+        mj:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Mj
+        predicate:
+          anyOf:
+            - $ref: '#/components/schemas/GEProofPred'
+            - type: 'null'
+        r:
+          anyOf:
+            - additionalProperties:
+                type: string
+              type: object
+            - type: 'null'
+          title: R
+        t:
+          anyOf:
+            - additionalProperties:
+                type: string
+              type: object
+            - type: 'null'
+          title: T
+        u:
+          anyOf:
+            - additionalProperties:
+                type: string
+              type: object
+            - type: 'null'
+          title: U
+      type: object
+      title: GEProof
+    GEProofPred:
+      properties:
+        attr_name:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Attr Name
+          description: Attribute name
+        p_type:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: P Type
+          description: Predicate type
+        value:
+          anyOf:
+            - type: integer
+            - type: 'null'
+          title: Value
+          description: Predicate threshold value
+      type: object
+      title: GEProofPred
     HTTPValidationError:
       properties:
         detail:
@@ -3972,127 +4057,6 @@ components:
       required:
         - referent
       title: IndyCredInfo
-    IndyEQProof:
-      properties:
-        a_prime:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: A Prime
-        e:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: E
-        m:
-          anyOf:
-            - additionalProperties:
-                type: string
-              type: object
-            - type: 'null'
-          title: M
-        m2:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: M2
-        revealed_attrs:
-          anyOf:
-            - additionalProperties:
-                type: string
-              type: object
-            - type: 'null'
-          title: Revealed Attrs
-        v:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: V
-      type: object
-      title: IndyEQProof
-      description: IndyEQProof
-    IndyGEProof:
-      properties:
-        alpha:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Alpha
-        mj:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Mj
-        predicate:
-          anyOf:
-            - $ref: '#/components/schemas/IndyGEProofPred'
-            - type: 'null'
-        r:
-          anyOf:
-            - additionalProperties:
-                type: string
-              type: object
-            - type: 'null'
-          title: R
-        t:
-          anyOf:
-            - additionalProperties:
-                type: string
-              type: object
-            - type: 'null'
-          title: T
-        u:
-          anyOf:
-            - additionalProperties:
-                type: string
-              type: object
-            - type: 'null'
-          title: U
-      type: object
-      title: IndyGEProof
-      description: IndyGEProof
-    IndyGEProofPred:
-      properties:
-        attr_name:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Attr Name
-          description: Attribute name, indy-canonicalized
-        p_type:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: P Type
-          description: Predicate type
-        value:
-          anyOf:
-            - type: integer
-            - type: 'null'
-          title: Value
-          description: Predicate threshold value
-      type: object
-      title: IndyGEProofPred
-      description: IndyGEProofPred
-    IndyNonRevocProof:
-      properties:
-        c_list:
-          anyOf:
-            - additionalProperties:
-                type: string
-              type: object
-            - type: 'null'
-          title: C List
-        x_list:
-          anyOf:
-            - additionalProperties:
-                type: string
-              type: object
-            - type: 'null'
-          title: X List
-      type: object
-      title: IndyNonRevocProof
-      description: IndyNonRevocProof
     IndyNonRevocationInterval:
       properties:
         from:
@@ -4114,509 +4078,6 @@ components:
       type: object
       title: IndyNonRevocationInterval
       description: IndyNonRevocationInterval
-    IndyPresSpec:
-      properties:
-        requested_attributes:
-          additionalProperties:
-            $ref: '#/components/schemas/IndyRequestedCredsRequestedAttr'
-          type: object
-          title: Requested Attributes
-          description: Nested object mapping proof request attribute referents to requested-attribute specifiers
-        requested_predicates:
-          additionalProperties:
-            $ref: '#/components/schemas/IndyRequestedCredsRequestedPred'
-          type: object
-          title: Requested Predicates
-          description: Nested object mapping proof request predicate referents to requested-predicate specifiers
-        self_attested_attributes:
-          additionalProperties:
-            type: string
-          type: object
-          title: Self Attested Attributes
-          description: Self-attested attributes to build into proof
-        trace:
-          anyOf:
-            - type: boolean
-            - type: 'null'
-          title: Trace
-          description: Whether to trace event (default false)
-      type: object
-      required:
-        - requested_attributes
-        - requested_predicates
-        - self_attested_attributes
-      title: IndyPresSpec
-      description: IndyPresSpec
-    IndyPrimaryProof:
-      properties:
-        eq_proof:
-          anyOf:
-            - $ref: '#/components/schemas/IndyEQProof'
-            - type: 'null'
-          description: Indy equality proof
-        ge_proofs:
-          anyOf:
-            - items:
-                $ref: '#/components/schemas/IndyGEProof'
-              type: array
-            - type: 'null'
-          title: Ge Proofs
-          description: Indy GE proofs
-      type: object
-      title: IndyPrimaryProof
-      description: IndyPrimaryProof
-    IndyProof:
-      properties:
-        identifiers:
-          anyOf:
-            - items:
-                $ref: '#/components/schemas/IndyProofIdentifier'
-              type: array
-            - type: 'null'
-          title: Identifiers
-          description: Indy proof.identifiers content
-        proof:
-          anyOf:
-            - $ref: '#/components/schemas/IndyProofProof'
-            - type: 'null'
-          description: Indy proof.proof content
-        requested_proof:
-          anyOf:
-            - $ref: '#/components/schemas/IndyProofRequestedProof'
-            - type: 'null'
-          description: Indy proof.requested_proof content
-      type: object
-      title: IndyProof
-      description: IndyProof
-    IndyProofIdentifier:
-      properties:
-        cred_def_id:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Cred Def Id
-          description: Credential definition identifier
-        rev_reg_id:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Rev Reg Id
-          description: Revocation registry identifier
-        schema_id:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Schema Id
-          description: Schema identifier
-        timestamp:
-          anyOf:
-            - type: integer
-              maximum: 1.8446744073709552e+19
-              minimum: 0.0
-            - type: 'null'
-          title: Timestamp
-          description: Timestamp epoch
-      type: object
-      title: IndyProofIdentifier
-      description: IndyProofIdentifier
-    IndyProofProof:
-      properties:
-        aggregated_proof:
-          anyOf:
-            - $ref: '#/components/schemas/IndyProofProofAggregatedProof'
-            - type: 'null'
-          description: Indy proof aggregated proof
-        proofs:
-          anyOf:
-            - items:
-                $ref: '#/components/schemas/IndyProofProofProofsProof'
-              type: array
-            - type: 'null'
-          title: Proofs
-          description: Indy proof proofs
-      type: object
-      title: IndyProofProof
-      description: IndyProofProof
-    IndyProofProofAggregatedProof:
-      properties:
-        c_hash:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: C Hash
-          description: c_hash value
-        c_list:
-          anyOf:
-            - items:
-                items:
-                  type: integer
-                type: array
-              type: array
-            - type: 'null'
-          title: C List
-          description: c_list value
-      type: object
-      title: IndyProofProofAggregatedProof
-      description: IndyProofProofAggregatedProof
-    IndyProofProofProofsProof:
-      properties:
-        non_revoc_proof:
-          anyOf:
-            - $ref: '#/components/schemas/IndyNonRevocProof'
-            - type: 'null'
-          description: Indy non-revocation proof
-        primary_proof:
-          anyOf:
-            - $ref: '#/components/schemas/IndyPrimaryProof'
-            - type: 'null'
-          description: Indy primary proof
-      type: object
-      title: IndyProofProofProofsProof
-      description: IndyProofProofProofsProof
-    IndyProofReqAttrSpec:
-      properties:
-        name:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Name
-          description: Attribute name
-        names:
-          anyOf:
-            - items:
-                type: string
-              type: array
-            - type: 'null'
-          title: Names
-          description: Attribute name group
-        non_revoked:
-          anyOf:
-            - $ref: '#/components/schemas/IndyProofReqAttrSpecNonRevoked'
-            - type: 'null'
-        restrictions:
-          anyOf:
-            - items:
-                additionalProperties:
-                  type: string
-                type: object
-              type: array
-            - type: 'null'
-          title: Restrictions
-          description: 'If present, credential must satisfy one of given restrictions: specify schema_id, schema_issuer_did, schema_name, schema_version, issuer_did, cred_def_id, and/or attr::<attribute-name>::value where <attribute-name> represents a credential attribute name'
-      type: object
-      title: IndyProofReqAttrSpec
-      description: IndyProofReqAttrSpec
-    IndyProofReqAttrSpecNonRevoked:
-      properties:
-        from:
-          anyOf:
-            - type: integer
-              maximum: 1.8446744073709552e+19
-              minimum: 0.0
-            - type: 'null'
-          title: From
-          description: Earliest time of interest in non-revocation interval
-        to:
-          anyOf:
-            - type: integer
-              maximum: 1.8446744073709552e+19
-              minimum: 0.0
-            - type: 'null'
-          title: To
-          description: Latest time of interest in non-revocation interval
-      type: object
-      title: IndyProofReqAttrSpecNonRevoked
-      description: IndyProofReqAttrSpecNonRevoked
-    IndyProofReqPredSpec:
-      properties:
-        name:
-          type: string
-          title: Name
-          description: Attribute name
-        non_revoked:
-          anyOf:
-            - $ref: '#/components/schemas/IndyProofReqPredSpecNonRevoked'
-            - type: 'null'
-        p_type:
-          type: string
-          title: P Type
-          description: Predicate type ('<', '<=', '>=', or '>')
-        p_value:
-          type: integer
-          title: P Value
-          description: Threshold value
-        restrictions:
-          anyOf:
-            - items:
-                additionalProperties:
-                  type: string
-                type: object
-              type: array
-            - type: 'null'
-          title: Restrictions
-          description: 'If present, credential must satisfy one of given restrictions: specify schema_id, schema_issuer_did, schema_name, schema_version, issuer_did, cred_def_id, and/or attr::<attribute-name>::value where <attribute-name> represents a credential attribute name'
-      type: object
-      required:
-        - name
-        - p_type
-        - p_value
-      title: IndyProofReqPredSpec
-      description: IndyProofReqPredSpec
-    IndyProofReqPredSpecNonRevoked:
-      properties:
-        from:
-          anyOf:
-            - type: integer
-              maximum: 1.8446744073709552e+19
-              minimum: 0.0
-            - type: 'null'
-          title: From
-          description: Earliest time of interest in non-revocation interval
-        to:
-          anyOf:
-            - type: integer
-              maximum: 1.8446744073709552e+19
-              minimum: 0.0
-            - type: 'null'
-          title: To
-          description: Latest time of interest in non-revocation interval
-      type: object
-      title: IndyProofReqPredSpecNonRevoked
-      description: IndyProofReqPredSpecNonRevoked
-    IndyProofRequest-Input:
-      properties:
-        name:
-          type: string
-          title: Name
-          description: Proof request name
-          default: Proof
-        non_revoked:
-          anyOf:
-            - $ref: '#/components/schemas/IndyProofRequestNonRevoked'
-            - type: 'null'
-        nonce:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Nonce
-          description: Nonce
-        requested_attributes:
-          additionalProperties:
-            $ref: '#/components/schemas/IndyProofReqAttrSpec'
-          type: object
-          title: Requested Attributes
-          description: Requested attribute specifications of proof request
-        requested_predicates:
-          additionalProperties:
-            $ref: '#/components/schemas/IndyProofReqPredSpec'
-          type: object
-          title: Requested Predicates
-          description: Requested predicate specifications of proof request
-        version:
-          type: string
-          title: Version
-          description: Proof request version
-          default: '1.0'
-      type: object
-      required:
-        - requested_attributes
-        - requested_predicates
-      title: IndyProofRequest
-    IndyProofRequest-Output:
-      properties:
-        name:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Name
-          description: Proof request name
-        non_revoked:
-          anyOf:
-            - $ref: '#/components/schemas/IndyProofRequestNonRevoked'
-            - type: 'null'
-        nonce:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Nonce
-          description: Nonce
-        requested_attributes:
-          additionalProperties:
-            $ref: '#/components/schemas/IndyProofReqAttrSpec'
-          type: object
-          title: Requested Attributes
-          description: Requested attribute specifications of proof request
-        requested_predicates:
-          additionalProperties:
-            $ref: '#/components/schemas/IndyProofReqPredSpec'
-          type: object
-          title: Requested Predicates
-          description: Requested predicate specifications of proof request
-        version:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Version
-          description: Proof request version
-      type: object
-      required:
-        - requested_attributes
-        - requested_predicates
-      title: IndyProofRequest
-      description: IndyProofRequest
-    IndyProofRequestNonRevoked:
-      properties:
-        from:
-          anyOf:
-            - type: integer
-              maximum: 1.8446744073709552e+19
-              minimum: 0.0
-            - type: 'null'
-          title: From
-          description: Earliest time of interest in non-revocation interval
-        to:
-          anyOf:
-            - type: integer
-              maximum: 1.8446744073709552e+19
-              minimum: 0.0
-            - type: 'null'
-          title: To
-          description: Latest time of interest in non-revocation interval
-      type: object
-      title: IndyProofRequestNonRevoked
-      description: IndyProofRequestNonRevoked
-    IndyProofRequestedProof:
-      properties:
-        predicates:
-          anyOf:
-            - additionalProperties:
-                $ref: '#/components/schemas/IndyProofRequestedProofPredicate'
-              type: object
-            - type: 'null'
-          title: Predicates
-          description: Proof requested proof predicates.
-        revealed_attr_groups:
-          anyOf:
-            - additionalProperties:
-                $ref: '#/components/schemas/IndyProofRequestedProofRevealedAttrGroup'
-              type: object
-            - type: 'null'
-          title: Revealed Attr Groups
-          description: Proof requested proof revealed attribute groups
-        revealed_attrs:
-          anyOf:
-            - additionalProperties:
-                $ref: '#/components/schemas/IndyProofRequestedProofRevealedAttr'
-              type: object
-            - type: 'null'
-          title: Revealed Attrs
-          description: Proof requested proof revealed attributes
-        self_attested_attrs:
-          anyOf:
-            - additionalProperties: true
-              type: object
-            - type: 'null'
-          title: Self Attested Attrs
-          description: Proof requested proof self-attested attributes
-        unrevealed_attrs:
-          anyOf:
-            - additionalProperties: true
-              type: object
-            - type: 'null'
-          title: Unrevealed Attrs
-          description: Unrevealed attributes
-      type: object
-      title: IndyProofRequestedProof
-      description: IndyProofRequestedProof
-    IndyProofRequestedProofPredicate:
-      properties:
-        sub_proof_index:
-          anyOf:
-            - type: integer
-            - type: 'null'
-          title: Sub Proof Index
-          description: Sub-proof index
-      type: object
-      title: IndyProofRequestedProofPredicate
-      description: IndyProofRequestedProofPredicate
-    IndyProofRequestedProofRevealedAttr:
-      properties:
-        encoded:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Encoded
-          description: Encoded value
-        raw:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Raw
-          description: Raw value
-        sub_proof_index:
-          anyOf:
-            - type: integer
-            - type: 'null'
-          title: Sub Proof Index
-          description: Sub-proof index
-      type: object
-      title: IndyProofRequestedProofRevealedAttr
-      description: IndyProofRequestedProofRevealedAttr
-    IndyProofRequestedProofRevealedAttrGroup:
-      properties:
-        sub_proof_index:
-          anyOf:
-            - type: integer
-            - type: 'null'
-          title: Sub Proof Index
-          description: Sub-proof index
-        values:
-          anyOf:
-            - additionalProperties:
-                $ref: '#/components/schemas/RawEncoded'
-              type: object
-            - type: 'null'
-          title: Values
-          description: Indy proof requested proof revealed attr groups group value
-      type: object
-      title: IndyProofRequestedProofRevealedAttrGroup
-      description: IndyProofRequestedProofRevealedAttrGroup
-    IndyRequestedCredsRequestedAttr:
-      properties:
-        cred_id:
-          type: string
-          title: Cred Id
-          description: Wallet credential identifier (typically but not necessarily a UUID)
-        revealed:
-          anyOf:
-            - type: boolean
-            - type: 'null'
-          title: Revealed
-          description: Whether to reveal attribute in proof (default true)
-      type: object
-      required:
-        - cred_id
-      title: IndyRequestedCredsRequestedAttr
-      description: IndyRequestedCredsRequestedAttr
-    IndyRequestedCredsRequestedPred:
-      properties:
-        cred_id:
-          type: string
-          title: Cred Id
-          description: Wallet credential identifier (typically but not necessarily a UUID)
-        timestamp:
-          anyOf:
-            - type: integer
-              maximum: 1.8446744073709552e+19
-              minimum: 0.0
-            - type: 'null'
-          title: Timestamp
-          description: Epoch timestamp of interest for non-revocation proof
-      type: object
-      required:
-        - cred_id
-      title: IndyRequestedCredsRequestedPred
-      description: IndyRequestedCredsRequestedPred
     InputDescriptors:
       properties:
         constraints:
@@ -5213,6 +4674,24 @@ components:
         - connection_id
         - content
       title: Message
+    NonRevocProof:
+      properties:
+        c_list:
+          anyOf:
+            - additionalProperties:
+                type: string
+              type: object
+            - type: 'null'
+          title: C List
+        x_list:
+          anyOf:
+            - additionalProperties:
+                type: string
+              type: object
+            - type: 'null'
+          title: X List
+      type: object
+      title: NonRevocProof
     OobRecord:
       properties:
         attach_thread_id:
@@ -5376,11 +4855,11 @@ components:
           title: Parent Thread Id
         presentation:
           anyOf:
-            - $ref: '#/components/schemas/IndyProof'
+            - $ref: '#/components/schemas/Proof'
             - type: 'null'
         presentation_request:
           anyOf:
-            - $ref: '#/components/schemas/IndyProofRequest-Output'
+            - $ref: '#/components/schemas/ProofRequest'
             - type: 'null'
         proof_id:
           type: string
@@ -5427,14 +4906,385 @@ components:
         - proof_id
         - role
       title: PresentationExchange
-    ProofRequestType:
-      type: string
-      enum:
-        - indy
-        - jwt
-        - ld_proof
-        - anoncreds
-      title: ProofRequestType
+    PrimaryProof:
+      properties:
+        eq_proof:
+          anyOf:
+            - $ref: '#/components/schemas/EQProof'
+            - type: 'null'
+          description: Equality proof
+        ge_proofs:
+          anyOf:
+            - items:
+                $ref: '#/components/schemas/GEProof'
+              type: array
+            - type: 'null'
+          title: Ge Proofs
+          description: GE proofs
+      type: object
+      title: PrimaryProof
+    Proof:
+      properties:
+        identifiers:
+          anyOf:
+            - items:
+                $ref: '#/components/schemas/ProofIdentifier'
+              type: array
+            - type: 'null'
+          title: Identifiers
+          description: Proof.identifiers content
+        proof:
+          anyOf:
+            - $ref: '#/components/schemas/ProofProof'
+            - type: 'null'
+          description: Proof.proof content
+        requested_proof:
+          anyOf:
+            - $ref: '#/components/schemas/ProofRequestedProof'
+            - type: 'null'
+          description: Proof.requested_proof content
+      type: object
+      title: Proof
+    ProofIdentifier:
+      properties:
+        cred_def_id:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Cred Def Id
+          description: Credential definition identifier
+        rev_reg_id:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Rev Reg Id
+          description: Revocation registry identifier
+        schema_id:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Schema Id
+          description: Schema identifier
+        timestamp:
+          anyOf:
+            - type: integer
+              maximum: 1.8446744073709552e+19
+              minimum: 0.0
+            - type: 'null'
+          title: Timestamp
+          description: Timestamp epoch
+      type: object
+      title: ProofIdentifier
+    ProofProof:
+      properties:
+        aggregated_proof:
+          anyOf:
+            - $ref: '#/components/schemas/ProofProofAggregatedProof'
+            - type: 'null'
+          description: Proof aggregated proof
+        proofs:
+          anyOf:
+            - items:
+                $ref: '#/components/schemas/ProofProofProofsProof'
+              type: array
+            - type: 'null'
+          title: Proofs
+          description: Proof proofs
+      type: object
+      title: ProofProof
+    ProofProofAggregatedProof:
+      properties:
+        c_hash:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: C Hash
+          description: c_hash value
+        c_list:
+          anyOf:
+            - items:
+                items:
+                  type: integer
+                type: array
+              type: array
+            - type: 'null'
+          title: C List
+          description: c_list value
+      type: object
+      title: ProofProofAggregatedProof
+    ProofProofProofsProof:
+      properties:
+        non_revoc_proof:
+          anyOf:
+            - $ref: '#/components/schemas/NonRevocProof'
+            - type: 'null'
+          description: Non-revocation proof
+        primary_proof:
+          anyOf:
+            - $ref: '#/components/schemas/PrimaryProof'
+            - type: 'null'
+          description: Primary proof
+      type: object
+      title: ProofProofProofsProof
+    ProofReqAttrSpec:
+      properties:
+        name:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Name
+          description: Attribute name
+        names:
+          anyOf:
+            - items:
+                type: string
+              type: array
+            - type: 'null'
+          title: Names
+          description: Attribute name group
+        non_revoked:
+          anyOf:
+            - $ref: '#/components/schemas/ProofReqAttrSpecNonRevoked'
+            - type: 'null'
+        restrictions:
+          anyOf:
+            - items:
+                additionalProperties:
+                  type: string
+                type: object
+              type: array
+            - type: 'null'
+          title: Restrictions
+          description: 'If present, credential must satisfy one of given restrictions: specify schema_id, schema_issuer_did, schema_name, schema_version, issuer_did, cred_def_id, and/or attr::<attribute-name>::value where <attribute-name> represents a credential attribute name'
+      type: object
+      title: ProofReqAttrSpec
+    ProofReqAttrSpecNonRevoked:
+      properties:
+        from:
+          anyOf:
+            - type: integer
+              maximum: 1.8446744073709552e+19
+              minimum: 0.0
+            - type: 'null'
+          title: From
+          description: Earliest time of interest in non-revocation interval
+        to:
+          anyOf:
+            - type: integer
+              maximum: 1.8446744073709552e+19
+              minimum: 0.0
+            - type: 'null'
+          title: To
+          description: Latest time of interest in non-revocation interval
+      type: object
+      title: ProofReqAttrSpecNonRevoked
+    ProofReqPredSpec:
+      properties:
+        name:
+          type: string
+          title: Name
+          description: Attribute name
+        non_revoked:
+          anyOf:
+            - $ref: '#/components/schemas/ProofReqPredSpecNonRevoked'
+            - type: 'null'
+        p_type:
+          type: string
+          title: P Type
+          description: Predicate type ('<', '<=', '>=', or '>')
+        p_value:
+          type: integer
+          title: P Value
+          description: Threshold value
+        restrictions:
+          anyOf:
+            - items:
+                additionalProperties:
+                  type: string
+                type: object
+              type: array
+            - type: 'null'
+          title: Restrictions
+          description: 'If present, credential must satisfy one of given restrictions: specify schema_id, schema_issuer_did, schema_name, schema_version, issuer_did, cred_def_id, and/or attr::<attribute-name>::value where <attribute-name> represents a credential attribute name'
+      type: object
+      required:
+        - name
+        - p_type
+        - p_value
+      title: ProofReqPredSpec
+    ProofReqPredSpecNonRevoked:
+      properties:
+        from:
+          anyOf:
+            - type: integer
+              maximum: 1.8446744073709552e+19
+              minimum: 0.0
+            - type: 'null'
+          title: From
+          description: Earliest time of interest in non-revocation interval
+        to:
+          anyOf:
+            - type: integer
+              maximum: 1.8446744073709552e+19
+              minimum: 0.0
+            - type: 'null'
+          title: To
+          description: Latest time of interest in non-revocation interval
+      type: object
+      title: ProofReqPredSpecNonRevoked
+    ProofRequest:
+      properties:
+        name:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Name
+          description: Proof request name
+        non_revoked:
+          anyOf:
+            - $ref: '#/components/schemas/ProofRequestNonRevoked'
+            - type: 'null'
+        nonce:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Nonce
+          description: Nonce
+        requested_attributes:
+          additionalProperties:
+            $ref: '#/components/schemas/ProofReqAttrSpec'
+          type: object
+          title: Requested Attributes
+          description: Requested attribute specifications of proof request
+        requested_predicates:
+          additionalProperties:
+            $ref: '#/components/schemas/ProofReqPredSpec'
+          type: object
+          title: Requested Predicates
+          description: Requested predicate specifications of proof request
+        version:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Version
+          description: Proof request version
+      type: object
+      required:
+        - requested_attributes
+        - requested_predicates
+      title: ProofRequest
+    ProofRequestNonRevoked:
+      properties:
+        from:
+          anyOf:
+            - type: integer
+              maximum: 1.8446744073709552e+19
+              minimum: 0.0
+            - type: 'null'
+          title: From
+          description: Earliest time of interest in non-revocation interval
+        to:
+          anyOf:
+            - type: integer
+              maximum: 1.8446744073709552e+19
+              minimum: 0.0
+            - type: 'null'
+          title: To
+          description: Latest time of interest in non-revocation interval
+      type: object
+      title: ProofRequestNonRevoked
+    ProofRequestedProof:
+      properties:
+        predicates:
+          anyOf:
+            - additionalProperties:
+                $ref: '#/components/schemas/ProofRequestedProofPredicate'
+              type: object
+            - type: 'null'
+          title: Predicates
+          description: Proof requested proof predicates.
+        revealed_attr_groups:
+          anyOf:
+            - additionalProperties:
+                $ref: '#/components/schemas/ProofRequestedProofRevealedAttrGroup'
+              type: object
+            - type: 'null'
+          title: Revealed Attr Groups
+          description: Proof requested proof revealed attribute groups
+        revealed_attrs:
+          anyOf:
+            - additionalProperties:
+                $ref: '#/components/schemas/ProofRequestedProofRevealedAttr'
+              type: object
+            - type: 'null'
+          title: Revealed Attrs
+          description: Proof requested proof revealed attributes
+        self_attested_attrs:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Self Attested Attrs
+          description: Proof requested proof self-attested attributes
+        unrevealed_attrs:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Unrevealed Attrs
+          description: Unrevealed attributes
+      type: object
+      title: ProofRequestedProof
+    ProofRequestedProofPredicate:
+      properties:
+        sub_proof_index:
+          anyOf:
+            - type: integer
+            - type: 'null'
+          title: Sub Proof Index
+          description: Sub-proof index
+      type: object
+      title: ProofRequestedProofPredicate
+    ProofRequestedProofRevealedAttr:
+      properties:
+        encoded:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Encoded
+          description: Encoded value
+        raw:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Raw
+          description: Raw value
+        sub_proof_index:
+          anyOf:
+            - type: integer
+            - type: 'null'
+          title: Sub Proof Index
+          description: Sub-proof index
+      type: object
+      title: ProofRequestedProofRevealedAttr
+    ProofRequestedProofRevealedAttrGroup:
+      properties:
+        sub_proof_index:
+          anyOf:
+            - type: integer
+            - type: 'null'
+          title: Sub Proof Index
+          description: Sub-proof index
+        values:
+          anyOf:
+            - additionalProperties:
+                $ref: '#/components/schemas/RawEncoded'
+              type: object
+            - type: 'null'
+          title: Values
+          description: Proof requested proof revealed attr groups group value
+      type: object
+      title: ProofRequestedProofRevealedAttrGroup
     PublishRevocationsRequest:
       properties:
         revocation_registry_credential_map:
@@ -5760,20 +5610,13 @@ components:
             - type: string
             - type: 'null'
           title: Comment
-        type:
-          $ref: '#/components/schemas/ProofRequestType'
-          default: indy
-        indy_proof_request:
+        anoncreds_proof_request:
           anyOf:
-            - $ref: '#/components/schemas/IndyProofRequest-Input'
+            - $ref: '#/components/schemas/AnonCredsPresentationRequest'
             - type: 'null'
         dif_proof_request:
           anyOf:
             - $ref: '#/components/schemas/DIFProofRequest'
-            - type: 'null'
-        anoncreds_proof_request:
-          anyOf:
-            - $ref: '#/components/schemas/AnonCredsPresentationRequest'
             - type: 'null'
         connection_id:
           type: string

@@ -7,7 +7,6 @@ from app.models.verifier import (
     AnonCredsPresSpec,
     DIFPresSpec,
     ProofRequestBase,
-    ProofRequestType,
     RejectProofRequest,
 )
 from shared.exceptions.cloudapi_value_error import CloudApiValueError
@@ -15,13 +14,12 @@ from shared.exceptions.cloudapi_value_error import CloudApiValueError
 
 def test_proof_request_base_model():
     with pytest.raises(CloudApiValueError) as exc:
-        ProofRequestBase(type=ProofRequestType.ANONCREDS, anoncreds_proof_request=None)
+        ProofRequestBase(anoncreds_proof_request=None)
     assert exc.value.detail == (
-        "anoncreds_proof_request must be populated if `anoncreds` type is selected"
+        "One of anoncreds_proof_request or dif_proof_request must be populated"
     )
     with pytest.raises(CloudApiValueError) as exc:
         ProofRequestBase(
-            type=ProofRequestType.LD_PROOF,
             anoncreds_proof_request=AnonCredsPresentationRequest(
                 requested_attributes={}, requested_predicates={}
             ),
@@ -30,48 +28,23 @@ def test_proof_request_base_model():
             ),
         )
     assert exc.value.detail == (
-        "Only dif_proof_request must be populated if `ld_proof` type is selected"
+        "Only one of anoncreds_proof_request or dif_proof_request must be populated"
     )
 
-    with pytest.raises(CloudApiValueError) as exc:
-        ProofRequestBase(
-            type=ProofRequestType.ANONCREDS,
-            anoncreds_proof_request=AnonCredsPresentationRequest(
-                requested_attributes={}, requested_predicates={}
-            ),
-            dif_proof_request=DIFProofRequest(
-                presentation_definition=PresentationDefinition()
-            ),
-        )
-    assert exc.value.detail == (
-        "Only anoncreds_proof_request must be populated if `anoncreds` type is selected"
-    )
-
-    with pytest.raises(CloudApiValueError) as exc:
-        ProofRequestBase(type=ProofRequestType.LD_PROOF, dif_proof_request=None)
-    assert exc.value.detail == (
-        "dif_proof_request must be populated if `ld_proof` type is selected"
-    )
-
-    ProofRequestBase.check_proof_request(
-        values=ProofRequestBase(
-            type=ProofRequestType.ANONCREDS,
-            anoncreds_proof_request=AnonCredsPresentationRequest(
-                requested_attributes={}, requested_predicates={}
-            ),
-        )
+    ProofRequestBase(
+        anoncreds_proof_request=AnonCredsPresentationRequest(
+            requested_attributes={}, requested_predicates={}
+        ),
     )
 
 
 def test_accept_proof_request_model():
     AcceptProofRequest(
         proof_id="abc",
-        type=ProofRequestType.LD_PROOF,
         dif_presentation_spec=DIFPresSpec(),
     )
 
     AcceptProofRequest(
-        type=ProofRequestType.ANONCREDS,
         proof_id="abc",
         anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={},
@@ -82,21 +55,26 @@ def test_accept_proof_request_model():
 
     with pytest.raises(CloudApiValueError) as exc:
         AcceptProofRequest(
-            type=ProofRequestType.LD_PROOF,
             dif_presentation_spec=None,
             proof_id="abc",
         )
     assert exc.value.detail == (
-        "dif_presentation_spec must be populated if `ld_proof` type is selected"
+        "One of anoncreds_presentation_spec or dif_presentation_spec must be populated"
     )
     with pytest.raises(CloudApiValueError) as exc:
         AcceptProofRequest(
-            type=ProofRequestType.ANONCREDS,
-            anoncreds_presentation_spec=None,
+            anoncreds_presentation_spec=AnonCredsPresSpec(
+                name="abc",
+                version="1.0",
+                requested_attributes={},
+                requested_predicates={},
+                self_attested_attributes={},
+            ),
+            dif_presentation_spec=DIFPresSpec(),
             proof_id="abc",
         )
     assert exc.value.detail == (
-        "anoncreds_presentation_spec must be populated if `anoncreds` type is selected"
+        "Only one of anoncreds_presentation_spec or dif_presentation_spec must be populated"
     )
 
 

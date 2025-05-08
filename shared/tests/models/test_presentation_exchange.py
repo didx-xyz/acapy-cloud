@@ -1,15 +1,34 @@
 from aries_cloudcontroller import (
-    IndyProof,
-    IndyProofProof,
-    IndyProofRequest,
+    AttachDecorator,
+    AttachDecoratorData,
+    V20Pres,
     V20PresExRecord,
     V20PresExRecordByFormat,
+    V20PresFormat,
+    V20PresProposal,
+    V20PresRequest,
 )
 
 from shared.models.presentation_exchange import (
     PresentationExchange,
+    Proof,
+    ProofProof,
+    ProofRequest,
     presentation_record_to_model,
     string_to_bool,
+)
+
+anoncreds_format = V20PresFormat(format="anoncreds", attach_id="abc")
+attach_decorator = AttachDecorator(data=AttachDecoratorData())
+anoncreds_pres = V20Pres(
+    formats=[anoncreds_format], presentationsattach=[attach_decorator]
+)
+
+anoncreds_pres_proposal = V20PresProposal(
+    formats=[anoncreds_format], proposalsattach=[attach_decorator]
+)
+anoncreds_pres_request = V20PresRequest(
+    formats=[anoncreds_format], request_presentationsattach=[attach_decorator]
 )
 
 
@@ -20,8 +39,8 @@ def test_presentation_exchange_model():
         created_at="2023-01-01T00:00:00Z",
         error_msg=None,
         parent_thread_id="parent-thread-id",
-        presentation=IndyProof(proof=IndyProofProof()),
-        presentation_request=IndyProofRequest(
+        presentation=Proof(proof=ProofProof()),
+        presentation_request=ProofRequest(
             name="request",
             requested_attributes={},
             requested_predicates={},
@@ -38,8 +57,8 @@ def test_presentation_exchange_model():
     assert exchange.created_at == "2023-01-01T00:00:00Z"
     assert exchange.error_msg is None
     assert exchange.parent_thread_id == "parent-thread-id"
-    assert exchange.presentation == IndyProof(proof=IndyProofProof())
-    assert exchange.presentation_request == IndyProofRequest(
+    assert exchange.presentation == Proof(proof=ProofProof())
+    assert exchange.presentation_request == ProofRequest(
         name="request",
         requested_attributes={},
         requested_predicates={},
@@ -63,10 +82,12 @@ def test_presentation_record_to_model():
         thread_id="thread-id",
         updated_at="2023-01-01T01:00:00Z",
         verified="true",
+        pres=anoncreds_pres,
+        pres_request=anoncreds_pres_request,
         by_format={
-            "pres": {"indy": IndyProof(proof=IndyProofProof())},
+            "pres": {"anoncreds": Proof(proof=ProofProof())},
             "pres_request": {
-                "indy": IndyProofRequest(
+                "anoncreds": ProofRequest(
                     name="request",
                     requested_attributes={},
                     requested_predicates={},
@@ -78,8 +99,8 @@ def test_presentation_record_to_model():
     model = presentation_record_to_model(record)
 
     assert model.proof_id == "v2-pres-ex-id"
-    assert model.presentation == IndyProof(proof=IndyProofProof())
-    assert model.presentation_request == IndyProofRequest(
+    assert model.presentation == Proof(proof=ProofProof())
+    assert model.presentation_request == ProofRequest(
         name="request",
         requested_attributes={},
         requested_predicates={},

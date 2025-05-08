@@ -25,7 +25,6 @@ async def test_send_credential_oob(
     alice_member_client: RichAsyncClient,
 ):
     credential = {
-        "type": "anoncreds",
         "anoncreds_credential_detail": {
             "credential_definition_id": anoncreds_credential_definition_id,
             "attributes": sample_credential_attributes,
@@ -90,7 +89,6 @@ async def test_send_credential_and_request(
 ):
     credential = {
         "connection_id": faber_anoncreds_and_alice_connection.faber_connection_id,
-        "type": "anoncreds",
         "anoncreds_credential_detail": {
             "credential_definition_id": anoncreds_credential_definition_id,
             "attributes": sample_credential_attributes,
@@ -162,7 +160,6 @@ async def test_revoke_credential(
 
     credential = {
         "connection_id": faber_connection_id,
-        "type": "anoncreds",
         "anoncreds_credential_detail": {
             "credential_definition_id": anoncreds_credential_definition_id_revocable,
             "attributes": sample_credential_attributes,

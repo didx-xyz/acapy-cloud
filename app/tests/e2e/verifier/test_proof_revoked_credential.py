@@ -60,7 +60,6 @@ async def proof_revoked_credential(
     # Do proof request
     request_body = {
         "comment": "Test proof of revocation",
-        "type": proof_type,
         f"{proof_type}_proof_request": {
             "name": "Proof of SPEED",
             "version": "1.0",
@@ -102,7 +101,6 @@ async def proof_revoked_credential(
         f"{VERIFIER_BASE_PATH}/accept-request",
         json={
             "proof_id": alice_proof_exchange_id,
-            "type": proof_type,
             f"{proof_type}_presentation_spec": {
                 "requested_attributes": {
                     "THE_SPEED": {"cred_id": referent, "revealed": True}
@@ -169,7 +167,6 @@ async def regression_proof_revoked_credential(
     # Do proof request
     request_body = {
         "comment": "Test proof of revocation",
-        "type": proof_type,
         f"{proof_type}_proof_request": {
             "non_revoked": {"to": int(time.time())},
             "requested_attributes": {
@@ -204,7 +201,6 @@ async def regression_proof_revoked_credential(
         f"{VERIFIER_BASE_PATH}/accept-request",
         json={
             "proof_id": alice_proof_exchange_id,
-            "type": proof_type,
             f"{proof_type}_presentation_spec": {
                 "requested_attributes": {
                     "THE_SPEED": {"cred_id": referent, "revealed": True}

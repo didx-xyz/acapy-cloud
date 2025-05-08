@@ -26,7 +26,6 @@ async def test_issue_credential_with_save_exchange_record(
     save_exchange_record: Optional[bool],
 ) -> CredentialExchange:
     credential = {
-        "type": "anoncreds",
         "connection_id": faber_anoncreds_and_alice_connection.faber_connection_id,
         "anoncreds_credential_detail": {
             "credential_definition_id": anoncreds_credential_definition_id,
@@ -122,7 +121,6 @@ async def test_request_credential_with_save_exchange_record(
 ):
     # This test asserts that the holder can control `save_exchange_records` behaviour
     credential = {
-        "type": "anoncreds",
         "connection_id": faber_anoncreds_and_alice_connection.faber_connection_id,
         "anoncreds_credential_detail": {
             "credential_definition_id": anoncreds_credential_definition_id,
@@ -220,7 +218,6 @@ async def test_get_cred_exchange_records(
     ).json()
 
     credential = {
-        "type": "anoncreds",
         "connection_id": faber_anoncreds_and_alice_connection.faber_connection_id,
         "anoncreds_credential_detail": {
             "credential_definition_id": anoncreds_credential_definition_id,

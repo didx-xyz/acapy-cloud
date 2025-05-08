@@ -3,17 +3,20 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from aries_cloudcontroller import (
     AcaPyClient,
+    AnonCredsPresSpec,
+    AnonCredsRequestedCredsRequestedAttr,
+    AnonCredsRequestedCredsRequestedPred,
     ConnRecord,
     IndyCredInfo,
-    IndyPresSpec,
-    IndyRequestedCredsRequestedAttr,
-    IndyRequestedCredsRequestedPred,
 )
 from httpx import Response
 
 from app.exceptions import CloudApiException
 from app.routes.verifier import AcceptProofRequest, SendProofRequest
-from app.tests.services.verifier.utils import indy_pres_spec, sample_indy_proof_request
+from app.tests.services.verifier.utils import (
+    anoncreds_pres_spec,
+    sample_anoncreds_proof_request,
+)
 from app.util.acapy_verifier_utils import (
     are_valid_schemas,
     assert_valid_prover,
@@ -39,7 +42,7 @@ pres_exchange = PresentationExchange(
     created_at="2021-09-15 13:49:47Z",
     proof_id="v2-abcd",
     presentation=None,
-    presentation_request=sample_indy_proof_request(),
+    presentation_request=sample_anoncreds_proof_request().to_dict(),
     role="prover",
     state="proposal-sent",
     updated_at=None,
@@ -88,18 +91,18 @@ async def test_get_schema_ids(mock_agent_controller: AcaPyClient):
         schema_id="NR6Y28AiZ893utPSfoQRrz:2:another_schema:0.3"
     )
 
-    presentation = IndyPresSpec(
+    presentation = AnonCredsPresSpec(
         self_attested_attributes={},
         requested_attributes={
-            "group_name": IndyRequestedCredsRequestedAttr(
+            "group_name": AnonCredsRequestedCredsRequestedAttr(
                 revealed=False, cred_id="first-unrevealed-cred-id"
             ),
-            "another_group_name": IndyRequestedCredsRequestedAttr(
+            "another_group_name": AnonCredsRequestedCredsRequestedAttr(
                 revealed=True, cred_id="first-revealed-cred-id"
             ),
         },
         requested_predicates={
-            "pred_group_name": IndyRequestedCredsRequestedPred(
+            "pred_group_name": AnonCredsRequestedCredsRequestedPred(
                 cred_id="first-revealed-pred-cred-id"
             )
         },
@@ -172,18 +175,18 @@ async def test_assert_valid_prover_invitation_key(
         invitation_key="H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV",
     )
 
-    presentation = IndyPresSpec(
+    presentation = AnonCredsPresSpec(
         self_attested_attributes={},
         requested_attributes={
-            "group_name": IndyRequestedCredsRequestedAttr(
+            "group_name": AnonCredsRequestedCredsRequestedAttr(
                 revealed=False, cred_id="first-unrevealed-cred-id"
             ),
-            "another_group_name": IndyRequestedCredsRequestedAttr(
+            "another_group_name": AnonCredsRequestedCredsRequestedAttr(
                 revealed=True, cred_id="first-revealed-cred-id"
             ),
         },
         requested_predicates={
-            "pred_group_name": IndyRequestedCredsRequestedPred(
+            "pred_group_name": AnonCredsRequestedCredsRequestedPred(
                 cred_id="first-revealed-pred-cred-id"
             )
         },
@@ -208,7 +211,7 @@ async def test_assert_valid_prover_invitation_key(
             aries_controller=mock_agent_controller,
             presentation=AcceptProofRequest(
                 proof_id=pres_exchange.proof_id,
-                indy_presentation_spec=presentation,
+                anoncreds_presentation_spec=presentation,
             ),
         )
 
@@ -221,18 +224,18 @@ async def test_assert_valid_prover_public_did(
         connection_id=pres_exchange.connection_id, their_public_did="did:sov:123"
     )
 
-    presentation = IndyPresSpec(
+    presentation = AnonCredsPresSpec(
         self_attested_attributes={},
         requested_attributes={
-            "group_name": IndyRequestedCredsRequestedAttr(
+            "group_name": AnonCredsRequestedCredsRequestedAttr(
                 revealed=False, cred_id="first-unrevealed-cred-id"
             ),
-            "another_group_name": IndyRequestedCredsRequestedAttr(
+            "another_group_name": AnonCredsRequestedCredsRequestedAttr(
                 revealed=True, cred_id="first-revealed-cred-id"
             ),
         },
         requested_predicates={
-            "pred_group_name": IndyRequestedCredsRequestedPred(
+            "pred_group_name": AnonCredsRequestedCredsRequestedPred(
                 cred_id="first-revealed-pred-cred-id"
             )
         },
@@ -257,7 +260,7 @@ async def test_assert_valid_prover_public_did(
             aries_controller=mock_agent_controller,
             presentation=AcceptProofRequest(
                 proof_id=pres_exchange.proof_id,
-                indy_presentation_spec=presentation,
+                anoncreds_presentation_spec=presentation,
             ),
         )
 
@@ -280,7 +283,7 @@ async def test_assert_valid_prover_x_no_public_did_no_invitation_key(
             aries_controller=mock_agent_controller,
             presentation=AcceptProofRequest(
                 proof_id=pres_exchange.proof_id,
-                indy_presentation_spec=indy_pres_spec,
+                anoncreds_presentation_spec=anoncreds_pres_spec,
             ),
         )
 
@@ -312,7 +315,7 @@ async def test_assert_valid_prover_x_actor_invalid_role(
                 aries_controller=mock_agent_controller,
                 presentation=AcceptProofRequest(
                     proof_id=pres_exchange.proof_id,
-                    indy_presentation_spec=indy_pres_spec,
+                    anoncreds_presentation_spec=anoncreds_pres_spec,
                 ),
             )
 
@@ -350,7 +353,7 @@ async def test_assert_valid_prover_could_not_fetch_actor_recover_label(
             aries_controller=mock_agent_controller,
             presentation=AcceptProofRequest(
                 proof_id=pres_exchange.proof_id,
-                indy_presentation_spec=indy_pres_spec,
+                anoncreds_presentation_spec=anoncreds_pres_spec,
             ),
         )
 
@@ -383,7 +386,7 @@ async def test_assert_valid_prover_x_could_not_fetch_actor_exc(
                 aries_controller=mock_agent_controller,
                 presentation=AcceptProofRequest(
                     proof_id=pres_exchange.proof_id,
-                    indy_presentation_spec=indy_pres_spec,
+                    anoncreds_presentation_spec=anoncreds_pres_spec,
                 ),
             )
 
@@ -413,7 +416,7 @@ async def test_assert_valid_prover_x_could_not_fetch_actor_exc2(
                 aries_controller=mock_agent_controller,
                 presentation=AcceptProofRequest(
                     proof_id=pres_exchange.proof_id,
-                    indy_presentation_spec=indy_pres_spec,
+                    anoncreds_presentation_spec=anoncreds_pres_spec,
                 ),
             )
 
@@ -448,7 +451,7 @@ async def test_assert_valid_prover_x_invalid_schemas(
                 aries_controller=mock_agent_controller,
                 presentation=AcceptProofRequest(
                     proof_id=pres_exchange.proof_id,
-                    indy_presentation_spec=indy_pres_spec,
+                    anoncreds_presentation_spec=anoncreds_pres_spec,
                 ),
             )
 
@@ -480,7 +483,7 @@ async def test_assert_valid_prover_x_no_schemas(
                 aries_controller=mock_agent_controller,
                 presentation=AcceptProofRequest(
                     proof_id=pres_exchange.proof_id,
-                    indy_presentation_spec=indy_pres_spec,
+                    anoncreds_presentation_spec=anoncreds_pres_spec,
                 ),
             )
 
@@ -501,7 +504,7 @@ async def test_assert_valid_prover_x_no_connection_id(
             aries_controller=mock_agent_controller,
             presentation=AcceptProofRequest(
                 proof_id=test_pres_exchange.proof_id,
-                indy_presentation_spec=indy_pres_spec,
+                anoncreds_presentation_spec=anoncreds_pres_spec,
             ),
         )
 
@@ -528,7 +531,7 @@ async def test_assert_valid_prover_x_no_connection_id2(
             aries_controller=mock_agent_controller,
             presentation=AcceptProofRequest(
                 proof_id=test_pres_exchange.proof_id,
-                indy_presentation_spec=indy_pres_spec,
+                anoncreds_presentation_spec=anoncreds_pres_spec,
             ),
         )
 
@@ -551,7 +554,7 @@ async def test_assert_valid_verifier_invitation_key(mock_agent_controller: AcaPy
             aries_controller=mock_agent_controller,
             proof_request=SendProofRequest(
                 connection_id="a-connection-id",
-                indy_proof_request=sample_indy_proof_request(),
+                anoncreds_proof_request=sample_anoncreds_proof_request(),
             ),
         )
 
@@ -567,7 +570,7 @@ async def test_assert_valid_verifier_public_did(mock_agent_controller: AcaPyClie
             aries_controller=mock_agent_controller,
             proof_request=SendProofRequest(
                 connection_id="abcde",
-                indy_proof_request=sample_indy_proof_request(),
+                anoncreds_proof_request=sample_anoncreds_proof_request(),
             ),
         )
 
@@ -592,7 +595,7 @@ async def test_assert_valid_verifier_x_no_public_did_no_invitation_key(
                 aries_controller=mock_agent_controller,
                 proof_request=SendProofRequest(
                     connection_id="a-connection-id",
-                    indy_proof_request=sample_indy_proof_request(),
+                    anoncreds_proof_request=sample_anoncreds_proof_request(),
                 ),
             )
 
@@ -621,7 +624,7 @@ async def test_assert_valid_verifier_x_not_verifier(mock_agent_controller: AcaPy
                 aries_controller=mock_agent_controller,
                 proof_request=SendProofRequest(
                     connection_id="a-connection-id",
-                    indy_proof_request=sample_indy_proof_request(),
+                    anoncreds_proof_request=sample_anoncreds_proof_request(),
                 ),
             )
 
@@ -648,7 +651,7 @@ async def test_assert_valid_verifier_could_not_fetch_actor_recover_label(
             aries_controller=mock_agent_controller,
             proof_request=SendProofRequest(
                 connection_id="a-connection-id",
-                indy_proof_request=sample_indy_proof_request(),
+                anoncreds_proof_request=sample_anoncreds_proof_request(),
             ),
         )
 
@@ -679,7 +682,7 @@ async def test_assert_valid_verifier_x_could_not_fetch_actor_exc(
                 aries_controller=mock_agent_controller,
                 proof_request=SendProofRequest(
                     connection_id="a-connection-id",
-                    indy_proof_request=sample_indy_proof_request(),
+                    anoncreds_proof_request=sample_anoncreds_proof_request(),
                 ),
             )
 
@@ -707,7 +710,7 @@ async def test_assert_valid_verifier_x_could_not_fetch_actor_exc2(
                 aries_controller=mock_agent_controller,
                 proof_request=SendProofRequest(
                     connection_id="a-connection-id",
-                    indy_proof_request=sample_indy_proof_request(),
+                    anoncreds_proof_request=sample_anoncreds_proof_request(),
                 ),
             )
 
@@ -732,7 +735,7 @@ async def test_assert_valid_verifier_x_could_not_fetch_actor_exc3(
                 aries_controller=mock_agent_controller,
                 proof_request=SendProofRequest(
                     connection_id="a-connection-id",
-                    indy_proof_request=sample_indy_proof_request(),
+                    anoncreds_proof_request=sample_anoncreds_proof_request(),
                 ),
             )
 
@@ -754,6 +757,6 @@ async def test_assert_valid_verifier_x_could_not_fetch_actor_exc4(
                 aries_controller=mock_agent_controller,
                 proof_request=SendProofRequest(
                     connection_id="a-connection-id",
-                    indy_proof_request=sample_indy_proof_request(),
+                    anoncreds_proof_request=sample_anoncreds_proof_request(),
                 ),
             )

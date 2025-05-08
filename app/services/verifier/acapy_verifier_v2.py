@@ -14,7 +14,6 @@ from app.exceptions import CloudApiException, handle_acapy_call
 from app.models.verifier import (
     AcceptProofRequest,
     CreateProofRequest,
-    ProofRequestType,
     RejectProofRequest,
     SendProofRequest,
 )
@@ -38,21 +37,19 @@ class VerifierV2(Verifier):
         controller: AcaPyClient,
         create_proof_request: CreateProofRequest,
     ) -> PresentationExchange:
-        if create_proof_request.type == ProofRequestType.INDY:
-            presentation_request = V20PresRequestByFormat(
-                indy=create_proof_request.indy_proof_request
-            )
-        elif create_proof_request.type == ProofRequestType.LD_PROOF:
-            presentation_request = V20PresRequestByFormat(
-                dif=create_proof_request.dif_proof_request
-            )
-        elif create_proof_request.type == ProofRequestType.ANONCREDS:
+        proof_type = create_proof_request.get_proof_type()
+        if proof_type == "anoncreds":
             presentation_request = V20PresRequestByFormat(
                 anoncreds=create_proof_request.anoncreds_proof_request
             )
+        elif proof_type == "dif":
+            presentation_request = V20PresRequestByFormat(
+                dif=create_proof_request.dif_proof_request
+            )
         else:
             raise CloudApiException(
-                f"Unsupported credential type: {create_proof_request.type.value}",
+                "Unsupported credential request. One of anoncreds_proof_request "
+                "or dif_proof_request must be populated.",
                 status_code=501,
             )
 
@@ -64,6 +61,7 @@ class VerifierV2(Verifier):
             auto_verify=True,
             comment=create_proof_request.comment,
         )
+        bound_logger.debug("Sending create request: {}", request_body)
         try:
             presentation_exchange = await handle_acapy_call(
                 logger=bound_logger,
@@ -85,21 +83,19 @@ class VerifierV2(Verifier):
         controller: AcaPyClient,
         send_proof_request: SendProofRequest,
     ) -> PresentationExchange:
-        if send_proof_request.type == ProofRequestType.INDY:
-            presentation_request = V20PresRequestByFormat(
-                indy=send_proof_request.indy_proof_request
-            )
-        elif send_proof_request.type == ProofRequestType.LD_PROOF:
-            presentation_request = V20PresRequestByFormat(
-                dif=send_proof_request.dif_proof_request
-            )
-        elif send_proof_request.type == ProofRequestType.ANONCREDS:
+        proof_type = send_proof_request.get_proof_type()
+        if proof_type == "anoncreds":
             presentation_request = V20PresRequestByFormat(
                 anoncreds=send_proof_request.anoncreds_proof_request
             )
+        elif proof_type == "dif":
+            presentation_request = V20PresRequestByFormat(
+                dif=send_proof_request.dif_proof_request
+            )
         else:
             raise CloudApiException(
-                f"Unsupported credential type: {send_proof_request.type.value}",
+                "Unsupported credential request. One of anoncreds_proof_request "
+                "or dif_proof_request must be populated.",
                 status_code=501,
             )
 
@@ -111,6 +107,7 @@ class VerifierV2(Verifier):
             auto_verify=True,
             comment=send_proof_request.comment,
         )
+        bound_logger.debug("Sending request: {}", request_body)
         try:
             bound_logger.debug("Send free v2 presentation request")
             presentation_exchange = await handle_acapy_call(
@@ -132,24 +129,20 @@ class VerifierV2(Verifier):
         cls, controller: AcaPyClient, accept_proof_request: AcceptProofRequest
     ) -> PresentationExchange:
         auto_remove = accept_proof_request.auto_remove
-
-        if accept_proof_request.type == ProofRequestType.INDY:
-            presentation_spec = V20PresSpecByFormatRequest(
-                auto_remove=auto_remove,
-                indy=accept_proof_request.indy_presentation_spec,
-            )
-        elif accept_proof_request.type == ProofRequestType.LD_PROOF:
-            presentation_spec = V20PresSpecByFormatRequest(
-                auto_remove=auto_remove, dif=accept_proof_request.dif_presentation_spec
-            )
-        elif accept_proof_request.type == ProofRequestType.ANONCREDS:
+        proof_type = accept_proof_request.get_proof_type()
+        if proof_type == "anoncreds":
             presentation_spec = V20PresSpecByFormatRequest(
                 auto_remove=auto_remove,
                 anoncreds=accept_proof_request.anoncreds_presentation_spec,
             )
+        elif proof_type == "dif":
+            presentation_spec = V20PresSpecByFormatRequest(
+                auto_remove=auto_remove, dif=accept_proof_request.dif_presentation_spec
+            )
         else:
             raise CloudApiException(
-                f"Unsupported credential type: {accept_proof_request.type.value}",
+                "Unsupported credential. One of anoncreds_presentation_spec "
+                "or dif_presentation_spec must be populated.",
                 status_code=501,
             )
 

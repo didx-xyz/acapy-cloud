@@ -35,7 +35,6 @@ async def test_revoke_many_credentials(
     # Do proof request
     request_body = {
         "comment": "Test proof of revocation",
-        "type": "anoncreds",
         "anoncreds_proof_request": {
             "name": "Proof of SPEED",
             "version": "1.0",
@@ -79,7 +78,6 @@ async def test_revoke_many_credentials(
         f"{VERIFIER_BASE_PATH}/accept-request",
         json={
             "proof_id": alice_proof_exchange_id,
-            "type": "anoncreds",
             "anoncreds_presentation_spec": {
                 "requested_attributes": {
                     "THE_SPEED": {"cred_id": referent, "revealed": True}

@@ -37,7 +37,6 @@ async def test_send_anoncreds_proof_request(
     alice_member_client: RichAsyncClient,
 ):
     request_body = {
-        "type": "anoncreds",
         "connection_id": acme_and_alice_connection.acme_connection_id,
         "anoncreds_proof_request": sample_anoncreds_proof_request().to_dict(),
     }
@@ -80,7 +79,6 @@ async def test_accept_anoncreds_proof_request(
     acme_and_alice_connection: AcmeAliceConnect,
 ):
     request_body = {
-        "type": "anoncreds",
         "connection_id": acme_and_alice_connection.acme_connection_id,
         "anoncreds_proof_request": {
             "name": "Proof Request",
@@ -121,7 +119,6 @@ async def test_accept_anoncreds_proof_request(
         cred_id=referent, revealed=True
     )
     proof_accept = AcceptProofRequest(
-        type="anoncreds",
         proof_id=alice_proof_id,
         anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={"0_speed_uuid": request_attrs},
@@ -169,7 +166,6 @@ async def test_reject_anoncreds_proof_request(
     delete_proof_record: bool,
 ):
     request_body = {
-        "type": "anoncreds",
         "connection_id": acme_and_alice_connection.acme_connection_id,
         "anoncreds_proof_request": sample_anoncreds_proof_request().to_dict(),
     }
@@ -245,7 +241,6 @@ async def test_get_proof_and_get_proofs_anoncreds(
     acme_connection_id = acme_and_alice_connection.acme_connection_id
 
     request_body = {
-        "type": "anoncreds",
         "save_exchange_record": True,
         "connection_id": acme_connection_id,
         "anoncreds_proof_request": sample_anoncreds_proof_request(
@@ -291,7 +286,6 @@ async def test_get_proof_and_get_proofs_anoncreds(
     )
 
     proof_accept = AcceptProofRequest(
-        type="anoncreds",
         proof_id=alice_proof_id,
         anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={"0_speed_uuid": request_attrs},
@@ -324,7 +318,6 @@ async def test_get_proof_and_get_proofs_anoncreds(
 
     # Acme does proof request and alice does not respond
     request_body = {
-        "type": "anoncreds",
         "save_exchange_record": True,
         "connection_id": acme_connection_id,
         "anoncreds_proof_request": sample_anoncreds_proof_request().to_dict(),
@@ -406,7 +399,6 @@ async def test_delete_anoncreds_proof(
     acme_client: RichAsyncClient,
 ):
     request_body = {
-        "type": "anoncreds",
         "connection_id": acme_and_alice_connection.acme_connection_id,
         "anoncreds_proof_request": sample_anoncreds_proof_request().to_dict(),
     }
@@ -429,7 +421,6 @@ async def test_get_anoncreds_credentials_for_request(
     alice_member_client: RichAsyncClient,
 ):
     request_body = {
-        "type": "anoncreds",
         "connection_id": acme_and_alice_connection.acme_connection_id,
         "anoncreds_proof_request": sample_anoncreds_proof_request().to_dict(),
     }
@@ -492,7 +483,6 @@ async def test_accept_anoncreds_proof_request_verifier_has_issuer_role(
     meld_co_anoncreds_and_alice_connection: MeldCoAliceConnect,
 ):
     request_body = {
-        "type": "anoncreds",
         "connection_id": meld_co_anoncreds_and_alice_connection.meld_co_connection_id,
         "anoncreds_proof_request": sample_anoncreds_proof_request(
             restrictions=[{"cred_def_id": meld_co_anoncreds_credential_definition_id}]
@@ -532,7 +522,6 @@ async def test_accept_anoncreds_proof_request_verifier_has_issuer_role(
     )
 
     proof_accept = AcceptProofRequest(
-        type="anoncreds",
         proof_id=alice_proof_id,
         anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={"0_speed_uuid": request_attrs},
@@ -573,7 +562,6 @@ async def test_saving_of_anoncreds_presentation_exchange_records(
     alice_save_exchange_record: Optional[bool],
 ):
     request_body = {
-        "type": "anoncreds",
         "connection_id": acme_and_alice_connection.acme_connection_id,
         "anoncreds_proof_request": sample_anoncreds_proof_request(
             restrictions=[{"cred_def_id": anoncreds_credential_definition_id}]
@@ -605,7 +593,6 @@ async def test_saving_of_anoncreds_presentation_exchange_records(
     )
 
     proof_accept = AcceptProofRequest(
-        type="anoncreds",
         proof_id=alice_proof_id,
         anoncreds_presentation_spec=AnonCredsPresSpec(
             requested_attributes={"0_speed_uuid": request_attrs},
@@ -686,7 +673,6 @@ async def test_regression_proof_valid_anoncreds_credential(
     # Do proof request
     request_body = {
         "comment": "Test cred is not revoked",
-        "type": "anoncreds",
         "anoncreds_proof_request": {
             "non_revoked": {"to": unix_timestamp},
             "requested_attributes": {
@@ -721,7 +707,6 @@ async def test_regression_proof_valid_anoncreds_credential(
         f"{VERIFIER_BASE_PATH}/accept-request",
         json={
             "proof_id": alice_proof_exchange_id,
-            "type": "anoncreds",
             "anoncreds_presentation_spec": {
                 "requested_attributes": {
                     "THE_SPEED": {"cred_id": referent, "revealed": True}
@@ -760,7 +745,6 @@ async def test_restrictions_on_attr(
     value: str,
 ):
     request_body = {
-        "type": "anoncreds",
         "connection_id": acme_and_alice_connection.acme_connection_id,
         "anoncreds_proof_request": {
             "requested_attributes": {
