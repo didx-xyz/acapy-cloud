@@ -1,7 +1,7 @@
 import asyncio
 from typing import Optional
 
-from aries_cloudcontroller import IssuerCredRevRecord, RevRegWalletUpdatedResult
+from aries_cloudcontroller import IssuerCredRevRecord
 from fastapi import APIRouter, Depends
 
 from app.dependencies.acapy_clients import client_from_auth
@@ -15,6 +15,7 @@ from app.models.issuer import (
     RevokeCredential,
     RevokedResponse,
 )
+from app.models.revocation import RevRegWalletUpdatedResult
 from app.services import revocation_registry
 from app.util.retry_method import coroutine_with_retry_until_value
 from app.util.wallet_type_checks import get_wallet_type

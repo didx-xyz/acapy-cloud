@@ -1,4 +1,4 @@
-from typing import Literal, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 from aries_cloudcontroller import (
     AnonCredsPresentationRequest as AcaPyAnonCredsPresentationRequest,
@@ -130,13 +130,17 @@ class RejectProofRequest(ProofId):
 
 
 class CredInfo(BaseModel):
-    attrs: dict = Field(..., description="Attribute names and value")
-    cred_def_id: str = Field(..., description="Credential definition identifier")
-    referent: str = Field(
-        ..., description="removed - renamed to credential_id", exclude=True
+    attrs: Optional[dict[str, Any]] = Field(
+        default=None, description="Attribute names and value"
     )
-    credential_id: str = Field(
-        ..., description="Credential identifier", validation_alias="referent"
+    cred_def_id: Optional[str] = Field(
+        default=None, description="Credential definition identifier"
+    )
+    referent: Optional[str] = Field(
+        default=None, description="removed - renamed to credential_id", exclude=True
+    )
+    credential_id: Optional[str] = Field(
+        default=None, description="Credential identifier", validation_alias="referent"
     )
     cred_rev_id: Optional[str] = Field(
         default=None, description="Credential revocation identifier"
@@ -147,9 +151,14 @@ class CredInfo(BaseModel):
     schema_id: Optional[str] = Field(default=None, description="Schema identifier")
 
 
+class NonRevocationInterval(IndyNonRevocationInterval):
+    # We just rename the model to avoid confusion with AnonCreds using this
+    pass
+
+
 class CredPrecis(BaseModel):
     cred_info: CredInfo = Field(description="Credential info")
-    interval: Optional[IndyNonRevocationInterval] = Field(
+    interval: Optional[NonRevocationInterval] = Field(
         default=None, description="Non-revocation interval from presentation request"
     )
     presentation_referents: Optional[list[str]] = Field(

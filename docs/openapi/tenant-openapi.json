@@ -5581,18 +5581,39 @@
       "CredInfo": {
         "properties": {
           "attrs": {
-            "additionalProperties": true,
-            "type": "object",
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Attrs",
             "description": "Attribute names and value"
           },
           "cred_def_id": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Cred Def Id",
             "description": "Credential definition identifier"
           },
           "credential_id": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Credential Id",
             "description": "Credential identifier"
           },
@@ -5634,11 +5655,6 @@
           }
         },
         "type": "object",
-        "required": [
-          "attrs",
-          "cred_def_id",
-          "credential_id"
-        ],
         "title": "CredInfo"
       },
       "CredInfoList": {
@@ -5670,7 +5686,7 @@
           "interval": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/IndyNonRevocationInterval"
+                "$ref": "#/components/schemas/NonRevocationInterval"
               },
               {
                 "type": "null"
@@ -6941,41 +6957,6 @@
         "title": "Hangup",
         "description": "Hangup"
       },
-      "IndyNonRevocationInterval": {
-        "properties": {
-          "from": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "maximum": 1.8446744073709552E+19,
-                "minimum": 0.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "From",
-            "description": "Earliest time of interest in non-revocation interval"
-          },
-          "to": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "maximum": 1.8446744073709552E+19,
-                "minimum": 0.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "To",
-            "description": "Latest time of interest in non-revocation interval"
-          }
-        },
-        "type": "object",
-        "title": "IndyNonRevocationInterval",
-        "description": "IndyNonRevocationInterval"
-      },
       "InputDescriptors": {
         "properties": {
           "constraints": {
@@ -8097,6 +8078,40 @@
         },
         "type": "object",
         "title": "NonRevocProof"
+      },
+      "NonRevocationInterval": {
+        "properties": {
+          "from": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From",
+            "description": "Earliest time of interest in non-revocation interval"
+          },
+          "to": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To",
+            "description": "Latest time of interest in non-revocation interval"
+          }
+        },
+        "type": "object",
+        "title": "NonRevocationInterval"
       },
       "OobRecord": {
         "properties": {
@@ -9291,12 +9306,11 @@
               }
             ],
             "title": "Rev Reg Delta",
-            "description": "Indy revocation registry delta"
+            "description": "Revocation registry delta"
           }
         },
         "type": "object",
-        "title": "RevRegWalletUpdatedResult",
-        "description": "RevRegWalletUpdatedResult"
+        "title": "RevRegWalletUpdatedResult"
       },
       "RevokeCredential": {
         "properties": {

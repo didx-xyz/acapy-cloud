@@ -318,4 +318,7 @@ class VerifierV2(Verifier):
             bound_logger.debug("Successfully got matching v2 credentials.")
         else:
             bound_logger.debug("No matching v2 credentials obtained.")
+
+        # Convert IndyCredPrecis to CredPrecis
+        result = [CredPrecis(**cred.model_dump()) for cred in result]
         return result
