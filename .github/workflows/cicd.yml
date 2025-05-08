@@ -127,6 +127,7 @@ jobs:
     name: OpenAPI
     needs: docker
     uses: ./.github/workflows/update-openapi.yml
+    if: github.event_name == 'pull_request' || github.ref_name == github.event.repository.default_branch
     with:
       image-version: ${{ needs.docker.outputs.image_version }}
     secrets:
