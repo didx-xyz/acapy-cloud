@@ -5670,7 +5670,7 @@
           "interval": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/IndyNonRevocationInterval"
+                "$ref": "#/components/schemas/NonRevocationInterval"
               },
               {
                 "type": "null"
@@ -6941,41 +6941,6 @@
         "title": "Hangup",
         "description": "Hangup"
       },
-      "IndyNonRevocationInterval": {
-        "properties": {
-          "from": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "maximum": 1.8446744073709552E+19,
-                "minimum": 0.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "From",
-            "description": "Earliest time of interest in non-revocation interval"
-          },
-          "to": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "maximum": 1.8446744073709552E+19,
-                "minimum": 0.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "To",
-            "description": "Latest time of interest in non-revocation interval"
-          }
-        },
-        "type": "object",
-        "title": "IndyNonRevocationInterval",
-        "description": "IndyNonRevocationInterval"
-      },
       "InputDescriptors": {
         "properties": {
           "constraints": {
@@ -8097,6 +8062,40 @@
         },
         "type": "object",
         "title": "NonRevocProof"
+      },
+      "NonRevocationInterval": {
+        "properties": {
+          "from": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From",
+            "description": "Earliest time of interest in non-revocation interval"
+          },
+          "to": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 1.8446744073709552E+19,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To",
+            "description": "Latest time of interest in non-revocation interval"
+          }
+        },
+        "type": "object",
+        "title": "NonRevocationInterval"
       },
       "OobRecord": {
         "properties": {
