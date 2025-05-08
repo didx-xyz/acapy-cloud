@@ -27,7 +27,6 @@ async def issue_credential_to_alice(
     alice_member_client: RichAsyncClient,
 ) -> CredentialExchange:
     credential = {
-        "type": credential_type,
         "connection_id": faber_and_alice_connection.faber_connection_id,
         f"{credential_type}_credential_detail": {
             "credential_definition_id": credential_definition_id,
@@ -94,7 +93,6 @@ async def meld_co_issue_credential_to_alice(
     alice_member_client: RichAsyncClient,
 ) -> CredentialExchange:
     credential = {
-        "type": credential_type,
         "connection_id": meld_co_and_alice_connection.meld_co_connection_id,
         f"{credential_type}_credential_detail": {
             "credential_definition_id": meld_co_credential_definition_id,
@@ -170,7 +168,6 @@ async def issue_alice_creds(
     faber_cred_ex_ids = []
     for i in range(3):
         credential = {
-            "type": credential_type,
             "connection_id": faber_conn_id,
             "save_exchange_record": True,
             f"{credential_type}_credential_detail": {
@@ -363,7 +360,6 @@ async def get_or_issue_regression_cred_revoked(
         )
         # Cred doesn't yet exist; issue credential for regression testing
         credential = {
-            "type": credential_type,
             "connection_id": faber_and_alice_connection.faber_connection_id,
             "save_exchange_record": True,
             f"{credential_type}_credential_detail": {
@@ -478,7 +474,6 @@ async def get_or_issue_regression_cred_valid(
         )
         # Cred doesn't yet exist; issue credential for regression testing
         credential = {
-            "type": credential_type,
             "connection_id": faber_and_alice_connection.faber_connection_id,
             "save_exchange_record": True,
             f"{credential_type}_credential_detail": {
@@ -564,7 +559,6 @@ async def issue_alice_many_creds(
     num_creds = request.param if hasattr(request, "param") else 3
     for i in range(num_creds):
         credential = {
-            "type": credential_type,
             "connection_id": faber_conn_id,
             "save_exchange_record": True,
             f"{credential_type}_credential_detail": {

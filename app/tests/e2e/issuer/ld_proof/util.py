@@ -5,7 +5,6 @@ from app.models.issuer import SendCredential
 
 def create_credential(proof_type: str) -> dict:
     return SendCredential(
-        type="ld_proof",
         connection_id="",
         ld_credential_detail=LDProofVCDetail(
             credential=Credential(

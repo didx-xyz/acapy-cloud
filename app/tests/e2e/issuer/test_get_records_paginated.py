@@ -17,9 +17,7 @@ CREDENTIALS_BASE_PATH = router.prefix
     reason="Temporarily skip; existing tests on dev don't clean up old records yet",
 )
 @pytest.mark.xdist_group(name="issuer_test_group")
-@pytest.mark.parametrize("credential_type", ["anoncreds"])
 async def test_get_credential_exchange_records_paginated(
-    credential_type: str,
     alice_member_client: RichAsyncClient,
     faber_anoncreds_client: RichAsyncClient,
     anoncreds_credential_definition_id: str,
@@ -41,7 +39,6 @@ async def test_get_credential_exchange_records_paginated(
         for i in range(num_credentials_to_test):
             test_attributes["speed"] = str(i)
             credential_v2 = {
-                "type": credential_type,
                 "connection_id": issuer_connection_id,
                 "anoncreds_credential_detail": {
                     "credential_definition_id": credential_definition_id,

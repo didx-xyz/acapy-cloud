@@ -29,7 +29,7 @@ def test_credential_exchange_model():
         schema_id="schema-id",
         state="offer-sent",
         thread_id="thread-id",
-        type="indy",
+        type="anoncreds",
         updated_at="2023-01-01T01:00:00Z",
     )
 
@@ -44,7 +44,7 @@ def test_credential_exchange_model():
     assert exchange.schema_id == "schema-id"
     assert exchange.state == "offer-sent"
     assert exchange.thread_id == "thread-id"
-    assert exchange.type == "indy"
+    assert exchange.type == "anoncreds"
     assert exchange.updated_at == "2023-01-01T01:00:00Z"
 
 
@@ -85,7 +85,7 @@ def test_schema_cred_def_from_record():
     record = V20CredExRecord(
         by_format={
             "cred_offer": {
-                "indy": {
+                "anoncreds": {
                     "schema_id": "schema-id",
                     "cred_def_id": "cred-def-id",
                 }
@@ -101,7 +101,7 @@ def test_schema_cred_def_from_record():
     record = V20CredExRecord(
         by_format={
             "cred_proposal": {
-                "indy": {
+                "anoncreds": {
                     "schema_id": "schema-id",
                     "cred_def_id": "cred-def-id",
                 }
@@ -151,7 +151,7 @@ def test_attributes_from_record_v2():
                     V20CredAttrSpec(name="age", value="40"),
                 ]
             ),
-            formats=[V20CredFormat(format="indy", attach_id="attach_id")],
+            formats=[V20CredFormat(format="anoncreds", attach_id="attach_id")],
             offersattach=[],
         ),
     )
@@ -168,7 +168,7 @@ def test_attributes_from_record_v2():
                     V20CredAttrSpec(name="age", value="50"),
                 ]
             ),
-            formats=[V20CredFormat(format="indy", attach_id="attach_id")],
+            formats=[V20CredFormat(format="anoncreds", attach_id="attach_id")],
             filtersattach=[],
         )
     )
