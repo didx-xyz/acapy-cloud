@@ -206,8 +206,6 @@ async def accept_proof_request(
     }
     ```
 
-    In the context of the holder's wallet, the `cred_id` is called the `referent`.
-
     The `revealed` parameter indicates whether the holder wants to reveal the attribute value to the verifier or not.
 
     Request Body:

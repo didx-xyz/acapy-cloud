@@ -30,13 +30,9 @@ class VCRecordList(BaseModel):
 
 class CredInfo(IndyCredInfoAcaPy):
     credential_id: str = Field(
-        ..., validation_alias="referent", description="Credential identifier"
+        ..., description="Credential identifier", validation_alias="referent"
     )
-    referent: str = Field(
-        ...,
-        description="removed - renamed to credential_id",
-        exclude=True,
-    )
+    referent: str = Field(..., description="Renamed to credential_id", exclude=True)
 
 
 class CredInfoList(BaseModel):
