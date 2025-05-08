@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from aries_cloudcontroller import AcaPyClient, IndyCredPrecis
+from aries_cloudcontroller import AcaPyClient
 
 from app.models.verifier import (
     AcceptProofRequest,
     CreateProofRequest,
+    CredPrecis,
     RejectProofRequest,
     SendProofRequest,
 )
@@ -191,7 +192,7 @@ class Verifier(ABC):
     @abstractmethod
     async def get_credentials_by_proof_id(
         cls, controller: AcaPyClient, proof_id: str
-    ) -> List[IndyCredPrecis]:
+    ) -> List[CredPrecis]:
         """
         Retrieve the credentials for a proof
 
@@ -204,6 +205,6 @@ class Verifier(ABC):
 
         Returns:
         --------
-        [IndyCredPrecis]
+        [CredPrecis]
             A list of presentation exchange records
         """
