@@ -513,13 +513,4 @@ async def get_credentials_by_proof_id(
         raise
 
     bound_logger.debug("Successfully fetched credentials for proof request.")
-    return [
-        CredPrecis(
-            cred_info=CredInfo(
-                **cred.cred_info.model_dump(),
-            ),
-            interval=cred.interval,
-            presentation_referents=cred.presentation_referents,
-        )
-        for cred in result
-    ]
+    return result
