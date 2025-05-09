@@ -1,0 +1,27 @@
+fullnameOverride: did-registrar
+
+replicaCount: 1
+
+podAnnotations:
+  sidecar.istio.io/proxyCPU: 10m
+
+image:
+  registry: docker.io
+  name: universalregistrar/uni-registrar-web
+  pullPolicy: Always
+  digest: sha256:d02207a156cb97dd79d3515bc90a963d12660c4ca82382f77ae6b5d32351267f
+
+service:
+  appProtocol: http
+  port: 9080
+  containerPort: 9080
+
+livenessProbe:
+  tcpSocket:
+    port: 9080
+readinessProbe:
+  tcpSocket:
+    port: 9080
+startupProbe:
+  tcpSocket:
+    port: 9080
