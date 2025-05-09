@@ -1,6 +1,6 @@
 from typing import Optional
 
-from aries_cloudcontroller import DID, AcaPyClient, DIDCreate
+from aries_cloudcontroller import DID, AcaPyClient, CreateCheqdDIDRequest, DIDCreate
 
 from app.exceptions import CloudApiException, handle_acapy_call
 from app.util.did import qualified_did_sov
@@ -51,16 +51,52 @@ async def create_did(
     if did_create is None:
         did_create = DIDCreate()
 
-    did_response = await handle_acapy_call(
-        logger=logger, acapy_call=controller.wallet.create_did, body=did_create
-    )
+    did_method = did_create.method
 
-    result = did_response.result
-    if not result or not result.did or not result.verkey:
-        logger.error("Failed to create DID: `{}`.", did_response)
-        raise CloudApiException("Error creating did.")
+    if did_method == "cheqd":
+        create_cheqd_did_options = {}
+        if did_create.options:
+            create_cheqd_did_options = did_create.options.to_dict()
+        if did_create.seed:
+            create_cheqd_did_options["seed"] = did_create.seed
+        # Notes:
+        # - supported options: seed, network, verification_method
+        # - key_type option is not implemented (default is ed25519)
 
-    logger.debug("Successfully created local DID.")
+        request = CreateCheqdDIDRequest(options=create_cheqd_did_options)
+        logger.debug("Creating cheqd DID: `{}`", request)
+        cheqd_did_response = await handle_acapy_call(
+            logger=logger,
+            acapy_call=controller.did.did_cheqd_create_post,
+            body=request,
+        )
+        verkey = cheqd_did_response.verkey
+        did = cheqd_did_response.did
+
+        # Note: neither `success` nor `did_state` is populated in the response
+
+        if not verkey or not did:
+            logger.error("Failed to create cheqd DID: `{}`.", cheqd_did_response)
+            raise CloudApiException("Error creating cheqd did.")
+
+        result = DID(
+            did=did,
+            method=did_method,
+            verkey=verkey,
+            key_type="ed25519",
+            posture="posted",
+        )
+    else:
+        did_response = await handle_acapy_call(
+            logger=logger, acapy_call=controller.wallet.create_did, body=did_create
+        )
+
+        result = did_response.result
+        if not result or not result.did or not result.verkey:
+            logger.error("Failed to create DID: `{}`.", did_response)
+            raise CloudApiException("Error creating did.")
+
+    logger.debug("Successfully created local {} DID.", did_method)
     return result
 
 
