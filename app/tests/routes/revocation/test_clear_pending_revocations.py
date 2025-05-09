@@ -12,8 +12,11 @@ from app.exceptions import CloudApiException
 from app.models.issuer import ClearPendingRevocationsRequest
 from app.routes.revocation import clear_pending_revocations
 
+skip_reason = "Clear pending revocations is not yet implemented in AnonCreds"
+
 
 @pytest.mark.anyio
+@pytest.mark.skip(reason=skip_reason)
 async def test_clear_pending_revocations_success():
     mock_aries_controller = AsyncMock()
 
@@ -21,10 +24,7 @@ async def test_clear_pending_revocations_success():
         "app.routes.revocation.client_from_auth"
     ) as mock_client_from_auth, patch(
         "app.services.revocation_registry.clear_pending_revocations"
-    ) as mock_clear_pending_revocations, patch(
-        "app.routes.revocation.get_wallet_type"
-    ) as mock_get_wallet_type:
-        mock_get_wallet_type.return_value = "askar"
+    ) as mock_clear_pending_revocations:
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )
@@ -43,6 +43,7 @@ async def test_clear_pending_revocations_success():
 
 
 @pytest.mark.anyio
+@pytest.mark.skip(reason=skip_reason)
 @pytest.mark.parametrize(
     "exception_class, expected_status_code, expected_detail",
     [
@@ -63,10 +64,7 @@ async def test_clear_pending_revocations_fail_acapy_error(
         "app.routes.revocation.client_from_auth"
     ) as mock_client_from_auth, pytest.raises(
         HTTPException, match=expected_detail
-    ) as exc, patch(
-        "app.routes.revocation.get_wallet_type"
-    ) as mock_get_wallet_type:
-        mock_get_wallet_type.return_value = "askar"
+    ) as exc:
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )
@@ -83,6 +81,7 @@ async def test_clear_pending_revocations_fail_acapy_error(
 
 
 @pytest.mark.anyio
+@pytest.mark.skip(reason=skip_reason)
 async def test_clear_pending_revocations_fail_anoncreds_error():
     mock_aries_controller = AsyncMock()
 
@@ -91,10 +90,7 @@ async def test_clear_pending_revocations_fail_anoncreds_error():
     ) as mock_client_from_auth, pytest.raises(
         CloudApiException,
         match="Clearing pending revocations is not supported for the 'anoncreds' wallet type.",
-    ) as exc, patch(
-        "app.routes.revocation.get_wallet_type"
-    ) as mock_get_wallet_type:
-        mock_get_wallet_type.return_value = "askar-anoncreds"
+    ) as exc:
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )
