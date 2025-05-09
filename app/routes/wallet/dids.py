@@ -49,13 +49,10 @@ async def create_did(
     if not did_create:
         did_create = DIDCreate()
 
-    # Convert our custom DIDCreate model to ACA-Py's DIDCreate model
-    acapy_did_create_request = did_create.to_acapy_request()
-
     async with client_from_auth(auth) as aries_controller:
-        logger.debug("Creating DID with request: {}", acapy_did_create_request)
+        logger.debug("Creating DID with request: {}", did_create)
         result = await acapy_wallet.create_did(
-            controller=aries_controller, did_create=acapy_did_create_request
+            controller=aries_controller, did_create=did_create
         )
 
     logger.debug("Successfully created DID.")
