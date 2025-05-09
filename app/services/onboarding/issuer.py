@@ -109,7 +109,7 @@ async def onboard_issuer_no_public_did(
     try:
         bound_logger.info("Creating connection with endorser")
 
-        issuer_connection_id = await create_connection_with_endorser(
+        await create_connection_with_endorser(
             endorser_controller=endorser_controller,
             issuer_controller=issuer_controller,
             endorser_did=endorser_did,
@@ -119,8 +119,6 @@ async def onboard_issuer_no_public_did(
 
         issuer_did = await register_issuer_did(
             issuer_controller=issuer_controller,
-            issuer_label=issuer_label,
-            issuer_endorser_connection_id=issuer_connection_id,
             logger=bound_logger,
         )
     except Exception as e:
@@ -129,5 +127,5 @@ async def onboard_issuer_no_public_did(
             f"Error creating connection with endorser: {str(e)}",
         ) from e
 
-    bound_logger.debug("Successfully registered DID for issuer.")
+    bound_logger.debug("Successfully registered DID for issuer: {}", issuer_did)
     return issuer_did
