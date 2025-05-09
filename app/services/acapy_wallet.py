@@ -1,8 +1,9 @@
 from typing import Optional
 
-from aries_cloudcontroller import DID, AcaPyClient, CreateCheqdDIDRequest, DIDCreate
+from aries_cloudcontroller import DID, AcaPyClient, CreateCheqdDIDRequest
 
 from app.exceptions import CloudApiException, handle_acapy_call
+from app.models.wallet import DIDCreate
 from app.util.did import qualified_did_sov
 from shared.log_config import get_logger
 
@@ -54,9 +55,7 @@ async def create_did(
     did_method = did_create.method
 
     if did_method == "cheqd":
-        create_cheqd_did_options = {}
-        if did_create.options:
-            create_cheqd_did_options = did_create.options.to_dict()
+        create_cheqd_did_options = did_create.to_acapy_options().to_dict()
         if did_create.seed:
             create_cheqd_did_options["seed"] = did_create.seed
         # Notes:
