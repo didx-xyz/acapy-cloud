@@ -48,3 +48,17 @@ export function getGovernanceBearerToken() {
   console.error("Error description:", response.json().error_description);
   throw new Error("Failed to obtain bearer token");
 }
+
+// Create auth headers for enterprise
+export function createAuthHeaders(token) {
+  return { 'Authorization': `Bearer ${token}` };
+}
+
+// Setup auth for enterprise - get and return token
+export function setupAuth() {
+  return getBearerToken();
+}
+
+export function setupGOvernanceAuth() {
+  return getGovernanceBearerToken();
+}

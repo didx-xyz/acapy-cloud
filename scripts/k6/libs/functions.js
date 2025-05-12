@@ -4,6 +4,7 @@
 import { check, sleep } from "k6";
 import http from "k6/http";
 import sse from "k6/x/sse";
+import { createAuthHeaders } from '../libs/auth.js';
 // let customDuration = new Trend('custom_duration', true);
 
 // Helper function to generate a unique, zero-based index for even distribution of operations
@@ -19,7 +20,7 @@ function logError(response, requestBody) {
   }
 }
 
-export function createTenant(bearerToken, wallet) {
+export function createTenant(token, wallet) {
   const url = `${__ENV.CLOUDAPI_URL}/tenant-admin/v1/tenants`;
   const payload = JSON.stringify({
     wallet_label: wallet.wallet_label,
@@ -31,8 +32,8 @@ export function createTenant(bearerToken, wallet) {
   });
   const params = {
     headers: {
-      Authorization: `Bearer ${bearerToken}`,
       "Content-Type": "application/json",
+      ...createAuthHeaders(token),
     },
   };
 
@@ -687,6 +688,7 @@ export function createSchema(bearerToken, schemaName, schemaVersion) {
   const url = `${__ENV.CLOUDAPI_URL}/governance/v1/definitions/schemas`;
   const params = {
     headers: {
+      // x-api-key: governance.governance-agent-api-key
       Authorization: `Bearer ${bearerToken}`,
     },
     timeout: "120s",

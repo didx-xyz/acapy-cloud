@@ -5,7 +5,7 @@ import { check, sleep } from "k6";
 import { SharedArray } from "k6/data";
 import { Counter, Trend } from "k6/metrics";
 import file from "k6/x/file";
-import { getBearerToken } from "../libs/auth.js";
+import { setupAuth } from '../libs/auth.js';
 import { createTenant } from "../libs/functions.js";
 
 const vus = Number(__ENV.VUS || 1);
@@ -68,7 +68,7 @@ const wallets = new SharedArray("wallets", () => {
 const filepath = `output/${outputPrefix}-create-holders.json`;
 export function setup() {
   file.writeString(filepath, "");
-  const bearerToken = getBearerToken();
+  const bearerToken = setupAuth();
   // eslint-disable-next-line
   return { bearerToken };
 }
