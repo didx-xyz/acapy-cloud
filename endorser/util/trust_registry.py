@@ -54,6 +54,8 @@ async def is_valid_issuer(did: str, schema_id: str) -> bool:
     try:
         async with RichAsyncClient() as client:
             bound_logger.debug("Fetch schema from trust registry")
+            if "/" in schema_id:
+                schema_id = schema_id.replace("/", "~")
             await client.get(f"{TRUST_REGISTRY_URL}/registry/schemas/{schema_id}")
     except HTTPException as http_err:
         if http_err.status_code == 404:
