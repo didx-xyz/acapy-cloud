@@ -3,14 +3,17 @@
 
 import { check, sleep } from "k6";
 import { Counter } from "k6/metrics";
-import { getBearerToken } from "../libs/auth.js";
 import {
   checkRevoked,
   getWalletIndex,
   revokeCredentialAutoPublish,
 } from "../libs/functions.js";
 
-const inputFilepath = "../output/create-credentials.json";
+const holderPrefix = __ENV.HOLDER_PREFIX;
+const issuerPrefix = __ENV.ISSUER_PREFIX;
+const outputPrefix = `${issuerPrefix}-${holderPrefix}`;
+
+const inputFilepath = `../output/${outputPrefix}-create-credentials.json`;
 const data = open(inputFilepath, "r");
 
 const vus = Number.parseInt(__ENV.VUS, 10);
@@ -45,8 +48,7 @@ export const options = {
 
 export function setup() {
   const tenants = data.trim().split("\n").map(JSON.parse);
-  const bearerToken = getBearerToken();
-  return { bearerToken, tenants }; // eslint-disable-line no-eval
+  return { tenants }; // eslint-disable-line no-eval
 }
 
 export default function (data) {
