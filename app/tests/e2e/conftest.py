@@ -44,6 +44,11 @@ async def governance_public_did(
 
     try:
         response = await get_public_did(governance_acapy_client)
+        if not response.did.startswith("did:cheqd:"):
+            raise CloudApiException(
+                status_code=404,
+                detail="Governance has did:sov; creating did:cheqd",
+            )
     except CloudApiException as e:
         if e.status_code == 404:
             # Did not found, create and publish
