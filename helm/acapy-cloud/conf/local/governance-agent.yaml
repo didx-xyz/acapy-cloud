@@ -31,7 +31,7 @@ command:
   - --plugin
   - cheqd
   - --plugin-config-value
-  - resolver_url="http://did-resolver:8080/1.0/identifiers"
+  - resolver_url="http://did-resolver:8080/1.0/identifiers/"
   - --plugin-config-value
   - registrar_url="http://did-registrar:9080/1.0/"
 
