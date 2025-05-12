@@ -59,12 +59,12 @@ export function createTenant(token, wallet) {
   throw new Error("Failed to create tenant");
 }
 
-export function getWalletIdByWalletName(bearerToken, walletName) {
+export function getWalletIdByWalletName(token, walletName) {
   const url = `${__ENV.CLOUDAPI_URL}/tenant-admin/v1/tenants?wallet_name=${walletName}`;
   const params = {
     headers: {
-      Authorization: `Bearer ${bearerToken}`,
       "Content-Type": "application/json",
+      ...createAuthHeaders(token),
     },
   };
 
@@ -109,13 +109,13 @@ export function getTrustRegistryActor(walletName) {
   return null;
 }
 
-export function getAccessTokenByWalletId(bearerToken, walletId) {
+export function getAccessTokenByWalletId(token, walletId) {
   const start = new Date();
   const url = `${__ENV.CLOUDAPI_URL}/tenant-admin/v1/tenants/${walletId}/access-token`;
 
   const params = {
     headers: {
-      Authorization: `Bearer ${bearerToken}`,
+      ...createAuthHeaders(token),
     },
   };
 
@@ -174,7 +174,7 @@ export function deleteTenant(bearerToken, walletId) {
   }
 }
 
-export function createIssuerTenant(bearerToken, walletName) {
+export function createIssuerTenant(token, walletName) {
   const url = `${__ENV.CLOUDAPI_URL}/tenant-admin/v1/tenants`;
   const payload = JSON.stringify({
     wallet_label: walletName,
@@ -187,8 +187,8 @@ export function createIssuerTenant(bearerToken, walletName) {
   });
   const params = {
     headers: {
-      Authorization: `Bearer ${bearerToken}`,
       "Content-Type": "application/json",
+      ...createAuthHeaders(token),
     },
   };
 
@@ -376,7 +376,6 @@ export function acceptCredential(holderAccessToken, credentialId) {
 }
 
 export function createCredentialDefinition(
-  bearerToken,
   issuerAccessToken,
   credDefTag,
   schemaId
@@ -384,7 +383,6 @@ export function createCredentialDefinition(
   const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/definitions/credentials`;
   const params = {
     headers: {
-      Authorization: `Bearer ${bearerToken}`,
       "x-api-key": issuerAccessToken,
     },
     timeout: "120s",
@@ -453,14 +451,12 @@ export function getCredentialIdByThreadId(holderAccessToken, threadId) {
 }
 
 export function getCredentialDefinitionId(
-  bearerToken,
   issuerAccessToken,
   credDefTag
 ) {
   const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/definitions/credentials?schema_version=0.1.0`;
   const params = {
     headers: {
-      Authorization: `Bearer ${bearerToken}`,
       "x-api-key": issuerAccessToken,
     },
   };
@@ -684,12 +680,11 @@ export function getDocs() {
   }
 }
 
-export function createSchema(bearerToken, schemaName, schemaVersion) {
+export function createSchema(token, schemaName, schemaVersion) {
   const url = `${__ENV.CLOUDAPI_URL}/governance/v1/definitions/schemas`;
   const params = {
     headers: {
-      // x-api-key: governance.governance-agent-api-key
-      Authorization: `Bearer ${bearerToken}`,
+      ...createAuthHeaders(token),
     },
     timeout: "120s",
   };
@@ -723,11 +718,11 @@ export function createSchema(bearerToken, schemaName, schemaVersion) {
   }
 }
 
-export function getSchema(bearerToken, schemaName, schemaVersion) {
+export function getSchema(token, schemaName, schemaVersion) {
   const url = `${__ENV.CLOUDAPI_URL}/governance/v1/definitions/schemas?schema_name=${schemaName}&schema_version=${schemaVersion}`;
   const params = {
     headers: {
-      Authorization: `Bearer ${bearerToken}`,
+      ...createAuthHeaders(token),
     },
   };
 

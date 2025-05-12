@@ -1,7 +1,7 @@
 import { check } from "k6";
 import { createIssuerIfNotExists } from "../libs/issuerUtils.js";
 import { createSchemaIfNotExists } from "../libs/schemaUtils.js";
-import { getBearerToken, getGovernanceBearerToken } from "./auth.js";
+import { setupAuth, setupGovernanceAuth } from "./auth.js";
 import {
   createCredentialDefinition,
   getCredentialDefinitionId,
@@ -14,8 +14,8 @@ export function bootstrapIssuer(
   schemaName,
   schemaVersion
 ) {
-  const bearerToken = getBearerToken();
-  const governanceBearerToken = getGovernanceBearerToken();
+  const bearerToken = setupAuth();
+  const governanceBearerToken = setupGovernanceAuth();
   const issuers = [];
 
   for (let i = 0; i < numIssuers; i++) {
@@ -36,7 +36,6 @@ export function bootstrapIssuer(
 
     const { issuerWalletId, issuerAccessToken } = issuerData;
     const credentialDefinitionId = getCredentialDefinitionId(
-      bearerToken,
       issuerAccessToken,
       credDefTag
     );
@@ -66,7 +65,6 @@ export function bootstrapIssuer(
       });
 
       const createCredentialDefinitionResponse = createCredentialDefinition(
-        bearerToken,
         issuerAccessToken,
         credDefTag,
         schemaId

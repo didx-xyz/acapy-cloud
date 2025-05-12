@@ -59,6 +59,6 @@ export function setupAuth() {
   return getBearerToken();
 }
 
-export function setupGOvernanceAuth() {
+export function setupGovernanceAuth() {
   return getGovernanceBearerToken();
 }
