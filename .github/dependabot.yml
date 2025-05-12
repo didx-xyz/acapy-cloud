@@ -7,9 +7,7 @@ version: 2
 updates:
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: github-actions
-    directories:
-      - /
-      - /.github/workflows/actions/connect-eks
+    directory: /
     schedule:
       interval: weekly
       day: saturday

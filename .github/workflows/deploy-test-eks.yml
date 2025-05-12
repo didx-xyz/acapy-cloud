@@ -121,7 +121,7 @@ jobs:
           persist-credentials: false
 
       - name: Connect to EKS
-        uses: ./.github/workflows/actions/connect-eks
+        uses: didx-xyz/workflows/connect-eks@5298eb98f9bfb1ca77170580aaae6bac1cb47723 # master
         with:
           aws-region: af-south-1
           aws-role-arn: arn:aws:iam::402177810328:role/cicd
@@ -201,7 +201,7 @@ jobs:
           persist-credentials: false
 
       - name: Connect to EKS
-        uses: ./.github/workflows/actions/connect-eks
+        uses: didx-xyz/workflows/connect-eks@5298eb98f9bfb1ca77170580aaae6bac1cb47723 # master
         with:
           aws-region: af-south-1
           aws-role-arn: arn:aws:iam::402177810328:role/cicd
@@ -479,7 +479,7 @@ jobs:
           persist-credentials: false
 
       - name: Connect to EKS
-        uses: ./.github/workflows/actions/connect-eks
+        uses: didx-xyz/workflows/connect-eks@5298eb98f9bfb1ca77170580aaae6bac1cb47723 # master
         with:
           aws-region: af-south-1
           aws-role-arn: arn:aws:iam::402177810328:role/cicd
