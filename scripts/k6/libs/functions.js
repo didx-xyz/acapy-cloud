@@ -300,7 +300,6 @@ export function acceptInvitation(holderAccessToken, invitationObj) {
 }
 
 export function createCredential(
-  bearerToken,
   issuerAccessToken,
   credentialDefinitionId,
   issuerConnectionId
@@ -308,7 +307,6 @@ export function createCredential(
   const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/issuer/credentials`;
   const params = {
     headers: {
-      Authorization: `Bearer ${bearerToken}`,
       "x-api-key": issuerAccessToken,
     },
   };
