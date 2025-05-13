@@ -95,13 +95,13 @@ async def create_bob_alice_connection(
     )
 
     # Use Alice's connection DID to fetch Bob's connection
-    their_did = alice_connection["my_did"]
+    msg_id = alice_connection["invitation_msg_id"]
 
     bob_connection = await check_webhook_state(
         client=bob_member_client,
         topic="connections",
         state="completed",
-        filter_map={"their_did": their_did},
+        filter_map={"invitation_msg_id": msg_id},
     )
 
     bob_connection_id = bob_connection["connection_id"]

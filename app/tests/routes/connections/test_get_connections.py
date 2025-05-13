@@ -25,7 +25,7 @@ connections_response = ConnectionList(
     [
         {},
         {"alias": "test_alias"},
-        {"connection_protocol": "didexchange/1.0"},
+        {"connection_protocol": "didexchange/1.1"},
         {"invitation_key": "invitation_key"},
         {"invitation_msg_id": "invitation_msg_id"},
         {"their_role": "invitee"},

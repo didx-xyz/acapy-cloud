@@ -272,7 +272,7 @@ async def create_did_exchange_request(
             goal=goal,
             goal_code=goal_code,
             my_label=my_label,
-            protocol="didexchange/1.0",
+            protocol="didexchange/1.1",
             use_did=use_did,
             use_did_method=use_did_method,
             use_public_did=use_public_did,
