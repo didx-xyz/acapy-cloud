@@ -139,11 +139,11 @@ export function getAccessTokenByWalletId(headers, walletId) {
   return null;
 }
 
-export function deleteTenant(bearerToken, walletId) {
+export function deleteTenant(headers, walletId) {
   const url = `${__ENV.CLOUDAPI_URL}/tenant-admin/v1/tenants/${walletId}`;
   const params = {
     headers: {
-      Authorization: `Bearer ${bearerToken}`,
+      ...headers,
     },
   };
 
