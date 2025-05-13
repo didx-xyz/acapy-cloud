@@ -4,7 +4,6 @@
 import { check } from "k6";
 import { Counter } from "k6/metrics";
 import file from "k6/x/file";
-import { getBearerToken } from "../libs/auth.js";
 import {
   acceptCredential,
   createCredential,
@@ -72,17 +71,15 @@ function shuffleArray(array) {
 }
 
 export function setup() {
-  const bearerToken = getBearerToken();
 
   file.writeString(outputFilepath, "");
   let holders = data.trim().split("\n").map(JSON.parse);
   holders = shuffleArray(holders); // Randomize the order of holders
 
-  return { bearerToken, holders };
+  return { holders };
 }
 
 export default function (data) {
-  const bearerToken = data.bearerToken;
   const holders = data.holders;
   const walletIndex = getWalletIndex(__VU, __ITER, iterations);
   const wallet = holders[walletIndex];
@@ -93,7 +90,6 @@ export default function (data) {
   try {
     createCredentialResponse = retry(() => {
       const response = createCredential(
-        bearerToken,
         wallet.issuer_access_token,
         wallet.issuer_credential_definition_id,
         wallet.issuer_connection_id

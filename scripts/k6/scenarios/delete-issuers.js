@@ -4,7 +4,7 @@
 import { check } from "k6";
 import { SharedArray } from "k6/data";
 import { Counter } from "k6/metrics";
-import { getBearerToken } from "../libs/auth.js";
+import { getAuthHeaders } from '../libs/auth.js';
 import { deleteTenant, getWalletIdByWalletName } from "../libs/functions.js";
 import file from "k6/x/file"; // Add file import
 
@@ -59,8 +59,8 @@ const wallets = new SharedArray("wallets", () => {
 const filepath = `output/${outputPrefix}-create-issuers.json`;
 
 export function setup() {
-  const bearerToken = getBearerToken();
-  return { bearerToken }; // eslint-disable-line no-eval
+  const { tenantAdminHeaders } = getAuthHeaders();
+  return { tenantAdminHeaders }; // eslint-disable-line no-eval
 }
 
 export function teardown() {
@@ -80,12 +80,12 @@ function getWalletIndex(vu, iter) {
 }
 
 export default function (data) {
-  const bearerToken = data.bearerToken;
+  const tenantAdminHeaders = data.tenantAdminHeaders;
   const walletIndex = getWalletIndex(__VU, __ITER + 1); // __ITER starts from 0, adding 1 to align with the logic
   const wallet = wallets[walletIndex];
 
-  const walletId = getWalletIdByWalletName(bearerToken, wallet.wallet_name);
-  const deleteHolderResponse = deleteTenant(bearerToken, walletId);
+  const walletId = getWalletIdByWalletName(tenantAdminHeaders, wallet.wallet_name);
+  const deleteHolderResponse = deleteTenant(tenantAdminHeaders, walletId);
   check(deleteHolderResponse, {
     "Delete Issuer Tenant Response status code is 204": (r) => {
       if (r.status !== 204 && r.status !== 200) {

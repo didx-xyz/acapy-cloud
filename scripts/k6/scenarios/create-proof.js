@@ -3,10 +3,8 @@
 
 import { check, sleep } from "k6";
 import { Counter } from "k6/metrics";
-import { getBearerToken } from "../libs/auth.js";
 import {
   acceptProofRequest,
-  genericWaitForSSEEvent,
   getProof,
   getProofIdByThreadId,
   getProofIdCredentials,
@@ -70,16 +68,14 @@ function shuffleArray(array) {
 }
 
 export function setup() {
-  const bearerToken = getBearerToken();
 
   let tenants = data.trim().split("\n").map(JSON.parse);
   tenants = shuffleArray(tenants);
 
-  return { bearerToken, tenants };
+  return { tenants };
 }
 
 export default function (data) {
-  const bearerToken = data.bearerToken;
   const tenants = data.tenants;
   const walletIndex = getWalletIndex(__VU, __ITER, iterations);
   const wallet = tenants[walletIndex];
