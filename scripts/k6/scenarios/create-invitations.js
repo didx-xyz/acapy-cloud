@@ -4,7 +4,6 @@
 import { check } from "k6";
 import { Counter, Trend } from "k6/metrics";
 import file from "k6/x/file";
-import { getBearerToken } from "../libs/auth.js";
 import {
   acceptInvitation,
   createInvitation,
@@ -66,14 +65,13 @@ const dataIssuer = open(inputFilepathIssuer, "r");
 const outputFilepath = `output/${outputPrefix}-create-invitation.json`;
 
 export function setup() {
-  const bearerToken = getBearerToken();
   const holders = data.trim().split("\n").map(JSON.parse);
   const issuers = dataIssuer.trim().split("\n").map(JSON.parse);
   file.writeString(outputFilepath, "");
 
   const walletName = issuerPrefix;
 
-  return { bearerToken, issuers, holders };
+  return { issuers, holders };
 }
 
 function getIssuerIndex(vu, iter) {
@@ -85,11 +83,6 @@ function getIssuerIndex(vu, iter) {
 
 export default function (data) {
 
-  // if (__ITER === 0) {
-  //   vuStartTimes[__VU] = Date.now();
-  // }
-  const start = Date.now();
-  const bearerToken = data.bearerToken;
   const issuers = data.issuers;
   const walletIndex = getWalletIndex(__VU, __ITER, iterations);
 

@@ -4,7 +4,6 @@
 import { check } from "k6";
 import { Counter } from "k6/metrics";
 import file from "k6/x/file";
-import { getBearerToken } from "../libs/auth.js";
 import {
   acceptCredential,
   createCredential,

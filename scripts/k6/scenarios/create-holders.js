@@ -69,7 +69,6 @@ const filepath = `output/${outputPrefix}-create-holders.json`;
 export function setup() {
   file.writeString(filepath, "");
 
-  // Get standard auth configuration for bearer token and auth strategy
   const { tenantAdminHeaders } = getAuthHeaders();
   return { tenantAdminHeaders };
 }
