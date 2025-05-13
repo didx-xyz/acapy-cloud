@@ -321,7 +321,7 @@ components:
           title: Group Id
           description: An optional group identifier. Useful with `get_tenants` to fetch wallets by group id.
           examples:
-            - Some Group Id
+            - Some-Group-Id
         image_url:
           anyOf:
             - type: string
@@ -398,7 +398,7 @@ components:
           title: Group Id
           description: An optional group identifier. Useful with `get_tenants` to fetch wallets by group id.
           examples:
-            - Some Group Id
+            - Some-Group-Id
       type: object
       required:
         - access_token
@@ -455,7 +455,7 @@ components:
           title: Group Id
           description: An optional group identifier. Useful with `get_tenants` to fetch wallets by group id.
           examples:
-            - Some Group Id
+            - Some-Group-Id
       type: object
       required:
         - wallet_id
