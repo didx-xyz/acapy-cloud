@@ -29,7 +29,7 @@ export function createTenant(headers, wallet) {
     image_url:
       "https://upload.wikimedia.org/wikipedia/commons/7/70/Example.png",
   });
-
+  console.log(`URL: ${url}`);
   const params = {
     headers: {
       "Content-Type": "application/json",
