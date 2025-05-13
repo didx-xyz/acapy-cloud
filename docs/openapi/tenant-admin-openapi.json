@@ -513,7 +513,7 @@
             "title": "Group Id",
             "description": "An optional group identifier. Useful with `get_tenants` to fetch wallets by group id.",
             "examples": [
-              "Some Group Id"
+              "Some-Group-Id"
             ]
           },
           "image_url": {
@@ -641,7 +641,7 @@
             "title": "Group Id",
             "description": "An optional group identifier. Useful with `get_tenants` to fetch wallets by group id.",
             "examples": [
-              "Some Group Id"
+              "Some-Group-Id"
             ]
           }
         },
@@ -732,7 +732,7 @@
             "title": "Group Id",
             "description": "An optional group identifier. Useful with `get_tenants` to fetch wallets by group id.",
             "examples": [
-              "Some Group Id"
+              "Some-Group-Id"
             ]
           }
         },
