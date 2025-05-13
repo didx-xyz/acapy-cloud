@@ -13,3 +13,5 @@ export ISSUER_PREFIX=k6_issuer
 export HOLDER_PREFIX=k6_holder
 export SCHEMA_PREFIX=k6_schema
 export NUM_ISSUERS=2
+export SCHEMA_NAME=k6_schema
+export SCHEMA_VERSION=1.0
