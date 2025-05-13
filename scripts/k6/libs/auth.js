@@ -14,8 +14,9 @@ export function getAuthHeaders() {
     tenantAdminHeaders = { 'Authorization': `Bearer ${token}` };
     governanceHeaders = { 'Authorization': `Bearer ${governanceToken}` };
   } else {
-    tenantAdminHeaders = { 'x-api-key': __ENV.TENANT_ADMIN_API_KEY };
-    governanceHeaders = { 'x-api-key': __ENV.GOVERNANCE_API_KEY };
+    console.log("Using API keys for authentication");
+    tenantAdminHeaders = { 'x-api-key': `tenant-admin.${__ENV.TENANT_ADMIN_API_KEY}` };
+    governanceHeaders = { 'x-api-key': `governance.${__ENV.GOVERNANCE_API_KEY }` };
   }
 
   return { tenantAdminHeaders, governanceHeaders };

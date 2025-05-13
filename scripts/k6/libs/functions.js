@@ -25,7 +25,7 @@ export function createTenant(headers, wallet) {
     wallet_label: wallet.wallet_label,
     wallet_name: wallet.wallet_name,
     wallet_type: "askar-anoncreds",
-    group_id: "Some Group Id",
+    group_id: "GroupA",
     image_url:
       "https://upload.wikimedia.org/wikipedia/commons/7/70/Example.png",
   });
@@ -181,7 +181,7 @@ export function createIssuerTenant(headers, walletName) {
     wallet_name: walletName,
     wallet_type: "askar-anoncreds",
     roles: ["issuer", "verifier"],
-    group_id: "Group A",
+    group_id: "GroupA",
     image_url:
       "https://upload.wikimedia.org/wikipedia/commons/7/70/Example.png",
   });
