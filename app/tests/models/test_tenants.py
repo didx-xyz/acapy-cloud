@@ -50,9 +50,9 @@ def test_create_tenant_model_group_id():
     with pytest.raises(CloudApiValueError) as exc:
         CreateTenantRequest(wallet_label="a", group_id="^")
     assert exc.value.detail == (
-        "group_id may not contain certain special characters. "
-        "Must be alphanumeric, may include spaces, and the following special "
-        f"characters are allowed: {allowable_special_chars}"
+        "group_id may not contain certain special characters and spaces. "
+        "Must be alphanumeric and the following special characters "
+        f"are allowed: {allowable_special_chars}"
     )
 
 
