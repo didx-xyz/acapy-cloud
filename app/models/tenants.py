@@ -17,7 +17,7 @@ label_examples = ["Tenant Label"]
 group_id_field = Field(
     None,
     description="An optional group identifier. Useful with `get_tenants` to fetch wallets by group id.",
-    examples=["Some Group Id"],
+    examples=["Some-Group-Id"],
 )
 image_url_field = Field(
     None,
@@ -100,10 +100,10 @@ class CreateTenantRequest(BaseModel):
             if len(v) > 50:
                 raise CloudApiValueError("group_id has a max length of 50 characters")
 
-            if not re.match(rf"^[a-zA-Z0-9 {allowable_special_chars}]+$", v):
+            if not re.match(rf"^[a-zA-Z0-9{allowable_special_chars}]+$", v):
                 raise CloudApiValueError(
-                    "group_id may not contain certain special characters. Must be alphanumeric, may include "
-                    f"spaces, and the following special characters are allowed: {allowable_special_chars}"
+                    "group_id may not contain spaces, or certain special characters. Must be alphanumeric "
+                    f"and the following special characters are allowed: {allowable_special_chars}"
                 )
 
         return v
