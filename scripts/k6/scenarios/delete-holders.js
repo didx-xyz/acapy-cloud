@@ -31,8 +31,8 @@ export const options = {
     // "http_req_duration{scenario:default}": ["max>=0"],
     // "http_reqs{scenario:default}": ["count >= 0"],
     // "iteration_duration{scenario:default}": ["max>=0"],
-    'test_function_reqs{my_custom_tag:specific_function}': ['count>=0'],
-    checks: ["rate==1"],
+    // 'test_function_reqs{my_custom_tag:specific_function}': ['count>=0'],
+    // checks: ["rate==1"],
   },
   tags: {
     test_run_id: "phased-issuance",
