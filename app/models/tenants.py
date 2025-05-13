@@ -102,7 +102,7 @@ class CreateTenantRequest(BaseModel):
 
             if not re.match(rf"^[a-zA-Z0-9{allowable_special_chars}]+$", v):
                 raise CloudApiValueError(
-                    "group_id may not contain certain special characters and spaces. Must be alphanumeric "
+                    "group_id may not contain spaces, or certain special characters. Must be alphanumeric "
                     f"and the following special characters are allowed: {allowable_special_chars}"
                 )
 
