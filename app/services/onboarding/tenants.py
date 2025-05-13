@@ -113,7 +113,7 @@ async def onboard_tenant(
     roles: List[TrustRegistryRole],
     wallet_auth_token: str,
     wallet_id: str,
-    did_method: Literal["sov", "cheqd"] = "sov",
+    did_method: Literal["sov", "cheqd"] = "cheqd",
 ) -> OnboardResult:
     bound_logger = logger.bind(
         body={"tenant_label": tenant_label, "roles": roles, "wallet_id": wallet_id}
