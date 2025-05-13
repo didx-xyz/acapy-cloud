@@ -3,12 +3,12 @@
 import { createSchema, getSchema } from "./functions.js";
 
 export function createSchemaIfNotExists(
-  bearerToken,
+  governanceHeaders,
   schemaName,
   schemaVersion
 ) {
   const schemaExists = checkSchemaExists(
-    bearerToken,
+    governanceHeaders,
     schemaName,
     schemaVersion
   );
@@ -22,7 +22,7 @@ export function createSchemaIfNotExists(
     `Schema: ${schemaName} version: ${schemaVersion} does not exist - creating...`
   );
   const createSchemaResponse = createSchema(
-    bearerToken,
+    governanceHeaders,
     schemaName,
     schemaVersion
   );
@@ -36,8 +36,8 @@ export function createSchemaIfNotExists(
   throw new Error(`Failed to create schema ${schemaName} v${schemaVersion}`);
 }
 
-function checkSchemaExists(bearerToken, schemaName, schemaVersion) {
-  const getSchemaResponse = getSchema(bearerToken, schemaName, schemaVersion);
+function checkSchemaExists(governanceHeaders, schemaName, schemaVersion) {
+  const getSchemaResponse = getSchema(governanceHeaders, schemaName, schemaVersion);
   if (getSchemaResponse.status === 200 && getSchemaResponse.body !== "[]") {
     // Schema exists
     return true;
@@ -46,8 +46,8 @@ function checkSchemaExists(bearerToken, schemaName, schemaVersion) {
   return false;
 }
 
-function getSchemaId(bearerToken, schemaName, schemaVersion) {
-  const getSchemaResponse = getSchema(bearerToken, schemaName, schemaVersion);
+function getSchemaId(governanceHeaders, schemaName, schemaVersion) {
+  const getSchemaResponse = getSchema(governanceHeaders, schemaName, schemaVersion);
   if (getSchemaResponse.status === 200 && getSchemaResponse.body !== "[]") {
     // Schema exists
     const schemaData = JSON.parse(getSchemaResponse.body);

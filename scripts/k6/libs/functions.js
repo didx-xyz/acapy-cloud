@@ -59,12 +59,12 @@ export function createTenant(headers, wallet) {
   throw new Error("Failed to create tenant");
 }
 
-export function getWalletIdByWalletName(token, walletName) {
+export function getWalletIdByWalletName(headers, walletName) {
   const url = `${__ENV.CLOUDAPI_URL}/tenant-admin/v1/tenants?wallet_name=${walletName}`;
   const params = {
     headers: {
       "Content-Type": "application/json",
-      ...createAuthHeaders(token),
+      ...headers,
     },
   };
 
@@ -109,13 +109,13 @@ export function getTrustRegistryActor(walletName) {
   return null;
 }
 
-export function getAccessTokenByWalletId(token, walletId) {
+export function getAccessTokenByWalletId(headers, walletId) {
   const start = new Date();
   const url = `${__ENV.CLOUDAPI_URL}/tenant-admin/v1/tenants/${walletId}/access-token`;
 
   const params = {
     headers: {
-      ...createAuthHeaders(token),
+      ...headers,
     },
   };
 
@@ -174,7 +174,7 @@ export function deleteTenant(bearerToken, walletId) {
   }
 }
 
-export function createIssuerTenant(token, walletName) {
+export function createIssuerTenant(headers, walletName) {
   const url = `${__ENV.CLOUDAPI_URL}/tenant-admin/v1/tenants`;
   const payload = JSON.stringify({
     wallet_label: walletName,
@@ -188,7 +188,7 @@ export function createIssuerTenant(token, walletName) {
   const params = {
     headers: {
       "Content-Type": "application/json",
-      ...createAuthHeaders(token),
+      ...headers,
     },
   };
 
@@ -678,11 +678,11 @@ export function getDocs() {
   }
 }
 
-export function createSchema(token, schemaName, schemaVersion) {
+export function createSchema(headers, schemaName, schemaVersion) {
   const url = `${__ENV.CLOUDAPI_URL}/governance/v1/definitions/schemas`;
   const params = {
     headers: {
-      ...createAuthHeaders(token),
+      ...headers,
     },
     timeout: "120s",
   };
@@ -716,11 +716,11 @@ export function createSchema(token, schemaName, schemaVersion) {
   }
 }
 
-export function getSchema(token, schemaName, schemaVersion) {
+export function getSchema(headers, schemaName, schemaVersion) {
   const url = `${__ENV.CLOUDAPI_URL}/governance/v1/definitions/schemas?schema_name=${schemaName}&schema_version=${schemaVersion}`;
   const params = {
     headers: {
-      ...createAuthHeaders(token),
+      ...headers,
     },
   };
 

@@ -5,13 +5,13 @@ import {
   getWalletIdByWalletName,
 } from "./functions.js";
 
-export function createIssuerIfNotExists(bearerToken, walletName) {
-  let issuerWalletId = getWalletIdByWalletName(bearerToken, walletName);
+export function createIssuerIfNotExists(headers, walletName) {
+  let issuerWalletId = getWalletIdByWalletName(headers, walletName);
   let issuerAccessToken;
 
   if (issuerWalletId !== null) {
     // Issuer exists, retrieve the access token
-    issuerAccessToken = getAccessTokenByWalletId(bearerToken, issuerWalletId);
+    issuerAccessToken = getAccessTokenByWalletId(headers, issuerWalletId);
     if (typeof issuerAccessToken !== "string") {
       console.error(
         `Failed to retrieve access token for wallet ID ${issuerWalletId}`
@@ -23,7 +23,7 @@ export function createIssuerIfNotExists(bearerToken, walletName) {
     // Issuer doesn't exist, create a new one
     try {
       const createIssuerTenantResponse = createIssuerTenant(
-        bearerToken,
+        headers,
         walletName
       );
       if (createIssuerTenantResponse.status !== 200) {
