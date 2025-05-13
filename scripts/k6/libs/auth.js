@@ -3,6 +3,24 @@
 
 import http from "k6/http";
 
+export function getAuthHeaders() {
+  let tenantAdminHeaders, governanceHeaders;
+
+  if (__ENV.USE_ENTERPRISE === 'true') {
+    // Only get tokens once for better performance
+    const token = getBearerToken();
+    const governanceToken = getGovernanceBearerToken();
+
+    tenantAdminHeaders = { 'Authorization': `Bearer ${token}` };
+    governanceHeaders = { 'Authorization': `Bearer ${governanceToken}` };
+  } else {
+    tenantAdminHeaders = { 'x-api-key': __ENV.TENANT_ADMIN_API_KEY };
+    governanceHeaders = { 'x-api-key': __ENV.GOVERNANCE_API_KEY };
+  }
+
+  return { tenantAdminHeaders, governanceHeaders };
+}
+
 export function getBearerToken() {
   const url = `${__ENV.CLOUDAPI_URL}/${__ENV.OAUTH_ENDPOINT}`;
   const clientId = __ENV.CLIENT_ID;
@@ -47,18 +65,4 @@ export function getGovernanceBearerToken() {
   console.error("Response body:", response.body);
   console.error("Error description:", response.json().error_description);
   throw new Error("Failed to obtain bearer token");
-}
-
-// Create auth headers for enterprise
-export function createAuthHeaders(token) {
-  return { 'Authorization': `Bearer ${token}` };
-}
-
-// Setup auth for enterprise - get and return token
-export function setupAuth() {
-  return getBearerToken();
-}
-
-export function setupGovernanceAuth() {
-  return getGovernanceBearerToken();
 }

@@ -5,7 +5,7 @@ import { check, sleep } from "k6";
 import { SharedArray } from "k6/data";
 import { Counter, Trend } from "k6/metrics";
 import file from "k6/x/file";
-import { setupAuth } from '../libs/auth.js';
+import { getAuthHeaders } from '../libs/auth.js';
 import { createTenant } from "../libs/functions.js";
 
 const vus = Number(__ENV.VUS || 1);
@@ -68,9 +68,10 @@ const wallets = new SharedArray("wallets", () => {
 const filepath = `output/${outputPrefix}-create-holders.json`;
 export function setup() {
   file.writeString(filepath, "");
-  const bearerToken = setupAuth();
-  // eslint-disable-next-line
-  return { bearerToken };
+
+  // Get standard auth configuration for bearer token and auth strategy
+  const { tenantAdminHeaders } = getAuthHeaders();
+  return { tenantAdminHeaders };
 }
 
 const iterationsPerVU = options.scenarios.default.iterations;
@@ -82,11 +83,11 @@ function getWalletIndex(vu, iter) {
 
 export default function (data) {
   const start = Date.now();
-  const bearerToken = data.bearerToken;
+  const tenantAdminHeaders = data.tenantAdminHeaders;
   const walletIndex = getWalletIndex(__VU, __ITER + 1); // __ITER starts from 0, adding 1 to align with the logic
   const wallet = wallets[walletIndex];
 
-  const createTenantResponse = createTenant(bearerToken, wallet);
+  const createTenantResponse = createTenant(tenantAdminHeaders, wallet);
   check(createTenantResponse, {
     "Create Tenant Response status code is 200": (r) => {
       if (r.status !== 200) {

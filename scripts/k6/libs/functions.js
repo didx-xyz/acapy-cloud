@@ -4,7 +4,6 @@
 import { check, sleep } from "k6";
 import http from "k6/http";
 import sse from "k6/x/sse";
-import { createAuthHeaders } from '../libs/auth.js';
 // let customDuration = new Trend('custom_duration', true);
 
 // Helper function to generate a unique, zero-based index for even distribution of operations
@@ -20,7 +19,7 @@ function logError(response, requestBody) {
   }
 }
 
-export function createTenant(token, wallet) {
+export function createTenant(headers, wallet) {
   const url = `${__ENV.CLOUDAPI_URL}/tenant-admin/v1/tenants`;
   const payload = JSON.stringify({
     wallet_label: wallet.wallet_label,
@@ -30,10 +29,11 @@ export function createTenant(token, wallet) {
     image_url:
       "https://upload.wikimedia.org/wikipedia/commons/7/70/Example.png",
   });
+
   const params = {
     headers: {
       "Content-Type": "application/json",
-      ...createAuthHeaders(token),
+      ...headers,
     },
   };
 
