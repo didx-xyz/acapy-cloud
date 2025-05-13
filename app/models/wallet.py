@@ -39,7 +39,7 @@ class DIDCreate(BaseModel):
     _supported_methods = ["cheqd", "sov", "key", "web", "did:peer:2", "did:peer:4"]
 
     method: Optional[StrictStr] = Field(
-        default="sov",
+        default="cheqd",
         description=(
             "Method for the requested DID. Supported methods are "
             f"{', '.join(_supported_methods)}."
