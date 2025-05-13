@@ -232,7 +232,7 @@ async def test_onboard_verifier_no_public_did(mock_agent_controller: AcaPyClient
         body=InvitationCreateRequest(
             use_public_did=False,
             alias="Trust Registry verifier_name",
-            handshake_protocols=["https://didcomm.org/didexchange/1.0"],
+            handshake_protocols=["https://didcomm.org/didexchange/1.1"],
         ),
     )
 

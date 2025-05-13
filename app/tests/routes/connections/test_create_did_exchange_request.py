@@ -99,7 +99,7 @@ async def test_create_did_exchange_request_success(
             goal=body_params.get("goal"),
             goal_code=body_params.get("goal_code"),
             my_label=body_params.get("my_label"),
-            protocol="didexchange/1.0",
+            protocol="didexchange/1.1",
             use_did=expected_use_did,
             use_did_method=expected_use_did_method,
             use_public_did=expected_use_public_did,

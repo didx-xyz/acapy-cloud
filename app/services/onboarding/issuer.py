@@ -52,7 +52,7 @@ async def onboard_issuer(
     bound_logger.debug("Creating OOB invitation on behalf of issuer")
     request_body = InvitationCreateRequest(
         alias=f"Trust Registry {issuer_label}",
-        handshake_protocols=["https://didcomm.org/didexchange/1.0"],
+        handshake_protocols=["https://didcomm.org/didexchange/1.1"],
     )
     invitation = await handle_acapy_call(
         logger=bound_logger,

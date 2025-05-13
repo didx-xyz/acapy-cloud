@@ -34,7 +34,7 @@ async def test_create_oob_invitation_success(body):
         return_value=test_invitation_record
     )
     handshake_protocols = [
-        "https://didcomm.org/didexchange/1.0",
+        "https://didcomm.org/didexchange/1.1",
     ]
     if body and body.attachments:
         handshake_protocols = None

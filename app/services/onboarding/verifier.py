@@ -40,7 +40,7 @@ async def onboard_verifier(*, verifier_controller: AcaPyClient, verifier_label: 
         request_body = InvitationCreateRequest(
             use_public_did=False,
             alias=f"Trust Registry {verifier_label}",
-            handshake_protocols=["https://didcomm.org/didexchange/1.0"],
+            handshake_protocols=["https://didcomm.org/didexchange/1.1"],
         )
         invitation: InvitationRecord = await handle_acapy_call(
             logger=logger,

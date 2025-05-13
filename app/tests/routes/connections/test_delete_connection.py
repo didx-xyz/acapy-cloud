@@ -20,7 +20,7 @@ async def test_delete_connection_by_id_success():
 
     mock_aries_controller.connection.get_connection = AsyncMock(
         return_value=ConnRecord(
-            connection_id=connection_id, connection_protocol="didexchange/1.0"
+            connection_id=connection_id, connection_protocol="didexchange/1.1"
         )
     )
     mock_aries_controller.connection.delete_connection = AsyncMock()
@@ -52,7 +52,7 @@ async def test_delete_connection_by_id_success_did_exchange():
     # Mock to return a connection that uses the didexchange protocol
     mock_aries_controller.connection.get_connection = AsyncMock(
         return_value=ConnRecord(
-            connection_id=connection_id, connection_protocol="didexchange/1.0"
+            connection_id=connection_id, connection_protocol="didexchange/1.1"
         )
     )
     mock_aries_controller.did_rotate.hangup = AsyncMock(return_value=Hangup())

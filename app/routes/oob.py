@@ -63,7 +63,7 @@ async def create_oob_invitation(
 
     handshake_protocols = (
         [
-            "https://didcomm.org/didexchange/1.0",
+            "https://didcomm.org/didexchange/1.1",
         ]
         if body.create_connection
         else None

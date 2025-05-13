@@ -60,7 +60,7 @@ async def create_endorser_invitation(
     logger.debug("Create OOB invitation on behalf of endorser")
     request_body = InvitationCreateRequest(
         alias=name,
-        handshake_protocols=["https://didcomm.org/didexchange/1.0"],
+        handshake_protocols=["https://didcomm.org/didexchange/1.1"],
         use_public_did=True,
     )
     invitation = await handle_acapy_call(

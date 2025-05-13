@@ -37,7 +37,7 @@ async def test_accept_invitation_oob(
         json={
             "create_connection": True,
             "use_public_did": False,
-            "handshake_protocols": ["https://didcomm.org/didexchange/1.0"],
+            "handshake_protocols": ["https://didcomm.org/didexchange/1.1"],
         },
     )
     assert invitation_response.status_code == 200
