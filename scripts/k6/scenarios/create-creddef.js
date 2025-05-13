@@ -2,7 +2,7 @@
 /* eslint-disable no-undefined, no-console, camelcase */
 
 import { check } from "k6";
-import { getBearerToken, getGovernanceBearerToken } from "../libs/auth.js";
+import { getAuthHeaders } from "./auth.js";
 import { createCredentialDefinition } from "../libs/functions.js";
 import { createSchemaIfNotExists } from "../libs/schemaUtils.js";
 
@@ -41,18 +41,17 @@ const inputFilepath = "../output/create-issuers.json";
 const data = open(inputFilepath, "r");
 
 export function setup() {
-  const bearerToken = getBearerToken();
-  const governanceBearerToken = getGovernanceBearerToken();
+  const { governanceHeaders } = getAuthHeaders();
   const issuers = data.trim().split("\n").map(JSON.parse);
   const schemaId = createSchemaIfNotExists(
-    governanceBearerToken,
+    governanceHeaders,
     schemaName,
     schemaVersion
   );
   check(schemaId, {
     "Schema ID is not null": (id) => id !== null && id !== undefined,
   });
-  return { bearerToken, issuers, schemaId }; // eslint-disable-line no-eval
+  return { issuers, schemaId }; // eslint-disable-line no-eval
 }
 
 const iterationsPerVU = options.scenarios.default.iterations;
@@ -63,7 +62,6 @@ function getWalletIndex(vu, iter) {
 }
 
 export default function (data) {
-  const bearerToken = data.bearerToken;
   const issuers = data.issuers;
   const schemaId = data.schemaId;
   const walletIndex = getWalletIndex(__VU, __ITER + 1); // __ITER starts from 0, adding 1 to align with the logic
@@ -71,7 +69,6 @@ export default function (data) {
   const credDefTag = wallet.wallet_name;
 
   const createCredentialDefinitionResponse = createCredentialDefinition(
-    bearerToken,
     wallet.access_token,
     credDefTag,
     schemaId

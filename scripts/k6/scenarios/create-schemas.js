@@ -4,7 +4,7 @@
 import { check } from "k6";
 import { SharedArray } from "k6/data";
 import file from "k6/x/file";
-import { getGovernanceBearerToken } from "../libs/auth.js";
+import { getAuthHeaders } from "./auth.js";
 import { createSchema, getSchema } from "../libs/functions.js";
 
 const outputFilepath = "output/create-schemas.json";
@@ -55,8 +55,8 @@ const schemas = new SharedArray("schemas", () => {
 
 export function setup() {
   file.writeString(outputFilepath, "");
-  const governanceBearerToken = getGovernanceBearerToken();
-  return { governanceBearerToken }; // eslint-disable-line no-eval
+  const { governanceHeaders } = getAuthHeaders();
+  return { governanceHeaders }; // eslint-disable-line no-eval
 }
 
 const iterationsPerVU = options.scenarios.default.iterations;
@@ -67,12 +67,12 @@ function getWalletIndex(vu, iter) {
 }
 
 export default function (data) {
-  const governanceBearerToken = data.governanceBearerToken;
+  const governanceHeaders = data.governanceHeaders;
   const walletIndex = getWalletIndex(__VU, __ITER + 1); // __ITER starts from 0, adding 1 to align with the logic
   const schema = schemas[walletIndex];
 
   const checkSchemaResponse = getSchema(
-    governanceBearerToken,
+    governanceHeaders,
     schema.schemaName,
     schema.schemaVersion
   );
@@ -81,7 +81,7 @@ export default function (data) {
   });
 
   const createSchemaResponse = createSchema(
-    governanceBearerToken,
+    governanceHeaders,
     schema.schemaName,
     schema.schemaVersion
   );
@@ -91,7 +91,7 @@ export default function (data) {
   });
 
   const getSchemaResponse = getSchema(
-    governanceBearerToken,
+    governanceHeaders,
     schema.schemaName,
     schema.schemaVersion
   );
