@@ -323,7 +323,6 @@ jobs:
         with:
           pytest-coverage-path: ./pytest/test_coverage.txt
           junitxml-path: ./pytest/test_output.xml
-          create-new-comment: true
           title: EKS E2E Test Coverage
           # Resolves `Warning: Your comment is too long (maximum is 65536 characters), coverage report will not be added.`
           hide-report: ${{ github.event_name != 'pull_request' }}
@@ -503,7 +502,6 @@ jobs:
         with:
           pytest-coverage-path: ./pytest-regression/test_coverage.txt
           junitxml-path: ./pytest-regression/test_output.xml
-          create-new-comment: true
           title: EKS Regression Test Coverage
           # Resolves `Warning: Your comment is too long (maximum is 65536 characters), coverage report will not be added.`
           hide-report: ${{ github.event_name != 'pull_request' }}
