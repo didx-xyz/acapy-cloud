@@ -7,6 +7,7 @@ from aries_cloudcontroller import (
     AnonCredsSchemasApi,
     ConnectionApi,
     CredentialsApi,
+    DidApi,
     EndorseTransactionApi,
     IssueCredentialV20Api,
     LedgerApi,
@@ -33,6 +34,7 @@ def get_mock_agent_controller() -> AcaPyClient:
     controller.anoncreds_schemas = Mock(spec=AnonCredsSchemasApi)
     controller.connection = Mock(spec=ConnectionApi)
     controller.credentials = Mock(spec=CredentialsApi)
+    controller.did = Mock(spec=DidApi)
     controller.endorse_transaction = Mock(spec=EndorseTransactionApi)
     controller.issue_credential_v2_0 = Mock(spec=IssueCredentialV20Api)
     controller.ledger = Mock(spec=LedgerApi)
