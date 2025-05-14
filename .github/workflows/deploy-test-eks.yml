@@ -178,7 +178,7 @@ jobs:
               -f ${{ inputs.acapy-helmfile-path || './helm/acapy-cloud.yaml.gotmpl' }} \
               --state-values-set image.tag=${{ inputs.image-version }} \
               --state-values-set image.registry=ghcr.io/${{ github.repository_owner }} \
-              --state-values-set pgProxyEnabled=${{ inputs.reset-deployments }} \
+              --state-values-set pgProxyEnabled=${{ inputs.reset-deployments == false }} \
               --state-values-set namespace=${{ inputs.namespace || 'acapy-cloud-dev' }}
           helm-plugins: ${{ inputs.helm-plugins || 'https://github.com/databus23/helm-diff' }}
           helmfile-version: ${{ inputs.helmfile-version || env.HELMFILE_VERSION_DEFAULT }}
@@ -231,7 +231,7 @@ jobs:
               --state-values-set release=acapy-test-regression \
               --set fullnameOverride=acapy-test-regression \
               --set env.RUN_REGRESSION_TESTS=true \
-              --set env.FAIL_ON_RECREATING_FIXTURES=${{ inputs.reset-deployments }} \
+              --set env.FAIL_ON_RECREATING_FIXTURES=${{ inputs.reset-deployments == false }} \
               --state-values-set regressionEnabled=true \
               --state-values-set namespace=${{ inputs.namespace || 'acapy-cloud-dev' }}
           helm-plugins: ${{ inputs.helm-plugins || 'https://github.com/databus23/helm-diff' }}
