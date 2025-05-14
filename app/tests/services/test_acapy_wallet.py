@@ -63,9 +63,11 @@ async def test_create_cheqd_did_success(mock_agent_controller: AcaPyClient):
     expected_did = "did:cheqd:testnet:abcdef1234567890"
     expected_verkey = "WgWxqztrNooG92RXvxSTWvWgWxqztrNooG92RXvxSTWv"
 
-    mock_agent_controller.did.did_cheqd_create_post.return_value = CreateCheqdDIDResponse(
-        did=expected_did,
-        verkey=expected_verkey,
+    mock_agent_controller.did.did_cheqd_create_post.return_value = (
+        CreateCheqdDIDResponse(
+            did=expected_did,
+            verkey=expected_verkey,
+        )
     )
 
     created_did = await acapy_wallet.create_did(
