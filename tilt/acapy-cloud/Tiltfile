@@ -684,6 +684,11 @@ def setup_cloudapi(build_enabled, expose):
                 link("http://tails.cloudapi." + ingress_domain, "Tails"),
             ]
         },
+        "driver-did-cheqd": {},
+        "did-registrar": {
+            "depends": ["driver-did-cheqd"],
+        },
+        "did-resolver": {},
     }
 
     for release in releases:

@@ -69,7 +69,7 @@ spec:
       - name: {{ include "acapy-cloud.fullname" . }}
         securityContext:
           {{- toYaml .Values.securityContext | nindent 10 }}
-        image: "{{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}{{ if .Values.image.digest }}@{{ .Values.image.digest }}{{ end }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- if .Values.args }}
         args:
@@ -171,7 +171,7 @@ spec:
       - name: "{{ .name }}"
         securityContext:
           {{- toYaml .securityContext | nindent 10 }}
-        image: "{{ .image.repository | default $.Values.image.repository }}:{{ .image.tag | default $.Values.image.tag }}"
+        image: "{{ .image.repository | default $.Values.image.repository }}:{{ .image.tag | default $.Values.image.tag }}{{ if .image.digest }}@{{ .image.digest }}{{ end }}"
         imagePullPolicy: {{ .image.pullPolicy | default $.Values.image.pullPolicy }}
         ports:
         - name: "{{ trunc 15 .name }}"

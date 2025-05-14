@@ -1,0 +1,38 @@
+fullnameOverride: did-resolver
+
+replicaCount: 1
+
+podAnnotations:
+  sidecar.istio.io/proxyCPU: 10m
+
+image:
+  registry: ghcr.io
+  name: cheqd/did-resolver
+  pullPolicy: Always
+  tag: 3.7.7
+
+service:
+  appProtocol: http
+  port: 8080
+  containerPort: 8080
+
+livenessProbe:
+  tcpSocket:
+    port: 8080
+readinessProbe:
+  tcpSocket:
+    port: 8080
+startupProbe:
+  tcpSocket:
+    port: 8080
+
+env:
+  # Syntax: <grpc-endpoint-url:port>,boolean,time
+  # 1st parameter is gRPC endpoint
+  # 2nd (Boolean) parameter is whether to use TLS or not
+  # 3nd connection timeout
+  # MAINNET_ENDPOINT: "grpc.cheqd.net:443,true,5s"
+  TESTNET_ENDPOINT: "grpc.cheqd.network:443,true,5s"
+
+  RESOLVER_LISTENER: "0.0.0.0:8080"
+  RESOLVER_LOG_LEVEL: "warn"
