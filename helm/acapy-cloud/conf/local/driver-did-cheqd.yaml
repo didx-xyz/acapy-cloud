@@ -9,6 +9,8 @@ image:
   registry: ghcr.io
   name: cheqd/did-registrar
   pullPolicy: Always
+  ## This is not currently Multi-Arch
+  ## Pending merge/release of https://github.com/cheqd/did-registrar/pull/427
   tag: production-latest
 
 service:
