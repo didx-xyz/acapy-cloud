@@ -87,7 +87,9 @@ async def create_did(
         )
     else:
         did_response = await handle_acapy_call(
-            logger=logger, acapy_call=controller.wallet.create_did, body=did_create
+            logger=logger,
+            acapy_call=controller.wallet.create_did,
+            body=did_create.to_acapy_request(),
         )
 
         result = did_response.result
