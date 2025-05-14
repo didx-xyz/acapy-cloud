@@ -1,3 +1,4 @@
+from unittest import mock
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -94,13 +95,13 @@ from app.routes.wallet.dids import create_did
 )
 async def test_create_did_success(request_body, create_body):
     mock_aries_controller = AsyncMock()
-    mock_create_did = AsyncMock()
+    mock_aries_controller.wallet.create_did = AsyncMock()
 
     with patch(
         "app.routes.wallet.dids.client_from_auth"
     ) as mock_client_from_auth, patch(
-        "app.services.acapy_wallet.create_did", mock_create_did
-    ):
+        "app.services.acapy_wallet.handle_acapy_call"
+    ) as mock_handle_acapy_call:
         # Configure client_from_auth to return our mocked aries_controller on enter
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -108,8 +109,10 @@ async def test_create_did_success(request_body, create_body):
 
         await create_did(did_create=request_body, auth="mocked_auth")
 
-        mock_create_did.assert_awaited_once_with(
-            did_create=create_body, controller=mock_aries_controller
+        mock_handle_acapy_call.assert_awaited_once_with(
+            logger=mock.ANY,
+            acapy_call=mock_aries_controller.wallet.create_did,
+            body=create_body,
         )
 
 

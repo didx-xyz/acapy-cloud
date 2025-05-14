@@ -36,12 +36,15 @@ class DIDCreate(BaseModel):
     # Downstream processes should use the `to_acapy_options` method to convert the model's fields
     # into the `DIDCreateOptions` structure expected by ACA-Py.
 
+    _supported_methods = ["cheqd", "sov", "key", "web", "did:peer:2", "did:peer:4"]
+
     method: Optional[StrictStr] = Field(
         default="sov",
         description=(
-            "Method for the requested DID. Supported methods are 'sov', 'key', 'web', 'did:peer:2', or 'did:peer:4'."
+            "Method for the requested DID. Supported methods are "
+            f"{', '.join(_supported_methods)}."
         ),
-        examples=["sov", "key", "web", "did:peer:2", "did:peer:4"],
+        examples=_supported_methods,
     )
     seed: Optional[StrictStr] = Field(
         default=None,
