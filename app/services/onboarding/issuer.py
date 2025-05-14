@@ -1,3 +1,5 @@
+from typing import Literal
+
 from aries_cloudcontroller import DID, AcaPyClient, InvitationCreateRequest
 
 from app.exceptions import CloudApiException, handle_acapy_call
@@ -19,6 +21,7 @@ async def onboard_issuer(
     issuer_controller: AcaPyClient,
     issuer_wallet_id: str,
     issuer_label: str = None,
+    did_method: Literal["sov", "cheqd"] = "sov",
 ) -> OnboardResult:
     """Onboard the controller as issuer.
 
@@ -31,6 +34,7 @@ async def onboard_issuer(
         issuer_controller (AcaPyClient): authenticated ACA-Py client for issuer
         endorser_controller (AcaPyClient): authenticated ACA-Py client for endorser
         issuer_label (str): alias for the issuer
+        did_method (Literal["sov", "cheqd"]): DID method to use for onboarding the issuer
     """
     bound_logger = logger.bind(
         body={"issuer_label": issuer_label, "issuer_wallet_id": issuer_wallet_id}
@@ -47,6 +51,7 @@ async def onboard_issuer(
             issuer_controller=issuer_controller,
             issuer_wallet_id=issuer_wallet_id,
             issuer_label=issuer_label,
+            did_method=did_method,
         )
 
     bound_logger.debug("Creating OOB invitation on behalf of issuer")
@@ -73,6 +78,7 @@ async def onboard_issuer_no_public_did(
     issuer_controller: AcaPyClient,
     issuer_wallet_id: str,
     issuer_label: str,
+    did_method: Literal["sov", "cheqd"] = "sov",
 ) -> DID:
     """
     Onboard an issuer without a public DID.
@@ -90,6 +96,7 @@ async def onboard_issuer_no_public_did(
         endorser_controller (AcaPyClient): Authenticated ACA-Py client for endorser
         issuer_controller (AcaPyClient): Authenticated ACA-Py client for issuer
         issuer_wallet_id (str): Wallet id of the issuer
+        did_method (Literal["sov", "cheqd"]): DID method to use for onboarding the issuer
 
     Returns:
         issuer_did (DID): The issuer's DID after completing the onboarding process
@@ -99,35 +106,40 @@ async def onboard_issuer_no_public_did(
     )
     bound_logger.debug("Onboarding issuer that has no public DID")
 
-    try:
-        bound_logger.debug("Getting public DID for endorser")
-        endorser_did = await acapy_wallet.get_public_did(controller=endorser_controller)
-    except Exception as e:
-        bound_logger.critical("Could not get endorser's public DID: {}", e)
-        raise CloudApiException("Unable to get endorser public DID.") from e
+    issuer_connection_id = None
+    if did_method == "sov":
+        try:
+            bound_logger.debug("Getting public DID for endorser")
+            endorser_did = await acapy_wallet.get_public_did(
+                controller=endorser_controller
+            )
+        except Exception as e:
+            bound_logger.critical("Could not get endorser's public DID: {}", e)
+            raise CloudApiException("Unable to get endorser public DID.") from e
 
-    try:
-        bound_logger.info("Creating connection with endorser")
+        try:
+            bound_logger.info("Creating connection with endorser")
 
-        issuer_connection_id = await create_connection_with_endorser(
-            endorser_controller=endorser_controller,
-            issuer_controller=issuer_controller,
-            endorser_did=endorser_did,
-            name=issuer_label,
-            logger=bound_logger,
-        )
+            issuer_connection_id = await create_connection_with_endorser(
+                endorser_controller=endorser_controller,
+                issuer_controller=issuer_controller,
+                endorser_did=endorser_did,
+                name=issuer_label,
+                logger=bound_logger,
+            )
+        except Exception as e:
+            bound_logger.exception("Could not create connection with endorser.")
+            raise CloudApiException(
+                f"Error creating connection with endorser: {str(e)}",
+            ) from e
 
-        issuer_did = await register_issuer_did(
-            issuer_controller=issuer_controller,
-            issuer_label=issuer_label,
-            issuer_endorser_connection_id=issuer_connection_id,
-            logger=bound_logger,
-        )
-    except Exception as e:
-        bound_logger.exception("Could not create connection with endorser.")
-        raise CloudApiException(
-            f"Error creating connection with endorser: {str(e)}",
-        ) from e
+    issuer_did = await register_issuer_did(
+        issuer_controller=issuer_controller,
+        issuer_label=issuer_label,
+        issuer_endorser_connection_id=issuer_connection_id,
+        did_method=did_method,
+        logger=bound_logger,
+    )
 
-    bound_logger.debug("Successfully registered DID for issuer.")
+    bound_logger.debug("Successfully registered DID for issuer: {}.", issuer_did)
     return issuer_did

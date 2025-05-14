@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Literal
 
 from aries_cloudcontroller import (
     AcaPyClient,
@@ -113,6 +113,7 @@ async def onboard_tenant(
     roles: List[TrustRegistryRole],
     wallet_auth_token: str,
     wallet_id: str,
+    did_method: Literal["sov", "cheqd"] = "sov",
 ) -> OnboardResult:
     bound_logger = logger.bind(
         body={"tenant_label": tenant_label, "roles": roles, "wallet_id": wallet_id}
@@ -130,6 +131,7 @@ async def onboard_tenant(
                 issuer_controller=tenant_controller,
                 issuer_wallet_id=wallet_id,
                 issuer_label=tenant_label,
+                did_method=did_method,
             )
             bound_logger.debug("Onboarding as issuer completed successfully.")
             return onboard_result

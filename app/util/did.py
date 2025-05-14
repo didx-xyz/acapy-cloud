@@ -30,7 +30,7 @@ def ed25519_verkey_to_did_key(key: str) -> str:
 
 
 def qualified_did_sov(did: str) -> str:
-    if not did.startswith("did:sov:"):
+    if not did.startswith("did:"):
         return f"did:sov:{did}"
 
     return did

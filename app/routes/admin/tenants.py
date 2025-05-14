@@ -189,6 +189,7 @@ async def create_tenant(
                     roles=roles,
                     wallet_auth_token=wallet_response.token,
                     wallet_id=wallet_response.wallet_id,
+                    did_method=body.did_method,
                 )
                 bound_logger.debug("Registering actor in the trust registry")
                 await register_actor(

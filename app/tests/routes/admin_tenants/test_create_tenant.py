@@ -105,6 +105,7 @@ async def test_create_tenant_success(roles):
                 roles=roles,
                 wallet_auth_token=create_wallet_response.token,
                 wallet_id=create_wallet_response.wallet_id,
+                did_method="sov",
             )
             mock_register_actor.assert_awaited_once_with(
                 actor=Actor(

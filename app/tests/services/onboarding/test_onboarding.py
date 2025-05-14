@@ -14,6 +14,7 @@ from aries_cloudcontroller import (
 )
 
 from app.exceptions import CloudApiException
+from app.models.wallet import DIDCreate
 from app.services.onboarding import issuer, verifier
 from shared.util.mock_agent_controller import get_mock_agent_controller
 
@@ -131,7 +132,9 @@ async def test_onboard_issuer_no_public_did(
     acapy_ledger_accept_taa_if_required_mock.assert_called_once_with(
         mock_agent_controller
     )
-    acapy_wallet_create_did_mock.assert_called_once_with(mock_agent_controller)
+    acapy_wallet_create_did_mock.assert_called_once_with(
+        mock_agent_controller, did_create=DIDCreate(method="sov")
+    )
     acapy_ledger_register_nym_on_ledger_mock.assert_called_once_with(
         mock_agent_controller,
         did="WgWxqztrNooG92RXvxSTWv",
