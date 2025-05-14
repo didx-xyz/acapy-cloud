@@ -118,6 +118,9 @@ jobs:
       - name: Debug
         run: |
           echo "Debugging: ${{ toJson(github) }}"
+      - name: Debug
+        run: |
+          echo "Debugging: ${{ toJson(inputs) }}"
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
