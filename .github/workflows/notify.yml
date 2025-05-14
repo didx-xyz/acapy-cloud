@@ -11,23 +11,23 @@ on:
         required: true
         type: string
         description: The version of the image built.
-      regression-tests:
-        description: Run Regression Tests on EKS
-        required: false
-        default: true
-        type: boolean
       reset-deployments:
         description: Reset deployment - Clean start
         required: false
         default: false
         type: boolean
-      run-k6:
-        description: Run K6 Tests on EKS
+      run-e2e-tests:
+        description: Run End-to-End Tests
         required: false
         default: true
         type: boolean
-      run-tests:
-        description: Run End-to-End Tests on EKS
+      run-k6-tests:
+        description: Run K6 Tests
+        required: false
+        default: true
+        type: boolean
+      run-regression-tests:
+        description: Run Regression Tests
         required: false
         default: true
         type: boolean
@@ -73,9 +73,9 @@ jobs:
                   'acapy-cloud-ref': process.env.ACAPY_CLOUD_REF,
                   'image-tag': process.env.IMAGE_TAG,
                   'reset-deployments': process.env.RESET_DEPLOYMENTS,
-                  'regression-tests': process.env.REGRESSION_TESTS,
-                  'run-k6': process.env.RUN_K6,
-                  'run-tests': process.env.RUN_TESTS,
+                  'regression-tests': process.env.RUN_REGRESSION_TESTS,
+                  'run-k6': process.env.RUN_K6_TESTS,
+                  'run-tests': process.env.RUN_E2E_TESTS,
                 }
               })
               console.log(result)
@@ -86,7 +86,7 @@ jobs:
         env:
           ACAPY_CLOUD_REF: ${{ inputs.acapy-cloud-ref }}
           IMAGE_TAG: ${{ inputs.image-version }}
-          REGRESSION_TESTS: ${{ inputs.regression-tests }}
           RESET_DEPLOYMENTS: ${{ inputs.reset-deployments }}
-          RUN_K6: ${{ inputs.run-k6 }}
-          RUN_TESTS: ${{ inputs.run-tests }}
+          RUN_E2E_TESTS: ${{ inputs.run-e2e-tests }}
+          RUN_K6_TESTS: ${{ inputs.run-k6-tests }}
+          RUN_REGRESSION_TESTS: ${{ inputs.run-regression-tests }}

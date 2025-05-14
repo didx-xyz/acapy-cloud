@@ -3,23 +3,23 @@ name: CICD
 on:
   workflow_dispatch:
     inputs:
-      regression-tests:
-        description: Run Regression Tests on EKS
-        required: false
-        default: true
-        type: boolean
       reset-deployments:
         description: Reset deployment - Clean start
         required: false
         default: false
         type: boolean
-      run-k6:
+      run-e2e-tests:
+        description: Run End-to-End Tests on EKS
+        required: false
+        default: true
+        type: boolean
+      run-k6-tests:
         description: Run K6 Tests on EKS
         required: false
         default: true
         type: boolean
-      run-tests:
-        description: Run End-to-End Tests on EKS
+      run-regression-tests:
+        description: Run Regression Tests on EKS
         required: false
         default: true
         type: boolean
@@ -157,10 +157,10 @@ jobs:
       helmfile-version: ${{ needs.export-versions.outputs.HELMFILE_VERSION }}
       image-version: ${{ needs.docker.outputs.image_version }}
       namespace: acapy-cloud-dev
-      regression-tests: ${{ github.event.inputs.regression-tests || true }}
       reset-deployments: ${{ github.event.inputs.reset-deployments || false }}
-      run-k6: ${{ github.event.inputs.run-k6 || true }}
-      run-tests: ${{ github.event.inputs.run-tests || true }}
+      run-e2e-tests: ${{ github.event.inputs.run-e2e-tests || true }}
+      run-k6-tests: ${{ github.event.inputs.run-k6-tests || true }}
+      run-regression-tests: ${{ github.event.inputs.run-regression-tests || true }}
     secrets:
       tailscale-authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
 
@@ -184,10 +184,10 @@ jobs:
     with:
       acapy-cloud-ref: ${{ github.sha }}
       image-version: ${{ needs.docker.outputs.image_version }}
-      regression-tests: ${{ inputs.regression-tests || true }}
       reset-deployments: ${{ inputs.reset-deployments || false }}
-      run-k6: ${{ inputs.run-k6 || true }}
-      run-tests: ${{ inputs.run-tests || true }}
+      run-e2e-tests: ${{ inputs.run-e2e-tests || true }}
+      run-k6-tests: ${{ inputs.run-k6-tests || true }}
+      run-regression-tests: ${{ inputs.run-regression-tests || true }}
     secrets:
       devops-app-id: ${{ secrets.DEVOPS_APP_ID }}
       devops-private-key: ${{ secrets.DEVOPS_PRIVATE_KEY }}
