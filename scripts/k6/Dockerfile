@@ -21,9 +21,9 @@ COPY --from=builder /app/xk6 /usr/local/bin/xk6
 USER nobody
 WORKDIR /k6
 
-COPY --chown=nobody:nodody scripts /k6/scripts
-COPY --chown=nobody:nodody scenarios /k6/scenarios
-COPY --chown=nobody:nodody libs /k6/libs
-COPY --chown=nobody:nodody env.sh /k6/env.sh
+COPY --chown=nobody:nobody scripts /k6/scripts
+COPY --chown=nobody:nobody scenarios /k6/scenarios
+COPY --chown=nobody:nobody libs /k6/libs
+COPY --chown=nobody:nobody env.sh /k6/env.sh
 
 ENTRYPOINT ["/bin/bash"]
