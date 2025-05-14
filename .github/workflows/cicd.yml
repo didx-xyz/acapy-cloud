@@ -157,10 +157,10 @@ jobs:
       helmfile-version: ${{ needs.export-versions.outputs.HELMFILE_VERSION }}
       image-version: ${{ needs.docker.outputs.image_version }}
       namespace: acapy-cloud-dev
-      regression-tests: ${{ github.event.inputs.regression-tests || 'true' }}
-      reset-deployments: ${{ github.event.inputs.reset-deployments || 'false' }}
-      run-k6: ${{ github.event.inputs.run-k6 || 'true' }}
-      run-tests: ${{ github.event.inputs.run-tests || 'true' }}
+      regression-tests: ${{ github.event.inputs.regression-tests || true }}
+      reset-deployments: ${{ github.event.inputs.reset-deployments || false }}
+      run-k6: ${{ github.event.inputs.run-k6 || true }}
+      run-tests: ${{ github.event.inputs.run-tests || true }}
     secrets:
       tailscale-authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
 

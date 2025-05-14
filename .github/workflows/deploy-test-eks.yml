@@ -70,23 +70,23 @@ on:
       regression-tests:
         description: Run Regression Tests
         required: false
-        default: 'true'
-        type: string
+        default: true
+        type: boolean
       reset-deployments:
         description: Reset deployment - Clean start
         required: false
-        default: 'false'
-        type: string
+        default: false
+        type: boolean
       run-k6:
         description: Run K6 Tests
         required: false
-        default: 'true'
-        type: string
+        default: true
+        type: boolean
       run-tests:
         description: Run End-to-End Tests
         required: false
-        default: 'true'
-        type: string
+        default: true
+        type: boolean
     secrets:
       tailscale-authkey:
         required: true
@@ -133,7 +133,7 @@ jobs:
           tailscale-authkey: ${{ secrets.tailscale-authkey || secrets.TAILSCALE_AUTHKEY }}
 
       - name: Helmfile Destroy
-        if: inputs.reset-deployments == 'true'
+        if: inputs.reset-deployments
         # https://github.com/helmfile/helmfile-action
         uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
         with:
@@ -175,7 +175,7 @@ jobs:
               -f ${{ inputs.acapy-helmfile-path || './helm/acapy-cloud.yaml.gotmpl' }} \
               --state-values-set image.tag=${{ inputs.image-version }} \
               --state-values-set image.registry=ghcr.io/${{ github.repository_owner }} \
-              --state-values-set pgProxyEnabled=${{ inputs.reset-deployments == 'false' }} \
+              --state-values-set pgProxyEnabled=${{ inputs.reset-deployments }} \
               --state-values-set namespace=${{ inputs.namespace || 'acapy-cloud-dev' }}
           helm-plugins: ${{ inputs.helm-plugins || 'https://github.com/databus23/helm-diff' }}
           helmfile-version: ${{ inputs.helmfile-version || env.HELMFILE_VERSION_DEFAULT }}
@@ -184,7 +184,7 @@ jobs:
   test-e2e:
     name: Tests / End-to-End
     needs: deploy
-    if: inputs.run-tests == 'true' || inputs.regression-tests == 'true'
+    if: inputs.run-tests || inputs.regression-tests
     runs-on: ubuntu-latest
 
     timeout-minutes: 30
@@ -213,7 +213,7 @@ jobs:
           tailscale-authkey: ${{ secrets.tailscale-authkey || secrets.TAILSCALE_AUTHKEY }}
 
       - name: Helmfile run regression tests
-        if: inputs.regression-tests == 'true'
+        if: inputs.regression-tests
         id: pytest-regression
         # https://github.com/helmfile/helmfile-action
         uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
@@ -228,7 +228,7 @@ jobs:
               --state-values-set release=acapy-test-regression \
               --set fullnameOverride=acapy-test-regression \
               --set env.RUN_REGRESSION_TESTS=true \
-              --set env.FAIL_ON_RECREATING_FIXTURES=${{ inputs.reset-deployments == 'false' }} \
+              --set env.FAIL_ON_RECREATING_FIXTURES=${{ inputs.reset-deployments }} \
               --state-values-set regressionEnabled=true \
               --state-values-set namespace=${{ inputs.namespace || 'acapy-cloud-dev' }}
           helm-plugins: ${{ inputs.helm-plugins || 'https://github.com/databus23/helm-diff' }}
@@ -236,7 +236,7 @@ jobs:
           helm-version: ${{ inputs.helm-version || env.HELM_VERSION_DEFAULT }}
 
       - name: Helmfile run pytest
-        if: inputs.run-tests == 'true'
+        if: inputs.run-tests
         id: pytest
         # https://github.com/helmfile/helmfile-action
         uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
@@ -464,7 +464,7 @@ jobs:
   test-k6:
     name: Tests / K6
     needs: deploy
-    if: inputs.run-k6 == 'true'
+    if: inputs.run-k6
     runs-on: ubuntu-latest
 
     timeout-minutes: 30
