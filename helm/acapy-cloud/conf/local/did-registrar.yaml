@@ -9,7 +9,11 @@ image:
   registry: docker.io
   name: universalregistrar/uni-registrar-web
   pullPolicy: Always
-  digest: sha256:d02207a156cb97dd79d3515bc90a963d12660c4ca82382f77ae6b5d32351267f
+  tag: latest
+  ## Multi-Arch Digest
+  digest: sha256:f94053ab9b7ee8104f88bc9ecceeb0353455a9559ec1ab933f9fab7588d67f16
+  ## If things start breaking, this is a known good SHA but isn't Multi-Arch
+  # digest: sha256:d02207a156cb97dd79d3515bc90a963d12660c4ca82382f77ae6b5d32351267f
 
 service:
   appProtocol: http
