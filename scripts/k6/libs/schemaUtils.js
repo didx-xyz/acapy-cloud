@@ -16,7 +16,7 @@ export function createSchemaIfNotExists(
     console.log(
       `Schema: ${schemaName} version: ${schemaVersion} already exists`
     );
-    return getSchemaId(bearerToken, schemaName, schemaVersion);
+    return getSchemaId(governanceHeaders, schemaName, schemaVersion);
   }
   console.log(
     `Schema: ${schemaName} version: ${schemaVersion} does not exist - creating...`

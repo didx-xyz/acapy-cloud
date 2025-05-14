@@ -487,5 +487,20 @@ jobs:
           cluster-name: cloudapi-dev
           tailscale-authkey: ${{ secrets.tailscale-authkey || secrets.TAILSCALE_AUTHKEY }}
 
-      - name: Soon™
-        run: echo "Soon™"
+      - name: Prepare output directory
+        run: mkdir -p ${{ github.workspace }}/scripts/k6/output && chmod 777 ${{ github.workspace }}/scripts/k6/output
+
+      - name: Run k6 tests
+        run: |
+          docker run --rm --network=host \
+            -v ${{ github.workspace }}/scripts/k6:/scripts \
+            -e CLOUDAPI_URL="https://acapy-cloud.dev.didxtech.com" \
+            -e GOVERNANCE_API_KEY="adminApiKey" \
+            -e TENANT_ADMIN_API_KEY="adminApiKey" \
+            --workdir /scripts \
+            --entrypoint /bin/sh \
+            ghcr.io/${{ github.repository_owner }}/acapy-cloud/xk6:${VERSION} \
+            /scripts/run_tests.sh
+        shell: bash
+        env:
+          VERSION: ${{ inputs.image-version }}

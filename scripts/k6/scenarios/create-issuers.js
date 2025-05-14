@@ -6,7 +6,7 @@ import { check } from "k6";
 import { SharedArray } from "k6/data";
 import { Counter, Trend } from "k6/metrics";
 import file from "k6/x/file";
-import { getBearerToken } from "../libs/auth.js";
+import { getAuthHeaders } from '../libs/auth.js';
 import {
   createIssuerTenant,
   getTrustRegistryActor,
@@ -15,9 +15,9 @@ import {
 const vus = Number.parseInt(__ENV.VUS, 10);
 const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
 const issuerPrefix = __ENV.ISSUER_PREFIX;
+const outputPrefix = `${issuerPrefix}`;
 // const holderPrefix = __ENV.HOLDER_PREFIX;
-
-const outputFilepath = "output/create-issuers.json";
+const filepath = `output/${outputPrefix}-create-issuers.json`;
 
 export const options = {
   scenarios: {
@@ -36,7 +36,7 @@ export const options = {
     // "http_req_duration{scenario:default}": ["max>=0"],
     // "http_reqs{scenario:default}": ["count >= 0"],
     // "iteration_duration{scenario:default}": ["max>=0"],
-    'specific_function_reqs{my_custom_tag:specific_function}': ['count>=0'],
+    // 'specific_function_reqs{my_custom_tag:specific_function}': ['count>=0'],
     checks: ["rate==1"],
   },
   tags: {
@@ -65,9 +65,9 @@ const wallets = new SharedArray("wallets", () => {
 });
 
 export function setup() {
-  const bearerToken = getBearerToken();
-  file.writeString(outputFilepath, "");
-  return { bearerToken };
+  const { tenantAdminHeaders } = getAuthHeaders();
+  file.writeString(filepath, "");
+  return { tenantAdminHeaders };
 }
 
 const iterationsPerVU = options.scenarios.default.iterations;
@@ -79,13 +79,13 @@ function getWalletIndex(vu, iter) {
 
 export default function (data) {
   const start = Date.now();
-  const bearerToken = data.bearerToken;
+  const tenantAdminHeaders = data.tenantAdminHeaders;
   const walletIndex = getWalletIndex(__VU, __ITER + 1); // __ITER starts from 0, adding 1 to align with the logic
   const wallet = wallets[walletIndex];
   const credDefTag = wallet.walletName;
 
   const createIssuerTenantResponse = createIssuerTenant(
-    bearerToken,
+    tenantAdminHeaders,
     wallet.walletName
   );
   check(createIssuerTenantResponse, {
@@ -123,7 +123,7 @@ export default function (data) {
     wallet_id: walletId,
     access_token: accessToken,
   });
-  file.appendString(outputFilepath, `${issuerData}\n`);
+  file.appendString(filepath, `${issuerData}\n`);
 
   const end = Date.now();
   const duration = end - start;

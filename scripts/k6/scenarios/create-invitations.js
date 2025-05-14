@@ -148,8 +148,8 @@ export default function (data) {
       return true;
     },
   });
-  const { my_did: holderDid, connection_id: holderConnectionId } =
-    JSON.parse(createInvitationResponse.body);
+  const { my_did, connection_id: holderConnectionId } = JSON.parse(createInvitationResponse.body);
+  const holderDid = my_did.split(':').slice(0, 3).join(':');
 
   const waitForSSEEventResponse = genericPolling({
     accessToken: wallet.access_token,

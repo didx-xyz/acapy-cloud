@@ -2,7 +2,7 @@
 /* eslint-disable no-undefined, no-console, camelcase */
 
 import { check } from "k6";
-import { getAuthHeaders } from "./auth.js";
+import { getAuthHeaders } from '../libs/auth.js';
 import { createCredentialDefinition } from "../libs/functions.js";
 import { createSchemaIfNotExists } from "../libs/schemaUtils.js";
 
@@ -10,6 +10,7 @@ const vus = Number.parseInt(__ENV.VUS, 10);
 const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
 const schemaName = __ENV.SCHEMA_NAME;
 const schemaVersion = __ENV.SCHEMA_VERSION;
+const issuerPrefix = __ENV.ISSUER_PREFIX;
 
 export const options = {
   scenarios: {
@@ -37,7 +38,7 @@ export const options = {
   },
 };
 
-const inputFilepath = "../output/create-issuers.json";
+const inputFilepath = `../output/${issuerPrefix}-create-issuers.json`;
 const data = open(inputFilepath, "r");
 
 export function setup() {

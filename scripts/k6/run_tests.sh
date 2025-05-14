@@ -21,6 +21,7 @@ run_test() {
 
 # Single issuer, multiple holder tests
 export MULTI_ISSUERS=false
+xk6 run ./scenarios/bootstrap-issuer.js -e ITERATIONS=1 -e VUS=1
 run_test ./scenarios/create-holders.js
 run_test ./scenarios/create-invitations.js
 run_test ./scenarios/create-credentials.js

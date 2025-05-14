@@ -29,7 +29,6 @@ export function createTenant(headers, wallet) {
     image_url:
       "https://upload.wikimedia.org/wikipedia/commons/7/70/Example.png",
   });
-
   const params = {
     headers: {
       "Content-Type": "application/json",
@@ -249,6 +248,7 @@ export function createDidExchangeRequest(holderAccessToken, issuerPublicDid) {
     const response = http.post(url, null, params);
     // console.log(`Request params: ${JSON.stringify(params, null, 2)}`);
     // console.log(`Holder Access tpoken: ${holderAccessToken}`);
+    // console.log(`Response: ${JSON.stringify(response, null, 2)}`);
     return response;
   } catch (error) {
     console.error(`Error creating invitation: ${error.message}`);
@@ -268,6 +268,7 @@ export function getIssuerConnectionId(issuerAccessToken, holderDid) {
     // console.log(`Request URL: ${url}`);
     const response = http.get(url, params);
     // console.log(`Request params: ${JSON.stringify(params, null, 2)}`);
+    // console.log(`Response: ${JSON.stringify(response, null, 2)}`);
     return response;
   } catch (error) {
     console.error(`Error creating invitation: ${error.message}`);
