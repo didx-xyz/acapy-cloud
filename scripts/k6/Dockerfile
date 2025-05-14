@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN apk add --update --no-cache git
 
-RUN go install go.k6.io/xk6/cmd/xk6@v0.19.2
+RUN go install go.k6.io/xk6/cmd/xk6@v0.19.3
 RUN xk6 build v1.0.0 --output /app/xk6 \
   --with github.com/avitalique/xk6-file@v1.5.0 \
   --with github.com/phymbert/xk6-sse@v0.1.9 \
