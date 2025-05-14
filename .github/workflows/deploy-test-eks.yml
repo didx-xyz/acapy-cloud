@@ -492,7 +492,7 @@ jobs:
 
       - name: Run k6 tests
         run: |
-          docker run --rm \
+          docker run --rm --network=host \
             -v ${{ github.workspace }}/scripts/k6:/scripts \
             -e CLOUDAPI_URL="https://acapy-cloud.dev.didxtech.com" \
             -e GOVERNANCE_API_KEY="adminApiKey" \
