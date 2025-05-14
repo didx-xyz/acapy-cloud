@@ -248,6 +248,7 @@ export function createDidExchangeRequest(holderAccessToken, issuerPublicDid) {
     const response = http.post(url, null, params);
     // console.log(`Request params: ${JSON.stringify(params, null, 2)}`);
     // console.log(`Holder Access tpoken: ${holderAccessToken}`);
+    // console.log(`Response: ${JSON.stringify(response, null, 2)}`);
     return response;
   } catch (error) {
     console.error(`Error creating invitation: ${error.message}`);
@@ -267,6 +268,7 @@ export function getIssuerConnectionId(issuerAccessToken, holderDid) {
     // console.log(`Request URL: ${url}`);
     const response = http.get(url, params);
     // console.log(`Request params: ${JSON.stringify(params, null, 2)}`);
+    // console.log(`Response: ${JSON.stringify(response, null, 2)}`);
     return response;
   } catch (error) {
     console.error(`Error creating invitation: ${error.message}`);
