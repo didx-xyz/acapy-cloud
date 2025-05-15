@@ -55,44 +55,63 @@ env:
   HELMFILE_VERSION: v1.0.0
   MISE_VERSION: 2025.5.0
 
+  RESET_DEPLOYMENTS: ${{ github.event.inputs.reset-deployments || 'false' }}
+  RUN_E2E_TESTS: ${{ github.event.inputs.run-e2e-tests || 'true' }}
+  RUN_K6_TESTS: ${{ github.event.inputs.run-k6-tests || 'true' }}
+  RUN_REGRESSION_TESTS: ${{ github.event.inputs.run-regression-tests || 'true' }}
+
 jobs:
-  export-versions:
-    name: Export tool versions
+  prep:
+    name: Prep workflow
     runs-on: ubuntu-latest
-
-    ###
-    # Needed because we can't pass env vars (`${{ env.HELM_VERSION }}`) to `workflow_call`
-    ###
-
     outputs:
-      HELM_VERSION: ${{ steps.export.outputs.HELM_VERSION }}
-      HELMFILE_VERSION: ${{ steps.export.outputs.HELMFILE_VERSION }}
-      MISE_VERSION: ${{ steps.export.outputs.MISE_VERSION }}
+      ###
+      # Because we can't pass env vars (`${{ env.HELM_VERSION }}`) to `workflow_call`
+      ###
+      helm-version: ${{ steps.export-versions.outputs.helm-version }}
+      helmfile-version: ${{ steps.export-versions.outputs.helmfile-version }}
+      mise-version: ${{ steps.export-versions.outputs.mise-version }}
+
+      ###
+      # Because https://github.com/actions/runner/issues/1483
+      ###
+      reset-deployments: ${{ steps.export-bools.outputs.reset-deployments }}
+      run-e2e-tests: ${{ steps.export-bools.outputs.run-e2e-tests }}
+      run-k6-tests: ${{ steps.export-bools.outputs.run-k6-tests }}
+      run-regression-tests: ${{ steps.export-bools.outputs.run-regression-tests }}
 
     steps:
       - name: Export tool versions
-        id: export
+        id: export-versions
         run: |
-          echo "HELM_VERSION=${HELM_VERSION}" >> $GITHUB_OUTPUT
-          echo "HELMFILE_VERSION=${HELMFILE_VERSION}" >> $GITHUB_OUTPUT
-          echo "MISE_VERSION=${MISE_VERSION}" >> $GITHUB_OUTPUT
+          echo "helm-version=${HELM_VERSION}" >> $GITHUB_OUTPUT
+          echo "helmfile-version=${HELMFILE_VERSION}" >> $GITHUB_OUTPUT
+          echo "mise-version=${MISE_VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Export boolean env vars
+        id: export-bools
+        run: |
+          echo "reset-deployments=${RESET_DEPLOYMENTS}" >> $GITHUB_OUTPUT
+          echo "run-e2e-tests=${RUN_E2E_TESTS}" >> $GITHUB_OUTPUT
+          echo "run-k6-tests=${RUN_K6_TESTS}" >> $GITHUB_OUTPUT
+          echo "run-regression-tests=${RUN_REGRESSION_TESTS}" >> $GITHUB_OUTPUT
 
   lint:
     name: Lint
-    needs: export-versions
+    needs: prep
     uses: ./.github/workflows/format.yml
     with:
-      mise-version: ${{ needs.export-versions.outputs.MISE_VERSION }}
+      mise-version: ${{ needs.prep.outputs.mise-version }}
     concurrency:
       group: format-check-${{ github.ref_name }}
       cancel-in-progress: true
 
   unit-test:
     name: Tests
-    needs: export-versions
+    needs: prep
     uses: ./.github/workflows/unit.yml
     with:
-      mise-version: ${{ needs.export-versions.outputs.MISE_VERSION }}
+      mise-version: ${{ needs.prep.outputs.mise-version }}
     concurrency:
       group: unit-test-${{ github.ref_name }}
       cancel-in-progress: true
@@ -130,11 +149,11 @@ jobs:
     name: Tests
     needs:
       - docker
-      - export-versions
+      - prep
     uses: ./.github/workflows/local-tests.yml
     with:
       image-version: ${{ needs.docker.outputs.image_version }}
-      mise-version: ${{ needs.export-versions.outputs.MISE_VERSION }}
+      mise-version: ${{ needs.prep.outputs.mise-version }}
     secrets:
       codacy-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
     concurrency:
@@ -147,20 +166,20 @@ jobs:
     uses: ./.github/workflows/deploy-test-eks.yml
     needs:
       - docker
-      - export-versions
+      - prep
     with:
       acapy-helmfile-path: ./helm/acapy-cloud.yaml.gotmpl
       acapy-test-helmfile-path: ./helm/acapy-test.yaml.gotmpl
       connect-configs-dir: ./resources/connect-processors/cloud
       helm-plugins: https://github.com/databus23/helm-diff
-      helm-version: ${{ needs.export-versions.outputs.HELM_VERSION }}
-      helmfile-version: ${{ needs.export-versions.outputs.HELMFILE_VERSION }}
+      helm-version: ${{ needs.prep.outputs.helm-version }}
+      helmfile-version: ${{ needs.prep.outputs.helmfile-version }}
       image-version: ${{ needs.docker.outputs.image_version }}
       namespace: acapy-cloud-dev
-      reset-deployments: ${{ github.event.inputs.reset-deployments || false }}
-      run-e2e-tests: ${{ github.event.inputs.run-e2e-tests || true }}
-      run-k6-tests: ${{ github.event.inputs.run-k6-tests || true }}
-      run-regression-tests: ${{ github.event.inputs.run-regression-tests || true }}
+      reset-deployments: ${{ needs.prep.outputs.reset-deployments == 'true' }}
+      run-e2e-tests: ${{ needs.prep.outputs.run-e2e-tests == 'true' }}
+      run-k6-tests: ${{ needs.prep.outputs.run-k6-tests == 'true' }}
+      run-regression-tests: ${{ needs.prep.outputs.run-regression-tests == 'true' }}
       tailscale-tags: ${{ vars.TAILSCALE_TAGS }}
     secrets:
       tailscale-oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
@@ -179,8 +198,8 @@ jobs:
     needs:
       - docker
       - eks
-      - export-versions
       - local-test
+      - prep
 
     uses: ./.github/workflows/notify.yml
     with:

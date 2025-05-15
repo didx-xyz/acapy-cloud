@@ -7,7 +7,7 @@ The CI/CD pipeline is defined in the [cicd.yml](cicd.yml) file.
 title: CI/CD Pipeline
 ---
 flowchart LR
-    ExportVersions(Export tool versions)
+    PrepWorkflow(Prep Workflow)
     Lint(Lint / Format)
     TestsUnit(Tests / Unit)
     DockerBuild(Docker / Build)
@@ -15,12 +15,13 @@ flowchart LR
     TestsLocal(Tests / Local)
     EKSDeploy(EKS / Deploy)
     EKSTestE2E(EKS / Tests / End-to-End)
+    EKSTestRegression(EKS / Tests / Regression)
     EKSTestK6(EKS / Tests / K6)
     Notify(Notify / didx-cloud)
     OpenAPI(OpenAPI / Diff)
 
-    ExportVersions --> Lint
-    ExportVersions --> TestsUnit
+    PrepWorkflow --> Lint
+    PrepWorkflow --> TestsUnit
     Lint --> DockerBuild
     TestsUnit --> DockerBuild
     DockerBuild --> DockerPush
@@ -29,8 +30,10 @@ flowchart LR
     DockerPush --> OpenAPI
     EKSDeploy --> EKSTestE2E
     EKSDeploy --> EKSTestK6
+    EKSDeploy --> EKSTestRegression
     EKSTestE2E --> Notify
     EKSTestK6 --> Notify
+    EKSTestRegression --> Notify
     TestsLocal --> Notify
 ```
 
