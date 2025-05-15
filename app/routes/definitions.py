@@ -174,7 +174,7 @@ async def get_schemas(
 
 
 @router.get(
-    "/schemas/{schema_id}",
+    "/schemas/{schema_id:path}",
     summary="Get a Schema",
     response_model=CredentialSchema,
 )
