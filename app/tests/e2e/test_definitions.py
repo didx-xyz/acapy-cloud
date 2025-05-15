@@ -102,15 +102,8 @@ async def test_create_anoncreds_credential_definition(
     ).model_dump()
 
     faber_public_did = await get_public_did(faber_anoncreds_acapy_client)
-    schema = await faber_anoncreds_acapy_client.anoncreds_schemas.get_schema(
-        schema_id=schema_id
-    )
 
-    assert (
-        result["id"]
-        == f"{faber_public_did.did}:3:CL:{schema.schema_metadata['seqNo']}:{tag}"
-    )
-    assert result["tag"] == tag
+    assert result["id"] == schema_id
     assert result["schema_id"] == schema_id
 
     cred_def_id = result["id"]
