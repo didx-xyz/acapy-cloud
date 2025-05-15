@@ -29,3 +29,6 @@ readinessProbe:
 startupProbe:
   tcpSocket:
     port: 9080
+
+env:
+  LOG_LEVEL: "warn"
