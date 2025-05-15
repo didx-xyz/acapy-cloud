@@ -49,8 +49,8 @@ async def create_credential_definition(
 
     await assert_valid_issuer(public_did, credential_definition.schema_id)
 
-    if support_revocation:
-        await publisher.check_endorser_connection()
+    # if support_revocation:
+    #     await publisher.check_endorser_connection()
 
     wallet_type = await get_wallet_type(
         aries_controller=aries_controller,
