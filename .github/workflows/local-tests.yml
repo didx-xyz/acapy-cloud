@@ -147,6 +147,15 @@ jobs:
       - name: Docker Cache Logs
         if: always()
         run: docker logs docker-cache
+      - name: Cheqd DID Registrar Logs
+        if: always()
+        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=driver-did-cheqd --tail 10000
+      - name: Cheqd DID Resolver Logs
+        if: always()
+        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=did-resolver --tail 10000
+      - name: DID Registrar (Universal Registrar) Logs
+        if: always()
+        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=did-registrar --tail 10000
       - name: Endorser Logs
         if: always()
         run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=endorser --tail 10000
