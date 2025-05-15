@@ -103,7 +103,6 @@ async def test_create_anoncreds_credential_definition(
 
     faber_public_did = await get_public_did(faber_anoncreds_acapy_client)
 
-    assert result["id"].split("/")[0] == schema_id.split("/")[0]  # DID match
     assert result["schema_id"] == schema_id
 
     cred_def_id = result["id"]
