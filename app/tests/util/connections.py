@@ -238,15 +238,15 @@ async def connect_using_trust_registry_invite(
     )
 
     alice_connection_id = invitation_response["connection_id"]
-    acme_connection_id = payload["connection_id"]
+    actor_connection_id = payload["connection_id"]
 
     # both connections should be active before continuing
     await assert_both_connections_ready(
-        alice_member_client, actor_client, alice_connection_id, acme_connection_id
+        alice_member_client, actor_client, alice_connection_id, actor_connection_id
     )
 
     return BobAliceConnect(
-        alice_connection_id=alice_connection_id, bob_connection_id=acme_connection_id
+        alice_connection_id=alice_connection_id, bob_connection_id=actor_connection_id
     )
 
 
