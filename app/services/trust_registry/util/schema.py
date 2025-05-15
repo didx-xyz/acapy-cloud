@@ -25,8 +25,6 @@ async def registry_has_schema(schema_id: str) -> bool:
     )
     try:
         async with RichAsyncClient() as client:
-            if "/" in schema_id:  # Handle / in http request
-                schema_id = schema_id.replace("/", "~")
             bound_logger.debug("Fetch schema from trust registry")
             await client.get(f"{TRUST_REGISTRY_URL}/registry/schemas/{schema_id}")
     except HTTPException as http_err:
