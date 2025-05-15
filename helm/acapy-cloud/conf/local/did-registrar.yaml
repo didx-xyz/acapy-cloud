@@ -15,6 +15,12 @@ image:
   ## If things start breaking, this is a known good SHA but isn't Multi-Arch
   # digest: sha256:d02207a156cb97dd79d3515bc90a963d12660c4ca82382f77ae6b5d32351267f
 
+env:
+  ## Be very careful, this can do _a lot_ of logging
+  ## Valid levels are: TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF
+  LOGGING_LEVEL_ROOT: WARN
+  LOGGING_LEVEL_uniregistrar: WARN
+
 service:
   appProtocol: http
   port: 9080
