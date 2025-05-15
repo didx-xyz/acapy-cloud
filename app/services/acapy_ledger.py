@@ -185,6 +185,10 @@ async def schema_id_from_credential_definition_id(
     )
     bound_logger.debug("Getting schema id from credential definition id")
 
+    if credential_definition_id.startswith("did:cheqd"):
+        # TODO: Implement schema id retrieval for Cheqd
+        return
+
     # scrape schema id or sequence number from cred def id
     tokens = credential_definition_id.split(":")
     if len(tokens) == 8:  # node protocol >= 1.4: cred def id has 5 or 8 tokens
