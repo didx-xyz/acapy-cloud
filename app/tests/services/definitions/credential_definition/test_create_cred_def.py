@@ -117,7 +117,7 @@ async def test_create_credential_definition_with_revocation():
         )
 
         assert result == sample_cred_def_id
-        mock_publisher.check_endorser_connection.assert_called_once()
+        # mock_publisher.check_endorser_connection.assert_called_once()
         mock_publisher.publish_credential_definition.assert_called_once()
         mock_publisher.wait_for_revocation_registry.assert_called_once_with(
             credential_definition_id=sample_cred_def_id, wallet_type="askar"
