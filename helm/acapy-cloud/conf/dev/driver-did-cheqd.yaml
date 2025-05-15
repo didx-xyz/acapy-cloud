@@ -1,0 +1,37 @@
+fullnameOverride: driver-did-cheqd
+
+replicaCount: 1
+
+podAnnotations:
+  sidecar.istio.io/proxyCPU: 10m
+
+image:
+  registry: ghcr.io
+  ## Temporarily point to our fork
+  ## pending merge/release of https://github.com/cheqd/did-registrar/pull/427
+  name: didx-xyz/cheqd-did-registrar
+  # name: cheqd/did-registrar
+  pullPolicy: Always
+  tag: production-latest
+
+service:
+  appProtocol: http
+  port: 3000
+  containerPort: 3000
+
+livenessProbe:
+  tcpSocket:
+    port: 3000
+readinessProbe:
+  tcpSocket:
+    port: 3000
+startupProbe:
+  tcpSocket:
+    port: 3000
+
+secretData: {}
+  # FEE_PAYER_TESTNET_MNEMONIC: "" # Cheqd did-registrar uses testnet faucet by default
+  # FEE_PAYER_MAINNET_MNEMONIC: "..."
+
+extraSecretNamesForEnvFrom:
+  - cheqd-testnet-mnemonic
