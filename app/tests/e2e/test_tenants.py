@@ -179,7 +179,6 @@ async def test_create_tenant_member_w_wallet_name(
 async def test_create_tenant_issuer(
     tenant_admin_client: RichAsyncClient,
     tenant_admin_acapy_client: AcaPyClient,
-    governance_acapy_client: AcaPyClient,
 ):
     wallet_label = uuid4().hex
     response = await tenant_admin_client.post(
@@ -324,7 +323,6 @@ async def test_create_tenant_verifier(
 async def test_update_tenant_verifier_to_issuer(
     tenant_admin_client: RichAsyncClient,
     tenant_admin_acapy_client: AcaPyClient,
-    governance_acapy_client: AcaPyClient,
 ):
     wallet_label = uuid4().hex
     image_url = "https://image.ca"
