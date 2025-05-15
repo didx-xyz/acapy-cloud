@@ -100,10 +100,8 @@ async def update_schema(
     return update_schema_res
 
 
-@router.get("/{schema_id}", response_model=Schema)
+@router.get("/{schema_id:path}", response_model=Schema)
 async def get_schema(schema_id: str, db_session: Session = Depends(get_db)) -> Schema:
-    if "~" in schema_id:
-        schema_id = schema_id.replace("~", "/")
     bound_logger = logger.bind(body={"schema_id": schema_id})
     bound_logger.debug("GET request received: Fetch schema")
     try:
