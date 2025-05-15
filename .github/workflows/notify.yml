@@ -73,9 +73,9 @@ jobs:
                   'acapy-cloud-ref': process.env.ACAPY_CLOUD_REF,
                   'image-tag': process.env.IMAGE_TAG,
                   'reset-deployments': process.env.RESET_DEPLOYMENTS,
-                  'regression-tests': process.env.RUN_REGRESSION_TESTS,
-                  'run-k6': process.env.RUN_K6_TESTS,
-                  'run-tests': process.env.RUN_E2E_TESTS,
+                  'run-e2e-tests': process.env.RUN_E2E_TESTS,
+                  'run-k6-tests': process.env.RUN_K6_TESTS,
+                  'run-regression-tests': process.env.RUN_REGRESSION_TESTS,
                 }
               })
               console.log(result)

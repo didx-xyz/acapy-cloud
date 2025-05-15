@@ -87,8 +87,15 @@ on:
         required: false
         default: true
         type: boolean
+      tailscale-tags:
+        description: Tailscale device tags to use
+        required: false
+        default: "tag:cloudapi-dev"
+        type: string
     secrets:
-      tailscale-authkey:
+      tailscale-oauth-client-id:
+        required: true
+      tailscale-oauth-secret:
         required: true
 
 permissions: {}
@@ -127,7 +134,9 @@ jobs:
           aws-role-arn: arn:aws:iam::402177810328:role/cicd
           aws-role-session-name: github-cicd
           cluster-name: cloudapi-dev
-          tailscale-authkey: ${{ secrets.tailscale-authkey || secrets.TAILSCALE_AUTHKEY }}
+          tailscale-oauth-client-id: ${{ secrets.tailscale-oauth-client-id || secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          tailscale-oauth-secret: ${{ secrets.tailscale-oauth-secret || secrets.TAILSCALE_OAUTH_SECRET }}
+          tailscale-tags: ${{ inputs.tailscale-tags || vars.TAILSCALE_TAGS }}
 
       - name: Helmfile Destroy
         if: inputs.reset-deployments
@@ -207,7 +216,9 @@ jobs:
           aws-role-arn: arn:aws:iam::402177810328:role/cicd
           aws-role-session-name: github-cicd
           cluster-name: cloudapi-dev
-          tailscale-authkey: ${{ secrets.tailscale-authkey || secrets.TAILSCALE_AUTHKEY }}
+          tailscale-oauth-client-id: ${{ secrets.tailscale-oauth-client-id || secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          tailscale-oauth-secret: ${{ secrets.tailscale-oauth-secret || secrets.TAILSCALE_OAUTH_SECRET }}
+          tailscale-tags: ${{ inputs.tailscale-tags || vars.TAILSCALE_TAGS }}
 
       - name: Helmfile run tests
         id: pytest
@@ -382,7 +393,9 @@ jobs:
           aws-role-arn: arn:aws:iam::402177810328:role/cicd
           aws-role-session-name: github-cicd
           cluster-name: cloudapi-dev
-          tailscale-authkey: ${{ secrets.tailscale-authkey || secrets.TAILSCALE_AUTHKEY }}
+          tailscale-oauth-client-id: ${{ secrets.tailscale-oauth-client-id || secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          tailscale-oauth-secret: ${{ secrets.tailscale-oauth-secret || secrets.TAILSCALE_OAUTH_SECRET }}
+          tailscale-tags: ${{ inputs.tailscale-tags || vars.TAILSCALE_TAGS }}
 
       - name: Helmfile run tests
         id: regression
@@ -559,7 +572,9 @@ jobs:
           aws-role-arn: arn:aws:iam::402177810328:role/cicd
           aws-role-session-name: github-cicd
           cluster-name: cloudapi-dev
-          tailscale-authkey: ${{ secrets.tailscale-authkey || secrets.TAILSCALE_AUTHKEY }}
+          tailscale-oauth-client-id: ${{ secrets.tailscale-oauth-client-id || secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          tailscale-oauth-secret: ${{ secrets.tailscale-oauth-secret || secrets.TAILSCALE_OAUTH_SECRET }}
+          tailscale-tags: ${{ inputs.tailscale-tags || vars.TAILSCALE_TAGS }}
 
       - name: Prepare output directory
         run: mkdir -p ${{ github.workspace }}/scripts/k6/output && chmod 777 ${{ github.workspace }}/scripts/k6/output

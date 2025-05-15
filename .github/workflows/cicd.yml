@@ -161,8 +161,10 @@ jobs:
       run-e2e-tests: ${{ github.event.inputs.run-e2e-tests || true }}
       run-k6-tests: ${{ github.event.inputs.run-k6-tests || true }}
       run-regression-tests: ${{ github.event.inputs.run-regression-tests || true }}
+      tailscale-tags: ${{ vars.TAILSCALE_TAGS }}
     secrets:
-      tailscale-authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+      tailscale-oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+      tailscale-oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
 
     permissions:
       id-token: write # Required to authenticate with AWS
