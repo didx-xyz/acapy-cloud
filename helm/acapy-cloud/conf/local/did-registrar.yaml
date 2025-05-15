@@ -31,5 +31,5 @@ startupProbe:
     port: 9080
 
 env:
-  LOGGING_LEVEL_ROOT: WARNING
-  LOGGING_LEVEL_uniregistrar: WARNING
+  LOGGING_LEVEL_ROOT: WARN
+  LOGGING_LEVEL_uniregistrar: WARN
