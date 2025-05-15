@@ -152,7 +152,6 @@ async def fetch_or_create_connection(
     alice_member_client: RichAsyncClient,
     bob_member_client: RichAsyncClient,
     connection_alias: str,
-    did_exchange: bool = False,
 ) -> BobAliceConnect:
     # fetch connection with this alias for both bob and alice
     alice_connection = await fetch_existing_connection_by_alias(
@@ -176,18 +175,11 @@ async def fetch_or_create_connection(
     else:
         # Create connection since they don't exist
         assert_fail_on_recreating_fixtures()
-        if did_exchange:
-            return await create_did_exchange(
-                bob_member_client=bob_member_client,
-                alice_member_client=alice_member_client,
-                alias=connection_alias,
-            )
-        else:
-            return await create_bob_alice_connection(
-                bob_member_client=bob_member_client,
-                alice_member_client=alice_member_client,
-                alias=connection_alias,
-            )
+        return await create_bob_alice_connection(
+            bob_member_client=bob_member_client,
+            alice_member_client=alice_member_client,
+            alias=connection_alias,
+        )
 
 
 async def create_connection_by_test_mode(
@@ -195,21 +187,13 @@ async def create_connection_by_test_mode(
     alice_member_client: RichAsyncClient,
     bob_member_client: RichAsyncClient,
     alias: str,
-    did_exchange: bool = False,
 ) -> BobAliceConnect:
     if test_mode == TestMode.clean_run:
-        if did_exchange:
-            return await create_did_exchange(
-                bob_member_client=bob_member_client,
-                alice_member_client=alice_member_client,
-                alias=alias,
-            )
-        else:
-            return await create_bob_alice_connection(
-                bob_member_client=bob_member_client,
-                alice_member_client=alice_member_client,
-                alias=alias,
-            )
+        return await create_bob_alice_connection(
+            bob_member_client=bob_member_client,
+            alice_member_client=alice_member_client,
+            alias=alias,
+        )
     elif test_mode == TestMode.regression_run:
         connection_alias_prefix = RegressionTestConfig.reused_connection_alias
 
@@ -217,7 +201,6 @@ async def create_connection_by_test_mode(
             alice_member_client,
             bob_member_client,
             connection_alias=f"{connection_alias_prefix}-{alias}",
-            did_exchange=did_exchange,
         )
     else:
         assert False, f"unknown test mode: {test_mode}"
@@ -226,14 +209,14 @@ async def create_connection_by_test_mode(
 async def connect_using_trust_registry_invite(
     alice_member_client: RichAsyncClient,
     alice_tenant: CreateTenantResponse,
-    verifier_client: RichAsyncClient,
-    verifier: CreateTenantResponse,
+    actor_client: RichAsyncClient,
+    actor: CreateTenantResponse,
     connection_alias: str,
-) -> AcmeAliceConnect:
-    acme_actor = await fetch_actor_by_id(verifier.wallet_id)
-    assert acme_actor.didcomm_invitation
+) -> BobAliceConnect:
+    fetched_actor = await fetch_actor_by_id(actor.wallet_id)
+    assert fetched_actor.didcomm_invitation
 
-    invitation = acme_actor.didcomm_invitation
+    invitation = fetched_actor.didcomm_invitation
     invitation_json = base64_to_json(invitation.split("?oob=")[1])
 
     # accept invitation on alice side -- she uses here connection alias
@@ -246,7 +229,7 @@ async def connect_using_trust_registry_invite(
 
     alice_label = alice_tenant.wallet_label
     payload = await check_webhook_state(
-        client=verifier_client,
+        client=actor_client,
         topic="connections",
         state="completed",
         filter_map={
@@ -255,59 +238,59 @@ async def connect_using_trust_registry_invite(
     )
 
     alice_connection_id = invitation_response["connection_id"]
-    acme_connection_id = payload["connection_id"]
+    actor_connection_id = payload["connection_id"]
 
     # both connections should be active before continuing
     await assert_both_connections_ready(
-        alice_member_client, verifier_client, alice_connection_id, acme_connection_id
+        alice_member_client, actor_client, alice_connection_id, actor_connection_id
     )
 
-    return AcmeAliceConnect(
-        alice_connection_id=alice_connection_id, acme_connection_id=acme_connection_id
+    return BobAliceConnect(
+        alice_connection_id=alice_connection_id, bob_connection_id=actor_connection_id
     )
 
 
 async def fetch_or_create_trust_registry_connection(
     alice_member_client: RichAsyncClient,
     alice_tenant: CreateTenantResponse,
-    verifier_client: RichAsyncClient,
-    verifier: CreateTenantResponse,
+    actor_client: RichAsyncClient,
+    actor: CreateTenantResponse,
     connection_alias: str,
-) -> AcmeAliceConnect:
+) -> BobAliceConnect:
     # fetch connection by alias for alice's side
     alice_connection = await fetch_existing_connection_by_alias(
         alice_member_client, alias=connection_alias
     )
     their_did = alice_connection.my_did if alice_connection else None
-    verifier_connection = await fetch_existing_connection_by_alias(
-        verifier_client,
+    actor_connection = await fetch_existing_connection_by_alias(
+        actor_client,
         alias=None,
         their_label=alice_tenant.wallet_label,
         their_did=their_did,
     )
 
     # Check if connections exist
-    if alice_connection and verifier_connection:
-        return AcmeAliceConnect(
+    if alice_connection and actor_connection:
+        return BobAliceConnect(
             alice_connection_id=alice_connection.connection_id,
-            acme_connection_id=verifier_connection.connection_id,
+            bob_connection_id=actor_connection.connection_id,
         )
     else:
-        assert not alice_connection, "Alice has connection, but not found for verifier"
-        assert not verifier_connection, "Verifier has connection, but not for Alice"
+        assert not alice_connection, "Alice has connection, but not found for actor"
+        assert not actor_connection, "Actor has connection, but not for Alice"
 
         # Create connection since they don't exist
         assert_fail_on_recreating_fixtures()
         return await connect_using_trust_registry_invite(
             alice_member_client=alice_member_client,
             alice_tenant=alice_tenant,
-            verifier_client=verifier_client,
-            verifier=verifier,
+            actor_client=actor_client,
+            actor=actor,
             connection_alias=connection_alias,
         )
 
 
-async def create_did_exchange(
+async def create_did_exchange_w_public_did(
     bob_member_client: RichAsyncClient, alice_member_client: RichAsyncClient, alias: str
 ) -> BobAliceConnect:
 
@@ -327,13 +310,12 @@ async def create_did_exchange(
         )
     ).json()
 
-    their_did = alice_connection["my_did"]
-
+    alice_label = alice_member_client.name[7:-7]
     bob_connection = await check_webhook_state(
         client=bob_member_client,
         topic="connections",
         state="request-received",
-        filter_map={"their_did": their_did},
+        filter_map={"their_label": alice_label},
     )
 
     bob_connection_id = bob_connection["connection_id"]

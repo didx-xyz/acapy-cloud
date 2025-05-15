@@ -40,20 +40,37 @@ async def bob_and_alice_connection(
 @pytest.fixture(scope="function")
 async def faber_anoncreds_and_alice_connection(
     alice_member_client: RichAsyncClient,
+    alice_tenant: CreateTenantResponse,
     faber_anoncreds_client: RichAsyncClient,
+    faber_anoncreds_issuer: CreateTenantResponse,
     test_mode: str,  # pylint: disable=redefined-outer-name
 ) -> FaberAliceConnect:
-    bob_alice_connection = await create_connection_by_test_mode(
-        test_mode=test_mode,
-        alice_member_client=alice_member_client,
-        bob_member_client=faber_anoncreds_client,
-        alias="AliceFaberAnonCredsConnection",
-        did_exchange=True,
-    )
+    connection_alias = "AliceFaberTrustRegistryConnection"
+
+    if test_mode == TestMode.clean_run:
+        faber_alice_connect = await connect_using_trust_registry_invite(
+            alice_member_client=alice_member_client,
+            alice_tenant=alice_tenant,
+            actor_client=faber_anoncreds_client,
+            actor=faber_anoncreds_issuer,
+            connection_alias=connection_alias,
+        )
+    elif test_mode == TestMode.regression_run:
+        connection_alias_prefix = RegressionTestConfig.reused_connection_alias
+
+        faber_alice_connect = await fetch_or_create_trust_registry_connection(
+            alice_member_client=alice_member_client,
+            alice_tenant=alice_tenant,
+            actor_client=faber_anoncreds_client,
+            actor=faber_anoncreds_issuer,
+            connection_alias=f"{connection_alias_prefix}-{connection_alias}",
+        )
+    else:
+        assert False, f"unknown test mode: {test_mode}"
 
     return FaberAliceConnect(
-        alice_connection_id=bob_alice_connection.alice_connection_id,
-        faber_connection_id=bob_alice_connection.bob_connection_id,
+        alice_connection_id=faber_alice_connect.alice_connection_id,
+        faber_connection_id=faber_alice_connect.bob_connection_id,
     )
 
 
@@ -72,8 +89,8 @@ async def acme_and_alice_connection(
         acme_alice_connect = await connect_using_trust_registry_invite(
             alice_member_client=alice_member_client,
             alice_tenant=alice_tenant,
-            verifier_client=acme_client,
-            verifier=acme_verifier,
+            actor_client=acme_client,
+            actor=acme_verifier,
             connection_alias=connection_alias,
         )
     elif test_mode == TestMode.regression_run:
@@ -82,14 +99,17 @@ async def acme_and_alice_connection(
         acme_alice_connect = await fetch_or_create_trust_registry_connection(
             alice_member_client=alice_member_client,
             alice_tenant=alice_tenant,
-            verifier_client=acme_client,
-            verifier=acme_verifier,
+            actor_client=acme_client,
+            actor=acme_verifier,
             connection_alias=f"{connection_alias_prefix}-{connection_alias}",
         )
     else:
         assert False, f"unknown test mode: {test_mode}"
 
-    return acme_alice_connect
+    return AcmeAliceConnect(
+        alice_connection_id=acme_alice_connect.alice_connection_id,
+        acme_connection_id=acme_alice_connect.bob_connection_id,
+    )
 
 
 # Create fixture to handle parameters and return either meld_co-alice connection fixture
@@ -106,41 +126,35 @@ async def meld_co_anoncreds_and_alice_connection(
         connection_alias = "AliceMeldCoAnonCredsTrustRegistryConnection"
 
         if test_mode == TestMode.clean_run:
-            acme_alice_connect = await connect_using_trust_registry_invite(
+            meld_co_alice_connect = await connect_using_trust_registry_invite(
                 alice_member_client=alice_member_client,
                 alice_tenant=alice_tenant,
-                verifier_client=meld_co_anoncreds_client,
-                verifier=meld_co_anoncreds_issuer_verifier,
+                actor_client=meld_co_anoncreds_client,
+                actor=meld_co_anoncreds_issuer_verifier,
                 connection_alias=connection_alias,
             )
         elif test_mode == TestMode.regression_run:
             connection_alias_prefix = RegressionTestConfig.reused_connection_alias
 
-            acme_alice_connect = await fetch_or_create_trust_registry_connection(
+            meld_co_alice_connect = await fetch_or_create_trust_registry_connection(
                 alice_member_client=alice_member_client,
                 alice_tenant=alice_tenant,
-                verifier_client=meld_co_anoncreds_client,
-                verifier=meld_co_anoncreds_issuer_verifier,
+                actor_client=meld_co_anoncreds_client,
+                actor=meld_co_anoncreds_issuer_verifier,
                 connection_alias=f"{connection_alias_prefix}-{connection_alias}",
             )
         else:
             assert False, f"unknown test mode: {test_mode}"
-
-        return MeldCoAliceConnect(
-            alice_connection_id=acme_alice_connect.alice_connection_id,
-            meld_co_connection_id=acme_alice_connect.acme_connection_id,
-        )
     else:
         # No indirect request param for trust registry connection; establish normal connection:
-        bob_alice_connection = await create_connection_by_test_mode(
+        meld_co_alice_connect = await create_connection_by_test_mode(
             test_mode=test_mode,
             alice_member_client=alice_member_client,
             bob_member_client=meld_co_anoncreds_client,
             alias="AliceMeldCoAnonCredsConnection",
-            did_exchange=True,
         )
 
-        return MeldCoAliceConnect(
-            alice_connection_id=bob_alice_connection.alice_connection_id,
-            meld_co_connection_id=bob_alice_connection.bob_connection_id,
-        )
+    return MeldCoAliceConnect(
+        alice_connection_id=meld_co_alice_connect.alice_connection_id,
+        meld_co_connection_id=meld_co_alice_connect.bob_connection_id,
+    )
