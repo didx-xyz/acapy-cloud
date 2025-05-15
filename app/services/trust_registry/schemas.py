@@ -83,8 +83,6 @@ async def get_schema_by_id(schema_id: str) -> Optional[Schema]:
 
     async with RichAsyncClient() as client:
         try:
-            if "/" in schema_id:  # Handle / in http request
-                schema_id = schema_id.replace("/", "~")
             schema_response = await client.get(
                 f"{TRUST_REGISTRY_URL}/registry/schemas/{schema_id}"
             )
