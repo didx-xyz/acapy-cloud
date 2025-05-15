@@ -30,7 +30,7 @@ async def create_did(
 
     This endpoint allows you to create a new DID in the wallet.
     The `method` parameter is optional and can be set to
-    'sov', 'key', 'web', 'did:peer:2', or 'did:peer:4'.
+    'cheqd', 'key', 'web', 'did:peer:2', or 'did:peer:4'.
 
     Request Body:
     ---

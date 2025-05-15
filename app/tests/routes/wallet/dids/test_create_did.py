@@ -2,6 +2,7 @@ from unittest import mock
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from aries_cloudcontroller import CreateCheqdDIDRequest
 from aries_cloudcontroller import DIDCreate as DIDCreateAcaPy
 from aries_cloudcontroller.exceptions import (
     ApiException,
@@ -19,7 +20,7 @@ from app.routes.wallet.dids import create_did
     [
         (
             None,
-            DIDCreateAcaPy(method="sov", options={"key_type": "ed25519"}),
+            CreateCheqdDIDRequest(options={"key_type": "ed25519"}),
         ),
         (
             DIDCreate(method="key"),
@@ -95,7 +96,6 @@ from app.routes.wallet.dids import create_did
 )
 async def test_create_did_success(request_body, create_body):
     mock_aries_controller = AsyncMock()
-    mock_aries_controller.wallet.create_did = AsyncMock()
 
     with patch(
         "app.routes.wallet.dids.client_from_auth"
@@ -107,11 +107,22 @@ async def test_create_did_success(request_body, create_body):
             mock_aries_controller
         )
 
+        if request_body is None:
+            acapy_call = mock_aries_controller.did.did_cheqd_create_post
+            mock_handle_acapy_call.return_value = AsyncMock(
+                did="did:cheqd:1234", verkey="a" * 131  # Expected verkey length
+            )
+        else:
+            acapy_call = mock_aries_controller.wallet.create_did
+            mock_handle_acapy_call.return_value = AsyncMock(
+                did=f"did:{request_body.method}:1234", verkey="1234"
+            )
+
         await create_did(did_create=request_body, auth="mocked_auth")
 
         mock_handle_acapy_call.assert_awaited_once_with(
             logger=mock.ANY,
-            acapy_call=mock_aries_controller.wallet.create_did,
+            acapy_call=acapy_call,
             body=create_body,
         )
 
