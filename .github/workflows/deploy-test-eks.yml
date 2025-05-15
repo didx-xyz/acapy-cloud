@@ -209,7 +209,7 @@ jobs:
           cluster-name: cloudapi-dev
           tailscale-authkey: ${{ secrets.tailscale-authkey || secrets.TAILSCALE_AUTHKEY }}
 
-      - name: Helmfile run pytest
+      - name: Helmfile run tests
         id: pytest
         # https://github.com/helmfile/helmfile-action
         uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
@@ -228,7 +228,7 @@ jobs:
           helmfile-version: ${{ inputs.helmfile-version || env.HELMFILE_VERSION_DEFAULT }}
           helm-version: ${{ inputs.helm-version || env.HELM_VERSION_DEFAULT }}
 
-      - name: Wait for pytest and print logs
+      - name: Wait for tests and print logs
         if: steps.pytest.outcome == 'success'
         shell: bash
         run: |
@@ -261,7 +261,7 @@ jobs:
           NAMESPACE: ${{ inputs.namespace || 'acapy-cloud-dev' }}
           PYTEST_COMPLETIONS: 1
 
-      - name: Copy End-to-End results
+      - name: Copy test results
         if: steps.pytest.outcome == 'success'
         shell: bash
         run: |
@@ -316,7 +316,7 @@ jobs:
           OUTPUT_FILE: test_output.xml
           COVERAGE_FILE: test_coverage.txt
 
-      - name: End-to-End coverage comment
+      - name: Create/Update test coverage comment
         if: steps.pytest.outcome == 'success'
         # https://github.com/MishaKav/pytest-coverage-comment
         uses: MishaKav/pytest-coverage-comment@13d3c18e21895566c746187c9ea74736372e5e91 # v1.1.54
@@ -328,18 +328,18 @@ jobs:
           hide-report: ${{ github.event_name != 'pull_request' }}
           hide-comment: ${{ github.event_name != 'pull_request' }}
 
-      - name: Publish End-to-End Report
+      - name: Publish test report
         # https://github.com/mikepenz/action-junit-report
         uses: mikepenz/action-junit-report@cf701569b05ccdd861a76b8607a66d76f6fd4857 # v5.5.1
         if: steps.pytest.outcome == 'success'
         with:
-          check_name: JUnit Test Report
+          check_name: JUnit E2E Test Report
           report_paths: ./pytest/test_output.xml
           fail_on_failure: true
           detailed_summary: true
           require_passed_tests: true
 
-      - name: Helmfile destroy pytest
+      - name: Helmfile Destroy
         # https://github.com/helmfile/helmfile-action
         uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
         if: always()
@@ -384,7 +384,7 @@ jobs:
           cluster-name: cloudapi-dev
           tailscale-authkey: ${{ secrets.tailscale-authkey || secrets.TAILSCALE_AUTHKEY }}
 
-      - name: Helmfile run Regression tests
+      - name: Helmfile run tests
         id: regression
         # https://github.com/helmfile/helmfile-action
         uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
@@ -406,7 +406,7 @@ jobs:
           helmfile-version: ${{ inputs.helmfile-version || env.HELMFILE_VERSION_DEFAULT }}
           helm-version: ${{ inputs.helm-version || env.HELM_VERSION_DEFAULT }}
 
-      - name: Wait for Regression tests and print logs
+      - name: Wait for tests and print logs
         if: steps.regression.outcome == 'success'
         shell: bash
         run: |
@@ -439,7 +439,7 @@ jobs:
           NAMESPACE: ${{ inputs.namespace || 'acapy-cloud-dev' }}
           PYTEST_COMPLETIONS: 1
 
-      - name: Copy Regression results
+      - name: Copy test results
         if: steps.regression.outcome == 'success'
         shell: bash
         run: |
@@ -495,7 +495,7 @@ jobs:
           COVERAGE_FILE: test_coverage.txt
           hide-comment: ${{ github.event_name != 'pull_request' }}
 
-      - name: Create Regression test coverage comment
+      - name: Create/Update test coverage comment
         if: steps.regression.outcome == 'success'
         # https://github.com/MishaKav/pytest-coverage-comment
         uses: MishaKav/pytest-coverage-comment@13d3c18e21895566c746187c9ea74736372e5e91 # v1.1.54
@@ -507,17 +507,17 @@ jobs:
           hide-report: ${{ github.event_name != 'pull_request' }}
           hide-comment: ${{ github.event_name != 'pull_request' }}
 
-      - name: Publish Regression test Report
+      - name: Publish test report
         uses: mikepenz/action-junit-report@cf701569b05ccdd861a76b8607a66d76f6fd4857 # v5.5.1
         if: steps.regression.outcome == 'success'
         with:
-          check_name: JUnit Test Report Regression
+          check_name: JUnit Regression Test Report
           report_paths: ./pytest-regression/test_output.xml
           fail_on_failure: true
           detailed_summary: true
           require_passed_tests: true
 
-      - name: Helmfile destroy Regression
+      - name: Helmfile destroy
         # https://github.com/helmfile/helmfile-action
         uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
         if: always()
