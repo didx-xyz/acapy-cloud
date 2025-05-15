@@ -8,23 +8,23 @@ on:
         required: false
         default: latest
         type: string
-      regression-tests:
-        description: Run Regression Tests
-        required: false
-        default: true
-        type: boolean
       reset-deployments:
         description: Reset deployments - Clean start
         required: false
         default: false
         type: boolean
-      run-k6:
+      run-e2e-tests:
+        description: Run End-to-End Tests
+        required: false
+        default: true
+        type: boolean
+      run-k6-tests:
         description: Run K6 Tests
         required: false
         default: true
         type: boolean
-      run-tests:
-        description: Run End-to-End Tests
+      run-regression-tests:
+        description: Run Regression Tests
         required: false
         default: true
         type: boolean
@@ -67,23 +67,23 @@ on:
         required: false
         default: acapy-cloud-dev
         type: string
-      regression-tests:
-        description: Run Regression Tests
-        required: false
-        default: true
-        type: boolean
       reset-deployments:
         description: Reset deployment - Clean start
         required: false
         default: false
         type: boolean
-      run-k6:
+      run-e2e-tests:
+        description: Run End-to-End Tests
+        required: false
+        default: true
+        type: boolean
+      run-k6-tests:
         description: Run K6 Tests
         required: false
         default: true
         type: boolean
-      run-tests:
-        description: Run End-to-End Tests
+      run-regression-tests:
+        description: Run Regression Tests
         required: false
         default: true
         type: boolean
@@ -181,7 +181,7 @@ jobs:
   test-e2e:
     name: Tests / End-to-End
     needs: deploy
-    if: inputs.run-tests || inputs.regression-tests
+    if: inputs.run-e2e-tests
     runs-on: ubuntu-latest
 
     timeout-minutes: 30
@@ -209,31 +209,7 @@ jobs:
           cluster-name: cloudapi-dev
           tailscale-authkey: ${{ secrets.tailscale-authkey || secrets.TAILSCALE_AUTHKEY }}
 
-      - name: Helmfile run regression tests
-        if: inputs.regression-tests
-        id: pytest-regression
-        # https://github.com/helmfile/helmfile-action
-        uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
-        with:
-          helmfile-args: |
-            apply \
-              --environment ${{ vars.ENVIRONMENT }} \
-              -f ${{ inputs.acapy-test-helmfile-path || './helm/acapy-test.yaml.gotmpl' }} \
-              --set image.tag=${{ inputs.image-version }} \
-              --set image.registry=ghcr.io/${{ github.repository_owner }} \
-              --set completions=1 \
-              --state-values-set release=acapy-test-regression \
-              --set fullnameOverride=acapy-test-regression \
-              --set env.RUN_REGRESSION_TESTS=true \
-              --set env.FAIL_ON_RECREATING_FIXTURES=${{ inputs.reset-deployments == false }} \
-              --state-values-set regressionEnabled=true \
-              --state-values-set namespace=${{ inputs.namespace || 'acapy-cloud-dev' }}
-          helm-plugins: ${{ inputs.helm-plugins || 'https://github.com/databus23/helm-diff' }}
-          helmfile-version: ${{ inputs.helmfile-version || env.HELMFILE_VERSION_DEFAULT }}
-          helm-version: ${{ inputs.helm-version || env.HELM_VERSION_DEFAULT }}
-
-      - name: Helmfile run pytest
-        if: inputs.run-tests
+      - name: Helmfile run tests
         id: pytest
         # https://github.com/helmfile/helmfile-action
         uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
@@ -252,7 +228,7 @@ jobs:
           helmfile-version: ${{ inputs.helmfile-version || env.HELMFILE_VERSION_DEFAULT }}
           helm-version: ${{ inputs.helm-version || env.HELM_VERSION_DEFAULT }}
 
-      - name: Wait for pytest and print logs
+      - name: Wait for tests and print logs
         if: steps.pytest.outcome == 'success'
         shell: bash
         run: |
@@ -285,8 +261,153 @@ jobs:
           NAMESPACE: ${{ inputs.namespace || 'acapy-cloud-dev' }}
           PYTEST_COMPLETIONS: 1
 
-      - name: Wait for pytest regression and print logs
-        if: steps.pytest-regression.outcome == 'success'
+      - name: Copy test results
+        if: steps.pytest.outcome == 'success'
+        shell: bash
+        run: |
+          echo "apiVersion: v1
+          kind: Pod
+          metadata:
+            name: $POD_NAME
+            namespace: $NAMESPACE
+            labels:
+              sidecar.istio.io/inject: \"false\"
+          spec:
+            containers:
+            - name: $POD_NAME
+              image: $CONTAINER_IMAGE
+              command:
+              - sleep
+              - inf
+              volumeMounts:
+              - name: pytest-volume
+                mountPath: $MOUNT_PATH/pytest
+            volumes:
+            - name: pytest-volume
+              persistentVolumeClaim:
+                claimName: $PVC_NAME
+            restartPolicy: Never
+            terminationGracePeriodSeconds: 5" > pytest-results-pod.yaml
+
+          kubectl apply -f pytest-results-pod.yaml
+
+          # Wait for the pod to be ready
+          echo "Waiting for pod to be ready..."
+          kubectl -n $NAMESPACE wait --for=condition=ready pod/$POD_NAME --timeout=60s
+
+          # Copy the files from the pod to your local system
+          echo "Copying files from pod..."
+          mkdir -p $LOCAL_PATH
+          kubectl -n $NAMESPACE cp $POD_NAME:$MOUNT_PATH/pytest/$OUTPUT_FILE $LOCAL_PATH/$OUTPUT_FILE
+          kubectl -n $NAMESPACE cp $POD_NAME:$MOUNT_PATH/pytest/$COVERAGE_FILE $LOCAL_PATH/$COVERAGE_FILE
+
+          # Clean up: delete the temporary pod
+          echo "Cleaning up..."
+          kubectl -n $NAMESPACE delete pod $POD_NAME
+
+          echo "Done!"
+        env:
+          PVC_NAME: acapy-test
+          POD_NAME: pytest-results
+          CONTAINER_IMAGE: busybox
+          MOUNT_PATH: /mnt
+          LOCAL_PATH: ./pytest
+          NAMESPACE: ${{ inputs.namespace || 'acapy-cloud-dev' }}
+          OUTPUT_FILE: test_output.xml
+          COVERAGE_FILE: test_coverage.txt
+
+      - name: Create/Update test coverage comment
+        if: steps.pytest.outcome == 'success'
+        # https://github.com/MishaKav/pytest-coverage-comment
+        uses: MishaKav/pytest-coverage-comment@13d3c18e21895566c746187c9ea74736372e5e91 # v1.1.54
+        with:
+          pytest-coverage-path: ./pytest/test_coverage.txt
+          junitxml-path: ./pytest/test_output.xml
+          title: EKS E2E Test Coverage
+          # Resolves `Warning: Your comment is too long (maximum is 65536 characters), coverage report will not be added.`
+          hide-report: ${{ github.event_name != 'pull_request' }}
+          hide-comment: ${{ github.event_name != 'pull_request' }}
+
+      - name: Publish test report
+        # https://github.com/mikepenz/action-junit-report
+        uses: mikepenz/action-junit-report@cf701569b05ccdd861a76b8607a66d76f6fd4857 # v5.5.1
+        if: steps.pytest.outcome == 'success'
+        with:
+          check_name: JUnit E2E Test Report
+          report_paths: ./pytest/test_output.xml
+          fail_on_failure: true
+          detailed_summary: true
+          require_passed_tests: true
+
+      - name: Helmfile Destroy
+        # https://github.com/helmfile/helmfile-action
+        uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
+        if: always()
+        with:
+          helmfile-args: |
+            destroy \
+              --environment ${{ vars.ENVIRONMENT }} \
+              -f ${{ inputs.acapy-test-helmfile-path || './helm/acapy-test.yaml.gotmpl' }} \
+              --state-values-set release=acapy-test
+          helm-plugins: ${{ inputs.helm-plugins || 'https://github.com/databus23/helm-diff' }}
+          helmfile-version: ${{ inputs.helmfile-version || env.HELMFILE_VERSION_DEFAULT }}
+          helm-version: ${{ inputs.helm-version || env.HELM_VERSION_DEFAULT }}
+
+  test-regression:
+    name: Tests / Regression
+    needs: deploy
+    if: inputs.run-regression-tests
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 30
+
+    environment:
+      name: dev
+
+    permissions:
+      id-token: write # Required to authenticate with AWS
+      checks: write # Required for action-junit-report
+      pull-requests: write # Required to comment on PRs for Pytest coverage comment
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Connect to EKS
+        uses: didx-xyz/workflows/connect-eks@5298eb98f9bfb1ca77170580aaae6bac1cb47723 # master
+        with:
+          aws-region: af-south-1
+          aws-role-arn: arn:aws:iam::402177810328:role/cicd
+          aws-role-session-name: github-cicd
+          cluster-name: cloudapi-dev
+          tailscale-authkey: ${{ secrets.tailscale-authkey || secrets.TAILSCALE_AUTHKEY }}
+
+      - name: Helmfile run tests
+        id: regression
+        # https://github.com/helmfile/helmfile-action
+        uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
+        with:
+          helmfile-args: |
+            apply \
+              --environment ${{ vars.ENVIRONMENT }} \
+              -f ${{ inputs.acapy-test-helmfile-path || './helm/acapy-test.yaml.gotmpl' }} \
+              --set image.tag=${{ inputs.image-version }} \
+              --set image.registry=ghcr.io/${{ github.repository_owner }} \
+              --set completions=1 \
+              --state-values-set release=acapy-test-regression \
+              --set fullnameOverride=acapy-test-regression \
+              --set env.RUN_REGRESSION_TESTS=true \
+              --set env.FAIL_ON_RECREATING_FIXTURES=${{ inputs.reset-deployments == false }} \
+              --state-values-set regressionEnabled=true \
+              --state-values-set namespace=${{ inputs.namespace || 'acapy-cloud-dev' }}
+          helm-plugins: ${{ inputs.helm-plugins || 'https://github.com/databus23/helm-diff' }}
+          helmfile-version: ${{ inputs.helmfile-version || env.HELMFILE_VERSION_DEFAULT }}
+          helm-version: ${{ inputs.helm-version || env.HELM_VERSION_DEFAULT }}
+
+      - name: Wait for tests and print logs
+        if: steps.regression.outcome == 'success'
         shell: bash
         run: |
           while true; do
@@ -318,8 +439,8 @@ jobs:
           NAMESPACE: ${{ inputs.namespace || 'acapy-cloud-dev' }}
           PYTEST_COMPLETIONS: 1
 
-      - name: Copy k8s pytest results
-        if: steps.pytest.outcome == 'success' || steps.pytest-regression.outcome == 'success'
+      - name: Copy test results
+        if: steps.regression.outcome == 'success'
         shell: bash
         run: |
           echo "apiVersion: v1
@@ -337,14 +458,9 @@ jobs:
               - sleep
               - inf
               volumeMounts:
-              - name: pytest-volume
-                mountPath: $MOUNT_PATH/pytest
               - name: pytest-regression-volume
                 mountPath: $MOUNT_PATH/pytest-regression
             volumes:
-            - name: pytest-volume
-              persistentVolumeClaim:
-                claimName: $PVC_NAME
             - name: pytest-regression-volume
               persistentVolumeClaim:
                 claimName: $PVC_NAME_REGRESSION
@@ -359,9 +475,7 @@ jobs:
 
           # Copy the files from the pod to your local system
           echo "Copying files from pod..."
-          mkdir -p $LOCAL_PATH $LOCAL_PATH_REGRESSION
-          kubectl -n $NAMESPACE cp $POD_NAME:$MOUNT_PATH/pytest/$OUTPUT_FILE $LOCAL_PATH/$OUTPUT_FILE
-          kubectl -n $NAMESPACE cp $POD_NAME:$MOUNT_PATH/pytest/$COVERAGE_FILE $LOCAL_PATH/$COVERAGE_FILE
+          mkdir -p $LOCAL_PATH_REGRESSION
           kubectl -n $NAMESPACE cp $POD_NAME:$MOUNT_PATH/pytest-regression/$OUTPUT_FILE $LOCAL_PATH_REGRESSION/$OUTPUT_FILE
           kubectl -n $NAMESPACE cp $POD_NAME:$MOUNT_PATH/pytest-regression/$COVERAGE_FILE $LOCAL_PATH_REGRESSION/$COVERAGE_FILE
 
@@ -371,79 +485,39 @@ jobs:
 
           echo "Done!"
         env:
-          PVC_NAME: acapy-test
           PVC_NAME_REGRESSION: acapy-test-regression
-          POD_NAME: pytest-results-pod
+          POD_NAME: pytest-regression-results
           CONTAINER_IMAGE: busybox
           MOUNT_PATH: /mnt
-          LOCAL_PATH: ./pytest
           LOCAL_PATH_REGRESSION: ./pytest-regression
           NAMESPACE: ${{ inputs.namespace || 'acapy-cloud-dev' }}
           OUTPUT_FILE: test_output.xml
           COVERAGE_FILE: test_coverage.txt
-
-      - name: Pytest coverage comment
-        if: steps.pytest.outcome == 'success'
-        # https://github.com/MishaKav/pytest-coverage-comment
-        uses: MishaKav/pytest-coverage-comment@13d3c18e21895566c746187c9ea74736372e5e91 # v1.1.54
-        with:
-          pytest-coverage-path: ./pytest/test_coverage.txt
-          junitxml-path: ./pytest/test_output.xml
-          create-new-comment: true
-          title: "K8s Test Coverage"
-          # Resolves `Warning: Your comment is too long (maximum is 65536 characters), coverage report will not be added.`
-          hide-report: ${{ github.event_name != 'pull_request' }}
           hide-comment: ${{ github.event_name != 'pull_request' }}
 
-      - name: Pytest regression coverage comment
-        if: steps.pytest-regression.outcome == 'success'
+      - name: Create/Update test coverage comment
+        if: steps.regression.outcome == 'success'
         # https://github.com/MishaKav/pytest-coverage-comment
         uses: MishaKav/pytest-coverage-comment@13d3c18e21895566c746187c9ea74736372e5e91 # v1.1.54
         with:
           pytest-coverage-path: ./pytest-regression/test_coverage.txt
           junitxml-path: ./pytest-regression/test_output.xml
-          create-new-comment: true
-          title: "K8s Regression Test Coverage"
+          title: EKS Regression Test Coverage
           # Resolves `Warning: Your comment is too long (maximum is 65536 characters), coverage report will not be added.`
           hide-report: ${{ github.event_name != 'pull_request' }}
           hide-comment: ${{ github.event_name != 'pull_request' }}
 
-      - name: Publish Pytest Report
-        # https://github.com/mikepenz/action-junit-report
+      - name: Publish test report
         uses: mikepenz/action-junit-report@cf701569b05ccdd861a76b8607a66d76f6fd4857 # v5.5.1
-        if: steps.pytest.outcome == 'success'
+        if: steps.regression.outcome == 'success'
         with:
-          check_name: JUnit Test Report
-          report_paths: "./pytest/test_output.xml"
+          check_name: JUnit Regression Test Report
+          report_paths: ./pytest-regression/test_output.xml
           fail_on_failure: true
           detailed_summary: true
           require_passed_tests: true
 
-      - name: Publish Pytest Regression Report
-        uses: mikepenz/action-junit-report@cf701569b05ccdd861a76b8607a66d76f6fd4857 # v5.5.1
-        if: steps.pytest-regression.outcome == 'success'
-        with:
-          check_name: JUnit Test Report Regression
-          report_paths: "./pytest-regression/test_output.xml"
-          fail_on_failure: true
-          detailed_summary: true
-          require_passed_tests: true
-
-      - name: Helmfile destroy pytest
-        # https://github.com/helmfile/helmfile-action
-        uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
-        if: always()
-        with:
-          helmfile-args: |
-            destroy \
-              --environment ${{ vars.ENVIRONMENT }} \
-              -f ${{ inputs.acapy-test-helmfile-path || './helm/acapy-test.yaml.gotmpl' }} \
-              --state-values-set release=acapy-test
-          helm-plugins: ${{ inputs.helm-plugins || 'https://github.com/databus23/helm-diff' }}
-          helmfile-version: ${{ inputs.helmfile-version || env.HELMFILE_VERSION_DEFAULT }}
-          helm-version: ${{ inputs.helm-version || env.HELM_VERSION_DEFAULT }}
-
-      - name: Helmfile destroy pytest regression
+      - name: Helmfile destroy
         # https://github.com/helmfile/helmfile-action
         uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
         if: always()
@@ -461,7 +535,7 @@ jobs:
   test-k6:
     name: Tests / K6
     needs: deploy
-    if: inputs.run-k6
+    if: inputs.run-k6-tests
     runs-on: ubuntu-latest
 
     timeout-minutes: 30
