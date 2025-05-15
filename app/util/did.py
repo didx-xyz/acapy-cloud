@@ -44,6 +44,8 @@ def strip_qualified_did_sov(did: str) -> str:
 
 
 def did_from_credential_definition_id(credential_definition_id: str) -> str:
-    parts = credential_definition_id.split(":")
-
+    if credential_definition_id.startswith("did:cheqd"):
+        parts = credential_definition_id.split("/")
+    else:  # Indy
+        parts = credential_definition_id.split(":")
     return parts[0]
