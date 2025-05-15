@@ -68,7 +68,7 @@ async def create_credential_definition(
         options = handle_model_with_validation(
             logger=bound_logger,
             model_class=CredDefPostOptions,
-            create_transaction_for_endorser=True,
+            create_transaction_for_endorser=False,
             revocation_registry_size=REGISTRY_SIZE,
             support_revocation=support_revocation,
         )
