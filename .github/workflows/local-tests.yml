@@ -37,7 +37,7 @@ jobs:
         uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.2.1
         with:
           version: ${{ inputs.mise-version }}
-          cache: true
+          cache: false
           experimental: true # Required for mise tasks
           install: true
         env:
@@ -139,9 +139,6 @@ jobs:
         # Connect Cloud can generate a lot of logs...
         if: always()
         run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=connect-cloud --tail 10000
-      - name: Docker Cache Logs
-        if: always()
-        run: docker logs docker-cache
       - name: Cheqd DID Registrar Logs
         if: always()
         run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=driver-did-cheqd --tail 10000
