@@ -133,5 +133,5 @@ async def remove_schema(schema_id: str, db_session: Session = Depends(get_db)) -
 def _get_schema_attrs(schema_id: SchemaID) -> List[str]:
     # Split from the back because DID may contain a colon
     if schema_id.schema_id.startswith("did:cheqd:"):
-        return
+        return []
     return schema_id.schema_id.split(":", 3)

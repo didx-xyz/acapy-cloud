@@ -187,7 +187,7 @@ async def schema_id_from_credential_definition_id(
 
     if credential_definition_id.startswith("did:cheqd"):
         # TODO: Implement schema id retrieval for Cheqd
-        return
+        return ""
 
     # scrape schema id or sequence number from cred def id
     tokens = credential_definition_id.split(":")
