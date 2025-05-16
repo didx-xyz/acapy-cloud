@@ -22,7 +22,6 @@ jobs:
           - agent
           - app
           - endorser
-          # - ledger-nodes # AMD64 only
           - pytest
           - tails-server
           - trust-registry
@@ -101,7 +100,6 @@ jobs:
           - agent
           - app
           - endorser
-          - ledger-nodes
           - pytest
           - tails-server
           - trust-registry
@@ -120,10 +118,6 @@ jobs:
             context: .
             file: dockerfiles/endorser/Dockerfile
             platforms: linux/amd64,linux/arm64
-          - image: ledger-nodes
-            context: https://github.com/bcgov/von-network.git#v1.9.0
-            file: Dockerfile
-            platforms: linux/amd64
           - image: pytest
             context: .
             file: dockerfiles/tests/Dockerfile
@@ -194,6 +188,4 @@ jobs:
             type=gha,scope=build-${{ matrix.image }}-arm64
             type=gha,scope=build-${{ matrix.image }}-amd64
             type=registry,ref=ghcr.io/${{ github.repository_owner }}/acapy-cloud/${{ matrix.image }}:latest
-          cache-to: |
-            ${{ matrix.image == 'ledger-nodes' && 'type=gha,mode=max,scope=build-${{ matrix.image }}-amd64' || '' }}
           platforms: ${{ matrix.platforms }}
