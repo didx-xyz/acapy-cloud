@@ -43,9 +43,6 @@ environments:
                   pathType: Prefix
 ---
 {{- $releases := list
-  "did-registrar"
-  "did-resolver"
-  "driver-did-cheqd"
   "endorser"
   "governance-agent"
   "governance-web"
@@ -192,6 +189,49 @@ releases:
       - ingress:
           {{ toYaml . | nindent 10 }}
       {{- end }}
+
+  # https://github.com/decentralized-identity/universal-registrar
+  - name: did-registrar
+    labels:
+      app: did-registrar
+    namespace: {{ .Values.namespace }}
+    chart: ./acapy-cloud
+    version: 0.2.0
+    values:
+      - ./acapy-cloud/conf/{{ .Environment.Name }}/did-registrar.yaml
+      - deploymentLabels:
+          tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
+        podLabels:
+          admission.datadoghq.com/enabled: "false"
+          tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
+  # https://github.com/cheqd/did-resolver
+  - name: did-resolver
+    labels:
+      app: did-resolver
+    namespace: {{ .Values.namespace }}
+    chart: ./acapy-cloud
+    version: 0.2.0
+    values:
+      - ./acapy-cloud/conf/{{ .Environment.Name }}/did-resolver.yaml
+      - deploymentLabels:
+          tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
+        podLabels:
+          admission.datadoghq.com/enabled: "false"
+          tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
+  # https://github.com/cheqd/did-registrar
+  - name: driver-did-cheqd
+    labels:
+      app: driver-did-cheqd
+    namespace: {{ .Values.namespace }}
+    chart: ./acapy-cloud
+    version: 0.2.0
+    values:
+      - ./acapy-cloud/conf/{{ .Environment.Name }}/driver-did-cheqd.yaml
+      - deploymentLabels:
+          tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
+        podLabels:
+          admission.datadoghq.com/enabled: "false"
+          tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
 ---
 repositories:
   - name: redpanda
