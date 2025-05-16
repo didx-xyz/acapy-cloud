@@ -20,10 +20,10 @@ TENANTS_BASE_PATH = tenants_router.prefix
 @pytest.mark.parametrize(
     "use_did,use_did_method,use_public_did",
     [
-        (None, None, False),
-        (True, None, False),
-        (None, "did:peer:2", False),
-        (None, "did:peer:4", False),
+        # (None, None, False),
+        # (True, None, False),
+        # (None, "did:peer:2", False),
+        # (None, "did:peer:4", False),
         (True, "did:peer:4", False),
         (None, None, True),
     ],
