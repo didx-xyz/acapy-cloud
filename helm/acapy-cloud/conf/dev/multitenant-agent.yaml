@@ -44,6 +44,12 @@ command:
   - nats_events.v1_0.nats_queue.events
   - --plugin-config-value
   - nats_queue.connection.connection_url="$(NATS_SERVER)"
+  - --plugin
+  - cheqd
+  - --plugin-config-value
+  - resolver_url="http://did-resolver:8080/1.0/identifiers/"
+  - --plugin-config-value
+  - registrar_url="http://did-registrar:9080/1.0/"
 
 lifecycle:
   preStop:
