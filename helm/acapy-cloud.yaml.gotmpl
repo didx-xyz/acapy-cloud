@@ -9,7 +9,7 @@ environments:
       ddProfilingEnabled:
         default: false
         overrides: {}
-      deployLedger: true
+      deployLedger: false
       natsReplicaCount: 1
       pgProxyEnabled: false
       pgAdmin:
@@ -86,8 +86,8 @@ releases:
       - name: env.DD_PROFILING_ENABLED
         value: {{ index $.Values.ddProfilingEnabled.overrides $release | default $.Values.ddProfilingEnabled.default }}
 {{- end }}
-{{- if .Values.deployLedger }}
   - name: ledger-nodes
+    installed: {{ .Values.deployLedger }}
     labels:
       app: ledger-nodes
     namespace: {{ .Values.namespace }}
@@ -107,6 +107,7 @@ releases:
       - name: image.tag
         value: {{ .Values.image.tag }}
   - name: ledger-browser
+    installed: {{ .Values.deployLedger }}
     labels:
       app: ledger-browser
     namespace: {{ .Values.namespace }}
@@ -125,7 +126,6 @@ releases:
         value: {{ .Values.image.registry }}
       - name: image.tag
         value: {{ .Values.image.tag }}
-{{- end }}
   # https://github.com/redpanda-data/helm-charts/tree/main/charts/connect
   - name: connect-cloud
     labels:

@@ -336,80 +336,6 @@ def setup_cloudapi_service(
         print(color.yellow("Skipping " + release + ", not enabled"))
 
 
-def setup_ledger(namespace, build_enabled, ingress_domain):
-    print(color.green("Installing Ledger..."))
-
-    # Setup Ledger Nodes
-    ledger_enabled = True
-    if "x86_64" in cpu_arch:
-        values_file = "./helm/ledger-nodes/conf/local/values.yaml"
-        helm_resource(
-            name="ledger-nodes",
-            chart="./helm/ledger-nodes",
-            release_name="ledger-nodes",
-            namespace=namespace,
-            flags=[
-                "--values",
-                values_file,
-                "--wait",
-            ],
-            labels=["02-indy-ledger"],
-            resource_deps=["cloudapi-ns"],
-            deps=[values_file],
-        )
-        k8s_resource(
-            workload="ledger-nodes",
-        )
-    else:
-        # Incompatible CPU Architecture
-        # Deploy Ledger Nodes and Browser via Docker Compose instead of Kind/Helm
-        ledger_enabled = False
-        print(
-            color.yellow(
-                "Skipping deploying Ledger Nodes to Kind, CPU Architecture not supported: "
-                + cpu_arch
-            )
-        )
-        print(color.yellow("Using docker compose for ledger nodes..."))
-
-        von_dir = "tilt/.von-network"
-        if not os.path.exists(von_dir):
-            print(color.yellow("von-network not found, cloning von-network repo"))
-            local(
-                "git clone https://github.com/bcgov/von-network.git -b v1.9.0 "
-                + von_dir,
-                quiet=True,
-            )
-
-        if build_enabled:
-            print(color.green("Docker Build of ledger-nodes for compose deployment..."))
-            custom_build(
-                registry + "/didx-xyz/acapy-cloud/ledger-nodes",
-                "docker build --network=host -t $EXPECTED_REF "
-                + "--platform=linux/amd64 "
-                + "--file="
-                + von_dir
-                + "/Dockerfile "
-                + von_dir
-                + " && docker push $EXPECTED_REF",
-                deps=[von_dir],
-                skips_local_docker=True,
-            )
-        else:
-            print(color.yellow("Skipping Docker Build for ledger-nodes"))
-
-        # Only use env file if not in CI mode
-        env_file_args = {}
-        if config.tilt_subcommand != "ci":
-            env_file_args["env_file"] = "./docker-compose-ledger.local.env"
-
-        docker_compose("./docker-compose-ledger.yaml", wait=True, **env_file_args)
-        dc_resource("ledger-nodes", labels=["02-indy-ledger"])
-        dc_resource("ledger-browser", labels=["02-indy-ledger"])
-
-    return ledger_enabled
-
-
 def add_live_update(live_update_config, enabled):
     # live_update_config: List[Tuple[str, str]]
     # enabled: bool
@@ -440,8 +366,6 @@ def setup_cloudapi(build_enabled, expose):
     setup_nats(namespace)
     setup_redpanda_connect_cloud(namespace)
 
-    ledger_enabled = setup_ledger(namespace, build_enabled, ingress_domain)
-
     releases = {
         "endorser": {
             "depends": ["nats"],
@@ -463,7 +387,7 @@ def setup_cloudapi(build_enabled, expose):
             },
         },
         "governance-agent": {
-            "depends": ["nats", "postgres", "ledger-browser"],
+            "depends": ["nats", "postgres", "did-registrar", "did-resolver"],
             "links": [
                 link(
                     "http://governance-agent.cloudapi." + ingress_domain,
@@ -511,7 +435,7 @@ def setup_cloudapi(build_enabled, expose):
             },
         },
         "multitenant-agent": {
-            "depends": ["nats", "postgres", "ledger-browser"],
+            "depends": ["nats", "postgres", "did-registrar", "did-resolver"],
             "links": [
                 link(
                     "http://multitenant-agent.cloudapi." + ingress_domain,
@@ -657,17 +581,6 @@ def setup_cloudapi(build_enabled, expose):
                     "trustregistry/**",
                 ],
             },
-        },
-        "ledger-browser": {
-            "depends": ["ledger-nodes"],
-            "enabled": ledger_enabled,
-            "labels": ["02-indy-ledger"],
-            "port_forwards": [port_forward(9000, 8000, "Ledger Browser PF")],
-            "links": [
-                link(
-                    "http://ledger-browser.cloudapi." + ingress_domain, "Ledger Browser"
-                ),
-            ],
         },
         "mediator": {
             "depends": [
