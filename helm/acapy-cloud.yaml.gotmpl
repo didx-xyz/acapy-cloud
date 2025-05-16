@@ -9,7 +9,6 @@ environments:
       ddProfilingEnabled:
         default: false
         overrides: {}
-      deployLedger: false
       natsReplicaCount: 1
       pgProxyEnabled: false
       pgAdmin:
@@ -29,7 +28,6 @@ environments:
           # governance-agent: true
           # multitenant-web: true
           # tenant-web: true
-      deployLedger: true
       natsReplicaCount: 1
       pgProxyEnabled: false
       pgAdmin:
@@ -86,46 +84,6 @@ releases:
       - name: env.DD_PROFILING_ENABLED
         value: {{ index $.Values.ddProfilingEnabled.overrides $release | default $.Values.ddProfilingEnabled.default }}
 {{- end }}
-  - name: ledger-nodes
-    installed: {{ .Values.deployLedger }}
-    labels:
-      app: ledger-nodes
-    namespace: {{ .Values.namespace }}
-    chart: ./ledger-nodes
-    version: 0.2.0
-    values:
-      - ./ledger-nodes/conf/{{ .Environment.Name }}/values.yaml
-      - deploymentLabels:
-          tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
-        podLabels:
-          admission.datadoghq.com/enabled: "false"
-          tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
-          sidecar.istio.io/inject: "false"
-    set:
-      - name: image.registry
-        value: {{ .Values.image.registry }}
-      - name: image.tag
-        value: {{ .Values.image.tag }}
-  - name: ledger-browser
-    installed: {{ .Values.deployLedger }}
-    labels:
-      app: ledger-browser
-    namespace: {{ .Values.namespace }}
-    chart: ./acapy-cloud
-    version: 0.2.0
-    values:
-      - ./acapy-cloud/conf/{{ .Environment.Name }}/ledger-browser.yaml
-      - deploymentLabels:
-          tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
-        podLabels:
-          admission.datadoghq.com/enabled: "false"
-          tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
-          sidecar.istio.io/inject: "false"
-    set:
-      - name: image.registry
-        value: {{ .Values.image.registry }}
-      - name: image.tag
-        value: {{ .Values.image.tag }}
   # https://github.com/redpanda-data/helm-charts/tree/main/charts/connect
   - name: connect-cloud
     labels:
