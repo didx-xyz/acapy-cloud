@@ -56,6 +56,11 @@ EOF
   # Cache registries
   retry_count=0
   while [ $retry_count -lt $MAX_RETRIES ]; do
+    # Disable Docker cache in CI
+    if [ -n "${GITHUB_ACTIONS}" ]; then
+      echo "Skipping Docker cache setup in CI environment."
+      break
+    fi
     if docker exec "${node}" curl -s -f ${CACHE_SETUP_URL} > /dev/null; then
       docker exec "${node}" bash -c "\
         curl -s ${CACHE_SETUP_URL} \
