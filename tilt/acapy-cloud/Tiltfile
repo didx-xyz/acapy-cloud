@@ -597,7 +597,12 @@ def setup_cloudapi(build_enabled, expose):
                 link("http://tails.cloudapi." + ingress_domain, "Tails"),
             ]
         },
-        "driver-did-cheqd": {},
+        "driver-did-cheqd": {
+          "flags": [
+            "--set",
+            "secretData.FEE_PAYER_TESTNET_MNEMONIC=" + os.environ.get("FEE_PAYER_TESTNET_MNEMONIC", ""),
+          ]
+        },
         "did-registrar": {
             "depends": ["driver-did-cheqd"],
         },
