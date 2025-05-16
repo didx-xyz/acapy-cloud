@@ -99,38 +99,6 @@ startupProbe:
 #     memory: 512Mi
 
 initContainers:
-  - name: wait-for-ledger-browser
-    image: curlimages/curl
-    command:
-      - sh
-      - -c
-      - |
-        until curl -s http://ledger-browser:8000/status -o /dev/null; do
-          echo "waiting for ledger-browser to be healthy"
-          sleep 10
-        done
-  - name: register-did
-    image: curlimages/curl:latest
-    env:
-    - name: ACAPY_WALLET_SEED
-      valueFrom:
-        secretKeyRef:
-          name: '{{ include "acapy-cloud.fullname" . }}-env'
-          key: ACAPY_WALLET_SEED
-    command:
-    - "/bin/sh"
-    - "-c"
-    - |
-      STATUS=$(curl -s -X POST \
-        -o /dev/null \
-        -w "%{http_code}" \
-        -H "Content-Type: application/json" -d "{\"seed\": \"$ACAPY_WALLET_SEED\"}" \
-        "http://ledger-browser:8000/register"
-      )
-      if [ $STATUS -ne 200 ]; then
-        echo "Failed to register DID. Status code: $STATUS"
-        exit 1
-      fi
   - name: nc-nats
     image: busybox
     command: ['sh', '-c', 'until nc -z nats 4222; do echo waiting for nats; sleep 2; done;']
@@ -205,7 +173,8 @@ env:
   ACAPY_WALLET_STORAGE_TYPE: postgres_storage
   ACAPY_AUTO_PROVISION: true
   # Ledger
-  ACAPY_GENESIS_URL: http://ledger-browser:8000/genesis
+  # ACAPY_GENESIS_URL: http://ledger-browser:8000/genesis
+  ACAPY_NO_LEDGER: true
   ACAPY_PUBLIC_INVITES: true
   ACAPY_ENDORSER_ROLE: endorser
   # ## DO NOT CHANGE VARIABLES BELOW
