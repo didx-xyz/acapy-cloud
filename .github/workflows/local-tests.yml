@@ -12,13 +12,15 @@ on:
     secrets:
       codacy-token:
         required: true
+      cheqd-mnemonic:
+        required: true
 
 permissions: {}
 
 jobs:
   local:
     name: Local End-to-End
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-8-core-32-gb
 
     timeout-minutes: 30
 
@@ -57,8 +59,9 @@ jobs:
         run: mise run tilt:ci
         shell: bash
         env:
-          REGISTRY: ghcr.io/${{ github.repository_owner }}
+          FEE_PAYER_TESTNET_MNEMONIC: ${{ secrets.cheqd-mnemonic }}
           IMAGE_TAG: ${{ inputs.image-version }}
+          REGISTRY: ghcr.io/${{ github.repository_owner }}
 
       - name: Test with pytest
         run: |
@@ -68,12 +71,7 @@ jobs:
           cp .env.example .env
           source .env
 
-          # Any port forwards will not be active after `tilt ci` has exited.
-          kubectl port-forward svc/ledger-browser 9000:8000 -n cloudapi &
-
           poetry run pytest \
-            --numprocesses 4 \
-            --dist loadgroup \
             --durations=25 \
             --ignore ./tilt \
             --cov | tee test_output.txt
@@ -144,9 +142,15 @@ jobs:
         # Connect Cloud can generate a lot of logs...
         if: always()
         run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=connect-cloud --tail 10000
-      - name: Docker Cache Logs
+      - name: Cheqd DID Registrar Logs
         if: always()
-        run: docker logs docker-cache
+        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=driver-did-cheqd --tail 10000
+      - name: Cheqd DID Resolver Logs
+        if: always()
+        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=did-resolver --tail 10000
+      - name: DID Registrar (Universal Registrar) Logs
+        if: always()
+        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=did-registrar --tail 10000
       - name: Endorser Logs
         if: always()
         run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=endorser --tail 10000
@@ -159,12 +163,6 @@ jobs:
       - name: Ingress Nginx Logs
         if: always()
         run: kubectl logs -n ingress-system -l app.kubernetes.io/instance=ingress-nginx --tail 10000
-      - name: Ledger Browser Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=ledger-browser --tail 10000
-      - name: Ledger Nodes Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=ledger-nodes --tail 10000
       - name: Mediator Logs
         if: always()
         run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=mediator --tail 10000

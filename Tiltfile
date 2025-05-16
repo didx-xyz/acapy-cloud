@@ -97,16 +97,8 @@ if config.tilt_subcommand in ("down"):
 
     if destroy_all:
         print(color.red("Destroying Kind cluster and deleting docker registry & cache"))
-        local(
-            "docker compose -f ./docker-compose-ledger.yaml down -v",
-            dir=os.path.dirname(__file__),
-        )
         local("mise run kind:destroy:all", dir=os.path.dirname(__file__))
 
     if destroy:
         print(color.red("Destroying Kind cluster"))
-        local(
-            "docker compose -f ./docker-compose-ledger.yaml down -v",
-            dir=os.path.dirname(__file__),
-        )
         local("mise run kind:destroy", dir=os.path.dirname(__file__))

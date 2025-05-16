@@ -179,7 +179,6 @@ async def test_create_tenant_member_w_wallet_name(
 async def test_create_tenant_issuer(
     tenant_admin_client: RichAsyncClient,
     tenant_admin_acapy_client: AcaPyClient,
-    governance_acapy_client: AcaPyClient,
 ):
     wallet_label = uuid4().hex
     response = await tenant_admin_client.post(
@@ -201,29 +200,13 @@ async def test_create_tenant_issuer(
         if not actor:
             pytest.fail("Missing actor")
 
-        endorser_did = await acapy_wallet.get_public_did(governance_acapy_client)
-
         acapy_token: str = tenant["access_token"].split(".", 1)[1]
         async with get_tenant_controller(acapy_token) as tenant_controller:
             public_did = await acapy_wallet.get_public_did(tenant_controller)
 
-            connections = await tenant_controller.connection.get_connections()
-
-        connections = [
-            connection
-            for connection in connections.results
-            if connection.their_public_did == endorser_did.did
-        ]
-
-        endorser_connection = connections[0]
-
-        # Connection with endorser
-        assert endorser_connection.state == "active"
-        assert endorser_connection.their_public_did == endorser_did.did
-
         # Actor
         assert actor.name == tenant["wallet_label"]
-        assert actor.did == f"did:sov:{public_did.did}"
+        assert actor.did == public_did.did
         assert actor.roles == ["issuer"]
 
         # Tenant
@@ -324,7 +307,6 @@ async def test_create_tenant_verifier(
 async def test_update_tenant_verifier_to_issuer(
     tenant_admin_client: RichAsyncClient,
     tenant_admin_acapy_client: AcaPyClient,
-    governance_acapy_client: AcaPyClient,
 ):
     wallet_label = uuid4().hex
     image_url = "https://image.ca"
@@ -412,8 +394,6 @@ async def test_update_tenant_verifier_to_issuer(
 
         new_actor = await trust_registry.fetch_actor_by_id(verifier_wallet_id)
 
-        endorser_did = await acapy_wallet.get_public_did(governance_acapy_client)
-
         acapy_token = (
             (
                 await tenant_admin_client.post(
@@ -427,22 +407,6 @@ async def test_update_tenant_verifier_to_issuer(
         async with get_tenant_controller(acapy_token) as tenant_controller:
             public_did = await acapy_wallet.get_public_did(tenant_controller)
             assert public_did
-
-            _connections = (
-                await tenant_controller.connection.get_connections()
-            ).results
-
-            connections = [
-                connection
-                for connection in _connections
-                if connection.their_public_did == endorser_did.did
-            ]
-
-        endorser_connection = connections[0]
-
-        # Connection invitation
-        assert endorser_connection.state == "active"
-        assert endorser_connection.their_public_did == endorser_did.did
 
         assert new_actor
         assert new_actor.name == new_wallet_label

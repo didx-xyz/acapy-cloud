@@ -44,8 +44,17 @@ class Schema(BaseModel):
             values = values.__dict__
 
         try:
+            id = values["id"]
+        except KeyError:
+            id = None
+
+        cheqd_did = False
+        if id and id.startswith("did:cheqd:"):
+            cheqd_did = True
+
+        try:
             for v in ["did", "name", "version"]:
-                if ":" in values[v]:
+                if not cheqd_did and ":" in values[v]:
                     raise CloudApiValueError(
                         f"Schema field `{v}` must not contain colon."
                     )
@@ -57,32 +66,32 @@ class Schema(BaseModel):
             name = None
             version = None
 
-        try:
-            id = values["id"]
-        except KeyError:
-            id = None
-
-        if id is None:
-            if None in (did, name, version):
-                raise CloudApiValueError(
-                    "Either `id` or all of (`did`, `name`, `version`) must be specified."
-                )
-            id = calc_schema_id(did, name, version)
+        if cheqd_did:
+            did = id.split("/")[0]
+            version = "1.0.0"
+            name = "Cheqd-LinkedResource"
         else:
-            if None not in (did, name, version):
-                expected_id = calc_schema_id(did, name, version)
-                if id != expected_id:
+            if id is None:
+                if None in (did, name, version):
                     raise CloudApiValueError(
-                        f"Schema's `id` field does not match expected format: `{expected_id}`."
+                        "Either `id` or all of (`did`, `name`, `version`) must be specified."
                     )
+                id = calc_schema_id(did, name, version)
             else:
-                # Extract did, name, and version from id if not specified
-                try:
-                    did, _, name, version = id.split(":")
-                except ValueError as e:
-                    raise CloudApiValueError(
-                        "Invalid `id` field. It does not match the expected format."
-                    ) from e
+                if None not in (did, name, version):
+                    expected_id = calc_schema_id(did, name, version)
+                    if id != expected_id:
+                        raise CloudApiValueError(
+                            f"Schema's `id` field does not match expected format: `{expected_id}`."
+                        )
+                else:
+                    # Extract did, name, and version from id if not specified
+                    try:
+                        did, _, name, version = id.split(":")
+                    except ValueError as e:
+                        raise CloudApiValueError(
+                            "Invalid `id` field. It does not match the expected format."
+                        ) from e
 
         values["did"] = did
         values["name"] = name

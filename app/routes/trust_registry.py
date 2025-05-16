@@ -28,7 +28,7 @@ async def get_schemas() -> List[Schema]:
     return schemas
 
 
-@router.get("/schemas/{schema_id}", response_model=Schema)
+@router.get("/schemas/{schema_id:path}", response_model=Schema)
 async def get_schema_by_id(schema_id: str) -> Schema:
     """
     Retrieve schema by id.

@@ -49,9 +49,6 @@ async def create_credential_definition(
 
     await assert_valid_issuer(public_did, credential_definition.schema_id)
 
-    if support_revocation:
-        await publisher.check_endorser_connection()
-
     wallet_type = await get_wallet_type(
         aries_controller=aries_controller,
         logger=bound_logger,
@@ -68,7 +65,7 @@ async def create_credential_definition(
         options = handle_model_with_validation(
             logger=bound_logger,
             model_class=CredDefPostOptions,
-            create_transaction_for_endorser=True,
+            create_transaction_for_endorser=False,
             revocation_registry_size=REGISTRY_SIZE,
             support_revocation=support_revocation,
         )

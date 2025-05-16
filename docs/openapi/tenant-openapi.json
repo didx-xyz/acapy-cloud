@@ -3357,7 +3357,7 @@
           "wallet"
         ],
         "summary": "Create Local DID",
-        "description": "Create Local DID\n---\n\nThis endpoint allows you to create a new DID in the wallet.\nThe `method` parameter is optional and can be set to\n'sov', 'key', 'web', 'did:peer:2', or 'did:peer:4'.\n\nRequest Body:\n---\n    DIDCreate (Optional):\n        method (str, optional): Method for the requested DID.\n        seed (str, optional): Optional seed for DID.\n        key_type (str, optional): Key type for the DID.\n        did (str, optional): Specific DID value.\n\nResponse:\n---\n    Returns the created DID object.",
+        "description": "Create Local DID\n---\n\nThis endpoint allows you to create a new DID in the wallet.\nThe `method` parameter is optional and can be set to\n'cheqd', 'key', 'web', 'did:peer:2', or 'did:peer:4'.\n\nRequest Body:\n---\n    DIDCreate (Optional):\n        method (str, optional): Method for the requested DID.\n        seed (str, optional): Optional seed for DID.\n        key_type (str, optional): Key type for the DID.\n        did (str, optional): Specific DID value.\n\nResponse:\n---\n    Returns the created DID object.",
         "operationId": "create_did_v1_wallet_dids_post",
         "requestBody": {
           "content": {
@@ -6205,7 +6205,7 @@
             ],
             "title": "Method",
             "description": "Method for the requested DID. Supported methods are cheqd, sov, key, web, did:peer:2, did:peer:4.",
-            "default": "sov",
+            "default": "cheqd",
             "examples": [
               "cheqd",
               "sov",

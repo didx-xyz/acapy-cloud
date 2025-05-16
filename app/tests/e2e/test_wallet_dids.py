@@ -121,6 +121,7 @@ async def test_set_public_did(
 
 
 @pytest.mark.anyio
+@pytest.mark.skip(reason="Can't use this method to set endpoint for cheqd dids")
 @pytest.mark.skipif(
     TestMode.regression_run in TestMode.fixture_params,
     reason="Skip posting to ledger in regression mode",

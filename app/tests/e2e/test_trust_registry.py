@@ -85,7 +85,7 @@ async def test_get_actors(
     # Verify actor DID matches the expected value
     actor_did = actor["did"]
     did_result = await faber_anoncreds_acapy_client.wallet.get_public_did()
-    assert actor_did == f"did:sov:{did_result.result.did}"
+    assert actor_did == did_result.result.did
 
     # Verify actor name matches the expected value
     actor_name = actor["name"]

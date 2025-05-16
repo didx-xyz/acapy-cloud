@@ -359,7 +359,7 @@ components:
             - type: 'null'
           title: Did Method
           description: The DID method to use for onboarding the tenant (only used for issuers)
-          default: sov
+          default: cheqd
           examples:
             - sov
             - cheqd

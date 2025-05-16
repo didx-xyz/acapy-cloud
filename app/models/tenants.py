@@ -63,7 +63,7 @@ class CreateTenantRequest(BaseModel):
     image_url: Optional[str] = image_url_field
     extra_settings: Optional[Dict[ExtraSettings, bool]] = ExtraSettings_field
     did_method: Optional[Literal["sov", "cheqd"]] = Field(
-        default="sov",
+        default="cheqd",
         description="The DID method to use for onboarding the tenant (only used for issuers)",
         examples=["sov", "cheqd"],
     )

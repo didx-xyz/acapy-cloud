@@ -44,6 +44,12 @@ command:
   - nats_events.v1_0.nats_queue.events
   - --plugin-config-value
   - nats_queue.connection.connection_url="$(NATS_SERVER)"
+  - --plugin
+  - cheqd
+  - --plugin-config-value
+  - resolver_url="http://did-resolver:8080/1.0/identifiers/"
+  - --plugin-config-value
+  - registrar_url="http://did-registrar:9080/1.0/"
 
 lifecycle:
   preStop:
@@ -106,16 +112,6 @@ startupProbe:
 #     memory: 512Mi
 
 initContainers:
-  - name: wait-for-ledger-browser
-    image: curlimages/curl
-    command:
-      - sh
-      - -c
-      - |
-        until curl -s http://ledger-browser:8000/status -o /dev/null; do
-          echo "waiting for ledger-browser to be healthy"
-          sleep 2
-        done
   - name: nc-nats
     image: busybox
     command: ['sh', '-c', 'until nc -z nats 4222; do echo waiting for nats; sleep 2; done;']
@@ -196,7 +192,8 @@ env:
   ACAPY_WALLET_STORAGE_TYPE: postgres_storage
   ACAPY_AUTO_PROVISION: true
   # Ledger
-  ACAPY_GENESIS_URL: http://ledger-browser:8000/genesis
+  # ACAPY_GENESIS_URL: http://ledger-browser:8000/genesis
+  ACAPY_NO_LEDGER: true
 
   # Multi-tenant Configuration
   ACAPY_MULTITENANT: true

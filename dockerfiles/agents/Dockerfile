@@ -1,4 +1,4 @@
-FROM ghcr.io/didx-xyz/acapy-agent:py3.12-1.3.0-20250505@sha256:941c04facd7219904cec6eb3b0f3f6012528bad6fae7a91c0b73bc869a3fba87
+FROM ghcr.io/didx-xyz/acapy-agent:py3.12-debug-connections@sha256:74f82c137261e088e3af28518522d5ec54c284b32d96ce3bfe7e6e9ced24bbcd
 
 USER root
 
@@ -6,8 +6,8 @@ USER root
 ARG PROTOBUF_VERSION=5.29.3
 RUN pip install --no-cache-dir protobuf==${PROTOBUF_VERSION} \
   acapy-wallet-groups-plugin==1.3.0.post20250506 \
-  git+https://github.com/didx-xyz/aries-acapy-plugins@1.3.0-20250505#subdirectory=nats_events \
-  git+https://github.com/didx-xyz/aries-acapy-plugins@development#subdirectory=cheqd
+  git+https://github.com/didx-xyz/aries-acapy-plugins@5944351b#subdirectory=nats_events \
+  git+https://github.com/didx-xyz/aries-acapy-plugins@5944351b#subdirectory=cheqd
 
 COPY scripts/startup.sh startup.sh
 RUN chmod +x ./startup.sh
