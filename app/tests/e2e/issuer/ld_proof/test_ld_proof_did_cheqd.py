@@ -20,7 +20,7 @@ CREDENTIALS_BASE_PATH = issuer_router.prefix
 OOB_BASE_PATH = oob_router.prefix
 WALLET = wallet_router.prefix
 
-credential_ = create_credential("Ed25519Signature2018")
+credential_ = create_credential("Ed25519Signature2020")
 
 
 @pytest.mark.anyio
