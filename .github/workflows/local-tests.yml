@@ -68,9 +68,6 @@ jobs:
           cp .env.example .env
           source .env
 
-          # Any port forwards will not be active after `tilt ci` has exited.
-          kubectl port-forward svc/ledger-browser 9000:8000 -n cloudapi &
-
           poetry run pytest \
             --durations=25 \
             --ignore ./tilt \
@@ -166,12 +163,6 @@ jobs:
       - name: Ingress Nginx Logs
         if: always()
         run: kubectl logs -n ingress-system -l app.kubernetes.io/instance=ingress-nginx --tail 10000
-      - name: Ledger Browser Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=ledger-browser --tail 10000
-      - name: Ledger Nodes Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=ledger-nodes --tail 10000
       - name: Mediator Logs
         if: always()
         run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=mediator --tail 10000
