@@ -171,7 +171,7 @@ spec:
       - name: "{{ .name }}"
         securityContext:
           {{- toYaml .securityContext | nindent 10 }}
-        image: "{{ .image.repository | default $.Values.image.repository }}:{{ .image.tag | default $.Values.image.tag }}{{ if .image.digest }}@{{ .image.digest }}{{ end }}"
+        image: "{{ .image.registry | default $.Values.image.registry }}/{{ .image.name | default $.Values.image.name }}:{{ .image.tag | default $.Values.image.tag }}{{ if .image.digest }}@{{ .image.digest }}{{ end }}"
         imagePullPolicy: {{ .image.pullPolicy | default $.Values.image.pullPolicy }}
         ports:
         - name: "{{ trunc 15 .name }}"

@@ -22,7 +22,6 @@ env:
   ## Valid levels are: TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF
   LOGGING_LEVEL_ROOT: WARN
   LOGGING_LEVEL_uniregistrar: WARN
-
 service:
   appProtocol: http
   port: 9080

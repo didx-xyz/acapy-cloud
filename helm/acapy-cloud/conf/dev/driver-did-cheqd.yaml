@@ -26,6 +26,13 @@ startupProbe:
   tcpSocket:
     port: 3000
 
-secretData:
-  FEE_PAYER_TESTNET_MNEMONIC: "" # Cheqd did-registrar uses testnet faucet by default
+secretData: {}
+  # FEE_PAYER_TESTNET_MNEMONIC: "" # Cheqd did-registrar uses testnet faucet by default
   # FEE_PAYER_MAINNET_MNEMONIC: "..."
+
+env:
+  FEE_PAYER_TESTNET_MNEMONIC:
+    valueFrom:
+      secretKeyRef:
+        name: cheqd-testnet-mnemonic
+        key: mnemonic
