@@ -94,7 +94,7 @@ export default function (data) {
         throw new Error(`Non-200 status: ${response.status}`);
       }
       return response;
-    }, 5, 2000);
+    }, 5, 2000, "Send proof request");
   } catch (error) {
     console.error(`Failed after retries: ${error.message}`);
     sendProofRequestResponse = error.response || error;
@@ -120,7 +120,7 @@ export default function (data) {
     sseUrlPath: "proofs/thread_id",
     topic: "proofs",
     expectedState: "request-received",
-    maxAttempts: 10,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
+    maxAttempts: 1,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
     lookBack: 60,
     sseTag: "proof_request_received",
   });
@@ -156,7 +156,7 @@ export default function (data) {
         throw new Error('No credential ID returned');
       }
       return response;
-    }, 5, 2000, 'Get credential ID');
+    }, 5, 5000, 'Get credential ID');
   } catch (error) {
     console.error(`Failed to get proof credentials after retries: ${error.message}`);
     throw error; // Re-throw as this is required for the next steps
@@ -199,7 +199,7 @@ export default function (data) {
     sseUrlPath: "proofs/thread_id",
     topic: "proofs",
     expectedState: "done",
-    maxAttempts: 10,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
+    maxAttempts: 1,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
     lookBack: 60,
     sseTag: "proof_done",
   });
@@ -223,13 +223,19 @@ export default function (data) {
   // const getProofResponse = getProof(issuer.accessToken, wallet.issuer_connection_id, threadId );
   let getProofResponse;
   try {
-    getProofResponse = getProof(
-      wallet.issuer_access_token,
-      wallet.issuer_connection_id,
-      threadId
-    );
+    getProofResponse = retry(() => {
+      const response = getProof(
+        wallet.issuer_access_token,
+        wallet.issuer_connection_id,
+        threadId
+      );
+      if (response.status !== 200) {
+        throw new Error(`Non-200 status: ${response.status}`);
+      }
+      return response;
+    }, 5, 2000, "Get proof");
   } catch (error) {
-    // console.error(`Error creating credential: ${error.message}`);
+    console.error(`Failed to get proof after retries: ${error.message}`);
     getProofResponse = { status: 500, response: error.message };
   }
 

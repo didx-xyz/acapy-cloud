@@ -17,6 +17,9 @@ export function bootstrapIssuer(
   const { tenantAdminHeaders, governanceHeaders } = getAuthHeaders();
   const issuers = [];
 
+  // console.log(`Bearer token: ${tenantAdminHeaders.Authorization}`);
+  // console.log(`Governance token: ${governanceHeaders.Authorization}`);
+
   for (let i = 0; i < numIssuers; i++) {
     console.log(`Creating issuer ${issuerPrefix}_${i}`);
     const walletName = `${issuerPrefix}_${i}`;
@@ -36,7 +39,8 @@ export function bootstrapIssuer(
     const { issuerWalletId, issuerAccessToken } = issuerData;
     const credentialDefinitionId = getCredentialDefinitionId(
       issuerAccessToken,
-      credDefTag
+      credDefTag,
+      schemaVersion
     );
 
     if (credentialDefinitionId) {

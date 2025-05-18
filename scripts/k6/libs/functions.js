@@ -26,6 +26,7 @@ export function createTenant(headers, wallet) {
     wallet_name: wallet.wallet_name,
     wallet_type: "askar-anoncreds",
     group_id: "GroupA",
+    did_method: "sov",
     image_url:
       "https://upload.wikimedia.org/wikipedia/commons/7/70/Example.png",
   });
@@ -66,6 +67,8 @@ export function getWalletIdByWalletName(headers, walletName) {
       ...headers,
     },
   };
+
+  // console.log(`Getting wallet ID for wallet name: ${walletName}`);
 
   const response = http.get(url, params);
   if (response.status >= 200 && response.status < 300) {
@@ -109,7 +112,7 @@ export function getTrustRegistryActor(walletName) {
 }
 
 export function getAccessTokenByWalletId(headers, walletId) {
-  const start = new Date();
+  console.log(`Getting access token for wallet ID: ${walletId}`);
   const url = `${__ENV.CLOUDAPI_URL}/tenant-admin/v1/tenants/${walletId}/access-token`;
 
   const params = {
@@ -181,6 +184,7 @@ export function createIssuerTenant(headers, walletName) {
     wallet_type: "askar-anoncreds",
     roles: ["issuer", "verifier"],
     group_id: "GroupA",
+    did_method: "cheqd",
     image_url:
       "https://upload.wikimedia.org/wikipedia/commons/7/70/Example.png",
   });
@@ -190,6 +194,10 @@ export function createIssuerTenant(headers, walletName) {
       ...headers,
     },
   };
+
+  // console.log(`Payload: ${payload}`);
+  // console.log(`Params: ${JSON.stringify(params, null, 2)}`);
+  // console.log(`URL: ${url}`);
 
   try {
     const response = http.post(url, payload, params);
@@ -206,11 +214,10 @@ export function createIssuerTenant(headers, walletName) {
   }
 }
 
-export function createInvitation(bearerToken, issuerAccessToken) {
+export function createInvitation(issuerAccessToken) {
   const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/oob/create-invitation`;
   const params = {
     headers: {
-      Authorization: `Bearer ${bearerToken}`,
       "x-api-key": issuerAccessToken,
     },
   };
@@ -256,6 +263,26 @@ export function createDidExchangeRequest(holderAccessToken, issuerPublicDid) {
   }
 }
 
+export function getHolderConnections(holderAccessToken, holderConnectionId) {
+  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/connections/${holderConnectionId}`;
+  const params = {
+    headers: {
+      "x-api-key": holderAccessToken,
+    },
+  };
+
+  try {
+    // console.log(`Request URL: ${url}`);
+    const response = http.get(url, params);
+    // console.log(`Request params: ${JSON.stringify(params, null, 2)}`);
+    // console.log(`Response: ${JSON.stringify(response, null, 2)}`);
+    return response;
+  } catch (error) {
+    console.error(`Error getting holder connections: ${error.message}`);
+    throw error;
+  }
+}
+
 export function getIssuerConnectionId(issuerAccessToken, holderDid) {
   const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/connections?their_did=${holderDid}`;
   const params = {
@@ -268,7 +295,8 @@ export function getIssuerConnectionId(issuerAccessToken, holderDid) {
     // console.log(`Request URL: ${url}`);
     const response = http.get(url, params);
     // console.log(`Request params: ${JSON.stringify(params, null, 2)}`);
-    // console.log(`Response: ${JSON.stringify(response, null, 2)}`);
+
+    // console.log(`VU ${__VU}: Iteration ${__ITER}: getIssuerConnectionId Response: ${JSON.stringify(response, null, 2)}`);
     return response;
   } catch (error) {
     console.error(`Error creating invitation: ${error.message}`);
@@ -313,7 +341,8 @@ export function createCredential(
   };
 
   // console.log(`credentialDefinitionId: ${credentialDefinitionId}`);
-  // console.log(`Request Body: ${JSON.stringify(params)}`);
+  // console.log(`issuerConnectionId: ${issuerConnectionId}`);
+  // console.log(`IssuerAccessToken: ${issuerAccessToken}`);
 
   try {
     // Construct the request body including the invitation object
@@ -451,9 +480,10 @@ export function getCredentialIdByThreadId(holderAccessToken, threadId) {
 
 export function getCredentialDefinitionId(
   issuerAccessToken,
-  credDefTag
+  credDefTag,
+  schemaVersion
 ) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/definitions/credentials?schema_version=0.1.0`;
+  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/definitions/credentials?schema_version=${schemaVersion}`;
   const params = {
     headers: {
       "x-api-key": issuerAccessToken,
@@ -658,7 +688,7 @@ export function getProof(issuerAccessToken, issuerConnectionId, proofThreadId) {
     // console.log(`ProofThreadId: ${proofThreadId}`);
     return response;
   } catch (error) {
-    console.error(`Error accepting invitation: ${error.message}`);
+    console.error(`Error getting proof: ${error.message}`);
     throw error;
   }
 }
@@ -870,6 +900,7 @@ export function genericPolling({
       timeout: requestTimeout * 1000, // Convert seconds to milliseconds
       tags: sseTag ? { name: sseTag } : { name: `GET_${eventType}_Event` }
     });
+    // console.log(`VU ${__VU}: Iteration ${__ITER}: Attempt: ${attempts} - Polling Response body: ${response.body}`);
     // TODO: if it is a connection error, back-off, else the fetch timeout serves as a back-off
     // Track success/failure metrics
     if (response.status !== 200) {

@@ -98,7 +98,7 @@ export default function (data) {
         throw new Error(`Non-200 status: ${response.status}`);
       }
       return response;
-    }, 5, 2000);
+    }, 5, 5000, "createCredentialResponse");
   } catch (error) {
     console.error(`Failed after retries: ${error.message}`);
     createCredentialResponse = error.response || error;

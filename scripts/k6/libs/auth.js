@@ -8,6 +8,8 @@ export function getAuthHeaders() {
 
   if (__ENV.USE_ENTERPRISE === 'true') {
     // Only get tokens once for better performance
+    console.log("Using Bearer token for authentication");
+
     const token = getBearerToken();
     const governanceToken = getGovernanceBearerToken();
 
