@@ -350,19 +350,6 @@ components:
           description: Optional per-tenant settings to configure wallet behaviour for advanced users.
           examples:
             - ACAPY_AUTO_ACCEPT_INVITES: false
-        did_method:
-          anyOf:
-            - type: string
-              enum:
-                - sov
-                - cheqd
-            - type: 'null'
-          title: Did Method
-          description: The DID method to use for onboarding the tenant (only used for issuers)
-          default: cheqd
-          examples:
-            - sov
-            - cheqd
       type: object
       required:
         - wallet_label

@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 from aries_cloudcontroller import (
@@ -105,7 +105,7 @@ async def test_onboard_issuer_no_public_did(
     )
 
     # Patch asyncio.sleep to return immediately
-    with patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep, patch(
+    with patch(
         "app.services.acapy_wallet.get_public_did",
         side_effect=[
             CloudApiException(detail="Not found"),  # Issuer did doesn't exist yet
@@ -113,13 +113,7 @@ async def test_onboard_issuer_no_public_did(
         ],
     ), patch(
         "app.services.acapy_wallet.create_did", return_value=did_object
-    ) as acapy_wallet_create_did_mock, patch(
-        "app.services.acapy_ledger.register_nym_on_ledger", return_value=None
-    ) as acapy_ledger_register_nym_on_ledger_mock, patch(
-        "app.services.acapy_ledger.accept_taa_if_required", return_value=None
-    ) as acapy_ledger_accept_taa_if_required_mock, patch(
-        "app.services.acapy_wallet.set_public_did", return_value=None
-    ) as acapy_wallet_set_public_did_mock:
+    ) as acapy_wallet_create_did_mock:
         onboard_result = await issuer.onboard_issuer(
             issuer_label="issuer_name",
             endorser_controller=endorser_controller,
@@ -128,68 +122,10 @@ async def test_onboard_issuer_no_public_did(
         )
 
     # Assertions
-    assert onboard_result.did == "did:sov:WgWxqztrNooG92RXvxSTWv"
-    acapy_ledger_accept_taa_if_required_mock.assert_called_once_with(
-        mock_agent_controller
-    )
+    assert onboard_result.did == "did:sov:WgWxqztrNooG92RXvxSTWv"  # TODO: cheqd
     acapy_wallet_create_did_mock.assert_called_once_with(
-        mock_agent_controller, did_create=DIDCreate(method="sov")
+        mock_agent_controller, did_create=DIDCreate(method="cheqd")
     )
-    acapy_ledger_register_nym_on_ledger_mock.assert_called_once_with(
-        mock_agent_controller,
-        did="WgWxqztrNooG92RXvxSTWv",
-        verkey="WgWxqztrNooG92RXvxSTWvWgWxqztrNooG92RXvxSTWv",
-        alias="issuer_name",
-        create_transaction_for_endorser=True,
-    )
-    acapy_wallet_set_public_did_mock.assert_called_once_with(
-        mock_agent_controller,
-        did="WgWxqztrNooG92RXvxSTWv",
-        create_transaction_for_endorser=True,
-    )
-    mock_sleep.assert_awaited()  # Ensure that sleep was called and patched
-
-
-@pytest.mark.anyio
-async def test_onboard_issuer_no_public_did_endorser_did_exception(
-    mock_agent_controller: AcaPyClient,
-):
-    endorser_controller = get_mock_agent_controller()
-
-    with patch(
-        "app.services.acapy_wallet.get_public_did",
-        side_effect=CloudApiException(detail="Error"),
-    ), pytest.raises(CloudApiException, match="Unable to get endorser public DID."):
-        await issuer.onboard_issuer(
-            issuer_label="issuer_name",
-            endorser_controller=endorser_controller,
-            issuer_controller=mock_agent_controller,
-            issuer_wallet_id="issuer_wallet_id",
-        )
-
-
-@pytest.mark.anyio
-async def test_onboard_issuer_no_public_did_connection_error(
-    mock_agent_controller: AcaPyClient,
-):
-    endorser_controller = get_mock_agent_controller()
-
-    mock_agent_controller.out_of_band.receive_invitation.side_effect = (
-        CloudApiException(detail="Error")
-    )
-
-    with patch(
-        "app.services.acapy_wallet.get_public_did",
-        side_effect=[CloudApiException(detail="Error"), did_object],
-    ), pytest.raises(
-        CloudApiException, match="Error creating connection with endorser"
-    ):
-        await issuer.onboard_issuer(
-            issuer_label="issuer_name",
-            endorser_controller=endorser_controller,
-            issuer_controller=mock_agent_controller,
-            issuer_wallet_id="issuer_wallet_id",
-        )
 
 
 @pytest.mark.anyio

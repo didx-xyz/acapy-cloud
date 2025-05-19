@@ -164,7 +164,7 @@ async def register_issuer_did(
     issuer_controller: AcaPyClient,
     issuer_label: str,
     issuer_endorser_connection_id: str,
-    did_method: Literal["sov", "cheqd"] = "sov",
+    did_method: Literal["cheqd"] = "cheqd",
     logger: Logger,
 ) -> DID:
     logger.info("Creating {} DID for issuer", did_method)

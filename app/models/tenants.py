@@ -62,11 +62,6 @@ class CreateTenantRequest(BaseModel):
     group_id: Optional[str] = group_id_field
     image_url: Optional[str] = image_url_field
     extra_settings: Optional[Dict[ExtraSettings, bool]] = ExtraSettings_field
-    did_method: Optional[Literal["sov", "cheqd"]] = Field(
-        default="cheqd",
-        description="The DID method to use for onboarding the tenant (only used for issuers)",
-        examples=["sov", "cheqd"],
-    )
 
     @field_validator("wallet_label", mode="before")
     @classmethod

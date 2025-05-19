@@ -26,7 +26,6 @@ export function createTenant(headers, wallet) {
     wallet_name: wallet.wallet_name,
     wallet_type: "askar-anoncreds",
     group_id: "GroupA",
-    did_method: "sov",
     image_url:
       "https://upload.wikimedia.org/wikipedia/commons/7/70/Example.png",
   });
@@ -184,7 +183,6 @@ export function createIssuerTenant(headers, walletName) {
     wallet_type: "askar-anoncreds",
     roles: ["issuer", "verifier"],
     group_id: "GroupA",
-    did_method: "cheqd",
     image_url:
       "https://upload.wikimedia.org/wikipedia/commons/7/70/Example.png",
   });
