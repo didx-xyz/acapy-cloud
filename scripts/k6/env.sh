@@ -15,3 +15,4 @@ export SCHEMA_PREFIX=k6_schema
 export NUM_ISSUERS=1
 export SCHEMA_NAME=k6_schema
 export SCHEMA_VERSION=1.0
+export OOB_INVITATION=true # temporary until connect via pulbic DID on Cheqd is implemented
