@@ -151,7 +151,7 @@ secretData:
   ACAPY_TENANT_AGENT_API_KEY: adminApiKey
   ACAPY_WALLET_KEY: verySecretGovernanceWalletKey
   ACAPY_WALLET_NAME: governance
-  ACAPY_WALLET_SEED: verySecretPaddedWalletSeedPadded
+  # ACAPY_WALLET_SEED: verySecretPaddedWalletSeedPadded
 
   ACAPY_WALLET_STORAGE_CONFIG: '{ "max_connections":10, "min_connections":1, "url":"cloudapi-postgresql:5432" }'
   ACAPY_WALLET_STORAGE_CREDS: '{ "account": "governance", "admin_account": "governance", "admin_password": "governance", "password": "governance" }'
