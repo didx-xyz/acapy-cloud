@@ -43,7 +43,7 @@ export VUS=1
 run_test ./scenarios/delete-holders.js
 export VUS=1 # delete single issuer - TODO: improve this
 export ITERATIONS="${NUM_ISSUERS}"
-# run_test ./scenarios/delete-issuers.js
+run_test ./scenarios/delete-issuers.js
 
 # # Multiple issuers tests
 # source ./env.sh # concurrent
