@@ -35,10 +35,10 @@ run_test ./scenarios/create-credentials.js
 run_test ./scenarios/create-proof.js
 export ITERATIONS=$((ITERATIONS * VUS)) # revoke sequentially
 export VUS=1
-# run_test ./scenarios/revoke-credentials.js
-# source ./env.sh # concurrent
-# export IS_REVOKED=true
-# run_test ./scenarios/create-proof.js
+run_test ./scenarios/revoke-credentials.js
+source ./env.sh # concurrent
+export IS_REVOKED=true
+run_test ./scenarios/create-proof.js
 
 run_test ./scenarios/delete-holders.js
 export VUS=1 # delete single issuer - TODO: improve this
