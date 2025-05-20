@@ -6,8 +6,8 @@ USER root
 ARG PROTOBUF_VERSION=5.29.3
 RUN pip install --no-cache-dir protobuf==${PROTOBUF_VERSION} \
   acapy-wallet-groups-plugin==1.3.0.post20250506 \
-  git+https://github.com/didx-xyz/aries-acapy-plugins@24030d68#subdirectory=nats_events \
-  git+https://github.com/didx-xyz/aries-acapy-plugins@24030d68#subdirectory=cheqd
+  git+https://github.com/didx-xyz/aries-acapy-plugins@140d7f053#subdirectory=nats_events \
+  git+https://github.com/didx-xyz/aries-acapy-plugins@140d7f053#subdirectory=cheqd
 
 COPY scripts/startup.sh startup.sh
 RUN chmod +x ./startup.sh
