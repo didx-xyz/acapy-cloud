@@ -1,5 +1,3 @@
-from urllib import parse as urlparse
-
 import pytest
 from aries_cloudcontroller import AcaPyClient
 
