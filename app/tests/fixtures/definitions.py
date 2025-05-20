@@ -163,7 +163,7 @@ async def fetch_or_create_regression_test_cred_def(
 
 async def get_clean_or_regression_test_cred_def(
     test_mode: str,
-    auth: AcaPyAuthVerified,
+    client: RichAsyncClient,
     schema: CredentialSchema,
     support_revocation: bool,
 ) -> CredentialDefinition:
