@@ -92,15 +92,13 @@ async def get_clean_or_regression_test_schema(
 async def anoncreds_schema_definition(
     request,
     faber_anoncreds_client: RichAsyncClient,
-    mock_governance_auth: AcaPyAuthVerified,
+    governance_client: RichAsyncClient,
 ) -> CredentialSchema:
-    auth = acapy_auth_verified(
-        acapy_auth_from_header(faber_anoncreds_client.headers["x-api-key"])
-    )
+
     return await get_clean_or_regression_test_schema(
         name="test_anoncreds_schema",
-        auth=auth,
-        gov_auth=mock_governance_auth,
+        faber_client=faber_anoncreds_client,
+        governance_client=governance_client,
         test_mode=request.param,
     )
 
@@ -109,21 +107,21 @@ async def anoncreds_schema_definition(
 async def anoncreds_schema_definition_alt(
     request,
     faber_anoncreds_client: RichAsyncClient,
-    mock_governance_auth: AcaPyAuthVerified,
+    governance_client: RichAsyncClient,
 ) -> CredentialSchema:
     auth = acapy_auth_verified(
         acapy_auth_from_header(faber_anoncreds_client.headers["x-api-key"])
     )
     return await get_clean_or_regression_test_schema(
         name="test_anoncreds_schema_alt",
-        auth=auth,
-        gov_auth=mock_governance_auth,
+        faber_client=faber_anoncreds_client,
+        governance_client=governance_client,
         test_mode=request.param,
     )
 
 
 async def fetch_or_create_regression_test_cred_def(
-    auth: AcaPyAuthVerified, schema: CredentialSchema, support_revocation: bool
+    client: RichAsyncClient, schema: CredentialSchema, support_revocation: bool
 ):
     regression_test_cred_def_tag = "RegressionTestTag"
     schema_id = schema.id
