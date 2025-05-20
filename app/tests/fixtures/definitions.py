@@ -85,7 +85,10 @@ async def get_clean_or_regression_test_schema(
                 name, faber_client, governance_client
             )
         )
-    return schema_definition_result  # pylint: disable=possibly-used-before-assignment
+    else:
+        raise ValueError(f"Bad test mode: {test_mode}")
+
+    return schema_definition_result
 
 
 @pytest.fixture(scope="session", params=TestMode.fixture_params)
@@ -182,9 +185,10 @@ async def get_clean_or_regression_test_cred_def(
         result = await fetch_or_create_regression_test_cred_def(
             client=client, schema=schema, support_revocation=support_revocation
         )
-    return CredentialDefinition.model_validate(
-        result  # pylint: disable=possibly-used-before-assignment
-    )
+    else:
+        raise ValueError(f"Bad test mode: {test_mode}")
+
+    return CredentialDefinition.model_validate(result)
 
 
 @pytest.fixture(scope="session", params=TestMode.fixture_params)
