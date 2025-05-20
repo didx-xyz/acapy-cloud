@@ -193,12 +193,9 @@ async def anoncreds_credential_definition_id(
     anoncreds_schema_definition: CredentialSchema,  # pylint: disable=redefined-outer-name
     faber_anoncreds_client: RichAsyncClient,
 ) -> str:
-    auth = acapy_auth_verified(
-        acapy_auth_from_header(faber_anoncreds_client.headers["x-api-key"])
-    )
     result = await get_clean_or_regression_test_cred_def(
         test_mode=request.param,
-        auth=auth,
+        client=faber_anoncreds_client,
         schema=anoncreds_schema_definition,
         support_revocation=False,
     )
@@ -211,12 +208,9 @@ async def anoncreds_credential_definition_id_revocable(
     anoncreds_schema_definition_alt: CredentialSchema,  # pylint: disable=redefined-outer-name
     faber_anoncreds_client: RichAsyncClient,
 ) -> str:
-    auth = acapy_auth_verified(
-        acapy_auth_from_header(faber_anoncreds_client.headers["x-api-key"])
-    )
     result = await get_clean_or_regression_test_cred_def(
         test_mode=request.param,
-        auth=auth,
+        client=faber_anoncreds_client,
         schema=anoncreds_schema_definition_alt,
         support_revocation=True,
     )
@@ -229,12 +223,10 @@ async def meld_co_anoncreds_credential_definition_id(
     anoncreds_schema_definition: CredentialSchema,  # pylint: disable=redefined-outer-name
     meld_co_anoncreds_client: RichAsyncClient,
 ) -> str:
-    auth = acapy_auth_verified(
-        acapy_auth_from_header(meld_co_anoncreds_client.headers["x-api-key"])
-    )
+
     result = await get_clean_or_regression_test_cred_def(
         test_mode=request.param,
-        auth=auth,
+        client=meld_co_anoncreds_client,
         schema=anoncreds_schema_definition,
         support_revocation=False,
     )
