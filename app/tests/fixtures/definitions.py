@@ -126,12 +126,15 @@ async def fetch_or_create_regression_test_cred_def(
     regression_test_cred_def_tag = "RegressionTestTag"
     schema_id = schema.id
 
-    cred_defs = await get_credential_definitions(schema_id=schema_id, auth=auth)
-
+    cred_defs_response = await client.get(
+        f"{DEFINITIONS_BASE_PATH}/credentials?schema_id={schema_id}"
+    )
+    cred_defs = cred_defs_response.json()
+    print("Cred defs:", cred_defs)
     filtered_cred_defs = [
         cred_def
         for cred_def in cred_defs
-        if cred_def.tag == regression_test_cred_def_tag
+        if cred_def["tag"] == regression_test_cred_def_tag
     ]
 
     num_cred_defs = len(filtered_cred_defs)
@@ -150,9 +153,11 @@ async def fetch_or_create_regression_test_cred_def(
             schema_id=schema.id,
             support_revocation=support_revocation,
         )
-        result = await create_credential_definition(
-            credential_definition=definition, auth=auth
+        response = await client.post(
+            DEFINITIONS_BASE_PATH + "/credentials",
+            json=definition.model_dump(),
         )
+        result = response.json()
     return result
 
 
