@@ -173,15 +173,18 @@ async def get_clean_or_regression_test_cred_def(
             schema_id=schema.id,
             support_revocation=support_revocation,
         )
-        result = await create_credential_definition(
-            credential_definition=definition, auth=auth
+        response = await client.post(
+            DEFINITIONS_BASE_PATH + "/credentials",
+            json=definition.model_dump(),
         )
-
+        result = response.json()
     elif test_mode == TestMode.regression_run:
         result = await fetch_or_create_regression_test_cred_def(
-            auth=auth, schema=schema, support_revocation=support_revocation
+            client=client, schema=schema, support_revocation=support_revocation
         )
-    return result  # pylint: disable=possibly-used-before-assignment
+    return CredentialDefinition.model_validate(
+        result  # pylint: disable=possibly-used-before-assignment
+    )
 
 
 @pytest.fixture(scope="session", params=TestMode.fixture_params)
