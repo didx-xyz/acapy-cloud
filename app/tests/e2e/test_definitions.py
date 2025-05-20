@@ -1,11 +1,8 @@
+from urllib import parse as urlparse
+
 import pytest
 from aries_cloudcontroller import AcaPyClient
 
-from app.dependencies.auth import (
-    acapy_auth_from_header,
-    acapy_auth_verified,
-)
-from app.routes import definitions
 from app.routes.definitions import (
     CreateCredentialDefinition,
     CredentialSchema,
@@ -91,15 +88,12 @@ async def test_create_anoncreds_credential_definition(
         support_revocation=support_revocation,
     )
 
-    auth = acapy_auth_verified(
-        acapy_auth_from_header(faber_anoncreds_client.headers["x-api-key"])
-    )
-
     result = (
-        await definitions.create_credential_definition(
-            credential_definition=credential_definition, auth=auth
+        await faber_anoncreds_client.post(
+            f"{DEFINITIONS_BASE_PATH}/credentials",
+            json=credential_definition.model_dump(),
         )
-    ).model_dump()
+    ).json()
 
     faber_public_did = await get_public_did(faber_anoncreds_acapy_client)
 
@@ -107,8 +101,10 @@ async def test_create_anoncreds_credential_definition(
 
     cred_def_id = result["id"]
     get_cred_def_result = (
-        await definitions.get_credential_definition_by_id(cred_def_id, auth)
-    ).model_dump()
+        await faber_anoncreds_client.get(
+            f"{DEFINITIONS_BASE_PATH}/credentials/{cred_def_id}"
+        )
+    ).json()
 
     assert get_cred_def_result["tag"] == tag
     assert get_cred_def_result["schema_id"] == schema_id
