@@ -62,9 +62,9 @@ async def fetch_or_create_regression_test_schema_definition(
 
 async def get_clean_or_regression_test_schema(
     name: str,
-    auth: AcaPyAuthVerified,
+    faber_client: RichAsyncClient,
     test_mode: str,
-    gov_auth: AcaPyAuthVerified,
+    governance_client: RichAsyncClient,
 ):
     if test_mode == TestMode.clean_run:
         definition = CreateSchema(
