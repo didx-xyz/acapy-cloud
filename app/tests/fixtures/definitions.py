@@ -15,12 +15,15 @@ from app.routes.definitions import (
     get_credential_definitions,
     get_schemas,
 )
+from app.routes.definitions import router as definitions_router
 from app.tests.util.regression_testing import (
     TestMode,
     assert_fail_on_recreating_fixtures,
 )
 from app.util.string import random_version
 from shared import RichAsyncClient
+
+DEFINITIONS_BASE_PATH = definitions_router.prefix
 
 
 async def fetch_or_create_regression_test_schema_definition(
