@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from aries_cloudcontroller.models.did_create import DIDCreate as DIDCreateAcaPy
 from aries_cloudcontroller.models.did_create_options import DIDCreateOptions
@@ -58,6 +58,11 @@ class DIDCreate(BaseModel):
     did: Optional[StrictStr] = Field(
         default=None,
         description="Specify the final value of DID (including `did:<method>:` prefix) if the method supports it.",
+    )
+    network: Optional[Literal["mainnet", "testnet"]] = Field(
+        default=None,
+        description="Specify the network to use for Cheqd DIDs. Valid values are `mainnet` and `testnet`.",
+        examples=["mainnet", "testnet"],
     )
 
     def to_acapy_options(self) -> DIDCreateOptions:

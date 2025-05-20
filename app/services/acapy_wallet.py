@@ -58,6 +58,8 @@ async def create_did(
         create_cheqd_did_options = did_create.to_acapy_options().to_dict()
         if did_create.seed:
             create_cheqd_did_options["seed"] = did_create.seed
+        if did_create.network:
+            create_cheqd_did_options["network"] = did_create.network
         # Notes:
         # - supported options: seed, network, verification_method
         # - key_type option is not implemented (default is ed25519)
