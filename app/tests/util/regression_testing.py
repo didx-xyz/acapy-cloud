@@ -1,5 +1,5 @@
 import os
-from typing import AsyncGenerator, Literal
+from typing import AsyncGenerator
 
 from app.models.tenants import CreateTenantRequest, CreateTenantResponse
 from app.tests.util.tenants import TENANT_BASE_PATH, delete_tenant, post_tenant_request
@@ -39,7 +39,6 @@ async def get_or_create_tenant(
     admin_client: RichAsyncClient,
     name: str,
     roles: list[str],
-    wallet_type: Literal["askar", "askar-anoncreds"],
 ) -> CreateTenantResponse:
     group_id = f"{RegressionTestConfig.group_id_prefix}-{name}"
 
@@ -63,9 +62,7 @@ async def get_or_create_tenant(
     assert_fail_on_recreating_fixtures()
 
     # If not found, create a new tenant
-    request = CreateTenantRequest(
-        wallet_label=name, group_id=group_id, roles=roles, wallet_type=wallet_type
-    )
+    request = CreateTenantRequest(wallet_label=name, group_id=group_id, roles=roles)
     return await post_tenant_request(admin_client, request)
 
 
@@ -73,10 +70,9 @@ async def get_or_create_tenant_with_delete_check(
     admin_client: RichAsyncClient,
     name: str,
     roles: list[str],
-    wallet_type: Literal["askar", "askar-anoncreds"],
 ) -> AsyncGenerator[CreateTenantResponse, None]:
     tenant = await get_or_create_tenant(
-        admin_client=admin_client, name=name, roles=roles, wallet_type=wallet_type
+        admin_client=admin_client, name=name, roles=roles
     )
     try:
         yield tenant
