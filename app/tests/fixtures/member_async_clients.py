@@ -21,7 +21,7 @@ async def trust_registry_client() -> AsyncGenerator[RichAsyncClient, Any]:
         yield client
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 async def governance_client() -> AsyncGenerator[RichAsyncClient, Any]:
     async with get_governance_client() as gov_async_client:
         yield gov_async_client

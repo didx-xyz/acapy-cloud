@@ -15,6 +15,7 @@ from app.routes.definitions import (
     get_credential_definitions,
     get_schemas,
 )
+from app.routes.definitions import router as definitions_router
 from app.tests.util.regression_testing import (
     TestMode,
     assert_fail_on_recreating_fixtures,
@@ -22,15 +23,20 @@ from app.tests.util.regression_testing import (
 from app.util.string import random_version
 from shared import RichAsyncClient
 
+DEFINITIONS_BASE_PATH = definitions_router.prefix
+
 
 async def fetch_or_create_regression_test_schema_definition(
     name: str,
-    auth: AcaPyAuthVerified,  # Used for fetching the schema
-    gov_auth: AcaPyAuthVerified,  # Used for creating the schema
+    faber_client: RichAsyncClient,  # Used for fetching the schema
+    governance_client: RichAsyncClient,  # Used for creating the schema
 ) -> CredentialSchema:
     regression_test_schema_name = "Regression_" + name
 
-    schemas = await get_schemas(schema_name=regression_test_schema_name, auth=auth)
+    response = await faber_client.get(
+        f"{DEFINITIONS_BASE_PATH}/schemas?schema_name={regression_test_schema_name}",
+    )
+    schemas = response.json()
     num_schemas = len(schemas)
     assert (
         num_schemas < 2
@@ -47,16 +53,18 @@ async def fetch_or_create_regression_test_schema_definition(
             attribute_names=["speed", "name", "age"],
         )
 
-        schema_definition_result = await create_schema(definition, gov_auth)
-
-    return schema_definition_result
+        schema_definition_response = await governance_client.post(
+            DEFINITIONS_BASE_PATH + "/schemas", json=definition.model_dump()
+        )
+        schema_definition_result = schema_definition_response.json()
+    return CredentialSchema.model_validate(schema_definition_result)
 
 
 async def get_clean_or_regression_test_schema(
     name: str,
-    auth: AcaPyAuthVerified,
+    faber_client: RichAsyncClient,
     test_mode: str,
-    gov_auth: AcaPyAuthVerified,
+    governance_client: RichAsyncClient,
 ):
     if test_mode == TestMode.clean_run:
         definition = CreateSchema(
@@ -65,29 +73,35 @@ async def get_clean_or_regression_test_schema(
             attribute_names=["speed", "name", "age"],
         )
 
-        schema_definition_result = await create_schema(definition, gov_auth)
+        schema_definition_response = await governance_client.post(
+            DEFINITIONS_BASE_PATH + "/schemas", json=definition.model_dump()
+        )
+        schema_definition_result = CredentialSchema.model_validate(
+            schema_definition_response.json()
+        )
     elif test_mode == TestMode.regression_run:
         schema_definition_result = (
             await fetch_or_create_regression_test_schema_definition(
-                name, auth, gov_auth
+                name, faber_client, governance_client
             )
         )
-    return schema_definition_result  # pylint: disable=possibly-used-before-assignment
+    else:
+        raise ValueError(f"Bad test mode: {test_mode}")
+
+    return schema_definition_result
 
 
 @pytest.fixture(scope="session", params=TestMode.fixture_params)
 async def anoncreds_schema_definition(
     request,
     faber_anoncreds_client: RichAsyncClient,
-    mock_governance_auth: AcaPyAuthVerified,
+    governance_client: RichAsyncClient,
 ) -> CredentialSchema:
-    auth = acapy_auth_verified(
-        acapy_auth_from_header(faber_anoncreds_client.headers["x-api-key"])
-    )
+
     return await get_clean_or_regression_test_schema(
         name="test_anoncreds_schema",
-        auth=auth,
-        gov_auth=mock_governance_auth,
+        faber_client=faber_anoncreds_client,
+        governance_client=governance_client,
         test_mode=request.param,
     )
 
@@ -96,31 +110,34 @@ async def anoncreds_schema_definition(
 async def anoncreds_schema_definition_alt(
     request,
     faber_anoncreds_client: RichAsyncClient,
-    mock_governance_auth: AcaPyAuthVerified,
+    governance_client: RichAsyncClient,
 ) -> CredentialSchema:
     auth = acapy_auth_verified(
         acapy_auth_from_header(faber_anoncreds_client.headers["x-api-key"])
     )
     return await get_clean_or_regression_test_schema(
         name="test_anoncreds_schema_alt",
-        auth=auth,
-        gov_auth=mock_governance_auth,
+        faber_client=faber_anoncreds_client,
+        governance_client=governance_client,
         test_mode=request.param,
     )
 
 
 async def fetch_or_create_regression_test_cred_def(
-    auth: AcaPyAuthVerified, schema: CredentialSchema, support_revocation: bool
+    client: RichAsyncClient, schema: CredentialSchema, support_revocation: bool
 ):
     regression_test_cred_def_tag = "RegressionTestTag"
     schema_id = schema.id
 
-    cred_defs = await get_credential_definitions(schema_id=schema_id, auth=auth)
-
+    cred_defs_response = await client.get(
+        f"{DEFINITIONS_BASE_PATH}/credentials?schema_id={schema_id}"
+    )
+    cred_defs = cred_defs_response.json()
+    print("Cred defs:", cred_defs)
     filtered_cred_defs = [
         cred_def
         for cred_def in cred_defs
-        if cred_def.tag == regression_test_cred_def_tag
+        if cred_def["tag"] == regression_test_cred_def_tag
     ]
 
     num_cred_defs = len(filtered_cred_defs)
@@ -139,15 +156,17 @@ async def fetch_or_create_regression_test_cred_def(
             schema_id=schema.id,
             support_revocation=support_revocation,
         )
-        result = await create_credential_definition(
-            credential_definition=definition, auth=auth
+        response = await client.post(
+            DEFINITIONS_BASE_PATH + "/credentials",
+            json=definition.model_dump(),
         )
+        result = response.json()
     return result
 
 
 async def get_clean_or_regression_test_cred_def(
     test_mode: str,
-    auth: AcaPyAuthVerified,
+    client: RichAsyncClient,
     schema: CredentialSchema,
     support_revocation: bool,
 ) -> CredentialDefinition:
@@ -157,15 +176,19 @@ async def get_clean_or_regression_test_cred_def(
             schema_id=schema.id,
             support_revocation=support_revocation,
         )
-        result = await create_credential_definition(
-            credential_definition=definition, auth=auth
+        response = await client.post(
+            DEFINITIONS_BASE_PATH + "/credentials",
+            json=definition.model_dump(),
         )
-
+        result = response.json()
     elif test_mode == TestMode.regression_run:
         result = await fetch_or_create_regression_test_cred_def(
-            auth=auth, schema=schema, support_revocation=support_revocation
+            client=client, schema=schema, support_revocation=support_revocation
         )
-    return result  # pylint: disable=possibly-used-before-assignment
+    else:
+        raise ValueError(f"Bad test mode: {test_mode}")
+
+    return CredentialDefinition.model_validate(result)
 
 
 @pytest.fixture(scope="session", params=TestMode.fixture_params)
@@ -174,12 +197,9 @@ async def anoncreds_credential_definition_id(
     anoncreds_schema_definition: CredentialSchema,  # pylint: disable=redefined-outer-name
     faber_anoncreds_client: RichAsyncClient,
 ) -> str:
-    auth = acapy_auth_verified(
-        acapy_auth_from_header(faber_anoncreds_client.headers["x-api-key"])
-    )
     result = await get_clean_or_regression_test_cred_def(
         test_mode=request.param,
-        auth=auth,
+        client=faber_anoncreds_client,
         schema=anoncreds_schema_definition,
         support_revocation=False,
     )
@@ -192,12 +212,9 @@ async def anoncreds_credential_definition_id_revocable(
     anoncreds_schema_definition_alt: CredentialSchema,  # pylint: disable=redefined-outer-name
     faber_anoncreds_client: RichAsyncClient,
 ) -> str:
-    auth = acapy_auth_verified(
-        acapy_auth_from_header(faber_anoncreds_client.headers["x-api-key"])
-    )
     result = await get_clean_or_regression_test_cred_def(
         test_mode=request.param,
-        auth=auth,
+        client=faber_anoncreds_client,
         schema=anoncreds_schema_definition_alt,
         support_revocation=True,
     )
@@ -210,12 +227,10 @@ async def meld_co_anoncreds_credential_definition_id(
     anoncreds_schema_definition: CredentialSchema,  # pylint: disable=redefined-outer-name
     meld_co_anoncreds_client: RichAsyncClient,
 ) -> str:
-    auth = acapy_auth_verified(
-        acapy_auth_from_header(meld_co_anoncreds_client.headers["x-api-key"])
-    )
+
     result = await get_clean_or_regression_test_cred_def(
         test_mode=request.param,
-        auth=auth,
+        client=meld_co_anoncreds_client,
         schema=anoncreds_schema_definition,
         support_revocation=False,
     )
