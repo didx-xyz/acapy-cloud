@@ -73,11 +73,16 @@ async def get_clean_or_regression_test_schema(
             attribute_names=["speed", "name", "age"],
         )
 
-        schema_definition_result = await create_schema(definition, gov_auth)
+        schema_definition_response = await governance_client.post(
+            DEFINITIONS_BASE_PATH + "/schemas", json=definition.model_dump()
+        )
+        schema_definition_result = CredentialSchema.model_validate(
+            schema_definition_response.json()
+        )
     elif test_mode == TestMode.regression_run:
         schema_definition_result = (
             await fetch_or_create_regression_test_schema_definition(
-                name, auth, gov_auth
+                name, faber_client, governance_client
             )
         )
     return schema_definition_result  # pylint: disable=possibly-used-before-assignment
