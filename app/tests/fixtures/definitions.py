@@ -28,8 +28,8 @@ DEFINITIONS_BASE_PATH = definitions_router.prefix
 
 async def fetch_or_create_regression_test_schema_definition(
     name: str,
-    auth: AcaPyAuthVerified,  # Used for fetching the schema
-    gov_auth: AcaPyAuthVerified,  # Used for creating the schema
+    faber_client: RichAsyncClient,  # Used for fetching the schema
+    governance_client: RichAsyncClient,  # Used for creating the schema
 ) -> CredentialSchema:
     regression_test_schema_name = "Regression_" + name
 
