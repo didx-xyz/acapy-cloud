@@ -33,7 +33,10 @@ async def fetch_or_create_regression_test_schema_definition(
 ) -> CredentialSchema:
     regression_test_schema_name = "Regression_" + name
 
-    schemas = await get_schemas(schema_name=regression_test_schema_name, auth=auth)
+    response = await faber_client.get(
+        f"{DEFINITIONS_BASE_PATH}/schemas?schema_name={regression_test_schema_name}",
+    )
+    schemas = response.json()
     num_schemas = len(schemas)
     assert (
         num_schemas < 2
@@ -50,9 +53,11 @@ async def fetch_or_create_regression_test_schema_definition(
             attribute_names=["speed", "name", "age"],
         )
 
-        schema_definition_result = await create_schema(definition, gov_auth)
-
-    return schema_definition_result
+        schema_definition_response = await governance_client.post(
+            DEFINITIONS_BASE_PATH + "/schemas", json=definition.model_dump()
+        )
+        schema_definition_result = schema_definition_response.json()
+    return CredentialSchema.model_validate(schema_definition_result)
 
 
 async def get_clean_or_regression_test_schema(
