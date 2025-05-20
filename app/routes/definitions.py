@@ -384,7 +384,7 @@ async def get_credential_definitions(
 
 
 @router.get(
-    "/credentials/{credential_definition_id}",
+    "/credentials/{credential_definition_id:path}",
     summary="Get a Credential Definition",
     response_model=CredentialDefinition,
 )
