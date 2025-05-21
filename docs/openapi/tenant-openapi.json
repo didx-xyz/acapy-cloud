@@ -6274,6 +6274,7 @@
               "mainnet",
               "testnet"
             ]
+          }
         },
         "type": "object",
         "title": "DIDCreate"
