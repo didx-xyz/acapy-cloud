@@ -1,19 +1,10 @@
 import pytest
 
-from app.dependencies.auth import (
-    AcaPyAuthVerified,
-    acapy_auth_from_header,
-    acapy_auth_verified,
-)
 from app.models.definitions import CredentialDefinition
 from app.routes.definitions import (
     CreateCredentialDefinition,
     CreateSchema,
     CredentialSchema,
-    create_credential_definition,
-    create_schema,
-    get_credential_definitions,
-    get_schemas,
 )
 from app.routes.definitions import router as definitions_router
 from app.tests.util.regression_testing import (
@@ -112,9 +103,6 @@ async def anoncreds_schema_definition_alt(
     faber_anoncreds_client: RichAsyncClient,
     governance_client: RichAsyncClient,
 ) -> CredentialSchema:
-    auth = acapy_auth_verified(
-        acapy_auth_from_header(faber_anoncreds_client.headers["x-api-key"])
-    )
     return await get_clean_or_regression_test_schema(
         name="test_anoncreds_schema_alt",
         faber_client=faber_anoncreds_client,
