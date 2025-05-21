@@ -146,15 +146,14 @@ strategy:
   type: Recreate
 
 podSecurityContext:
-  fsGroup: 1000
-
+  fsGroup: 1001
 securityContext:
   capabilities:
     drop:
     - ALL
   readOnlyRootFilesystem: true
   runAsNonRoot: true
-  runAsUser: 1000
+  runAsUser: 1001
 
 persistence:
   enabled: true
@@ -162,6 +161,29 @@ persistence:
   capacity: 10Gi
   storageClassName: gp3
   accessMode: ReadWriteOnce
+
+extraVolumes:
+  - name: acapy-agent
+    emptyDir: {}
+  - name: cache
+    emptyDir: {}
+  - name: ledger
+    emptyDir: {}
+  - name: log
+    emptyDir: {}
+  - name: tmp
+    emptyDir: {}
+extraVolumeMounts:
+  - name: acapy-agent
+    mountPath: /home/aries/.acapy_agent
+  - name: cache
+    mountPath: /home/aries/.cache
+  - name: ledger
+    mountPath: /home/aries/ledger
+  - name: log
+    mountPath: /home/aries/log
+  - name: tmp
+    mountPath: /tmp
 
 autoscaling:
   enabled: false

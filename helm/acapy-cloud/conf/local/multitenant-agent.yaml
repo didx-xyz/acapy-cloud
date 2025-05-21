@@ -130,12 +130,42 @@ initContainers:
             name: '{{ include "acapy-cloud.fullname" . }}-env'
             key: WALLET_DB_PORT
 
+podSecurityContext:
+  fsGroup: 1001
+securityContext:
+  runAsUser: 1001
+  runAsNonRoot: true
+  readOnlyRootFilesystem: true
+
 persistence:
   enabled: true
   mountPath: /home/aries/.indy_client
   capacity: 1Gi
   storageClassName: standard
   accessMode: ReadWriteOnce
+
+extraVolumes:
+  - name: acapy-agent
+    emptyDir: {}
+  - name: cache
+    emptyDir: {}
+  - name: ledger
+    emptyDir: {}
+  - name: log
+    emptyDir: {}
+  - name: tmp
+    emptyDir: {}
+extraVolumeMounts:
+  - name: acapy-agent
+    mountPath: /home/aries/.acapy_agent
+  - name: cache
+    mountPath: /home/aries/.cache
+  - name: ledger
+    mountPath: /home/aries/ledger
+  - name: log
+    mountPath: /home/aries/log
+  - name: tmp
+    mountPath: /tmp
 
 autoscaling:
   enabled: false
