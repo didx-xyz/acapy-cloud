@@ -3,7 +3,7 @@
   "info": {
     "title": "CloudAPI Multitenant Admin",
     "description": "\nWelcome to CloudAPI Multitenant Admin!\n\nFor detailed guidance on using the API, please visit our official documentation:\nhttps://www.didx.co.za/acapy-cloud/index.html\n",
-    "version": "5.0.0rc1"
+    "version": "5.0.0-rc2"
   },
   "servers": [
     {
@@ -561,27 +561,6 @@
               {
                 "ACAPY_AUTO_ACCEPT_INVITES": false
               }
-            ]
-          },
-          "did_method": {
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "sov",
-                  "cheqd"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Did Method",
-            "description": "The DID method to use for onboarding the tenant (only used for issuers)",
-            "default": "sov",
-            "examples": [
-              "sov",
-              "cheqd"
             ]
           }
         },

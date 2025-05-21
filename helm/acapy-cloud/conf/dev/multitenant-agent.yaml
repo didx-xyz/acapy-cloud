@@ -44,6 +44,12 @@ command:
   - nats_events.v1_0.nats_queue.events
   - --plugin-config-value
   - nats_queue.connection.connection_url="$(NATS_SERVER)"
+  - --plugin
+  - cheqd
+  - --plugin-config-value
+  - resolver_url="http://did-resolver:8080/1.0/identifiers/"
+  - --plugin-config-value
+  - registrar_url="http://did-registrar:9080/1.0/"
 
 lifecycle:
   preStop:
@@ -106,16 +112,6 @@ startupProbe:
 #     memory: 512Mi
 
 initContainers:
-  - name: wait-for-ledger-browser
-    image: curlimages/curl
-    command:
-      - sh
-      - -c
-      - |
-        until curl -s http://ledger-browser:8000/status -o /dev/null; do
-          echo "waiting for ledger-browser to be healthy"
-          sleep 2
-        done
   - name: nc-nats
     image: busybox
     command: ['sh', '-c', 'until nc -z nats 4222; do echo waiting for nats; sleep 2; done;']
@@ -146,12 +142,48 @@ initContainers:
             name: '{{ include "acapy-cloud.fullname" . }}-env'
             key: WALLET_DB_PORT
 
+strategy:
+  type: Recreate
+
+podSecurityContext:
+  fsGroup: 1001
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1001
+
 persistence:
   enabled: true
   mountPath: /home/aries/.indy_client
-  capacity: 1Gi
-  storageClassName: efs
+  capacity: 10Gi
+  storageClassName: gp3
   accessMode: ReadWriteOnce
+
+extraVolumes:
+  - name: acapy-agent
+    emptyDir: {}
+  - name: cache
+    emptyDir: {}
+  - name: ledger
+    emptyDir: {}
+  - name: log
+    emptyDir: {}
+  - name: tmp
+    emptyDir: {}
+extraVolumeMounts:
+  - name: acapy-agent
+    mountPath: /home/aries/.acapy_agent
+  - name: cache
+    mountPath: /home/aries/.cache
+  - name: ledger
+    mountPath: /home/aries/ledger
+  - name: log
+    mountPath: /home/aries/log
+  - name: tmp
+    mountPath: /tmp
 
 autoscaling:
   enabled: false
@@ -196,7 +228,8 @@ env:
   ACAPY_WALLET_STORAGE_TYPE: postgres_storage
   ACAPY_AUTO_PROVISION: true
   # Ledger
-  ACAPY_GENESIS_URL: http://ledger-browser:8000/genesis
+  # ACAPY_GENESIS_URL: http://ledger-browser:8000/genesis
+  ACAPY_NO_LEDGER: true
 
   # Multi-tenant Configuration
   ACAPY_MULTITENANT: true

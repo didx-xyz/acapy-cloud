@@ -35,14 +35,22 @@ async def register_schema(
     bound_logger.debug("POST request received: Register schema")
     schema_attrs_list = _get_schema_attrs(schema_id)
     try:
-        create_schema_res = crud.create_schema(
-            db_session,
-            schema=Schema(
+        if schema_attrs_list:
+            schema = Schema(
                 did=schema_attrs_list[0],
                 name=schema_attrs_list[2],
                 version=schema_attrs_list[3],
                 id=schema_id.schema_id,
-            ),
+            )
+        else:
+            # did:cheqd schema
+            schema = Schema(
+                id=schema_id.schema_id,
+            )
+
+        create_schema_res = crud.create_schema(
+            db_session,
+            schema=schema,
         )
     except crud.SchemaAlreadyExistsException as e:
         bound_logger.info("Bad request: Schema already exists.")
@@ -92,7 +100,7 @@ async def update_schema(
     return update_schema_res
 
 
-@router.get("/{schema_id}", response_model=Schema)
+@router.get("/{schema_id:path}", response_model=Schema)
 async def get_schema(schema_id: str, db_session: Session = Depends(get_db)) -> Schema:
     bound_logger = logger.bind(body={"schema_id": schema_id})
     bound_logger.debug("GET request received: Fetch schema")
@@ -124,4 +132,6 @@ async def remove_schema(schema_id: str, db_session: Session = Depends(get_db)) -
 
 def _get_schema_attrs(schema_id: SchemaID) -> List[str]:
     # Split from the back because DID may contain a colon
+    if schema_id.schema_id.startswith("did:cheqd:"):
+        return []
     return schema_id.schema_id.split(":", 3)

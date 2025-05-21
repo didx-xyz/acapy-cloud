@@ -21,7 +21,6 @@ async def onboard_issuer(
     issuer_controller: AcaPyClient,
     issuer_wallet_id: str,
     issuer_label: str = None,
-    did_method: Literal["sov", "cheqd"] = "sov",
 ) -> OnboardResult:
     """Onboard the controller as issuer.
 
@@ -34,7 +33,6 @@ async def onboard_issuer(
         issuer_controller (AcaPyClient): authenticated ACA-Py client for issuer
         endorser_controller (AcaPyClient): authenticated ACA-Py client for endorser
         issuer_label (str): alias for the issuer
-        did_method (Literal["sov", "cheqd"]): DID method to use for onboarding the issuer
     """
     bound_logger = logger.bind(
         body={"issuer_label": issuer_label, "issuer_wallet_id": issuer_wallet_id}
@@ -51,7 +49,6 @@ async def onboard_issuer(
             issuer_controller=issuer_controller,
             issuer_wallet_id=issuer_wallet_id,
             issuer_label=issuer_label,
-            did_method=did_method,
         )
 
     bound_logger.debug("Creating OOB invitation on behalf of issuer")
@@ -78,7 +75,7 @@ async def onboard_issuer_no_public_did(
     issuer_controller: AcaPyClient,
     issuer_wallet_id: str,
     issuer_label: str,
-    did_method: Literal["sov", "cheqd"] = "sov",
+    did_method: Literal["cheqd"] = "cheqd",
 ) -> DID:
     """
     Onboard an issuer without a public DID.
@@ -96,7 +93,7 @@ async def onboard_issuer_no_public_did(
         endorser_controller (AcaPyClient): Authenticated ACA-Py client for endorser
         issuer_controller (AcaPyClient): Authenticated ACA-Py client for issuer
         issuer_wallet_id (str): Wallet id of the issuer
-        did_method (Literal["sov", "cheqd"]): DID method to use for onboarding the issuer
+        did_method (Literal["cheqd"]): DID method to use for onboarding the issuer
 
     Returns:
         issuer_did (DID): The issuer's DID after completing the onboarding process

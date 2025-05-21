@@ -6,6 +6,7 @@ import {
 } from "./functions.js";
 
 export function createIssuerIfNotExists(headers, walletName) {
+  // console.log(` We are here XXXXXXXXXXXXXXX`);
   let issuerWalletId = getWalletIdByWalletName(headers, walletName);
   let issuerAccessToken;
 

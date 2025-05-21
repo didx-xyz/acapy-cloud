@@ -65,7 +65,7 @@ async def test_create_tenant_success(roles):
         label=wallet_label,
         wallet_key=base58.b58encode(token_urlsafe(48)).decode(),
         wallet_name=wallet_name,
-        wallet_type="askar",
+        wallet_type="askar-anoncreds",
         group_id=body.group_id,
         extra_settings=body.extra_settings,
     )
@@ -105,7 +105,6 @@ async def test_create_tenant_success(roles):
                 roles=roles,
                 wallet_auth_token=create_wallet_response.token,
                 wallet_id=create_wallet_response.wallet_id,
-                did_method="sov",
             )
             mock_register_actor.assert_awaited_once_with(
                 actor=Actor(

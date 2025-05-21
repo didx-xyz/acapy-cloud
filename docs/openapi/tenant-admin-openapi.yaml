@@ -11,7 +11,7 @@ info:
     https://www.didx.co.za/acapy-cloud/index.html
 
 '
-  version: 5.0.0rc1
+  version: 5.0.0-rc2
 servers:
   - url: /tenant-admin
 paths:
@@ -350,19 +350,6 @@ components:
           description: Optional per-tenant settings to configure wallet behaviour for advanced users.
           examples:
             - ACAPY_AUTO_ACCEPT_INVITES: false
-        did_method:
-          anyOf:
-            - type: string
-              enum:
-                - sov
-                - cheqd
-            - type: 'null'
-          title: Did Method
-          description: The DID method to use for onboarding the tenant (only used for issuers)
-          default: sov
-          examples:
-            - sov
-            - cheqd
       type: object
       required:
         - wallet_label

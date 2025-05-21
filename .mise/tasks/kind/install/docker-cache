@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 # mise description="Start up the Docker Pullthrough Cache"
 
+# Disable Docker cache in CI
+if [ -n "${GITHUB_ACTIONS}" ]; then
+  echo "Skipping Docker cache setup in CI environment."
+  exit 0
+fi
+
 # 'gcr.io' seems to have issues when run in Github Actions
 # https://github.com/rpardini/docker-registry-proxy/issues/115
 registries="quay.io ghcr.io registry.k8s.io"

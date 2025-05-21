@@ -777,7 +777,6 @@ async def test_restrictions_on_attr(
 
         if value == "44":
             result = response.json()[0]
-            print(result)
             assert "cred_info" in result
             assert [
                 attr

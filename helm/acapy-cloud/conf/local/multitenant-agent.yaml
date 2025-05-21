@@ -100,16 +100,6 @@ startupProbe:
 #     memory: 512Mi
 
 initContainers:
-  - name: wait-for-ledger-browser
-    image: curlimages/curl
-    command:
-      - sh
-      - -c
-      - |
-        until curl -s http://ledger-browser:8000/status -o /dev/null; do
-          echo "waiting for ledger-browser to be healthy"
-          sleep 2
-        done
   - name: nc-nats
     image: busybox
     command: ['sh', '-c', 'until nc -z nats 4222; do echo waiting for nats; sleep 2; done;']
@@ -140,12 +130,42 @@ initContainers:
             name: '{{ include "acapy-cloud.fullname" . }}-env'
             key: WALLET_DB_PORT
 
+podSecurityContext:
+  fsGroup: 1001
+securityContext:
+  runAsUser: 1001
+  runAsNonRoot: true
+  readOnlyRootFilesystem: true
+
 persistence:
   enabled: true
   mountPath: /home/aries/.indy_client
   capacity: 1Gi
   storageClassName: standard
   accessMode: ReadWriteOnce
+
+extraVolumes:
+  - name: acapy-agent
+    emptyDir: {}
+  - name: cache
+    emptyDir: {}
+  - name: ledger
+    emptyDir: {}
+  - name: log
+    emptyDir: {}
+  - name: tmp
+    emptyDir: {}
+extraVolumeMounts:
+  - name: acapy-agent
+    mountPath: /home/aries/.acapy_agent
+  - name: cache
+    mountPath: /home/aries/.cache
+  - name: ledger
+    mountPath: /home/aries/ledger
+  - name: log
+    mountPath: /home/aries/log
+  - name: tmp
+    mountPath: /tmp
 
 autoscaling:
   enabled: false
@@ -191,8 +211,8 @@ env:
   ACAPY_WALLET_STORAGE_TYPE: postgres_storage
   ACAPY_AUTO_PROVISION: true
   # Ledger
-  ACAPY_GENESIS_URL: http://ledger-browser:8000/genesis
-  # ACAPY_NO_LEDGER: true  # TODO: disable ledger when switching to did:cheqd
+  # ACAPY_GENESIS_URL: http://ledger-browser:8000/genesis
+  ACAPY_NO_LEDGER: true
 
   # Multi-tenant Configuration
   ACAPY_MULTITENANT: true

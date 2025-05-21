@@ -96,41 +96,6 @@ startupProbe:
 #     memory: 512Mi
 
 initContainers:
-  - name: wait-for-ledger-browser
-    image: curlimages/curl
-    command:
-      - sh
-      - -c
-      - |
-        until curl -s http://ledger-browser:8000/status -o /dev/null; do
-          echo "waiting for ledger-browser to be healthy"
-          sleep 10
-        done
-  - name: register-did
-    image: curlimages/curl:latest
-    env:
-    - name: ACAPY_WALLET_SEED
-      valueFrom:
-        secretKeyRef:
-          name: '{{ include "acapy-cloud.fullname" . }}-env'
-          key: ACAPY_WALLET_SEED
-    command:
-    - "/bin/sh"
-    - "-c"
-    - |
-      STATUS=$(curl -s -X POST \
-        -o /dev/null \
-        -w "%{http_code}" \
-        -H "Content-Type: application/json" -d "{\"seed\": \"$ACAPY_WALLET_SEED\"}" \
-        "http://ledger-browser:8000/register"
-      )
-      if [ $STATUS -ne 200 ]; then
-        echo "Failed to register DID. Status code: $STATUS"
-        exit 1
-      fi
-  - name: nc-nats
-    image: busybox
-    command: ['sh', '-c', 'until nc -z nats 4222; do echo waiting for nats; sleep 2; done;']
   - name: nats-check
     image: bitnami/natscli
     command:
@@ -158,8 +123,42 @@ initContainers:
             name: '{{ include "acapy-cloud.fullname" . }}-env'
             key: WALLET_DB_PORT
 
+podSecurityContext:
+  fsGroup: 1001
+securityContext:
+  runAsUser: 1001
+  runAsNonRoot: true
+  readOnlyRootFilesystem: true
+
 persistence:
   enabled: false
+
+extraVolumes:
+  - name: indy-tails
+    emptyDir: {}
+  - name: acapy-agent
+    emptyDir: {}
+  - name: cache
+    emptyDir: {}
+  - name: ledger
+    emptyDir: {}
+  - name: log
+    emptyDir: {}
+  - name: tmp
+    emptyDir: {}
+extraVolumeMounts:
+  - name: indy-tails
+    mountPath: /home/aries/.indy_client/tails
+  - name: acapy-agent
+    mountPath: /home/aries/.acapy_agent
+  - name: cache
+    mountPath: /home/aries/.cache
+  - name: ledger
+    mountPath: /home/aries/ledger
+  - name: log
+    mountPath: /home/aries/log
+  - name: tmp
+    mountPath: /tmp
 
 autoscaling:
   enabled: false
@@ -174,7 +173,7 @@ secretData:
   ACAPY_TENANT_AGENT_API_KEY: adminApiKey
   ACAPY_WALLET_KEY: verySecretGovernanceWalletKey
   ACAPY_WALLET_NAME: governance
-  ACAPY_WALLET_SEED: verySecretPaddedWalletSeedPadded
+  # ACAPY_WALLET_SEED: verySecretPaddedWalletSeedPadded
 
   ACAPY_WALLET_STORAGE_CONFIG: '{ "max_connections":10, "min_idle_count":10, "url":"cloudapi-postgresql:5432" }'
   ACAPY_WALLET_STORAGE_CREDS: '{ "account": "governance", "admin_account": "governance", "admin_password": "governance", "password": "governance" }'
@@ -203,8 +202,8 @@ env:
   ACAPY_WALLET_STORAGE_TYPE: postgres_storage
   ACAPY_AUTO_PROVISION: true
   # Ledger
-  ACAPY_GENESIS_URL: http://ledger-browser:8000/genesis
-  # ACAPY_NO_LEDGER: true  # TODO: disable ledger when switching to did:cheqd
+  # ACAPY_GENESIS_URL: http://ledger-browser:8000/genesis
+  ACAPY_NO_LEDGER: true
 
   ACAPY_PUBLIC_INVITES: true
   ACAPY_ENDORSER_ROLE: endorser

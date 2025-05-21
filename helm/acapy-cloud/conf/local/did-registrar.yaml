@@ -37,3 +37,7 @@ readinessProbe:
 startupProbe:
   tcpSocket:
     port: 9080
+
+env:
+  LOGGING_LEVEL_ROOT: WARN
+  LOGGING_LEVEL_uniregistrar: WARN

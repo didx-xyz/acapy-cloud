@@ -1,7 +1,7 @@
 /* global __ENV, __ITER, __VU */
 /* eslint-disable no-undefined, no-console, camelcase */
 
-import { check } from "k6";
+import { check, sleep } from "k6";
 import { Counter, Trend } from "k6/metrics";
 import file from "k6/x/file";
 import {
@@ -14,6 +14,7 @@ import {
   createDidExchangeRequest,
   getIssuerConnectionId,
   genericPolling,
+  getHolderConnections,
 } from "../libs/functions.js";
 import { bootstrapIssuer } from "../libs/setup.js";
 // import bootstrapIssuer from "./bootstrap-issuer.js";
@@ -27,6 +28,7 @@ const schemaVersion = __ENV.SCHEMA_VERSION;
 const numIssuers = __ENV.NUM_ISSUERS;
 const outputPrefix = `${issuerPrefix}-${holderPrefix}`;
 const version = __ENV.VERSION;
+const useOobInvitation = __ENV.OOB_INVITATION === "true";
 
 export const options = {
   scenarios: {
@@ -125,31 +127,113 @@ export default function (data) {
   const { did: issuerPublicDid } = JSON.parse(publicDidResponse.body);
 
 
-  let createInvitationResponse;
-  try {
-    createInvitationResponse = retry(() => {
-      const response = createDidExchangeRequest(wallet.access_token, issuerPublicDid);
-      if (response.status !== 200) {
-        throw new Error(`createInvitationResponse Non-200 status: ${response.body}`);
-      }
-      return response;
-    }, 5, 2000);
-  } catch (e) {
-    console.error(`Failed after retries: ${e.message}`);
-    createInvitationResponse = e.response || e;
+  let holderConnectionId;
+  let holderDid;
+
+  if (useOobInvitation) {
+    // OOB Invitation flow
+    // console.log("Using OOB Invitation flow");
+    let createOobInvitationResponse;
+    try {
+      createOobInvitationResponse = retry(() => {
+        const response = createInvitation(issuer.accessToken, issuerPublicDid);
+        if (response.status !== 200) {
+          throw new Error(`createOobInvitationResponse Non-200 status: ${response.body}`);
+        }
+        return response;
+      }, 5, 2000);
+    } catch (e) {
+      console.error(`Failed after retries: ${e.message}`);
+      createOobInvitationResponse = e.response || e;
+    }
+
+    check(createOobInvitationResponse, {
+      "Invitation created successfully": (r) => {
+        if (r.status !== 200) {
+          throw new Error(
+            `Unexpected response status while creating invitation:\nStatus: ${r.status}\nBody: ${r.body}`
+          );
+        }
+        return true;
+      },
+    });
+
+    const { invitation: invitationObj } = JSON.parse(createOobInvitationResponse.body);
+
+    const acceptInvitationResponse = acceptInvitation(
+      wallet.access_token,
+      invitationObj
+    );
+
+    check(acceptInvitationResponse, {
+      "Invitation accepted successfully": (r) => {
+        if (r.status !== 200) {
+          throw new Error(
+            `Unexpected response while accepting invitation:\nStatus: ${r.status}\nBody: ${r.body}`
+          );
+        }
+        return true;
+      },
+    });
+
+    holderConnectionId = JSON.parse(acceptInvitationResponse.body).connection_id;
+
+    let getHolderPrivateDidResponse;
+    try {
+      getHolderPrivateDidResponse = retry(() => {
+        const response = getHolderConnections(wallet.access_token, holderConnectionId);
+        if (response.status !== 200) {
+          throw new Error(`getHolderPrivateDidResponse Non-200 status: ${response.body}`);
+        }
+        return response;
+      }, 5, 2000);
+    } catch (e) {
+      console.error(`Failed after retries: ${e.message}`);
+      getHolderPrivateDidResponse = e.response || e;
+    }
+    check(getHolderPrivateDidResponse, {
+      "Holder Private DID retrieved successfully": (r) => {
+        if (r.status !== 200) {
+          throw new Error(
+            `Unexpected response status while getting holder private DID:\nStatus: ${r.status}\nBody: ${r.body}`
+          );
+        }
+        return true;
+      },
+    });
+
+    const { my_did: holderPrivateDidFull } = JSON.parse(getHolderPrivateDidResponse.body);
+    holderDid = holderPrivateDidFull.split(':').slice(0, 3).join(':');
+  } else {
+    // DIDExchange flow
+    let createInvitationResponse;
+    try {
+      createInvitationResponse = retry(() => {
+        const response = createDidExchangeRequest(wallet.access_token, issuerPublicDid);
+        if (response.status !== 200) {
+          throw new Error(`createInvitationResponse Non-200 status: ${response.body}`);
+        }
+        return response;
+      }, 5, 2000);
+    } catch (e) {
+      console.error(`Failed after retries: ${e.message}`);
+      createInvitationResponse = e.response || e;
+    }
+    check(createInvitationResponse, {
+      "Invitation created successfully": (r) => {
+        if (r.status !== 200) {
+          throw new Error(
+            `Unexpected response status while create invitation:\nStatus: ${r.status}\nBody: ${r.body}`
+          );
+        }
+        return true;
+      },
+    });
+    const responseBody = JSON.parse(createInvitationResponse.body);
+    holderConnectionId = responseBody.connection_id;
+    const my_did = responseBody.my_did;
+    holderDid = my_did.split(':').slice(0, 3).join(':');
   }
-  check(createInvitationResponse, {
-    "Invitation created successfully": (r) => {
-      if (r.status !== 200) {
-        throw new Error(
-          `Unexpected response status while create invitation:\nStatus: ${r.status}\nBody: ${r.body}`
-        );
-      }
-      return true;
-    },
-  });
-  const { my_did, connection_id: holderConnectionId } = JSON.parse(createInvitationResponse.body);
-  const holderDid = my_did.split(':').slice(0, 3).join(':');
 
   const waitForSSEEventResponse = genericPolling({
     accessToken: wallet.access_token,
@@ -174,7 +258,7 @@ export default function (data) {
   });
 
   // Issuer is now going to check
-
+  sleep(2);
   let getIssuerConnectionIdResponse;
   try {
     getIssuerConnectionIdResponse = retry(() => {
@@ -182,15 +266,19 @@ export default function (data) {
       if (response.status !== 200) {
         throw new Error(`getIssuerConnectionId Non-200 status: ${response.status} ${response.body}`);
       }
+      if (response.body === "[]") {
+        throw new Error(`getIssuerConnectionId: Empty response body: ${response.body}`);
+      }
       return response;
     }
-    , 5, 2000);
+    , 5, 2000, "getIssuerConnectionId");
   }
   catch (e) {
     console.error(`Failed after retries: ${e.message}`);
     getIssuerConnectionIdResponse = e.response || e;
   }
 
+  // console.log(`VU ${__VU}: Iteration ${__ITER}: Issuer connection ID Response Body: ${getIssuerConnectionIdResponse.body}`);
   const [{ connection_id: issuerConnectionId }] = JSON.parse(getIssuerConnectionIdResponse.body);
 
   const holderData = JSON.stringify({

@@ -20,11 +20,11 @@ CREDENTIALS_BASE_PATH = issuer_router.prefix
 OOB_BASE_PATH = oob_router.prefix
 WALLET = wallet_router.prefix
 
-credential_ = create_credential("Ed25519Signature2018")
+credential_ = create_credential("Ed25519Signature2020")
 
 
 @pytest.mark.anyio
-async def test_send_jsonld_credential_sov(
+async def test_send_jsonld_credential_cheqd(
     faber_anoncreds_client: RichAsyncClient,
     faber_anoncreds_acapy_client: AcaPyClient,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
@@ -37,12 +37,10 @@ async def test_send_jsonld_credential_sov(
         await faber_anoncreds_acapy_client.wallet.get_public_did()
     ).result.did
 
-    # Updating JSON-LD credential did:sov
+    # Updating JSON-LD credential
     credential = deepcopy(credential_)
     credential["connection_id"] = faber_connection_id
-    credential["ld_credential_detail"]["credential"][
-        "issuer"
-    ] = f"did:sov:{faber_pub_did}"
+    credential["ld_credential_detail"]["credential"]["issuer"] = faber_pub_did
 
     # Send credential
     response = await faber_anoncreds_client.post(
@@ -89,7 +87,7 @@ async def test_send_jsonld_credential_sov(
 
 
 @pytest.mark.anyio
-async def test_send_jsonld_oob_sov(
+async def test_send_jsonld_oob_cheqd(
     faber_anoncreds_client: RichAsyncClient,
     faber_anoncreds_acapy_client: AcaPyClient,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
@@ -101,12 +99,10 @@ async def test_send_jsonld_oob_sov(
         await faber_anoncreds_acapy_client.wallet.get_public_did()
     ).result.did
 
-    # Updating JSON-LD credential did:sov
+    # Updating JSON-LD credential
     credential = deepcopy(credential_)
     credential["connection_id"] = faber_connection_id
-    credential["ld_credential_detail"]["credential"][
-        "issuer"
-    ] = f"did:sov:{faber_pub_did}"
+    credential["ld_credential_detail"]["credential"]["issuer"] = faber_pub_did
 
     # faber create offer
     response = await faber_anoncreds_client.post(
@@ -162,7 +158,7 @@ async def test_send_jsonld_oob_sov(
 
 
 @pytest.mark.anyio
-async def test_send_jsonld_request_sov(
+async def test_send_jsonld_request_cheqd(
     alice_member_client: RichAsyncClient,
     faber_anoncreds_client: RichAsyncClient,
     faber_anoncreds_acapy_client: AcaPyClient,
@@ -176,9 +172,7 @@ async def test_send_jsonld_request_sov(
     # Updating JSON-LD credential did:key with proofType ed25519
     credential = deepcopy(credential_)
     credential["connection_id"] = faber_connection_id
-    credential["ld_credential_detail"]["credential"][
-        "issuer"
-    ] = f"did:sov:{faber_pub_did}"
+    credential["ld_credential_detail"]["credential"]["issuer"] = faber_pub_did
 
     response = await faber_anoncreds_client.post(
         CREDENTIALS_BASE_PATH,
@@ -240,7 +234,7 @@ async def test_send_jsonld_request_sov(
 
 
 @pytest.mark.anyio
-async def test_issue_jsonld_sov(
+async def test_issue_jsonld_cheqd(
     alice_member_client: RichAsyncClient,
     faber_anoncreds_client: RichAsyncClient,
     faber_anoncreds_acapy_client: AcaPyClient,
@@ -254,9 +248,7 @@ async def test_issue_jsonld_sov(
     # Updating JSON-LD credential did:key with proofType ed25519
     credential = deepcopy(credential_)
     credential["connection_id"] = faber_connection_id
-    credential["ld_credential_detail"]["credential"][
-        "issuer"
-    ] = f"did:sov:{faber_pub_did}"
+    credential["ld_credential_detail"]["credential"]["issuer"] = faber_pub_did
 
     response = await faber_anoncreds_client.post(
         CREDENTIALS_BASE_PATH,

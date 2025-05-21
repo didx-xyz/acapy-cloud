@@ -6,7 +6,7 @@ adminApiKey = "adminApiKey"
 
 # pylint: disable=invalid-name
 
-PROJECT_VERSION = os.getenv("PROJECT_VERSION", "5.0.0rc1")
+PROJECT_VERSION = os.getenv("PROJECT_VERSION", "5.0.0-rc2")
 
 # the ACAPY_LABEL field with which the governance agent is initialised
 GOVERNANCE_LABEL = os.getenv("GOVERNANCE_ACAPY_LABEL", "Governance")
@@ -63,8 +63,8 @@ TEST_CLIENT_TIMEOUT = int(os.getenv("TEST_CLIENT_TIMEOUT", "300"))
 # timeout for endorsement events and registry creation
 CRED_DEF_ACK_TIMEOUT = int(os.getenv("CRED_DEF_ACK_TIMEOUT", "60"))
 PUBLISH_REVOCATIONS_TIMEOUT = int(os.getenv("PUBLISH_REVOCATIONS_TIMEOUT", "60"))
-REGISTRY_CREATION_TIMEOUT = int(os.getenv("REGISTRY_CREATION_TIMEOUT", "60"))
-REGISTRY_SIZE = int(os.getenv("REGISTRY_SIZE", "32767"))
+REGISTRY_CREATION_TIMEOUT = int(os.getenv("REGISTRY_CREATION_TIMEOUT", "120"))
+REGISTRY_SIZE = int(os.getenv("REGISTRY_SIZE", "200"))
 ISSUER_DID_ENDORSE_TIMEOUT = int(os.getenv("ISSUER_DID_ENDORSE_TIMEOUT", "60"))
 
 # NATS
