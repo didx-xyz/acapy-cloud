@@ -121,7 +121,6 @@ async def fetch_or_create_regression_test_cred_def(
         f"{DEFINITIONS_BASE_PATH}/credentials?schema_id={schema_id}"
     )
     cred_defs = cred_defs_response.json()
-    print("Cred defs:", cred_defs)
     filtered_cred_defs = [
         cred_def
         for cred_def in cred_defs
