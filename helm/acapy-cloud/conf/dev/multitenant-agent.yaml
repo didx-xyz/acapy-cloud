@@ -142,11 +142,14 @@ initContainers:
             name: '{{ include "acapy-cloud.fullname" . }}-env'
             key: WALLET_DB_PORT
 
+strategy:
+  type: Recreate
+
 persistence:
   enabled: true
   mountPath: /home/aries/.indy_client
-  capacity: 1Gi
-  storageClassName: efs
+  capacity: 10Gi
+  storageClassName: gp3
   accessMode: ReadWriteOnce
 
 autoscaling:

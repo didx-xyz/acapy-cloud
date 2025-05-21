@@ -50,11 +50,14 @@ readinessProbe:
     port: "{{ trunc 15 .Release.Name }}"
   initialDelaySeconds: 5
 
+strategy:
+  type: Recreate
+
 persistence:
   enabled: true
   mountPath: /tails-server-db
   capacity: 10Gi
-  storageClassName: efs
+  storageClassName: gp3
   accessMode: ReadWriteOnce
 
 podSecurityContext:

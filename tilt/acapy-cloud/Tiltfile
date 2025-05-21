@@ -594,7 +594,7 @@ def setup_cloudapi(build_enabled, expose):
         },
         "tails-server": {
             "links": [
-                link("http://tails.cloudapi." + ingress_domain, "Tails"),
+                link("http://tails-server.cloudapi." + ingress_domain, "Tails"),
             ]
         },
         "driver-did-cheqd": {
