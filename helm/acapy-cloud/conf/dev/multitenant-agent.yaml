@@ -145,6 +145,17 @@ initContainers:
 strategy:
   type: Recreate
 
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
 persistence:
   enabled: true
   mountPath: /home/aries/.indy_client
