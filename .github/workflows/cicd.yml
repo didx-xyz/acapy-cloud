@@ -51,7 +51,7 @@ on:
 permissions: {}
 
 env:
-  HELM_VERSION: v3.18.0
+  HELM_VERSION: v3.17.3
   HELMFILE_VERSION: v1.1.0
   MISE_VERSION: 2025.5.9
 
