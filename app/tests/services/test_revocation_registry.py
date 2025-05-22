@@ -48,7 +48,6 @@ message_attach_data = {
 txn_data = {"txn": {"messages_attach": [message_attach_data]}}
 
 
-
 @pytest.mark.anyio
 async def test_revoke_credential(mock_agent_controller: AcaPyClient):
     mock_agent_controller.anoncreds_revocation.revoke.return_value = {}
@@ -383,8 +382,8 @@ async def test_validate_rev_reg_ids_non_existent(mock_agent_controller: AcaPyCli
 @pytest.mark.anyio
 async def test_validate_rev_reg_ids_error(mock_agent_controller: AcaPyClient):
     # Mock ApiException for non-existent revocation registry ID
-    mock_agent_controller.anoncreds_revocation.get_revocation_registry.side_effect = ApiException(
-        status=500, reason="ERROR"
+    mock_agent_controller.anoncreds_revocation.get_revocation_registry.side_effect = (
+        ApiException(status=500, reason="ERROR")
     )
 
     with pytest.raises(
@@ -611,8 +610,8 @@ async def test_revoke_credential_auto_publish_timeout(
 @pytest.mark.anyio
 async def test_revoke_credential_no_result_returned(mock_agent_controller: AcaPyClient):
     mock_agent_controller.anoncreds_revocation.revoke.return_value = None
-    mock_agent_controller.anoncreds_revocation.get_cred_rev_record.return_value = MagicMock(
-        result=MagicMock(state="revoked")
+    mock_agent_controller.anoncreds_revocation.get_cred_rev_record.return_value = (
+        MagicMock(result=MagicMock(state="revoked"))
     )
 
     with pytest.raises(
@@ -633,8 +632,8 @@ async def test_revoke_credential_with_transaction_result(
     # Craft the test data to match the expected structure
     mock_agent_controller.anoncreds_revocation.revoke.return_value = txn_data
 
-    mock_agent_controller.anoncreds_revocation.get_cred_rev_record.return_value = MagicMock(
-        result=MagicMock(state="revoked")
+    mock_agent_controller.anoncreds_revocation.get_cred_rev_record.return_value = (
+        MagicMock(result=MagicMock(state="revoked"))
     )
     response = await test_module.revoke_credential(
         controller=mock_agent_controller,
