@@ -156,7 +156,7 @@ jobs:
       mise-version: ${{ needs.prep.outputs.mise-version }}
     secrets:
       codacy-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-      cheqd-mnemonic: ${{ secrets.CHEQD_TESTNET_MNEMONIC }}
+      cheqd-mnemonic: ${{ secrets.CHEQD_MNEMONIC }}
     concurrency:
       group: local-tests-${{ github.ref_name }}
       cancel-in-progress: true
