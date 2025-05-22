@@ -63,9 +63,12 @@ async def test_create_credential_definition_success():
 async def test_create_credential_definition_with_revocation():
     mock_aries_controller = AsyncMock(spec=AcaPyClient)
     mock_publisher = AsyncMock()
-    mock_publisher.publish_credential_definition.return_value = MagicMock(
-        sent=MagicMock(credential_definition_id=sample_cred_def_id),
-        txn=MagicMock(transaction_id="test_txn_id"),
+    mock_publisher.publish_anoncreds_credential_definition.return_value = (
+        CredDefResult(
+            credential_definition_state=CredDefState(
+                credential_definition_id=sample_cred_def_id
+            )
+        )
     )
 
     create_cred_def_payload = CreateCredentialDefinition(
@@ -82,10 +85,6 @@ async def test_create_credential_definition_with_revocation():
         "app.services.definitions.credential_definitions.assert_valid_issuer"
     ), patch(
         "app.services.definitions.credential_definitions.handle_model_with_validation"
-    ), patch(
-        "app.services.definitions.credential_definitions.wait_for_transaction_ack"
-    ), patch(
-        "app.services.definitions.credential_definitions.CredentialDefinitionSendRequest"
     ):
 
         result = await create_credential_definition(
@@ -93,7 +92,7 @@ async def test_create_credential_definition_with_revocation():
         )
 
         assert result == sample_cred_def_id
-        mock_publisher.publish_credential_definition.assert_called_once()
+        mock_publisher.publish_anoncreds_credential_definition.assert_called_once()
         mock_publisher.wait_for_revocation_registry.assert_called_once_with(
             credential_definition_id=sample_cred_def_id
         )

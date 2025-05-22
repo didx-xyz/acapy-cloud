@@ -60,7 +60,7 @@ async def test_get_credential_revocation_record_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
 ):
     mock_aries_controller = AsyncMock()
-    mock_aries_controller.revocation.get_revocation_status = AsyncMock(
+    mock_aries_controller.anoncreds_revocation.get_cred_rev_record = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
 
