@@ -1,8 +1,6 @@
 # https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx
 fullnameOverride: ingress-nginx
 controller:
-  progressDeadlineSeconds: null
-  minReadySeconds: null
   ingressClassResource:
     name: nginx
     enabled: true
