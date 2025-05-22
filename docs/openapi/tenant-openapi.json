@@ -3436,7 +3436,7 @@
           "wallet"
         ],
         "summary": "Set Public DID",
-        "description": "Set the Current Public DID\n---\n\nThis endpoint allows you to set the current public DID.\n\n**Notes:**\n    - Requires an active endorser connection to make a DID public.\n    - By default, only issuers can have and update public DIDs.\n\nParameters:\n---\n    did: str\n\nResponse:\n---\n    Returns the public DID.",
+        "description": "Set the Current Public DID\n---\n\nThis endpoint allows you to set the current public DID.\n\n**Note:**\n    - By default, only issuers can have and update public DIDs.\n\nParameters:\n---\n    did: str\n\nResponse:\n---\n    Returns the public DID.",
         "operationId": "set_public_did_v1_wallet_dids_public_put",
         "security": [
           {

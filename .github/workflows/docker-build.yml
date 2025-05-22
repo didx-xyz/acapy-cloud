@@ -21,7 +21,6 @@ jobs:
         image:
           - agent
           - app
-          - endorser
           - pytest
           - tails-server
           - trust-registry
@@ -39,9 +38,6 @@ jobs:
           - image: app
             context: .
             file: dockerfiles/app/Dockerfile
-          - image: endorser
-            context: .
-            file: dockerfiles/endorser/Dockerfile
           - image: pytest
             context: .
             file: dockerfiles/tests/Dockerfile
@@ -99,7 +95,6 @@ jobs:
         image:
           - agent
           - app
-          - endorser
           - pytest
           - tails-server
           - trust-registry
@@ -113,10 +108,6 @@ jobs:
           - image: app
             context: .
             file: dockerfiles/app/Dockerfile
-            platforms: linux/amd64,linux/arm64
-          - image: endorser
-            context: .
-            file: dockerfiles/endorser/Dockerfile
             platforms: linux/amd64,linux/arm64
           - image: pytest
             context: .
