@@ -63,11 +63,9 @@ async def test_create_credential_definition_success():
 async def test_create_credential_definition_with_revocation():
     mock_aries_controller = AsyncMock(spec=AcaPyClient)
     mock_publisher = AsyncMock()
-    mock_publisher.publish_anoncreds_credential_definition.return_value = (
-        CredDefResult(
-            credential_definition_state=CredDefState(
-                credential_definition_id=sample_cred_def_id
-            )
+    mock_publisher.publish_anoncreds_credential_definition.return_value = CredDefResult(
+        credential_definition_state=CredDefState(
+            credential_definition_id=sample_cred_def_id
         )
     )
 
