@@ -52,8 +52,8 @@ permissions: {}
 
 env:
   HELM_VERSION: v3.17.3
-  HELMFILE_VERSION: v1.0.0
-  MISE_VERSION: 2025.5.0
+  HELMFILE_VERSION: v1.1.0
+  MISE_VERSION: 2025.5.9
 
   RESET_DEPLOYMENTS: ${{ github.event.inputs.reset-deployments || 'false' }}
   RUN_E2E_TESTS: ${{ github.event.inputs.run-e2e-tests || 'true' }}
@@ -156,7 +156,7 @@ jobs:
       mise-version: ${{ needs.prep.outputs.mise-version }}
     secrets:
       codacy-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-      cheqd-mnemonic: ${{ secrets.CHEQD_TESTNET_MNEMONIC }}
+      cheqd-mnemonic: ${{ secrets.CHEQD_MNEMONIC }}
     concurrency:
       group: local-tests-${{ github.ref_name }}
       cancel-in-progress: true
