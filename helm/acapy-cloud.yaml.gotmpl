@@ -120,7 +120,7 @@ releases:
       app: postgres
     namespace: {{ .Values.namespace }}
     chart: oci://registry-1.docker.io/bitnamicharts/postgresql-ha
-    version: 15.3.14
+    version: 16.0.6
     values:
       - ./acapy-cloud/conf/postgres.yaml
       - postgresql:
@@ -136,7 +136,7 @@ releases:
       app: pgadmin
     namespace: {{ .Values.namespace }}
     chart: runix/pgadmin4
-    version: 1.38.0
+    version: 1.44.0
     installed: {{ .Values.pgAdmin.enabled }}
     values:
       - ./acapy-cloud/conf/pgadmin.yaml
