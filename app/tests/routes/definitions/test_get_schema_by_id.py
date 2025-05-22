@@ -43,46 +43,52 @@ acapy_anoncreds_response = GetSchemaResult(
 
 
 @pytest.mark.anyio
-@pytest.mark.parametrize("role", [Role.GOVERNANCE, Role.TENANT])
-async def test_get_schema_by_id_success(role):
+async def test_get_schema_by_id_success():
     mock_aries_controller = AsyncMock()
-    mock_aries_controller.schema.get_schema = AsyncMock(return_value=acapy_response)
-    mock_auth = AcaPyAuth(token="mocked_token", role=role)
+    mock_aries_controller.anoncreds_schemas.get_schema = AsyncMock(
+        return_value=acapy_anoncreds_response
+    )
+    with patch("app.routes.definitions.client_from_auth") as mock_client_from_auth:
+        mock_client_from_auth.return_value.__aenter__.return_value = (
+            mock_aries_controller
+        )
 
-    response = await get_schema(schema_id=schema_id, auth=mock_auth)
+        response = await get_schema(schema_id=schema_id, auth="mock_auth")
 
     assert response == schema_response
-    mock_aries_controller.schema.get_schema.assert_awaited_once_with(
+    mock_aries_controller.anoncreds_schemas.get_schema.assert_awaited_once_with(
         schema_id=schema_id,
     )
 
 
 @pytest.mark.anyio
 @pytest.mark.parametrize(
-    "exception_class, expected_status_code, expected_detail, role",
+    "exception_class, expected_status_code, expected_detail",
     [
-        (BadRequestException, 400, "Bad request", Role.GOVERNANCE),
-        (ApiException, 500, "Internal Server Error", Role.TENANT),
+        (BadRequestException, 400, "Bad request"),
+        (ApiException, 500, "Internal Server Error"),
     ],
 )
 async def test_get_schema_by_id_fail_acapy_error(
     exception_class,
     expected_status_code,
     expected_detail,
-    role,
 ):
     mock_aries_controller = AsyncMock()
-    mock_aries_controller.schema.get_schema = AsyncMock(
+    mock_aries_controller.anoncreds_schemas.get_schema = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
-    mock_auth = AcaPyAuth(token="mocked_token", role=role)
+    with patch("app.routes.definitions.client_from_auth") as mock_client_from_auth:
+        mock_client_from_auth.return_value.__aenter__.return_value = (
+            mock_aries_controller
+        )
 
-    with pytest.raises(HTTPException) as exc:
-        await get_schema(schema_id=schema_id, auth=mock_auth)
+        with pytest.raises(HTTPException) as exc:
+            await get_schema(schema_id=schema_id, auth="mock_auth")
 
     assert exc.value.status_code == expected_status_code
     assert exc.value.detail == expected_detail
-    mock_aries_controller.schema.get_schema.assert_awaited_once_with(
+    mock_aries_controller.anoncreds_schemas.get_schema.assert_awaited_once_with(
         schema_id=schema_id,
     )
 
@@ -90,7 +96,7 @@ async def test_get_schema_by_id_fail_acapy_error(
 @pytest.mark.anyio
 async def test_get_schema_by_id_404():
     mock_aries_controller = AsyncMock()
-    mock_aries_controller.schema.get_schema = AsyncMock(
+    mock_aries_controller.anoncreds_schemas.get_schema = AsyncMock(
         return_value=SchemaGetResult(var_schema=None)
     )
     mock_auth = AcaPyAuth(token="mocked_token", role="TENANT")
@@ -104,7 +110,7 @@ async def test_get_schema_by_id_404():
             await get_schema(schema_id=schema_id, auth=mock_auth)
 
         assert exc.value.status_code == 404
-        mock_aries_controller.schema.get_schema.assert_awaited_once_with(
+        mock_aries_controller.anoncreds_schemas.get_schema.assert_awaited_once_with(
             schema_id=schema_id,
         )
 

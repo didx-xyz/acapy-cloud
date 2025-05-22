@@ -50,7 +50,7 @@ async def test_get_pending_revocations_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
 ):
     mock_aries_controller = AsyncMock()
-    mock_aries_controller.revocation.get_registry = AsyncMock(
+    mock_aries_controller.anoncreds_revocation.get_revocation_registry = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
 

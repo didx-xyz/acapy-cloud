@@ -69,8 +69,12 @@ async def test_get_credential_definition_by_id_error(
     exception_class, expected_status_code, expected_detail
 ):
     mock_aries_controller = AsyncMock()
-    mock_aries_controller.credential_definition.get_cred_def = AsyncMock(
-        side_effect=exception_class(status=expected_status_code, reason=expected_detail)
+    mock_aries_controller.anoncreds_credential_definitions.get_credential_definition = (
+        AsyncMock(
+            side_effect=exception_class(
+                status=expected_status_code, reason=expected_detail
+            )
+        )
     )
 
     with patch("app.routes.definitions.client_from_auth") as mock_client_from_auth:
@@ -86,7 +90,7 @@ async def test_get_credential_definition_by_id_error(
 
         assert exc.value.status_code == expected_status_code
         assert exc.value.detail == expected_detail
-        mock_aries_controller.credential_definition.get_cred_def.assert_awaited_once_with(
+        mock_aries_controller.anoncreds_credential_definitions.get_credential_definition.assert_awaited_once_with(
             cred_def_id=cred_def_id,
         )
 
@@ -94,8 +98,8 @@ async def test_get_credential_definition_by_id_error(
 @pytest.mark.anyio
 async def test_get_credential_definition_by_id_404():
     mock_aries_controller = AsyncMock()
-    mock_aries_controller.credential_definition.get_cred_def = AsyncMock(
-        return_value=None
+    mock_aries_controller.anoncreds_credential_definitions.get_credential_definition = (
+        AsyncMock(return_value=None)
     )
 
     with patch("app.routes.definitions.client_from_auth") as mock_client_from_auth:
@@ -110,6 +114,6 @@ async def test_get_credential_definition_by_id_404():
             )
 
         assert exc.value.status_code == 404
-        mock_aries_controller.credential_definition.get_cred_def.assert_awaited_once_with(
+        mock_aries_controller.anoncreds_credential_definitions.get_credential_definition.assert_awaited_once_with(
             cred_def_id=cred_def_id,
         )
