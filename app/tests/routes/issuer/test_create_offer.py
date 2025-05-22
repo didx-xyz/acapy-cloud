@@ -51,8 +51,7 @@ anoncreds_cred = AnonCredsCredential(
         ),
     ],
 )
-@pytest.mark.parametrize("wallet_type", ["askar-anoncreds"])
-async def test_create_offer_success(credential, wallet_type):
+async def test_create_offer_success(credential):
     mock_aries_controller = AsyncMock()
     issuer = Mock()
     issuer.create_offer = AsyncMock()
@@ -66,30 +65,16 @@ async def test_create_offer_success(credential, wallet_type):
         return_value="schema_id",
     ), patch(
         "app.routes.issuer.assert_valid_issuer"
-    ), patch(
-        "app.util.valid_issuer.get_wallet_type", return_value=wallet_type
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )
 
-        if (
-            credential.get_credential_type() == "anoncreds"
-            and wallet_type != "askar-anoncreds"
-        ):
-            with pytest.raises(CloudApiException) as exc:
-                await create_offer(credential=credential, auth="mocked_auth")
-            assert exc.value.status_code == 400
-            assert (
-                exc.value.detail
-                == "AnonCreds credentials can only be issued by an askar-anoncreds wallet"
-            )
-        else:
-            await create_offer(credential=credential, auth="mocked_auth")
+        await create_offer(credential=credential, auth="mocked_auth")
 
-            issuer.create_offer.assert_awaited_once_with(
-                controller=mock_aries_controller, credential=credential
-            )
+        issuer.create_offer.assert_awaited_once_with(
+            controller=mock_aries_controller, credential=credential
+        )
 
 
 @pytest.mark.anyio
@@ -120,8 +105,6 @@ async def test_create_offer_fail_acapy_error(
         return_value="schema_id",
     ), patch(
         "app.routes.issuer.assert_valid_issuer"
-    ), patch(
-        "app.util.valid_issuer.get_wallet_type", return_value="askar"
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
