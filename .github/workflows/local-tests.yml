@@ -72,6 +72,8 @@ jobs:
           source .env
 
           poetry run pytest \
+            --numprocesses 2 \
+            --dist loadgroup \
             --durations=25 \
             --ignore ./tilt \
             --cov | tee test_output.txt
