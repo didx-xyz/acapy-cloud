@@ -55,9 +55,7 @@ async def test_get_schemas_by_id_success():
         ),
     ):
 
-        result = await get_schemas_by_id(
-            mock_aries_controller, mock_schema_ids
-        )
+        result = await get_schemas_by_id(mock_aries_controller, mock_schema_ids)
 
         assert len(result) == 2
         assert all(isinstance(schema, CredentialSchema) for schema in result)
@@ -136,9 +134,7 @@ async def test_get_schemas_by_id_anoncreds_success():
         ),
     ):
 
-        result = await get_schemas_by_id(
-            mock_aries_controller, mock_schema_ids
-        )
+        result = await get_schemas_by_id(mock_aries_controller, mock_schema_ids)
 
         assert len(result) == 2
         assert all(isinstance(schema, CredentialSchema) for schema in result)
@@ -163,8 +159,6 @@ async def test_get_schemas_by_id_no_schemas_returned():
         "app.services.definitions.schemas.handle_acapy_call",
         return_value=None,
     ):
-        result = await get_schemas_by_id(
-            mock_aries_controller, mock_schema_ids
-        )
+        result = await get_schemas_by_id(mock_aries_controller, mock_schema_ids)
 
         assert len(result) == 0
