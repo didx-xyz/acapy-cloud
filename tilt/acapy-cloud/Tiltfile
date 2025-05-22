@@ -367,25 +367,6 @@ def setup_cloudapi(build_enabled, expose):
     setup_redpanda_connect_cloud(namespace)
 
     releases = {
-        "endorser": {
-            "depends": ["nats"],
-            "image": {
-                "dockerfile": "./dockerfiles/endorser/Dockerfile",
-                "live_update": add_live_update(
-                    [
-                        ("./endorser", "/endorser"),
-                        ("./shared", "/shared"),
-                    ],
-                    enabled=build_enabled,
-                ),
-                "ignore": [
-                    "app/**",
-                    "scripts/**",
-                    "trustregistry/**",
-                    "waypoint/**",
-                ],
-            },
-        },
         "governance-agent": {
             "depends": ["nats", "postgres", "did-registrar", "did-resolver"],
             "links": [
@@ -398,7 +379,6 @@ def setup_cloudapi(build_enabled, expose):
                 "dockerfile": "./dockerfiles/agents/Dockerfile",
                 "ignore": [
                     "app/**",
-                    "endorser/**",
                     "shared/**",
                     "trustregistry/**",
                     "waypoint/**",
@@ -427,7 +407,6 @@ def setup_cloudapi(build_enabled, expose):
                     enabled=build_enabled,
                 ),
                 "ignore": [
-                    "endorser/**",
                     "scripts/**",
                     "trustregistry/**",
                     "waypoint/**",
@@ -446,7 +425,6 @@ def setup_cloudapi(build_enabled, expose):
                 "dockerfile": "./dockerfiles/agents/Dockerfile",
                 "ignore": [
                     "app/**",
-                    "endorser/**",
                     "shared/**",
                     "trustregistry/**",
                     "waypoint/**",
@@ -475,7 +453,6 @@ def setup_cloudapi(build_enabled, expose):
                     enabled=build_enabled,
                 ),
                 "ignore": [
-                    "endorser/**",
                     "scripts/**",
                     "trustregistry/**",
                     "waypoint/**",
@@ -500,7 +477,6 @@ def setup_cloudapi(build_enabled, expose):
                     enabled=build_enabled,
                 ),
                 "ignore": [
-                    "endorser/**",
                     "scripts/**",
                     "trustregistry/**",
                     "waypoint/**",
@@ -525,7 +501,6 @@ def setup_cloudapi(build_enabled, expose):
                     enabled=build_enabled,
                 ),
                 "ignore": [
-                    "endorser/**",
                     "scripts/**",
                     "trustregistry/**",
                     "waypoint/**",
@@ -554,7 +529,6 @@ def setup_cloudapi(build_enabled, expose):
                 ),
                 "ignore": [
                     "app/**",
-                    "endorser/**",
                     "scripts/**",
                     "waypoint/**",
                 ],
@@ -576,7 +550,6 @@ def setup_cloudapi(build_enabled, expose):
                 ),
                 "ignore": [
                     "app/**",
-                    "endorser/**",
                     "scripts/**",
                     "trustregistry/**",
                 ],

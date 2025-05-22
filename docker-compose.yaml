@@ -212,29 +212,6 @@ services:
     env_file:
       - environments/governance-public/fastapi.default.env
 
-  governance-endorser:
-    image: ${REGISTRY:-local}/governance-endorser:${IMAGE_TAG:-latest}
-    container_name: governance-endorser
-    build:
-      context: .
-      dockerfile: ./dockerfiles/endorser/Dockerfile
-    ports:
-      - 0.0.0.0:3009:3009
-    volumes:
-      - ./endorser:/endorser
-      - ./logs:/logs
-    networks:
-      - governance-multitenant
-      - governance-ga
-      - host
-    env_file:
-      - environments/endorser/endorser.env
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3009/health/ready || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
   waypoint:
     image: ${REGISTRY:-local}/waypoint:${IMAGE_TAG:-latest}
     container_name: waypoint
@@ -251,7 +228,6 @@ services:
       - host
       - nats
     depends_on:
-      - governance-endorser
       - nats-1
       - nats-2
       - nats-3

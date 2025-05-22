@@ -130,8 +130,7 @@ async def set_public_did(
 
     This endpoint allows you to set the current public DID.
 
-    **Notes:**
-        - Requires an active endorser connection to make a DID public.
+    **Note:**
         - By default, only issuers can have and update public DIDs.
 
     Parameters:

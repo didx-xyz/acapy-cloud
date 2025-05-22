@@ -151,9 +151,6 @@ jobs:
       - name: DID Registrar (Universal Registrar) Logs
         if: always()
         run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=did-registrar --tail 10000
-      - name: Endorser Logs
-        if: always()
-        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=endorser --tail 10000
       - name: Governance Agent Logs
         if: always()
         run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=governance-agent --tail 10000

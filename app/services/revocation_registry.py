@@ -229,7 +229,9 @@ async def publish_pending_revocations(
             acapy_call = controller.anoncreds_revocation.publish_revocations
             body = PublishRevocationsSchemaAnonCreds(
                 rrid2crid=revocation_registry_credential_map,
-                options=PublishRevocationsOptions(create_transaction_for_endorser=True),
+                options=PublishRevocationsOptions(
+                    create_transaction_for_endorser=False
+                ),
             )
         else:  # wallet_type == "askar":
             acapy_call = controller.revocation.publish_revocations
