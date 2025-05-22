@@ -17,8 +17,7 @@ from app.services.trust_registry.util.issuer import assert_valid_issuer
 from app.util.assert_public_did import assert_public_did
 from app.util.definitions import credential_definition_from_acapy
 from app.util.did import strip_qualified_did_sov
-from app.util.transaction_acked import wait_for_transaction_ack
-from shared import CRED_DEF_ACK_TIMEOUT, REGISTRY_SIZE
+from shared import REGISTRY_SIZE
 from shared.log_config import get_logger
 
 logger = get_logger(__name__)
@@ -74,18 +73,6 @@ async def create_credential_definition(
     credential_definition_id = (
         result.credential_definition_state.credential_definition_id
     )
-
-    # Set AnonCreds transaction info if it exists
-    result_txn = result.registration_metadata.get("txn")
-    transaction_id = result_txn.get("transaction_id") if result_txn else None
-
-    if transaction_id:
-        await wait_for_transaction_ack(
-            aries_controller=aries_controller,
-            transaction_id=transaction_id,
-            max_attempts=CRED_DEF_ACK_TIMEOUT,
-            retry_delay=1,
-        )
 
     if support_revocation:
         await publisher.wait_for_revocation_registry(
