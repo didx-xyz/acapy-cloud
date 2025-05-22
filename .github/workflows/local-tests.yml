@@ -20,7 +20,7 @@ permissions: {}
 jobs:
   local:
     name: Local End-to-End
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
 
     timeout-minutes: 30
 
@@ -30,16 +30,17 @@ jobs:
           persist-credentials: false
 
       - name: Cache Python venv
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: useblacksmith/cache@c5fe29eb0efdf1cf4186b9f7fcbbcbc0cf025662 # v5.0.2
         with:
           path: .venv
-          key: python-${{ hashFiles('**/poetry.lock', '.mise.toml') }}
+          key: bsmith-python-${{ hashFiles('**/poetry.lock', '.mise.toml') }}
 
       - name: Set up Mise
         uses: jdx/mise-action@c94f0bf9e520b150e34c017db785461f7e71c5fb # v2.2.2
         with:
           version: ${{ inputs.mise-version }}
           cache: true
+          cache_key_prefix: bsmith-mise
           experimental: true # Required for mise tasks
           install: true
         env:
