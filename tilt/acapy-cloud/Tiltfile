@@ -556,6 +556,7 @@ def setup_cloudapi(build_enabled, expose):
             },
         },
         "mediator": {
+            "enabled": False,
             "depends": [
                 "postgres",
                 "governance-agent",
