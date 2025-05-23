@@ -58,9 +58,9 @@ async def test_get_credential_definitions_with_filters():
 
     mock_cred_def_ids = ["cred_def_1"]
     mock_cred_def_results = [
-        CredentialDefinitionGetResult(
-            credential_definition=CredentialDefinition(
-                id="5Q1Zz9foMeAA8Q7mrmzCfZ:3:CL:7:tag_1",
+        GetCredDefResult(
+            credential_definition_id = "5Q1Zz9foMeAA8Q7mrmzCfZ:3:CL:7:tag_1",
+            credential_definition=CredDef(
                 schema_id="schema_1",
                 tag="tag_1",
             )
@@ -69,12 +69,10 @@ async def test_get_credential_definitions_with_filters():
 
     with patch(
         "app.services.definitions.credential_definitions.handle_acapy_call"
-    ) as mock_handle_acapy_call, patch(
-        "app.services.definitions.credential_definitions.credential_definition_from_acapy",
-        side_effect=lambda x: CredDefModel(id=x.id, schema_id=x.schema_id, tag=x.tag),
-    ):
+    ) as mock_handle_acapy_call:
+
         mock_handle_acapy_call.side_effect = [
-            CredentialDefinitionsCreatedResult(
+            GetCredDefsResponse(
                 credential_definition_ids=mock_cred_def_ids
             ),
             *mock_cred_def_results,
@@ -102,7 +100,7 @@ async def test_get_credential_definitions_no_results():
     with patch(
         "app.services.definitions.credential_definitions.handle_acapy_call"
     ) as mock_handle_acapy_call:
-        mock_handle_acapy_call.return_value = CredentialDefinitionsCreatedResult(
+        mock_handle_acapy_call.return_value = GetCredDefsResponse(
             credential_definition_ids=None
         )
 
@@ -117,10 +115,10 @@ async def test_get_credential_definitions_some_missing():
 
     mock_cred_def_ids = ["cred_def_1", "cred_def_2"]
     mock_cred_def_results = [
-        CredentialDefinitionGetResult(credential_definition=None),
-        CredentialDefinitionGetResult(
-            credential_definition=CredentialDefinition(
-                id="5Q1Zz9foMeAA8Q7mrmzCfZ:3:CL:7:tag_2",
+        GetCredDefResult(credential_definition=None),
+        GetCredDefResult(
+            credential_definition_id = "5Q1Zz9foMeAA8Q7mrmzCfZ:3:CL:7:tag_2",
+            credential_definition=CredDef(
                 schema_id="schema_2",
                 tag="tag_2",
             )
@@ -129,12 +127,9 @@ async def test_get_credential_definitions_some_missing():
 
     with patch(
         "app.services.definitions.credential_definitions.handle_acapy_call"
-    ) as mock_handle_acapy_call, patch(
-        "app.services.definitions.credential_definitions.credential_definition_from_acapy",
-        side_effect=lambda x: CredDefModel(id=x.id, schema_id=x.schema_id, tag=x.tag),
-    ):
+    ) as mock_handle_acapy_call:
         mock_handle_acapy_call.side_effect = [
-            CredentialDefinitionsCreatedResult(
+            GetCredDefsResponse(
                 credential_definition_ids=mock_cred_def_ids
             ),
             *mock_cred_def_results,
