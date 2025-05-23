@@ -60,7 +60,7 @@ async def test_send_credential(
     IssuerV2.send_credential.assert_called_once()
 
     mock_schema_id_from_credential_definition_id.assert_called_once_with(
-        mock_agent_controller, cred_def_id, "askar"
+        mock_agent_controller, cred_def_id
     )
     mock_assert_valid_issuer.assert_called_once_with(did, "schema_id")
 
