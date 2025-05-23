@@ -5,7 +5,6 @@ from aries_cloudcontroller import AcaPyClient
 
 from app.exceptions import CloudApiException, handle_acapy_call
 from app.services.revocation_registry import wait_for_active_registry
-from app.util.check_endorser_connection import check_endorser_connection
 from shared import REGISTRY_CREATION_TIMEOUT
 
 
@@ -13,24 +12,6 @@ class CredentialDefinitionPublisher:
     def __init__(self, controller: AcaPyClient, logger: Logger):
         self._logger = logger
         self._controller = controller
-
-    async def check_endorser_connection(self):
-        has_connections = await check_endorser_connection(
-            aries_controller=self._controller
-        )
-
-        if not has_connections:
-            self._logger.error(
-                "Failed to create credential definition supporting revocation: "
-                "no endorser connection found. Issuer attempted to create a credential "
-                "definition with support for revocation but does not have an active "
-                "connection with an endorser, which is required for this operation."
-            )
-            raise CloudApiException(
-                "Credential definition creation failed: An active endorser connection "
-                "is required to support revocation. Please establish a connection with "
-                "an endorser and try again."
-            )
 
     async def publish_anoncreds_credential_definition(self, request_body):
         try:
