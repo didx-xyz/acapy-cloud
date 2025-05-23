@@ -59,11 +59,11 @@ async def test_get_credential_definitions_with_filters():
     mock_cred_def_ids = ["cred_def_1"]
     mock_cred_def_results = [
         GetCredDefResult(
-            credential_definition_id = "5Q1Zz9foMeAA8Q7mrmzCfZ:3:CL:7:tag_1",
+            credential_definition_id="5Q1Zz9foMeAA8Q7mrmzCfZ:3:CL:7:tag_1",
             credential_definition=CredDef(
                 schema_id="schema_1",
                 tag="tag_1",
-            )
+            ),
         )
     ]
 
@@ -72,9 +72,7 @@ async def test_get_credential_definitions_with_filters():
     ) as mock_handle_acapy_call:
 
         mock_handle_acapy_call.side_effect = [
-            GetCredDefsResponse(
-                credential_definition_ids=mock_cred_def_ids
-            ),
+            GetCredDefsResponse(credential_definition_ids=mock_cred_def_ids),
             *mock_cred_def_results,
         ]
 
@@ -117,11 +115,11 @@ async def test_get_credential_definitions_some_missing():
     mock_cred_def_results = [
         GetCredDefResult(credential_definition=None),
         GetCredDefResult(
-            credential_definition_id = "5Q1Zz9foMeAA8Q7mrmzCfZ:3:CL:7:tag_2",
+            credential_definition_id="5Q1Zz9foMeAA8Q7mrmzCfZ:3:CL:7:tag_2",
             credential_definition=CredDef(
                 schema_id="schema_2",
                 tag="tag_2",
-            )
+            ),
         ),
     ]
 
@@ -129,9 +127,7 @@ async def test_get_credential_definitions_some_missing():
         "app.services.definitions.credential_definitions.handle_acapy_call"
     ) as mock_handle_acapy_call:
         mock_handle_acapy_call.side_effect = [
-            GetCredDefsResponse(
-                credential_definition_ids=mock_cred_def_ids
-            ),
+            GetCredDefsResponse(credential_definition_ids=mock_cred_def_ids),
             *mock_cred_def_results,
         ]
 
