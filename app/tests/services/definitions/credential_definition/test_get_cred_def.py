@@ -3,9 +3,6 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from aries_cloudcontroller import (
     CredDef,
-    CredentialDefinition,
-    CredentialDefinitionGetResult,
-    CredentialDefinitionsCreatedResult,
     GetCredDefResult,
     GetCredDefsResponse,
 )
