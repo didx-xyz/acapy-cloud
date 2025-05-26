@@ -1,6 +1,6 @@
 [project]
 name = "acapy-cloud"
-version = "5.0.0-rc2"
+version = "5.0.0-rc4"
 description = "Main project configuration for acapy-cloud"
 authors = [
   { name = "Mourits de Beer", email = "mourits.debeer@didx.co.za" },
