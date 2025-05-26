@@ -64,7 +64,7 @@ async def test_revoke_credential(mock_agent_controller: AcaPyClient):
 @pytest.mark.anyio
 async def test_publish_pending_revocations_success(mock_agent_controller: AcaPyClient):
     with patch(
-        "app.services.revocation_registry.validate_rev_reg_ids", return_value=None
+        "app.services.revocation_registry.validate_rev_reg_ids"
     ) as mock_validate_rev_reg_ids:
         anoncreds_revocation = mock_agent_controller.anoncreds_revocation
         anoncreds_revocation.publish_revocations.return_value = (
@@ -72,24 +72,24 @@ async def test_publish_pending_revocations_success(mock_agent_controller: AcaPyC
                 rrid2crid=revocation_registry_credential_map_output
             )
         )
-
-    await test_module.publish_pending_revocations(
-        controller=mock_agent_controller,
-        revocation_registry_credential_map=revocation_registry_credential_map_input,
-    )
-
-    anoncreds_revocation = mock_agent_controller.anoncreds_revocation
-    anoncreds_revocation.publish_revocations.assert_called_once_with(
-        body=PublishRevocationsSchemaAnonCreds(
-            rrid2crid=revocation_registry_credential_map_input,
-            options=PublishRevocationsOptions(create_transaction_for_endorser=True),
+        mock_validate_rev_reg_ids.return_value = AsyncMock(None)
+        await test_module.publish_pending_revocations(
+            controller=mock_agent_controller,
+            revocation_registry_credential_map=revocation_registry_credential_map_input,
         )
-    )
 
-    mock_validate_rev_reg_ids.assert_called_once_with(
-        controller=mock_agent_controller,
-        revocation_registry_credential_map=revocation_registry_credential_map_input,
-    )
+        anoncreds_revocation = mock_agent_controller.anoncreds_revocation
+        anoncreds_revocation.publish_revocations.assert_called_once_with(
+            body=PublishRevocationsSchemaAnonCreds(
+                rrid2crid=revocation_registry_credential_map_input,
+                options=PublishRevocationsOptions(create_transaction_for_endorser=True),
+            )
+        )
+
+        mock_validate_rev_reg_ids.assert_called_once_with(
+            controller=mock_agent_controller,
+            revocation_registry_credential_map=revocation_registry_credential_map_input,
+        )
 
 
 @pytest.mark.anyio
