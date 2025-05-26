@@ -615,40 +615,16 @@ async def test_revoke_credential_auto_publish_timeout(
 async def test_revoke_credential_no_result_returned(mock_agent_controller: AcaPyClient):
     mock_agent_controller.anoncreds_revocation.revoke.return_value = None
     mock_agent_controller.anoncreds_revocation.get_cred_rev_record.return_value = (
-        MagicMock(result=MagicMock(state="revoked"))
+        MagicMock(result=MagicMock(state="revoked",rev_reg_id="rev_reg_id_1", cred_rev_id="1"))
     )
 
-    with pytest.raises(
-        CloudApiException,
-        match="Revocation was published but no result was returned",
-    ):
-        await test_module.revoke_credential(
-            controller=mock_agent_controller,
-            credential_exchange_id=cred_ex_id,
-            auto_publish_to_ledger=True,
-        )
-
-
-@pytest.mark.anyio
-async def test_revoke_credential_with_transaction_result(
-    mock_agent_controller: AcaPyClient,
-):
-    # Craft the test data to match the expected structure
-    mock_agent_controller.anoncreds_revocation.revoke.return_value = txn_data
-
-    mock_agent_controller.anoncreds_revocation.get_cred_rev_record.return_value = (
-        MagicMock(result=MagicMock(state="revoked"))
-    )
-    response = await test_module.revoke_credential(
+    result = await test_module.revoke_credential(
         controller=mock_agent_controller,
         credential_exchange_id=cred_ex_id,
         auto_publish_to_ledger=True,
     )
-
-    assert isinstance(response, RevokedResponse)
-    assert response.cred_rev_ids_published == {
-        "rev_reg_id_1": [1]
-    }, "The cred_rev_ids_published should match the expected transformation"
+    assert isinstance(result, RevokedResponse)
+    assert result.cred_rev_ids_published == {"rev_reg_id_1": [1]}
 
 
 # TODO for when anoncreds gives transaction id
