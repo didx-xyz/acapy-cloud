@@ -82,7 +82,7 @@ async def test_publish_pending_revocations_success(mock_agent_controller: AcaPyC
         anoncreds_revocation.publish_revocations.assert_called_once_with(
             body=PublishRevocationsSchemaAnonCreds(
                 rrid2crid=revocation_registry_credential_map_input,
-                options=PublishRevocationsOptions(create_transaction_for_endorser=True),
+                options=PublishRevocationsOptions(create_transaction_for_endorser=False),
             )
         )
 
@@ -115,9 +115,7 @@ async def test_publish_pending_revocations_empty_response(
         anoncreds_revocation.publish_revocations.assert_called_once_with(
             body=PublishRevocationsSchemaAnonCreds(
                 rrid2crid=revocation_registry_credential_map_input,
-                options=PublishRevocationsOptions(
-                    create_transaction_for_endorser=False
-                ),
+                options=PublishRevocationsOptions(create_transaction_for_endorser=False),
             )
         )
         mock_validate_rev_reg_ids.assert_called_once_with(
@@ -156,7 +154,7 @@ async def test_publish_pending_revocations_failure(mock_agent_controller: AcaPyC
         mock_agent_controller.anoncreds_revocation.publish_revocations.assert_called_once_with(
             body=PublishRevocationsSchemaAnonCreds(
                 rrid2crid=revocation_registry_credential_map_input,
-                options=PublishRevocationsOptions(create_transaction_for_endorser=True),
+                options=PublishRevocationsOptions(create_transaction_for_endorser=False),
             )
         )
         mock_validate_rev_reg_ids.assert_called_once_with(
