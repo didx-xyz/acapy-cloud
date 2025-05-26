@@ -133,12 +133,13 @@ async def test_publish_pending_revocations_failure(mock_agent_controller: AcaPyC
 
     # Simulate successful validation
     with patch(
-        "app.services.revocation_registry.validate_rev_reg_ids", return_value=None
+        "app.services.revocation_registry.validate_rev_reg_ids"
     ) as mock_validate_rev_reg_ids:
         # Simulate failure in publish revocations call
-        mock_agent_controller.revocation.publish_revocations.side_effect = ApiException(
-            reason=error_message, status=status_code
+        mock_agent_controller.anoncreds_revocation.publish_revocations.side_effect = (
+            ApiException(reason=error_message, status=status_code)
         )
+        mock_validate_rev_reg_ids.return_value = AsyncMock(None)
 
         with pytest.raises(
             CloudApiException,
@@ -152,8 +153,11 @@ async def test_publish_pending_revocations_failure(mock_agent_controller: AcaPyC
         assert exc.value.status_code == status_code
 
         # You may also verify that publish_revocations was attempted
-        mock_agent_controller.revocation.publish_revocations.assert_called_once_with(
-            body=PublishRevocations(rrid2crid=revocation_registry_credential_map_input)
+        mock_agent_controller.anoncreds_revocation.publish_revocations.assert_called_once_with(
+            body=PublishRevocationsSchemaAnonCreds(
+                rrid2crid=revocation_registry_credential_map_input,
+                options=PublishRevocationsOptions(create_transaction_for_endorser=True),
+            )
         )
         mock_validate_rev_reg_ids.assert_called_once_with(
             controller=mock_agent_controller,
