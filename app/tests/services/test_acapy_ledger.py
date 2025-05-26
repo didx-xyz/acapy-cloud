@@ -166,6 +166,7 @@ async def test_schema_id_from_credential_definition_id_schema_id(
     mock_agent_controller.schema.get_schema.assert_not_called()
     assert schema_id_fetched == schema_id
 
+
 # TODO: Is this test still relevant?
 # @pytest.mark.anyio
 # async def test_schema_id_from_credential_definition_id_caching(
