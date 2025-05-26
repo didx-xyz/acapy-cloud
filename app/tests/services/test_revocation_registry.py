@@ -268,8 +268,8 @@ async def test_get_credential_revocation_record_api_exception(
     status_code = 500
 
     # Mock ApiException from ACA-Py
-    mock_agent_controller.anoncreds_revocation.get_cred_rev_record.side_effect = ApiException(
-        reason=error_message, status=status_code
+    mock_agent_controller.anoncreds_revocation.get_cred_rev_record.side_effect = (
+        ApiException(reason=error_message, status=status_code)
     )
 
     with pytest.raises(
@@ -406,8 +406,8 @@ async def test_validate_rev_reg_ids_no_pending_publications(
     mock_agent_controller: AcaPyClient,
 ):
     # Mock response with no pending publications
-    mock_agent_controller.anoncreds_revocation.get_revocation_registry.return_value = RevRegResult(
-        result=IssuerRevRegRecord(pending_pub=None)
+    mock_agent_controller.anoncreds_revocation.get_revocation_registry.return_value = (
+        RevRegResult(result=IssuerRevRegRecord(pending_pub=None))
     )
 
     with pytest.raises(
@@ -444,8 +444,8 @@ async def test_validate_rev_reg_ids_result_none(
     mock_agent_controller: AcaPyClient,
 ):
     # Mock response where cred_rev_id is not in pending_pub
-    mock_agent_controller.anoncreds_revocation.get_revocation_registry.return_value = RevRegResult(
-        result=None
+    mock_agent_controller.anoncreds_revocation.get_revocation_registry.return_value = (
+        RevRegResult(result=None)
     )
 
     with pytest.raises(
@@ -485,8 +485,8 @@ async def test_get_pending_revocations_failure(
     rev_reg_id = "mocked_rev_reg_id"
 
     # Mock ApiException from ACA-Py
-    mock_agent_controller.anoncreds_revocation.get_revocation_registry.side_effect = ApiException(
-        reason=error_message, status=status_code
+    mock_agent_controller.anoncreds_revocation.get_revocation_registry.side_effect = (
+        ApiException(reason=error_message, status=status_code)
     )
 
     with pytest.raises(
@@ -615,7 +615,11 @@ async def test_revoke_credential_auto_publish_timeout(
 async def test_revoke_credential_no_result_returned(mock_agent_controller: AcaPyClient):
     mock_agent_controller.anoncreds_revocation.revoke.return_value = None
     mock_agent_controller.anoncreds_revocation.get_cred_rev_record.return_value = (
-        MagicMock(result=MagicMock(state="revoked",rev_reg_id="rev_reg_id_1", cred_rev_id="1"))
+        MagicMock(
+            result=MagicMock(
+                state="revoked", rev_reg_id="rev_reg_id_1", cred_rev_id="1"
+            )
+        )
     )
 
     result = await test_module.revoke_credential(
