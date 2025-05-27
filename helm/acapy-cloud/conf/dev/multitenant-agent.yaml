@@ -142,9 +142,6 @@ initContainers:
             name: '{{ include "acapy-cloud.fullname" . }}-env'
             key: WALLET_DB_PORT
 
-strategy:
-  type: Recreate
-
 podSecurityContext:
   fsGroup: 1001
 securityContext:
@@ -156,7 +153,7 @@ securityContext:
   runAsUser: 1001
 
 persistence:
-  enabled: true
+  enabled: false
   mountPath: /home/aries/.indy_client
   capacity: 10Gi
   storageClassName: gp3
@@ -166,6 +163,8 @@ extraVolumes:
   - name: acapy-agent
     emptyDir: {}
   - name: cache
+    emptyDir: {}
+  - name: indy-client
     emptyDir: {}
   - name: ledger
     emptyDir: {}
@@ -178,6 +177,8 @@ extraVolumeMounts:
     mountPath: /home/aries/.acapy_agent
   - name: cache
     mountPath: /home/aries/.cache
+  - name: indy-client
+    mountPath: /home/aries/.indy_client
   - name: ledger
     mountPath: /home/aries/ledger
   - name: log
