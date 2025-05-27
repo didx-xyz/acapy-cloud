@@ -24,6 +24,7 @@ controller:
     allow-snippet-annotations: true
     # Required for Mediator Ingress Websocket detection
     annotations-risk-level: Critical
+    proxy-body-size: 1024m
   service:
     type: NodePort # Required for Kind/Tilt
     ports:

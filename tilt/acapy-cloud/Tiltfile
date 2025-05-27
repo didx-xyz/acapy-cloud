@@ -3,7 +3,7 @@ load("ext://color", "color")
 load("ext://helm_resource", "helm_resource", "helm_repo")
 
 # https://github.com/bitnami/charts/tree/main/bitnami/postgresql-ha
-postgres_version = "16.0.6"
+postgres_version = "16.0.7"
 # https://github.com/rowanruseler/helm-charts/tree/main/charts/pgadmin4
 pgadmin_version = "1.44.0"
 
@@ -258,6 +258,50 @@ def setup_redpanda_connect_cloud(namespace):
     )
 
 
+def setup_minio(namespace, ingress_domain):
+    resource_name = "minio"
+    project_root = os.getcwd()
+    current_dir = os.path.abspath(os.path.dirname(__file__))
+    values_file = project_root + "/helm/acapy-cloud/conf/minio.yaml"
+
+    print(color.green("Installing MinIO..."))
+
+    # https://github.com/bitnami/charts/tree/main/bitnami/minio
+    helm_resource(
+        name=resource_name,
+        chart="oci://registry-1.docker.io/bitnamicharts/minio",
+        release_name=resource_name,
+        namespace=namespace,
+        flags=[
+            "--values",
+            values_file,
+            "--set",
+            "ingress.hostname=minio." + ingress_domain,
+            "--set",
+            "apiIngress.hostname=minio-api." + ingress_domain,
+            "--version",
+            "16.0.10",
+            "--wait",
+        ],
+        labels=["04-dbs"],
+        resource_deps=[
+            "cloudapi-ns",
+            "ingress-nginx",
+        ],
+        deps=[
+            values_file,
+        ],
+    )
+
+    k8s_resource(
+        workload=resource_name,
+        links=[
+            link("http://minio." + ingress_domain, "MinIO Console"),
+            link("http://minio-api." + ingress_domain, "MinIO API"),
+        ],
+    )
+
+
 def build_cloudapi_service(service, image={}):
     # use custom_build instead of docker_build to support both docker and podman (in docker compatibility mode)
     custom_build(
@@ -361,14 +405,15 @@ def setup_cloudapi(build_enabled, expose):
     ingress_domain = generate_ingress_domain(expose)
     print(color.green("Ingress Domain: " + ingress_domain))
 
-    setup_postgres(namespace)
-    setup_pgadmin(namespace, ingress_domain)
+    setup_minio(namespace, ingress_domain)
     setup_nats(namespace)
+    setup_pgadmin(namespace, ingress_domain)
+    setup_postgres(namespace)
     setup_redpanda_connect_cloud(namespace)
 
     releases = {
         "governance-agent": {
-            "depends": ["nats", "postgres", "did-registrar", "did-resolver"],
+            "depends": ["nats", "postgres", "did-registrar", "did-resolver", "minio"],
             "links": [
                 link(
                     "http://governance-agent.cloudapi." + ingress_domain,
@@ -414,7 +459,7 @@ def setup_cloudapi(build_enabled, expose):
             },
         },
         "multitenant-agent": {
-            "depends": ["nats", "postgres", "did-registrar", "did-resolver"],
+            "depends": ["nats", "postgres", "did-registrar", "did-resolver", "minio"]],
             "links": [
                 link(
                     "http://multitenant-agent.cloudapi." + ingress_domain,
