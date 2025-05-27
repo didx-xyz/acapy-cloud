@@ -138,7 +138,7 @@ securityContext:
   readOnlyRootFilesystem: true
 
 persistence:
-  enabled: true
+  enabled: false
   mountPath: /home/aries/.indy_client
   capacity: 1Gi
   storageClassName: standard
@@ -148,6 +148,8 @@ extraVolumes:
   - name: acapy-agent
     emptyDir: {}
   - name: cache
+    emptyDir: {}
+  - name: indy-client
     emptyDir: {}
   - name: ledger
     emptyDir: {}
@@ -160,6 +162,8 @@ extraVolumeMounts:
     mountPath: /home/aries/.acapy_agent
   - name: cache
     mountPath: /home/aries/.cache
+  - name: indy-client
+    mountPath: /home/aries/.indy_client
   - name: ledger
     mountPath: /home/aries/ledger
   - name: log
