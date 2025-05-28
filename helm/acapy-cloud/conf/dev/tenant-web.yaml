@@ -142,7 +142,6 @@ env:
 podSecurityContext:
   fsGroup: 65534
 securityContext:
-  readOnlyRootFilesystem: true
   runAsUser: 65534
 
 extraVolumes:

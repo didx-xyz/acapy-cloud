@@ -144,6 +144,7 @@ initContainers:
 podSecurityContext:
   fsGroup: 1001
 securityContext:
+  readOnlyRootFilesystem: false
   runAsUser: 1001
 
 persistence:

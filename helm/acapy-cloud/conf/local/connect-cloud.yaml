@@ -82,4 +82,5 @@ extraVolumeMounts:
 podSecurityContext:
   fsGroup: 10001
 securityContext:
+  readOnlyRootFilesystem: false
   runAsUser: 10001
