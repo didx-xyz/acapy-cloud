@@ -4,7 +4,20 @@ replicaCount: 1
 
 podAnnotations:
   sidecar.istio.io/proxyCPU: 10m
-  ad.datadoghq.com/tails-server.logs: '[{"source": "python.acapy", "service": "tails-server"}]'
+  ad.datadoghq.com/tails-server.logs: >-
+    [{
+      "source": "python.uvicorn",
+      "service": "tails-server",
+      "log_processing_rules": [{
+        "type": "exclude_at_match",
+        "name": "exclude_health_probes",
+        "pattern": "GET /health/(ready|live) HTTP/\\d\\.\\d\"\\s+200\\s+OK"
+      }]
+    }]
+  proxy.istio.io/config: >-
+    proxyMetadata:
+      ISTIO_META_IDLE_TIMEOUT: 0s
+    terminationDrainDuration: 35s
 podLabels:
   admission.datadoghq.com/enabled: "true"
 
