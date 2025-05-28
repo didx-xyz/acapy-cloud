@@ -280,7 +280,7 @@ version = "2.1.1"
 description = "Base58 and Base58Check implementation."
 optional = false
 python-versions = ">=3.5"
-groups = ["app"]
+groups = ["main"]
 files = [
     {file = "base58-2.1.1-py3-none-any.whl", hash = "sha256:11a36f4d3ce51dfc1043f3218591ac4eb1ceb172919cebe05b52a5bcc8d245c2"},
     {file = "base58-2.1.1.tar.gz", hash = "sha256:c5d0cb3f5b6e81e8e35da5754388ddcc6d0d14b6c6a132cb93d69ed580a7278c"},
@@ -2625,4 +2625,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.12.8"
-content-hash = "e0123d171ea95fa8fecc782b344f870bfb19cdff56bb2b7a3b12fb2ccfd96547"
+content-hash = "51978b4ed94953e063cbb665bb111ade02e3f9f0ec5f0a2dcdc22d4e13ac2e80"
