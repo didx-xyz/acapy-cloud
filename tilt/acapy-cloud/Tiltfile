@@ -425,6 +425,7 @@ def setup_cloudapi(build_enabled, expose):
                 "ignore": [
                     "app/**",
                     "shared/**",
+                    "tails/**",
                     "trustregistry/**",
                     "waypoint/**",
                 ],
@@ -453,6 +454,7 @@ def setup_cloudapi(build_enabled, expose):
                 ),
                 "ignore": [
                     "scripts/**",
+                    "tails/**",
                     "trustregistry/**",
                     "waypoint/**",
                 ],
@@ -471,6 +473,7 @@ def setup_cloudapi(build_enabled, expose):
                 "ignore": [
                     "app/**",
                     "shared/**",
+                    "tails/**",
                     "trustregistry/**",
                     "waypoint/**",
                 ],
@@ -499,6 +502,7 @@ def setup_cloudapi(build_enabled, expose):
                 ),
                 "ignore": [
                     "scripts/**",
+                    "tails/**",
                     "trustregistry/**",
                     "waypoint/**",
                 ],
@@ -523,6 +527,7 @@ def setup_cloudapi(build_enabled, expose):
                 ),
                 "ignore": [
                     "scripts/**",
+                    "tails/**",
                     "trustregistry/**",
                     "waypoint/**",
                 ],
@@ -547,6 +552,7 @@ def setup_cloudapi(build_enabled, expose):
                 ),
                 "ignore": [
                     "scripts/**",
+                    "tails/**",
                     "trustregistry/**",
                     "waypoint/**",
                 ],
@@ -575,6 +581,7 @@ def setup_cloudapi(build_enabled, expose):
                 "ignore": [
                     "app/**",
                     "scripts/**",
+                    "tails/**",
                     "waypoint/**",
                 ],
             },
@@ -596,6 +603,7 @@ def setup_cloudapi(build_enabled, expose):
                 "ignore": [
                     "app/**",
                     "scripts/**",
+                    "tails/**",
                     "trustregistry/**",
                 ],
             },
@@ -615,7 +623,23 @@ def setup_cloudapi(build_enabled, expose):
             "links": [
                 link("http://tails-server.cloudapi." + ingress_domain, "Tails"),
                 link("http://tails-server.cloudapi." + ingress_domain + "/docs", "Docs"),
-            ]
+            ],
+            "image": {
+                "dockerfile": "./dockerfiles/tails/Dockerfile",
+                "live_update": add_live_update(
+                    [
+                        ("./tails", "/tails"),
+                        ("./shared", "/shared"),
+                    ],
+                    enabled=build_enabled,
+                ),
+                "ignore": [
+                    "app/**",
+                    "scripts/**",
+                    "trustregistry/**",
+                    "waypoint/**",
+                ],
+            },
         },
         "driver-did-cheqd": {
             "flags": (
