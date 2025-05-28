@@ -11,8 +11,6 @@ podLabels:
 
 image:
   name: acapy-cloud/tails-server
-  # registry: ghcr.io/bcgov
-  # tag: 1.1
   pullPolicy: Always
   tag: master
 
@@ -23,20 +21,17 @@ ingress:
     className: nginx
     rules:
       - host: tails-server.{{ .Values.ingressDomain }}
-        paths:
-          - path: /
-            port: 6543
-
-args:
-  - tails-server
+command:
+  - poetry
+  - run
+  - uvicorn
+  - tails.main:app
+  - --log-config=/tmp/log_conf.yaml
+  - --reload
   - --host
   - 0.0.0.0
   - --port
   - 6543
-  - --storage-path
-  - /tails-server-db
-  - --log-level
-  - INFO
 
 service:
   port: 6543
@@ -44,19 +39,24 @@ service:
   appProtocol: tcp
 
 livenessProbe:
-  tcpSocket:
-    port: "{{ trunc 15 .Release.Name }}"
+  httpGet:
+    port: 6543
+    path: /health/live
 readinessProbe:
-  tcpSocket:
-    port: "{{ trunc 15 .Release.Name }}"
+  httpGet:
+    port: 6543
+    path: /health/ready
   initialDelaySeconds: 5
 
 persistence:
-  enabled: true
-  mountPath: /tails-server-db
-  capacity: 10Gi
-  storageClassName: standard
-  accessMode: ReadWriteOnce
+  enabled: false
+
+extraVolumes:
+  - name: tmp-tails
+    emptyDir: {}
+extraVolumeMounts:
+  - name: tmp-tails
+    mountPath: /tmp/tails
 
 podSecurityContext:
   fsGroup: 65534
