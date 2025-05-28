@@ -76,7 +76,7 @@ async def get_file_by_hash(
 @router.put("/hash/{tails_hash}")
 async def put_file_by_hash(
     tails_hash: str,
-    file: UploadFile = File(...),
+    tails: UploadFile = File(...),
 ):
     """Upload a single file to S3"""
 
@@ -91,7 +91,7 @@ async def put_file_by_hash(
             chunk_size = 8192  # 8KB chunks
 
             while True:
-                chunk = await file.read(chunk_size)
+                chunk = await tails.read(chunk_size)
                 if not chunk:
                     break
 
@@ -128,7 +128,7 @@ async def put_file_by_hash(
                 BUCKET_NAME,
                 tails_hash,
                 ExtraArgs={
-                    "ContentType": file.content_type or "application/octet-stream"
+                    "ContentType": tails.content_type or "application/octet-stream"
                 },
             )
 
