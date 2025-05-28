@@ -14,6 +14,14 @@ environments:
       pgAdmin:
         enabled: true
         ingress: {}
+      minio:
+        enabled: true
+        ingress:
+          ingressClassName: nginx
+          hostname: minio.127.0.0.1.nip.io
+        apiIngress:
+          ingressClassName: nginx
+          hostname: minio-api.127.0.0.1.nip.io
   dev:
     values:
     - namespace: acapy-cloud-dev
@@ -39,6 +47,15 @@ environments:
               paths:
                 - path: /
                   pathType: Prefix
+      minio:
+        enabled: true
+        ingress:
+          ingressClassName: nginx-internal
+          hostname: minio-acapy-cloud.dev.didxtech.com
+        apiIngress:
+          ingressClassName: nginx-internal
+          hostname: minio-api-acapy-cloud.dev.didxtech.com
+
 ---
 {{- $releases := list
   "governance-agent"
@@ -192,7 +209,7 @@ releases:
 
   # https://github.com/bitnami/charts/tree/main/bitnami/minio
   - name: minio
-    installed: {{ eq .Environment.Name "local" }}
+    installed: {{ .Values.minio.enabled }}
     namespace: {{ .Values.namespace }}
     chart: oci://registry-1.docker.io/bitnamicharts/minio
     version: 16.0.10
@@ -201,9 +218,9 @@ releases:
     values:
       - ./acapy-cloud/conf/minio.yaml
       - ingress:
-          hostname: minio.127.0.0.1.nip.io
-        apiIngress:
-          hostname: minio-api.127.0.0.1.nip.io
+          {{ toYaml .Values.minio.ingress | nindent 10 }}
+      - apiIngress:
+          {{ toYaml .Values.minio.apiIngress | nindent 10 }}
 ---
 repositories:
   - name: redpanda
