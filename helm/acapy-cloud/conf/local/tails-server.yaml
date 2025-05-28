@@ -1,6 +1,5 @@
 fullnameOverride: tails-server
 
-# Because we don't have a RWX StorageClass in the local Kind cluster
 replicaCount: 1
 
 podAnnotations:
@@ -45,6 +44,11 @@ service:
   containerPort: 6543
   appProtocol: tcp
 
+startupProbe:
+  httpGet:
+    port: 6543
+    path: /health/ready
+  initialDelaySeconds: 5
 livenessProbe:
   httpGet:
     port: 6543
@@ -53,7 +57,6 @@ readinessProbe:
   httpGet:
     port: 6543
     path: /health/ready
-  initialDelaySeconds: 5
 
 persistence:
   enabled: false
