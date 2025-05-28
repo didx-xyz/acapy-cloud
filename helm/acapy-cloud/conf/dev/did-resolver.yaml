@@ -36,3 +36,8 @@ env:
 
   RESOLVER_LISTENER: 0.0.0.0:8080
   LOG_LEVEL: warn
+
+podSecurityContext:
+  fsGroup: 65533
+securityContext:
+  runAsUser: 100

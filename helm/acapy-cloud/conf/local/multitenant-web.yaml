@@ -69,14 +69,14 @@ readinessProbe:
 #     memory: 256Mi
 
 initContainers:
-  - name: wait-governance-agent
+  - name: wait-multitenant-agent
     image: curlimages/curl
     command:
       - sh
       - -c
       - |
-        until curl -s {{ .Values.env.ACAPY_GOVERNANCE_AGENT_URL }} -o /dev/null; do
-          echo "waiting for governance-agent to be healthy"
+        until curl -s {{ .Values.env.ACAPY_TENANT_AGENT_URL }} -o /dev/null; do
+          echo "waiting for multitenant-agent to be healthy"
           sleep 2
         done
 
@@ -110,7 +110,7 @@ env:
 podSecurityContext:
   fsGroup: 65534
 securityContext:
-  runAsUser: 0
+  runAsUser: 65534
 
 extraVolumes:
   - name: logs

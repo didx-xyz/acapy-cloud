@@ -139,8 +139,6 @@ podSecurityContext:
   fsGroup: 1001
 securityContext:
   runAsUser: 1001
-  runAsNonRoot: true
-  readOnlyRootFilesystem: true
 
 persistence:
   enabled: false

@@ -36,3 +36,8 @@ env:
       secretKeyRef:
         name: cheqd-testnet-mnemonic
         key: mnemonic
+
+podSecurityContext:
+  fsGroup: 1000
+securityContext:
+  runAsUser: 1000

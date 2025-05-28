@@ -29,3 +29,8 @@ startupProbe:
 secretData:
   FEE_PAYER_TESTNET_MNEMONIC: "" # Cheqd did-registrar uses testnet faucet by default
   # FEE_PAYER_MAINNET_MNEMONIC: "..."
+
+podSecurityContext:
+  fsGroup: 1000
+securityContext:
+  runAsUser: 1000

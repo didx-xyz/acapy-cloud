@@ -36,3 +36,15 @@ readinessProbe:
 startupProbe:
   tcpSocket:
     port: 9080
+
+extraVolumes:
+  - name: tmp
+    emptyDir: {}
+extraVolumeMounts:
+  - name: tmp
+    mountPath: /tmp
+
+podSecurityContext:
+  fsGroup: 65534
+securityContext:
+  runAsUser: 65534
