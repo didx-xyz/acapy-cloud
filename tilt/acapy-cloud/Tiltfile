@@ -459,7 +459,7 @@ def setup_cloudapi(build_enabled, expose):
             },
         },
         "multitenant-agent": {
-            "depends": ["nats", "postgres", "did-registrar", "did-resolver", "minio"]],
+            "depends": ["nats", "postgres", "did-registrar", "did-resolver", "minio"],
             "links": [
                 link(
                     "http://multitenant-agent.cloudapi." + ingress_domain,
