@@ -96,7 +96,6 @@ persistence:
 autoscaling:
   enabled: false
 
-
 podLabels:
   admission.datadoghq.com/enabled: "true"
   sidecar.istio.io/inject: "true"
@@ -119,6 +118,7 @@ env:
 podSecurityContext:
   fsGroup: 65534
 securityContext:
+  readOnlyRootFilesystem: true
   runAsUser: 65534
 
 extraVolumes:

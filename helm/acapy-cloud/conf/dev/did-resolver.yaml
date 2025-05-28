@@ -40,4 +40,5 @@ env:
 podSecurityContext:
   fsGroup: 65533
 securityContext:
+  readOnlyRootFilesystem: true
   runAsUser: 100

@@ -10,8 +10,6 @@ podLabels:
 
 image:
   name: acapy-cloud/tails-server
-  # registry: ghcr.io/bcgov
-  # tag: 1.1
   pullPolicy: Always
   tag: master
 
@@ -22,20 +20,24 @@ ingress:
     className: nginx-internal
     rules:
       - host: tails-server-{{ .Values.ingressDomain }}
-        paths:
-          - path: /
-            port: 6543
-
-args:
-  - tails-server
+command:
+  - poetry
+  - run
+  - uvicorn
+  - tails.main:app
+  - --log-config=/tmp/log_conf.yaml
+  - --reload
   - --host
   - 0.0.0.0
   - --port
   - 6543
-  - --storage-path
-  - /tails-server-db
-  - --log-level
-  - INFO
+
+secretData:
+  AWS_ACCESS_KEY_ID: minio
+  AWS_SECRET_ACCESS_KEY: password
+env:
+  S3_BUCKET_NAME: acapy-cloud-public
+  S3_ENDPOINT_URL: http://minio:9000
 
 service:
   port: 6543
@@ -43,26 +45,29 @@ service:
   appProtocol: tcp
 
 livenessProbe:
-  tcpSocket:
-    port: "{{ trunc 15 .Release.Name }}"
+  httpGet:
+    port: 6543
+    path: /health/live
 readinessProbe:
-  tcpSocket:
-    port: "{{ trunc 15 .Release.Name }}"
+  httpGet:
+    port: 6543
+    path: /health/ready
   initialDelaySeconds: 5
 
-strategy:
-  type: Recreate
-
 persistence:
-  enabled: true
-  mountPath: /tails-server-db
-  capacity: 10Gi
-  storageClassName: gp3
-  accessMode: ReadWriteOnce
+  enabled: false
+
+extraVolumes:
+  - name: tmp-tails
+    emptyDir: {}
+extraVolumeMounts:
+  - name: tmp-tails
+    mountPath: /tmp/tails
 
 podSecurityContext:
   fsGroup: 65534
 securityContext:
+  readOnlyRootFilesystem: true
   runAsUser: 65534
 
 # resources:
@@ -72,3 +77,40 @@ securityContext:
 #   limits:
 #     cpu: 250m
 #     memory: 256Mi
+
+configFiles:
+  log_conf.yaml:
+    path: /tmp/log_conf.yaml
+    content: |-
+      version: 1
+      disable_existing_loggers: False
+      formatters:
+        default:
+          "()": uvicorn.logging.DefaultFormatter
+          format: '%(asctime)s %(name)s %(levelname)s %(message)s'
+          use_colors: null
+        access:
+          "()": uvicorn.logging.AccessFormatter
+          format: '%(asctime)s %(name)s %(levelname)s %(client_addr)s - "%(request_line)s" %(status_code)s'
+      handlers:
+        default:
+          formatter: default
+          class: logging.StreamHandler
+          stream: ext://sys.stderr
+        access:
+          formatter: access
+          class: logging.StreamHandler
+          stream: ext://sys.stdout
+      loggers:
+        uvicorn:
+          level: INFO
+          handlers:
+            - default
+          propagate: no
+        uvicorn.error:
+          level: INFO
+        uvicorn.access:
+          level: INFO
+          handlers:
+            - access
+          propagate: no
