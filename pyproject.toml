@@ -45,6 +45,7 @@ sqlalchemy = "~2.0.40"
 
 [tool.poetry.group.tails.dependencies]
 boto3 = "~1.38.24"
+python-multipart = "~0.0.20"
 
 [tool.poetry.group.waypoint.dependencies]
 aiohttp = "~3.12.0"
