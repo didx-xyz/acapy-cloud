@@ -75,3 +75,6 @@ NATS_STATE_STREAM = os.getenv("NATS_STATE_STREAM", "cloudapi_aries_state_monitor
 NATS_STATE_SUBJECT = os.getenv("NATS_STATE_SUBJECT", "cloudapi.aries.state_monitoring")
 NATS_CREDS_FILE = os.getenv("NATS_CREDS_FILE", "")
 ENDORSER_DURABLE_CONSUMER = os.getenv("ENDORSER_DURABLE_CONSUMER", "endorser")
+
+# S3
+BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "tails-bucket")
