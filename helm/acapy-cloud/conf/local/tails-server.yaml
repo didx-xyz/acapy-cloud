@@ -33,6 +33,13 @@ command:
   - --port
   - 6543
 
+secretData:
+  AWS_ACCESS_KEY_ID: minio
+  AWS_SECRET_ACCESS_KEY: password
+env:
+  S3_BUCKET_NAME: acapy-cloud-public
+  S3_ENDPOINT_URL: http://minio:9000
+
 service:
   port: 6543
   containerPort: 6543
