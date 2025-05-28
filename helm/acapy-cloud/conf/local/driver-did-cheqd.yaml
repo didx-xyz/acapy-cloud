@@ -33,5 +33,4 @@ secretData:
 podSecurityContext:
   fsGroup: 1000
 securityContext:
-  readOnlyRootFilesystem: false
   runAsUser: 1000
