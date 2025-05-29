@@ -119,7 +119,9 @@ async def put_file_by_hash(
             # plus the 2-byte version tag
             tmp_file.seek(0, 2)
             if (tmp_file.tell() - 2) % 128 != 0:
-                raise HTTPException(status_code=400, detail="Tails file is not the correct size.")
+                raise HTTPException(
+                    status_code=400, detail="Tails file is not the correct size."
+                )
 
             tmp_file.seek(0)  # Reset file pointer to the beginning
             # Upload file to S3
