@@ -1,8 +1,8 @@
 import os
 
 from fastapi import FastAPI
-from routers.tails import get_s3_client
-from routers.tails import router as tails_router
+from tails.routers.tails import get_s3_client
+from tails.routers.tails import router as tails_router
 from scalar_fastapi import get_scalar_api_reference
 
 from shared.constants import BUCKET_NAME, PROJECT_VERSION
@@ -49,7 +49,7 @@ async def health_live():
 
 
 @app.get("/health/ready")
-async def health_check():
+async def health_ready():
     """Health check endpoint"""
     try:
         s3_client = get_s3_client()
