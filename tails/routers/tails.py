@@ -119,7 +119,7 @@ async def put_file_by_hash(
             # plus the 2-byte version tag
             tmp_file.seek(0, 2)
             if (tmp_file.tell() - 2) % 128 != 0:
-                raise HTTPException(detail="Tails file is not the correct size.")
+                raise HTTPException(status_code=400, detail="Tails file is not the correct size.")
 
             tmp_file.seek(0)  # Reset file pointer to the beginning
             # Upload file to S3
@@ -140,29 +140,7 @@ async def put_file_by_hash(
         )
     except ClientError as e:
         raise HTTPException(status_code=500, detail=f"S3 upload failed: {str(e)}")
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
-
-
-# @router.put("/{revocation_reg_id}")
-# async def put_file(
-#     request: Request,
-#     file: UploadFile = File(...),
-# ):
-#     pass
-
-
-# @router.get("/match/{substring}")
-# async def match_files(
-#     request: Request,
-#     substring: str,
-# ):
-#     pass
-
-
-# @router.get("/{revocation_reg_id}")
-# async def get_file(
-#     request: Request,
-#     revocation_reg_id: str,
-# ):
-#     pass
