@@ -1,12 +1,12 @@
 import os
 
 from fastapi import FastAPI
-from tails.routers.tails import get_s3_client
-from tails.routers.tails import router as tails_router
 from scalar_fastapi import get_scalar_api_reference
 
 from shared.constants import BUCKET_NAME, PROJECT_VERSION
 from shared.log_config import get_logger
+from tails.routers.tails import get_s3_client
+from tails.routers.tails import router as tails_router
 
 logger = get_logger(__name__)
 

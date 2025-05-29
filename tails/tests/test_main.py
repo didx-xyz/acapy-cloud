@@ -1,6 +1,8 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
-from tails.main import scalar_html, health_live, health_ready
+
+from tails.main import health_live, health_ready, scalar_html
 
 
 @pytest.mark.anyio
