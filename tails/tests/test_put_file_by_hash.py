@@ -9,7 +9,7 @@ from tails.routers.tails import put_file_by_hash
 
 
 @pytest.mark.anyio
-async def test_put_file_by_hash_success(tmp_path):
+async def test_put_file_by_hash_success():
     tails_hash = "testhash"
     file_content = b"\x00\x02" + b"a" * 128  # valid start, valid size
     mock_upload_file = AsyncMock()
