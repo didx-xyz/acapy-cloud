@@ -4,8 +4,6 @@ from aries_cloudcontroller import (
     ApiException,
     GetDIDEndpointResponse,
     GetSchemaResult,
-    ModelSchema,
-    SchemaGetResult,
     TAAInfo,
     TAARecord,
     TAAResult,

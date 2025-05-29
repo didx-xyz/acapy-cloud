@@ -5,8 +5,6 @@ from aries_cloudcontroller import (
     AcaPyClient,
     AnonCredsSchema,
     GetSchemaResult,
-    ModelSchema,
-    SchemaGetResult,
 )
 
 from app.models.definitions import CredentialSchema

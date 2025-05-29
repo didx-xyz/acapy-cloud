@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from aries_cloudcontroller import (
@@ -6,8 +6,6 @@ from aries_cloudcontroller import (
     CredDefResult,
     CredDefState,
     CredentialDefinitionSendRequest,
-    CredentialDefinitionSendResult,
-    TxnOrCredentialDefinitionSendResult,
 )
 
 from app.models.definitions import CreateCredentialDefinition

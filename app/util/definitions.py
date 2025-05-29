@@ -1,4 +1,3 @@
-from aries_cloudcontroller import CredentialDefinition as AcaPyCredentialDefinition
 from aries_cloudcontroller import (
     GetCredDefResult,
     GetSchemaResult,

@@ -3,7 +3,6 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from aries_cloudcontroller import AcaPyClient
 
-from app.exceptions import CloudApiException
 from app.models.definitions import CredentialSchema
 from app.services.definitions.schemas import get_schemas_as_tenant
 

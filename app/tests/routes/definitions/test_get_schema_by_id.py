@@ -12,7 +12,6 @@ from aries_cloudcontroller.exceptions import BadRequestException
 from fastapi import HTTPException
 
 from app.dependencies.auth import AcaPyAuth
-from app.dependencies.role import Role
 from app.models.definitions import CredentialSchema
 from app.routes.definitions import get_schema
 
