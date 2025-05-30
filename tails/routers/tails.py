@@ -86,7 +86,7 @@ async def put_file_by_hash(
         s3_client = get_s3_client()
 
         # Use temporary file to calculate hash and validate content
-        with tempfile.NamedTemporaryFile(dir="/tmp/tails") as tmp_file:
+        with tempfile.TemporaryFile(dir="/tmp/tails") as tmp_file:
             # Read file in chunks to avoid memory issues
             chunk_size = 8192  # 8KB chunks
 
