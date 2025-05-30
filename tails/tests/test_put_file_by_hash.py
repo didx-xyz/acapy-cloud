@@ -18,7 +18,7 @@ async def test_put_file_by_hash_success():
 
     mock_s3_client = MagicMock()
     with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
-        with patch("tempfile.NamedTemporaryFile") as mock_tmpfile:
+        with patch("tempfile.TemporaryFile") as mock_tmpfile:
             # Setup temp file mock
             tmp_file = MagicMock()
             tmp_file.__enter__.return_value = tmp_file
@@ -56,7 +56,7 @@ async def test_put_file_by_hash_hash_mismatch():
 
     mock_s3_client = MagicMock()
     with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
-        with patch("tempfile.NamedTemporaryFile") as mock_tmpfile:
+        with patch("tempfile.TemporaryFile") as mock_tmpfile:
             tmp_file = MagicMock()
             tmp_file.__enter__.return_value = tmp_file
             tmp_file.read.side_effect = [b"\x00\x02", file_content, b""]
@@ -87,7 +87,7 @@ async def test_put_file_by_hash_invalid_start():
 
     mock_s3_client = MagicMock()
     with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
-        with patch("tempfile.NamedTemporaryFile") as mock_tmpfile:
+        with patch("tempfile.TemporaryFile") as mock_tmpfile:
             tmp_file = MagicMock()
             tmp_file.__enter__.return_value = tmp_file
             tmp_file.read.side_effect = [b"\x01\x02", file_content, b""]
@@ -118,7 +118,7 @@ async def test_put_file_by_hash_invalid_size():
 
     mock_s3_client = MagicMock()
     with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
-        with patch("tempfile.NamedTemporaryFile") as mock_tmpfile:
+        with patch("tempfile.TemporaryFile") as mock_tmpfile:
             tmp_file = MagicMock()
             tmp_file.__enter__.return_value = tmp_file
             tmp_file.read.side_effect = [b"\x00\x02", file_content, b""]
@@ -150,7 +150,7 @@ async def test_put_file_by_hash_s3_error():
     with patch("tails.routers.tails.get_s3_client") as mock_get_s3_client:
         mock_s3_client = MagicMock()
         mock_get_s3_client.return_value = mock_s3_client
-        with patch("tempfile.NamedTemporaryFile") as mock_tmpfile:
+        with patch("tempfile.TemporaryFile") as mock_tmpfile:
             tmp_file = MagicMock()
             tmp_file.__enter__.return_value = tmp_file
             tmp_file.read.side_effect = [b"\x00\x02", file_content, b""]
