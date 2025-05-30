@@ -78,3 +78,8 @@ extraVolumeMounts:
   - name: resources
     mountPath: /resources
     readOnly: true
+
+podSecurityContext:
+  fsGroup: 10001
+securityContext:
+  runAsUser: 10001

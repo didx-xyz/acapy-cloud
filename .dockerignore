@@ -8,6 +8,7 @@
 !shared/
 !endorser/
 !scripts/
+!tails/
 !trustregistry/
 !waypoint/
 !LICENSE

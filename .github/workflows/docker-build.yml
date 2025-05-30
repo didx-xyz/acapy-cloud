@@ -42,8 +42,8 @@ jobs:
             context: .
             file: dockerfiles/tests/Dockerfile
           - image: tails-server
-            context: https://github.com/bcgov/indy-tails-server.git#v1.1.2
-            file: docker/Dockerfile.tails-server
+            context: .
+            file: dockerfiles/tails/Dockerfile
           - image: trust-registry
             context: .
             file: dockerfiles/trustregistry/Dockerfile
@@ -114,8 +114,8 @@ jobs:
             file: dockerfiles/tests/Dockerfile
             platforms: linux/amd64,linux/arm64
           - image: tails-server
-            context: https://github.com/bcgov/indy-tails-server.git#v1.1.2
-            file: docker/Dockerfile.tails-server
+            context: .
+            file: dockerfiles/tails/Dockerfile
             platforms: linux/amd64,linux/arm64
           - image: trust-registry
             context: .

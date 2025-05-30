@@ -1,12 +1,12 @@
 # https://mise.jdx.dev
 [tools]
 "aqua:nats-io/natscli" = "0.2"
-helm = "3.17"
+helm = "3.18.1"
 helmfile = "1"
 istioctl = "1.25"
 jq = "latest"
-kind = "0.27"
-kubectl = "1.32"
+kind = "0.29"
+kubectl = "1.33"
 poetry = "2.1"
 pre-commit = "4.2"
 python = "3.12"

@@ -163,6 +163,9 @@ jobs:
       - name: Mediator Logs
         if: always()
         run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=mediator --tail 10000
+      - name: MinIO Logs
+        if: always()
+        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=minio --tail 10000
       - name: Multitenant Agent Logs
         if: always()
         run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=multitenant-agent --tail 10000

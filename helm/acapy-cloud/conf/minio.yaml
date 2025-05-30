@@ -1,0 +1,33 @@
+fullnameOverride: minio
+
+auth:
+  rootUser: minio # minimum length of 3
+  rootPassword: password # minimum length of 8
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  hostname: minio.127.0.0.1.nip.io
+
+apiIngress:
+  enabled: true
+  ingressClassName: nginx
+  hostname: minio-api.127.0.0.1.nip.io
+
+persistence:
+  enabled: true
+  storageClass: ""
+  size: 8Gi
+
+provisioning:
+  enabled: true
+  podLabels:
+    sidecar.istio.io/inject: "false"
+  buckets:
+    - name: acapy-cloud-public
+  extraCommands:
+    - mc anonymous set download provisioning/acapy-cloud-public
+    - mc anonymous get provisioning/acapy-cloud-public
+
+podLabels:
+  sidecar.istio.io/inject: "false"

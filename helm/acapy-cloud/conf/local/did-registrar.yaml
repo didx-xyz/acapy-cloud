@@ -41,3 +41,15 @@ startupProbe:
 env:
   LOGGING_LEVEL_ROOT: WARN
   LOGGING_LEVEL_uniregistrar: WARN
+
+extraVolumes:
+  - name: tmp
+    emptyDir: {}
+extraVolumeMounts:
+  - name: tmp
+    mountPath: /tmp
+
+podSecurityContext:
+  fsGroup: 65534
+securityContext:
+  runAsUser: 65534
