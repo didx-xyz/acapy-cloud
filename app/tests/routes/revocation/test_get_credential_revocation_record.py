@@ -60,7 +60,7 @@ async def test_get_credential_revocation_record_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
 ):
     mock_aries_controller = AsyncMock()
-    mock_aries_controller.revocation.get_revocation_status = AsyncMock(
+    mock_aries_controller.anoncreds_revocation.get_cred_rev_record = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
 
@@ -68,10 +68,7 @@ async def test_get_credential_revocation_record_fail_acapy_error(
         "app.routes.revocation.client_from_auth"
     ) as mock_client_from_auth, pytest.raises(
         HTTPException, match=expected_detail
-    ) as exc, patch(
-        "app.services.revocation_registry.get_wallet_type"
-    ) as mock_get_wallet_type:
-        mock_get_wallet_type.return_value = "askar"
+    ) as exc:
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )

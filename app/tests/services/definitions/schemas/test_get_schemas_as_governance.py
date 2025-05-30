@@ -148,22 +148,3 @@ async def test_get_schemas_as_governance_anoncreds():
         assert len(result) == 2
         assert all(isinstance(schema, CredentialSchema) for schema in result)
         assert [schema.id for schema in result] == mock_schema_ids
-
-
-@pytest.mark.anyio
-async def test_get_schemas_as_governance_unsupported_wallet_type():
-    mock_aries_controller = AsyncMock()
-    mock_aries_controller.configuration.host = "https://governance-agent-url"
-    mock_aries_controller.server.get_config = AsyncMock(
-        return_value=AdminConfig(config={"wallet.type": "unsupported"})
-    )
-
-    with patch(
-        "app.services.definitions.schemas.GOVERNANCE_AGENT_URL",
-        "https://governance-agent-url",
-    ):
-        with pytest.raises(CloudApiException) as exc_info:
-            await get_schemas_as_governance(mock_aries_controller)
-
-        assert exc_info.value.status_code == 500
-        assert "Wallet type not supported. Cannot get schemas." in str(exc_info.value)

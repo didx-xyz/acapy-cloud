@@ -28,8 +28,7 @@ from app.tests.routes.issuer.test_create_offer import anoncreds_cred, ld_cred
         ),
     ],
 )
-@pytest.mark.parametrize("wallet_type", ["askar-anoncreds"])
-async def test_send_credential_success(credential, wallet_type):
+async def test_send_credential_success(credential):
     mock_aries_controller = AsyncMock()
     mock_aries_controller.issue_credential_v2_0.issue_credential_automated = AsyncMock()
 
@@ -42,28 +41,14 @@ async def test_send_credential_success(credential, wallet_type):
         return_value="schema_id",
     ), patch(
         "app.routes.issuer.assert_valid_issuer"
-    ), patch(
-        "app.util.valid_issuer.get_wallet_type", return_value=wallet_type
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )
 
-        if (
-            credential.get_credential_type() == "anoncreds"
-            and wallet_type != "askar-anoncreds"
-        ):
-            with pytest.raises(CloudApiException) as exc:
-                await send_credential(credential=credential, auth="mocked_auth")
-            assert exc.value.status_code == 400
-            assert (
-                exc.value.detail
-                == "AnonCreds credentials can only be issued by an askar-anoncreds wallet"
-            )
-        else:
-            await send_credential(credential=credential, auth="mocked_auth")
+        await send_credential(credential=credential, auth="mocked_auth")
 
-            mock_aries_controller.issue_credential_v2_0.issue_credential_automated.assert_awaited_once()
+        mock_aries_controller.issue_credential_v2_0.issue_credential_automated.assert_awaited_once()
 
 
 @pytest.mark.anyio
@@ -94,8 +79,6 @@ async def test_send_credential_fail_acapy_error(
         return_value="schema_id",
     ), patch(
         "app.routes.issuer.assert_valid_issuer"
-    ), patch(
-        "app.util.valid_issuer.get_wallet_type", return_value="askar-anoncreds"
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller

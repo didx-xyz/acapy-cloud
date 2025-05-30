@@ -18,7 +18,6 @@ from app.models.issuer import (
 from app.models.revocation import RevRegWalletUpdatedResult
 from app.services import revocation_registry
 from app.util.retry_method import coroutine_with_retry_until_value
-from app.util.wallet_type_checks import get_wallet_type
 from shared import PUBLISH_REVOCATIONS_TIMEOUT
 from shared.log_config import get_logger
 
@@ -273,16 +272,13 @@ async def clear_pending_revocations(
         ClearPendingRevocationsResult
             The revocations that are still pending after the clear request is performed
     """
+    raise CloudApiException(
+        "Clearing pending revocations is not yet supported for AnonCreds.", 501
+    )
     bound_logger = logger.bind(body=clear_pending_request)
     bound_logger.debug("POST request received: Clear pending revocations")
 
     async with client_from_auth(auth) as aries_controller:
-        wallet_type = await get_wallet_type(aries_controller, bound_logger)
-        if wallet_type == "askar-anoncreds":
-            raise CloudApiException(
-                "Clearing pending revocations is not supported for the 'anoncreds' wallet type.",
-                501,
-            )
         bound_logger.debug("Clearing pending revocations")
         response = await revocation_registry.clear_pending_revocations(
             controller=aries_controller,
@@ -373,18 +369,9 @@ async def fix_revocation_registry_entry_state(
     bound_logger.debug("PUT request received: Fix revocation registry entry state")
 
     async with client_from_auth(auth) as aries_controller:
-        wallet_type = await get_wallet_type(aries_controller, bound_logger)
-        if wallet_type == "askar-anoncreds":
-            acapy_call = (
-                aries_controller.anoncreds_revocation.update_rev_reg_revoked_state
-            )
-
-        else:  # wallet_type == "askar":
-            acapy_call = aries_controller.revocation.update_rev_reg_revoked_state
-
         response = await handle_acapy_call(
             logger=bound_logger,
-            acapy_call=acapy_call,
+            acapy_call=aries_controller.anoncreds_revocation.update_rev_reg_revoked_state,
             rev_reg_id=revocation_registry_id,
             apply_ledger_update=apply_ledger_update,
         )

@@ -18,7 +18,7 @@ from app.util.pagination import (
     order_by_query_parameter,
 )
 from app.util.save_exchange_record import save_exchange_record_query
-from app.util.valid_issuer import assert_public_did_and_wallet_type
+from app.util.valid_issuer import assert_issuer_public_did
 from shared.log_config import get_logger
 from shared.models.credential_exchange import CredentialExchange, Role, State
 
@@ -74,16 +74,13 @@ async def send_credential(
 
     async with client_from_auth(auth) as aries_controller:
         # Assert the agent has a public did, and using valid wallet type
-        public_did, wallet_type = await assert_public_did_and_wallet_type(
-            aries_controller, bound_logger
-        )
+        public_did = await assert_issuer_public_did(aries_controller, bound_logger)
 
         schema_id = None
         if credential_type == "anoncreds":
             schema_id = await schema_id_from_credential_definition_id(
                 aries_controller,
                 credential.anoncreds_credential_detail.credential_definition_id,
-                wallet_type,
             )
             if not credential.anoncreds_credential_detail.issuer_did:
                 credential.anoncreds_credential_detail.issuer_did = public_did
@@ -158,16 +155,13 @@ async def create_offer(
 
     async with client_from_auth(auth) as aries_controller:
         # Assert the agent has a public did, and using valid wallet type
-        public_did, wallet_type = await assert_public_did_and_wallet_type(
-            aries_controller, bound_logger
-        )
+        public_did = await assert_issuer_public_did(aries_controller, bound_logger)
 
         schema_id = None
         if credential_type == "anoncreds":
             schema_id = await schema_id_from_credential_definition_id(
                 aries_controller,
                 credential.anoncreds_credential_detail.credential_definition_id,
-                wallet_type,
             )
             if not credential.anoncreds_credential_detail.issuer_did:
                 credential.anoncreds_credential_detail.issuer_did = public_did
