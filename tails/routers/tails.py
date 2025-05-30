@@ -68,7 +68,7 @@ async def get_file_by_hash(
         )
 
     except ClientError as e:
-        if e.response["Error"]["Code"] == "NoSuchKey":
+        if e.response["Error"]["Code"] == "404":
             raise HTTPException(status_code=404, detail="File not found")
         raise HTTPException(status_code=500, detail=f"S3 download failed: {str(e)}")
 
