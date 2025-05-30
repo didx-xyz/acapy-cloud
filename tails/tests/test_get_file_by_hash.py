@@ -47,7 +47,7 @@ async def test_get_file_by_hash_success():
 async def test_get_file_by_hash_not_found():
     tails_hash = "notfound"
 
-    error_response = {"Error": {"Code": "NoSuchKey"}}
+    error_response = {"Error": {"Code": "404", "Message": "Not Found"}}
     with patch("tails.routers.tails.get_s3_client") as mock_get_s3_client:
         mock_s3_client = MagicMock()
         mock_get_s3_client.return_value = mock_s3_client
