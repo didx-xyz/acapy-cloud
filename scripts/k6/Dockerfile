@@ -1,4 +1,4 @@
-FROM docker.io/golang:1.24-alpine@sha256:ef18ee7117463ac1055f5a370ed18b8750f01589f13ea0b48642f5792b234044 AS builder
+FROM docker.io/golang:1.24-alpine@sha256:2853d623ec1c92b54a34e783ce77ce354eb58e56979fe35c117bdaa45de12807 AS builder
 
 WORKDIR /app
 
