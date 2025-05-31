@@ -64,7 +64,7 @@ pylint = "~3.3.0"
 pytest = "~8.3.2"
 pytest-cov = "~6.1.0"
 pytest-mock = "~3.14.0"
-pytest-xdist = "^3.6.1"
+pytest-xdist = "^3.7.0"
 
 [tool.coverage.run]
 omit = ["*/tests/*"]
