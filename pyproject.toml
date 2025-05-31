@@ -39,7 +39,7 @@ nats-py = { git = "https://github.com/ff137/nats.py", tag = "v2.10.0-w-orjson", 
 tenacity = "^9.1.0"
 
 [tool.poetry.group.trust-registry.dependencies]
-alembic = "~1.15.0"
+alembic = "~1.16.1"
 psycopg2-binary = "~2.9.6"
 sqlalchemy = "~2.0.40"
 
