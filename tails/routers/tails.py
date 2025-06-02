@@ -85,6 +85,18 @@ async def put_file_by_hash(
     try:
         s3_client = get_s3_client()
 
+        # Check if the file already exists
+        try:
+            s3_client.head_object(Bucket=BUCKET_NAME, Key=tails_hash)
+            raise HTTPException(
+                status_code=409, detail=f"File with hash {tails_hash} already exists."
+            )
+        except ClientError as e:
+            if e.response["Error"]["Code"] != "404":
+                raise HTTPException(
+                    status_code=500, detail=f"Error checking file existence: {str(e)}"
+                )
+
         # Use temporary file to calculate hash and validate content
         with tempfile.TemporaryFile(dir="/tmp/tails") as tmp_file:
             # Read file in chunks to avoid memory issues
