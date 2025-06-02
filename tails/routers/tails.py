@@ -116,9 +116,7 @@ async def put_file_by_hash(
 
             # Validate hash matches expected
             if tails_hash != b58_digest:
-                logger.error(
-                    f"Hash mismatch: Expected {tails_hash}, got {b58_digest}"
-                )
+                logger.error(f"Hash mismatch: Expected {tails_hash}, got {b58_digest}")
                 raise HTTPException(
                     status_code=400,
                     detail=f"Hash mismatch. Expected: {tails_hash}, Got: {b58_digest}",
