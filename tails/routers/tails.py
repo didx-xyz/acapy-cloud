@@ -75,7 +75,6 @@ async def get_file_by_hash(
 
 @router.put("/hash/{tails_hash}")
 async def put_file_by_hash(
-    request: Request,
     tails_hash: str,
     tails: UploadFile = File(...),
 ):
@@ -84,8 +83,6 @@ async def put_file_by_hash(
     sha256 = hashlib.sha256()
 
     try:
-        logger.debug(f"Content-Type: {request.headers.get('content-type')}")
-        logger.debug(f"Content-Length: {request.headers.get('content-length')}")
         logger.debug(f"File name: {tails.filename}")
 
         s3_client = get_s3_client()
@@ -111,7 +108,6 @@ async def put_file_by_hash(
             chunk_size = 8192  # 8KB chunks
 
             while True:
-                logger.debug("Reading chunk from upload file")
                 chunk = await tails.read(chunk_size)
                 if not chunk:
                     break
