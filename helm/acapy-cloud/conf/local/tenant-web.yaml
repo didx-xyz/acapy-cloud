@@ -134,9 +134,13 @@ securityContext:
 extraVolumes:
   - name: logs
     emptyDir: {}
+  - name: tmp
+    emptyDir: {}
 extraVolumeMounts:
   - name: logs
     mountPath: /logs
+  - name: tmp
+    mountPath: /tmp
 
 lifecycle:
   preStop:
