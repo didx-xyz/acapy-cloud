@@ -63,7 +63,7 @@ podLabels:
   admission.datadoghq.com/enabled: "false" # disabled by default (for now)
 podAnnotations:
   # gcr.io/datadoghq/dd-lib-python-init
-  admission.datadoghq.com/python-lib.version: v3.6.0
+  admission.datadoghq.com/python-lib.version: v3.8.1
   ad.datadoghq.com/istio-proxy.logs: '[{ "source": "envoy", "service": "{{ include "acapy-cloud.fullname" . }}" }]'
   ad.datadoghq.com/istio-init.logs: '[{ "source": "envoy", "service": "{{ include "acapy-cloud.fullname" . }}" }]'
 
