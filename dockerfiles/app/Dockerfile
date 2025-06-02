@@ -5,16 +5,16 @@ WORKDIR /app
 COPY poetry.lock /app
 COPY pyproject.toml /app
 
-ARG POETRY_VERSION=2.1.1
+ARG POETRY_VERSION=2.1.3
 RUN pip install --no-cache-dir poetry==${POETRY_VERSION}
 # Set Poetry's cache and virtualenvs path to a writable directory
-ENV POETRY_CACHE_DIR=/tmp/.cache/pypoetry
+ENV POETRY_CACHE_DIR=/poetry
 RUN poetry config cache-dir "$POETRY_CACHE_DIR" && \
   poetry config virtualenvs.path "$POETRY_CACHE_DIR/virtualenvs" && \
   poetry install --only main,app
 
-COPY app /app
-COPY shared /shared
+COPY --chown=65534:65534 app /app
+COPY --chown=65534:65534 shared /shared
 
 EXPOSE 8000
 

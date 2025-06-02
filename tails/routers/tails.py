@@ -102,7 +102,7 @@ async def put_file_by_hash(
                 )
 
         # Use temporary file to calculate hash and validate content
-        with tempfile.TemporaryFile(dir="/tmp/tails") as tmp_file:
+        with tempfile.TemporaryFile() as tmp_file:
             logger.debug("Using temporary file for hash calculation and validation")
             # Read file in chunks to avoid memory issues
             chunk_size = 8192  # 8KB chunks
