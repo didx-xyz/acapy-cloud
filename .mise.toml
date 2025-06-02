@@ -1,9 +1,9 @@
 # https://mise.jdx.dev
 [tools]
 "aqua:nats-io/natscli" = "0.2"
-helm = "3.18.1"
+helm = "3"
 helmfile = "1"
-istioctl = "1.25"
+istioctl = "1.26"
 jq = "latest"
 kind = "0.29"
 kubectl = "1.33"

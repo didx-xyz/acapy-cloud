@@ -62,11 +62,15 @@ persistence:
   enabled: false
 
 extraVolumes:
-  - name: tmp-tails
+  - name: logs
+    emptyDir: {}
+  - name: tmp
     emptyDir: {}
 extraVolumeMounts:
-  - name: tmp-tails
-    mountPath: /tmp/tails
+  - name: logs
+    mountPath: /logs
+  - name: tmp
+    mountPath: /tmp
 
 podSecurityContext:
   fsGroup: 65534

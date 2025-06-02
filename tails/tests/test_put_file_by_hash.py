@@ -17,6 +17,10 @@ async def test_put_file_by_hash_success():
     mock_upload_file.content_type = "application/octet-stream"
 
     mock_s3_client = MagicMock()
+    # Mock head_object to raise 404 (file doesn't exist)
+    error_response = {"Error": {"Code": "404", "Message": "Not Found"}}
+    mock_s3_client.head_object.side_effect = ClientError(error_response, "head_object")
+
     with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
         with patch("tempfile.TemporaryFile") as mock_tmpfile:
             # Setup temp file mock
@@ -47,6 +51,26 @@ async def test_put_file_by_hash_success():
 
 
 @pytest.mark.anyio
+async def test_put_file_by_hash_already_exists():
+    """Test that we get 409 when file already exists"""
+    tails_hash = "existinghash"
+    file_content = b"\x00\x02" + b"a" * 128
+    mock_upload_file = AsyncMock()
+    mock_upload_file.read = AsyncMock(side_effect=[file_content, b""])
+    mock_upload_file.content_type = "application/octet-stream"
+
+    mock_s3_client = MagicMock()
+    # Mock head_object to succeed (file exists)
+    mock_s3_client.head_object.return_value = {"ContentLength": 130}
+
+    with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
+        with pytest.raises(HTTPException) as exc:
+            await put_file_by_hash(tails_hash, mock_upload_file)
+        assert exc.value.status_code == 409
+        assert f"File with hash {tails_hash} already exists" in exc.value.detail
+
+
+@pytest.mark.anyio
 async def test_put_file_by_hash_hash_mismatch():
     tails_hash = "expectedhash"
     file_content = b"\x00\x02" + b"a" * 128
@@ -55,6 +79,10 @@ async def test_put_file_by_hash_hash_mismatch():
     mock_upload_file.content_type = "application/octet-stream"
 
     mock_s3_client = MagicMock()
+    # Mock head_object to raise 404 (file doesn't exist)
+    error_response = {"Error": {"Code": "404", "Message": "Not Found"}}
+    mock_s3_client.head_object.side_effect = ClientError(error_response, "head_object")
+
     with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
         with patch("tempfile.TemporaryFile") as mock_tmpfile:
             tmp_file = MagicMock()
@@ -86,6 +114,10 @@ async def test_put_file_by_hash_invalid_start():
     mock_upload_file.content_type = "application/octet-stream"
 
     mock_s3_client = MagicMock()
+    # Mock head_object to raise 404 (file doesn't exist)
+    error_response = {"Error": {"Code": "404", "Message": "Not Found"}}
+    mock_s3_client.head_object.side_effect = ClientError(error_response, "head_object")
+
     with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
         with patch("tempfile.TemporaryFile") as mock_tmpfile:
             tmp_file = MagicMock()
@@ -117,6 +149,10 @@ async def test_put_file_by_hash_invalid_size():
     mock_upload_file.content_type = "application/octet-stream"
 
     mock_s3_client = MagicMock()
+    # Mock head_object to raise 404 (file doesn't exist)
+    error_response = {"Error": {"Code": "404", "Message": "Not Found"}}
+    mock_s3_client.head_object.side_effect = ClientError(error_response, "head_object")
+
     with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
         with patch("tempfile.TemporaryFile") as mock_tmpfile:
             tmp_file = MagicMock()
@@ -150,6 +186,12 @@ async def test_put_file_by_hash_s3_error():
     with patch("tails.routers.tails.get_s3_client") as mock_get_s3_client:
         mock_s3_client = MagicMock()
         mock_get_s3_client.return_value = mock_s3_client
+        # Mock head_object to raise 404 (file doesn't exist)
+        not_found_response = {"Error": {"Code": "404", "Message": "Not Found"}}
+        mock_s3_client.head_object.side_effect = ClientError(
+            not_found_response, "head_object"
+        )
+
         with patch("tempfile.TemporaryFile") as mock_tmpfile:
             tmp_file = MagicMock()
             tmp_file.__enter__.return_value = tmp_file
@@ -187,3 +229,24 @@ async def test_put_file_by_hash_generic_error():
             await put_file_by_hash(tails_hash, mock_upload_file)
         assert exc.value.status_code == 500
         assert "Upload failed" in exc.value.detail
+
+
+@pytest.mark.anyio
+async def test_put_file_by_hash_head_object_other_error():
+    """Test that non-404 errors from head_object are handled properly"""
+    tails_hash = "testhash"
+    file_content = b"\x00\x02" + b"a" * 128
+    mock_upload_file = AsyncMock()
+    mock_upload_file.read = AsyncMock(side_effect=[file_content, b""])
+    mock_upload_file.content_type = "application/octet-stream"
+
+    mock_s3_client = MagicMock()
+    # Mock head_object to raise a non-404 error
+    error_response = {"Error": {"Code": "403", "Message": "Forbidden"}}
+    mock_s3_client.head_object.side_effect = ClientError(error_response, "head_object")
+
+    with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
+        with pytest.raises(HTTPException) as exc:
+            await put_file_by_hash(tails_hash, mock_upload_file)
+        assert exc.value.status_code == 500
+        assert "Error checking file existence" in exc.value.detail

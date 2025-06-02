@@ -83,10 +83,27 @@ async def put_file_by_hash(
     sha256 = hashlib.sha256()
 
     try:
+        logger.debug(f"File name: {tails.filename}")
+
         s3_client = get_s3_client()
 
+        # Check if the file already exists
+        try:
+            logger.debug(f"Checking if file with hash {tails_hash} exists in S3")
+            s3_client.head_object(Bucket=BUCKET_NAME, Key=tails_hash)
+            raise HTTPException(
+                status_code=409, detail=f"File with hash {tails_hash} already exists."
+            )
+        except ClientError as e:
+            if e.response["Error"]["Code"] != "404":
+                logger.error(f"Error checking file existence: {str(e)}")
+                raise HTTPException(
+                    status_code=500, detail=f"Error checking file existence: {str(e)}"
+                )
+
         # Use temporary file to calculate hash and validate content
-        with tempfile.TemporaryFile(dir="/tmp/tails") as tmp_file:
+        with tempfile.TemporaryFile() as tmp_file:
+            logger.debug("Using temporary file for hash calculation and validation")
             # Read file in chunks to avoid memory issues
             chunk_size = 8192  # 8KB chunks
 
@@ -98,31 +115,39 @@ async def put_file_by_hash(
                 sha256.update(chunk)
                 tmp_file.write(chunk)
 
+            logger.debug("Finished reading upload file")
+            logger.debug(f"SHA256 hash of uploaded file: {sha256.hexdigest()}")
             # Calculate final hash
             digest = sha256.digest()
             b58_digest = base58.b58encode(digest).decode("utf-8")
 
             # Validate hash matches expected
             if tails_hash != b58_digest:
+                logger.error(f"Hash mismatch: Expected {tails_hash}, got {b58_digest}")
                 raise HTTPException(
                     status_code=400,
                     detail=f"Hash mismatch. Expected: {tails_hash}, Got: {b58_digest}",
                 )
 
+            logger.debug("Checking file content starts with '00 02'")
             tmp_file.seek(0)
             if tmp_file.read(2) != b"\x00\x02":
+                logger.error("File does not start with '00 02'")
                 raise HTTPException(
                     status_code=400, detail='File must start with "00 02".'
                 )
 
             # Since each tail is 128 bytes, tails file size must be a multiple of 128
             # plus the 2-byte version tag
+            logger.debug("Checking file size is a multiple of 128 bytes")
             tmp_file.seek(0, 2)
             if (tmp_file.tell() - 2) % 128 != 0:
+                logger.error("Tails file is not the correct size.")
                 raise HTTPException(
                     status_code=400, detail="Tails file is not the correct size."
                 )
 
+            logger.debug("File content validated successfully, uploading to S3")
             tmp_file.seek(0)  # Reset file pointer to the beginning
             # Upload file to S3
             s3_client.upload_fileobj(

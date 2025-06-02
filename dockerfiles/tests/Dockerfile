@@ -7,7 +7,7 @@ COPY poetry.lock cloudapi-tests/
 WORKDIR /cloudapi-tests
 
 # Install all dependencies
-ARG POETRY_VERSION=2.1.1
+ARG POETRY_VERSION=2.1.3
 RUN pip install --no-cache-dir poetry==${POETRY_VERSION}
 
 ENV POETRY_VIRTUALENVS_CREATE=false
