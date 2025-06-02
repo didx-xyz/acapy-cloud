@@ -5,7 +5,7 @@ import tempfile
 import base58
 from boto3 import client as boto_client
 from botocore.exceptions import ClientError
-from fastapi import File, HTTPException, Request, UploadFile
+from fastapi import File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from shared import APIRouter
