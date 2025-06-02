@@ -116,6 +116,9 @@ async def put_file_by_hash(
 
             # Validate hash matches expected
             if tails_hash != b58_digest:
+                logger.error(
+                    f"Hash mismatch: Expected {tails_hash}, got {b58_digest}"
+                )
                 raise HTTPException(
                     status_code=400,
                     detail=f"Hash mismatch. Expected: {tails_hash}, Got: {b58_digest}",
@@ -123,6 +126,7 @@ async def put_file_by_hash(
 
             tmp_file.seek(0)
             if tmp_file.read(2) != b"\x00\x02":
+                logger.error("File does not start with '00 02'")
                 raise HTTPException(
                     status_code=400, detail='File must start with "00 02".'
                 )
@@ -131,6 +135,7 @@ async def put_file_by_hash(
             # plus the 2-byte version tag
             tmp_file.seek(0, 2)
             if (tmp_file.tell() - 2) % 128 != 0:
+                logger.error("Tails file is not the correct size.")
                 raise HTTPException(
                     status_code=400, detail="Tails file is not the correct size."
                 )
