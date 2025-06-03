@@ -347,6 +347,7 @@ def setup_cloudapi_service(
 
     # Setup CloudAPI Service
     if release_config.get("enabled", True):
+        base_values_file = chart + "/values.yaml"
         values_file = chart + "/conf/local/" + release + ".yaml"
         helm_resource(
             name=release,
@@ -372,7 +373,7 @@ def setup_cloudapi_service(
                 "istio",
             ]
             + release_config.get("depends", []),
-            deps=[values_file],
+            deps=[base_values_file, values_file],
             port_forwards=release_config.get("port_forwards", []),
         )
         k8s_resource(workload=release, links=release_config.get("links", []))
