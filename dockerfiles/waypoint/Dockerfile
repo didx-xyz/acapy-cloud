@@ -13,8 +13,8 @@ RUN poetry config cache-dir "$POETRY_CACHE_DIR" && \
   poetry config virtualenvs.path "$POETRY_CACHE_DIR/virtualenvs" && \
   poetry install --only main,waypoint
 
-COPY --chown=65534:65534 waypoint /waypoint
-COPY --chown=65534:65534 shared /shared
+COPY waypoint /waypoint
+COPY shared /shared
 
 EXPOSE 3011
 
