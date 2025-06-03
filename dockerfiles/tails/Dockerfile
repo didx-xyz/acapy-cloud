@@ -13,8 +13,8 @@ RUN poetry config cache-dir "$POETRY_CACHE_DIR" && \
   poetry config virtualenvs.path "$POETRY_CACHE_DIR/virtualenvs" && \
   poetry install --only main,tails
 
-COPY --chown=65534:65536 tails /tails
-COPY --chown=65534:65536 shared /shared
+COPY tails /tails
+COPY shared /shared
 
 EXPOSE 6543
 

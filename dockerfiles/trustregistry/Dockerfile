@@ -13,8 +13,8 @@ RUN poetry config cache-dir "$POETRY_CACHE_DIR" && \
   poetry config virtualenvs.path "$POETRY_CACHE_DIR/virtualenvs" && \
   poetry install --only main,trust-registry
 
-COPY --chown=65534:65534 trustregistry /trustregistry
-COPY --chown=65534:65534 shared /shared
+COPY trustregistry /trustregistry
+COPY shared /shared
 
 EXPOSE 8001
 
