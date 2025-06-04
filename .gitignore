@@ -13,8 +13,8 @@ tilt/docker
 # Helm chart dependencies
 helm/**/charts
 
-# VON Network
-tilt/.von-network
+# Cheqd Node
+tilt/.cheqd-node
 
 # Nats credentials
 **.creds

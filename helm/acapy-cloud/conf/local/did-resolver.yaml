@@ -16,6 +16,16 @@ service:
   port: 8080
   containerPort: 8080
 
+ingressDomain: 127.0.0.1.nip.io
+ingress:
+  internal:
+    enabled: true
+    className: nginx
+    rules:
+      - host: resolver.cheqd.{{ .Values.ingressDomain }}
+        paths:
+          - servicePort: "{{ .Values.service.port }}"
+
 livenessProbe:
   tcpSocket:
     port: 8080

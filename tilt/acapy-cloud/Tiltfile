@@ -7,6 +7,12 @@ postgres_version = "16.0.7"
 # https://github.com/rowanruseler/helm-charts/tree/main/charts/pgadmin4
 pgadmin_version = "1.44.0"
 
+# Mnemonic for the Cheqd Localnet Validator
+# Will be used for Localnet as well as the Fee Payer for Cheqd DID Driver
+cheqd_validator_mnemonic = (
+    "betray purity grief spatial rude select loud reason wolf harvest session awesome"
+)
+
 registry = "localhost:5001"
 
 # Detect CPU Architecture
@@ -85,7 +91,7 @@ def setup_pgadmin(namespace, ingress_domain):
     k8s_resource(
         workload="pgadmin",
         links=[
-            link("http://" + pgadmin_host, "pgAdmin"),
+            link("https://" + pgadmin_host, "pgAdmin"),
         ],
     )
 
@@ -296,8 +302,8 @@ def setup_minio(namespace, ingress_domain):
     k8s_resource(
         workload=resource_name,
         links=[
-            link("http://minio." + ingress_domain, "MinIO Console"),
-            link("http://minio-api." + ingress_domain, "MinIO API"),
+            link("https://minio." + ingress_domain, "MinIO Console"),
+            link("https://minio-api." + ingress_domain, "MinIO API"),
         ],
     )
 
@@ -322,7 +328,13 @@ def build_cloudapi_service(service, image={}):
 
 
 def setup_cloudapi_service(
-    release, chart, namespace, ingress_domain, build_enabled, release_config={}
+    release,
+    chart,
+    namespace,
+    ingress_domain,
+    build_enabled,
+    release_config={},
+    values_file=None,
 ):
     print(color.green("Installing " + release + "..."))
 
@@ -348,7 +360,8 @@ def setup_cloudapi_service(
     # Setup CloudAPI Service
     if release_config.get("enabled", True):
         base_values_file = chart + "/values.yaml"
-        values_file = chart + "/conf/local/" + release + ".yaml"
+        if not values_file:
+            values_file = chart + "/conf/local/" + release + ".yaml"
         helm_resource(
             name=release,
             chart=chart,
@@ -417,13 +430,14 @@ def setup_cloudapi(build_enabled, expose):
             "depends": ["nats", "postgres", "did-registrar", "did-resolver", "minio"],
             "links": [
                 link(
-                    "http://governance-agent.cloudapi." + ingress_domain,
+                    "https://governance-agent.cloudapi." + ingress_domain,
                     "Governance Agent",
                 ),
             ],
             "image": {
                 "dockerfile": "./dockerfiles/agents/Dockerfile",
                 "ignore": [
+                    "**/*.isorted",
                     "app/**",
                     "shared/**",
                     "tails/**",
@@ -436,11 +450,11 @@ def setup_cloudapi(build_enabled, expose):
             "depends": ["governance-agent", "multitenant-agent"],
             "links": [
                 link(
-                    "http://cloudapi." + ingress_domain + "/governance",
+                    "https://cloudapi." + ingress_domain + "/governance",
                     "Governance Web",
                 ),
                 link(
-                    "http://cloudapi." + ingress_domain + "/governance/docs",
+                    "https://cloudapi." + ingress_domain + "/governance/docs",
                     "Governance Web Docs",
                 ),
             ],
@@ -454,6 +468,7 @@ def setup_cloudapi(build_enabled, expose):
                     enabled=build_enabled,
                 ),
                 "ignore": [
+                    "**/*.isorted",
                     "scripts/**",
                     "tails/**",
                     "trustregistry/**",
@@ -465,13 +480,14 @@ def setup_cloudapi(build_enabled, expose):
             "depends": ["nats", "postgres", "did-registrar", "did-resolver", "minio"],
             "links": [
                 link(
-                    "http://multitenant-agent.cloudapi." + ingress_domain,
+                    "https://multitenant-agent.cloudapi." + ingress_domain,
                     "Multitenant Agent",
                 ),
             ],
             "image": {
                 "dockerfile": "./dockerfiles/agents/Dockerfile",
                 "ignore": [
+                    "**/*.isorted",
                     "app/**",
                     "shared/**",
                     "tails/**",
@@ -484,11 +500,11 @@ def setup_cloudapi(build_enabled, expose):
             "depends": ["governance-agent", "multitenant-agent"],
             "links": [
                 link(
-                    "http://cloudapi." + ingress_domain + "/tenant-admin",
+                    "https://cloudapi." + ingress_domain + "/tenant-admin",
                     "Tenant Admin",
                 ),
                 link(
-                    "http://cloudapi." + ingress_domain + "/tenant-admin/docs",
+                    "https://cloudapi." + ingress_domain + "/tenant-admin/docs",
                     "Tenant Admin Docs",
                 ),
             ],
@@ -502,6 +518,7 @@ def setup_cloudapi(build_enabled, expose):
                     enabled=build_enabled,
                 ),
                 "ignore": [
+                    "**/*.isorted",
                     "scripts/**",
                     "tails/**",
                     "trustregistry/**",
@@ -512,9 +529,9 @@ def setup_cloudapi(build_enabled, expose):
         "tenant-web": {
             "depends": ["governance-agent", "multitenant-agent"],
             "links": [
-                link("http://cloudapi." + ingress_domain + "/tenant", "Tenant"),
+                link("https://cloudapi." + ingress_domain + "/tenant", "Tenant"),
                 link(
-                    "http://cloudapi." + ingress_domain + "/tenant/docs", "Tenant Docs"
+                    "https://cloudapi." + ingress_domain + "/tenant/docs", "Tenant Docs"
                 ),
             ],
             "image": {
@@ -527,6 +544,7 @@ def setup_cloudapi(build_enabled, expose):
                     enabled=build_enabled,
                 ),
                 "ignore": [
+                    "**/*.isorted",
                     "scripts/**",
                     "tails/**",
                     "trustregistry/**",
@@ -537,9 +555,9 @@ def setup_cloudapi(build_enabled, expose):
         "public-web": {
             "depends": ["trust-registry"],
             "links": [
-                link("http://cloudapi." + ingress_domain + "/public", "Public"),
+                link("https://cloudapi." + ingress_domain + "/public", "Public"),
                 link(
-                    "http://cloudapi." + ingress_domain + "/public/docs", "Public Docs"
+                    "https://cloudapi." + ingress_domain + "/public/docs", "Public Docs"
                 ),
             ],
             "image": {
@@ -552,6 +570,7 @@ def setup_cloudapi(build_enabled, expose):
                     enabled=build_enabled,
                 ),
                 "ignore": [
+                    "**/*.isorted",
                     "scripts/**",
                     "tails/**",
                     "trustregistry/**",
@@ -563,10 +582,11 @@ def setup_cloudapi(build_enabled, expose):
             "depends": ["postgres"],
             "links": [
                 link(
-                    "http://trust-registry.cloudapi." + ingress_domain, "Trust Registry"
+                    "https://trust-registry.cloudapi." + ingress_domain,
+                    "Trust Registry",
                 ),
                 link(
-                    "http://trust-registry.cloudapi." + ingress_domain + "/docs",
+                    "https://trust-registry.cloudapi." + ingress_domain + "/docs",
                     "Trust Registry Docs",
                 ),
             ],
@@ -580,6 +600,7 @@ def setup_cloudapi(build_enabled, expose):
                     enabled=build_enabled,
                 ),
                 "ignore": [
+                    "**/*.isorted",
                     "app/**",
                     "scripts/**",
                     "tails/**",
@@ -590,7 +611,7 @@ def setup_cloudapi(build_enabled, expose):
         "waypoint": {
             "depends": ["nats"],
             "links": [
-                link("http://waypoint.cloudapi." + ingress_domain + "/docs", "Docs"),
+                link("https://waypoint.cloudapi." + ingress_domain + "/docs", "Docs"),
             ],
             "image": {
                 "dockerfile": "./dockerfiles/waypoint/Dockerfile",
@@ -602,6 +623,7 @@ def setup_cloudapi(build_enabled, expose):
                     enabled=build_enabled,
                 ),
                 "ignore": [
+                    "**/*.isorted",
                     "app/**",
                     "scripts/**",
                     "tails/**",
@@ -617,15 +639,15 @@ def setup_cloudapi(build_enabled, expose):
                 "multitenant-agent",
             ],
             "links": [
-                link("http://mediator.cloudapi." + ingress_domain, "Mediator"),
+                link("https://mediator.cloudapi." + ingress_domain, "Mediator"),
             ],
         },
         "tails-server": {
             "depends": ["minio"],
             "links": [
-                link("http://tails-server.cloudapi." + ingress_domain, "Tails"),
+                link("https://tails-server.cloudapi." + ingress_domain, "Tails"),
                 link(
-                    "http://tails-server.cloudapi." + ingress_domain + "/docs", "Docs"
+                    "https://tails-server.cloudapi." + ingress_domain + "/docs", "Docs"
                 ),
             ],
             "image": {
@@ -638,6 +660,7 @@ def setup_cloudapi(build_enabled, expose):
                     enabled=build_enabled,
                 ),
                 "ignore": [
+                    "**/*.isorted",
                     "app/**",
                     "scripts/**",
                     "trustregistry/**",
@@ -646,25 +669,30 @@ def setup_cloudapi(build_enabled, expose):
             },
         },
         "driver-did-cheqd": {
-            "flags": (
-                [
-                    "--set",
-                    "secretData.FEE_PAYER_TESTNET_MNEMONIC="
-                    + os.environ.get("FEE_PAYER_TESTNET_MNEMONIC"),
-                ]
-                if os.environ.get("FEE_PAYER_TESTNET_MNEMONIC")
-                else []
-            )
-            + [
-                # Add custom flags here
-                # "--set", "someParameter=someValue",
-                # "--set", "anotherParameter=anotherValue",
+            "flags": [
+                "--set",
+                "secretData.FEE_PAYER_TESTNET_MNEMONIC=" + cheqd_validator_mnemonic,
             ],
         },
         "did-registrar": {
             "depends": ["driver-did-cheqd"],
         },
-        "did-resolver": {},
+        "did-resolver": {
+            "flags": [
+                "--set",
+                "ingressDomain=" + ingress_domain,
+            ],
+            "links": [
+                link(
+                    "https://resolver.cheqd." + ingress_domain,
+                    "DID Resolver",
+                ),
+                link(
+                    "https://resolver.cheqd." + ingress_domain + "/swagger/",
+                    "DID Resolver Docs",
+                ),
+            ],
+        },
     }
 
     for release in releases:
