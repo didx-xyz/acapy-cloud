@@ -68,11 +68,11 @@ export function setup() {
         return true;
       },
     });
-    sleep(2); // Small delay between publishes
+    // sleep(2); // Small delay between publishes
   }
 
   console.log(`Published revocations for ${uniqueIssuers.length} issuer(s)`);
-  sleep(30); // Allow time for revocations to propagate
+  // sleep(30); // Allow time for revocations to propagate
 
   return { tenants };
 }
