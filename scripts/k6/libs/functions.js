@@ -4,6 +4,7 @@
 import { check, sleep } from "k6";
 import http from "k6/http";
 import sse from "k6/x/sse";
+import { log } from "../libs/k6Functions.js";
 // let customDuration = new Trend('custom_duration', true);
 
 // Helper function to generate a unique, zero-based index for even distribution of operations
@@ -81,8 +82,8 @@ export function getWalletIdByWalletName(headers, walletName) {
         return firstItem.wallet_id;
       }
     }
-    console.warn(`Wallet not found for wallet_name ${walletName}`);
-    console.warn(`Response body: ${response.body}`);
+    log('warn',`Wallet not found for wallet_name ${walletName}`);
+    log('debug',`Response body: ${response.body}`);
     return null;
   }
   logError(response);
@@ -494,13 +495,10 @@ export function getCredentialDefinitionId(
     const matchingItem = responseData.find((item) => item.tag === credDefTag);
 
     if (matchingItem) {
-      console.log(
-        `Credential definition found for tag ${credDefTag}: ${matchingItem.id}`
-      );
+      log('info',`Credential definition found for tag ${credDefTag}: ${matchingItem.id}`);
       return matchingItem.id;
     }
-    console.warn(`Credential definition not found for tag ${credDefTag}`);
-    // logError(response);
+    log('info',`Credential definition not found for tag ${credDefTag}`);
     return false;
   }
   logError(response);
