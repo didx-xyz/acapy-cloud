@@ -107,8 +107,10 @@ env:
 podSecurityContext:
   fsGroup: 65534
 securityContext:
+  # Required for Tilt Live Reload
   readOnlyRootFilesystem: false
-  runAsUser: 65534
+  runAsNonRoot: false
+  runAsUser: 0
 
 extraVolumes:
   - name: logs
