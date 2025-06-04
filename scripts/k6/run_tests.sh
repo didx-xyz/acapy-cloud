@@ -35,8 +35,10 @@ run_test ./scenarios/create-credentials.js
 run_test ./scenarios/create-proof.js
 export ITERATIONS=$((ITERATIONS * VUS)) # revoke sequentially
 export VUS=1
+export USE_AUTO_PUBLISH=true
 run_test ./scenarios/revoke-credentials.js
 source ./env.sh # concurrent
+# run_test ./scenarios/publish-revoke.js
 export IS_REVOKED=true
 run_test ./scenarios/create-proof.js
 
@@ -46,8 +48,8 @@ export ITERATIONS="${NUM_ISSUERS}"
 run_test ./scenarios/delete-issuers.js
 
 # # Multiple issuers tests
-# source ./env.sh # concurrent
-# export MULTI_ISSUERS=true
-# run_test ./scenarios/create-issuers.js
+source ./env.sh # concurrent
+export MULTI_ISSUERS=true
+run_test ./scenarios/create-issuers.js
 # run_test ./scenarios/create-creddef.js
-# run_test ./scenarios/delete-issuers.js
+run_test ./scenarios/delete-issuers.js
