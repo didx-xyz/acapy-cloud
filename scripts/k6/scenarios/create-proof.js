@@ -30,18 +30,12 @@ export const options = {
       maxDuration: "24h",
     },
   },
-  setupTimeout: "180s", // Increase the setup timeout to 120 seconds
-  teardownTimeout: "180s", // Increase the teardown timeout to 120 seconds
+  setupTimeout: "180s",
+  teardownTimeout: "180s",
   maxRedirects: 4,
   thresholds: {
     // https://community.grafana.com/t/ignore-http-calls-made-in-setup-or-teardown-in-results/97260/2
-    // "http_req_duration{scenario:default}": ["max>=0"],
-    // "http_reqs{scenario:default}": ["count >= 0"],
-    // "iteration_duration{scenario:default}": ["max>=0"],
-    // 'specific_function_reqs{my_custom_tag:specific_function}': ['count>=0'],
-    // checks: ["rate==1"],
     checks: ["rate>0.99"],
-    // 'specific_function_reqs{scenario:default}': ['count>=0'],
   },
   tags: {
     test_run_id: "phased-issuance",
@@ -54,10 +48,6 @@ const testFunctionReqs = new Counter("test_function_reqs");
 
 const inputFilepath = `../output/${outputPrefix}-create-invitation.json`;
 const data = open(inputFilepath, "r");
-
-// const specificFunctionReqs = new Counter('specific_function_reqs');
-
-// const mainIterationDuration = new Trend('main_iteration_duration');
 
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -190,7 +180,6 @@ export default function (data) {
     },
   });
 
-  // console.log(`Initiate wait for SSE event: done`);
   const waitForSSEProofDoneRequest = genericPolling({
     accessToken: wallet.access_token,
     walletId: wallet.wallet_id,
@@ -210,15 +199,6 @@ export default function (data) {
   check(waitForSSEProofDoneRequest, {
     [sseCheckMessageProofDone]: (r) => r === true
   });
-
-  // check(waitForSSEProofDoneRequest, {
-  //   "SSE Proof Request state: done": (r) => {
-  //     if (!r) {
-  //       throw new Error("SSE proof done was not successful");
-  //     }
-  //     return true;
-  //   },
-  // });
 
   // const getProofResponse = getProof(issuer.accessToken, wallet.issuer_connection_id, threadId );
   let getProofResponse;

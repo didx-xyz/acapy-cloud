@@ -3,7 +3,7 @@
 
 import { check, sleep } from "k6";
 import { Counter, Trend } from "k6/metrics";
-import log from "../libs/k6Functions.js";
+import { log } from "../libs/k6Functions.js";
 import file from "k6/x/file";
 import {
   acceptInvitation,
@@ -77,8 +77,6 @@ export default function (data) {
 
   const issuers = data.issuers;
   const walletIndex = getWalletIndex(__VU, __ITER, iterations);
-
-  log('debug', `Wallet Index: ${walletIndex}`);
 
   const holders = data.holders;
   const wallet = holders[walletIndex];

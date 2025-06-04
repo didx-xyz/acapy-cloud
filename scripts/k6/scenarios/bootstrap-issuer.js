@@ -3,6 +3,7 @@
 
 import { bootstrapIssuer } from "../libs/setup.js";
 import file from "k6/x/file";
+import { log } from "../libs/k6Functions.js";
 
 const issuerPrefix = __ENV.ISSUER_PREFIX;
 const schemaName = __ENV.SCHEMA_NAME;
@@ -10,8 +11,6 @@ const schemaVersion = __ENV.SCHEMA_VERSION;
 const numIssuers = __ENV.NUM_ISSUERS;
 const holderPrefix = __ENV.HOLDER_PREFIX;
 const outputPrefix = `${issuerPrefix}`;
-
-console.log(`Number of Issuers: ${numIssuers}`);
 
 const filepath = `output/${outputPrefix}-create-issuers.json`;
 export function setup() {
@@ -21,6 +20,7 @@ export function setup() {
 export default function () {
   const walletName = issuerPrefix;
   const credDefTag = walletName;
+  log('info', `Number of Issuers: ${numIssuers}`);
   const issuers = bootstrapIssuer(
     numIssuers,
     issuerPrefix,
@@ -30,11 +30,9 @@ export default function () {
   );
   issuers.forEach((issuerData) => {
     file.appendString(filepath, `${JSON.stringify(issuerData)}\n`);
-    console.log(`Issuer: ${JSON.stringify(issuerData)}`);
-    console.log(`Wallet ID: ${issuerData.walletId}`);
-    console.log(
-      `Credential Definition ID: ${issuerData.credentialDefinitionId}`
-    );
+    log('debug', `Issuer: ${JSON.stringify(issuerData)}`);
+    log('debug',`Wallet ID: ${issuerData.walletId}`);
+    log('debug', `Credential Definition ID: ${issuerData.credentialDefinitionId}`);
   });
 
   return issuers;
