@@ -6,11 +6,11 @@ import { SharedArray } from "k6/data";
 import { Counter, Trend } from "k6/metrics";
 import file from "k6/x/file";
 import { getAuthHeaders } from '../libs/auth.js';
-import { createTenant } from "../libs/functions.js";
+import { createTenant, getWalletIndex } from "../libs/functions.js";
 import { log } from "../libs/k6Functions.js";
 
 const vus = Number(__ENV.VUS || 1);
-const iterations = Number(__ENV.ITERATIONS || 1);
+const iterations = Number(__ENV.ITERATIONS || 10);
 const holderPrefix = __ENV.HOLDER_PREFIX || "holder";
 const issuerPrefix = __ENV.ISSUER_PREFIX || "issuer";
 const sleepDuration = Number(__ENV.SLEEP_DURATION || 0);
@@ -67,17 +67,9 @@ export function setup() {
   return { tenantAdminHeaders };
 }
 
-const iterationsPerVU = options.scenarios.default.iterations;
-// Helper function to calculate the wallet index based on VU and iteration
-function getWalletIndex(vu, iter) {
-  const walletIndex = (vu - 1) * iterationsPerVU + (iter - 1);
-  return walletIndex;
-}
-
 export default function (data) {
-  const start = Date.now();
   const tenantAdminHeaders = data.tenantAdminHeaders;
-  const walletIndex = getWalletIndex(__VU, __ITER + 1); // __ITER starts from 0, adding 1 to align with the logic
+  const walletIndex = getWalletIndex(__VU, __ITER, iterations);
   const wallet = wallets[walletIndex];
 
   const createTenantResponse = createTenant(tenantAdminHeaders, wallet);
@@ -92,7 +84,7 @@ export default function (data) {
   const { wallet_id: walletId, access_token: holderAccessToken } = JSON.parse(
     createTenantResponse.body
   );
-
+  log('debug',`Wallet Index: ${walletIndex}, wallet ID: ${walletId}`);
   const holderData = JSON.stringify({
     wallet_label: wallet.wallet_label,
     wallet_name: wallet.wallet_name,
@@ -101,7 +93,6 @@ export default function (data) {
   });
   file.appendString(filepath, `${holderData}\n`);
 
-  log('debug', `Sleeping for ${sleepDuration}ms after creating holder ${wallet.wallet_name}`);
   sleep(sleepDuration);
   testFunctionReqs.add(1);
 }

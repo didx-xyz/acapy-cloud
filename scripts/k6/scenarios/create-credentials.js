@@ -4,7 +4,7 @@
 import { check } from "k6";
 import { Counter } from "k6/metrics";
 import file from "k6/x/file";
-import log from "../libs/k6Functions.js";
+import { log } from "../libs/k6Functions.js";
 import {
   acceptCredential,
   createCredential,
@@ -81,7 +81,7 @@ export default function (data) {
   const walletIndex = getWalletIndex(__VU, __ITER, iterations);
   const wallet = holders[walletIndex];
 
-  log('debug'`Wallet Index: ${walletIndex}, Issuer Wallet ID: ${wallet.issuer_wallet_id}`);
+  log('debug', `Wallet Index: ${walletIndex}, Issuer Wallet ID: ${wallet.issuer_wallet_id}`);
 
   let createCredentialResponse;
   try {

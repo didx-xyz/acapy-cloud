@@ -10,6 +10,7 @@ import { getAuthHeaders } from '../libs/auth.js';
 import {
   createIssuerTenant,
   getTrustRegistryActor,
+  getWalletIndex,
 } from "../libs/functions.js";
 
 const vus = Number.parseInt(__ENV.VUS, 10);
@@ -28,15 +29,11 @@ export const options = {
       maxDuration: "24h",
     },
   },
-  setupTimeout: "300s", // Increase the setup timeout to 120 seconds
-  teardownTimeout: "120s", // Increase the teardown timeout to 120 seconds
+  setupTimeout: "300s",
+  teardownTimeout: "120s",
   maxRedirects: 4,
   thresholds: {
     // https://community.grafana.com/t/ignore-http-calls-made-in-setup-or-teardown-in-results/97260/2
-    // "http_req_duration{scenario:default}": ["max>=0"],
-    // "http_reqs{scenario:default}": ["count >= 0"],
-    // "iteration_duration{scenario:default}": ["max>=0"],
-    // 'specific_function_reqs{my_custom_tag:specific_function}': ['count>=0'],
     checks: ["rate==1"],
   },
   tags: {
@@ -46,7 +43,6 @@ export const options = {
 };
 
 const testFunctionReqs = new Counter("test_function_reqs");
-// const mainIterationDuration = new Trend("main_iteration_duration");
 
 // Seed data: Generating a list of options.iterations unique wallet names
 const wallets = new SharedArray("wallets", () => {
@@ -70,17 +66,10 @@ export function setup() {
   return { tenantAdminHeaders };
 }
 
-const iterationsPerVU = options.scenarios.default.iterations;
-// Helper function to calculate the wallet index based on VU and iteration
-function getWalletIndex(vu, iter) {
-  const walletIndex = (vu - 1) * iterationsPerVU + (iter - 1);
-  return walletIndex;
-}
-
 export default function (data) {
   const start = Date.now();
   const tenantAdminHeaders = data.tenantAdminHeaders;
-  const walletIndex = getWalletIndex(__VU, __ITER + 1); // __ITER starts from 0, adding 1 to align with the logic
+  const walletIndex = getWalletIndex(__VU, __ITER, iterations); // __ITER starts from 0, adding 1 to align with the logic
   const wallet = wallets[walletIndex];
   const credDefTag = wallet.walletName;
 

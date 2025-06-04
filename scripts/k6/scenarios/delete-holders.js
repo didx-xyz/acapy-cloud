@@ -6,10 +6,10 @@ import { SharedArray } from "k6/data";
 import { Counter } from "k6/metrics";
 import file from "k6/x/file"; // Add file import
 import { getAuthHeaders } from '../libs/auth.js';
-import { deleteTenant, getWalletIdByWalletName } from "../libs/functions.js";
+import { deleteTenant, getWalletIdByWalletName, getWalletIndex } from "../libs/functions.js";
 
 const vus = Number(__ENV.VUS || 1);
-const iterations = Number(__ENV.ITERATIONS || 1);
+const iterations = Number(__ENV.ITERATIONS || 10);
 const holderPrefix = __ENV.HOLDER_PREFIX || "holder";
 const issuerPrefix = __ENV.ISSUER_PREFIX || "issuer";
 const outputPrefix = `${holderPrefix}`;
@@ -74,16 +74,9 @@ export function teardown() {
   }
 }
 
-const iterationsPerVU = options.scenarios.default.iterations;
-// Helper function to calculate the wallet index based on VU and iteration
-function getWalletIndex(vu, iter) {
-  const walletIndex = (vu - 1) * iterationsPerVU + (iter - 1);
-  return walletIndex;
-}
-
 export default function (data) {
   const tenantAdminHeaders = data.tenantAdminHeaders;
-  const walletIndex = getWalletIndex(__VU, __ITER + 1); // __ITER starts from 0, adding 1 to align with the logic
+  const walletIndex = getWalletIndex(__VU, __ITER, iterations); // __ITER starts from 0, adding 1 to align with the logic
   const wallet = wallets[walletIndex];
 
   const walletId = getWalletIdByWalletName(tenantAdminHeaders, wallet.wallet_name);
