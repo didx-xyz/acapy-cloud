@@ -7,6 +7,8 @@ import {
   checkRevoked,
   getWalletIndex,
   revokeCredentialAutoPublish,
+  revokeCredential,
+  publishRevocation,
 } from "../libs/functions.js";
 
 const holderPrefix = __ENV.HOLDER_PREFIX;
@@ -30,11 +32,10 @@ export const options = {
       maxDuration: "24h",
     },
   },
-  setupTimeout: "180s", // Increase the setup timeout to 120 seconds
-  teardownTimeout: "180s", // Increase the teardown timeout to 120 seconds
+  setupTimeout: "180s",
+  teardownTimeout: "180s",
   maxRedirects: 4,
   thresholds: {
-    // https://community.grafana.com/t/ignore-http-calls-made-in-setup-or-teardown-in-results/97260/2
     "http_req_duration{scenario:default}": ["max>=0"],
     "http_reqs{scenario:default}": ["count >= 0"],
     "iteration_duration{scenario:default}": ["max>=0"],
@@ -48,7 +49,7 @@ export const options = {
 
 export function setup() {
   const tenants = data.trim().split("\n").map(JSON.parse);
-  return { tenants }; // eslint-disable-line no-eval
+  return { tenants };
 }
 
 export default function (data) {
@@ -56,40 +57,70 @@ export default function (data) {
   const walletIndex = getWalletIndex(__VU, __ITER, iterations);
   const wallet = tenants[walletIndex];
 
-  const revokeCredentialResponse = revokeCredentialAutoPublish(
-    wallet.issuer_access_token,
-    wallet.credential_exchange_id
-  );
-  check(revokeCredentialResponse, {
-    "Credential revoked successfully": (r) => {
-      if (r.status !== 200) {
-        throw new Error(
-          `Unexpected response while revoking credential: ${r.response}`
-        );
-      }
-      return true;
-    },
-  });
-  const checkRevokedCredentialResponse = checkRevoked(
-    wallet.issuer_access_token,
-    wallet.credential_exchange_id
-  );
-  check(checkRevokedCredentialResponse, {
-    "Credential state is revoked": (r) => {
-      if (r.status !== 200) {
-        throw new Error(
-          `Unexpected response while checking if credential is revoked: ${r.status}`
-        );
-      }
-      const responseBody = JSON.parse(r.body);
-      if (responseBody.state !== "revoked") {
-        throw new Error(
-          `Credential state is not revoked. Current state: ${responseBody.state}`
-        );
-      }
-      return true;
-    },
-  });
+  // Check environment variable to determine revocation method
+  const useAutoPublish =
+    __ENV.USE_AUTO_PUBLISH === "true" ||
+    __ENV.USE_AUTO_PUBLISH === undefined;
+
+  let revokeCredentialResponse;
+
+  if (useAutoPublish) {
+    // Option A: Use auto-publish (full flow)
+    revokeCredentialResponse = revokeCredentialAutoPublish(
+      wallet.issuer_access_token,
+      wallet.credential_exchange_id
+    );
+    check(revokeCredentialResponse, {
+      "Credential revoked successfully": (r) => {
+        if (r.status !== 200) {
+          throw new Error(
+            `VU ${__VU}: Iteration ${__ITER}: Unexpected response while revoking credential: ${r.response}`
+          );
+        }
+        return true;
+      },
+    });
+
+    // Check if credential is revoked when using auto-publish
+    const checkRevokedCredentialResponse = checkRevoked(
+      wallet.issuer_access_token,
+      wallet.credential_exchange_id
+    );
+    check(checkRevokedCredentialResponse, {
+      "Credential state is revoked": (r) => {
+        if (r.status !== 200) {
+          throw new Error(
+            `VU ${__VU}: Iteration ${__ITER}: Unexpected response while checking if credential is revoked: ${r.status}`
+          );
+        }
+        const responseBody = JSON.parse(r.body);
+        if (responseBody.state !== "revoked") {
+          throw new Error(
+            `VU ${__VU}: Iteration ${__ITER}: Credential state is not revoked. Current state: ${responseBody.state}`
+          );
+        }
+        return true;
+      },
+    });
+  } else {
+    // Option B: Only revoke (no publish, no check)
+    console.log(`VU ${__VU}: Iteration ${__ITER}: Revoking credential without auto-publish.`);
+    revokeCredentialResponse = revokeCredential(
+      wallet.issuer_access_token,
+      wallet.credential_exchange_id
+    );
+    check(revokeCredentialResponse, {
+      "Credential revoked successfully": (r) => {
+        if (r.status !== 200) {
+          throw new Error(
+            `VU ${__VU}: Iteration ${__ITER}: Unexpected response while revoking credential: ${r.response}`
+          );
+        }
+        return true;
+      },
+    });
+  }
+
   sleep(sleepDuration);
   testFunctionReqs.add(1);
 }
