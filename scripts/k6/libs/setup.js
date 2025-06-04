@@ -2,6 +2,7 @@ import { check } from "k6";
 import { createIssuerIfNotExists } from "../libs/issuerUtils.js";
 import { createSchemaIfNotExists } from "../libs/schemaUtils.js";
 import { getAuthHeaders } from "./auth.js";
+import { log } from "./k6Functions.js";
 import {
   createCredentialDefinition,
   getCredentialDefinitionId,
@@ -32,7 +33,7 @@ export function bootstrapIssuer(
     });
 
     if (!issuerData) {
-      console.error(`Failed to create or retrieve issuer for ${walletName}_0`);
+      log('info', `Failed to create or retrieve issuer for ${walletName}_0`);
       return issuers;
     }
 
@@ -44,9 +45,7 @@ export function bootstrapIssuer(
     );
 
     if (credentialDefinitionId) {
-      console.log(
-        `Credential definition already exists for issuer ${walletName}_0 - Skipping creation`
-      );
+      log('info', `Credential definition already exists for issuer ${walletName}_0 - Skipping creation`)
       issuers.push({
         walletName: walletName,
         walletId: issuerWalletId,
@@ -54,9 +53,7 @@ export function bootstrapIssuer(
         credentialDefinitionId,
       });
     } else {
-      console.warn(
-        `Failed to get credential definition ID for issuer ${walletName}_0`
-      );
+      log('info', `Credential definition not found for issuer ${walletName}_0 - Creating new one`);
 
       const schemaId = createSchemaIfNotExists(
         governanceHeaders,
@@ -81,9 +78,7 @@ export function bootstrapIssuer(
         const { id: credentialDefinitionId } = JSON.parse(
           createCredentialDefinitionResponse.body
         );
-        console.log(
-          `Credential definition created successfully for issuer ${walletName}_0`
-        );
+        log('info', `definition created successfully for issuer ${walletName}_0`);
         issuers.push({
           walletName: walletName,
           walletId: issuerWalletId,
@@ -91,9 +86,7 @@ export function bootstrapIssuer(
           credentialDefinitionId: credentialDefinitionId,
         });
       } else {
-        console.error(
-          `Failed to create credential definition for issuer ${walletName}_0`
-        );
+        log('error', `Failed to create credential definition for issuer ${walletName}_0`);
       }
     }
   }
