@@ -3,11 +3,11 @@
 
 import { check, sleep } from "k6";
 import { Counter, Trend } from "k6/metrics";
+import log from "../libs/k6Functions.js";
 import file from "k6/x/file";
 import {
   acceptInvitation,
   createInvitation,
-  genericWaitForSSEEvent,
   getWalletIndex,
   retry,
   getIssuerPublicDid,
@@ -16,8 +16,6 @@ import {
   genericPolling,
   getHolderConnections,
 } from "../libs/functions.js";
-import { bootstrapIssuer } from "../libs/setup.js";
-// import bootstrapIssuer from "./bootstrap-issuer.js";
 
 const vus = Number.parseInt(__ENV.VUS, 10);
 const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
@@ -237,8 +235,7 @@ export default function (data) {
     expectedState: "completed",
     maxAttempts: 3,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
     lookBack: 60,
-    // Pass through the tag for metrics/tracing
-    sseTag: "connection_ready"
+    sseTag: "connection_ready" // Pass through the tag for metrics/tracing
   });
 
   const sseEventError = "SSE event was not received successfully";

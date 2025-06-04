@@ -4,6 +4,7 @@
 import { check } from "k6";
 import { Counter } from "k6/metrics";
 import file from "k6/x/file";
+import log from "../libs/k6Functions.js";
 import {
   acceptCredential,
   createCredential,
@@ -30,8 +31,8 @@ export const options = {
       maxDuration: "24h",
     },
   },
-  setupTimeout: "180s", // Increase the setup timeout to 120 seconds
-  teardownTimeout: "180s", // Increase the teardown timeout to 120 seconds
+  setupTimeout: "180s",
+  teardownTimeout: "180s",
   maxRedirects: 4,
   thresholds: {
     // https://community.grafana.com/t/ignore-http-calls-made-in-setup-or-teardown-in-results/97260/2
@@ -39,8 +40,6 @@ export const options = {
     "http_reqs{scenario:default}": ["count >= 0"],
     "iteration_duration{scenario:default}": ["max>=0"],
     checks: ["rate>0.99"],
-    // 'specific_function_reqs{my_custom_tag:specific_function}': ['count>=0'],
-    // 'specific_function_reqs{scenario:default}': ['count>=0'],
   },
   tags: {
     test_run_id: "phased-issuance",
@@ -58,9 +57,7 @@ function getIssuerIndex(vu, iter) {
   const walletIndex = getWalletIndex(vu, iter);
   return issuerAssignments[walletIndex];
 }
-// const specificFunctionReqs = new Counter('specific_function_reqs');
 const testFunctionReqs = new Counter("test_function_reqs");
-// const mainIterationDuration = new Trend('main_iteration_duration');
 
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -84,7 +81,7 @@ export default function (data) {
   const walletIndex = getWalletIndex(__VU, __ITER, iterations);
   const wallet = holders[walletIndex];
 
-  // console.log(`VU: ${__VU}, Iteration: ${__ITER}, Wallet Index: ${walletIndex}, Issuer Wallet ID: ${wallet.issuer_wallet_id}`);
+  log('debug'`Wallet Index: ${walletIndex}, Issuer Wallet ID: ${wallet.issuer_wallet_id}`);
 
   let createCredentialResponse;
   try {
@@ -119,9 +116,9 @@ export default function (data) {
   const { thread_id: threadId, credential_exchange_id: issuerCredentialExchangeId } =
     JSON.parse(createCredentialResponse.body);
 
-  // console.log(`Thread ID: ${threadId}`);
-  // console.log(`Holer access token: ${wallet.holder_access_token}`);
-  // console.log(`Wallet ID: ${wallet.wallet_id}`);
+  log('debug', `Thread ID: ${threadId}`);
+  log('debug', `Holer access token: ${wallet.holder_access_token}`);
+  log('debug', `Wallet ID: ${wallet.wallet_id}`);
 
   const waitForSSEEventResponse = genericPolling({
     accessToken: wallet.access_token,
@@ -143,7 +140,7 @@ export default function (data) {
       [sseCheckMessage]: (r) => r === true
   });
 
-  // console.log(`VU ${__VU}: Iteration ${__ITER}: Accepting credential for thread ID: ${threadId}`);
+  log('debug', `Accepting credential for thread ID: ${threadId}`);
 
   const holderCredentialExchangeId = getCredentialIdByThreadId(wallet.access_token, threadId);
 
@@ -179,13 +176,5 @@ export default function (data) {
     issuer_connection_id: wallet.issuer_connection_id,
   });
   file.appendString(outputFilepath, `${issuerData}\n`);
-
-  // specificFunctionReqs.add(1, { my_custom_tag: 'specific_function' });
-
-  // const end = Date.now();
-  // const duration = end - start;
-  // console.log(`Duration for iteration ${__ITER}: ${duration} ms`);
-  // mainIterationDuration.add(duration);
-  // sleep(1);
   testFunctionReqs.add(1);
 }
