@@ -103,12 +103,12 @@ scenario_create_proof_verified() {
 scenario_revoke_credentials() {
   local iterations=$((ITERATIONS * VUS))
   local vus=1
-  xk6 run -o output-statsd ./scenarios/revoke-credentials.js -e ITERATIONS=${iterations} -e VUS=${vus}
+  xk6 run -o output-statsd ./scenarios/revoke-credentials.js -e ITERATIONS="${iterations}" -e VUS="${vus}"
 }
 
 scenario_publish_revoke() {
   export IS_REVOKED=true
-  xk6 run -o output-statsd ./scenarios/publish-revoke.js -e ITERATIONS=${iterations} -e VUS=${vus}
+  xk6 run -o output-statsd ./scenarios/publish-revoke.js -e ITERATIONS="${iterations}" -e VUS="${vus}"
 }
 
 scenario_create_proof_unverified() {

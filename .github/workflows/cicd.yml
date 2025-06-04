@@ -56,9 +56,9 @@ env:
   MISE_VERSION: 2025.6.0
 
   RESET_DEPLOYMENTS: ${{ github.event.inputs.reset-deployments || 'false' }}
-  RUN_E2E_TESTS: ${{ github.event.inputs.run-e2e-tests || 'false' }}
+  RUN_E2E_TESTS: ${{ github.event.inputs.run-e2e-tests || 'true' }}
   RUN_K6_TESTS: ${{ github.event.inputs.run-k6-tests || 'true' }}
-  RUN_REGRESSION_TESTS: ${{ github.event.inputs.run-regression-tests || 'false' }}
+  RUN_REGRESSION_TESTS: ${{ github.event.inputs.run-regression-tests || 'true' }}
 
 jobs:
   prep:
