@@ -31,7 +31,7 @@ startupProbe:
   httpGet:
     path: /status
     port: rpc
-  initialDelaySeconds: 5
+  initialDelaySeconds: 1
 
 secrets:
   validatorMnemonic: betray purity grief spatial rude select loud reason wolf harvest session awesome
@@ -42,7 +42,7 @@ config:
     minimum-gas-prices: 50ncheq
   config_toml:
     moniker: ACA-Py Cloud Cheqd Localnet
-    log_level: info
+    log_level: warn # Options: trace, debug, info, warn, error, fatal, panic
     log_format: plain
     p2p:
       external_address: ""
