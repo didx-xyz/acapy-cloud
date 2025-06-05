@@ -350,13 +350,14 @@ def setup_cloudapi_service(
             image_deps = build_cloudapi_service(release, release_config["image"])
             image_keys = [("image.registry", "image.name", "image.tag")]
         else:
-            print(color.yellow("Skipping Docker Build for " + release))
+            registry = release_config["image"].get("registry", os.environ.get("REGISTRY", "ghcr.io/didx-xyz"))
+            tag = release_config["image"].get("tag", os.environ.get("IMAGE_TAG", "latest"))
             # Use pre-existing image
             flags += [
                 "--set",
-                "image.registry=" + os.environ.get("REGISTRY", "ghcr.io/didx-xyz"),
+                "image.registry=" + registry,
                 "--set",
-                "image.tag=" + os.environ.get("IMAGE_TAG", "latest"),
+                "image.tag=" + tag,
             ]
 
     # Setup CloudAPI Service
@@ -450,6 +451,8 @@ def setup_cheqd_localnet(namespace, ingress_domain):
         {
             "depends": ["checkout-cheqd-node"],
             "image": {
+                "registry": "ghcr.io",
+                "tag": cheqd_noded_version.lstrip("v"),
                 "dockerfile": project_root + "/tilt/.cheqd-node/docker/Dockerfile",
                 "context": project_root + "/tilt/.cheqd-node",
                 "ignore": ["**"],
