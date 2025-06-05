@@ -379,6 +379,7 @@ def setup_cloudapi_service(
                 "--set",
                 "ingressDomain=cloudapi." + ingress_domain,
                 "--wait",
+                "--timeout=10m",
             ]
             + flags,
             labels=release_config.get("labels", ["01-cloudapi"]),
