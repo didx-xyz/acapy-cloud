@@ -119,7 +119,7 @@ releases:
     version: 0.1.0
     values:
       - ./cheqd/conf/localnet/values.yaml
-      - statefulsetLabels:
+      - statefulSetLabels:
           tags.datadoghq.com/env: acapy-cloud-{{ $.Environment.Name }}
         podLabels:
           tags.datadoghq.com/env: acapy-cloud-{{ $.Environment.Name }}
