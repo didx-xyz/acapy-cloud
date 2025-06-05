@@ -1,7 +1,7 @@
 /* global __ENV, __ITER, __VU */
 /* eslint-disable no-undefined, no-console, camelcase */
 
-import { check, sleep } from "k6";
+import { check, sleep, fail } from "k6";
 import { Counter } from "k6/metrics";
 import file from "k6/x/file";
 import {
@@ -70,7 +70,7 @@ export function setup() {
     if (epochData && epochData.trim()) {
       const epochJson = JSON.parse(epochData.trim().split('\n')[0]);
       epochTimestamp = epochJson.epoch_timestamp;
-      console.log(`Loaded epoch timestamp: ${epochTimestamp}`);
+      console.debug(`Loaded epoch timestamp: ${epochTimestamp}`); // can't use custom logger in setup becuase ITER is unavailable
     }
   } catch (error) {
     console.warn(`Could not parse epoch timestamp: ${error.message}`);
@@ -143,17 +143,20 @@ export default function (data) {
   let credentialId;
   try {
     credentialId = retry(() => {
-      const response = getProofIdCredentials(wallet.access_token, proofId, epochTimestamp);
-      if (response.length === 0) {
-        console.log('Credential ID:', response);
-        throw new Error('No credential ID returned');
-      }
-      return response;
-    }, 5, 5000, 'Get credential ID');
+      return getProofIdCredentials(wallet.access_token, proofId, epochTimestamp);
+    }, 2, 5000, 'Get credential ID');
   } catch (error) {
     console.error(`Failed to get proof credentials after retries: ${error.message}`);
-    throw error; // Re-throw as this is required for the next steps
   }
+
+  check(credentialId, {
+    "Credential ID retrieved successfully": (r) => {
+      if (!r || r.length === 0) {  // Check if r exists first, if undefined will exit on TypeError
+        fail("Credential ID retrieval failed - exiting iteration"); // Exit the iteration if credential ID is not found - no point in continuing
+      }
+      return true;
+    },
+  });
 
   let acceptProofResponse;
   try {
