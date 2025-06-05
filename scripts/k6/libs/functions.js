@@ -330,7 +330,8 @@ export function acceptInvitation(holderAccessToken, invitationObj) {
 export function createCredential(
   issuerAccessToken,
   credentialDefinitionId,
-  issuerConnectionId
+  issuerConnectionId,
+  dateOfIssue = "2021-09-29" // Default value
 ) {
   const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/issuer/credentials`;
   const params = {
@@ -338,10 +339,6 @@ export function createCredential(
       "x-api-key": issuerAccessToken,
     },
   };
-
-  // console.log(`credentialDefinitionId: ${credentialDefinitionId}`);
-  // console.log(`issuerConnectionId: ${issuerConnectionId}`);
-  // console.log(`IssuerAccessToken: ${issuerAccessToken}`);
 
   try {
     // Construct the request body including the invitation object
@@ -354,7 +351,7 @@ export function createCredential(
           id_number: "8698989898989",
           country_of_birth: "South Africa",
           citizen_status: "Citizen",
-          date_of_issue: "2021-09-29",
+          date_of_issue: dateOfIssue, // Use the parameter
           gender: "MALE",
           surname: "Doe",
           nationality: "South African",
@@ -365,9 +362,6 @@ export function createCredential(
       save_exchange_record: false,
       connection_id: issuerConnectionId,
     });
-
-    // console.log(`credentialDefinitionId: ${credentialDefinitionId}`)
-    // console.log(`issuerConnectionId: ${issuerConnectionId}`)
 
     const response = http.post(url, requestBody, params);
     if (response.status >= 200 && response.status < 300) {

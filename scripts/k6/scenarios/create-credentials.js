@@ -51,6 +51,8 @@ export const options = {
 const inputFilepath = `../output/${outputPrefix}-create-invitation.json`;
 const data = open(inputFilepath, "r");
 const outputFilepath = `output/${outputPrefix}-create-credentials.json`;
+// Add new output file for epoch timestamps
+const epochOutputFilepath = `output/${outputPrefix}-epoch-timestamps.json`;
 
 // Helper function to get the issuer index using pre-calculated assignments
 function getIssuerIndex(vu, iter) {
@@ -60,16 +62,23 @@ function getIssuerIndex(vu, iter) {
 const testFunctionReqs = new Counter("test_function_reqs");
 
 export function setup() {
-
   file.writeString(outputFilepath, "");
+
+  // Generate current epoch timestamp (10 digits)
+  const currentEpoch = Math.floor(Date.now() / 1000);
+
+  // Write epoch timestamp to file
+  file.writeString(epochOutputFilepath, JSON.stringify({ epoch_timestamp: currentEpoch }) + "\n");
+
   let holders = data.trim().split("\n").map(JSON.parse);
   holders = shuffleArray(holders); // Randomize the order of holders
 
-  return { holders };
+  return { holders, epochTimestamp: currentEpoch };
 }
 
 export default function (data) {
   const holders = data.holders;
+  const epochTimestamp = data.epochTimestamp;
   const walletIndex = getWalletIndex(__VU, __ITER, iterations);
   const wallet = holders[walletIndex];
 
@@ -81,7 +90,8 @@ export default function (data) {
       const response = createCredential(
         wallet.issuer_access_token,
         wallet.issuer_credential_definition_id,
-        wallet.issuer_connection_id
+        wallet.issuer_connection_id,
+        epochTimestamp.toString() // Pass epoch timestamp as date_of_issue
       );
       if (response.status !== 200) {
         throw new Error(`Non-200 status: ${response.status}`);
@@ -164,6 +174,7 @@ export default function (data) {
     issuer_access_token: wallet.issuer_access_token,
     issuer_credential_definition_id: wallet.issuer_credential_definition_id,
     issuer_connection_id: wallet.issuer_connection_id,
+    date_of_issue: epochTimestamp, // Include the epoch timestamp in output
   });
   file.appendString(outputFilepath, `${issuerData}\n`);
   testFunctionReqs.add(1);
