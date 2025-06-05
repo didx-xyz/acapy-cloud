@@ -3,7 +3,7 @@ from typing import AsyncGenerator, Optional
 from fastapi import Request
 from httpx import HTTPError, Response, Timeout
 
-from shared import WAYPOINT_URL
+from shared.constants import WAYPOINT_URL
 from shared.log_config import get_logger
 from shared.util.rich_async_client import RichAsyncClient
 

@@ -5,8 +5,8 @@ from dependency_injector.wiring import Provide, inject
 from fastapi import BackgroundTasks, Depends, Query, Request
 from sse_starlette.sse import EventSourceResponse
 
-from shared import DISCONNECT_CHECK_PERIOD, APIRouter
-from shared.constants import SSE_LOOK_BACK
+from shared import APIRouter
+from shared.constants import DISCONNECT_CHECK_PERIOD, SSE_LOOK_BACK
 from shared.log_config import get_logger
 from waypoint.services.dependency_injection.container import Container
 from waypoint.services.nats_service import NatsEventsProcessor

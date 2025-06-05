@@ -1,6 +1,6 @@
 import pytest
 
-from shared import TRUST_REGISTRY_URL
+from shared.constants import TRUST_REGISTRY_URL
 from shared.util.rich_async_client import RichAsyncClient
 from trustregistry.main import create_app
 from trustregistry.registry import registry_actors, registry_schemas

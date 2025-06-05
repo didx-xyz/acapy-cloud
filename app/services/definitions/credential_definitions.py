@@ -17,7 +17,7 @@ from app.services.trust_registry.util.issuer import assert_valid_issuer
 from app.util.assert_public_did import assert_public_did
 from app.util.definitions import credential_definition_from_acapy
 from app.util.did import strip_qualified_did_sov
-from shared import REGISTRY_SIZE
+from shared.constants import REGISTRY_SIZE
 from shared.log_config import get_logger
 
 logger = get_logger(__name__)

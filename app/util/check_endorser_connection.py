@@ -1,7 +1,7 @@
 from aries_cloudcontroller import AcaPyClient
 
 from app.exceptions import handle_acapy_call
-from shared import ACAPY_ENDORSER_ALIAS
+from shared.constants import ACAPY_ENDORSER_ALIAS
 from shared.log_config import get_logger
 
 logger = get_logger(__name__)

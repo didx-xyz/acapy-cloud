@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 from app.exceptions.cloudapi_exception import CloudApiException
 from app.services import acapy_wallet
 from app.services.acapy_ledger import accept_taa_if_required
-from shared import LEDGER_REGISTRATION_URL, LEDGER_TYPE
+from shared.constants import LEDGER_REGISTRATION_URL, LEDGER_TYPE
 from shared.log_config import get_logger
 from shared.util.rich_async_client import RichAsyncClient
 

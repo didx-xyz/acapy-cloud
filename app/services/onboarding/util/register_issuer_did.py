@@ -18,7 +18,7 @@ from app.services.onboarding.util.set_endorser_metadata import (
     set_endorser_info,
     set_endorser_role,
 )
-from shared import ACAPY_ENDORSER_ALIAS, ISSUER_DID_ENDORSE_TIMEOUT
+from shared.constants import ACAPY_ENDORSER_ALIAS, ISSUER_DID_ENDORSE_TIMEOUT
 
 
 async def create_connection_with_endorser(
