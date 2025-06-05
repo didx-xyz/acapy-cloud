@@ -9,7 +9,8 @@ environments:
       ddProfilingEnabled:
         default: false
         overrides: {}
-      deployCheqdLocalnet: true
+      cheqd:
+        enabled: true
       natsReplicaCount: 1
       pgProxyEnabled: false
       pgAdmin:
@@ -37,7 +38,8 @@ environments:
           # governance-agent: true
           # multitenant-web: true
           # tenant-web: true
-      deployCheqdLocalnet: true
+      cheqd:
+        enabled: true
       natsReplicaCount: 1
       pgProxyEnabled: false
       pgAdmin:
@@ -106,7 +108,7 @@ releases:
     labels:
       app: cheqd
     namespace: {{ .Values.namespace }}
-    installed: {{ .Values.deployCheqdLocalnet }}
+    installed: {{ .Values.cheqd.enabled }}
     chart: ./cheqd
     version: 0.1.0
     values:
