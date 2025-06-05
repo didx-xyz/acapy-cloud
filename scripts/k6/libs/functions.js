@@ -4,6 +4,7 @@
 import { check, sleep } from "k6";
 import http from "k6/http";
 import sse from "k6/x/sse";
+import { log } from "../libs/k6Functions.js";
 // let customDuration = new Trend('custom_duration', true);
 
 // Helper function to generate a unique, zero-based index for even distribution of operations
@@ -38,18 +39,6 @@ export function createTenant(headers, wallet) {
 
   const response = http.post(url, payload, params);
   if (response.status === 200) {
-    // Request was successful
-    // const { wallet_id: walletId, access_token: accessToken } = JSON.parse(response.body);
-    // // Store walletId and accessToken for the current VU and iteration
-    // const vuKey = `vu_${__VU}`;
-    // const iterKey = `iter_${__ITER}`;
-    // if (!global[vuKey]) {
-    //   global[vuKey] = {};
-    // }
-    // global[vuKey][iterKey] = {
-    //   walletId: walletId,
-    //   accessToken: accessToken
-    // };
     return response;
   }
   // Request failed
@@ -67,8 +56,6 @@ export function getWalletIdByWalletName(headers, walletName) {
     },
   };
 
-  // console.log(`Getting wallet ID for wallet name: ${walletName}`);
-
   const response = http.get(url, params);
   if (response.status >= 200 && response.status < 300) {
     // Request was successful
@@ -81,8 +68,8 @@ export function getWalletIdByWalletName(headers, walletName) {
         return firstItem.wallet_id;
       }
     }
-    console.warn(`Wallet not found for wallet_name ${walletName}`);
-    console.warn(`Response body: ${response.body}`);
+    log.warn(`Wallet not found for wallet_name ${walletName}`);
+    log.debug(`Response body: ${response.body}`);
     return null;
   }
   logError(response);
@@ -329,7 +316,8 @@ export function acceptInvitation(holderAccessToken, invitationObj) {
 export function createCredential(
   issuerAccessToken,
   credentialDefinitionId,
-  issuerConnectionId
+  issuerConnectionId,
+  dateOfIssue = "2021-09-29" // Default value
 ) {
   const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/issuer/credentials`;
   const params = {
@@ -337,10 +325,6 @@ export function createCredential(
       "x-api-key": issuerAccessToken,
     },
   };
-
-  // console.log(`credentialDefinitionId: ${credentialDefinitionId}`);
-  // console.log(`issuerConnectionId: ${issuerConnectionId}`);
-  // console.log(`IssuerAccessToken: ${issuerAccessToken}`);
 
   try {
     // Construct the request body including the invitation object
@@ -353,7 +337,7 @@ export function createCredential(
           id_number: "8698989898989",
           country_of_birth: "South Africa",
           citizen_status: "Citizen",
-          date_of_issue: "2021-09-29",
+          date_of_issue: dateOfIssue, // Use the parameter
           gender: "MALE",
           surname: "Doe",
           nationality: "South African",
@@ -364,9 +348,6 @@ export function createCredential(
       save_exchange_record: false,
       connection_id: issuerConnectionId,
     });
-
-    // console.log(`credentialDefinitionId: ${credentialDefinitionId}`)
-    // console.log(`issuerConnectionId: ${issuerConnectionId}`)
 
     const response = http.post(url, requestBody, params);
     if (response.status >= 200 && response.status < 300) {
@@ -494,13 +475,10 @@ export function getCredentialDefinitionId(
     const matchingItem = responseData.find((item) => item.tag === credDefTag);
 
     if (matchingItem) {
-      console.log(
-        `Credential definition found for tag ${credDefTag}: ${matchingItem.id}`
-      );
+      log.info(`Credential definition found for tag ${credDefTag}: ${matchingItem.id}`);
       return matchingItem.id;
     }
-    console.warn(`Credential definition not found for tag ${credDefTag}`);
-    // logError(response);
+    log.info(`Credential definition not found for tag ${credDefTag}`);
     return false;
   }
   logError(response);
@@ -581,7 +559,7 @@ export function getProofIdByThreadId(holderAccessToken, threadId) {
   }
 }
 
-export function getProofIdCredentials(holderAccessToken, proofId) {
+export function getProofIdCredentials(holderAccessToken, proofId, dateOfIssue = null) {
   const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/verifier/proofs/${proofId}/credentials`;
   const params = {
     headers: {
@@ -595,25 +573,44 @@ export function getProofIdCredentials(holderAccessToken, proofId) {
     // console.log(`Request headers: ${JSON.stringify(response.request.headers)}`);
     // Parse the response body
     const responseData = JSON.parse(response.body);
-    // Iterate over the responseData array
-    for (let i = 0; i < responseData.length; i++) {
-      const obj = responseData[i];
-      // Check if the current object has a matching thread_id
-      const credentialId = obj.cred_info.credential_id;
-      // TODO: this will always return the first credentialId - fix this
-      return credentialId;
+
+    // If no dateOfIssue filter is provided, return the first credential (existing behavior)
+    if (!dateOfIssue) {
+      for (let i = 0; i < responseData.length; i++) {
+        const obj = responseData[i];
+        const credentialId = obj.cred_info.credential_id;
+        // TODO: this will always return the first credentialId - fix this
+        return credentialId;
+      }
+    } else {
+      // Filter credentials by date_of_issue attribute
+      for (let i = 0; i < responseData.length; i++) {
+        const obj = responseData[i];
+        const credAttrs = obj.cred_info.attrs || {};
+
+        // Check if the credential has a date_of_issue attribute that matches
+        if (credAttrs.date_of_issue === dateOfIssue.toString()) {
+          const credentialId = obj.cred_info.credential_id;
+          log.debug(`Found matching credential with date_of_issue: ${dateOfIssue}`);
+          return credentialId;
+        }
+      }
+
+      // If no matching credential found, log available credentials for debugging
+      log.warn(`No credential found with date_of_issue: ${dateOfIssue}`);
+      log.warn(`Available credentials: ${JSON.stringify(responseData.map(obj => ({
+        credentialId: obj.cred_info.credential_id,
+        dateOfIssue: obj.cred_info.attrs?.date_of_issue
+      })), null, 2)}`);
     }
+
     // Throw an error if no match is found
     // console.log(`Log of the request made: ${JSON.stringify(response.request)}`);
     throw new Error(
-      `No match found for proofId: ${proofId}\nResponse body: ${JSON.stringify(
-        responseData,
-        null,
-        2
-      )}`
+      `No match found for proofId: ${proofId}${dateOfIssue ? ` with date_of_issue: ${dateOfIssue}` : ''}`
     );
   } catch (error) {
-    console.error("Error in getProofIdCredentials:", error);
+    log.error(`Error in getProofIdCredentials: Error message: ${error.message}`);
     throw error; // Re-throw the error to propagate it to the caller
   }
 }
@@ -778,13 +775,13 @@ export function revokeCredential(issuerAccessToken, credentialExchangeId) {
     const response = http.post(url, JSON.stringify(requestBody), params);
 
     if (response.status !== 200) {
-      console.error(`VU ${__VU}: Iteration ${__ITER}: Unexpected status code: ${response.status}`);
-      console.error(`VU ${__VU}: Iteration ${__ITER}: Response body: ${response.body}`);
+      log.error(`Unexpected status code: ${response.status}`);
+      log.error(`VU ${__VU}: Iteration ${__ITER}: Response body: ${response.body}`);
     }
 
     return response;
   } catch (error) {
-    console.error(`VU ${__VU}: Iteration ${__ITER}: Error revoking credential: ${error.message}`);
+    log.error(`Error revoking credential: ${error.message}`);
     throw error;
   }
 }
@@ -808,13 +805,13 @@ export function revokeCredentialAutoPublish(
     const response = http.post(url, JSON.stringify(requestBody), params);
 
     if (response.status !== 200) {
-      console.error(`Unexpected status code: ${response.status}`);
-      console.error(`Response body: ${response.body}`);
+      log.error(`Unexpected status code: ${response.status}`);
+      log.error(`Response body: ${response.body}`);
     }
 
     return response;
   } catch (error) {
-    console.error(`Error revoking credential: ${error.message}`);
+    log.error(`Error revoking credential: ${error.message}`);
     throw error;
   }
 }
@@ -1181,17 +1178,17 @@ export function retry(fn, retries = 3, delay = 2000, operation = 'Undefined') {
         return result;
       }
       // For subsequent successful attempts, log the success
-      console.log(`VU ${__VU}: Iteration ${__ITER}: Operation ${operation}: Succeeded on attempt ${attempts + 1}`);
+      log.info(`Operation ${operation}: Succeeded on attempt ${attempts + 1}`);
       return result;
     } catch (e) {
       attempts++;
-      // Only log from second attempt onwards
-      if (attempts > 1) {
-        console.warn(`VU ${__VU}: Iteration ${__ITER}: Operation ${operation}: Attempt ${attempts} failed: ${e.message}`);
+      // Log from first unsuccessful second attempt onwards
+      if (attempts < retries) {
+        log.warn(`Operation ${operation}: Attempt ${attempts}/${retries} failed: ${e.message}`);
       }
 
       if (attempts >= retries) {
-        console.error(`VU ${__VU}: Iteration ${__ITER}: Operation ${operation}: All ${retries} attempts failed`);
+        log.error(`Operation ${operation}: All ${attempts}/${retries} attempts failed`);
         throw e;
       }
 

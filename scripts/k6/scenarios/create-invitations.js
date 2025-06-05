@@ -3,11 +3,11 @@
 
 import { check, sleep } from "k6";
 import { Counter, Trend } from "k6/metrics";
+import { log } from "../libs/k6Functions.js";
 import file from "k6/x/file";
 import {
   acceptInvitation,
   createInvitation,
-  genericWaitForSSEEvent,
   getWalletIndex,
   retry,
   getIssuerPublicDid,
@@ -16,8 +16,6 @@ import {
   genericPolling,
   getHolderConnections,
 } from "../libs/functions.js";
-import { bootstrapIssuer } from "../libs/setup.js";
-// import bootstrapIssuer from "./bootstrap-issuer.js";
 
 const vus = Number.parseInt(__ENV.VUS, 10);
 const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
@@ -39,15 +37,11 @@ export const options = {
       maxDuration: "24h",
     },
   },
-  setupTimeout: "120s", // Increase the setup timeout to 120 seconds
-  teardownTimeout: "120s", // Increase the teardown timeout to 120 seconds
+  setupTimeout: "120s",
+  teardownTimeout: "120s",
   maxRedirects: 4,
   thresholds: {
     // https://community.grafana.com/t/ignore-http-calls-made-in-setup-or-teardown-in-results/97260/2
-    // "http_req_duration{scenario:default}": ["max>=0"],
-    // "http_reqs{scenario:default}": ["count >= 0"],
-    // "http_reqs{my_custom_tag:specific_function}": ["count>=0"],
-    // "iteration_duration{scenario:default}": ["max>=0"],
     checks: ["rate>0.99"],
   },
   tags: {
@@ -58,8 +52,6 @@ export const options = {
 };
 
 const testFunctionReqs = new Counter("test_function_reqs");     // successful completions
-// const mainIterationDuration = new Trend("main_iteration_duration");
-
 const inputFilepath = `../output/${holderPrefix}-create-holders.json`;
 const inputFilepathIssuer = `../output/${issuerPrefix}-create-issuers.json`;
 const data = open(inputFilepath, "r");
@@ -81,23 +73,18 @@ function getIssuerIndex(vu, iter) {
   return (vu + iter - 2) % numIssuers;
 }
 
-// const vuStartTimes = {};
-
 export default function (data) {
 
   const issuers = data.issuers;
   const walletIndex = getWalletIndex(__VU, __ITER, iterations);
 
-  // console.log(`VU: ${__VU}, Iteration: ${__ITER}, Wallet Index: ${walletIndex}`);
-
   const holders = data.holders;
   const wallet = holders[walletIndex];
 
-  // const issuerIndex = __ITER % numIssuers;
   const issuerIndex = getIssuerIndex(__VU, __ITER + 1);
   const issuer = issuers[issuerIndex];
 
-  // console.log(`VU: ${__VU}, Iteration: ${__ITER}, Wallet Index: ${walletIndex}, Issuer Index: ${issuerIndex}, Issuer Wallet ID: ${issuer.walletId}`);
+  log.debug(`Wallet Index: ${walletIndex}, Issuer Index: ${issuerIndex}, Issuer Wallet ID: ${issuer.walletId}`);
 
   let publicDidResponse;
   try {
@@ -132,7 +119,7 @@ export default function (data) {
 
   if (useOobInvitation) {
     // OOB Invitation flow
-    // console.log("Using OOB Invitation flow");
+    console.debug("Using OOB Invitation flow");
     let createOobInvitationResponse;
     try {
       createOobInvitationResponse = retry(() => {
@@ -206,6 +193,7 @@ export default function (data) {
     holderDid = holderPrivateDidFull.split(':').slice(0, 3).join(':');
   } else {
     // DIDExchange flow
+    console.debug("Using DIDExchange flow");
     let createInvitationResponse;
     try {
       createInvitationResponse = retry(() => {
@@ -245,8 +233,7 @@ export default function (data) {
     expectedState: "completed",
     maxAttempts: 3,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
     lookBack: 60,
-    // Pass through the tag for metrics/tracing
-    sseTag: "connection_ready"
+    sseTag: "connection_ready" // Pass through the tag for metrics/tracing
   });
 
   const sseEventError = "SSE event was not received successfully";
@@ -278,7 +265,7 @@ export default function (data) {
     getIssuerConnectionIdResponse = e.response || e;
   }
 
-  // console.log(`VU ${__VU}: Iteration ${__ITER}: Issuer connection ID Response Body: ${getIssuerConnectionIdResponse.body}`);
+  // log.debug(`Issuer connection ID Response Body: ${getIssuerConnectionIdResponse.body}`);
   const [{ connection_id: issuerConnectionId }] = JSON.parse(getIssuerConnectionIdResponse.body);
 
   const holderData = JSON.stringify({

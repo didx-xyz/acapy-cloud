@@ -1,8 +1,9 @@
 /* global __ENV, __ITER, __VU */
 /* eslint-disable no-undefined, no-console, camelcase */
 
-import { check, sleep } from "k6";
+import { check, sleep, fail } from "k6";
 import { Counter } from "k6/metrics";
+import file from "k6/x/file";
 import {
   acceptProofRequest,
   getProof,
@@ -13,6 +14,7 @@ import {
   retry,  // Add this import
   genericPolling,
 } from "../libs/functions.js";
+import { log, shuffleArray } from "../libs/k6Functions.js";
 
 const vus = Number.parseInt(__ENV.VUS, 10);
 const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
@@ -30,18 +32,12 @@ export const options = {
       maxDuration: "24h",
     },
   },
-  setupTimeout: "180s", // Increase the setup timeout to 120 seconds
-  teardownTimeout: "180s", // Increase the teardown timeout to 120 seconds
+  setupTimeout: "180s",
+  teardownTimeout: "180s",
   maxRedirects: 4,
   thresholds: {
     // https://community.grafana.com/t/ignore-http-calls-made-in-setup-or-teardown-in-results/97260/2
-    // "http_req_duration{scenario:default}": ["max>=0"],
-    // "http_reqs{scenario:default}": ["count >= 0"],
-    // "iteration_duration{scenario:default}": ["max>=0"],
-    // 'specific_function_reqs{my_custom_tag:specific_function}': ['count>=0'],
-    // checks: ["rate==1"],
     checks: ["rate>0.99"],
-    // 'specific_function_reqs{scenario:default}': ['count>=0'],
   },
   tags: {
     test_run_id: "phased-issuance",
@@ -54,35 +50,43 @@ const testFunctionReqs = new Counter("test_function_reqs");
 
 const inputFilepath = `../output/${outputPrefix}-create-invitation.json`;
 const data = open(inputFilepath, "r");
-
-// const specificFunctionReqs = new Counter('specific_function_reqs');
-
-// const mainIterationDuration = new Trend('main_iteration_duration');
-
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
+// Add path to epoch timestamps file
+const epochInputFilepath = `../output/${outputPrefix}-epoch-timestamps.json`;
+// Read epoch data in init stage
+let epochData = null;
+try {
+  epochData = open(epochInputFilepath, "r");
+} catch (error) {
+  console.warn(`Could not read epoch timestamp file: ${error.message}`);
 }
 
 export function setup() {
-
   let tenants = data.trim().split("\n").map(JSON.parse);
   tenants = shuffleArray(tenants);
 
-  return { tenants };
+  // Parse the epoch timestamp from the data read in init stage
+  let epochTimestamp = null;
+  try {
+    if (epochData && epochData.trim()) {
+      const epochJson = JSON.parse(epochData.trim().split('\n')[0]);
+      epochTimestamp = epochJson.epoch_timestamp;
+      console.debug(`Loaded epoch timestamp: ${epochTimestamp}`); // can't use custom logger in setup becuase ITER is unavailable
+    }
+  } catch (error) {
+    console.warn(`Could not parse epoch timestamp: ${error.message}`);
+  }
+
+  return { tenants, epochTimestamp };
 }
 
 export default function (data) {
   const tenants = data.tenants;
+  const epochTimestamp = data.epochTimestamp;
   const walletIndex = getWalletIndex(__VU, __ITER, iterations);
   const wallet = tenants[walletIndex];
 
-  // console.log(`wallet.issuer_connection_id: ${wallet.issuer_connection_id}`);
   // const sendProofRequestResponse = sendProofRequest(issuer.accessToken, wallet.issuer_connection_id);
-  // console.log(`VU: ${__VU}, Iteration: ${__ITER}, Issuer Wallet ID: ${wallet.issuer_wallet_id}`);
+  log.debug(`walletIndex: ${walletIndex}, walletId: ${wallet.wallet_id}, issuerConnectionId: ${wallet.issuer_connection_id}, issuerAccessToken: ${wallet.issuer_access_token}`);
   let sendProofRequestResponse;
   try {
     sendProofRequestResponse = retry(() => {
@@ -132,17 +136,6 @@ export default function (data) {
     [sseCheckMessage]: (r) => r === true
 });
 
-  // check(waitForSSEEventReceivedResponse, {
-  //   "SSE Event received successfully: request-recevied": (r) => {
-  //     if (!r) {
-  //       throw new Error("SSE event was not received successfully");
-  //     }
-  //     return true;
-  //   },
-  // });
-
-  // sleep(2);
-
   // TODO: return object and add check for the response
   const proofId = getProofIdByThreadId(wallet.access_token, threadId);
   // console.log(`Proof ID: ${proofId}`);
@@ -150,17 +143,20 @@ export default function (data) {
   let credentialId;
   try {
     credentialId = retry(() => {
-      const response = getProofIdCredentials(wallet.access_token, proofId);
-      if (response.length === 0) {
-        console.log('Credential ID:', response);
-        throw new Error('No credential ID returned');
-      }
-      return response;
+      return getProofIdCredentials(wallet.access_token, proofId, epochTimestamp);
     }, 5, 5000, 'Get credential ID');
   } catch (error) {
     console.error(`Failed to get proof credentials after retries: ${error.message}`);
-    throw error; // Re-throw as this is required for the next steps
   }
+
+  check(credentialId, {
+    "Credential ID retrieved successfully": (r) => {
+      if (!r || r.length === 0) {  // Check if r exists first, if undefined will exit on TypeError
+        fail("Credential ID retrieval failed - exiting iteration"); // Exit the iteration if credential ID is not found - no point in continuing
+      }
+      return true;
+    },
+  });
 
   let acceptProofResponse;
   try {
@@ -190,7 +186,6 @@ export default function (data) {
     },
   });
 
-  // console.log(`Initiate wait for SSE event: done`);
   const waitForSSEProofDoneRequest = genericPolling({
     accessToken: wallet.access_token,
     walletId: wallet.wallet_id,
@@ -210,15 +205,6 @@ export default function (data) {
   check(waitForSSEProofDoneRequest, {
     [sseCheckMessageProofDone]: (r) => r === true
   });
-
-  // check(waitForSSEProofDoneRequest, {
-  //   "SSE Proof Request state: done": (r) => {
-  //     if (!r) {
-  //       throw new Error("SSE proof done was not successful");
-  //     }
-  //     return true;
-  //   },
-  // });
 
   // const getProofResponse = getProof(issuer.accessToken, wallet.issuer_connection_id, threadId );
   let getProofResponse;
@@ -258,6 +244,7 @@ export default function (data) {
     }
     const responseBody = JSON.parse(r.body);
     if (responseBody[0].verified !== false) {
+      log.debug(`Wallet Index: ${walletIndex}, Issuer Connection ID: ${wallet.issuer_connection_id}`);
       throw new Error(
         `Credential is not unverified. Current verification status: ${responseBody[0].verified}`
       );

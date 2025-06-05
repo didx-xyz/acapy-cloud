@@ -4,10 +4,10 @@
 import { check } from "k6";
 import { Counter } from "k6/metrics";
 import file from "k6/x/file";
+import { log, shuffleArray } from "../libs/k6Functions.js";
 import {
   acceptCredential,
   createCredential,
-  genericWaitForSSEEvent,
   getCredentialIdByThreadId,
   getWalletIndex,
   retry,  // Add this import
@@ -30,8 +30,8 @@ export const options = {
       maxDuration: "24h",
     },
   },
-  setupTimeout: "180s", // Increase the setup timeout to 120 seconds
-  teardownTimeout: "180s", // Increase the teardown timeout to 120 seconds
+  setupTimeout: "180s",
+  teardownTimeout: "180s",
   maxRedirects: 4,
   thresholds: {
     // https://community.grafana.com/t/ignore-http-calls-made-in-setup-or-teardown-in-results/97260/2
@@ -39,8 +39,6 @@ export const options = {
     "http_reqs{scenario:default}": ["count >= 0"],
     "iteration_duration{scenario:default}": ["max>=0"],
     checks: ["rate>0.99"],
-    // 'specific_function_reqs{my_custom_tag:specific_function}': ['count>=0'],
-    // 'specific_function_reqs{scenario:default}': ['count>=0'],
   },
   tags: {
     test_run_id: "phased-issuance",
@@ -52,39 +50,37 @@ export const options = {
 const inputFilepath = `../output/${outputPrefix}-create-invitation.json`;
 const data = open(inputFilepath, "r");
 const outputFilepath = `output/${outputPrefix}-create-credentials.json`;
+const epochOutputFilepath = `output/${outputPrefix}-epoch-timestamps.json`;
 
 // Helper function to get the issuer index using pre-calculated assignments
 function getIssuerIndex(vu, iter) {
   const walletIndex = getWalletIndex(vu, iter);
   return issuerAssignments[walletIndex];
 }
-// const specificFunctionReqs = new Counter('specific_function_reqs');
 const testFunctionReqs = new Counter("test_function_reqs");
-// const mainIterationDuration = new Trend('main_iteration_duration');
-
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
 
 export function setup() {
-
   file.writeString(outputFilepath, "");
+
+  // Generate current epoch timestamp (10 digits)
+  const currentEpoch = Math.floor(Date.now() / 1000);
+
+  // Write epoch timestamp to file
+  file.writeString(epochOutputFilepath, JSON.stringify({ epoch_timestamp: currentEpoch }) + "\n");
+
   let holders = data.trim().split("\n").map(JSON.parse);
   holders = shuffleArray(holders); // Randomize the order of holders
 
-  return { holders };
+  return { holders, epochTimestamp: currentEpoch };
 }
 
 export default function (data) {
   const holders = data.holders;
+  const epochTimestamp = data.epochTimestamp;
   const walletIndex = getWalletIndex(__VU, __ITER, iterations);
   const wallet = holders[walletIndex];
 
-  // console.log(`VU: ${__VU}, Iteration: ${__ITER}, Wallet Index: ${walletIndex}, Issuer Wallet ID: ${wallet.issuer_wallet_id}`);
+  log.debug(`Wallet Index: ${walletIndex}, Issuer Wallet ID: ${wallet.issuer_wallet_id}`);
 
   let createCredentialResponse;
   try {
@@ -92,7 +88,8 @@ export default function (data) {
       const response = createCredential(
         wallet.issuer_access_token,
         wallet.issuer_credential_definition_id,
-        wallet.issuer_connection_id
+        wallet.issuer_connection_id,
+        epochTimestamp.toString() // Pass epoch timestamp as date_of_issue
       );
       if (response.status !== 200) {
         throw new Error(`Non-200 status: ${response.status}`);
@@ -119,9 +116,7 @@ export default function (data) {
   const { thread_id: threadId, credential_exchange_id: issuerCredentialExchangeId } =
     JSON.parse(createCredentialResponse.body);
 
-  // console.log(`Thread ID: ${threadId}`);
-  // console.log(`Holer access token: ${wallet.holder_access_token}`);
-  // console.log(`Wallet ID: ${wallet.wallet_id}`);
+  log.debug(`walletIndex: ${walletIndex}, walletId: ${wallet.wallet_id} issuerConnectionId: ${wallet.issuer_connection_id}`);
 
   const waitForSSEEventResponse = genericPolling({
     accessToken: wallet.access_token,
@@ -143,7 +138,7 @@ export default function (data) {
       [sseCheckMessage]: (r) => r === true
   });
 
-  // console.log(`VU ${__VU}: Iteration ${__ITER}: Accepting credential for thread ID: ${threadId}`);
+  log.debug(`Accepting credential for thread ID: ${threadId}`);
 
   const holderCredentialExchangeId = getCredentialIdByThreadId(wallet.access_token, threadId);
 
@@ -177,15 +172,8 @@ export default function (data) {
     issuer_access_token: wallet.issuer_access_token,
     issuer_credential_definition_id: wallet.issuer_credential_definition_id,
     issuer_connection_id: wallet.issuer_connection_id,
+    date_of_issue: epochTimestamp, // Include the epoch timestamp in output. Currently redundant, but potentially useful for future reference
   });
   file.appendString(outputFilepath, `${issuerData}\n`);
-
-  // specificFunctionReqs.add(1, { my_custom_tag: 'specific_function' });
-
-  // const end = Date.now();
-  // const duration = end - start;
-  // console.log(`Duration for iteration ${__ITER}: ${duration} ms`);
-  // mainIterationDuration.add(duration);
-  // sleep(1);
   testFunctionReqs.add(1);
 }
