@@ -669,22 +669,25 @@ def setup_cloudapi(build_enabled, expose):
             },
         },
         "driver-did-cheqd": {
+            # https://github.com/cheqd/did-registrar
             "flags": [
                 "--set",
                 "secretData.FEE_PAYER_TESTNET_MNEMONIC=" + cheqd_validator_mnemonic,
             ],
         },
         "did-registrar": {
+            # https://github.com/decentralized-identity/universal-registrar
             "depends": ["driver-did-cheqd"],
         },
         "did-resolver": {
+            # https://github.com/cheqd/did-resolver
             "flags": [
                 "--set",
                 "ingressDomain=" + ingress_domain,
             ],
             "links": [
                 link(
-                    "https://resolver.cheqd." + ingress_domain,
+                    "https://resolver.cheqd." + ingress_domain + "/1.0/identifiers/",
                     "DID Resolver",
                 ),
                 link(
