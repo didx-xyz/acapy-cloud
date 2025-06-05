@@ -3,7 +3,6 @@
     "bierner.markdown-mermaid",
     "editorconfig.editorconfig",
     "esbenp.prettier-vscode",
-    "ms-python.black-formatter",
     "ms-python.python",
     "ms-python.vscode-pylance",
     "tilt-dev.tiltfile"
