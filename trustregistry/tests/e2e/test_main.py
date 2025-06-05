@@ -22,7 +22,7 @@ def test_create_app():
 @pytest.mark.anyio
 async def test_root():
     async with RichAsyncClient() as client:
-        response = await client.get(f"{TRUST_REGISTRY_URL}")
+        response = await client.get(TRUST_REGISTRY_URL)
 
     assert response.status_code == 200
     json_response = response.json()

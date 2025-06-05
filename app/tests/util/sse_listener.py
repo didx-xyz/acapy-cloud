@@ -37,9 +37,7 @@ class SseListener:
         timeout: int = DEFAULT_LISTENER_TIMEOUT,
         look_back: int = 15,
     ) -> Dict[str, Any]:
-        """
-        Start listening for SSE events. When an event is received that matches the specified parameters.
-        """
+        """Start listening for SSE events. When an event is received that matches the specified parameters."""
         url = f"{waypoint_base_url}/{self.wallet_id}/{self.topic}/{field}/{field_id}/{desired_state}"
         params = {"look_back": look_back}
 

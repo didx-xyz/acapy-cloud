@@ -17,9 +17,7 @@ async def sign_jsonld(
     body: JsonLdSignRequest,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ):
-    """
-    Sign a JSON-LD structure
-    """
+    """Sign a JSON-LD structure"""
     bound_logger = logger.bind(
         # Do not log credential data:
         body=body.model_dump(exclude="credential")
@@ -98,9 +96,7 @@ async def verify_jsonld(
     body: JsonLdVerifyRequest,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> None:
-    """
-    Verify a JSON-LD structure
-    """
+    """Verify a JSON-LD structure"""
     bound_logger = logger.bind(body=body)
     bound_logger.debug("POST request received: Verify JsonLD")
 

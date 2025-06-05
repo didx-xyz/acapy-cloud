@@ -102,9 +102,7 @@ class NATSStatus:
 
 
 async def init_nats_client() -> AsyncGenerator[JetStreamContext, Any]:
-    """
-    Initialize a connection to the NATS server with robust error differentiation.
-    """
+    """Initialize a connection to the NATS server with robust error differentiation."""
     logger.debug("Initialise NATS server ...")
 
     nats_status = NATSStatus()

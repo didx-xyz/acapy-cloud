@@ -73,9 +73,7 @@ async def get_schemas_as_tenant(
     schema_name: Optional[str] = None,
     schema_version: Optional[str] = None,
 ) -> List[CredentialSchema]:
-    """
-    Allows tenants to get all schemas from trust registry
-    """
+    """Allows tenants to get all schemas from trust registry"""
     bound_logger = logger.bind(
         body={
             "schema_issuer_did": schema_issuer_did,
@@ -112,9 +110,7 @@ async def get_schemas_as_governance(
     schema_name: Optional[str] = None,
     schema_version: Optional[str] = None,
 ) -> List[CredentialSchema]:
-    """
-    Governance agents gets all schemas created by itself
-    """
+    """Governance agents gets all schemas created by itself"""
     bound_logger = logger.bind(
         body={
             "schema_issuer_did": schema_issuer_did,

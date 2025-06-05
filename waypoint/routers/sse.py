@@ -20,9 +20,7 @@ router = APIRouter(
 
 
 async def check_disconnect(request: Request, stop_event: asyncio.Event) -> None:
-    """
-    Check if the client has disconnected
-    """
+    """Check if the client has disconnected"""
     while not stop_event.is_set():
         if await request.is_disconnected():
             logger.debug("Waypoint client disconnected")
@@ -43,9 +41,7 @@ async def nats_event_stream_generator(
     group_id: Optional[str] = None,
     look_back: Optional[int] = None,
 ) -> AsyncGenerator[str, None]:
-    """
-    Generator for NATS events
-    """
+    """Generator for NATS events"""
 
     logger.debug("Starting NATS event stream generator")
     stop_event = asyncio.Event()

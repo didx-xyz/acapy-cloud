@@ -200,7 +200,7 @@ class Verifier(ABC):
         -----------
         controller: AcaPyClient
             The aries_cloudcontroller object
-         proof_id: str
+        proof_id: str
             The proof id
 
         Returns:

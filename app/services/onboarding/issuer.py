@@ -30,9 +30,13 @@ async def onboard_issuer(
       - make sure the issuer has set up endorsement with the endorser connection
 
     Args:
-        issuer_controller (AcaPyClient): authenticated ACA-Py client for issuer
         endorser_controller (AcaPyClient): authenticated ACA-Py client for endorser
+        issuer_controller (AcaPyClient): authenticated ACA-Py client for issuer
+        issuer_wallet_id (str): wallet id of the issuer
         issuer_label (str): alias for the issuer
+
+    Returns:
+        OnboardResult: The result of the onboarding process
     """
     bound_logger = logger.bind(
         body={"issuer_label": issuer_label, "issuer_wallet_id": issuer_wallet_id}

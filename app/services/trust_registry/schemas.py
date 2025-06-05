@@ -110,7 +110,7 @@ async def remove_schema_by_id(schema_id: str) -> None:
     """Remove schema from trust registry by id
 
     Args:
-        actor_id (str): identifier of the schema to remove
+        schema_id (str): identifier of the schema to remove
 
     Raises:
         TrustRegistryException: If an error occurred while removing the schema

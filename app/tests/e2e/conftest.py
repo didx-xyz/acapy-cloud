@@ -47,9 +47,6 @@ __all__ = [
     "anoncreds_schema_definition",
     "anoncreds_schema_definition_alt",
     "meld_co_anoncreds_credential_definition_id",
-    "create_public_did",
-    "get_logger",
-    "governance_public_did",
 ]
 
 logger = get_logger(__name__)

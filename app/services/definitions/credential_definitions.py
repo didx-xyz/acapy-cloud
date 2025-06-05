@@ -28,9 +28,7 @@ async def create_credential_definition(
     credential_definition: CreateCredentialDefinition,
     support_revocation: bool,
 ) -> str:
-    """
-    Create a credential definition
-    """
+    """Create a credential definition"""
     bound_logger = logger.bind(
         body={
             "schema_id": credential_definition.schema_id,
@@ -91,9 +89,7 @@ async def get_credential_definitions(
     schema_name: Optional[str] = None,
     schema_version: Optional[str] = None,
 ) -> List[CredentialDefinition]:
-    """
-    Get credential definitions
-    """
+    """Get credential definitions"""
     bound_logger = logger.bind(
         body={
             "issuer_did": issuer_did,

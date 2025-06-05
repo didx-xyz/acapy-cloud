@@ -116,7 +116,7 @@ async def fetch_actor_by_did(did: str) -> Optional[Actor]:
     """Retrieve actor by did from trust registry
 
     Args:
-        actor_id (str): did of the actor to retrieve
+        did (str): did of the actor to retrieve
 
     Raises:
         TrustRegistryException: If an error occurred while retrieving the actor.

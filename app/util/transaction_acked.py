@@ -15,9 +15,7 @@ async def wait_for_transaction_ack(
     max_attempts: int = 15,
     retry_delay: int = 1,
 ) -> None:
-    """
-    Wait for the transaction to be acknowledged by the endorser.
-    """
+    """Wait for the transaction to be acknowledged by the endorser."""
     bound_logger = logger.bind(transaction_id=transaction_id)
     bound_logger.debug("Waiting for transaction to be acknowledged by the endorser")
     try:

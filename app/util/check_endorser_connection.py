@@ -8,9 +8,7 @@ logger = get_logger(__name__)
 
 
 async def check_endorser_connection(aries_controller: AcaPyClient) -> bool:
-    """
-    Check if tenant has an active connection with the endorser.
-    """
+    """Check if tenant has an active connection with the endorser."""
     logger.debug("Get connection by endorser alias")
     endorser_connection = await handle_acapy_call(
         logger=logger,
