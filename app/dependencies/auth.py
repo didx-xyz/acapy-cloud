@@ -95,5 +95,5 @@ def verify_wallet_access(auth: AcaPyAuthVerified, wallet_id: str):
 
 
 def tenant_api_key(tenant_token: str):
-    "Get the cloud api key for a tenant with specified role."
+    """Get the cloud api key for a tenant with specified role."""
     return f"tenant.{tenant_token}"

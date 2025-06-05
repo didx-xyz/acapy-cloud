@@ -11,7 +11,7 @@ logger = get_logger(__name__)
 
 
 async def assert_public_did(aries_controller: AcaPyClient) -> str:
-    """assert the agent has a public did, throwing an error otherwise.
+    """Assert the agent has a public did, throwing an error otherwise.
 
     Args:
         aries_controller (AcaPyClient): the aca-py client.
