@@ -408,11 +408,13 @@ def add_live_update(live_update_config, enabled):
     return []
 
 
-def setup_cheqd_localnet(namespace, ingress_domain, build_enabled):
+def setup_cheqd_localnet(namespace, ingress_domain):
     print(color.green("Installing Cheqd Localnet..."))
 
     project_root = os.getcwd()
     cheqd_path = project_root + "/tilt/.cheqd-node"
+
+    build_enabled = cpu_arch == "arm64"
 
     if build_enabled and not os.path.exists(cheqd_path):
         clone_cmd = (
@@ -507,7 +509,7 @@ def setup_cloudapi(build_enabled, expose):
     setup_postgres(namespace)
     setup_redpanda_connect_cloud(namespace)
 
-    setup_cheqd_localnet(namespace, ingress_domain, build_enabled)
+    setup_cheqd_localnet(namespace, ingress_domain)
 
     releases = {
         "governance-agent": {
