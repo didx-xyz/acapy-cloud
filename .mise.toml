@@ -116,22 +116,16 @@ poetry run pytest -n auto --dist loadgroup $(find . -type d -path '*/tests/e2e' 
 description = "Format files"
 run = """
 #!/bin/bash
-isort . --profile black
-black .
-find . -type f -name "Tiltfile" | while read -r file; do
-    black "$file"
-  done
+ruff check --select I --fix
+ruff format
 """
 
 [tasks."fmt:check"]
 description = "Check all files for formatting"
 run = """
 #!/bin/bash
-isort . --check --profile black --diff
-black . --check --diff
-find . -type f -name "Tiltfile" | while read -r file; do
-    black --check --diff "$file"
-  done
+ruff check --select I
+ruff format --check
 """
 
 [tasks."bootstrap:kubeconfig"]

@@ -1,6 +1,7 @@
 {
   "recommendations": [
     "bierner.markdown-mermaid",
+    "charliermarsh.ruff",
     "editorconfig.editorconfig",
     "esbenp.prettier-vscode",
     "ms-python.python",
