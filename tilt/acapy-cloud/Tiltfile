@@ -93,7 +93,7 @@ def setup_pgadmin(namespace, ingress_domain):
     k8s_resource(
         workload="pgadmin",
         links=[
-            link("https://" + pgadmin_host, "pgAdmin"),
+            link("http://" + pgadmin_host, "pgAdmin"),
         ],
     )
 
@@ -304,8 +304,8 @@ def setup_minio(namespace, ingress_domain):
     k8s_resource(
         workload=resource_name,
         links=[
-            link("https://minio." + ingress_domain, "MinIO Console"),
-            link("https://minio-api." + ingress_domain, "MinIO API"),
+            link("http://minio." + ingress_domain, "MinIO Console"),
+            link("http://minio-api." + ingress_domain, "MinIO API"),
         ],
     )
 
@@ -472,15 +472,15 @@ def setup_cheqd_localnet(namespace, ingress_domain):
             "labels": ["11-cheqd"],
             "links": [
                 link(
-                    "https://api.cheqd." + ingress_domain,
+                    "http://api.cheqd." + ingress_domain,
                     "Cheqd API",
                 ),
                 link(
-                    "https://api.cheqd." + ingress_domain + "/swagger/",
+                    "http://api.cheqd." + ingress_domain + "/swagger/",
                     "Cheqd API Docs",
                 ),
                 link(
-                    "https://rpc.cheqd." + ingress_domain,
+                    "http://rpc.cheqd." + ingress_domain,
                     "Cheqd RPC",
                 ),
                 link(
@@ -488,7 +488,7 @@ def setup_cheqd_localnet(namespace, ingress_domain):
                     "Cheqd gRPC",
                 ),
                 link(
-                    "https://grpc-web.cheqd." + ingress_domain,
+                    "http://grpc-web.cheqd." + ingress_domain,
                     "Cheqd gRPC Web",
                 ),
             ],
@@ -523,7 +523,7 @@ def setup_cloudapi(build_enabled, expose):
             "depends": ["nats", "postgres", "did-registrar", "did-resolver", "minio"],
             "links": [
                 link(
-                    "https://governance-agent.cloudapi." + ingress_domain,
+                    "http://governance-agent.cloudapi." + ingress_domain,
                     "Governance Agent",
                 ),
             ],
@@ -543,11 +543,11 @@ def setup_cloudapi(build_enabled, expose):
             "depends": ["governance-agent", "multitenant-agent"],
             "links": [
                 link(
-                    "https://cloudapi." + ingress_domain + "/governance",
+                    "http://cloudapi." + ingress_domain + "/governance",
                     "Governance Web",
                 ),
                 link(
-                    "https://cloudapi." + ingress_domain + "/governance/docs",
+                    "http://cloudapi." + ingress_domain + "/governance/docs",
                     "Governance Web Docs",
                 ),
             ],
@@ -573,7 +573,7 @@ def setup_cloudapi(build_enabled, expose):
             "depends": ["nats", "postgres", "did-registrar", "did-resolver", "minio"],
             "links": [
                 link(
-                    "https://multitenant-agent.cloudapi." + ingress_domain,
+                    "http://multitenant-agent.cloudapi." + ingress_domain,
                     "Multitenant Agent",
                 ),
             ],
@@ -593,11 +593,11 @@ def setup_cloudapi(build_enabled, expose):
             "depends": ["governance-agent", "multitenant-agent"],
             "links": [
                 link(
-                    "https://cloudapi." + ingress_domain + "/tenant-admin",
+                    "http://cloudapi." + ingress_domain + "/tenant-admin",
                     "Tenant Admin",
                 ),
                 link(
-                    "https://cloudapi." + ingress_domain + "/tenant-admin/docs",
+                    "http://cloudapi." + ingress_domain + "/tenant-admin/docs",
                     "Tenant Admin Docs",
                 ),
             ],
@@ -622,9 +622,9 @@ def setup_cloudapi(build_enabled, expose):
         "tenant-web": {
             "depends": ["governance-agent", "multitenant-agent"],
             "links": [
-                link("https://cloudapi." + ingress_domain + "/tenant", "Tenant"),
+                link("http://cloudapi." + ingress_domain + "/tenant", "Tenant"),
                 link(
-                    "https://cloudapi." + ingress_domain + "/tenant/docs", "Tenant Docs"
+                    "http://cloudapi." + ingress_domain + "/tenant/docs", "Tenant Docs"
                 ),
             ],
             "image": {
@@ -648,9 +648,9 @@ def setup_cloudapi(build_enabled, expose):
         "public-web": {
             "depends": ["trust-registry"],
             "links": [
-                link("https://cloudapi." + ingress_domain + "/public", "Public"),
+                link("http://cloudapi." + ingress_domain + "/public", "Public"),
                 link(
-                    "https://cloudapi." + ingress_domain + "/public/docs", "Public Docs"
+                    "http://cloudapi." + ingress_domain + "/public/docs", "Public Docs"
                 ),
             ],
             "image": {
@@ -675,11 +675,11 @@ def setup_cloudapi(build_enabled, expose):
             "depends": ["postgres"],
             "links": [
                 link(
-                    "https://trust-registry.cloudapi." + ingress_domain,
+                    "http://trust-registry.cloudapi." + ingress_domain,
                     "Trust Registry",
                 ),
                 link(
-                    "https://trust-registry.cloudapi." + ingress_domain + "/docs",
+                    "http://trust-registry.cloudapi." + ingress_domain + "/docs",
                     "Trust Registry Docs",
                 ),
             ],
@@ -704,7 +704,7 @@ def setup_cloudapi(build_enabled, expose):
         "waypoint": {
             "depends": ["nats"],
             "links": [
-                link("https://waypoint.cloudapi." + ingress_domain + "/docs", "Docs"),
+                link("http://waypoint.cloudapi." + ingress_domain + "/docs", "Docs"),
             ],
             "image": {
                 "dockerfile": "./dockerfiles/waypoint/Dockerfile",
@@ -732,15 +732,15 @@ def setup_cloudapi(build_enabled, expose):
                 "multitenant-agent",
             ],
             "links": [
-                link("https://mediator.cloudapi." + ingress_domain, "Mediator"),
+                link("http://mediator.cloudapi." + ingress_domain, "Mediator"),
             ],
         },
         "tails-server": {
             "depends": ["minio"],
             "links": [
-                link("https://tails-server.cloudapi." + ingress_domain, "Tails"),
+                link("http://tails-server.cloudapi." + ingress_domain, "Tails"),
                 link(
-                    "https://tails-server.cloudapi." + ingress_domain + "/docs", "Docs"
+                    "http://tails-server.cloudapi." + ingress_domain + "/docs", "Docs"
                 ),
             ],
             "image": {
@@ -782,11 +782,11 @@ def setup_cloudapi(build_enabled, expose):
             ],
             "links": [
                 link(
-                    "https://resolver.cheqd." + ingress_domain + "/1.0/identifiers/",
+                    "http://resolver.cheqd." + ingress_domain + "/1.0/identifiers/",
                     "DID Resolver",
                 ),
                 link(
-                    "https://resolver.cheqd." + ingress_domain + "/swagger/",
+                    "http://resolver.cheqd." + ingress_domain + "/swagger/",
                     "DID Resolver Docs",
                 ),
             ],
