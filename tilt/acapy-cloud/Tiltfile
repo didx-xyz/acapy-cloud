@@ -425,7 +425,11 @@ def setup_cheqd_localnet(namespace, ingress_domain, build_enabled):
         print(color.green("Cloning cheqd-node repository..."))
     else:
         clone_cmd = "echo 'Cheqd node directory already exists or build is disabled, skipping clone'"
-        print(color.green("Cheqd node directory already exists or build is disabled, skipping clone"))
+        print(
+            color.green(
+                "Cheqd node directory already exists or build is disabled, skipping clone"
+            )
+        )
 
     local_resource(
         name="checkout-cheqd-node",
