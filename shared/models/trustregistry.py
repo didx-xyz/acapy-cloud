@@ -68,8 +68,9 @@ class Schema(BaseModel):
 
         if cheqd_did:
             did = id.split("/")[0]
-            version = "1.0.0"
-            name = "Cheqd-LinkedResource"
+            name = values.get("name", None)
+            version = values.get("version", None)
+
         else:
             if id is None:
                 if None in (did, name, version):
