@@ -1,0 +1,11 @@
+apiVersion: v2
+name: cheqd
+description: A Helm chart to deploy Cheqd localnet node in Kubernetes
+type: application
+version: 0.1.0
+appVersion: 3.1.9
+
+# dependencies:
+#   - name: common
+#     version: 2.x.x
+#     repository: oci://registry-1.docker.io/bitnamicharts

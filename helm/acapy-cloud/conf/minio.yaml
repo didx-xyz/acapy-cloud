@@ -7,12 +7,13 @@ auth:
 ingress:
   enabled: true
   ingressClassName: nginx
-  hostname: minio.127.0.0.1.nip.io
-
-apiIngress:
-  enabled: true
-  ingressClassName: nginx
   hostname: minio-api.127.0.0.1.nip.io
+
+console:
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hostname: minio.127.0.0.1.nip.io
 
 persistence:
   enabled: true

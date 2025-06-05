@@ -3,9 +3,11 @@ load("ext://color", "color")
 load("ext://helm_resource", "helm_resource", "helm_repo")
 
 # https://github.com/bitnami/charts/tree/main/bitnami/postgresql-ha
-postgres_version = "16.0.7"
+postgres_version = "16.0.10"
 # https://github.com/rowanruseler/helm-charts/tree/main/charts/pgadmin4
-pgadmin_version = "1.44.0"
+pgadmin_version = "1.47.0"
+# https://github.com/cheqd/cheqd-node
+cheqd_noded_version = "v3.1.9"
 
 # Mnemonic for the Cheqd Localnet Validator
 # Will be used for Localnet as well as the Fee Payer for Cheqd DID Driver
@@ -282,11 +284,11 @@ def setup_minio(namespace, ingress_domain):
             "--values",
             values_file,
             "--set",
-            "ingress.hostname=minio." + ingress_domain,
+            "console.ingress.hostname=minio." + ingress_domain,
             "--set",
-            "apiIngress.hostname=minio-api." + ingress_domain,
+            "ingress.hostname=minio-api." + ingress_domain,
             "--version",
-            "16.0.10",
+            "17.0.2",
             "--wait",
         ],
         labels=["04-dbs"],
@@ -406,6 +408,82 @@ def add_live_update(live_update_config, enabled):
     return []
 
 
+def setup_cheqd_localnet(namespace, ingress_domain, build_enabled):
+    print(color.green("Installing Cheqd Localnet..."))
+
+    project_root = os.getcwd()
+    cheqd_path = project_root + "/tilt/.cheqd-node"
+
+    if build_enabled and not os.path.exists(cheqd_path):
+        clone_cmd = (
+            "git clone https://github.com/cheqd/cheqd-node.git --depth 1 "
+            + "--branch "
+            + cheqd_noded_version
+            + " "
+            + cheqd_path
+        )
+        print(color.green("Cloning cheqd-node repository..."))
+    else:
+        clone_cmd = "echo 'Cheqd node directory already exists or build is disabled, skipping clone'"
+        print(color.green("Cheqd node directory already exists or build is disabled, skipping clone"))
+
+    local_resource(
+        name="checkout-cheqd-node",
+        cmd=clone_cmd,
+        allow_parallel=True,
+        labels=["11-cheqd"],
+        auto_init=build_enabled,
+    )
+
+    setup_cloudapi_service(
+        "cheqd",
+        "./helm/cheqd",
+        namespace,
+        ingress_domain,
+        build_enabled,
+        {
+            "depends": ["checkout-cheqd-node"],
+            "image": {
+                "dockerfile": project_root + "/tilt/.cheqd-node/docker/Dockerfile",
+                "context": project_root + "/tilt/.cheqd-node",
+                "ignore": ["**"],
+            },
+            "flags": [
+                "--set",
+                "ingressDomain=" + ingress_domain,
+                "--set",
+                "replicaCount=1",
+                "--set",
+                "secrets.validatorMnemonic=" + cheqd_validator_mnemonic,
+            ],
+            "labels": ["11-cheqd"],
+            "links": [
+                link(
+                    "https://api.cheqd." + ingress_domain,
+                    "Cheqd API",
+                ),
+                link(
+                    "https://api.cheqd." + ingress_domain + "/swagger/",
+                    "Cheqd API Docs",
+                ),
+                link(
+                    "https://rpc.cheqd." + ingress_domain,
+                    "Cheqd RPC",
+                ),
+                link(
+                    "https://grpc.cheqd." + ingress_domain,
+                    "Cheqd gRPC",
+                ),
+                link(
+                    "https://grpc-web.cheqd." + ingress_domain,
+                    "Cheqd gRPC Web",
+                ),
+            ],
+        },
+        values_file="./helm/cheqd/conf/localnet/values.yaml",
+    )
+
+
 def setup_cloudapi(build_enabled, expose):
     print(color.green("Installing CloudAPI..."))
 
@@ -424,6 +502,8 @@ def setup_cloudapi(build_enabled, expose):
     setup_pgadmin(namespace, ingress_domain)
     setup_postgres(namespace)
     setup_redpanda_connect_cloud(namespace)
+
+    setup_cheqd_localnet(namespace, ingress_domain, build_enabled)
 
     releases = {
         "governance-agent": {
@@ -670,6 +750,7 @@ def setup_cloudapi(build_enabled, expose):
         },
         "driver-did-cheqd": {
             # https://github.com/cheqd/did-registrar
+            "depends": ["cheqd", "did-resolver"],
             "flags": [
                 "--set",
                 "secretData.FEE_PAYER_TESTNET_MNEMONIC=" + cheqd_validator_mnemonic,
@@ -681,6 +762,7 @@ def setup_cloudapi(build_enabled, expose):
         },
         "did-resolver": {
             # https://github.com/cheqd/did-resolver
+            "depends": ["cheqd"],
             "flags": [
                 "--set",
                 "ingressDomain=" + ingress_domain,

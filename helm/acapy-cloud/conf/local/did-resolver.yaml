@@ -42,7 +42,8 @@ env:
   # 2nd (Boolean) parameter is whether or not to use TLS
   # 3rd connection timeout
   # MAINNET_ENDPOINT: grpc.cheqd.net:443,true,5s
-  TESTNET_ENDPOINT: grpc.cheqd.network:443,true,5s
+  # TESTNET_ENDPOINT: grpc.cheqd.network:443,true,5s
+  TESTNET_ENDPOINT: cheqd:9090,false,5s
 
   RESOLVER_LISTENER: 0.0.0.0:8080
   LOG_LEVEL: warn

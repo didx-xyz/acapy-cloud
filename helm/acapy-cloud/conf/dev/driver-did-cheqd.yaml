@@ -9,7 +9,8 @@ image:
   registry: ghcr.io
   name: cheqd/did-registrar
   pullPolicy: Always
-  tag: 2.4.6-1-ga6af3d5
+  tag: develop
+  digest: sha256:52221271f250ef162a1b83576fc0dff63e96d1d7897e8d0106eebec925f0519f
 
 service:
   appProtocol: http
@@ -26,16 +27,18 @@ startupProbe:
   tcpSocket:
     port: 3000
 
-secretData: {}
+secretData:
   # FEE_PAYER_TESTNET_MNEMONIC: "" # Cheqd did-registrar uses testnet faucet by default
   # FEE_PAYER_MAINNET_MNEMONIC: "..."
+  # Use the same Testnet Mnemonic as the Localnet Cheqd node
+  FEE_PAYER_TESTNET_MNEMONIC: betray purity grief spatial rude select loud reason wolf harvest session awesome
 
 env:
-  FEE_PAYER_TESTNET_MNEMONIC:
-    valueFrom:
-      secretKeyRef:
-        name: cheqd-testnet-mnemonic
-        key: mnemonic
+  # TESTNET_RPC_URL: https://rpc.cheqd.network
+  # MAINNET_RPC_URL: https://rpc.cheqd.net
+  TESTNET_RPC_URL: http://cheqd:26657
+  # RESOLVER_URL: https://resolver.cheqd.net
+  RESOLVER_URL: http://did-resolver:8080
 
 podSecurityContext:
   fsGroup: 1000

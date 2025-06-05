@@ -16,6 +16,16 @@ service:
   port: 8080
   containerPort: 8080
 
+ingressDomain: acapy-cloud.dev.didxtech.com
+ingress:
+  internal:
+    enabled: true
+    className: nginx-internal
+    rules:
+      - host: resolver-cheqd-{{ .Values.ingressDomain }}
+        paths:
+          - servicePort: "{{ .Values.service.port }}"
+
 livenessProbe:
   tcpSocket:
     port: 8080
@@ -32,7 +42,8 @@ env:
   # 2nd (Boolean) parameter is whether or not to use TLS
   # 3rd connection timeout
   # MAINNET_ENDPOINT: grpc.cheqd.net:443,true,5s
-  TESTNET_ENDPOINT: grpc.cheqd.network:443,true,5s # cheqd.cheqd.svc.cluster.local:9090,false,5s
+  # TESTNET_ENDPOINT: grpc.cheqd.network:443,true,5s
+  TESTNET_ENDPOINT: cheqd:9090,false,5s
 
   RESOLVER_LISTENER: 0.0.0.0:8080
   LOG_LEVEL: warn

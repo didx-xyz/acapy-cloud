@@ -1,0 +1,355 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "cheqd.fullname" . }}
+  labels:
+    {{- include "cheqd.labels" . | nindent 4 }}
+    {{- with .Values.statefulSetLabels }}
+    {{- tpl (toYaml .) $ | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      {{- include "cheqd.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "cheqd.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "cheqd.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+      initContainers:
+        {{- if eq .Values.network "localnet" }}
+        - name: bootstrap-localnet
+          image: "{{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}{{ with .Values.image.digest | printf "@%s" . }}{{ end }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              ## The following script is based on
+              ## https://github.com/cheqd/sdk/blob/main/localnet/init.sh
+              set -euox pipefail
+
+              mkdir -p $HOME/.cheqdnode/config
+
+              if [ -f $HOME/.cheqdnode/config/genesis.json ]; then
+                echo "Genesis file already exists, skipping initialization."
+                exit 0
+              fi
+
+              CHAIN_ID="testnet-6"
+
+              cheqd-noded init node0 --chain-id "$CHAIN_ID"
+              NODE_0_VAL_PUBKEY=$(cheqd-noded tendermint show-validator)
+
+              sed -i 's/"voting_period": "172800s"/"voting_period": "12s"/' "$HOME/.cheqdnode/config/genesis.json"
+              sed -i 's/"expedited_voting_period": "86400s"/"expedited_voting_period": "10s"/' "$HOME/.cheqdnode/config/genesis.json"
+
+              GENESIS="$HOME/.cheqdnode/config/genesis.json"
+              sed -i 's/"stake"/"ncheq"/' "$GENESIS"
+
+              echo ${VALIDATOR_MNEMONIC} | cheqd-noded keys add cheqd-user --keyring-backend test --recover
+              cheqd-noded genesis add-genesis-account cheqd-user 1000000000000000000ncheq --keyring-backend test
+              cheqd-noded genesis gentx cheqd-user 10000000000000000ncheq --chain-id $CHAIN_ID --pubkey "$NODE_0_VAL_PUBKEY" --keyring-backend test
+
+              cheqd-noded genesis collect-gentxs
+              cheqd-noded genesis validate-genesis
+          env:
+            - name: VALIDATOR_MNEMONIC
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cheqd.fullname" . }}
+                  key: validator_mnemonic
+          volumeMounts:
+            - name: data
+              mountPath: /home/cheqd/.cheqdnode
+        {{- else }}
+        - name: download-genesis
+          image: docker.io/busybox
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /cheqd/config
+              if [ ! -f /cheqd/config/genesis.json ]; then
+                echo "Genesis file not found, downloading..."
+                wget -qO /cheqd/config/genesis.json \
+                  https://raw.githubusercontent.com/cheqd/cheqd-node/refs/heads/main/networks/{{ .Values.network }}/genesis.json
+              else
+                echo "Genesis file already exists, skipping download."
+              fi
+          volumeMounts:
+            - name: data
+              mountPath: /cheqd
+        - name: download-snapshot
+          image: docker.io/alpine:3
+          imagePullPolicy: Always
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+
+              cd /cheqd
+              mkdir -p /cheqd/config
+              rm -rf /cheqd/lost+found
+
+              # Check if data directory exists with expected content
+              if [ -d /cheqd/data/application.db ] && \
+                 [ -d /cheqd/data/blockstore.db ] && \
+                 [ -d /cheqd/data/state.db ]; then
+                echo "Data directory already exists with expected content, skipping snapshot..."
+                exit 0
+              fi
+
+              # Install required tools
+              apk add --no-cache --update lz4 aria2
+
+              SNAPSHOT_FILE="/cheqd/{{ tpl .Values.snapshot.filename . }}"
+              ARIA2_FILE="${SNAPSHOT_FILE}.aria2"
+
+              # Download snapshot if needed
+              if [ -f "${ARIA2_FILE}" ]; then
+                echo "Partial download detected, continuing..."
+              elif [ -f "${SNAPSHOT_FILE}" ]; then
+                echo "Snapshot file already exists, skipping download..."
+              else
+                echo "Starting snapshot download..."
+              fi
+
+              if [ ! -f "${SNAPSHOT_FILE}" ] || [ -f "${ARIA2_FILE}" ]; then
+                echo "Downloading snapshot..."
+                echo "Snapshot date: {{ .Values.snapshot.date }}"
+                echo "Snapshot network: {{ .Values.network }}"
+
+                aria2c --split=8 \
+                  --max-connection-per-server=8 \
+                  --continue=true \
+                  {{- if .Values.snapshot.checksum }}
+                  --check-integrity=true \
+                  --checksum=sha-256={{ .Values.snapshot.checksum }} \
+                  {{- end }}
+                  --dir=/cheqd \
+                  --out={{ tpl .Values.snapshot.filename . }} \
+                  {{ tpl .Values.snapshot.url . }}
+              fi
+
+              # Extract snapshot
+              echo "Extracting snapshot..."
+              lz4 -d "${SNAPSHOT_FILE}" -c | tar -xvf - -C /cheqd
+              echo "Snapshot extracted successfully!"
+
+              # Set proper ownership
+              echo "Setting ownership..."
+              chown -R 1000:1000 /cheqd
+
+              # Clean up
+              echo "Cleaning up snapshot file..."
+              rm -f "${SNAPSHOT_FILE}"
+          volumeMounts:
+            - name: data
+              mountPath: /cheqd
+        {{- end }}
+      containers:
+        - name: cheqd
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}{{ with .Values.image.digest | printf "@%s" . }}{{ end }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - cheqd-noded
+            - start
+          ports:
+            - name: p2p
+              containerPort: {{ .Values.service.p2pPort }}
+              protocol: TCP
+            - name: rpc
+              containerPort: {{ .Values.service.rpcPort }}
+              protocol: TCP
+            - name: api
+              containerPort: {{ .Values.service.apiPort }}
+              protocol: TCP
+            - name: rosetta
+              containerPort: {{ .Values.service.rosettaPort }}
+              protocol: TCP
+            - name: grpc
+              containerPort: {{ .Values.service.grpcPort }}
+              protocol: TCP
+            - name: grpc-web
+              containerPort: {{ .Values.service.grpcWebPort }}
+              protocol: TCP
+            - name: metrics
+              containerPort: {{ .Values.service.metricsPort }}
+              protocol: TCP
+          {{- if .Values.startupProbe }}
+          startupProbe:
+            {{- tpl (toYaml .Values.startupProbe) . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.livenessProbe }}
+          livenessProbe:
+            {{- tpl (toYaml .Values.livenessProbe) . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.readinessProbe }}
+          readinessProbe:
+            {{- tpl (toYaml .Values.readinessProbe) . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.resources }}
+          resources:
+            {{- tpl (toYaml .Values.resources) . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /home/cheqd/.cheqdnode
+            - name: config
+              mountPath: /home/cheqd/.cheqdnode/config/config.toml
+              subPath: config.toml
+              readOnly: true
+            - name: app-config
+              mountPath: /home/cheqd/.cheqdnode/config/app.toml
+              subPath: app.toml
+              readOnly: true
+            {{- with .Values.secrets }}
+            {{- if .validatorKey }}
+            - name: validator-key
+              mountPath: /home/cheqd/.cheqdnode/{{ default "config/priv_validator_key.json" $.Values.config.config_toml.priv_validator_key_file }}
+              subPath: priv_validator_key.json
+              readOnly: true
+            {{- end }}
+            {{- if .nodeKey }}
+            - name: node-key
+              mountPath: /home/cheqd/.cheqdnode/{{ default "config/node_key.json" $.Values.config.config_toml.node_key_file }}
+              subPath: node_key.json
+              readOnly: true
+            {{- end }}
+            {{- end }}
+          {{- with .Values.volumeMounts }}
+            {{- tpl (toYaml .) $ | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "cheqd.fullname" . }}-config
+            items:
+              - key: config.toml
+                path: config.toml
+        - name: app-config
+          configMap:
+            name: {{ include "cheqd.fullname" . }}-config
+            items:
+              - key: app.toml
+                path: app.toml
+        {{- with .Values.secrets }}
+        {{- if .validatorKey }}
+        - name: validator-key
+          secret:
+            secretName: {{ include "cheqd.fullname" $ }}
+            items:
+              - key: priv_validator_key.json
+                path: priv_validator_key.json
+        {{- end }}
+        {{- if .nodeKey }}
+        - name: node-key
+          secret:
+            secretName: {{ include "cheqd.fullname" $ }}
+            items:
+              - key: node_key.json
+                path: node_key.json
+        {{- end }}
+        {{- end }}
+        {{- with .Values.volumes }}
+          {{- tpl (toYaml .) $ | nindent 10 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+      affinity:
+      {{- if .Values.affinity }}
+        {{- tpl (toYaml .Values.affinity .) | nindent 8 }}
+      {{- else }}
+      {{- if eq .Values.podAntiAffinityPreset "soft" }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app.kubernetes.io/instance
+                      operator: In
+                      values:
+                        - '{{ include "cheqd.fullname" . }}'
+                topologyKey: kubernetes.io/hostname
+      {{- else if eq .Values.podAntiAffinityPreset "hard" }}
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/instance
+                    operator: In
+                    values:
+                      - '{{ include "cheqd.fullname" . }}'
+              topologyKey: kubernetes.io/hostname
+      {{- end }}
+      {{- with .Values.nodeAffinityPreset }}
+      {{- if eq .type "soft" }}
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              preference:
+                matchExpressions:
+                  - key: {{ tpl .key $ }}
+                    operator: In
+                    values:
+                      {{- toYaml .values | nindent 22 }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+  {{- with .Values.persistentVolumeClaimRetentionPolicy }}
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: {{ .whenDeleted }}
+    whenScaled: {{ .whenScaled }}
+  {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        {{- with .Values.persistence.annotations }}
+        annotations:
+          {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+        {{- with .Values.persistence.labels }}
+        labels:
+          {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+      spec:
+        accessModes:
+          - {{ .Values.persistence.accessMode }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.capacity | quote }}
+        storageClassName: {{ .Values.persistence.storageClassName }}
