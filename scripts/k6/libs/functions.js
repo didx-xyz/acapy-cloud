@@ -573,7 +573,7 @@ export function getProofIdByThreadId(holderAccessToken, threadId) {
   }
 }
 
-export function getProofIdCredentials(holderAccessToken, proofId) {
+export function getProofIdCredentials(holderAccessToken, proofId, dateOfIssue = null) {
   const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/verifier/proofs/${proofId}/credentials`;
   const params = {
     headers: {
@@ -587,18 +587,41 @@ export function getProofIdCredentials(holderAccessToken, proofId) {
     // console.log(`Request headers: ${JSON.stringify(response.request.headers)}`);
     // Parse the response body
     const responseData = JSON.parse(response.body);
-    // Iterate over the responseData array
-    for (let i = 0; i < responseData.length; i++) {
-      const obj = responseData[i];
-      // Check if the current object has a matching thread_id
-      const credentialId = obj.cred_info.credential_id;
-      // TODO: this will always return the first credentialId - fix this
-      return credentialId;
+
+    // If no dateOfIssue filter is provided, return the first credential (existing behavior)
+    if (!dateOfIssue) {
+      for (let i = 0; i < responseData.length; i++) {
+        const obj = responseData[i];
+        const credentialId = obj.cred_info.credential_id;
+        // TODO: this will always return the first credentialId - fix this
+        return credentialId;
+      }
+    } else {
+      // Filter credentials by date_of_issue attribute
+      for (let i = 0; i < responseData.length; i++) {
+        const obj = responseData[i];
+        const credAttrs = obj.cred_info.attrs || {};
+
+        // Check if the credential has a date_of_issue attribute that matches
+        if (credAttrs.date_of_issue === dateOfIssue.toString()) {
+          const credentialId = obj.cred_info.credential_id;
+          console.log(`Found matching credential with date_of_issue: ${dateOfIssue}`);
+          return credentialId;
+        }
+      }
+
+      // If no matching credential found, log available credentials for debugging
+      console.warn(`No credential found with date_of_issue: ${dateOfIssue}`);
+      console.warn(`Available credentials: ${JSON.stringify(responseData.map(obj => ({
+        credentialId: obj.cred_info.credential_id,
+        dateOfIssue: obj.cred_info.attrs?.date_of_issue
+      })), null, 2)}`);
     }
+
     // Throw an error if no match is found
     // console.log(`Log of the request made: ${JSON.stringify(response.request)}`);
     throw new Error(
-      `No match found for proofId: ${proofId}\nResponse body: ${JSON.stringify(
+      `No match found for proofId: ${proofId}${dateOfIssue ? ` with date_of_issue: ${dateOfIssue}` : ''}\nResponse body: ${JSON.stringify(
         responseData,
         null,
         2

@@ -8,7 +8,6 @@ import { log, shuffleArray } from "../libs/k6Functions.js";
 import {
   acceptCredential,
   createCredential,
-  genericWaitForSSEEvent,
   getCredentialIdByThreadId,
   getWalletIndex,
   retry,  // Add this import
@@ -51,7 +50,6 @@ export const options = {
 const inputFilepath = `../output/${outputPrefix}-create-invitation.json`;
 const data = open(inputFilepath, "r");
 const outputFilepath = `output/${outputPrefix}-create-credentials.json`;
-// Add new output file for epoch timestamps
 const epochOutputFilepath = `output/${outputPrefix}-epoch-timestamps.json`;
 
 // Helper function to get the issuer index using pre-calculated assignments
@@ -174,7 +172,7 @@ export default function (data) {
     issuer_access_token: wallet.issuer_access_token,
     issuer_credential_definition_id: wallet.issuer_credential_definition_id,
     issuer_connection_id: wallet.issuer_connection_id,
-    date_of_issue: epochTimestamp, // Include the epoch timestamp in output
+    date_of_issue: epochTimestamp, // Include the epoch timestamp in output. Currently redundant, but potentially useful for future reference
   });
   file.appendString(outputFilepath, `${issuerData}\n`);
   testFunctionReqs.add(1);

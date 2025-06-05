@@ -3,6 +3,7 @@
 
 import { check, sleep } from "k6";
 import { Counter } from "k6/metrics";
+import file from "k6/x/file";
 import {
   acceptProofRequest,
   getProof,
@@ -49,17 +50,38 @@ const testFunctionReqs = new Counter("test_function_reqs");
 
 const inputFilepath = `../output/${outputPrefix}-create-invitation.json`;
 const data = open(inputFilepath, "r");
+// Add path to epoch timestamps file
+const epochInputFilepath = `../output/${outputPrefix}-epoch-timestamps.json`;
+// Read epoch data in init stage
+let epochData = null;
+try {
+  epochData = open(epochInputFilepath, "r");
+} catch (error) {
+  console.warn(`Could not read epoch timestamp file: ${error.message}`);
+}
 
 export function setup() {
-
   let tenants = data.trim().split("\n").map(JSON.parse);
   tenants = shuffleArray(tenants);
 
-  return { tenants };
+  // Parse the epoch timestamp from the data read in init stage
+  let epochTimestamp = null;
+  try {
+    if (epochData && epochData.trim()) {
+      const epochJson = JSON.parse(epochData.trim().split('\n')[0]);
+      epochTimestamp = epochJson.epoch_timestamp;
+      console.log(`Loaded epoch timestamp: ${epochTimestamp}`);
+    }
+  } catch (error) {
+    console.warn(`Could not parse epoch timestamp: ${error.message}`);
+  }
+
+  return { tenants, epochTimestamp };
 }
 
 export default function (data) {
   const tenants = data.tenants;
+  const epochTimestamp = data.epochTimestamp;
   const walletIndex = getWalletIndex(__VU, __ITER, iterations);
   const wallet = tenants[walletIndex];
 
@@ -121,7 +143,7 @@ export default function (data) {
   let credentialId;
   try {
     credentialId = retry(() => {
-      const response = getProofIdCredentials(wallet.access_token, proofId);
+      const response = getProofIdCredentials(wallet.access_token, proofId, epochTimestamp);
       if (response.length === 0) {
         console.log('Credential ID:', response);
         throw new Error('No credential ID returned');
