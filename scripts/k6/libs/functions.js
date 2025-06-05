@@ -605,14 +605,14 @@ export function getProofIdCredentials(holderAccessToken, proofId, dateOfIssue = 
         // Check if the credential has a date_of_issue attribute that matches
         if (credAttrs.date_of_issue === dateOfIssue.toString()) {
           const credentialId = obj.cred_info.credential_id;
-          console.log(`Found matching credential with date_of_issue: ${dateOfIssue}`);
+          log.debug(`Found matching credential with date_of_issue: ${dateOfIssue}`);
           return credentialId;
         }
       }
 
       // If no matching credential found, log available credentials for debugging
-      console.warn(`No credential found with date_of_issue: ${dateOfIssue}`);
-      console.warn(`Available credentials: ${JSON.stringify(responseData.map(obj => ({
+      log.warn(`No credential found with date_of_issue: ${dateOfIssue}`);
+      log.warn(`Available credentials: ${JSON.stringify(responseData.map(obj => ({
         credentialId: obj.cred_info.credential_id,
         dateOfIssue: obj.cred_info.attrs?.date_of_issue
       })), null, 2)}`);
@@ -621,14 +621,10 @@ export function getProofIdCredentials(holderAccessToken, proofId, dateOfIssue = 
     // Throw an error if no match is found
     // console.log(`Log of the request made: ${JSON.stringify(response.request)}`);
     throw new Error(
-      `No match found for proofId: ${proofId}${dateOfIssue ? ` with date_of_issue: ${dateOfIssue}` : ''}\nResponse body: ${JSON.stringify(
-        responseData,
-        null,
-        2
-      )}`
+      `No match found for proofId: ${proofId}${dateOfIssue ? ` with date_of_issue: ${dateOfIssue}` : ''}`
     );
   } catch (error) {
-    console.error("Error in getProofIdCredentials:", error);
+    log.error(`Error in getProofIdCredentials: Error message: ${error.message}`);
     throw error; // Re-throw the error to propagate it to the caller
   }
 }
@@ -1196,17 +1192,17 @@ export function retry(fn, retries = 3, delay = 2000, operation = 'Undefined') {
         return result;
       }
       // For subsequent successful attempts, log the success
-      console.log(`VU ${__VU}: Iteration ${__ITER}: Operation ${operation}: Succeeded on attempt ${attempts + 1}`);
+      log.info(`Operation ${operation}: Succeeded on attempt ${attempts + 1}`);
       return result;
     } catch (e) {
       attempts++;
-      // Only log from second attempt onwards
-      if (attempts > 1) {
-        console.warn(`VU ${__VU}: Iteration ${__ITER}: Operation ${operation}: Attempt ${attempts} failed: ${e.message}`);
+      // Log from first unsuccessful second attempt onwards
+      if (attempts < retries) {
+        log.warn(`Operation ${operation}: Attempt ${attempts}/${retries} failed: ${e.message}`);
       }
 
       if (attempts >= retries) {
-        console.error(`VU ${__VU}: Iteration ${__ITER}: Operation ${operation}: All ${retries} attempts failed`);
+        log.error(`Operation ${operation}: All ${attempts}/${retries} attempts failed`);
         throw e;
       }
 
