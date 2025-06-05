@@ -4,7 +4,7 @@
 import { check } from "k6";
 import { Counter } from "k6/metrics";
 import file from "k6/x/file";
-import { log } from "../libs/k6Functions.js";
+import { log, shuffleArray } from "../libs/k6Functions.js";
 import {
   acceptCredential,
   createCredential,
@@ -59,14 +59,6 @@ function getIssuerIndex(vu, iter) {
 }
 const testFunctionReqs = new Counter("test_function_reqs");
 
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
 export function setup() {
 
   file.writeString(outputFilepath, "");
@@ -81,7 +73,7 @@ export default function (data) {
   const walletIndex = getWalletIndex(__VU, __ITER, iterations);
   const wallet = holders[walletIndex];
 
-  log('debug', `Wallet Index: ${walletIndex}, Issuer Wallet ID: ${wallet.issuer_wallet_id}`);
+  log.debug(`Wallet Index: ${walletIndex}, Issuer Wallet ID: ${wallet.issuer_wallet_id}`);
 
   let createCredentialResponse;
   try {
@@ -116,9 +108,7 @@ export default function (data) {
   const { thread_id: threadId, credential_exchange_id: issuerCredentialExchangeId } =
     JSON.parse(createCredentialResponse.body);
 
-  log('debug', `Thread ID: ${threadId}`);
-  log('debug', `Holer access token: ${wallet.holder_access_token}`);
-  log('debug', `Wallet ID: ${wallet.wallet_id}`);
+  log.debug(`walletIndex: ${walletIndex}, walletId: ${wallet.wallet_id} issuerConnectionId: ${wallet.issuer_connection_id}`);
 
   const waitForSSEEventResponse = genericPolling({
     accessToken: wallet.access_token,
@@ -140,7 +130,7 @@ export default function (data) {
       [sseCheckMessage]: (r) => r === true
   });
 
-  log('debug', `Accepting credential for thread ID: ${threadId}`);
+  log.debug(`Accepting credential for thread ID: ${threadId}`);
 
   const holderCredentialExchangeId = getCredentialIdByThreadId(wallet.access_token, threadId);
 

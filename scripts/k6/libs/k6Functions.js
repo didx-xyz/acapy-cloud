@@ -48,4 +48,34 @@ const log = {
   }
 };
 
-export { log };
+/**
+ * Conditionally shuffles an array based on the SHUFFLE environment variable.
+ *
+ * @param {Array} array - The array to potentially shuffle
+ * @returns {Array} - The original array or shuffled array based on SHUFFLE env var
+ *
+ * Usage:
+ *   Set SHUFFLE=true or SHUFFLE=1 to enable shuffling (default: false)
+ *
+ *   import { shuffleArray } from './libs/k6Functions.js';
+ *   const shuffledData = shuffleArray(originalData);
+ */
+function shuffleArray(array) {
+  const shouldShuffle = __ENV.SHUFFLE === 'true' || __ENV.SHUFFLE === '1';
+
+  if (!shouldShuffle) {
+    return array;
+  }
+
+  // Create a copy to avoid mutating the original array
+  const shuffled = [...array];
+
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  return shuffled;
+}
+
+export { log, shuffleArray };

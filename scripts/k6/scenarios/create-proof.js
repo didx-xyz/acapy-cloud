@@ -13,6 +13,7 @@ import {
   retry,  // Add this import
   genericPolling,
 } from "../libs/functions.js";
+import { log, shuffleArray } from "../libs/k6Functions.js";
 
 const vus = Number.parseInt(__ENV.VUS, 10);
 const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
@@ -49,14 +50,6 @@ const testFunctionReqs = new Counter("test_function_reqs");
 const inputFilepath = `../output/${outputPrefix}-create-invitation.json`;
 const data = open(inputFilepath, "r");
 
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
 export function setup() {
 
   let tenants = data.trim().split("\n").map(JSON.parse);
@@ -70,9 +63,8 @@ export default function (data) {
   const walletIndex = getWalletIndex(__VU, __ITER, iterations);
   const wallet = tenants[walletIndex];
 
-  // console.log(`wallet.issuer_connection_id: ${wallet.issuer_connection_id}`);
   // const sendProofRequestResponse = sendProofRequest(issuer.accessToken, wallet.issuer_connection_id);
-  // console.log(`VU: ${__VU}, Iteration: ${__ITER}, Issuer Wallet ID: ${wallet.issuer_wallet_id}`);
+  log.debug(`walletIndex: ${walletIndex}, walletId: ${wallet.wallet_id}, issuerConnectionId: ${wallet.issuer_connection_id}, issuerAccessToken: ${wallet.issuer_access_token}`);
   let sendProofRequestResponse;
   try {
     sendProofRequestResponse = retry(() => {
@@ -121,17 +113,6 @@ export default function (data) {
   check(waitForSSEEventReceivedResponse, {
     [sseCheckMessage]: (r) => r === true
 });
-
-  // check(waitForSSEEventReceivedResponse, {
-  //   "SSE Event received successfully: request-recevied": (r) => {
-  //     if (!r) {
-  //       throw new Error("SSE event was not received successfully");
-  //     }
-  //     return true;
-  //   },
-  // });
-
-  // sleep(2);
 
   // TODO: return object and add check for the response
   const proofId = getProofIdByThreadId(wallet.access_token, threadId);
@@ -238,6 +219,7 @@ export default function (data) {
     }
     const responseBody = JSON.parse(r.body);
     if (responseBody[0].verified !== false) {
+      log.debug(`Wallet Index: ${walletIndex}, Issuer Connection ID: ${wallet.issuer_connection_id}`);
       throw new Error(
         `Credential is not unverified. Current verification status: ${responseBody[0].verified}`
       );

@@ -10,6 +10,7 @@ import {
   revokeCredential,
   publishRevocation,
 } from "../libs/functions.js";
+import { log } from "../libs/k6Functions.js";
 
 const holderPrefix = __ENV.HOLDER_PREFIX;
 const issuerPrefix = __ENV.ISSUER_PREFIX;
@@ -77,6 +78,7 @@ export default function (data) {
             `VU ${__VU}: Iteration ${__ITER}: Unexpected response while revoking credential: ${r.response}`
           );
         }
+        log.debug(`Revoked: Wallet Index: ${walletIndex}, Issuer Connection ID: ${wallet.issuer_connection_id}`);
         return true;
       },
     });
@@ -104,7 +106,7 @@ export default function (data) {
     });
   } else {
     // Option B: Only revoke (no publish, no check)
-    console.log(`VU ${__VU}: Iteration ${__ITER}: Revoking credential without auto-publish.`);
+    // log.debug(`Revoking credential without auto-publish.`);
     revokeCredentialResponse = revokeCredential(
       wallet.issuer_access_token,
       wallet.credential_exchange_id
