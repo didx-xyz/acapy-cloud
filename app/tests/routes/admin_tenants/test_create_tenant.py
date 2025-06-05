@@ -1,5 +1,5 @@
 from secrets import token_urlsafe
-from unittest.mock import AsyncMock, patch
+from unittest.mock import ANY, AsyncMock, patch
 
 import base58
 import pytest
@@ -78,7 +78,14 @@ async def test_create_tenant_success(roles):
             "app.routes.admin.tenants.handle_model_with_validation",
             return_value=expected_wallet_body,
         ),
-        patch("app.routes.admin.tenants.onboard_tenant", mock_onboard_tenant),
+        patch(
+            "app.services.onboarding.tenants.onboard_issuer",
+            mock_onboard_tenant,
+        ) as mock_onboard_issuer,
+        patch(
+            "app.services.onboarding.tenants.onboard_verifier",
+            mock_onboard_tenant,
+        ) as mock_onboard_verifier,
         patch("app.routes.admin.tenants.register_actor", mock_register_actor),
         patch("app.routes.admin.tenants.assert_actor_name", return_value=False),
     ):
@@ -100,12 +107,6 @@ async def test_create_tenant_success(roles):
         )
 
         if roles:
-            mock_onboard_tenant.assert_awaited_once_with(
-                tenant_label=wallet_label,
-                roles=roles,
-                wallet_auth_token=create_wallet_response.token,
-                wallet_id=create_wallet_response.wallet_id,
-            )
             mock_register_actor.assert_awaited_once_with(
                 actor=Actor(
                     id=create_wallet_response.wallet_id,
@@ -116,6 +117,18 @@ async def test_create_tenant_success(roles):
                     image_url=create_tenant_body.image_url,
                 )
             )
+            if "issuer" in roles:
+                mock_onboard_issuer.assert_awaited_once_with(
+                    endorser_controller=ANY,
+                    issuer_controller=ANY,
+                    issuer_wallet_id=wallet_id,
+                    issuer_label=wallet_label,
+                )
+            elif "verifier" in roles:
+                mock_onboard_verifier.assert_awaited_once_with(
+                    verifier_label=wallet_label,
+                    verifier_controller=ANY,
+                )
 
 
 @pytest.mark.anyio
