@@ -46,9 +46,18 @@ async def test_register_schema():
 
 @pytest.mark.anyio
 async def test_register_schema_cheqd():
-    with patch(
-        "trustregistry.registry.registry_schemas.crud.create_schema"
-    ) as mock_crud:
+    with (
+        patch(
+            "trustregistry.registry.registry_schemas.crud.create_schema"
+        ) as mock_crud,
+        patch(
+            "trustregistry.registry.registry_schemas.resolve_cheqd_schema"
+        ) as mock_resolve_cheqd,
+    ):
+        mock_resolve_cheqd.return_value = {
+            "name": "schema_name",
+            "version": "1.0",
+        }
         schema_id = registry_schemas.SchemaID(
             schema_id=(
                 "did:cheqd:testnet:9bf9286e-4f83-4138-b44e-62844e4cecc5/"
