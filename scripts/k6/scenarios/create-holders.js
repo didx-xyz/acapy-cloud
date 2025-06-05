@@ -84,7 +84,7 @@ export default function (data) {
   const { wallet_id: walletId, access_token: holderAccessToken } = JSON.parse(
     createTenantResponse.body
   );
-  log('debug',`Wallet Index: ${walletIndex}, wallet ID: ${walletId}`);
+  log.debug(`Wallet Index: ${walletIndex}, wallet ID: ${walletId}`);
   const holderData = JSON.stringify({
     wallet_label: wallet.wallet_label,
     wallet_name: wallet.wallet_name,

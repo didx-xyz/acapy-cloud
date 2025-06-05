@@ -82,8 +82,8 @@ export function getWalletIdByWalletName(headers, walletName) {
         return firstItem.wallet_id;
       }
     }
-    log('warn',`Wallet not found for wallet_name ${walletName}`);
-    log('debug',`Response body: ${response.body}`);
+    log.warn(`Wallet not found for wallet_name ${walletName}`);
+    log.debug(`Response body: ${response.body}`);
     return null;
   }
   logError(response);
@@ -495,10 +495,10 @@ export function getCredentialDefinitionId(
     const matchingItem = responseData.find((item) => item.tag === credDefTag);
 
     if (matchingItem) {
-      log('info',`Credential definition found for tag ${credDefTag}: ${matchingItem.id}`);
+      log.info(`Credential definition found for tag ${credDefTag}: ${matchingItem.id}`);
       return matchingItem.id;
     }
-    log('info',`Credential definition not found for tag ${credDefTag}`);
+    log.info(`Credential definition not found for tag ${credDefTag}`);
     return false;
   }
   logError(response);

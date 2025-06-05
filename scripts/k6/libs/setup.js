@@ -33,7 +33,7 @@ export function bootstrapIssuer(
     });
 
     if (!issuerData) {
-      log('info', `Failed to create or retrieve issuer for ${walletName}_0`);
+      log.info(`Failed to create or retrieve issuer for ${walletName}_0`);
       return issuers;
     }
 
@@ -45,7 +45,7 @@ export function bootstrapIssuer(
     );
 
     if (credentialDefinitionId) {
-      log('info', `Credential definition already exists for issuer ${walletName}_0 - Skipping creation`)
+      log.info(`Credential definition already exists for issuer ${walletName}_0 - Skipping creation`)
       issuers.push({
         walletName: walletName,
         walletId: issuerWalletId,
@@ -53,7 +53,7 @@ export function bootstrapIssuer(
         credentialDefinitionId,
       });
     } else {
-      log('info', `Credential definition not found for issuer ${walletName}_0 - Creating new one`);
+      log.info(`Credential definition not found for issuer ${walletName}_0 - Creating new one`);
 
       const schemaId = createSchemaIfNotExists(
         governanceHeaders,
@@ -78,7 +78,7 @@ export function bootstrapIssuer(
         const { id: credentialDefinitionId } = JSON.parse(
           createCredentialDefinitionResponse.body
         );
-        log('info', `definition created successfully for issuer ${walletName}_0`);
+        log.info(`definition created successfully for issuer ${walletName}_0`);
         issuers.push({
           walletName: walletName,
           walletId: issuerWalletId,
@@ -86,7 +86,7 @@ export function bootstrapIssuer(
           credentialDefinitionId: credentialDefinitionId,
         });
       } else {
-        log('error', `Failed to create credential definition for issuer ${walletName}_0`);
+        log.error(`Failed to create credential definition for issuer ${walletName}_0`);
       }
     }
   }

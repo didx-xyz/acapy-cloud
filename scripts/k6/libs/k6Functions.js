@@ -15,28 +15,37 @@
  * Usage:
  *   import { log } from './libs/k6Functions.js';
  *
- *   log('info', 'Test started');           // [VU:1|Iter:1] Test started
- *   log('debug', 'Debug info', data);      // [VU:1|Iter:1] DEBUG: Debug info {data}
- *   log('error', 'Something failed');      // [VU:1|Iter:1] Something failed
- *   log('warn', 'Warning message');       // [VU:1|Iter:1] Warning message
+ *   log.info('Test started');              // [VU:1|Iter:1] Test started
+ *   log.debug('Debug info', data);         // [VU:1|Iter:1] DEBUG: Debug info {data}
+ *   log.error('Something failed');         // [VU:1|Iter:1] Something failed
+ *   log.warn('Warning message');          // [VU:1|Iter:1] Warning message
  *
- * Supported levels: 'info', 'debug', 'error', 'warn'
+ * Supported methods: debug, info, error, warn
  * Only debug messages include the level name in the output prefix.
  */
 const DEBUG_ENABLED = __ENV.DEBUG === 'true' || __ENV.DEBUG === '1';
 
-function log(level, message, ...args) {
-  if (level === 'debug' && !DEBUG_ENABLED) return;
-
-  const prefix = level === 'debug'
-    ? `[VU:${__VU}|Iter:${__ITER}] DEBUG:`
-    : `[VU:${__VU}|Iter:${__ITER}]`;
-
-  if (level === 'error' || level === 'warn') {
-    console[level](`${prefix} ${message}`, ...args);
-  } else {
+const log = {
+  debug(message, ...args) {
+    if (!DEBUG_ENABLED) return;
+    const prefix = `[VU:${__VU}|Iter:${__ITER}] DEBUG:`;
     console.log(`${prefix} ${message}`, ...args);
+  },
+
+  info(message, ...args) {
+    const prefix = `[VU:${__VU}|Iter:${__ITER}]`;
+    console.log(`${prefix} ${message}`, ...args);
+  },
+
+  warn(message, ...args) {
+    const prefix = `[VU:${__VU}|Iter:${__ITER}]`;
+    console.warn(`${prefix} ${message}`, ...args);
+  },
+
+  error(message, ...args) {
+    const prefix = `[VU:${__VU}|Iter:${__ITER}]`;
+    console.error(`${prefix} ${message}`, ...args);
   }
-}
+};
 
 export { log };

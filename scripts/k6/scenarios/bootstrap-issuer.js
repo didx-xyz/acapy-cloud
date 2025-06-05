@@ -20,7 +20,7 @@ export function setup() {
 export default function () {
   const walletName = issuerPrefix;
   const credDefTag = walletName;
-  log('info', `Number of Issuers: ${numIssuers}`);
+  log.info(`Number of Issuers: ${numIssuers}`);
   const issuers = bootstrapIssuer(
     numIssuers,
     issuerPrefix,
@@ -30,9 +30,9 @@ export default function () {
   );
   issuers.forEach((issuerData) => {
     file.appendString(filepath, `${JSON.stringify(issuerData)}\n`);
-    log('debug', `Issuer: ${JSON.stringify(issuerData)}`);
-    log('debug',`Wallet ID: ${issuerData.walletId}`);
-    log('debug', `Credential Definition ID: ${issuerData.credentialDefinitionId}`);
+    log.debug(`Issuer: ${JSON.stringify(issuerData)}`);
+    log.debug(`Wallet ID: ${issuerData.walletId}`);
+    log.debug(`Credential Definition ID: ${issuerData.credentialDefinitionId}`);
   });
 
   return issuers;

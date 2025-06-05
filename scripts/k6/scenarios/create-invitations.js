@@ -84,7 +84,7 @@ export default function (data) {
   const issuerIndex = getIssuerIndex(__VU, __ITER + 1);
   const issuer = issuers[issuerIndex];
 
-  log('debug', `Wallet Index: ${walletIndex}, Issuer Index: ${issuerIndex}, Issuer Wallet ID: ${issuer.walletId}`);
+  log.debug(`Wallet Index: ${walletIndex}, Issuer Index: ${issuerIndex}, Issuer Wallet ID: ${issuer.walletId}`);
 
   let publicDidResponse;
   try {
@@ -119,7 +119,7 @@ export default function (data) {
 
   if (useOobInvitation) {
     // OOB Invitation flow
-    log('debug', "Using OOB Invitation flow");
+    log.debug("Using OOB Invitation flow");
     let createOobInvitationResponse;
     try {
       createOobInvitationResponse = retry(() => {
@@ -193,7 +193,7 @@ export default function (data) {
     holderDid = holderPrivateDidFull.split(':').slice(0, 3).join(':');
   } else {
     // DIDExchange flow
-    log('debug', "Using DIDExchange flow");
+    log.debug("Using DIDExchange flow");
     let createInvitationResponse;
     try {
       createInvitationResponse = retry(() => {
@@ -265,7 +265,7 @@ export default function (data) {
     getIssuerConnectionIdResponse = e.response || e;
   }
 
-  log('debug', `Issuer connection ID Response Body: ${getIssuerConnectionIdResponse.body}`);
+  log.debug(`Issuer connection ID Response Body: ${getIssuerConnectionIdResponse.body}`);
   const [{ connection_id: issuerConnectionId }] = JSON.parse(getIssuerConnectionIdResponse.body);
 
   const holderData = JSON.stringify({
