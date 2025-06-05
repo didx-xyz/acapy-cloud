@@ -1,23 +1,19 @@
 repos:
-    - repo: https://github.com/psf/black
-      rev: 25.1.0
-      hooks:
-          - id: black
-            stages: [pre-push]
-            language_version: python3
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.11.12
+    hooks:
+      - id: ruff-check # Run the linter
+      - id: ruff-check # Run import check
+        args: ["--select", "I"]
+      - id: ruff-format # Run the formatter
+        args: ["--check"]
 
-    - repo: https://github.com/asottile/blacken-docs
-      rev: 1.19.1
-      hooks:
-          - id: blacken-docs
-            stages: [pre-push]
-            additional_dependencies: [black~=25.1.0]
-            language_version: python3
-            files: '\.(rst|md|markdown|py|tex)$'
-
-    - repo: https://github.com/PyCQA/isort
-      rev: 6.0.0
-      hooks:
-          - id: isort
-            stages: [pre-push]
-            args: ["--profile", "black", "."]
+  - repo: https://github.com/asottile/blacken-docs
+    rev: 1.19.1
+    hooks:
+      - id: blacken-docs
+        stages: [pre-push]
+        additional_dependencies: [black~=25.1.0]
+        language_version: python3
+        files: '\.(rst|md|markdown|py|tex)$'

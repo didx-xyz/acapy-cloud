@@ -57,20 +57,16 @@ uuid_utils = "^0.11.0"
 
 [tool.poetry.group.dev.dependencies]
 anyio = "~4.9.0"
-black = "~25.1.0"
-isort = "~6.0.0"
 pre-commit = "~4.2.0"
 pylint = "~3.3.0"
 pytest = "~8.3.2"
 pytest-cov = "~6.1.0"
 pytest-mock = "~3.14.0"
 pytest-xdist = "^3.6.1"
+ruff = "~0.11.12"
 
 [tool.coverage.run]
 omit = ["*/tests/*", "*/.venv/*", "*/site-packages/*"]
-
-[tool.isort]
-profile = "black"
 
 [tool.pytest.ini_options]
 addopts = "--junitxml=junit.xml -p no:cacheprovider --cov-report=xml --cov-report=term:skip-covered"

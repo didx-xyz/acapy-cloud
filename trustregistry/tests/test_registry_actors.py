@@ -33,7 +33,6 @@ async def test_register_actor():
     "exception, status_code", [(ActorAlreadyExistsException, 409), (Exception, 500)]
 )
 async def test_register_actor_x(exception, status_code):
-
     with patch("trustregistry.registry.registry_actors.crud.create_actor") as mock_crud:
         actor = Actor(id="1", name="Alice", roles=["verifier"], did="did:sov:1234")
         mock_crud.side_effect = exception()

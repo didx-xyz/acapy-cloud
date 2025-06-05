@@ -42,9 +42,9 @@ async def test_initialize_wallet_type_askar_anoncreds(mock_acapy_client):
         config = EndorserConfig()
         await config.initialize()
 
-    assert (
-        config.wallet_type == "askar-anoncreds"
-    ), "Wallet type should be initialized to 'askar-anoncreds'"
+    assert config.wallet_type == "askar-anoncreds", (
+        "Wallet type should be initialized to 'askar-anoncreds'"
+    )
 
 
 @pytest.mark.anyio
@@ -87,9 +87,9 @@ async def test_initialize_only_once(mock_acapy_client):
     ):
         await config.initialize()
 
-        assert (
-            config.wallet_type == "askar"
-        ), "Wallet type should not change after first initialization"
+        assert config.wallet_type == "askar", (
+            "Wallet type should not change after first initialization"
+        )
 
 
 @pytest.mark.anyio
@@ -107,6 +107,6 @@ async def test_concurrent_initialization(mock_acapy_client):
         # Simulate concurrent initialization
         await asyncio.gather(config.initialize(), config.initialize())
 
-    assert (
-        config.wallet_type == "askar"
-    ), "Wallet type should be initialized correctly even with concurrent calls"
+    assert config.wallet_type == "askar", (
+        "Wallet type should be initialized correctly even with concurrent calls"
+    )

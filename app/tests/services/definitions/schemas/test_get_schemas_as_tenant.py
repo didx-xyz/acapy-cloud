@@ -34,12 +34,15 @@ mock_schemas = [
 async def test_get_schemas_as_tenant_all():
     mock_aries_controller = AsyncMock(spec=AcaPyClient)
 
-    with patch(
-        "app.services.definitions.schemas.get_trust_registry_schemas",
-        return_value=mock_schemas,
-    ), patch(
-        "app.services.definitions.schemas.get_schemas_by_id",
-        return_value=mock_schemas,
+    with (
+        patch(
+            "app.services.definitions.schemas.get_trust_registry_schemas",
+            return_value=mock_schemas,
+        ),
+        patch(
+            "app.services.definitions.schemas.get_schemas_by_id",
+            return_value=mock_schemas,
+        ),
     ):
         result = await get_schemas_as_tenant(mock_aries_controller)
 
@@ -53,11 +56,15 @@ async def test_get_schemas_as_tenant_by_id():
     mock_aries_controller = AsyncMock(spec=AcaPyClient)
 
     mock_schema = mock_schemas[0]
-    with patch(
-        "app.services.definitions.schemas.get_trust_registry_schemas",
-        return_value=[mock_schema],
-    ), patch(
-        "app.services.definitions.schemas.get_schemas_by_id", return_value=[mock_schema]
+    with (
+        patch(
+            "app.services.definitions.schemas.get_trust_registry_schemas",
+            return_value=[mock_schema],
+        ),
+        patch(
+            "app.services.definitions.schemas.get_schemas_by_id",
+            return_value=[mock_schema],
+        ),
     ):
         result = await get_schemas_as_tenant(
             mock_aries_controller, schema_name=schema_name_1
@@ -72,11 +79,15 @@ async def test_get_schemas_as_tenant_by_id():
 async def test_get_schemas_as_tenant_filter_issuer_did():
     mock_aries_controller = AsyncMock(spec=AcaPyClient)
 
-    with patch(
-        "app.services.definitions.schemas.get_trust_registry_schemas",
-        return_value=mock_schemas,
-    ), patch(
-        "app.services.definitions.schemas.get_schemas_by_id", return_value=mock_schemas
+    with (
+        patch(
+            "app.services.definitions.schemas.get_trust_registry_schemas",
+            return_value=mock_schemas,
+        ),
+        patch(
+            "app.services.definitions.schemas.get_schemas_by_id",
+            return_value=mock_schemas,
+        ),
     ):
         result = await get_schemas_as_tenant(
             mock_aries_controller, schema_issuer_did=schema_1_issuer_did
@@ -90,11 +101,15 @@ async def test_get_schemas_as_tenant_filter_issuer_did():
 async def test_get_schemas_as_tenant_filter_name():
     mock_aries_controller = AsyncMock(spec=AcaPyClient)
 
-    with patch(
-        "app.services.definitions.schemas.get_trust_registry_schemas",
-        return_value=mock_schemas,
-    ), patch(
-        "app.services.definitions.schemas.get_schemas_by_id", return_value=mock_schemas
+    with (
+        patch(
+            "app.services.definitions.schemas.get_trust_registry_schemas",
+            return_value=mock_schemas,
+        ),
+        patch(
+            "app.services.definitions.schemas.get_schemas_by_id",
+            return_value=mock_schemas,
+        ),
     ):
         result = await get_schemas_as_tenant(
             mock_aries_controller, schema_name=schema_name_1
@@ -108,11 +123,15 @@ async def test_get_schemas_as_tenant_filter_name():
 async def test_get_schemas_as_tenant_filter_version():
     mock_aries_controller = AsyncMock(spec=AcaPyClient)
 
-    with patch(
-        "app.services.definitions.schemas.get_trust_registry_schemas",
-        return_value=mock_schemas,
-    ), patch(
-        "app.services.definitions.schemas.get_schemas_by_id", return_value=mock_schemas
+    with (
+        patch(
+            "app.services.definitions.schemas.get_trust_registry_schemas",
+            return_value=mock_schemas,
+        ),
+        patch(
+            "app.services.definitions.schemas.get_schemas_by_id",
+            return_value=mock_schemas,
+        ),
     ):
         result = await get_schemas_as_tenant(
             mock_aries_controller, schema_version=schema_version_2

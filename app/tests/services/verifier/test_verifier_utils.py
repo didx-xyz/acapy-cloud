@@ -194,17 +194,20 @@ async def test_assert_valid_prover_invitation_key(
 
     mock_agent_controller.connection.get_connection.return_value = conn_record
 
-    with patch(
-        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
-        return_value=pres_exchange,
-    ), patch(
-        "app.util.acapy_verifier_utils.get_actor", return_value=sample_actor
-    ), patch(
-        "app.util.acapy_verifier_utils.get_schema_ids",
-        return_value=["did:schema:123"],
-    ), patch(
-        "app.util.acapy_verifier_utils.are_valid_schemas",
-        return_value=True,
+    with (
+        patch(
+            "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+            return_value=pres_exchange,
+        ),
+        patch("app.util.acapy_verifier_utils.get_actor", return_value=sample_actor),
+        patch(
+            "app.util.acapy_verifier_utils.get_schema_ids",
+            return_value=["did:schema:123"],
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.are_valid_schemas",
+            return_value=True,
+        ),
     ):
         # Should not throw
         await assert_valid_prover(
@@ -243,17 +246,20 @@ async def test_assert_valid_prover_public_did(
 
     mock_agent_controller.connection.get_connection.return_value = conn_record
 
-    with patch(
-        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
-        return_value=pres_exchange,
-    ), patch(
-        "app.util.acapy_verifier_utils.get_actor", return_value=sample_actor
-    ), patch(
-        "app.util.acapy_verifier_utils.get_schema_ids",
-        return_value=["did:schema:123"],
-    ), patch(
-        "app.util.acapy_verifier_utils.are_valid_schemas",
-        return_value=True,
+    with (
+        patch(
+            "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+            return_value=pres_exchange,
+        ),
+        patch("app.util.acapy_verifier_utils.get_actor", return_value=sample_actor),
+        patch(
+            "app.util.acapy_verifier_utils.get_schema_ids",
+            return_value=["did:schema:123"],
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.are_valid_schemas",
+            return_value=True,
+        ),
     ):
         # Should not throw
         await assert_valid_prover(
@@ -273,11 +279,14 @@ async def test_assert_valid_prover_x_no_public_did_no_invitation_key(
 
     mock_agent_controller.connection.get_connection.return_value = conn_record
 
-    with patch(
-        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
-        return_value=pres_exchange,
-    ), pytest.raises(
-        CloudApiException, match="Could not determine did of the verifier"
+    with (
+        patch(
+            "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+            return_value=pres_exchange,
+        ),
+        pytest.raises(
+            CloudApiException, match="Could not determine did of the verifier"
+        ),
     ):
         await assert_valid_prover(
             aries_controller=mock_agent_controller,
@@ -301,12 +310,15 @@ async def test_assert_valid_prover_x_actor_invalid_role(
     mock_agent_controller.connection.get_connection.return_value = conn_record
 
     # valid
-    with patch(
-        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
-        return_value=pres_exchange,
-    ), patch(
-        "app.util.acapy_verifier_utils.get_actor",
-        return_value=actor,
+    with (
+        patch(
+            "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+            return_value=pres_exchange,
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.get_actor",
+            return_value=actor,
+        ),
     ):
         with pytest.raises(
             CloudApiException, match="Actor is missing required role 'verifier'"
@@ -333,21 +345,27 @@ async def test_assert_valid_prover_could_not_fetch_actor_recover_label(
     mock_agent_controller.connection.get_connection.return_value = conn_record
 
     # valid
-    with patch(
-        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
-        return_value=pres_exchange,
-    ), patch(
-        "app.util.acapy_verifier_utils.fetch_actor_by_did",
-        return_value=None,
-    ), patch(
-        "app.util.acapy_verifier_utils.fetch_actor_by_name",
-        return_value=sample_actor,
-    ), patch(
-        "app.util.acapy_verifier_utils.get_schema_ids",
-        return_value=["did:schema:456"],
-    ), patch(
-        "app.util.acapy_verifier_utils.are_valid_schemas",
-        return_value=True,
+    with (
+        patch(
+            "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+            return_value=pres_exchange,
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.fetch_actor_by_did",
+            return_value=None,
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.fetch_actor_by_name",
+            return_value=sample_actor,
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.get_schema_ids",
+            return_value=["did:schema:456"],
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.are_valid_schemas",
+            return_value=True,
+        ),
     ):
         await assert_valid_prover(
             aries_controller=mock_agent_controller,
@@ -371,12 +389,15 @@ async def test_assert_valid_prover_x_could_not_fetch_actor_exc(
     mock_agent_controller.connection.get_connection.return_value = conn_record
 
     # valid
-    with patch(
-        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
-        return_value=pres_exchange,
-    ), patch(
-        "app.util.acapy_verifier_utils.get_actor",
-        side_effect=CloudApiException("Error", 500),
+    with (
+        patch(
+            "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+            return_value=pres_exchange,
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.get_actor",
+            side_effect=CloudApiException("Error", 500),
+        ),
     ):
         with pytest.raises(
             CloudApiException,
@@ -404,12 +425,15 @@ async def test_assert_valid_prover_x_could_not_fetch_actor_exc2(
     mock_agent_controller.connection.get_connection.return_value = conn_record
 
     # valid
-    with patch(
-        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
-        return_value=pres_exchange,
-    ), patch(
-        "app.util.acapy_verifier_utils.get_actor",
-        side_effect=Exception("Error."),
+    with (
+        patch(
+            "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+            return_value=pres_exchange,
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.get_actor",
+            side_effect=Exception("Error."),
+        ),
     ):
         with pytest.raises(Exception, match="Error."):
             await assert_valid_prover(
@@ -431,17 +455,20 @@ async def test_assert_valid_prover_x_invalid_schemas(
 
     mock_agent_controller.connection.get_connection.return_value = conn_record
 
-    with patch(
-        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
-        return_value=pres_exchange,
-    ), patch(
-        "app.util.acapy_verifier_utils.get_actor", return_value=sample_actor
-    ), patch(
-        "app.util.acapy_verifier_utils.get_schema_ids",
-        return_value=["did:schema:456"],
-    ), patch(
-        "app.util.acapy_verifier_utils.are_valid_schemas",
-        return_value=False,
+    with (
+        patch(
+            "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+            return_value=pres_exchange,
+        ),
+        patch("app.util.acapy_verifier_utils.get_actor", return_value=sample_actor),
+        patch(
+            "app.util.acapy_verifier_utils.get_schema_ids",
+            return_value=["did:schema:456"],
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.are_valid_schemas",
+            return_value=False,
+        ),
     ):
         with pytest.raises(
             CloudApiException,
@@ -466,14 +493,16 @@ async def test_assert_valid_prover_x_no_schemas(
 
     mock_agent_controller.connection.get_connection.return_value = conn_record
 
-    with patch(
-        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
-        return_value=pres_exchange,
-    ), patch(
-        "app.util.acapy_verifier_utils.get_actor", return_value=sample_actor
-    ), patch(
-        "app.util.acapy_verifier_utils.get_schema_ids",
-        return_value=[],
+    with (
+        patch(
+            "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+            return_value=pres_exchange,
+        ),
+        patch("app.util.acapy_verifier_utils.get_actor", return_value=sample_actor),
+        patch(
+            "app.util.acapy_verifier_utils.get_schema_ids",
+            return_value=[],
+        ),
     ):
         with pytest.raises(
             CloudApiException,
@@ -494,11 +523,14 @@ async def test_assert_valid_prover_x_no_connection_id(
 ):
     test_pres_exchange = pres_exchange.model_copy(update={"connection_id": None})
 
-    with patch(
-        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
-        return_value=test_pres_exchange,
-    ), pytest.raises(
-        CloudApiException, match="No connection id associated with proof request."
+    with (
+        patch(
+            "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+            return_value=test_pres_exchange,
+        ),
+        pytest.raises(
+            CloudApiException, match="No connection id associated with proof request."
+        ),
     ):
         await assert_valid_prover(
             aries_controller=mock_agent_controller,
@@ -523,10 +555,13 @@ async def test_assert_valid_prover_x_no_connection_id2(
         connection_id=""
     )
 
-    with patch(
-        "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
-        return_value=test_pres_exchange,
-    ), pytest.raises(CloudApiException, match="Cannot proceed. No connection id."):
+    with (
+        patch(
+            "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
+            return_value=test_pres_exchange,
+        ),
+        pytest.raises(CloudApiException, match="Cannot proceed. No connection id."),
+    ):
         await assert_valid_prover(
             aries_controller=mock_agent_controller,
             presentation=AcceptProofRequest(
@@ -546,10 +581,13 @@ async def test_assert_valid_verifier_invitation_key(mock_agent_controller: AcaPy
     mock_agent_controller.connection.get_connection.return_value = conn
 
     # valid
-    with patch(
-        "app.util.acapy_verifier_utils.assert_public_did",
-        side_effect=CloudApiException("Error"),
-    ), patch("app.util.acapy_verifier_utils.get_actor", return_value=sample_actor):
+    with (
+        patch(
+            "app.util.acapy_verifier_utils.assert_public_did",
+            side_effect=CloudApiException("Error"),
+        ),
+        patch("app.util.acapy_verifier_utils.get_actor", return_value=sample_actor),
+    ):
         await assert_valid_verifier(
             aries_controller=mock_agent_controller,
             proof_request=SendProofRequest(
@@ -562,10 +600,13 @@ async def test_assert_valid_verifier_invitation_key(mock_agent_controller: AcaPy
 @pytest.mark.anyio
 async def test_assert_valid_verifier_public_did(mock_agent_controller: AcaPyClient):
     # valid
-    with patch(
-        "app.util.acapy_verifier_utils.assert_public_did",
-        return_value="did:sov:something",
-    ), patch("app.util.acapy_verifier_utils.get_actor", return_value=sample_actor):
+    with (
+        patch(
+            "app.util.acapy_verifier_utils.assert_public_did",
+            return_value="did:sov:something",
+        ),
+        patch("app.util.acapy_verifier_utils.get_actor", return_value=sample_actor),
+    ):
         await assert_valid_verifier(
             aries_controller=mock_agent_controller,
             proof_request=SendProofRequest(
@@ -586,10 +627,13 @@ async def test_assert_valid_verifier_x_no_public_did_no_invitation_key(
     mock_agent_controller.connection.get_connection.return_value = conn
 
     # valid
-    with patch(
-        "app.util.acapy_verifier_utils.assert_public_did",
-        side_effect=CloudApiException("Error"),
-    ), patch("app.util.acapy_verifier_utils.get_actor", return_value=sample_actor):
+    with (
+        patch(
+            "app.util.acapy_verifier_utils.assert_public_did",
+            side_effect=CloudApiException("Error"),
+        ),
+        patch("app.util.acapy_verifier_utils.get_actor", return_value=sample_actor),
+    ):
         with pytest.raises(CloudApiException, match="Connection has no invitation key"):
             await assert_valid_verifier(
                 aries_controller=mock_agent_controller,
@@ -612,10 +656,13 @@ async def test_assert_valid_verifier_x_not_verifier(mock_agent_controller: AcaPy
     mock_agent_controller.connection.get_connection.return_value = conn
 
     # valid
-    with patch(
-        "app.util.acapy_verifier_utils.assert_public_did",
-        side_effect=CloudApiException("Error"),
-    ), patch("app.util.acapy_verifier_utils.get_actor", return_value=actor):
+    with (
+        patch(
+            "app.util.acapy_verifier_utils.assert_public_did",
+            side_effect=CloudApiException("Error"),
+        ),
+        patch("app.util.acapy_verifier_utils.get_actor", return_value=actor),
+    ):
         with pytest.raises(
             CloudApiException,
             match="Flint is not a valid verifier in the trust registry.",
@@ -634,18 +681,23 @@ async def test_assert_valid_verifier_could_not_fetch_actor_recover_label(
     mock_agent_controller: AcaPyClient,
 ):
     # valid with recovery from actor not found, using label
-    with patch(
-        "app.util.acapy_verifier_utils.assert_public_did",
-        return_value="did:sov:something",
-    ), patch(
-        "app.util.acapy_verifier_utils.fetch_actor_by_did",
-        return_value=None,
-    ), patch(
-        "app.util.acapy_verifier_utils.get_wallet_label_from_controller",
-        return_value="some_label",
-    ), patch(
-        "app.util.acapy_verifier_utils.fetch_actor_by_name",
-        return_value=sample_actor,
+    with (
+        patch(
+            "app.util.acapy_verifier_utils.assert_public_did",
+            return_value="did:sov:something",
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.fetch_actor_by_did",
+            return_value=None,
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.get_wallet_label_from_controller",
+            return_value="some_label",
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.fetch_actor_by_name",
+            return_value=sample_actor,
+        ),
     ):
         await assert_valid_verifier(
             aries_controller=mock_agent_controller,
@@ -661,18 +713,23 @@ async def test_assert_valid_verifier_x_could_not_fetch_actor_exc(
     mock_agent_controller: AcaPyClient,
 ):
     # failure to attempt recovery by reading wallet_label: No actor
-    with patch(
-        "app.util.acapy_verifier_utils.assert_public_did",
-        return_value="did:sov:something",
-    ), patch(
-        "app.util.acapy_verifier_utils.fetch_actor_by_did",
-        return_value=None,
-    ), patch(
-        "app.util.acapy_verifier_utils.get_wallet_label_from_controller",
-        return_value=None,
-    ), patch(
-        "app.util.acapy_verifier_utils.fetch_actor_by_name",
-        return_value=None,
+    with (
+        patch(
+            "app.util.acapy_verifier_utils.assert_public_did",
+            return_value="did:sov:something",
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.fetch_actor_by_did",
+            return_value=None,
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.get_wallet_label_from_controller",
+            return_value=None,
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.fetch_actor_by_name",
+            return_value=None,
+        ),
     ):
         with pytest.raises(
             CloudApiException,
@@ -692,15 +749,19 @@ async def test_assert_valid_verifier_x_could_not_fetch_actor_exc2(
     mock_agent_controller: AcaPyClient,
 ):
     # failure to attempt recovery by reading wallet_label
-    with patch(
-        "app.util.acapy_verifier_utils.assert_public_did",
-        return_value="did:sov:something",
-    ), patch(
-        "app.util.acapy_verifier_utils.fetch_actor_by_did",
-        return_value=None,
-    ), patch(
-        "app.util.acapy_verifier_utils.get_wallet_label_from_controller",
-        side_effect=KeyError("Oops"),
+    with (
+        patch(
+            "app.util.acapy_verifier_utils.assert_public_did",
+            return_value="did:sov:something",
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.fetch_actor_by_did",
+            return_value=None,
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.get_wallet_label_from_controller",
+            side_effect=KeyError("Oops"),
+        ),
     ):
         with pytest.raises(
             CloudApiException,
@@ -720,12 +781,15 @@ async def test_assert_valid_verifier_x_could_not_fetch_actor_exc3(
     mock_agent_controller: AcaPyClient,
 ):
     # failure to attempt recovery by reading wallet_label
-    with patch(
-        "app.util.acapy_verifier_utils.assert_public_did",
-        return_value="did:sov:something",
-    ), patch(
-        "app.util.acapy_verifier_utils.fetch_actor_by_did",
-        side_effect=CloudApiException("Error.", 500),
+    with (
+        patch(
+            "app.util.acapy_verifier_utils.assert_public_did",
+            return_value="did:sov:something",
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.fetch_actor_by_did",
+            side_effect=CloudApiException("Error.", 500),
+        ),
     ):
         with pytest.raises(
             CloudApiException,
@@ -745,12 +809,15 @@ async def test_assert_valid_verifier_x_could_not_fetch_actor_exc4(
     mock_agent_controller: AcaPyClient,
 ):
     # failure to attempt recovery by reading wallet_label
-    with patch(
-        "app.util.acapy_verifier_utils.assert_public_did",
-        return_value="did:sov:something",
-    ), patch(
-        "app.util.acapy_verifier_utils.fetch_actor_by_did",
-        side_effect=Exception("Error."),
+    with (
+        patch(
+            "app.util.acapy_verifier_utils.assert_public_did",
+            return_value="did:sov:something",
+        ),
+        patch(
+            "app.util.acapy_verifier_utils.fetch_actor_by_did",
+            side_effect=Exception("Error."),
+        ),
     ):
         with pytest.raises(Exception, match="Error."):
             await assert_valid_verifier(

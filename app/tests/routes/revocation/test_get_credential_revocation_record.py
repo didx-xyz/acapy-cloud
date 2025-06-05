@@ -22,11 +22,12 @@ async def test_get_credential_revocation_record_success(
     mock_aries_controller = AsyncMock()
     mock_get_revocation_record = AsyncMock()
 
-    with patch(
-        "app.routes.revocation.client_from_auth"
-    ) as mock_client_from_auth, patch(
-        "app.services.revocation_registry.get_credential_revocation_record",
-        mock_get_revocation_record,
+    with (
+        patch("app.routes.revocation.client_from_auth") as mock_client_from_auth,
+        patch(
+            "app.services.revocation_registry.get_credential_revocation_record",
+            mock_get_revocation_record,
+        ),
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -64,11 +65,10 @@ async def test_get_credential_revocation_record_fail_acapy_error(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
 
-    with patch(
-        "app.routes.revocation.client_from_auth"
-    ) as mock_client_from_auth, pytest.raises(
-        HTTPException, match=expected_detail
-    ) as exc:
+    with (
+        patch("app.routes.revocation.client_from_auth") as mock_client_from_auth,
+        pytest.raises(HTTPException, match=expected_detail) as exc,
+    ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )
@@ -93,7 +93,6 @@ async def test_get_credential_revocation_record_fail_bad_request(
         match="If credential_exchange_id is not provided then both "
         "credential_revocation_id and revocation_registry_id must be provided.",
     ) as exc:
-
         await get_credential_revocation_record(
             credential_exchange_id=credential_exchange_id,
             credential_revocation_id=credential_revocation_id,

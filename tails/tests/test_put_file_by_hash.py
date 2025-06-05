@@ -36,8 +36,12 @@ async def test_put_file_by_hash_success():
             mock_tmpfile.return_value = tmp_file
 
             # Patch hash calculation to match tails_hash
-            with patch("tails.routers.tails.hashlib.sha256") as mock_sha256, patch(
-                "tails.routers.tails.base58.b58encode", return_value=tails_hash.encode()
+            with (
+                patch("tails.routers.tails.hashlib.sha256") as mock_sha256,
+                patch(
+                    "tails.routers.tails.base58.b58encode",
+                    return_value=tails_hash.encode(),
+                ),
             ):
                 mock_sha = MagicMock()
                 mock_sha.digest.return_value = b"digest"
@@ -92,8 +96,11 @@ async def test_put_file_by_hash_hash_mismatch():
             tmp_file.seek = MagicMock()
             mock_tmpfile.return_value = tmp_file
 
-            with patch("tails.routers.tails.hashlib.sha256") as mock_sha256, patch(
-                "tails.routers.tails.base58.b58encode", return_value=b"wronghash"
+            with (
+                patch("tails.routers.tails.hashlib.sha256") as mock_sha256,
+                patch(
+                    "tails.routers.tails.base58.b58encode", return_value=b"wronghash"
+                ),
             ):
                 mock_sha = MagicMock()
                 mock_sha.digest.return_value = b"digest"
@@ -127,8 +134,12 @@ async def test_put_file_by_hash_invalid_start():
             tmp_file.seek = MagicMock()
             mock_tmpfile.return_value = tmp_file
 
-            with patch("tails.routers.tails.hashlib.sha256") as mock_sha256, patch(
-                "tails.routers.tails.base58.b58encode", return_value=tails_hash.encode()
+            with (
+                patch("tails.routers.tails.hashlib.sha256") as mock_sha256,
+                patch(
+                    "tails.routers.tails.base58.b58encode",
+                    return_value=tails_hash.encode(),
+                ),
             ):
                 mock_sha = MagicMock()
                 mock_sha.digest.return_value = b"digest"
@@ -162,8 +173,12 @@ async def test_put_file_by_hash_invalid_size():
             tmp_file.seek = MagicMock()
             mock_tmpfile.return_value = tmp_file
 
-            with patch("tails.routers.tails.hashlib.sha256") as mock_sha256, patch(
-                "tails.routers.tails.base58.b58encode", return_value=tails_hash.encode()
+            with (
+                patch("tails.routers.tails.hashlib.sha256") as mock_sha256,
+                patch(
+                    "tails.routers.tails.base58.b58encode",
+                    return_value=tails_hash.encode(),
+                ),
             ):
                 mock_sha = MagicMock()
                 mock_sha.digest.return_value = b"digest"
@@ -200,8 +215,12 @@ async def test_put_file_by_hash_s3_error():
             tmp_file.seek = MagicMock()
             mock_tmpfile.return_value = tmp_file
 
-            with patch("tails.routers.tails.hashlib.sha256") as mock_sha256, patch(
-                "tails.routers.tails.base58.b58encode", return_value=tails_hash.encode()
+            with (
+                patch("tails.routers.tails.hashlib.sha256") as mock_sha256,
+                patch(
+                    "tails.routers.tails.base58.b58encode",
+                    return_value=tails_hash.encode(),
+                ),
             ):
                 mock_sha = MagicMock()
                 mock_sha.digest.return_value = b"digest"

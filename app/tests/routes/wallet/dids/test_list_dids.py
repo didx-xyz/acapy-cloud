@@ -58,12 +58,10 @@ async def test_list_dids_fail_acapy_error(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
 
-    with patch(
-        "app.routes.wallet.dids.client_from_auth"
-    ) as mock_client_from_auth, pytest.raises(
-        exception_class, match=expected_detail
-    ) as exc, patch(
-        "app.routes.wallet.dids.handle_acapy_call", mock_get_dids
+    with (
+        patch("app.routes.wallet.dids.client_from_auth") as mock_client_from_auth,
+        pytest.raises(exception_class, match=expected_detail) as exc,
+        patch("app.routes.wallet.dids.handle_acapy_call", mock_get_dids),
     ):
         # Configure client_from_auth to return our mocked aries_controller on enter
         mock_client_from_auth.return_value.__aenter__.return_value = (

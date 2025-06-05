@@ -45,8 +45,9 @@ async def mock_nats_client():
 async def test_init_nats_client(nats_creds_file):
     mock_nats_client = AsyncMock(spec=NATS)  # pylint: disable=redefined-outer-name
 
-    with patch("nats.connect", return_value=mock_nats_client), patch(
-        "shared.services.nats_jetstream.NATS_CREDS_FILE", new=nats_creds_file
+    with (
+        patch("nats.connect", return_value=mock_nats_client),
+        patch("shared.services.nats_jetstream.NATS_CREDS_FILE", new=nats_creds_file),
     ):
         async for jetstream in init_nats_client():
             assert jetstream == mock_nats_client.jetstream.return_value
@@ -97,7 +98,8 @@ async def test_nats_events_processor_subscribe(
 @pytest.mark.anyio
 @pytest.mark.parametrize("exception", [BadSubscriptionError, Error, Exception])
 async def test_nats_events_processor_subscribe_error(
-    mock_nats_client, exception  # pylint: disable=redefined-outer-name
+    mock_nats_client,  # pylint: disable=redefined-outer-name
+    exception,
 ):
     processor = NatsEventsProcessor(mock_nats_client)
     mock_nats_client.pull_subscribe.side_effect = exception

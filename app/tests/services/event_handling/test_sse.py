@@ -92,7 +92,8 @@ def patch_yield_lines_with_disconnect_check(
 
 @pytest.mark.anyio
 async def test_yield_lines_with_disconnect_check_success(
-    response_mock, mock_request  # pylint: disable=redefined-outer-name
+    response_mock,  # pylint: disable=redefined-outer-name
+    mock_request,  # pylint: disable=redefined-outer-name
 ):
     # Execute yield_lines_with_disconnect_check and collect results
     results = [
@@ -105,7 +106,8 @@ async def test_yield_lines_with_disconnect_check_success(
 
 @pytest.mark.anyio
 async def test_yield_lines_with_disconnect_check_disconnects(
-    response_mock, mock_request  # pylint: disable=redefined-outer-name
+    response_mock,  # pylint: disable=redefined-outer-name
+    mock_request,  # pylint: disable=redefined-outer-name
 ):
     # Override the mock request to simulate a disconnection after the first yield
     mock_request.is_disconnected.side_effect = [False, True]

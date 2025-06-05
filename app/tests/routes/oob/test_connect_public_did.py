@@ -21,9 +21,12 @@ async def test_connect_to_public_did_success():
         return_value=created_connection
     )
     body = ConnectToPublicDid(public_did=test_public_did)
-    with patch("app.routes.oob.client_from_auth") as mock_client_from_auth, patch(
-        "app.routes.oob.conn_record_to_connection",
-        return_value=created_connection,
+    with (
+        patch("app.routes.oob.client_from_auth") as mock_client_from_auth,
+        patch(
+            "app.routes.oob.conn_record_to_connection",
+            return_value=created_connection,
+        ),
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller

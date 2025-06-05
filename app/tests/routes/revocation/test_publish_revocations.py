@@ -21,13 +21,16 @@ async def test_publish_revocations_success(publish_revocation_response):
 
     mock_get_transaction = AsyncMock()
 
-    with patch(
-        "app.routes.revocation.client_from_auth"
-    ) as mock_client_from_auth, patch(
-        "app.services.revocation_registry.publish_pending_revocations",
-        mock_publish_revocations,
-    ), patch(
-        "app.routes.revocation.coroutine_with_retry_until_value", mock_get_transaction
+    with (
+        patch("app.routes.revocation.client_from_auth") as mock_client_from_auth,
+        patch(
+            "app.services.revocation_registry.publish_pending_revocations",
+            mock_publish_revocations,
+        ),
+        patch(
+            "app.routes.revocation.coroutine_with_retry_until_value",
+            mock_get_transaction,
+        ),
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -65,13 +68,13 @@ async def test_publish_revocations_fail_acapy_error(
         )
     )
 
-    with patch(
-        "app.routes.revocation.client_from_auth"
-    ) as mock_client_from_auth, pytest.raises(
-        CloudApiException, match=expected_detail
-    ) as exc, patch(
-        "app.services.revocation_registry.publish_pending_revocations",
-        mock_publish_revocations,
+    with (
+        patch("app.routes.revocation.client_from_auth") as mock_client_from_auth,
+        pytest.raises(CloudApiException, match=expected_detail) as exc,
+        patch(
+            "app.services.revocation_registry.publish_pending_revocations",
+            mock_publish_revocations,
+        ),
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -93,17 +96,20 @@ async def test_publish_revocations_fail_timeout():
         return_value=TxnOrPublishRevocationsResult(txn=[txn_record])
     )
 
-    with patch(
-        "app.routes.revocation.client_from_auth"
-    ) as mock_client_from_auth, pytest.raises(
-        CloudApiException,
-        match="Timeout waiting for endorser to accept the revocations request.",
-    ) as exc, patch(
-        "app.services.revocation_registry.publish_pending_revocations",
-        mock_publish_revocations,
-    ), patch(
-        "app.routes.revocation.coroutine_with_retry_until_value",
-        AsyncMock(side_effect=asyncio.TimeoutError()),
+    with (
+        patch("app.routes.revocation.client_from_auth") as mock_client_from_auth,
+        pytest.raises(
+            CloudApiException,
+            match="Timeout waiting for endorser to accept the revocations request.",
+        ) as exc,
+        patch(
+            "app.services.revocation_registry.publish_pending_revocations",
+            mock_publish_revocations,
+        ),
+        patch(
+            "app.routes.revocation.coroutine_with_retry_until_value",
+            AsyncMock(side_effect=asyncio.TimeoutError()),
+        ),
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller

@@ -65,11 +65,12 @@ async def test_create_did_exchange_request_success(
         return_value=created_connection
     )
 
-    with patch(
-        "app.routes.connections.client_from_auth"
-    ) as mock_client_from_auth, patch(
-        "app.routes.connections.conn_record_to_connection",
-        return_value=created_connection,
+    with (
+        patch("app.routes.connections.client_from_auth") as mock_client_from_auth,
+        patch(
+            "app.routes.connections.conn_record_to_connection",
+            return_value=created_connection,
+        ),
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -123,12 +124,10 @@ async def test_create_did_exchange_request_fail_acapy_error(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
 
-    with patch(
-        "app.routes.connections.client_from_auth"
-    ) as mock_client_from_auth, pytest.raises(
-        HTTPException, match=expected_detail
-    ) as exc, patch(
-        "app.routes.connections.conn_record_to_connection"
+    with (
+        patch("app.routes.connections.client_from_auth") as mock_client_from_auth,
+        pytest.raises(HTTPException, match=expected_detail) as exc,
+        patch("app.routes.connections.conn_record_to_connection"),
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller

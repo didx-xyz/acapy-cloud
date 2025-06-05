@@ -61,9 +61,9 @@ async def test_get_presentation_exchange_records_paginated(
                     await asyncio.sleep(0.2)
                 else:
                     retry = False
-            assert (
-                not retry
-            ), f"Expected {expected_num} records, got {len(proofs)}: {proofs}"
+            assert not retry, (
+                f"Expected {expected_num} records, got {len(proofs)}: {proofs}"
+            )
 
         # Test ascending order
         response = await alice_member_client.get(

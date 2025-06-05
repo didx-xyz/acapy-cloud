@@ -122,9 +122,10 @@ async def onboard_tenant(
     if "issuer" in roles:
         bound_logger.debug("Tenant has 'issuer' role, onboarding as issuer")
         # Get governance and tenant controllers, onboard issuer
-        async with get_governance_controller() as governance_controller, get_tenant_controller(
-            wallet_auth_token
-        ) as tenant_controller:
+        async with (
+            get_governance_controller() as governance_controller,
+            get_tenant_controller(wallet_auth_token) as tenant_controller,
+        ):
             onboard_result = await onboard_issuer(
                 endorser_controller=governance_controller,
                 issuer_controller=tenant_controller,

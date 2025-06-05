@@ -35,16 +35,19 @@ async def test_create_schema_anoncreds_success():
         attribute_names=sample_attribute_names,
     )
 
-    with patch(
-        "app.services.definitions.schemas.GOVERNANCE_AGENT_URL",
-        "https://governance-agent-url",
-    ), patch(
-        "app.services.definitions.schemas.SchemaPublisher",
-        return_value=mock_schema_publisher,
-    ), patch(
-        "app.services.definitions.schemas.handle_model_with_validation"
-    ) as mock_handle_model:
-
+    with (
+        patch(
+            "app.services.definitions.schemas.GOVERNANCE_AGENT_URL",
+            "https://governance-agent-url",
+        ),
+        patch(
+            "app.services.definitions.schemas.SchemaPublisher",
+            return_value=mock_schema_publisher,
+        ),
+        patch(
+            "app.services.definitions.schemas.handle_model_with_validation"
+        ) as mock_handle_model,
+    ):
         mock_handle_model.side_effect = [
             AnonCredsSchema(
                 name=sample_schema_name,

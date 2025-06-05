@@ -13,8 +13,9 @@ async def test_get_credential_success():
     issuer = Mock()
     issuer.get_record = AsyncMock()
 
-    with patch("app.routes.issuer.client_from_auth") as mock_client_from_auth, patch(
-        "app.routes.issuer.IssuerV2.get_record", new=issuer.get_record
+    with (
+        patch("app.routes.issuer.client_from_auth") as mock_client_from_auth,
+        patch("app.routes.issuer.IssuerV2.get_record", new=issuer.get_record),
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -47,9 +48,11 @@ async def test_get_credential_fail_acapy_error(
         )
     )
 
-    with patch("app.routes.issuer.client_from_auth") as mock_client_from_auth, patch(
-        "app.routes.issuer.IssuerV2.get_record", new=issuer.get_record
-    ), pytest.raises(CloudApiException, match=expected_detail) as exc:
+    with (
+        patch("app.routes.issuer.client_from_auth") as mock_client_from_auth,
+        patch("app.routes.issuer.IssuerV2.get_record", new=issuer.get_record),
+        pytest.raises(CloudApiException, match=expected_detail) as exc,
+    ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )

@@ -34,8 +34,9 @@ async def test_app_lifespan():
     )
 
     # Patch the Container to return the mocked container
-    with patch("endorser.main.Container", return_value=container_mock), patch.object(
-        EndorserConfig, "initialize", new_callable=AsyncMock
+    with (
+        patch("endorser.main.Container", return_value=container_mock),
+        patch.object(EndorserConfig, "initialize", new_callable=AsyncMock),
     ):
         # Run the app_lifespan context manager
         async with app_lifespan(FastAPI()):

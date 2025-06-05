@@ -256,7 +256,6 @@ async def revoke_alice_creds(
     faber_client: RichAsyncClient,
     alice_issued_creds: List[CredentialExchange],
 ) -> List[CredentialExchange]:
-
     for cred in alice_issued_creds:
         await faber_client.post(
             f"{REVOCATION_BASE_PATH}/revoke",
@@ -284,7 +283,6 @@ async def revoke_creds_and_publish(
     faber_client: RichAsyncClient,
     issued_creds: List[CredentialExchange],
 ) -> List[CredentialExchange]:
-
     auto_publish = False
     if hasattr(request, "param") and request.param == "auto_publish_true":
         auto_publish = True
@@ -343,15 +341,15 @@ async def get_or_issue_regression_cred_revoked(
 
     response = await alice_member_client.get(WALLET_BASE_PATH, params=params)
     results = response.json()["results"]
-    assert (
-        len(results) < 2
-    ), f"Should have 1 or 0 credentials with this attr name, got: {results}"
+    assert len(results) < 2, (
+        f"Should have 1 or 0 credentials with this attr name, got: {results}"
+    )
 
     if results:
         revoked_credential = results[0]
-        assert (
-            revoked_credential["attrs"]["name"] == revoked_attribute_name
-        ), f"WQL returned unexpected credential: {revoked_credential}"
+        assert revoked_credential["attrs"]["name"] == revoked_attribute_name, (
+            f"WQL returned unexpected credential: {revoked_credential}"
+        )
 
     else:
         all_creds = await alice_member_client.get(WALLET_BASE_PATH)
@@ -457,15 +455,15 @@ async def get_or_issue_regression_cred_valid(
     response = await alice_member_client.get(WALLET_BASE_PATH, params=params)
 
     results = response.json()["results"]
-    assert (
-        len(results) < 2
-    ), f"Should have 1 or 0 credentials with this attr name, got: {results}"
+    assert len(results) < 2, (
+        f"Should have 1 or 0 credentials with this attr name, got: {results}"
+    )
 
     if results:
         valid_credential = results[0]
-        assert (
-            valid_credential["attrs"]["name"] == valid_credential_attribute_name
-        ), f"WQL returned unexpected credential: {valid_credential}"
+        assert valid_credential["attrs"]["name"] == valid_credential_attribute_name, (
+            f"WQL returned unexpected credential: {valid_credential}"
+        )
 
     else:
         all_creds = await alice_member_client.get(WALLET_BASE_PATH)
@@ -552,7 +550,6 @@ async def issue_alice_many_creds(
     credential_definition_id: str,
     faber_and_alice_connection: FaberAliceConnect,
 ) -> List[CredentialExchange]:
-
     faber_conn_id = faber_and_alice_connection.faber_connection_id
 
     faber_cred_ex_ids = []

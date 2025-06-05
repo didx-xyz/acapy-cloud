@@ -24,7 +24,8 @@ RECONNECT_THRESHOLD = int(
 )
 MAX_ATTEMPTS_BEFORE_ERROR = int(
     os.getenv(
-        "NATS_MAX_ATTEMPTS_BEFORE_ERROR", "2"  # Attempts before escalating to error
+        "NATS_MAX_ATTEMPTS_BEFORE_ERROR",
+        "2",  # Attempts before escalating to error
     )
 )
 

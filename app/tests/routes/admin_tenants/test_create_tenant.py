@@ -1,5 +1,5 @@
 from secrets import token_urlsafe
-from unittest.mock import AsyncMock, patch
+from unittest.mock import ANY, AsyncMock, patch
 
 import base58
 import pytest
@@ -70,17 +70,24 @@ async def test_create_tenant_success(roles):
         extra_settings=body.extra_settings,
     )
 
-    with patch(
-        "app.routes.admin.tenants.get_tenant_admin_controller"
-    ) as mock_get_admin_controller, patch(
-        "app.routes.admin.tenants.handle_model_with_validation",
-        return_value=expected_wallet_body,
-    ), patch(
-        "app.routes.admin.tenants.onboard_tenant", mock_onboard_tenant
-    ), patch(
-        "app.routes.admin.tenants.register_actor", mock_register_actor
-    ), patch(
-        "app.routes.admin.tenants.assert_actor_name", return_value=False
+    with (
+        patch(
+            "app.routes.admin.tenants.get_tenant_admin_controller"
+        ) as mock_get_admin_controller,
+        patch(
+            "app.routes.admin.tenants.handle_model_with_validation",
+            return_value=expected_wallet_body,
+        ),
+        patch(
+            "app.services.onboarding.tenants.onboard_issuer",
+            mock_onboard_tenant,
+        ) as mock_onboard_issuer,
+        patch(
+            "app.services.onboarding.tenants.onboard_verifier",
+            mock_onboard_tenant,
+        ) as mock_onboard_verifier,
+        patch("app.routes.admin.tenants.register_actor", mock_register_actor),
+        patch("app.routes.admin.tenants.assert_actor_name", return_value=False),
     ):
         # Configure get_tenant_admin_controller to return our mocked admin_controller on enter
         mock_get_admin_controller.return_value.__aenter__.return_value = (
@@ -100,12 +107,6 @@ async def test_create_tenant_success(roles):
         )
 
         if roles:
-            mock_onboard_tenant.assert_awaited_once_with(
-                tenant_label=wallet_label,
-                roles=roles,
-                wallet_auth_token=create_wallet_response.token,
-                wallet_id=create_wallet_response.wallet_id,
-            )
             mock_register_actor.assert_awaited_once_with(
                 actor=Actor(
                     id=create_wallet_response.wallet_id,
@@ -116,6 +117,18 @@ async def test_create_tenant_success(roles):
                     image_url=create_tenant_body.image_url,
                 )
             )
+            if "issuer" in roles:
+                mock_onboard_issuer.assert_awaited_once_with(
+                    endorser_controller=ANY,
+                    issuer_controller=ANY,
+                    issuer_wallet_id=wallet_id,
+                    issuer_label=wallet_label,
+                )
+            elif "verifier" in roles:
+                mock_onboard_verifier.assert_awaited_once_with(
+                    verifier_label=wallet_label,
+                    verifier_controller=ANY,
+                )
 
 
 @pytest.mark.anyio
@@ -124,13 +137,16 @@ async def test_create_tenant_success(roles):
     [[], ["issuer"], ["verifier"], ["issuer", "verifier"]],
 )
 async def test_create_tenant_fail_trust_registry_error(roles):
-    with patch(
-        "app.routes.admin.tenants.assert_actor_name",
-        side_effect=TrustRegistryException("Error"),
-    ), pytest.raises(
-        CloudApiException,
-        match="An error occurred when trying to register actor. Please try again",
-    ) as exc:
+    with (
+        patch(
+            "app.routes.admin.tenants.assert_actor_name",
+            side_effect=TrustRegistryException("Error"),
+        ),
+        pytest.raises(
+            CloudApiException,
+            match="An error occurred when trying to register actor. Please try again",
+        ) as exc,
+    ):
         await create_tenant(
             body=create_tenant_body.model_copy(update={"roles": roles}),
             admin_auth=TENANT_ADMIN_AUTHED,
@@ -145,16 +161,19 @@ async def test_create_tenant_fail_trust_registry_error(roles):
 )
 async def test_create_tenant_fail_actor_exists(roles):
     wallet_label = "abc"
-    with patch(
-        "app.routes.admin.tenants.assert_actor_name",
-        return_value=True,
-    ), pytest.raises(
-        HTTPException,
-        match=(
-            f"Can't create Tenant. The label `{wallet_label}` may not "
-            "be re-used because it exists on the trust registry."
+    with (
+        patch(
+            "app.routes.admin.tenants.assert_actor_name",
+            return_value=True,
         ),
-    ) as exc:
+        pytest.raises(
+            HTTPException,
+            match=(
+                f"Can't create Tenant. The label `{wallet_label}` may not "
+                "be re-used because it exists on the trust registry."
+            ),
+        ) as exc,
+    ):
         await create_tenant(
             body=create_tenant_body.model_copy(
                 update={"roles": roles, "wallet_label": wallet_label}
@@ -170,19 +189,23 @@ async def test_create_tenant_fail_actor_exists(roles):
     [[], ["issuer"], ["verifier"], ["issuer", "verifier"]],
 )
 async def test_create_tenant_fail_wallet_name_exists(roles):
-    with patch(
-        "app.routes.admin.tenants.handle_acapy_call",
-        side_effect=CloudApiException(status_code=400, detail="already exists"),
-    ), patch(
-        "app.routes.admin.tenants.assert_actor_name",
-        return_value=False,
-    ), pytest.raises(
-        HTTPException,
-        match=(
-            f"A wallet with name `{wallet_name}` already exists. "
-            "The wallet name must be unique."
+    with (
+        patch(
+            "app.routes.admin.tenants.handle_acapy_call",
+            side_effect=CloudApiException(status_code=400, detail="already exists"),
         ),
-    ) as exc:
+        patch(
+            "app.routes.admin.tenants.assert_actor_name",
+            return_value=False,
+        ),
+        pytest.raises(
+            HTTPException,
+            match=(
+                f"A wallet with name `{wallet_name}` already exists. "
+                "The wallet name must be unique."
+            ),
+        ) as exc,
+    ):
         await create_tenant(
             body=create_tenant_body.model_copy(update={"roles": roles}),
             admin_auth=TENANT_ADMIN_AUTHED,
@@ -199,14 +222,14 @@ async def test_create_tenant_fail_wallet_name_exists(roles):
 )
 async def test_create_tenant_fail_wallet_creation(status_code, error_msg, roles):
     # Create tenant should raise the same error message / status code of create wallet failure
-    with patch(
-        "app.routes.admin.tenants.handle_acapy_call",
-        side_effect=CloudApiException(status_code=status_code, detail=error_msg),
-    ), patch(
-        "app.routes.admin.tenants.assert_actor_name", return_value=False
-    ), pytest.raises(
-        HTTPException, match=error_msg
-    ) as exc:
+    with (
+        patch(
+            "app.routes.admin.tenants.handle_acapy_call",
+            side_effect=CloudApiException(status_code=status_code, detail=error_msg),
+        ),
+        patch("app.routes.admin.tenants.assert_actor_name", return_value=False),
+        pytest.raises(HTTPException, match=error_msg) as exc,
+    ):
         await create_tenant(
             body=create_tenant_body.model_copy(update={"roles": roles}),
             admin_auth=TENANT_ADMIN_AUTHED,
@@ -230,16 +253,19 @@ async def test_create_tenant_fail_onboard_exception(exception, roles):
     )
     mock_admin_controller.multitenancy.delete_wallet = AsyncMock()
 
-    with patch(
-        "app.routes.admin.tenants.get_tenant_admin_controller"
-    ) as mock_get_admin_controller, patch(
-        "app.routes.admin.tenants.onboard_tenant",
-        side_effect=exception,
-    ) as mock_onboard, patch(
-        "app.routes.admin.tenants.assert_actor_name",
-        return_value=False,
-    ), pytest.raises(
-        type(exception), match="Error"
+    with (
+        patch(
+            "app.routes.admin.tenants.get_tenant_admin_controller"
+        ) as mock_get_admin_controller,
+        patch(
+            "app.routes.admin.tenants.onboard_tenant",
+            side_effect=exception,
+        ) as mock_onboard,
+        patch(
+            "app.routes.admin.tenants.assert_actor_name",
+            return_value=False,
+        ),
+        pytest.raises(type(exception), match="Error"),
     ):
         mock_get_admin_controller.return_value.__aenter__.return_value = (
             mock_admin_controller

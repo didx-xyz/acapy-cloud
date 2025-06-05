@@ -11,7 +11,6 @@ from app.routes.wallet.sd_jws import sign_sd_jws
 
 @pytest.mark.anyio
 async def test_sign_jws_success():
-
     sd_jws = (
         "eyJ0eXAiOiAiSldUIiwgImFsZyI6ICJFZERTQSIsICJraWQiOiAiZGlkOnNvdjpBR2d1UjRtYzE4NlR3MTFLZVdkNHFxI2"
         "tleS0xIn0.eyJ0ZXN0IjogInRlc3RfdmFsdWUifQ.3IxwPkA2niDxCsd12kDRVveR-aPBJx7YibWy9fbrFTSWbITQ16CqA0"
@@ -40,14 +39,11 @@ async def test_sign_jws_success():
 
     payload = SDJWSCreate(**request_body.model_dump())
 
-    with patch(
-        "app.routes.wallet.sd_jws.client_from_auth"
-    ) as mock_client_from_auth, patch(
-        "app.routes.wallet.sd_jws.handle_acapy_call", mock_handle_acapy_call
-    ), patch(
-        "app.routes.wallet.sd_jws.logger"
-    ) as mock_logger:
-
+    with (
+        patch("app.routes.wallet.sd_jws.client_from_auth") as mock_client_from_auth,
+        patch("app.routes.wallet.sd_jws.handle_acapy_call", mock_handle_acapy_call),
+        patch("app.routes.wallet.sd_jws.logger") as mock_logger,
+    ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )
@@ -98,10 +94,13 @@ async def test_sign_jws_validation_error():
         ],
     )
 
-    with patch("app.routes.wallet.sd_jws.SDJWSCreate") as mock_jws_create, patch(
-        "app.routes.wallet.sd_jws.logger"
-    ) as mock_logger, patch(
-        "app.routes.wallet.sd_jws.extract_validation_error_msg", return_value=error_msg
+    with (
+        patch("app.routes.wallet.sd_jws.SDJWSCreate") as mock_jws_create,
+        patch("app.routes.wallet.sd_jws.logger") as mock_logger,
+        patch(
+            "app.routes.wallet.sd_jws.extract_validation_error_msg",
+            return_value=error_msg,
+        ),
     ):
         mock_jws_create.side_effect = mock_validation_error
 

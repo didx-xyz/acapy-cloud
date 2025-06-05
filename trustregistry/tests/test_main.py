@@ -223,9 +223,10 @@ async def test_root(db_session_mock):  # pylint: disable=redefined-outer-name
         db.Schema(id="456", did="did:123", name="schema2", version="1.0"),
     ]
     actors = [db.Actor(id="1", name="Alice"), db.Actor(id="2", name="Bob")]
-    with patch("trustregistry.main.crud.get_schemas") as mock_get_schemas, patch(
-        "trustregistry.main.crud.get_actors"
-    ) as mock_get_actors:
+    with (
+        patch("trustregistry.main.crud.get_schemas") as mock_get_schemas,
+        patch("trustregistry.main.crud.get_actors") as mock_get_actors,
+    ):
         mock_get_schemas.return_value = schemas
         mock_get_actors.return_value = actors
 

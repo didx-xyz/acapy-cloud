@@ -36,12 +36,12 @@ cred_def_response = [
 async def test_get_credential_definitions_success(params, response):
     mock_aries_controller = AsyncMock()
 
-    with patch(
-        "app.routes.definitions.client_from_auth"
-    ) as mock_get_client_controller, patch(
-        "app.routes.definitions.cred_def_service.get_credential_definitions"
-    ) as mock_get_credential_definitions:
-
+    with (
+        patch("app.routes.definitions.client_from_auth") as mock_get_client_controller,
+        patch(
+            "app.routes.definitions.cred_def_service.get_credential_definitions"
+        ) as mock_get_credential_definitions,
+    ):
         mock_get_credential_definitions.return_value = response
         mock_get_client_controller.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -78,12 +78,12 @@ async def test_get_credential_definitions_fail_acapy_error(
 ):
     mock_aries_controller = AsyncMock()
 
-    with patch(
-        "app.routes.definitions.client_from_auth"
-    ) as mock_get_client_controller, patch(
-        "app.routes.definitions.cred_def_service.get_credential_definitions"
-    ) as mock_get_credential_definitions:
-
+    with (
+        patch("app.routes.definitions.client_from_auth") as mock_get_client_controller,
+        patch(
+            "app.routes.definitions.cred_def_service.get_credential_definitions"
+        ) as mock_get_credential_definitions,
+    ):
         mock_get_credential_definitions.side_effect = CloudApiException(
             status_code=expected_status_code, detail=expected_detail
         )

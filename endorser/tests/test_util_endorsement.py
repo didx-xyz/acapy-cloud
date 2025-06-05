@@ -321,12 +321,12 @@ async def test_should_accept_endorsement_retries_on_http_exception(
     result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
     # Assertions
-    assert (
-        result
-    ), "The endorsement should be accepted due to is_valid_issuer true after retry."
-    assert (
-        mock_is_valid_issuer.call_count == 2
-    ), "is_valid_issuer should have been called exactly twice."
+    assert result, (
+        "The endorsement should be accepted due to is_valid_issuer true after retry."
+    )
+    assert mock_is_valid_issuer.call_count == 2, (
+        "is_valid_issuer should have been called exactly twice."
+    )
 
 
 @pytest.mark.anyio
@@ -387,12 +387,12 @@ async def test_should_accept_endorsement_fails_after_max_retries(
     result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
     # Assertions
-    assert (
-        result is None
-    ), "The endorsement should not be accepted due to is_valid_issuer failing repeatedly"
-    assert (
-        mock_is_valid_issuer.call_count == 5
-    ), "is_valid_issuer should have been called exactly `max_retries` times."
+    assert result is None, (
+        "The endorsement should not be accepted due to is_valid_issuer failing repeatedly"
+    )
+    assert mock_is_valid_issuer.call_count == 5, (
+        "is_valid_issuer should have been called exactly `max_retries` times."
+    )
 
 
 @pytest.mark.anyio
@@ -492,9 +492,9 @@ async def test_should_accept_endorsement_signature_request_applicable(
 
     result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
-    assert (
-        result is transaction_mock
-    ), "The endorsement should be accepted based on signature_request."
+    assert result is transaction_mock, (
+        "The endorsement should be accepted based on signature_request."
+    )
 
 
 @pytest.mark.anyio
@@ -517,6 +517,6 @@ async def test_should_accept_endorsement_signature_request_not_applicable(
 
     result = await should_accept_endorsement(mock_acapy_client, transaction_id)
 
-    assert (
-        result is None
-    ), "The endorsement should not be accepted based on signature_request."
+    assert result is None, (
+        "The endorsement should not be accepted based on signature_request."
+    )

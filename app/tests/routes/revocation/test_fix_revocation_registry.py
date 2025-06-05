@@ -109,13 +109,13 @@ async def test_fix_revocation_registry_entry_state_success(
 ):
     mock_aries_controller = AsyncMock()
 
-    with patch(
-        "app.routes.revocation.client_from_auth"
-    ) as mock_client_from_auth, patch(
-        "app.routes.revocation.handle_acapy_call",
-    ) as mock_handle_acapy_call, patch(
-        "app.routes.revocation.logger"
-    ) as mock_logger:
+    with (
+        patch("app.routes.revocation.client_from_auth") as mock_client_from_auth,
+        patch(
+            "app.routes.revocation.handle_acapy_call",
+        ) as mock_handle_acapy_call,
+        patch("app.routes.revocation.logger") as mock_logger,
+    ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )

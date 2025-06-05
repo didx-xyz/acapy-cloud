@@ -56,12 +56,15 @@ async def test_get_schemas_success(params, response, role):
     mock_aries_controller = AsyncMock()
     mock_auth = AcaPyAuth(token="mocked_token", role=role)
 
-    with patch("app.routes.definitions.client_from_auth") as mock_acapy_auth, patch(
-        "app.routes.definitions.schemas_service.get_schemas_as_tenant"
-    ) as mock_get_schemas_as_tenant, patch(
-        "app.routes.definitions.schemas_service.get_schemas_as_governance"
-    ) as mock_get_schemas_as_governance:
-
+    with (
+        patch("app.routes.definitions.client_from_auth") as mock_acapy_auth,
+        patch(
+            "app.routes.definitions.schemas_service.get_schemas_as_tenant"
+        ) as mock_get_schemas_as_tenant,
+        patch(
+            "app.routes.definitions.schemas_service.get_schemas_as_governance"
+        ) as mock_get_schemas_as_governance,
+    ):
         mock_acapy_auth.return_value.__aenter__.return_value = mock_aries_controller
         mock_get_schemas_as_tenant.return_value = response
         mock_get_schemas_as_governance.return_value = response
@@ -97,11 +100,15 @@ async def test_get_schemas_failure(error_code, detail, role):
     mock_aries_controller = AsyncMock()
     mock_auth = AcaPyAuth(token="mocked_token", role=role)
 
-    with patch("app.routes.definitions.client_from_auth") as mock_acapy_auth, patch(
-        "app.routes.definitions.schemas_service.get_schemas_as_tenant"
-    ) as mock_get_schemas_as_tenant, patch(
-        "app.routes.definitions.schemas_service.get_schemas_as_governance"
-    ) as mock_get_schemas_as_governance:
+    with (
+        patch("app.routes.definitions.client_from_auth") as mock_acapy_auth,
+        patch(
+            "app.routes.definitions.schemas_service.get_schemas_as_tenant"
+        ) as mock_get_schemas_as_tenant,
+        patch(
+            "app.routes.definitions.schemas_service.get_schemas_as_governance"
+        ) as mock_get_schemas_as_governance,
+    ):
         mock_get_schemas_as_tenant.side_effect = CloudApiException(
             status_code=error_code, detail=detail
         )

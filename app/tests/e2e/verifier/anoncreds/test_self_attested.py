@@ -20,7 +20,6 @@ async def test_self_attested_attributes_anoncreds(
     alice_member_client: RichAsyncClient,
     issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
 ):
-
     request_body = {
         "anoncreds_proof_request": {
             "requested_attributes": {
@@ -100,15 +99,15 @@ async def test_self_attested_attributes_anoncreds(
     assert "presentation" in proof, f"Proof should have presentation: {proof}"
     presentation = proof["presentation"]
 
-    assert (
-        "requested_proof" in presentation
-    ), f"Presentation should have requested_proof: {presentation}"
+    assert "requested_proof" in presentation, (
+        f"Presentation should have requested_proof: {presentation}"
+    )
     req = presentation["requested_proof"]
 
-    assert (
-        "self_attested_attrs" in req
-    ), f"Requested_proof should have self_attested_attrs: {req}"
+    assert "self_attested_attrs" in req, (
+        f"Requested_proof should have self_attested_attrs: {req}"
+    )
 
-    assert (
-        req["self_attested_attrs"]["self_attested_cell_nr"] == "1234567890"
-    ), f"self_attested_attrs should have expected cell nr: {req}"
+    assert req["self_attested_attrs"]["self_attested_cell_nr"] == "1234567890", (
+        f"self_attested_attrs should have expected cell nr: {req}"
+    )

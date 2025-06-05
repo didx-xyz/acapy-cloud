@@ -104,12 +104,12 @@ async def revoke_credential(
                 "Please check the revocation record state and retry if not revoked."
             )
 
-        assert (
-            record.result.rev_reg_id is not None
-        ), "rev_reg_id is not present in the revocation response"
-        assert (
-            record.result.cred_rev_id is not None
-        ), "cred_rev_id is not present in the revocation response"
+        assert record.result.rev_reg_id is not None, (
+            "rev_reg_id is not present in the revocation response"
+        )
+        assert record.result.cred_rev_id is not None, (
+            "cred_rev_id is not present in the revocation response"
+        )
 
         return RevokedResponse(
             cred_rev_ids_published={

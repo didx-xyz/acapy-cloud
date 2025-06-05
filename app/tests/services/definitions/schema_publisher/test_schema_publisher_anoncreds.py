@@ -71,12 +71,15 @@ credential_schema = CredentialSchema(
 @pytest.mark.anyio
 async def test_publish_anoncreds_schema_success(publisher):
     final_result = credential_schema
-    with patch(
-        "app.services.definitions.schema_publisher.handle_acapy_call",
-        return_value=anoncreds_schema_result,
-    ), patch(
-        "app.services.definitions.schema_publisher.register_schema"
-    ) as mock_register_schema:
+    with (
+        patch(
+            "app.services.definitions.schema_publisher.handle_acapy_call",
+            return_value=anoncreds_schema_result,
+        ),
+        patch(
+            "app.services.definitions.schema_publisher.register_schema"
+        ) as mock_register_schema,
+    ):
         result = await publisher.publish_anoncreds_schema(anoncreds_schema_request)
 
         assert result == final_result
@@ -88,16 +91,19 @@ async def test_publish_anoncreds_schema_already_exists(publisher):
     mock_schema_request = anoncreds_schema_request
     mock_existing_schema = credential_schema
 
-    with patch(
-        "app.services.definitions.schema_publisher.handle_acapy_call",
-        side_effect=[
-            CloudApiException(detail="already exist", status_code=400),
-            mock_existing_schema,
-        ],
-    ), patch.object(
-        publisher,
-        "_handle_existing_anoncreds_schema",
-        return_value=mock_existing_schema,
+    with (
+        patch(
+            "app.services.definitions.schema_publisher.handle_acapy_call",
+            side_effect=[
+                CloudApiException(detail="already exist", status_code=400),
+                mock_existing_schema,
+            ],
+        ),
+        patch.object(
+            publisher,
+            "_handle_existing_anoncreds_schema",
+            return_value=mock_existing_schema,
+        ),
     ):
         result = await publisher.publish_anoncreds_schema(mock_schema_request)
 
@@ -149,12 +155,15 @@ async def test_publish_anoncreds_schema_timeout_error(publisher):
         registration_metadata={"txn": {"transaction_id": "txn_id"}},
     )
 
-    with patch(
-        "app.services.definitions.schema_publisher.handle_acapy_call",
-        return_value=mock_result,
-    ), patch(
-        "app.services.definitions.schema_publisher.coroutine_with_retry_until_value",
-        side_effect=asyncio.TimeoutError,
+    with (
+        patch(
+            "app.services.definitions.schema_publisher.handle_acapy_call",
+            return_value=mock_result,
+        ),
+        patch(
+            "app.services.definitions.schema_publisher.coroutine_with_retry_until_value",
+            side_effect=asyncio.TimeoutError,
+        ),
     ):
         with pytest.raises(CloudApiException) as exc_info:
             await publisher.publish_anoncreds_schema(mock_schema_request)
@@ -214,12 +223,15 @@ async def test_handle_existing_anoncreds_schema_success(publisher):
     mock_pub_did.result.did = "test_did"
 
     mock_schema = anoncreds_get_schema_result
-    with patch(
-        "app.services.definitions.schema_publisher.handle_acapy_call",
-        side_effect=[mock_pub_did, mock_schema],
-    ), patch(
-        "app.services.definitions.schema_publisher.anoncreds_credential_schema",
-        return_value=MagicMock(spec=CredentialSchema),
+    with (
+        patch(
+            "app.services.definitions.schema_publisher.handle_acapy_call",
+            side_effect=[mock_pub_did, mock_schema],
+        ),
+        patch(
+            "app.services.definitions.schema_publisher.anoncreds_credential_schema",
+            return_value=MagicMock(spec=CredentialSchema),
+        ),
     ):
         result = await publisher._handle_existing_anoncreds_schema(mock_schema_request)
 
@@ -271,17 +283,20 @@ async def test_handle_existing_anoncreds_schema_changed_did(publisher):
     mock_schemas_created_ids.schema_ids = ["schema_id_1"]
 
     mock_schema = anoncreds_schema_result
-    with patch(
-        "app.services.definitions.schema_publisher.handle_acapy_call",
-        side_effect=[
-            mock_pub_did,
-            mock_schema_none,
-            mock_schemas_created_ids,
-            mock_schema,
-        ],
-    ), patch(
-        "app.services.definitions.schema_publisher.anoncreds_credential_schema",
-        return_value=MagicMock(spec=CredentialSchema),
+    with (
+        patch(
+            "app.services.definitions.schema_publisher.handle_acapy_call",
+            side_effect=[
+                mock_pub_did,
+                mock_schema_none,
+                mock_schemas_created_ids,
+                mock_schema,
+            ],
+        ),
+        patch(
+            "app.services.definitions.schema_publisher.anoncreds_credential_schema",
+            return_value=MagicMock(spec=CredentialSchema),
+        ),
     ):
         result = await publisher._handle_existing_anoncreds_schema(mock_schema_request)
 

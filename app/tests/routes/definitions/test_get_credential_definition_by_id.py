@@ -36,11 +36,10 @@ async def test_get_credential_definition_by_id_success():
     mock_aries_controller.anoncreds_credential_definitions.get_credential_definition = (
         AsyncMock(return_value=anoncreds_cred_def_acapy_result)
     )
-    with patch(
-        "app.routes.definitions.client_from_auth"
-    ) as mock_client_from_auth, patch(
-        "app.routes.definitions.get_schema"
-    ) as mock_get_schema:
+    with (
+        patch("app.routes.definitions.client_from_auth") as mock_client_from_auth,
+        patch("app.routes.definitions.get_schema") as mock_get_schema,
+    ):
         # Configure client_from_auth to return our mocked aries_controller on enter
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
