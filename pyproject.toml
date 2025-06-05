@@ -74,8 +74,6 @@ junit_family = "xunit2"
 [tool.ruff]
 lint.select = ["B006", "C", "D", "E", "F"]
 lint.ignore = [
-  "C405", # Fix this
-  "C417", # Fix this
   "C901", # Fix eventually
   "D100",
   "D101",
@@ -84,8 +82,6 @@ lint.ignore = [
   "D104",
   "D105",
   "D107",
-  "D200", # One-line docstring should fit on one line
-  "D202", # No blank lines allowed after function docstring
   "D203",
   "D204",
   "D205", # 1 blank line required between summary line and description
@@ -101,7 +97,7 @@ lint.ignore = [
   "D408",
   "D409",
   "D413",
-  "D417", # Fix this
+  "D417", # Detects missing argument descriptions - false positives in route methods
   "E501",
 ]
 line-length = 88

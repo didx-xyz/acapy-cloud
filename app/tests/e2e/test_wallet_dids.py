@@ -40,7 +40,7 @@ async def test_list_dids(
 ):
     # Capture the existing DIDs before the request
     initial_dids = await list_dids(auth=mock_governance_auth)
-    initial_dids_set = set(map(lambda x: x.did, initial_dids))
+    initial_dids_set = {x.did for x in initial_dids}
 
     # Make the GET request
     response = await governance_client.get(WALLET_BASE_PATH)
@@ -53,7 +53,7 @@ async def test_list_dids(
     ]
 
     # Compare the filtered response with the initial DIDs
-    initial_dids_dict = list(map(lambda x: x.to_dict(), initial_dids))
+    initial_dids_dict = [x.to_dict() for x in initial_dids]
     assert filtered_response_data == initial_dids_dict
 
 

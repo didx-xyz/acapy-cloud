@@ -41,8 +41,7 @@ async def nats_event_stream_generator(
     group_id: Optional[str] = None,
     look_back: Optional[int] = None,
 ) -> AsyncGenerator[str, None]:
-    """Generator for NATS events"""
-
+    """Generator for NATS events."""
     logger.debug("Starting NATS event stream generator")
     stop_event = asyncio.Event()
 
