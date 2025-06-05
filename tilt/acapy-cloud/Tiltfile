@@ -439,7 +439,6 @@ def setup_cheqd_localnet(namespace, ingress_domain):
         cmd=clone_cmd,
         allow_parallel=True,
         labels=["11-cheqd"],
-        auto_init=build_enabled,
     )
 
     setup_cloudapi_service(
