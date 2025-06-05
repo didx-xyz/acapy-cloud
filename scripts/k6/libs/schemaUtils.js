@@ -18,9 +18,7 @@ export function createSchemaIfNotExists(
     );
     return getSchemaId(governanceHeaders, schemaName, schemaVersion);
   }
-  console.log(
-    `Schema: ${schemaName} version: ${schemaVersion} does not exist - creating...`
-  );
+  log.info(`Schema: ${schemaName} version: ${schemaVersion} does not exist - creating...`);
   const createSchemaResponse = createSchema(
     governanceHeaders,
     schemaName,

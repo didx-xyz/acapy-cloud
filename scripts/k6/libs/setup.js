@@ -18,11 +18,8 @@ export function bootstrapIssuer(
   const { tenantAdminHeaders, governanceHeaders } = getAuthHeaders();
   const issuers = [];
 
-  // console.log(`Bearer token: ${tenantAdminHeaders.Authorization}`);
-  // console.log(`Governance token: ${governanceHeaders.Authorization}`);
-
   for (let i = 0; i < numIssuers; i++) {
-    console.log(`Creating issuer ${issuerPrefix}_${i}`);
+    log.debug(`Creating issuer ${issuerPrefix}_${i}`);
     const walletName = `${issuerPrefix}_${i}`;
     // const hack = `${walletName}_0`;
 
