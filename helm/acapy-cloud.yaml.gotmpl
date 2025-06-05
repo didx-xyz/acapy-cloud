@@ -21,10 +21,11 @@ environments:
         enabled: true
         ingress:
           ingressClassName: nginx
-          hostname: minio.127.0.0.1.nip.io
-        apiIngress:
-          ingressClassName: nginx
           hostname: minio-api.127.0.0.1.nip.io
+        console:
+          ingress:
+            ingressClassName: nginx
+            hostname: minio.127.0.0.1.nip.io
   dev:
     values:
     - namespace: acapy-cloud-dev
@@ -59,10 +60,11 @@ environments:
         enabled: true
         ingress:
           ingressClassName: nginx-internal
-          hostname: minio-acapy-cloud.dev.didxtech.com
-        apiIngress:
-          ingressClassName: nginx-internal
           hostname: minio-api-acapy-cloud.dev.didxtech.com
+        console:
+          ingress:
+            ingressClassName: nginx-internal
+            hostname: minio-acapy-cloud.dev.didxtech.com
 
 ---
 {{- $releases := list
@@ -250,8 +252,8 @@ releases:
       - ./acapy-cloud/conf/minio.yaml
       - ingress:
           {{ toYaml .Values.minio.ingress | nindent 10 }}
-      - apiIngress:
-          {{ toYaml .Values.minio.apiIngress | nindent 10 }}
+      - console:
+          {{ toYaml .Values.minio.console | nindent 10 }}
 ---
 repositories:
   - name: redpanda
