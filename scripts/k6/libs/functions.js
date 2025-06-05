@@ -776,13 +776,13 @@ export function revokeCredential(issuerAccessToken, credentialExchangeId) {
     const response = http.post(url, JSON.stringify(requestBody), params);
 
     if (response.status !== 200) {
-      console.error(`VU ${__VU}: Iteration ${__ITER}: Unexpected status code: ${response.status}`);
-      console.error(`VU ${__VU}: Iteration ${__ITER}: Response body: ${response.body}`);
+      log.error(`Unexpected status code: ${response.status}`);
+      log.error(`VU ${__VU}: Iteration ${__ITER}: Response body: ${response.body}`);
     }
 
     return response;
   } catch (error) {
-    console.error(`VU ${__VU}: Iteration ${__ITER}: Error revoking credential: ${error.message}`);
+    log.error(`Error revoking credential: ${error.message}`);
     throw error;
   }
 }
@@ -806,13 +806,13 @@ export function revokeCredentialAutoPublish(
     const response = http.post(url, JSON.stringify(requestBody), params);
 
     if (response.status !== 200) {
-      console.error(`Unexpected status code: ${response.status}`);
-      console.error(`Response body: ${response.body}`);
+      log.error(`Unexpected status code: ${response.status}`);
+      log.error(`Response body: ${response.body}`);
     }
 
     return response;
   } catch (error) {
-    console.error(`Error revoking credential: ${error.message}`);
+    log.error(`Error revoking credential: ${error.message}`);
     throw error;
   }
 }
