@@ -80,7 +80,8 @@ async def test_check_disconnection():
 
 @pytest.mark.anyio
 async def test_sse_event_stream_generator_wallet_id_topic_field_desired_state(
-    nats_processor_mock, request_mock  # pylint: disable=redefined-outer-name
+    nats_processor_mock,  # pylint: disable=redefined-outer-name
+    request_mock,  # pylint: disable=redefined-outer-name
 ):
     async def mock_event_generator():
         yield expected_cloudapi_event

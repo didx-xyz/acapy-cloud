@@ -29,9 +29,9 @@ async def fetch_or_create_regression_test_schema_definition(
     )
     schemas = response.json()
     num_schemas = len(schemas)
-    assert (
-        num_schemas < 2
-    ), f"Should have 1 or 0 schemas with this name, got: {num_schemas}"
+    assert num_schemas < 2, (
+        f"Should have 1 or 0 schemas with this name, got: {num_schemas}"
+    )
 
     if schemas:
         schema_definition_result = schemas[0]
@@ -88,7 +88,6 @@ async def anoncreds_schema_definition(
     faber_anoncreds_client: RichAsyncClient,
     governance_client: RichAsyncClient,
 ) -> CredentialSchema:
-
     return await get_clean_or_regression_test_schema(
         name="test_anoncreds_schema",
         faber_client=faber_anoncreds_client,
@@ -128,9 +127,9 @@ async def fetch_or_create_regression_test_cred_def(
     ]
 
     num_cred_defs = len(filtered_cred_defs)
-    assert (
-        num_cred_defs < 2
-    ), f"Should have 1 or 0 cred defs with this tag, got: {num_cred_defs}"
+    assert num_cred_defs < 2, (
+        f"Should have 1 or 0 cred defs with this tag, got: {num_cred_defs}"
+    )
 
     if filtered_cred_defs:
         result = filtered_cred_defs[0]
@@ -214,7 +213,6 @@ async def meld_co_anoncreds_credential_definition_id(
     anoncreds_schema_definition: CredentialSchema,  # pylint: disable=redefined-outer-name
     meld_co_anoncreds_client: RichAsyncClient,
 ) -> str:
-
     result = await get_clean_or_regression_test_cred_def(
         test_mode=request.param,
         client=meld_co_anoncreds_client,

@@ -17,8 +17,9 @@ async def test_store_credential_success():
     mock_aries_controller = AsyncMock()
     mock_aries_controller.issue_credential_v2_0.store_credential = AsyncMock()
 
-    with patch("app.routes.issuer.client_from_auth") as mock_client_from_auth, patch(
-        "app.services.issuer.acapy_issuer_v2.credential_record_to_model_v2"
+    with (
+        patch("app.routes.issuer.client_from_auth") as mock_client_from_auth,
+        patch("app.services.issuer.acapy_issuer_v2.credential_record_to_model_v2"),
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -48,11 +49,10 @@ async def test_store_credential_fail_acapy_error(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
 
-    with patch(
-        "app.routes.issuer.client_from_auth"
-    ) as mock_client_from_auth, pytest.raises(
-        HTTPException, match=expected_detail
-    ) as exc:
+    with (
+        patch("app.routes.issuer.client_from_auth") as mock_client_from_auth,
+        pytest.raises(HTTPException, match=expected_detail) as exc,
+    ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )

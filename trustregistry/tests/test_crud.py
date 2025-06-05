@@ -44,7 +44,6 @@ def test_get_actors(db_session_mock: Session, expected, skip, limit):
     db_session_mock.scalars.return_value.all.return_value = expected
 
     with patch("trustregistry.crud.select") as select_mock:
-
         actors = crud.get_actors(db_session_mock, skip=skip, limit=limit)
 
         db_session_mock.scalars.assert_called_once()
@@ -63,7 +62,6 @@ def test_get_actor_by_did(db_session_mock: Session, expected, actor_did):
     db_session_mock.scalars.return_value.first.return_value = expected
 
     with patch("trustregistry.crud.select") as select_mock:
-
         if expected:
             actor = crud.get_actor_by_did(db_session_mock, actor_did=actor_did)
 
@@ -159,10 +157,10 @@ def test_create_actor_exception(db_session_mock: Session):
 @pytest.mark.parametrize("actor, actor_id", [(actor1, "1"), (None, "NotInDB")])
 def test_delete_actor(db_session_mock: Session, actor, actor_id):
     db_session_mock.scalars.return_value.one_or_none.return_value = actor
-    with patch("trustregistry.crud.select") as select_mock, patch(
-        "trustregistry.crud.delete"
-    ) as delete_mock:
-
+    with (
+        patch("trustregistry.crud.select") as select_mock,
+        patch("trustregistry.crud.delete") as delete_mock,
+    ):
         if actor:
             result = crud.delete_actor(db_session_mock, actor_id=actor_id)
 
@@ -211,7 +209,6 @@ def test_get_schemas(db_session_mock: Session, expected, skip, limit):
     db_session_mock.scalars.return_value.all.return_value = expected
 
     with patch("trustregistry.crud.select") as select_mock:
-
         schemas = crud.get_schemas(db_session_mock, skip=skip, limit=limit)
 
         db_session_mock.scalars.assert_called_once()
@@ -229,7 +226,6 @@ def test_get_schema_by_id(db_session_mock: Session, expected, schema_id):
     db_session_mock.scalars.return_value.first.return_value = expected
 
     with patch("trustregistry.crud.select") as select_mock:
-
         if expected:
             schema = crud.get_schema_by_id(db_session_mock, schema_id=schema_id)
 
@@ -301,9 +297,10 @@ def test_update_schema(db_session_mock: Session, new_schema, old_schema):
 )
 def test_delete_schema(db_session_mock: Session, schema, schema_id):
     db_session_mock.scalars.return_value.one_or_none.return_value = schema
-    with patch("trustregistry.crud.select") as select_mock, patch(
-        "trustregistry.crud.delete"
-    ) as delete_mock:
+    with (
+        patch("trustregistry.crud.select") as select_mock,
+        patch("trustregistry.crud.delete") as delete_mock,
+    ):
         if schema:
             result = crud.delete_schema(db_session_mock, schema_id)
 

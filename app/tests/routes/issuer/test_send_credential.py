@@ -32,15 +32,15 @@ async def test_send_credential_success(credential):
     mock_aries_controller = AsyncMock()
     mock_aries_controller.issue_credential_v2_0.issue_credential_automated = AsyncMock()
 
-    with patch("app.routes.issuer.client_from_auth") as mock_client_from_auth, patch(
-        "app.util.valid_issuer.assert_public_did", return_value="public_did"
-    ), patch(
-        "app.services.issuer.acapy_issuer_v2.credential_record_to_model_v2"
-    ), patch(
-        "app.routes.issuer.schema_id_from_credential_definition_id",
-        return_value="schema_id",
-    ), patch(
-        "app.routes.issuer.assert_valid_issuer"
+    with (
+        patch("app.routes.issuer.client_from_auth") as mock_client_from_auth,
+        patch("app.util.valid_issuer.assert_public_did", return_value="public_did"),
+        patch("app.services.issuer.acapy_issuer_v2.credential_record_to_model_v2"),
+        patch(
+            "app.routes.issuer.schema_id_from_credential_definition_id",
+            return_value="schema_id",
+        ),
+        patch("app.routes.issuer.assert_valid_issuer"),
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -68,17 +68,15 @@ async def test_send_credential_fail_acapy_error(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
 
-    with patch(
-        "app.routes.issuer.client_from_auth"
-    ) as mock_client_from_auth, pytest.raises(
-        HTTPException, match=expected_detail
-    ) as exc, patch(
-        "app.util.valid_issuer.assert_public_did", return_value="public_did"
-    ), patch(
-        "app.routes.issuer.schema_id_from_credential_definition_id",
-        return_value="schema_id",
-    ), patch(
-        "app.routes.issuer.assert_valid_issuer"
+    with (
+        patch("app.routes.issuer.client_from_auth") as mock_client_from_auth,
+        pytest.raises(HTTPException, match=expected_detail) as exc,
+        patch("app.util.valid_issuer.assert_public_did", return_value="public_did"),
+        patch(
+            "app.routes.issuer.schema_id_from_credential_definition_id",
+            return_value="schema_id",
+        ),
+        patch("app.routes.issuer.assert_valid_issuer"),
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -105,13 +103,19 @@ async def test_send_credential_fail_bad_public_did():
     mock_aries_controller = AsyncMock()
     mock_aries_controller.issue_credential_v2_0.issue_credential_automated = AsyncMock()
 
-    with patch("app.routes.issuer.client_from_auth") as mock_client_from_auth, patch(
-        "app.util.valid_issuer.assert_public_did",
-        AsyncMock(side_effect=CloudApiException(status_code=404, detail="Not found")),
-    ), pytest.raises(
-        HTTPException,
-        match="Wallet making this request has no public DID. Only issuers with a public DID can make this request.",
-    ) as exc:
+    with (
+        patch("app.routes.issuer.client_from_auth") as mock_client_from_auth,
+        patch(
+            "app.util.valid_issuer.assert_public_did",
+            AsyncMock(
+                side_effect=CloudApiException(status_code=404, detail="Not found")
+            ),
+        ),
+        pytest.raises(
+            HTTPException,
+            match="Wallet making this request has no public DID. Only issuers with a public DID can make this request.",
+        ) as exc,
+    ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )

@@ -70,19 +70,21 @@ async def test_get_schemas_by_id_anoncreds_success():
         ),
     ]
 
-    with patch(
-        "app.services.definitions.schemas.handle_acapy_call",
-        side_effect=mock_schema_results,
-    ), patch(
-        "app.services.definitions.schemas.anoncreds_schema_from_acapy",
-        side_effect=lambda x: CredentialSchema(
-            id=x.schema_id,
-            name=x.var_schema.name,
-            version=x.var_schema.version,
-            attribute_names=x.var_schema.attr_names,
+    with (
+        patch(
+            "app.services.definitions.schemas.handle_acapy_call",
+            side_effect=mock_schema_results,
+        ),
+        patch(
+            "app.services.definitions.schemas.anoncreds_schema_from_acapy",
+            side_effect=lambda x: CredentialSchema(
+                id=x.schema_id,
+                name=x.var_schema.name,
+                version=x.var_schema.version,
+                attribute_names=x.var_schema.attr_names,
+            ),
         ),
     ):
-
         result = await get_schemas_by_id(mock_aries_controller, mock_schema_ids)
 
         assert len(result) == 2

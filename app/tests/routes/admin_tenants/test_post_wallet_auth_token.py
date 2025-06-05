@@ -18,17 +18,17 @@ async def test_post_wallet_auth_token_success(group_id):
     multitenancy_mock = AsyncMock(get_auth_token=AsyncMock())
     admin_controller_mock = AsyncMock(multitenancy=multitenancy_mock)
 
-    with patch(
-        "app.routes.admin.tenants.get_wallet_and_assert_valid_group",
-        return_value=AsyncMock(),
-    ) as mock_assert_valid_group, patch(
-        "app.routes.admin.tenants.fetch_actor_by_id", return_value=None
-    ), patch(
-        "app.routes.admin.tenants.remove_actor_by_id", return_value=AsyncMock()
-    ), patch(
-        "app.routes.admin.tenants.get_tenant_admin_controller"
-    ) as mock_get_admin_controller:
-
+    with (
+        patch(
+            "app.routes.admin.tenants.get_wallet_and_assert_valid_group",
+            return_value=AsyncMock(),
+        ) as mock_assert_valid_group,
+        patch("app.routes.admin.tenants.fetch_actor_by_id", return_value=None),
+        patch("app.routes.admin.tenants.remove_actor_by_id", return_value=AsyncMock()),
+        patch(
+            "app.routes.admin.tenants.get_tenant_admin_controller"
+        ) as mock_get_admin_controller,
+    ):
         # Configure get_tenant_admin_controller to return our mocked admin_controller on enter
         mock_get_admin_controller.return_value.__aenter__.return_value = (
             admin_controller_mock
@@ -65,7 +65,6 @@ async def test_post_wallet_auth_token_fail_wrong_group():
     with patch(
         "app.routes.admin.tenants.get_tenant_admin_controller"
     ) as mock_get_admin_controller:
-
         mock_get_admin_controller.return_value.__aenter__.return_value = (
             admin_controller_mock
         )

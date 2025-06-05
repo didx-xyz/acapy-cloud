@@ -29,15 +29,20 @@ async def test_get_schemas_as_governance_success():
     mock_response = MagicMock()
     mock_response.schema_ids = mock_schema_ids
 
-    with patch(
-        "app.services.definitions.schemas.GOVERNANCE_AGENT_URL",
-        "https://governance-agent-url",
-    ), patch(
-        "app.services.definitions.schemas.handle_acapy_call", return_value=mock_response
-    ), patch(
-        "app.services.definitions.schemas.get_schemas_by_id", return_value=mock_schemas
+    with (
+        patch(
+            "app.services.definitions.schemas.GOVERNANCE_AGENT_URL",
+            "https://governance-agent-url",
+        ),
+        patch(
+            "app.services.definitions.schemas.handle_acapy_call",
+            return_value=mock_response,
+        ),
+        patch(
+            "app.services.definitions.schemas.get_schemas_by_id",
+            return_value=mock_schemas,
+        ),
     ):
-
         result = await get_schemas_as_governance(mock_aries_controller)
 
         assert len(result) == 2
@@ -75,16 +80,20 @@ async def test_get_schemas_as_governance_with_filters():
     mock_response = MagicMock()
     mock_response.schema_ids = mock_schema_ids
 
-    with patch(
-        "app.services.definitions.schemas.GOVERNANCE_AGENT_URL",
-        "https://governance-agent-url",
-    ), patch(
-        "app.services.definitions.schemas.handle_acapy_call", return_value=mock_response
-    ), patch(
-        "app.services.definitions.schemas.get_schemas_by_id",
-        return_value=[mock_schemas[0]],
+    with (
+        patch(
+            "app.services.definitions.schemas.GOVERNANCE_AGENT_URL",
+            "https://governance-agent-url",
+        ),
+        patch(
+            "app.services.definitions.schemas.handle_acapy_call",
+            return_value=mock_response,
+        ),
+        patch(
+            "app.services.definitions.schemas.get_schemas_by_id",
+            return_value=[mock_schemas[0]],
+        ),
     ):
-
         result = await get_schemas_as_governance(
             mock_aries_controller,
             schema_issuer_did="did:sov:123",
@@ -108,15 +117,17 @@ async def test_get_schemas_as_governance_no_schemas():
     mock_response = MagicMock()
     mock_response.schema_ids = None
 
-    with patch(
-        "app.services.definitions.schemas.GOVERNANCE_AGENT_URL",
-        "https://governance-agent-url",
-    ), patch(
-        "app.services.definitions.schemas.handle_acapy_call", return_value=mock_response
-    ), patch(
-        "app.services.definitions.schemas.get_schemas_by_id", return_value=[]
+    with (
+        patch(
+            "app.services.definitions.schemas.GOVERNANCE_AGENT_URL",
+            "https://governance-agent-url",
+        ),
+        patch(
+            "app.services.definitions.schemas.handle_acapy_call",
+            return_value=mock_response,
+        ),
+        patch("app.services.definitions.schemas.get_schemas_by_id", return_value=[]),
     ):
-
         result = await get_schemas_as_governance(mock_aries_controller)
 
         assert len(result) == 0
@@ -134,15 +145,20 @@ async def test_get_schemas_as_governance_anoncreds():
     mock_response = MagicMock()
     mock_response.schema_ids = mock_schema_ids
 
-    with patch(
-        "app.services.definitions.schemas.GOVERNANCE_AGENT_URL",
-        "https://governance-agent-url",
-    ), patch(
-        "app.services.definitions.schemas.handle_acapy_call", return_value=mock_response
-    ), patch(
-        "app.services.definitions.schemas.get_schemas_by_id", return_value=mock_schemas
+    with (
+        patch(
+            "app.services.definitions.schemas.GOVERNANCE_AGENT_URL",
+            "https://governance-agent-url",
+        ),
+        patch(
+            "app.services.definitions.schemas.handle_acapy_call",
+            return_value=mock_response,
+        ),
+        patch(
+            "app.services.definitions.schemas.get_schemas_by_id",
+            return_value=mock_schemas,
+        ),
     ):
-
         result = await get_schemas_as_governance(mock_aries_controller)
 
         assert len(result) == 2

@@ -31,7 +31,6 @@ did_object = DID(
 async def test_onboard_issuer_public_did_exists(
     mock_agent_controller: AcaPyClient,
 ):
-
     endorser_controller = get_mock_agent_controller()
 
     endorser_controller.out_of_band.create_invitation.return_value = InvitationRecord(
@@ -105,15 +104,18 @@ async def test_onboard_issuer_no_public_did(
     )
 
     # Patch asyncio.sleep to return immediately
-    with patch(
-        "app.services.acapy_wallet.get_public_did",
-        side_effect=[
-            CloudApiException(detail="Not found"),  # Issuer did doesn't exist yet
-            did_object,  # Endorser did
-        ],
-    ), patch(
-        "app.services.acapy_wallet.create_did", return_value=did_object
-    ) as acapy_wallet_create_did_mock:
+    with (
+        patch(
+            "app.services.acapy_wallet.get_public_did",
+            side_effect=[
+                CloudApiException(detail="Not found"),  # Issuer did doesn't exist yet
+                did_object,  # Endorser did
+            ],
+        ),
+        patch(
+            "app.services.acapy_wallet.create_did", return_value=did_object
+        ) as acapy_wallet_create_did_mock,
+    ):
         onboard_result = await issuer.onboard_issuer(
             issuer_label="issuer_name",
             endorser_controller=endorser_controller,
@@ -146,7 +148,6 @@ async def test_onboard_verifier_public_did_exists(mock_agent_controller: AcaPyCl
 
 @pytest.mark.anyio
 async def test_onboard_verifier_no_public_did(mock_agent_controller: AcaPyClient):
-
     did_key = "did:key:123#456"
     invitation_url = "https://invitation.com/"
 
@@ -182,10 +183,13 @@ async def test_onboard_verifier_no_recipient_keys(mock_agent_controller: AcaPyCl
         invitation=InvitationMessage(services=[{"recipientKeys": []}]),
     )
 
-    with patch(
-        "app.services.acapy_wallet.get_public_did",
-        side_effect=CloudApiException(detail="No public did found"),
-    ), pytest.raises(CloudApiException):
+    with (
+        patch(
+            "app.services.acapy_wallet.get_public_did",
+            side_effect=CloudApiException(detail="No public did found"),
+        ),
+        pytest.raises(CloudApiException),
+    ):
         await verifier.onboard_verifier(
             verifier_label="verifier_name", verifier_controller=mock_agent_controller
         )
@@ -197,10 +201,13 @@ async def test_onboard_verifier_invalid_invitation(mock_agent_controller: AcaPyC
         invitation=InvitationMessage(services=[]),
     )
 
-    with patch(
-        "app.services.acapy_wallet.get_public_did",
-        side_effect=CloudApiException(detail="No public did found"),
-    ), pytest.raises(CloudApiException):
+    with (
+        patch(
+            "app.services.acapy_wallet.get_public_did",
+            side_effect=CloudApiException(detail="No public did found"),
+        ),
+        pytest.raises(CloudApiException),
+    ):
         await verifier.onboard_verifier(
             verifier_label="verifier_name", verifier_controller=mock_agent_controller
         )

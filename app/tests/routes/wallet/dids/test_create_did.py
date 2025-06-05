@@ -97,11 +97,10 @@ from app.routes.wallet.dids import create_did
 async def test_create_did_success(request_body, create_body):
     mock_aries_controller = AsyncMock()
 
-    with patch(
-        "app.routes.wallet.dids.client_from_auth"
-    ) as mock_client_from_auth, patch(
-        "app.services.acapy_wallet.handle_acapy_call"
-    ) as mock_handle_acapy_call:
+    with (
+        patch("app.routes.wallet.dids.client_from_auth") as mock_client_from_auth,
+        patch("app.services.acapy_wallet.handle_acapy_call") as mock_handle_acapy_call,
+    ):
         # Configure client_from_auth to return our mocked aries_controller on enter
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -110,7 +109,8 @@ async def test_create_did_success(request_body, create_body):
         if request_body is None:
             acapy_call = mock_aries_controller.did.did_cheqd_create_post
             mock_handle_acapy_call.return_value = AsyncMock(
-                did="did:cheqd:1234", verkey="a" * 131  # Expected verkey length
+                did="did:cheqd:1234",
+                verkey="a" * 131,  # Expected verkey length
             )
         else:
             acapy_call = mock_aries_controller.wallet.create_did
@@ -144,12 +144,10 @@ async def test_create_did_fail_acapy_error(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
 
-    with patch(
-        "app.routes.wallet.dids.client_from_auth"
-    ) as mock_client_from_auth, pytest.raises(
-        exception_class, match=expected_detail
-    ) as exc, patch(
-        "app.services.acapy_wallet.create_did", mock_create_did
+    with (
+        patch("app.routes.wallet.dids.client_from_auth") as mock_client_from_auth,
+        pytest.raises(exception_class, match=expected_detail) as exc,
+        patch("app.services.acapy_wallet.create_did", mock_create_did),
     ):
         # Configure client_from_auth to return our mocked aries_controller on enter
         mock_client_from_auth.return_value.__aenter__.return_value = (

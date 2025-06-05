@@ -77,11 +77,14 @@ async def test_publish_anoncreds_credential_definition_other_error(publisher):
 async def test_wait_for_revocation_registry_success(publisher):
     mock_cred_def_id = "test_cred_def_id"
 
-    with patch(
-        "app.services.definitions.credential_definition_publisher.wait_for_active_registry"
-    ), patch(
-        "app.services.definitions.credential_definition_publisher.REGISTRY_CREATION_TIMEOUT",
-        1,
+    with (
+        patch(
+            "app.services.definitions.credential_definition_publisher.wait_for_active_registry"
+        ),
+        patch(
+            "app.services.definitions.credential_definition_publisher.REGISTRY_CREATION_TIMEOUT",
+            1,
+        ),
     ):
         await publisher.wait_for_revocation_registry(mock_cred_def_id)
         # If no exception is raised, the test passes
@@ -91,12 +94,15 @@ async def test_wait_for_revocation_registry_success(publisher):
 async def test_wait_for_revocation_registry_timeout(publisher):
     mock_cred_def_id = "test_cred_def_id"
 
-    with patch(
-        "app.services.definitions.credential_definition_publisher.wait_for_active_registry",
-        side_effect=asyncio.TimeoutError,
-    ), patch(
-        "app.services.definitions.credential_definition_publisher.REGISTRY_CREATION_TIMEOUT",
-        0.1,
+    with (
+        patch(
+            "app.services.definitions.credential_definition_publisher.wait_for_active_registry",
+            side_effect=asyncio.TimeoutError,
+        ),
+        patch(
+            "app.services.definitions.credential_definition_publisher.REGISTRY_CREATION_TIMEOUT",
+            0.1,
+        ),
     ):
         with pytest.raises(CloudApiException) as exc_info:
             await publisher.wait_for_revocation_registry(mock_cred_def_id)

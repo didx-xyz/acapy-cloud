@@ -177,7 +177,6 @@ async def test_clear_pending_revocations_success(mock_agent_controller: AcaPyCli
     with patch(
         "app.services.revocation_registry.validate_rev_reg_ids", return_value=None
     ) as mock_validate_rev_reg_ids:
-
         # Mock clear_pending_revocations call to return successful result
         mock_agent_controller.revocation.clear_pending_revocations.return_value = (
             PublishRevocations(rrid2crid=expected_result_map)

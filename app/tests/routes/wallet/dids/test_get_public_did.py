@@ -60,11 +60,10 @@ async def test_get_public_did_fail_acapy_error(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
 
-    with patch(
-        "app.routes.wallet.dids.client_from_auth"
-    ) as mock_client_from_auth, pytest.raises(
-        HTTPException, match=expected_detail
-    ) as exc:
+    with (
+        patch("app.routes.wallet.dids.client_from_auth") as mock_client_from_auth,
+        pytest.raises(HTTPException, match=expected_detail) as exc,
+    ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )

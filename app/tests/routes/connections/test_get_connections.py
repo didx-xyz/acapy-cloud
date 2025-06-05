@@ -45,10 +45,11 @@ async def test_get_connections_success(params):
         return_value=connections_response
     )
 
-    with patch(
-        "app.routes.connections.client_from_auth"
-    ) as mock_client_from_auth, patch(
-        "app.routes.connections.conn_record_to_connection", side_effect=lambda x: x
+    with (
+        patch("app.routes.connections.client_from_auth") as mock_client_from_auth,
+        patch(
+            "app.routes.connections.conn_record_to_connection", side_effect=lambda x: x
+        ),
     ):
         # Configure client_from_auth to return our mocked aries_controller on enter
         mock_client_from_auth.return_value.__aenter__.return_value = (
@@ -107,11 +108,10 @@ async def test_get_connections_fail_acapy_error(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
 
-    with patch(
-        "app.routes.connections.client_from_auth"
-    ) as mock_client_from_auth, pytest.raises(
-        HTTPException, match=expected_detail
-    ) as exc:
+    with (
+        patch("app.routes.connections.client_from_auth") as mock_client_from_auth,
+        pytest.raises(HTTPException, match=expected_detail) as exc,
+    ):
         # Configure client_from_auth to return our mocked aries_controller on enter
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller

@@ -36,9 +36,9 @@ async def test_send_jsonld_key_ed25519(
     # Updating JSON-LD credential did:key with proofType ed25519
     credential = deepcopy(credential_)
     credential["connection_id"] = faber_connection_id
-    credential["ld_credential_detail"]["credential"][
-        "issuer"
-    ] = register_issuer_key_ed25519
+    credential["ld_credential_detail"]["credential"]["issuer"] = (
+        register_issuer_key_ed25519
+    )
 
     # Send credential
     response = await faber_anoncreds_client.post(
@@ -133,9 +133,9 @@ async def test_send_jsonld_oob(
     # Updating JSON-LD credential did:key with proofType ed25519
     credential = deepcopy(credential_)
     credential["connection_id"] = faber_connection_id
-    credential["ld_credential_detail"]["credential"][
-        "issuer"
-    ] = register_issuer_key_ed25519
+    credential["ld_credential_detail"]["credential"]["issuer"] = (
+        register_issuer_key_ed25519
+    )
 
     # Send credential
     response = await faber_anoncreds_client.post(
@@ -175,9 +175,9 @@ async def test_send_jsonld_request(
     # Updating JSON-LD credential did:key with proofType ed25519
     credential = deepcopy(credential_)
     credential["connection_id"] = faber_connection_id
-    credential["ld_credential_detail"]["credential"][
-        "issuer"
-    ] = register_issuer_key_ed25519
+    credential["ld_credential_detail"]["credential"]["issuer"] = (
+        register_issuer_key_ed25519
+    )
 
     response = await faber_anoncreds_client.post(
         CREDENTIALS_BASE_PATH,
@@ -242,9 +242,9 @@ async def test_issue_jsonld_ed(
     # Updating JSON-LD credential did:key with proofType ed25519
     credential = deepcopy(credential_)
     credential["connection_id"] = faber_connection_id
-    credential["ld_credential_detail"]["credential"][
-        "issuer"
-    ] = register_issuer_key_ed25519
+    credential["ld_credential_detail"]["credential"]["issuer"] = (
+        register_issuer_key_ed25519
+    )
 
     response = await faber_anoncreds_client.post(
         CREDENTIALS_BASE_PATH,
@@ -311,9 +311,9 @@ async def test_send_jsonld_mismatch_ed_bbs(
     # Creating JSON-LD credential did:key with proofType: BbsBlsSignature2020
     credential = deepcopy(credential_)
     credential["connection_id"] = faber_connection_id
-    credential["ld_credential_detail"]["credential"][
-        "issuer"
-    ] = register_issuer_key_ed25519
+    credential["ld_credential_detail"]["credential"]["issuer"] = (
+        register_issuer_key_ed25519
+    )
     credential["ld_credential_detail"]["options"] = {"proofType": "BbsBlsSignature2020"}
 
     # Send credential must fail did:key made with ed25519 mismatch with proofType:BbsBlsSignature2020

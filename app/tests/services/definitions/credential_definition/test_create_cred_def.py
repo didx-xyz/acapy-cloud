@@ -30,17 +30,20 @@ async def test_create_credential_definition_success():
         schema_id="test_schema_id", tag="test_tag", support_revocation=False
     )
 
-    with patch(
-        "app.services.definitions.credential_definitions.CredentialDefinitionPublisher",
-        return_value=mock_publisher,
-    ), patch(
-        "app.services.definitions.credential_definitions.assert_public_did",
-        return_value="test_public_did",
-    ), patch(
-        "app.services.definitions.credential_definitions.assert_valid_issuer"
-    ), patch(
-        "app.services.definitions.credential_definitions.handle_model_with_validation"
-    ) as mock_handle_model:
+    with (
+        patch(
+            "app.services.definitions.credential_definitions.CredentialDefinitionPublisher",
+            return_value=mock_publisher,
+        ),
+        patch(
+            "app.services.definitions.credential_definitions.assert_public_did",
+            return_value="test_public_did",
+        ),
+        patch("app.services.definitions.credential_definitions.assert_valid_issuer"),
+        patch(
+            "app.services.definitions.credential_definitions.handle_model_with_validation"
+        ) as mock_handle_model,
+    ):
         mock_handle_model.return_value = CredentialDefinitionSendRequest(
             schema_id="CXQseFxV34pcb8vf32XhEa:2:test_schema:0.3.0",
             support_revocation=False,
@@ -71,18 +74,20 @@ async def test_create_credential_definition_with_revocation():
         schema_id="test_schema_id", tag="test_tag", support_revocation=True
     )
 
-    with patch(
-        "app.services.definitions.credential_definitions.CredentialDefinitionPublisher",
-        return_value=mock_publisher,
-    ), patch(
-        "app.services.definitions.credential_definitions.assert_public_did",
-        return_value="test_public_did",
-    ), patch(
-        "app.services.definitions.credential_definitions.assert_valid_issuer"
-    ), patch(
-        "app.services.definitions.credential_definitions.handle_model_with_validation"
+    with (
+        patch(
+            "app.services.definitions.credential_definitions.CredentialDefinitionPublisher",
+            return_value=mock_publisher,
+        ),
+        patch(
+            "app.services.definitions.credential_definitions.assert_public_did",
+            return_value="test_public_did",
+        ),
+        patch("app.services.definitions.credential_definitions.assert_valid_issuer"),
+        patch(
+            "app.services.definitions.credential_definitions.handle_model_with_validation"
+        ),
     ):
-
         result = await create_credential_definition(
             mock_aries_controller, create_cred_def_payload, True
         )
@@ -101,14 +106,16 @@ async def test_create_credential_definition_invalid_issuer():
         schema_id="test_schema_id", tag="test_tag", support_revocation=False
     )
 
-    with patch(
-        "app.services.definitions.credential_definitions.assert_public_did",
-        return_value="test_public_did",
-    ), patch(
-        "app.services.definitions.credential_definitions.assert_valid_issuer",
-        side_effect=Exception("Invalid issuer"),
+    with (
+        patch(
+            "app.services.definitions.credential_definitions.assert_public_did",
+            return_value="test_public_did",
+        ),
+        patch(
+            "app.services.definitions.credential_definitions.assert_valid_issuer",
+            side_effect=Exception("Invalid issuer"),
+        ),
     ):
-
         with pytest.raises(Exception) as exc_info:
             await create_credential_definition(
                 mock_aries_controller, create_cred_def_payload, False

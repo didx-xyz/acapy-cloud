@@ -22,14 +22,15 @@ cred_def_response = CredentialDefinition(
 async def test_create_credential_definition_success():
     mock_aries_controller = AsyncMock()
 
-    with patch(
-        "app.routes.definitions.client_from_auth"
-    ) as mock_get_client_controller, patch(
-        "app.routes.definitions.cred_def_service.create_credential_definition"
-    ) as mock_create_credential_definition, patch(
-        "app.routes.definitions.coroutine_with_retry"
-    ) as mock_coroutine_with_retry:
-
+    with (
+        patch("app.routes.definitions.client_from_auth") as mock_get_client_controller,
+        patch(
+            "app.routes.definitions.cred_def_service.create_credential_definition"
+        ) as mock_create_credential_definition,
+        patch(
+            "app.routes.definitions.coroutine_with_retry"
+        ) as mock_coroutine_with_retry,
+    ):
         mock_get_client_controller.return_value.__aenter__.return_value = (
             mock_aries_controller
         )
@@ -65,12 +66,12 @@ async def test_create_credential_definition_fail_acapy_error(
 ):
     mock_aries_controller = AsyncMock()
 
-    with patch(
-        "app.routes.definitions.client_from_auth"
-    ) as mock_get_client_controller, patch(
-        "app.routes.definitions.cred_def_service.create_credential_definition"
-    ) as mock_create_credential_definition:
-
+    with (
+        patch("app.routes.definitions.client_from_auth") as mock_get_client_controller,
+        patch(
+            "app.routes.definitions.cred_def_service.create_credential_definition"
+        ) as mock_create_credential_definition,
+    ):
         mock_get_client_controller.return_value.__aenter__.return_value = (
             mock_aries_controller
         )

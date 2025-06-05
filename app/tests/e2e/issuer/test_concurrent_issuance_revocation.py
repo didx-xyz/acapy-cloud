@@ -92,9 +92,9 @@ async def test_concurrent_issuance_sequential_revocation(
         num_credentials_returned = len(alice_cred_ex_response)
         num_tries += 1
 
-    assert (
-        num_credentials_returned == num_creds
-    ), f"Expected {num_creds} credentials to be issued; only got {num_credentials_returned}"
+    assert num_credentials_returned == num_creds, (
+        f"Expected {num_creds} credentials to be issued; only got {num_credentials_returned}"
+    )
 
     # Accept all credentials concurrently using asyncio.gather()
     request_tasks = []

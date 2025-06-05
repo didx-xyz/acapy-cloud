@@ -388,7 +388,6 @@ async def get_credential_definition_by_id(
     bound_logger.debug("GET request received: Get credential definition by id")
 
     async with client_from_auth(auth) as aries_controller:
-
         bound_logger.debug("Getting credential definition")
         credential_definition = await handle_acapy_call(
             logger=bound_logger,

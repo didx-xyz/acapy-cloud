@@ -70,7 +70,6 @@ async def test_get_credential_definitions_with_filters():
     with patch(
         "app.services.definitions.credential_definitions.handle_acapy_call"
     ) as mock_handle_acapy_call:
-
         mock_handle_acapy_call.side_effect = [
             GetCredDefsResponse(credential_definition_ids=mock_cred_def_ids),
             *mock_cred_def_results,

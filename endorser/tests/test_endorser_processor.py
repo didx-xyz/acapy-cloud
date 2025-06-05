@@ -266,11 +266,14 @@ async def test_process_endorsement_event_governance(endorsement_processor_mock):
 
     event_json = json.dumps(event_dict)
 
-    with patch(
-        "endorser.services.endorsement_processor.should_accept_endorsement"
-    ) as mock_should_accept_endorsement, patch(
-        "endorser.services.endorsement_processor.accept_endorsement"
-    ) as mock_accept_endorsement:
+    with (
+        patch(
+            "endorser.services.endorsement_processor.should_accept_endorsement"
+        ) as mock_should_accept_endorsement,
+        patch(
+            "endorser.services.endorsement_processor.accept_endorsement"
+        ) as mock_accept_endorsement,
+    ):
         mock_should_accept_endorsement.return_value = MagicMock()
         mock_accept_endorsement.return_value = AsyncMock()
         await endorsement_processor_mock._process_endorsement_event(event_json)
@@ -293,11 +296,14 @@ async def test_process_endorsement_event_governance_no_accept(
 
     event_json = json.dumps(event_dict)
 
-    with patch(
-        "endorser.services.endorsement_processor.should_accept_endorsement"
-    ) as mock_should_accept_endorsement, patch(
-        "endorser.services.endorsement_processor.accept_endorsement"
-    ) as mock_accept_endorsement:
+    with (
+        patch(
+            "endorser.services.endorsement_processor.should_accept_endorsement"
+        ) as mock_should_accept_endorsement,
+        patch(
+            "endorser.services.endorsement_processor.accept_endorsement"
+        ) as mock_accept_endorsement,
+    ):
         mock_should_accept_endorsement.return_value = False
         mock_accept_endorsement.return_value = AsyncMock()
         await endorsement_processor_mock._process_endorsement_event(event_json)
@@ -318,11 +324,14 @@ async def test_process_endorsement_event_not_governance(endorsement_processor_mo
 
     event_json = json.dumps(event_dict)
 
-    with patch(
-        "endorser.services.endorsement_processor.should_accept_endorsement"
-    ) as mock_should_accept_endorsement, patch(
-        "endorser.services.endorsement_processor.accept_endorsement"
-    ) as mock_accept_endorsement:
+    with (
+        patch(
+            "endorser.services.endorsement_processor.should_accept_endorsement"
+        ) as mock_should_accept_endorsement,
+        patch(
+            "endorser.services.endorsement_processor.accept_endorsement"
+        ) as mock_accept_endorsement,
+    ):
         mock_accept_endorsement.return_value = AsyncMock()
         await endorsement_processor_mock._process_endorsement_event(event_json)
 
@@ -352,7 +361,8 @@ async def test_endorsement_processor_subscribe(
 @pytest.mark.anyio
 @pytest.mark.parametrize("exception", [BadSubscriptionError, Error, Exception])
 async def test_endorsement_processor_subscribe_error(
-    mock_nats_client, exception  # pylint: disable=redefined-outer-name
+    mock_nats_client,  # pylint: disable=redefined-outer-name
+    exception,
 ):
     processor = EndorsementProcessor(mock_nats_client)
     mock_nats_client.pull_subscribe.side_effect = exception
@@ -435,7 +445,6 @@ class MockFuture:
 
 
 def test_retry_log(endorsement_processor_mock):  # pylint: disable=redefined-outer-name
-
     # Mock a retry state
     mock_retry_state = MagicMock(spec=RetryCallState)
 

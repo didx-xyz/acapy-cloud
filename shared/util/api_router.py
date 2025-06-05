@@ -24,7 +24,7 @@ class APIRouter(FastAPIRouter):
         add_alternate_path = super().api_route(
             alternate_path,
             include_in_schema=False,  # Will not be included in generated schema
-            **kwargs
+            **kwargs,
         )
 
         def decorator(func: DecoratedCallable) -> DecoratedCallable:

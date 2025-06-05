@@ -30,11 +30,12 @@ async def test_create_schema_success(mock_governance_auth):
 
     mock_create_schema_service.return_value = create_schema_response
 
-    with patch(
-        "app.routes.definitions.client_from_auth"
-    ) as mock_client_from_auth, patch(
-        "app.routes.definitions.schemas_service.create_schema",
-        mock_create_schema_service,
+    with (
+        patch("app.routes.definitions.client_from_auth") as mock_client_from_auth,
+        patch(
+            "app.routes.definitions.schemas_service.create_schema",
+            mock_create_schema_service,
+        ),
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -70,11 +71,12 @@ async def test_create_schema_assert_public_did_failure(mock_governance_auth):
     mock_aries_controller = AsyncMock()
     mock_create_schema_service = AsyncMock()
 
-    with patch(
-        "app.routes.definitions.client_from_auth"
-    ) as mock_client_from_auth, patch(
-        "app.routes.definitions.schemas_service.create_schema",
-        mock_create_schema_service,
+    with (
+        patch("app.routes.definitions.client_from_auth") as mock_client_from_auth,
+        patch(
+            "app.routes.definitions.schemas_service.create_schema",
+            mock_create_schema_service,
+        ),
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -108,11 +110,12 @@ async def test_create_schema_failure(
     mock_aries_controller = AsyncMock()
     mock_create_schema_service = AsyncMock()
 
-    with patch(
-        "app.routes.definitions.client_from_auth"
-    ) as mock_client_from_auth, patch(
-        "app.routes.definitions.schemas_service.create_schema",
-        mock_create_schema_service,
+    with (
+        patch("app.routes.definitions.client_from_auth") as mock_client_from_auth,
+        patch(
+            "app.routes.definitions.schemas_service.create_schema",
+            mock_create_schema_service,
+        ),
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller

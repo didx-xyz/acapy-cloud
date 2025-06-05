@@ -18,9 +18,10 @@ async def test_hangup_did_rotation_success():
     mock_aries_controller = AsyncMock()
     mock_aries_controller.did_rotate.hangup = AsyncMock(return_value=hangup_response)
 
-    with patch(
-        "app.routes.connections.client_from_auth"
-    ) as mock_client_from_auth, patch("app.routes.connections.logger"):
+    with (
+        patch("app.routes.connections.client_from_auth") as mock_client_from_auth,
+        patch("app.routes.connections.logger"),
+    ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )
@@ -54,11 +55,10 @@ async def test_hangup_did_rotation_fail_acapy_error(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
 
-    with patch(
-        "app.routes.connections.client_from_auth"
-    ) as mock_client_from_auth, pytest.raises(
-        HTTPException, match=expected_detail
-    ) as exc:
+    with (
+        patch("app.routes.connections.client_from_auth") as mock_client_from_auth,
+        pytest.raises(HTTPException, match=expected_detail) as exc,
+    ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )

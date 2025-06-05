@@ -111,7 +111,6 @@ async def revoke_many(
     faber_anoncreds_client: RichAsyncClient,
     issue_many_creds: List[CredentialExchange],  # pylint: disable=redefined-outer-name
 ) -> List[CredentialExchange]:
-
     auto_publish = True
     if hasattr(request, "param") and request.param == "auto_publish_false":
         auto_publish = False

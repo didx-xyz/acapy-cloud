@@ -23,12 +23,13 @@ async def test_set_did_endpoint_success():
     request_body = SetDidEndpointRequest(endpoint="https://example.com")
     endpoint_type = "Endpoint"
 
-    with patch(
-        "app.routes.wallet.dids.client_from_auth"
-    ) as mock_client_from_auth, patch(
-        "app.routes.wallet.dids.handle_model_with_validation",
-        return_value=DIDEndpointWithType(
-            did=did, endpoint=request_body.endpoint, endpoint_type=endpoint_type
+    with (
+        patch("app.routes.wallet.dids.client_from_auth") as mock_client_from_auth,
+        patch(
+            "app.routes.wallet.dids.handle_model_with_validation",
+            return_value=DIDEndpointWithType(
+                did=did, endpoint=request_body.endpoint, endpoint_type=endpoint_type
+            ),
         ),
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
@@ -61,11 +62,10 @@ async def test_set_did_endpoint_fail_acapy_error(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
 
-    with patch(
-        "app.routes.wallet.dids.client_from_auth"
-    ) as mock_client_from_auth, pytest.raises(
-        HTTPException, match=expected_detail
-    ) as exc:
+    with (
+        patch("app.routes.wallet.dids.client_from_auth") as mock_client_from_auth,
+        pytest.raises(HTTPException, match=expected_detail) as exc,
+    ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )

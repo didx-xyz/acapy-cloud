@@ -16,16 +16,19 @@ async def test_get_tenant_success(group_id):
     admin_controller_mock = AsyncMock()
 
     # Patch the dependencies
-    with patch(
-        "app.routes.admin.tenants.get_wallet_and_assert_valid_group",
-        return_value=AsyncMock(),
-    ) as mock_assert_valid_group, patch(
-        "app.routes.admin.tenants.get_tenant_admin_controller"
-    ) as mock_get_admin_controller, patch(
-        "app.routes.admin.tenants.tenant_from_wallet_record",
-        return_value=Mock(),
+    with (
+        patch(
+            "app.routes.admin.tenants.get_wallet_and_assert_valid_group",
+            return_value=AsyncMock(),
+        ) as mock_assert_valid_group,
+        patch(
+            "app.routes.admin.tenants.get_tenant_admin_controller"
+        ) as mock_get_admin_controller,
+        patch(
+            "app.routes.admin.tenants.tenant_from_wallet_record",
+            return_value=Mock(),
+        ),
     ):
-
         # Configure get_tenant_admin_controller to return our mocked admin_controller on enter
         mock_get_admin_controller.return_value.__aenter__.return_value = (
             admin_controller_mock
@@ -60,7 +63,6 @@ async def test_get_tenant_fail_wrong_group():
     with patch(
         "app.routes.admin.tenants.get_tenant_admin_controller"
     ) as mock_get_admin_controller:
-
         mock_get_admin_controller.return_value.__aenter__.return_value = (
             admin_controller_mock
         )

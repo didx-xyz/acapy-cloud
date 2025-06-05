@@ -73,13 +73,11 @@ async def test_verify_jws_success():
     request_body = SDJWSVerifyRequest(sd_jws=sd_jws)
     verify_request = SDJWSVerify(sd_jwt=request_body.sd_jws)
 
-    with patch(
-        "app.routes.wallet.sd_jws.client_from_auth"
-    ) as mock_client_from_auth, patch(
-        "app.routes.wallet.sd_jws.handle_acapy_call", mock_handle_acapy_call
-    ), patch(
-        "app.routes.wallet.sd_jws.logger"
-    ) as mock_logger:
+    with (
+        patch("app.routes.wallet.sd_jws.client_from_auth") as mock_client_from_auth,
+        patch("app.routes.wallet.sd_jws.handle_acapy_call", mock_handle_acapy_call),
+        patch("app.routes.wallet.sd_jws.logger") as mock_logger,
+    ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
         )
@@ -121,10 +119,13 @@ async def test_verify_jws_validation_error():
         ],
     )
 
-    with patch("app.routes.wallet.sd_jws.SDJWSVerify") as mock_jws_verify, patch(
-        "app.routes.wallet.sd_jws.logger"
-    ) as mock_logger, patch(
-        "app.routes.wallet.sd_jws.extract_validation_error_msg", return_value=error_msg
+    with (
+        patch("app.routes.wallet.sd_jws.SDJWSVerify") as mock_jws_verify,
+        patch("app.routes.wallet.sd_jws.logger") as mock_logger,
+        patch(
+            "app.routes.wallet.sd_jws.extract_validation_error_msg",
+            return_value=error_msg,
+        ),
     ):
         mock_jws_verify.side_effect = mock_validation_error
 

@@ -50,9 +50,10 @@ async def test_nats_status_closed_callback():
 
 @pytest.mark.anyio
 async def test_init_nats_client_with_creds():
-    with patch(
-        "shared.services.nats_jetstream.NATS_CREDS_FILE", "test_creds.conf"
-    ), patch("shared.services.nats_jetstream.nats.connect") as mock_connect:
+    with (
+        patch("shared.services.nats_jetstream.NATS_CREDS_FILE", "test_creds.conf"),
+        patch("shared.services.nats_jetstream.nats.connect") as mock_connect,
+    ):
         mock_connect.return_value = AsyncMock(
             jetstream=Mock(return_value="jetstream_context")
         )
@@ -67,9 +68,13 @@ async def test_init_nats_client_with_creds():
 
 @pytest.mark.anyio
 async def test_init_nats_client_without_creds():
-    with patch("shared.services.nats_jetstream.NATS_CREDS_FILE", None), patch(
-        "shared.services.nats_jetstream.nats.connect", AsyncMock()
-    ) as mock_connect, patch("shared.services.nats_jetstream.logger") as mock_logger:
+    with (
+        patch("shared.services.nats_jetstream.NATS_CREDS_FILE", None),
+        patch(
+            "shared.services.nats_jetstream.nats.connect", AsyncMock()
+        ) as mock_connect,
+        patch("shared.services.nats_jetstream.logger") as mock_logger,
+    ):
         mock_connect.return_value = AsyncMock(
             jetstream=Mock(return_value="jetstream_context")
         )
@@ -87,10 +92,11 @@ async def test_init_nats_client_without_creds():
 
 @pytest.mark.anyio
 async def test_init_nats_client_connection_error():
-    with patch("shared.services.nats_jetstream.NATS_CREDS_FILE", None), patch(
-        "shared.services.nats_jetstream.nats.connect"
-    ) as mock_connect, patch("shared.services.nats_jetstream.logger") as mock_logger:
-
+    with (
+        patch("shared.services.nats_jetstream.NATS_CREDS_FILE", None),
+        patch("shared.services.nats_jetstream.nats.connect") as mock_connect,
+        patch("shared.services.nats_jetstream.logger") as mock_logger,
+    ):
         mock_connect.side_effect = NoServersError()
 
         with pytest.raises(NoServersError):

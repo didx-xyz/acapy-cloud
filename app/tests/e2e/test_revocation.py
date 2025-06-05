@@ -60,9 +60,9 @@ async def clear_pending_revokes(
     ]
 
     for key in revocation_registry_credential_map:
-        assert (
-            len(revocation_registry_credential_map[key]) >= 2
-        ), "We expect at least two cred_rev_ids per rev_reg_id after revoking one"
+        assert len(revocation_registry_credential_map[key]) >= 2, (
+            "We expect at least two cred_rev_ids per rev_reg_id after revoking one"
+        )
 
     # clear_revoke_response = await faber_client.post(
     #     f"{REVOCATION_BASE_PATH}/clear-pending-revocations",
