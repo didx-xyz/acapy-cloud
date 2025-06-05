@@ -32,6 +32,6 @@ async def resolve_cheqd_schema(id: str) -> Optional[dict]:
         raise e
     except Exception as e:
         logger.error(f"Unexpected error while resolving schema with id {id}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        raise HTTPException(status_code=500, detail="Internal Server Error") from e
 
     return response.json()
