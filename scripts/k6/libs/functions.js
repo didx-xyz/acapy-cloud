@@ -39,18 +39,6 @@ export function createTenant(headers, wallet) {
 
   const response = http.post(url, payload, params);
   if (response.status === 200) {
-    // Request was successful
-    // const { wallet_id: walletId, access_token: accessToken } = JSON.parse(response.body);
-    // // Store walletId and accessToken for the current VU and iteration
-    // const vuKey = `vu_${__VU}`;
-    // const iterKey = `iter_${__ITER}`;
-    // if (!global[vuKey]) {
-    //   global[vuKey] = {};
-    // }
-    // global[vuKey][iterKey] = {
-    //   walletId: walletId,
-    //   accessToken: accessToken
-    // };
     return response;
   }
   // Request failed
@@ -67,8 +55,6 @@ export function getWalletIdByWalletName(headers, walletName) {
       ...headers,
     },
   };
-
-  // console.log(`Getting wallet ID for wallet name: ${walletName}`);
 
   const response = http.get(url, params);
   if (response.status >= 200 && response.status < 300) {

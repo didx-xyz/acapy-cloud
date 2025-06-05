@@ -1,6 +1,7 @@
 // schemaUtils.js
 
 import { createSchema, getSchema } from "./functions.js";
+import { log } from "./k6Functions.js";
 
 export function createSchemaIfNotExists(
   governanceHeaders,

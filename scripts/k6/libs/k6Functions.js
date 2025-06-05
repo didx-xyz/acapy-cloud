@@ -25,26 +25,30 @@
  */
 const DEBUG_ENABLED = __ENV.DEBUG === 'true' || __ENV.DEBUG === '1';
 
+// Helper function to generate prefix with timestamp
+function getLogPrefix(includeLevel = false) {
+  const timestamp = new Date().toISOString();
+  const vuInfo = `[VU:${__VU}|Iter:${__ITER}]`;
+  const levelSuffix = includeLevel ? ' DEBUG:' : '';
+  return `${timestamp} ${vuInfo}${levelSuffix}`;
+}
+
 const log = {
   debug(message, ...args) {
     if (!DEBUG_ENABLED) return;
-    const prefix = `[VU:${__VU}|Iter:${__ITER}] DEBUG:`;
-    console.log(`${prefix} ${message}`, ...args);
+    console.log(`${getLogPrefix(true)} ${message}`, ...args);
   },
 
   info(message, ...args) {
-    const prefix = `[VU:${__VU}|Iter:${__ITER}]`;
-    console.log(`${prefix} ${message}`, ...args);
+    console.log(`${getLogPrefix()} ${message}`, ...args);
   },
 
   warn(message, ...args) {
-    const prefix = `[VU:${__VU}|Iter:${__ITER}]`;
-    console.warn(`${prefix} ${message}`, ...args);
+    console.warn(`${getLogPrefix()} ${message}`, ...args);
   },
 
   error(message, ...args) {
-    const prefix = `[VU:${__VU}|Iter:${__ITER}]`;
-    console.error(`${prefix} ${message}`, ...args);
+    console.error(`${getLogPrefix()} ${message}`, ...args);
   }
 };
 

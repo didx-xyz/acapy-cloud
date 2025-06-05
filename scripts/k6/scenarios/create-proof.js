@@ -144,7 +144,7 @@ export default function (data) {
   try {
     credentialId = retry(() => {
       return getProofIdCredentials(wallet.access_token, proofId, epochTimestamp);
-    }, 2, 5000, 'Get credential ID');
+    }, 5, 5000, 'Get credential ID');
   } catch (error) {
     console.error(`Failed to get proof credentials after retries: ${error.message}`);
   }

@@ -30,7 +30,7 @@ export function bootstrapIssuer(
     });
 
     if (!issuerData) {
-      log.info(`Failed to create or retrieve issuer for ${walletName}_0`);
+      log.error(`Failed to create or retrieve issuer for ${walletName}_0`);
       return issuers;
     }
 
