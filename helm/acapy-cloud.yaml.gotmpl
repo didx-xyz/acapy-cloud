@@ -11,6 +11,7 @@ environments:
         overrides: {}
       cheqd:
         enabled: true
+        config: {}
       natsReplicaCount: 1
       pgProxyEnabled: false
       pgAdmin:
@@ -40,6 +41,9 @@ environments:
           # tenant-web: true
       cheqd:
         enabled: true
+        config:
+          log_level: warn
+          log_format: json
       natsReplicaCount: 1
       pgProxyEnabled: false
       pgAdmin:
@@ -120,6 +124,12 @@ releases:
         {{- if not (eq .Environment.Name "local") }}
         ingress: null # Disable ingress for non-local environments
         {{- end }}
+      {{- with .Values.cheqd.config }}
+      - config:
+          config_toml:
+            log_level: {{ .log_level }}
+            log_format: {{ .log_format }}
+      {{- end }}
 
   # https://github.com/redpanda-data/helm-charts/tree/main/charts/connect
   - name: connect-cloud
