@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from shared.log_config import get_logger
 from shared.models.trustregistry import Schema
+from shared.util.resolve_cheqd_resources import resolve_cheqd_schema
 from trustregistry import crud
 from trustregistry.db import get_db
 
@@ -44,8 +45,11 @@ async def register_schema(
             )
         else:
             # did:cheqd schema
+            cheqd_schema = await resolve_cheqd_schema(schema_id.schema_id)
             schema = Schema(
                 id=schema_id.schema_id,
+                name=cheqd_schema.get("name"),
+                version=cheqd_schema.get("version"),
             )
 
         create_schema_res = crud.create_schema(
