@@ -1,4 +1,4 @@
-name: Deploy and Test EKS
+name: Deploy / Test EKS
 
 on:
   workflow_dispatch:
@@ -10,11 +10,6 @@ on:
         type: string
       reset-deployments:
         description: Reset deployments - Clean start
-        required: false
-        default: false
-        type: boolean
-      skip-deploy:
-        description: Skip deployments
         required: false
         default: false
         type: boolean
@@ -32,6 +27,11 @@ on:
         description: Run Regression Tests
         required: false
         default: true
+        type: boolean
+      skip-deploy:
+        description: Skip deployments
+        required: false
+        default: false
         type: boolean
   workflow_call:
     inputs:
@@ -92,16 +92,16 @@ on:
         required: false
         default: true
         type: boolean
-      tailscale-tags:
-        description: Tailscale device tags to use
-        required: false
-        default: "tag:cloudapi-dev"
-        type: string
       skip-deploy:
         description: Skip deployments
         required: false
         default: false
         type: boolean
+      tailscale-tags:
+        description: Tailscale device tags to use
+        required: false
+        default: "tag:cloudapi-dev"
+        type: string
     secrets:
       tailscale-oauth-client-id:
         required: true

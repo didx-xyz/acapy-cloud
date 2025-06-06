@@ -29,7 +29,7 @@ startupProbe:
 secretData:
   # FEE_PAYER_TESTNET_MNEMONIC: "" # Cheqd did-registrar uses testnet faucet by default
   # FEE_PAYER_MAINNET_MNEMONIC: "..."
-  # Use the same Testnet Mnemonic as the Localnet Cheqd node
+  # Use the same Mnemonic as the Localnet Cheqd node
   FEE_PAYER_TESTNET_MNEMONIC: betray purity grief spatial rude select loud reason wolf harvest session awesome
 
 env:

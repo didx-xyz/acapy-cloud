@@ -1,7 +1,7 @@
 {{- with .Values.istio.peerAuth }}
 {{- if .enabled }}
 # https://istio.io/latest/docs/reference/config/security/peer_authentication/
-apiVersion: security.istio.io/v1beta1
+apiVersion: security.istio.io/v1
 kind: PeerAuthentication
 metadata:
   name: {{ include "acapy-cloud.fullname" $ }}
