@@ -77,7 +77,7 @@ jobs:
             type=gha,scope=build-${{ matrix.image }}-${{ matrix.arch }}
             type=registry,ref=ghcr.io/${{ github.repository_owner }}/acapy-cloud/${{ matrix.image }}:latest
           cache-to: |
-            type=gha,mode=max,scope=build-${{ matrix.image }}-${{ matrix.arch }}
+            type=gha,mode=min,scope=build-${{ matrix.image }}-${{ matrix.arch }}
           platforms: linux/${{ matrix.arch }}
 
   push:

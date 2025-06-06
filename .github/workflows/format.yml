@@ -1,4 +1,4 @@
-name: Lint/Format
+name: Lint / Format
 
 on:
   workflow_call:
@@ -19,7 +19,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Overwrite .mise.toml # It's not needed in this workflow
+      - name: Overwrite .mise.toml # The full `mise.toml` isn't needed for this workflow
         run: |
           cat <<EOF > .mise.toml
           [tools]

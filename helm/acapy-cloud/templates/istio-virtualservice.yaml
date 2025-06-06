@@ -1,7 +1,7 @@
 {{- with .Values.istio.virtualService }}
 {{- if .enabled }}
 # https://istio.io/latest/docs/reference/config/networking/virtual-service/
-apiVersion: networking.istio.io/v1beta1
+apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
   name: {{ include "acapy-cloud.fullname" $ }}
