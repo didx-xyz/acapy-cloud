@@ -23,11 +23,6 @@ on:
         required: false
         default: true
         type: boolean
-      run-k6-tests-standalone:
-        description: Run K6 Tests in a standalone job
-        required: false
-        default: false
-        type: boolean
 
   push:
     branches:
@@ -64,7 +59,6 @@ env:
   RUN_E2E_TESTS: ${{ github.event.inputs.run-e2e-tests || 'true' }}
   RUN_K6_TESTS: ${{ github.event.inputs.run-k6-tests || 'true' }}
   RUN_REGRESSION_TESTS: ${{ github.event.inputs.run-regression-tests || 'true' }}
-  RUN_K6_TESTS_STANDALONE: ${{ github.event.inputs.run-k6-tests-standalone || 'false' }}
 
 jobs:
   prep:
@@ -85,7 +79,6 @@ jobs:
       run-e2e-tests: ${{ steps.export-bools.outputs.run-e2e-tests }}
       run-k6-tests: ${{ steps.export-bools.outputs.run-k6-tests }}
       run-regression-tests: ${{ steps.export-bools.outputs.run-regression-tests }}
-      run-k6-tests-standalone: ${{ steps.export-bools.outputs.run-k6-tests-standalone }}
 
     steps:
       - name: Export tool versions
@@ -102,7 +95,6 @@ jobs:
           echo "run-e2e-tests=${RUN_E2E_TESTS}" >> $GITHUB_OUTPUT
           echo "run-k6-tests=${RUN_K6_TESTS}" >> $GITHUB_OUTPUT
           echo "run-regression-tests=${RUN_REGRESSION_TESTS}" >> $GITHUB_OUTPUT
-          echo "run-k6-tests-standalone=${RUN_K6_TESTS_STANDALONE}" >> $GITHUB_OUTPUT
 
   lint:
     name: Lint
@@ -189,7 +181,7 @@ jobs:
       run-e2e-tests: ${{ needs.prep.outputs.run-e2e-tests == 'true' }}
       run-k6-tests: ${{ needs.prep.outputs.run-k6-tests == 'true' }}
       run-regression-tests: ${{ needs.prep.outputs.run-regression-tests == 'true' }}
-      run-k6-tests-standalone: ${{ needs.prep.outputs.run-k6-tests-standalone == 'true' }}
+      skip-deploy: false # Downstream workflow has boolean input, but we don't want to run it from here
       tailscale-tags: ${{ vars.TAILSCALE_TAGS }}
     secrets:
       tailscale-oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}

@@ -13,6 +13,11 @@ on:
         required: false
         default: false
         type: boolean
+      skip-deploy:
+        description: Skip deployments
+        required: false
+        default: false
+        type: boolean
       run-e2e-tests:
         description: Run End-to-End Tests
         required: false
@@ -27,11 +32,6 @@ on:
         description: Run Regression Tests
         required: false
         default: true
-        type: boolean
-      run-k6-tests-standalone:
-        description: Run K6 Tests without deployment (standalone)
-        required: false
-        default: false
         type: boolean
   workflow_call:
     inputs:
@@ -97,8 +97,8 @@ on:
         required: false
         default: "tag:cloudapi-dev"
         type: string
-      run-k6-tests-standalone:
-        description: Run K6 Tests without deployment (standalone)
+      skip-deploy:
+        description: Skip deployments
         required: false
         default: false
         type: boolean
@@ -121,7 +121,7 @@ env:
 jobs:
   deploy:
     name: Deploy
-    if: ${{ !inputs.run-k6-tests-standalone }}
+    if: ${{ !inputs.skip-deploy }}
     runs-on: ubuntu-latest
 
     timeout-minutes: 30
@@ -201,7 +201,10 @@ jobs:
   test-e2e:
     name: Tests / End-to-End
     needs: deploy
-    if: inputs.run-e2e-tests
+    if: |
+      always() &&
+      inputs.run-e2e-tests &&
+      (needs.deploy.result == 'success' || needs.deploy.result == 'skipped')
     runs-on: ubuntu-latest
 
     timeout-minutes: 30
@@ -378,7 +381,10 @@ jobs:
   test-regression:
     name: Tests / Regression
     needs: deploy
-    if: inputs.run-regression-tests
+    if: |
+      always() &&
+      inputs.run-regression-tests &&
+      (needs.deploy.result == 'success' || needs.deploy.result == 'skipped')
     runs-on: ubuntu-latest
 
     timeout-minutes: 30
@@ -561,7 +567,7 @@ jobs:
     needs: deploy
     if: |
       always() &&
-      (inputs.run-k6-tests || inputs.run-k6-tests-standalone) &&
+      inputs.run-k6-tests &&
       (needs.deploy.result == 'success' || needs.deploy.result == 'skipped')
     runs-on: ubuntu-latest
 
