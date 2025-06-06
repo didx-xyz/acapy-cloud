@@ -1,0 +1,28 @@
+# https://github.com/bitnami/charts/tree/main/bitnami/valkey
+fullnameOverride: valkey
+architecture: replication
+auth:
+  enabled: false
+primary:
+  replicaCount: 1
+  resourcesPreset: nano
+  persistence:
+    enabled: true
+    size: 1Gi
+  persistentVolumeClaimRetentionPolicy:
+    enabled: true
+    whenDeleted: Delete
+  podLabels:
+    sidecar.istio.io/inject: "false"
+replica:
+  replicaCount: 0
+  resourcesPreset: nano
+  persistence:
+    enabled: true
+    size: 1Gi
+  persistentVolumeClaimRetentionPolicy:
+    enabled: true
+    whenDeleted: Delete
+  podLabels:
+    sidecar.istio.io/inject: "false"
+  podManagementPolicy: Parallel
