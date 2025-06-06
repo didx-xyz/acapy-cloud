@@ -5,6 +5,7 @@ from typing import List
 from aries_cloudcontroller import (
     AcaPyClient,
     GetSchemaResult,
+    GetSchemasResponse,
     SchemaPostRequest,
 )
 
@@ -99,60 +100,42 @@ class SchemaPublisher:
         self, schema: SchemaPostRequest
     ) -> CredentialSchema:
         self._logger.info("Handling case of schema already existing on ledger")
-        self._logger.debug("Fetching public DID for governance controller")
-        pub_did = await handle_acapy_call(
+        self._logger.debug("Fetching created schemas to find existing schema.")
+
+        fetched_schema_ids: GetSchemasResponse = await handle_acapy_call(
             logger=self._logger,
-            acapy_call=self._controller.wallet.get_public_did,
+            acapy_call=self._controller.anoncreds_schemas.get_schemas,
+            schema_name=schema.var_schema.name,
+            schema_version=schema.var_schema.version,
         )
 
-        schema_id = f"{pub_did.result.did}:2:{schema.var_schema.name}:{schema.var_schema.version}"
         self._logger.debug(
-            "Fetching schema id `{}` which is associated with request",
-            schema_id,
+            "Found schemas with name `{}` and version `{}`: {}",
+            schema.var_schema.name,
+            schema.var_schema.version,
+            fetched_schema_ids,
         )
 
-        fetched_schema: GetSchemaResult = await handle_acapy_call(
-            logger=self._logger,
-            acapy_call=self._controller.anoncreds_schemas.get_schema,
-            schema_id=schema_id,
-        )
-
-        # Edge case where the governance agent has changed its public did
-        # Then we need to retrieve the schema in a different way as constructing
-        # the schema ID the way above will not be correct due to different public did.
-        if fetched_schema.var_schema is None:
-            self._logger.debug(
-                "Schema not found. Governance agent may have changed public DID. "
-                "Fetching schemas created by governance with requested name and version"
-            )
-            schemas_created_ids = await handle_acapy_call(
+        fetch_schemas: List[GetSchemaResult] = [
+            await handle_acapy_call(
                 logger=self._logger,
-                acapy_call=self._controller.anoncreds_schemas.get_schemas,
-                schema_name=schema.var_schema.name,
-                schema_version=schema.var_schema.version,
+                acapy_call=self._controller.anoncreds_schemas.get_schema,
+                schema_id=schema_id,
             )
-            self._logger.debug("Getting schemas associated with fetched ids")
-            schemas: List[GetSchemaResult] = [
-                await handle_acapy_call(
-                    logger=self._logger,
-                    acapy_call=self._controller.anoncreds_schemas.get_schema,
-                    schema_id=schema_id,
-                )
-                for schema_id in schemas_created_ids.schema_ids
-                if schema_id
-            ]
+            for schema_id in fetched_schema_ids.schema_ids
+            if schema_id
+        ]
 
-            if not schemas:
-                raise CloudApiException("Could not publish schema.", 500)
-            if len(schemas) > 1:
-                error_message = (
-                    f"Multiple schemas with name {schema.var_schema.name} "
-                    f"and version {schema.var_schema.version} exist."
-                    f"These are: `{str(schemas_created_ids.schema_ids)}`."
-                )
-                raise CloudApiException(error_message, 409)
-            self._logger.debug("Using updated schema id with new DID")
-            fetched_schema: GetSchemaResult = schemas[0]
+        if not fetch_schemas:
+            raise CloudApiException("Could not publish schema.", 500)
+        if len(fetch_schemas) > 1:
+            error_message = (
+                f"Multiple schemas with name {schema.var_schema.name} "
+                f"and version {schema.var_schema.version} exist."
+                f"These are: `{str(fetched_schema_ids.schema_ids)}`."
+            )
+            raise CloudApiException(error_message, 409)
+        fetched_schema: GetSchemaResult = fetch_schemas[0]
 
         # Schema exists with different attributes
         if set(fetched_schema.var_schema.attr_names) != set(
