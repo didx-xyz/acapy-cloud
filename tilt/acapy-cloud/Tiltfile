@@ -520,7 +520,7 @@ def setup_cloudapi(build_enabled, expose):
 
     releases = {
         "governance-agent": {
-            "depends": ["nats", "postgres", "did-registrar", "did-resolver", "minio"],
+            "depends": ["nats", "postgres", "did-registrar", "did-resolver"],
             "links": [
                 link(
                     "http://governance-agent.cloudapi." + ingress_domain,
@@ -540,7 +540,7 @@ def setup_cloudapi(build_enabled, expose):
             },
         },
         "governance-web": {
-            "depends": ["governance-agent", "multitenant-agent"],
+            "depends": ["governance-agent"],
             "links": [
                 link(
                     "http://cloudapi." + ingress_domain + "/governance",
@@ -570,7 +570,7 @@ def setup_cloudapi(build_enabled, expose):
             },
         },
         "multitenant-agent": {
-            "depends": ["nats", "postgres", "did-registrar", "did-resolver", "minio"],
+            "depends": ["nats", "postgres", "did-registrar", "did-resolver"],
             "links": [
                 link(
                     "http://multitenant-agent.cloudapi." + ingress_domain,
@@ -590,7 +590,7 @@ def setup_cloudapi(build_enabled, expose):
             },
         },
         "multitenant-web": {
-            "depends": ["governance-agent", "multitenant-agent"],
+            "depends": ["multitenant-agent"],
             "links": [
                 link(
                     "http://cloudapi." + ingress_domain + "/tenant-admin",
@@ -726,11 +726,7 @@ def setup_cloudapi(build_enabled, expose):
         },
         "mediator": {
             "enabled": False,
-            "depends": [
-                "postgres",
-                "governance-agent",
-                "multitenant-agent",
-            ],
+            "depends": ["postgres"],
             "links": [
                 link("http://mediator.cloudapi." + ingress_domain, "Mediator"),
             ],
@@ -763,7 +759,7 @@ def setup_cloudapi(build_enabled, expose):
         },
         "driver-did-cheqd": {
             # https://github.com/cheqd/did-registrar
-            "depends": ["cheqd", "did-resolver"],
+            "depends": ["did-resolver"],
             "flags": [
                 "--set",
                 "secretData.FEE_PAYER_TESTNET_MNEMONIC=" + cheqd_validator_mnemonic,
