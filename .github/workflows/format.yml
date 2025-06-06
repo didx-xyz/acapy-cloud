@@ -41,5 +41,11 @@ jobs:
       - name: Check code style with Ruff
         run: ruff format --check
 
+      - name: Check Tiltfiles with Ruff
+        run: |
+          find . -type f -name "Tiltfile" | while read -r file; do
+            ruff format --check "$file"
+          done
+
       - name: Check code lint rules with Ruff
         run: ruff check

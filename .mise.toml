@@ -118,6 +118,9 @@ run = """
 #!/bin/bash
 ruff check --select I --fix
 ruff format
+find . -type f -name "Tiltfile" | while read -r file; do
+  ruff format "$file"
+done
 """
 
 [tasks."fmt:check"]
@@ -126,6 +129,9 @@ run = """
 #!/bin/bash
 ruff check --select I
 ruff format --check
+find . -type f -name "Tiltfile" | while read -r file; do
+  ruff format --check --diff "$file"
+done
 """
 
 [tasks."bootstrap:kubeconfig"]
