@@ -170,7 +170,7 @@ releases:
       app: postgres
     namespace: {{ .Values.namespace }}
     chart: oci://registry-1.docker.io/bitnamicharts/postgresql-ha
-    version: 16.0.11
+    version: 16.0.10
     values:
       - ./acapy-cloud/conf/postgres.yaml
       - postgresql:
@@ -245,7 +245,7 @@ releases:
     installed: {{ .Values.minio.enabled }}
     namespace: {{ .Values.namespace }}
     chart: oci://registry-1.docker.io/bitnamicharts/minio
-    version: 17.0.3
+    version: 17.0.2
     labels:
       app: minio
     values:
