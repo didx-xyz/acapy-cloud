@@ -42,7 +42,7 @@ ACAPY_ENDORSER_ALIAS = os.getenv("ACAPY_ENDORSER_ALIAS", "endorser")
 
 ACAPY_TAILS_SERVER_BASE_URL = os.getenv("ACAPY_TAILS_SERVER_BASE_URL", f"{url}:6543")
 
-RESOLVER_URL = os.getenv("RESOLVER_URL", "http://did-resolver:8080/1.0/identifiers/")
+RESOLVER_URL = os.getenv("RESOLVER_URL", "http://did-resolver:8080/1.0/identifiers")
 
 # For testing ledger
 LEDGER_TYPE: str = "von"
