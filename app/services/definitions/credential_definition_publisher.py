@@ -5,7 +5,7 @@ from aries_cloudcontroller import AcaPyClient
 
 from app.exceptions import CloudApiException, handle_acapy_call
 from app.services.revocation_registry import wait_for_active_registry
-from shared import REGISTRY_CREATION_TIMEOUT
+from shared.constants import REGISTRY_CREATION_TIMEOUT
 
 
 class CredentialDefinitionPublisher:

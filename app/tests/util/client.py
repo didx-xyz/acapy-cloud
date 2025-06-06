@@ -3,7 +3,8 @@ from typing import Any, Dict
 from aries_cloudcontroller import AcaPyClient
 from httpx import AsyncHTTPTransport
 
-from shared import (
+from shared import RichAsyncClient
+from shared.constants import (
     GOVERNANCE_ACAPY_API_KEY,
     GOVERNANCE_AGENT_URL,
     GOVERNANCE_FASTAPI_ENDPOINT,
@@ -12,7 +13,6 @@ from shared import (
     TENANT_AGENT_URL,
     TENANT_FASTAPI_ENDPOINT,
     TEST_CLIENT_TIMEOUT,
-    RichAsyncClient,
 )
 
 

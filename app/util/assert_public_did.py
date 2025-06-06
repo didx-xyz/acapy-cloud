@@ -8,9 +8,7 @@ logger = get_logger(__name__)
 
 
 async def assert_public_did(aries_controller: AcaPyClient) -> str:
-    """
-    Assert tenant has a public DID and return it.
-    """
+    """Assert tenant has a public DID and return it."""
     try:
         logger.debug("Asserting client has public DID")
         public_did = await acapy_wallet.assert_public_did(aries_controller)

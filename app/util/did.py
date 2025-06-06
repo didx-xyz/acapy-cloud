@@ -7,7 +7,6 @@ from shared.exceptions import CloudApiValueError
 
 def ed25519_verkey_to_did_key(key: str) -> str:
     """Convert a naked ed25519 verkey to W3C did:key format."""
-
     # Length validation
     if len(key) not in (43, 44):
         raise CloudApiValueError(

@@ -60,7 +60,7 @@ async def accept_taa(
     -----------
     controller: AcaPyClient
         The aries_cloudcontroller object
-    TAA:
+    taa:
         The TAA object we want to agree to
     mechanism:
         An optional mechanism to specify

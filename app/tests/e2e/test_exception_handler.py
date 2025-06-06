@@ -1,7 +1,7 @@
 import pytest
 
 from app.routes.connections import router
-from shared import TENANT_FASTAPI_ENDPOINT
+from shared.constants import TENANT_FASTAPI_ENDPOINT
 from shared.util.rich_async_client import RichAsyncClient
 
 CONNECTIONS_BASE_PATH = router.prefix

@@ -5,8 +5,8 @@ from dependency_injector.wiring import Provide, inject
 from fastapi import BackgroundTasks, Depends, Query, Request
 from sse_starlette.sse import EventSourceResponse
 
-from shared import DISCONNECT_CHECK_PERIOD, APIRouter
-from shared.constants import SSE_LOOK_BACK
+from shared import APIRouter
+from shared.constants import DISCONNECT_CHECK_PERIOD, SSE_LOOK_BACK
 from shared.log_config import get_logger
 from waypoint.services.dependency_injection.container import Container
 from waypoint.services.nats_service import NatsEventsProcessor
@@ -20,9 +20,7 @@ router = APIRouter(
 
 
 async def check_disconnect(request: Request, stop_event: asyncio.Event) -> None:
-    """
-    Check if the client has disconnected
-    """
+    """Check if the client has disconnected"""
     while not stop_event.is_set():
         if await request.is_disconnected():
             logger.debug("Waypoint client disconnected")
@@ -43,10 +41,7 @@ async def nats_event_stream_generator(
     group_id: Optional[str] = None,
     look_back: Optional[int] = None,
 ) -> AsyncGenerator[str, None]:
-    """
-    Generator for NATS events
-    """
-
+    """Generator for NATS events."""
     logger.debug("Starting NATS event stream generator")
     stop_event = asyncio.Event()
 

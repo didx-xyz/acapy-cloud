@@ -1,6 +1,6 @@
 import pytest
 
-from shared import TRUST_REGISTRY_URL
+from shared.constants import TRUST_REGISTRY_URL
 from shared.util.rich_async_client import RichAsyncClient
 from trustregistry.registry.registry_schemas import SchemaID, _get_schema_attrs
 

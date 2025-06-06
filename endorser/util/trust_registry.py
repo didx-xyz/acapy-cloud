@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from shared import TRUST_REGISTRY_URL
+from shared.constants import TRUST_REGISTRY_URL
 from shared.log_config import get_logger
 from shared.util.rich_async_client import RichAsyncClient
 

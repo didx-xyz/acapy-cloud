@@ -58,7 +58,6 @@ uuid_utils = "^0.11.0"
 [tool.poetry.group.dev.dependencies]
 anyio = "~4.9.0"
 pre-commit = "~4.2.0"
-pylint = "~3.3.0"
 pytest = "~8.3.2"
 pytest-cov = "~6.1.0"
 pytest-mock = "~3.14.0"
@@ -71,6 +70,38 @@ omit = ["*/tests/*", "*/.venv/*", "*/site-packages/*"]
 [tool.pytest.ini_options]
 addopts = "--junitxml=junit.xml -p no:cacheprovider --cov-report=xml --cov-report=term:skip-covered"
 junit_family = "xunit2"
+
+[tool.ruff]
+lint.select = ["B006", "C", "D", "E", "F"]
+lint.ignore = [
+  "C901", # Fix eventually
+  "D100",
+  "D101",
+  "D102",
+  "D103",
+  "D104",
+  "D105",
+  "D107",
+  "D203",
+  "D204",
+  "D205", # 1 blank line required between summary line and description
+  "D212", # Multi-line docstring summary should start at the first line
+  "D213",
+  "D215",
+  "D415", # Docstring: First line should end with a period, question mark, or exclamation point
+  "D400",
+  "D401",
+  "D404",
+  "D406",
+  "D407",
+  "D408",
+  "D409",
+  "D413",
+  "D417", # Detects missing argument descriptions - false positives in route methods
+  "E501",
+]
+line-length = 88
+exclude = [".git/*", "endorser/*"]
 
 [build-system]
 requires = ["poetry-core>=2.1"]

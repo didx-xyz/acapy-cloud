@@ -6,7 +6,7 @@ from fastapi.params import Depends
 from fastapi.security import APIKeyHeader
 
 from app.dependencies.role import Role
-from shared import ACAPY_MULTITENANT_JWT_SECRET, GOVERNANCE_LABEL
+from shared.constants import ACAPY_MULTITENANT_JWT_SECRET, GOVERNANCE_LABEL
 
 x_api_key_scheme = APIKeyHeader(name="x-api-key")
 
@@ -95,5 +95,5 @@ def verify_wallet_access(auth: AcaPyAuthVerified, wallet_id: str):
 
 
 def tenant_api_key(tenant_token: str):
-    "Get the cloud api key for a tenant with specified role."
+    """Get the cloud api key for a tenant with specified role."""
     return f"tenant.{tenant_token}"

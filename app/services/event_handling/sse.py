@@ -3,7 +3,7 @@ from typing import AsyncGenerator, Optional
 from fastapi import Request
 from httpx import HTTPError, Response, Timeout
 
-from shared import WAYPOINT_URL
+from shared.constants import WAYPOINT_URL
 from shared.log_config import get_logger
 from shared.util.rich_async_client import RichAsyncClient
 
@@ -39,12 +39,17 @@ async def sse_subscribe_event_with_field_and_state(
     Subscribe to server-side events for a specific wallet ID and topic.
 
     Args:
+        request: The request object.
         group_id: The group to which the wallet belongs.
         wallet_id: The ID of the wallet subscribing to the events.
         topic: The topic to which the wallet is subscribing.
         field: The field of interest that field_id will match on (e.g. connection_id, thread_id, etc).
         field_id: The identifier of the field that the webhook event will match on.
         desired_state: The state that the webhook event will match on.
+        look_back: The number of seconds to look back for events before subscribing.
+
+    Returns:
+        AsyncGenerator[str, None]: A generator that yields the events.
     """
     bound_logger = logger.bind(
         body={

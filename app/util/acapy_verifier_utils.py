@@ -108,8 +108,7 @@ async def assert_valid_verifier(
     aries_controller: AcaPyClient,
     proof_request: SendProofRequest,
 ):
-    """Check transaction requirements against trust registry for verifier"""
-
+    """Check transaction requirements against trust registry for verifier."""
     # 1. Check agent has public did
     # CASE: Agent has public DID
     bound_logger = logger.bind(body=proof_request)
@@ -216,7 +215,7 @@ async def get_schema_ids(
         predicate.cred_id for _, predicate in presentation.requested_predicates.items()
     ]
 
-    revealed_cred_ids = set([*revealed_attr_cred_ids, *revealed_predicate_cred_ids])
+    revealed_cred_ids = {*revealed_attr_cred_ids, *revealed_predicate_cred_ids}
 
     logger.bind(body=revealed_cred_ids).debug(
         "Getting records from each of the revealed credential ids"

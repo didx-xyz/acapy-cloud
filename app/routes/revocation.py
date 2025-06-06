@@ -18,7 +18,7 @@ from app.models.issuer import (
 from app.models.revocation import RevRegWalletUpdatedResult
 from app.services import revocation_registry
 from app.util.retry_method import coroutine_with_retry_until_value
-from shared import PUBLISH_REVOCATIONS_TIMEOUT
+from shared.constants import PUBLISH_REVOCATIONS_TIMEOUT
 from shared.log_config import get_logger
 
 logger = get_logger(__name__)

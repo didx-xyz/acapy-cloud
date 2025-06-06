@@ -428,10 +428,7 @@ async def get_created_active_registries(
     controller: AcaPyClient,
     cred_def_id: str,
 ) -> List[str]:
-    """
-    Get the active revocation registries for a credential definition with state active.
-
-    """
+    """Get the active revocation registries for a credential definition with state active."""
     bound_logger = logger.bind(body={"cred_def_id": cred_def_id})
     try:
         # Both will be in active state when created

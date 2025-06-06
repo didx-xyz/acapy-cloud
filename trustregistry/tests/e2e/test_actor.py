@@ -3,7 +3,7 @@ import json
 import pytest
 
 from app.util.string import random_string
-from shared import TRUST_REGISTRY_URL
+from shared.constants import TRUST_REGISTRY_URL
 from shared.util.rich_async_client import RichAsyncClient
 
 # Apply the marker to all tests in this module. Tests must run sequentially in same xdist group.

@@ -14,7 +14,7 @@ from app.dependencies.acapy_clients import (
 from app.dependencies.auth import AcaPyAuth
 from app.dependencies.role import Role
 from app.tests.util.client import get_tenant_acapy_client
-from shared import GOVERNANCE_ACAPY_API_KEY, TENANT_ACAPY_API_KEY
+from shared.constants import GOVERNANCE_ACAPY_API_KEY, TENANT_ACAPY_API_KEY
 
 
 @pytest.mark.anyio

@@ -11,7 +11,7 @@ logger = get_logger(__name__)
 
 
 async def assert_public_did(aries_controller: AcaPyClient) -> str:
-    """assert the agent has a public did, throwing an error otherwise.
+    """Assert the agent has a public did, throwing an error otherwise.
 
     Args:
         aries_controller (AcaPyClient): the aca-py client.
@@ -39,7 +39,8 @@ async def create_did(
     """Create a local did
 
     Args:
-        controller (AcaPyClient): [description]
+        controller (AcaPyClient): The acapy client.
+        did_create (DIDCreate): The did create object.
 
     Raises:
         HTTPException: If the creation of the did failed
@@ -106,13 +107,14 @@ async def create_did(
 async def set_public_did(
     controller: AcaPyClient,
     did: str,
-    connection_id: str = None,
+    connection_id: str | None = None,
 ) -> DID:
     """Set the public did.
 
     Args:
         controller (AcaPyClient): aca-py client
         did (str): the did to set as public
+        connection_id (str): the connection id to use to set the public did
 
     Raises:
         CloudApiException: if registration of the public did failed

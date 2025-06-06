@@ -78,8 +78,7 @@ async def put_file_by_hash(
     tails_hash: str,
     tails: UploadFile = File(...),
 ):
-    """Upload a single file to S3"""
-
+    """Upload a single file to S3."""
     sha256 = hashlib.sha256()
 
     try:
