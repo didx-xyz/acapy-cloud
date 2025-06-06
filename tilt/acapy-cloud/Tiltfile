@@ -396,6 +396,7 @@ def setup_cloudapi_service(
             + release_config.get("depends", []),
             deps=[base_values_file, values_file],
             port_forwards=release_config.get("port_forwards", []),
+            auto_init=release_config.get("auto_init", True),
         )
         k8s_resource(workload=release, links=release_config.get("links", []))
     else:
@@ -725,7 +726,7 @@ def setup_cloudapi(build_enabled, expose):
             },
         },
         "mediator": {
-            "enabled": False,
+            "auto_init": False,
             "depends": ["postgres"],
             "links": [
                 link("http://mediator.cloudapi." + ingress_domain, "Mediator"),
