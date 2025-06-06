@@ -28,6 +28,11 @@ on:
         required: false
         default: true
         type: boolean
+      run-k6-tests-standalone:
+        description: Run K6 Tests without deployment (standalone)
+        required: false
+        default: false
+        type: boolean
   workflow_call:
     inputs:
       acapy-helmfile-path:
@@ -92,6 +97,11 @@ on:
         required: false
         default: "tag:cloudapi-dev"
         type: string
+      run-k6-tests-standalone:
+        description: Run K6 Tests without deployment (standalone)
+        required: false
+        default: false
+        type: boolean
     secrets:
       tailscale-oauth-client-id:
         required: true
@@ -111,6 +121,7 @@ env:
 jobs:
   deploy:
     name: Deploy
+    if: ${{ !inputs.run-k6-tests-standalone }}
     runs-on: ubuntu-latest
 
     timeout-minutes: 30
@@ -548,7 +559,10 @@ jobs:
   test-k6:
     name: Tests / K6
     needs: deploy
-    if: inputs.run-k6-tests
+    if: |
+      always() &&
+      (inputs.run-k6-tests || inputs.run-k6-tests-standalone) &&
+      (needs.deploy.result == 'success' || needs.deploy.result == 'skipped')
     runs-on: ubuntu-latest
 
     timeout-minutes: 30
