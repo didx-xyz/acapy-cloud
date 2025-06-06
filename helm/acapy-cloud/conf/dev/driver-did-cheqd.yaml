@@ -9,8 +9,7 @@ image:
   registry: ghcr.io
   name: cheqd/did-registrar
   pullPolicy: Always
-  tag: develop
-  digest: sha256:52221271f250ef162a1b83576fc0dff63e96d1d7897e8d0106eebec925f0519f
+  tag: 2.6.0-1-g6979b43
 
 service:
   appProtocol: http
