@@ -142,6 +142,9 @@ jobs:
         # Connect Cloud can generate a lot of logs...
         if: always()
         run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=connect-cloud --tail 10000
+      - name: Cheqd Noded Logs
+        if: always()
+        run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=cheqd --tail 10000
       - name: Cheqd DID Registrar Logs
         if: always()
         run: kubectl logs -n cloudapi -l app.kubernetes.io/instance=driver-did-cheqd --tail 10000

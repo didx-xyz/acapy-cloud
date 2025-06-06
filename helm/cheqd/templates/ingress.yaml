@@ -1,0 +1,51 @@
+{{- range $key, $_ := .Values.ingress }}
+{{- if eq (tpl (toString .enabled) $) "true" }}
+{{- if $key }}
+---
+{{- end }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  {{- if .name }}
+  name: {{ tpl .name $ }}
+  {{- else }}
+  name: {{ printf "%s-%s" (include "cheqd.fullname" $) $key }}
+  {{- end }}
+  labels:
+    {{- include "cheqd.labels" $ | nindent 4 }}
+    {{- with .labels }}
+    {{- tpl (toYaml .) $ | nindent 4 }}
+    {{- end }}
+  {{- with .annotations }}
+  annotations:
+    {{- tpl (toYaml .) $ | nindent 4 }}
+  {{- end }}
+spec:
+{{- if .tls }}
+  tls:
+  {{- range .tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ tpl . $ | quote }}
+      {{- end }}
+      secretName: {{ tpl .secretName $ }}
+  {{- end }}
+{{- end }}
+  ingressClassName: {{ .className }}
+  rules:
+  {{- range .hosts }}
+    - host: {{ tpl .host $ | quote }}
+      http:
+        paths:
+        {{- range .paths }}
+          - path: {{ default "/" .path }}
+            pathType: {{ default "Prefix" .pathType }}
+            backend:
+              service:
+                name: {{ include "cheqd.fullname" $ }}
+                port:
+                  number: {{ default $.Values.service.rpcPort (tpl (toString .servicePort) $) }}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}

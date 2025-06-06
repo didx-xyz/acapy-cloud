@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "cheqd.fullname" . }}-config
+  labels:
+    {{- include "cheqd.labels" . | nindent 4 }}
+data:
+  app.toml: |-
+    {{- tpl (toToml .Values.config.app_toml) . | nindent 4 }}
+  config.toml: |-
+    {{- tpl (toToml .Values.config.config_toml) . | nindent 4 }}

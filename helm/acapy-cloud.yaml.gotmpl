@@ -9,6 +9,9 @@ environments:
       ddProfilingEnabled:
         default: false
         overrides: {}
+      cheqd:
+        enabled: true
+        config: {}
       natsReplicaCount: 1
       pgProxyEnabled: false
       pgAdmin:
@@ -18,10 +21,11 @@ environments:
         enabled: true
         ingress:
           ingressClassName: nginx
-          hostname: minio.127.0.0.1.nip.io
-        apiIngress:
-          ingressClassName: nginx
           hostname: minio-api.127.0.0.1.nip.io
+        console:
+          ingress:
+            ingressClassName: nginx
+            hostname: minio.127.0.0.1.nip.io
   dev:
     values:
     - namespace: acapy-cloud-dev
@@ -36,6 +40,11 @@ environments:
           # governance-agent: true
           # multitenant-web: true
           # tenant-web: true
+      cheqd:
+        enabled: true
+        config:
+          log_level: warn
+          log_format: json
       natsReplicaCount: 1
       pgProxyEnabled: false
       pgAdmin:
@@ -51,10 +60,11 @@ environments:
         enabled: true
         ingress:
           ingressClassName: nginx-internal
-          hostname: minio-acapy-cloud.dev.didxtech.com
-        apiIngress:
-          ingressClassName: nginx-internal
           hostname: minio-api-acapy-cloud.dev.didxtech.com
+        console:
+          ingress:
+            ingressClassName: nginx-internal
+            hostname: minio-acapy-cloud.dev.didxtech.com
 
 ---
 {{- $releases := list
@@ -100,6 +110,29 @@ releases:
       - name: env.DD_PROFILING_ENABLED
         value: {{ index $.Values.ddProfilingEnabled.overrides $release | default $.Values.ddProfilingEnabled.default }}
 {{- end }}
+  - name: cheqd
+    labels:
+      app: cheqd
+    namespace: {{ .Values.namespace }}
+    installed: {{ .Values.cheqd.enabled }}
+    chart: ./cheqd
+    version: 0.1.0
+    values:
+      - ./cheqd/conf/localnet/values.yaml
+      - statefulSetLabels:
+          tags.datadoghq.com/env: acapy-cloud-{{ $.Environment.Name }}
+        podLabels:
+          tags.datadoghq.com/env: acapy-cloud-{{ $.Environment.Name }}
+        {{- if not (eq .Environment.Name "local") }}
+        ingress: null # Disable ingress for non-local environments
+        {{- end }}
+      {{- with .Values.cheqd.config }}
+      - config:
+          config_toml:
+            log_level: {{ .log_level }}
+            log_format: {{ .log_format }}
+      {{- end }}
+
   # https://github.com/redpanda-data/helm-charts/tree/main/charts/connect
   - name: connect-cloud
     labels:
@@ -137,7 +170,7 @@ releases:
       app: postgres
     namespace: {{ .Values.namespace }}
     chart: oci://registry-1.docker.io/bitnamicharts/postgresql-ha
-    version: 16.0.7
+    version: 16.0.10
     values:
       - ./acapy-cloud/conf/postgres.yaml
       - postgresql:
@@ -153,7 +186,7 @@ releases:
       app: pgadmin
     namespace: {{ .Values.namespace }}
     chart: runix/pgadmin4
-    version: 1.44.0
+    version: 1.47.0
     installed: {{ .Values.pgAdmin.enabled }}
     values:
       - ./acapy-cloud/conf/pgadmin.yaml
@@ -212,15 +245,15 @@ releases:
     installed: {{ .Values.minio.enabled }}
     namespace: {{ .Values.namespace }}
     chart: oci://registry-1.docker.io/bitnamicharts/minio
-    version: 16.0.10
+    version: 17.0.2
     labels:
       app: minio
     values:
       - ./acapy-cloud/conf/minio.yaml
       - ingress:
           {{ toYaml .Values.minio.ingress | nindent 10 }}
-      - apiIngress:
-          {{ toYaml .Values.minio.apiIngress | nindent 10 }}
+      - console:
+          {{ toYaml .Values.minio.console | nindent 10 }}
 ---
 repositories:
   - name: redpanda
