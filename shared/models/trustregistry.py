@@ -68,8 +68,8 @@ class Schema(BaseModel):
 
         if cheqd_did:
             did = id.split("/")[0]
-            name = values.get("name", None)
-            version = values.get("version", None)
+            name = values.get("name")
+            version = values.get("version")
 
         else:
             if id is None:
