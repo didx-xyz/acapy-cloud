@@ -19,7 +19,9 @@ async def test_resolve_cheqd_schema_success():
     ):
         result = await resolve_cheqd_schema("schema1")
         assert result == {"id": "schema1", "name": "Test Schema"}
-        mock_logger.debug.assert_called_with("Resolving Cheqd schema with id: schema1")
+        mock_logger.debug.assert_called_with(
+            "Resolving Cheqd schema with schema_id: schema1"
+        )
 
 
 @pytest.mark.anyio
@@ -36,7 +38,7 @@ async def test_resolve_cheqd_schema_http_exception():
             await resolve_cheqd_schema("schema404")
         assert exc_info.value.status_code == 404
         mock_logger.error.assert_called_with(
-            "HTTPException while resolving schema with id schema404: Not found"
+            "HTTPException while resolving schema with schema_id schema404: Not found"
         )
 
 
