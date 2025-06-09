@@ -2,12 +2,18 @@ load("../utils/Tiltfile", "namespace_create_wrap", "generate_ingress_domain")
 load("ext://color", "color")
 load("ext://helm_resource", "helm_resource", "helm_repo")
 
-# https://github.com/bitnami/charts/tree/main/bitnami/postgresql-ha
-postgres_version = "16.0.10"
-# https://github.com/rowanruseler/helm-charts/tree/main/charts/pgadmin4
-pgadmin_version = "1.47.0"
 # https://github.com/cheqd/cheqd-node
 cheqd_noded_version = "v3.1.9"
+# https://github.com/bitnami/charts/tree/main/bitnami/minio
+minio_version = "17.0.3"
+# https://github.com/rowanruseler/helm-charts/tree/main/charts/pgadmin4
+pgadmin_version = "1.47.0"
+# https://github.com/bitnami/charts/tree/main/bitnami/postgresql-ha
+postgres_version = "16.0.11"
+# https://github.com/redpanda-data/helm-charts/tree/main/charts/connect
+redpanda_connect_version = "3.0.3"
+# https://github.com/bitnami/charts/tree/main/bitnami/valkey
+valkey_version = "3.0.11"
 
 # Mnemonic for the Cheqd Localnet Validator
 # Will be used for Localnet as well as the Fee Payer for Cheqd DID Driver
@@ -47,7 +53,35 @@ def setup_postgres(namespace):
             "--wait",
         ],
         labels=["04-dbs"],
-        resource_deps=["cloudapi-ns", "istio"],
+        resource_deps=["cloudapi-ns"],
+        deps=[values_file],
+    )
+
+
+def setup_valkey(namespace):
+    print(color.green("Installing Valkey..."))
+
+    values_file = "./helm/acapy-cloud/conf/valkey.yaml"
+
+    ## Setup Valkey
+    # https://github.com/bitnami/charts/tree/main/bitnami/valkey
+    helm_resource(
+        name="valkey",
+        chart="oci://registry-1.docker.io/bitnamicharts/valkey",
+        release_name="valkey",
+        namespace=namespace,
+        flags=[
+            "--values",
+            values_file,
+            "--version",
+            valkey_version,
+            "--wait",
+        ],
+        labels=["04-dbs"],
+        resource_deps=["cloudapi-ns"],
+        port_forwards=[
+            port_forward(6379, name="valkey"),
+        ],
         deps=[values_file],
     )
 
@@ -250,7 +284,7 @@ def setup_redpanda_connect_cloud(namespace):
             "--set",
             "streams.streamsConfigMap=" + resource_name + "-pipelines",
             "--version",
-            "3.0.3",
+            redpanda_connect_version,
         ],
         labels=["03-streaming"],
         resource_deps=[
@@ -288,7 +322,7 @@ def setup_minio(namespace, ingress_domain):
             "--set",
             "ingress.hostname=minio-api." + ingress_domain,
             "--version",
-            "17.0.2",
+            minio_version,
             "--wait",
         ],
         labels=["04-dbs"],
@@ -464,10 +498,6 @@ def setup_cheqd_localnet(namespace, ingress_domain):
             },
             "flags": [
                 "--set",
-                "ingressDomain=" + ingress_domain,
-                "--set",
-                "replicaCount=1",
-                "--set",
                 "secrets.validatorMnemonic=" + cheqd_validator_mnemonic,
             ],
             "labels": ["11-cheqd"],
@@ -511,17 +541,17 @@ def setup_cloudapi(build_enabled, expose):
     ingress_domain = generate_ingress_domain(expose)
     print(color.green("Ingress Domain: " + ingress_domain))
 
+    setup_cheqd_localnet(namespace, ingress_domain)
     setup_minio(namespace, ingress_domain)
     setup_nats(namespace)
     setup_pgadmin(namespace, ingress_domain)
     setup_postgres(namespace)
     setup_redpanda_connect_cloud(namespace)
-
-    setup_cheqd_localnet(namespace, ingress_domain)
+    setup_valkey(namespace)
 
     releases = {
         "governance-agent": {
-            "depends": ["nats", "postgres", "did-registrar", "did-resolver"],
+            "depends": ["nats", "postgres", "valkey", "did-registrar", "did-resolver"],
             "links": [
                 link(
                     "http://governance-agent.cloudapi." + ingress_domain,
@@ -571,7 +601,7 @@ def setup_cloudapi(build_enabled, expose):
             },
         },
         "multitenant-agent": {
-            "depends": ["nats", "postgres", "did-registrar", "did-resolver"],
+            "depends": ["nats", "postgres", "valkey", "did-registrar", "did-resolver"],
             "links": [
                 link(
                     "http://multitenant-agent.cloudapi." + ingress_domain,

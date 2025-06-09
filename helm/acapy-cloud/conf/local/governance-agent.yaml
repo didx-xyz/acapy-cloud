@@ -182,6 +182,10 @@ secretData:
   WALLET_DB_PORT: 5432
   WALLET_DB_USER: governance
 
+  # Sensitive because it _could_ contain credentials
+  # Format: redis[s]://user:password@host:port
+  VALKEY_URL: redis://valkey-primary:6379
+
 env:
   ACAPY_LOG_LEVEL: info
   # NATS related

@@ -5,6 +5,7 @@ import pytest
 from app.routes.issuer import router as issuer_router
 from app.routes.revocation import router as revocation_router
 from app.tests.util.connections import FaberAliceConnect
+from app.tests.util.regression_testing import TestMode
 from app.tests.util.webhooks import check_webhook_state
 from shared import RichAsyncClient
 from shared.models.credential_exchange import CredentialExchange
@@ -40,6 +41,10 @@ async def check_unique_cred_rev_ids(
 
 
 @pytest.mark.anyio
+@pytest.mark.skipif(
+    TestMode.regression_run in TestMode.fixture_params,
+    reason="Do not test multi-issuance and revocation in regression mode",
+)
 async def test_concurrent_issuance_sequential_revocation(
     faber_anoncreds_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,

@@ -120,26 +120,6 @@ initContainers:
           secretKeyRef:
             name: '{{ include "acapy-cloud.fullname" . }}-env'
             key: WALLET_DB_PORT
-  - name: wait-governance-agent
-    image: curlimages/curl
-    command:
-      - sh
-      - -c
-      - |
-        until curl -s http://governance-agent:3021 -o /dev/null; do
-          echo "waiting for governance-agent to be healthy"
-          sleep 2
-        done
-  - name: wait-multitenant-agent
-    image: curlimages/curl
-    command:
-      - sh
-      - -c
-      - |
-        until curl -s http://multitenant-agent:3021 -o /dev/null; do
-          echo "waiting for multitenant-agent to be healthy"
-          sleep 2
-        done
 
 podSecurityContext:
   fsGroup: 1001
