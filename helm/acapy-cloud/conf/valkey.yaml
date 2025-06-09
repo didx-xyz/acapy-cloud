@@ -18,7 +18,7 @@ replica:
   replicaCount: 0
   resourcesPreset: nano
   persistence:
-    enabled: true
+    enabled: false
     size: 1Gi
   persistentVolumeClaimRetentionPolicy:
     enabled: true
