@@ -121,6 +121,13 @@ spec:
           {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 10 }}
           {{- end }}
         {{- end }}
+        {{- range $k,$_ := .Values.secretData }}
+        - name: {{ $k }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "acapy-cloud.fullname" $ }}-env
+              key: {{ $k }}
+        {{- end }}
         {{- if .Values.livenessProbe }}
         livenessProbe:
           {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe "context" $) | nindent 10 }}
@@ -136,10 +143,6 @@ spec:
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
         envFrom:
-        {{- if .Values.secretData }}
-          - secretRef:
-              name: {{ include "acapy-cloud.fullname" . }}-env
-        {{- end }}
         {{- range .Values.extraSecretNamesForEnvFrom }}
           - secretRef:
               name: {{ . }}
