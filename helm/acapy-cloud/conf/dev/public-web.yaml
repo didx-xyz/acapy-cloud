@@ -86,7 +86,7 @@ initContainers:
       - -c
       - |
         until curl -s {{ .Values.env.TRUST_REGISTRY_URL }} -o /dev/null; do
-          echo "waiting for governance-agent to be healthy"
+          echo "waiting for trust-registry to be healthy"
           sleep 2
         done
 

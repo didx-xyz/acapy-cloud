@@ -498,10 +498,6 @@ def setup_cheqd_localnet(namespace, ingress_domain):
             },
             "flags": [
                 "--set",
-                "ingressDomain=" + ingress_domain,
-                "--set",
-                "replicaCount=1",
-                "--set",
                 "secrets.validatorMnemonic=" + cheqd_validator_mnemonic,
             ],
             "labels": ["11-cheqd"],
