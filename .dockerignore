@@ -5,9 +5,10 @@
 !pyproject.toml
 !poetry.lock
 !app/
-!shared/
+!dockerfiles/poetry-requirements.txt
 !endorser/
 !scripts/
+!shared/
 !tails/
 !trustregistry/
 !waypoint/

@@ -5,8 +5,9 @@ WORKDIR /tails
 COPY poetry.lock /tails
 COPY pyproject.toml /tails
 
-ARG POETRY_VERSION=2.1.3
-RUN pip install --no-cache-dir poetry==${POETRY_VERSION}
+COPY dockerfiles/poetry-requirements.txt /tails
+RUN pip install --no-cache-dir -r poetry-requirements.txt
+
 # Set Poetry's cache and virtualenvs path to a writable directory
 ENV POETRY_CACHE_DIR=/poetry
 RUN poetry config cache-dir "$POETRY_CACHE_DIR" && \
