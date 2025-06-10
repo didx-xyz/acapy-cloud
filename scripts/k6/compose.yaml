@@ -17,13 +17,13 @@ services:
     environment:
       - K6_STATSD_ADDR=datadog:8125
       - K6_CONSOLE_OUTPUT_FANCY=true
-      - BASE_HOLDER_PREFIX=holder101
+      - BASE_HOLDER_PREFIX=holder
       - BASE_VUS=5
       - BASE_ITERATIONS=1
       - TOTAL_BATCHES=1
-      - VERSION=99
-      - ISSUERS=issuer-99
-      - SCHEMA_NAME="model_99"
+      - VERSION=0.1.0
+      - ISSUERS=issuer
+      - SCHEMA_NAME="schema"
       - SCHEMA_VERSION=0.1.0
       - DENOMINATOR=1
       - FACTOR=1

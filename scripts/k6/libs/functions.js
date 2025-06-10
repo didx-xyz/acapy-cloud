@@ -1199,19 +1199,16 @@ export function retry(fn, retries = 3, delay = 2000, operation = 'Undefined') {
   }
 }
 
-// {
-//   "name": "load_pop",
-//   "version": "0.1.0",
-//   "attribute_names": [
-//     "date_of_birth",
-//     "id_number",
-//     "country_of_birth",
-//     "citizen_status",
-//     "date_of_issue",
-//     "gender",
-//     "surname",
-//     "nationality",
-//     "country_of_birth_iso_code",
-//     "names"
-//   ]
-// }
+export function pollAndCheck(pollingConfig, context) {
+  const response = genericPolling(pollingConfig);
+
+  // Generate check message from perspective, topic, and state
+  // e.g., "Holder credentials done event received successfully"
+  const checkMessage = `${context.perspective} ${pollingConfig.topic} ${pollingConfig.state} event received successfully`;
+
+  check(response, {
+    [checkMessage]: (r) => r === true
+  });
+
+  return response;
+}

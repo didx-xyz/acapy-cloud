@@ -110,7 +110,9 @@ scenario_revoke_credentials() {
 
 scenario_publish_revoke() {
   export IS_REVOKED=true
-  xk6 run -o output-statsd ./scenarios/publish-revoke.js -e ITERATIONS="${iterations}" -e VUS="${vus}"
+  local original_vus=${BASE_VUS}
+  local original_iters=${BASE_ITERATIONS}
+  xk6 run -o output-statsd ./scenarios/publish-revoke.js -e ITERATIONS="${original_iters}" -e VUS="${original_vus}"
 }
 
 scenario_create_proof_unverified() {
@@ -173,10 +175,10 @@ run_batch() {
   run_ha_iterations "${deployments}" scenario_create_invitations
   run_ha_iterations "${deployments}" scenario_create_credentials
   run_ha_iterations "${deployments}" scenario_create_proof_verified
-  export USE_AUTO_PUBLISH=true
+  export USE_AUTO_PUBLISH=false
   run_ha_iterations "${deployments}" scenario_revoke_credentials
-  # source ./env.sh # Reset environment variables for the next batch
-  # run_ha_iterations "${deployments}" scenario_publish_revoke
+  # # source ./env.sh # Reset environment variables for the next batch
+  run_ha_iterations "${deployments}" scenario_publish_revoke
   run_ha_iterations "${deployments}" scenario_create_proof_unverified
 }
 

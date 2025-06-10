@@ -10,8 +10,8 @@ import {
   createCredential,
   getCredentialIdByThreadId,
   getWalletIndex,
-  retry,  // Add this import
-  genericPolling,
+  retry,
+  pollAndCheck,
 } from "../libs/functions.js";
 
 const vus = Number.parseInt(__ENV.VUS, 10);
@@ -118,24 +118,17 @@ export default function (data) {
 
   log.debug(`walletIndex: ${walletIndex}, walletId: ${wallet.wallet_id} issuerConnectionId: ${wallet.issuer_connection_id}`);
 
-  const waitForSSEEventResponse = genericPolling({
+  pollAndCheck({
     accessToken: wallet.access_token,
     walletId: wallet.wallet_id,
     topic: "credentials",
     field: "thread_id",
     fieldId: threadId,
     state: "offer-received",
-    maxAttempts: 10,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
+    maxAttempts: 10,
     lookBack: 60,
     sseTag: "credential_offer_received",
-  });
-
-  const sseEventError = "SSE event was not received successfully";
-  const sseCheckMessage = "SSE request received successfully: offer-received";
-
-  check(waitForSSEEventResponse, {
-      [sseCheckMessage]: (r) => r === true
-  });
+  }, { perspective: "Holder" });
 
   log.debug(`Accepting credential for thread ID: ${threadId}`);
 
@@ -166,24 +159,17 @@ export default function (data) {
     },
   });
 
-  const waitForSSECredentialEventResponse = genericPolling({
+  pollAndCheck({
     accessToken: wallet.access_token,
     walletId: wallet.wallet_id,
     topic: "credentials",
     field: "credential_exchange_id",
     fieldId: holderCredentialExchangeId,
     state: "done",
-    maxAttempts: 10,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
+    maxAttempts: 10,
     lookBack: 60,
     sseTag: "credential_received",
-  });
-
-  const sseCredentialEventError = "SSE event was not received successfully";
-  const sseCredentialCheckMessage = "SSE request received successfully: done";
-
-  check(waitForSSECredentialEventResponse, {
-      [sseCredentialCheckMessage]: (r) => r === true
-  });
+  }, { perspective: "Holder" });
 
   const issuerData = JSON.stringify({
     credential_exchange_id: issuerCredentialExchangeId,
