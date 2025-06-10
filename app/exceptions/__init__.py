@@ -9,8 +9,8 @@ from shared.exceptions.cloudapi_value_error import CloudApiValueError
 __all__ = [
     "ApiException",
     "CloudApiException",
+    "CloudApiValueError",
+    "TrustRegistryException",
     "handle_acapy_call",
     "handle_model_with_validation",
-    "TrustRegistryException",
-    "CloudApiValueError",
 ]
