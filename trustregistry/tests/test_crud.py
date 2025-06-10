@@ -148,9 +148,9 @@ def test_create_actor_already_exists(db_session_mock: Session, orig: str):
 
 
 def test_create_actor_exception(db_session_mock: Session):
-    db_session_mock.add.side_effect = Exception("Some error")
+    db_session_mock.add.side_effect = RuntimeError("Some error")
 
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         crud.create_actor(db_session_mock, actor1)
 
 

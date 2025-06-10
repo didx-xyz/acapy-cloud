@@ -88,7 +88,7 @@ async def onboard_verifier(*, verifier_controller: AcaPyClient, verifier_label: 
             raise CloudApiException(  # pylint: disable=W0707
                 "Error onboarding verifier: No public DID found. "
                 "Tried and failed to create invitation on their behalf."
-            )
+            ) from None
 
     bound_logger.debug("Returning verifier onboard result.")
     return OnboardResult(**onboarding_result)

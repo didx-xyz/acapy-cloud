@@ -133,7 +133,7 @@ async def assert_valid_verifier(
         if not invitation_key:
             raise CloudApiException(  # pylint: disable=W0707
                 "Connection has no invitation key.", 400
-            )
+            ) from None
         public_did = ed25519_verkey_to_did_key(invitation_key)
 
     # Try get actor from TR

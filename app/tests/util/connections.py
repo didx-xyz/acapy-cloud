@@ -202,7 +202,7 @@ async def create_connection_by_test_mode(
             connection_alias=f"{connection_alias_prefix}-{alias}",
         )
     else:
-        assert False, f"unknown test mode: {test_mode}"
+        raise AssertionError(f"unknown test mode: {test_mode}")
 
 
 async def connect_using_trust_registry_invite(

@@ -66,7 +66,7 @@ async def faber_anoncreds_and_alice_connection(
             connection_alias=f"{connection_alias_prefix}-{connection_alias}",
         )
     else:
-        assert False, f"unknown test mode: {test_mode}"
+        raise AssertionError(f"unknown test mode: {test_mode}")
 
     return FaberAliceConnect(
         alice_connection_id=faber_alice_connect.alice_connection_id,
@@ -104,7 +104,7 @@ async def acme_and_alice_connection(
             connection_alias=f"{connection_alias_prefix}-{connection_alias}",
         )
     else:
-        assert False, f"unknown test mode: {test_mode}"
+        raise AssertionError(f"unknown test mode: {test_mode}")
 
     return AcmeAliceConnect(
         alice_connection_id=acme_alice_connect.alice_connection_id,
@@ -144,7 +144,7 @@ async def meld_co_anoncreds_and_alice_connection(
                 connection_alias=f"{connection_alias_prefix}-{connection_alias}",
             )
         else:
-            assert False, f"unknown test mode: {test_mode}"
+            raise AssertionError(f"unknown test mode: {test_mode}")
     else:
         # No indirect request param for trust registry connection; establish normal connection:
         meld_co_alice_connect = await create_connection_by_test_mode(
