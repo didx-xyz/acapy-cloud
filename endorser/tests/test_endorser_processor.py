@@ -3,7 +3,7 @@ import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from nats.aio.client import Client as NATS
+from nats.aio.client import Client as NATSClient
 from nats.errors import BadSubscriptionError, Error, TimeoutError
 from nats.js.client import JetStreamContext
 from nats.js.errors import FetchTimeoutError
@@ -26,7 +26,7 @@ from shared.constants import (
 @pytest.fixture
 async def mock_nats_client():
     with patch("nats.connect") as mock_connect:
-        mock_nats = AsyncMock(spec=NATS)
+        mock_nats = AsyncMock(spec=NATSClient)
         mock_jetstream = AsyncMock(spec=JetStreamContext)
         mock_nats.jetstream.return_value = mock_jetstream
         mock_connect.return_value = mock_nats
