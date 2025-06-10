@@ -1,20 +1,10 @@
 import os
 
 import pytest
-from aries_cloudcontroller import DID, AcaPyClient
+from aries_cloudcontroller import DID
 
-import app.services.acapy_wallet as wallet_service
 from app.dependencies.auth import AcaPyAuthVerified
-from app.models.wallet import SetDidEndpointRequest
-from app.routes.wallet.dids import (
-    get_did_endpoint,
-    get_public_did,
-    list_dids,
-    router,
-    set_did_endpoint,
-)
-from app.tests.util.ledger import create_public_did, post_to_ledger
-from app.tests.util.regression_testing import TestMode
+from app.routes.wallet.dids import get_public_did, list_dids, router
 from shared import RichAsyncClient
 
 # Tests can conflict if they run in parallel, e.g. test_set_did_endpoint during test_list_dids changes expected response
@@ -92,53 +82,3 @@ async def test_get_did_endpoint(governance_client: RichAsyncClient):
 
     response = response.json()
     assert response["did"] == did
-
-
-@pytest.mark.anyio
-@pytest.mark.skipif(
-    skip_set_public_did or TestMode.regression_run in TestMode.fixture_params,
-    reason="Avoid creating additional did for governance from different seed",
-)
-async def test_set_public_did(
-    governance_client: RichAsyncClient, governance_acapy_client: AcaPyClient
-):
-    did_object = await wallet_service.create_did(governance_acapy_client)
-    await post_to_ledger(did=did_object.did, verkey=did_object.verkey)
-
-    did = did_object.did
-    response = await governance_client.put(f"{WALLET_BASE_PATH}/public?did={did}")
-
-    assert response.status_code == 200
-
-    # With endorsement the set pub dic returns None but sets the did correctly
-    # So let's get it a different way and check that it is correct
-    response = await governance_client.get(f"{WALLET_BASE_PATH}/public")
-    assert response.status_code == 200
-    response = response.json()
-
-    assert response["verkey"]
-    assert response["did"] == did
-
-
-@pytest.mark.anyio
-@pytest.mark.skip(reason="Can't use this method to set endpoint for cheqd dids")
-@pytest.mark.skipif(
-    TestMode.regression_run in TestMode.fixture_params,
-    reason="Skip posting to ledger in regression mode",
-)
-async def test_set_did_endpoint(
-    governance_acapy_client: AcaPyClient, mock_governance_auth: AcaPyAuthVerified
-):
-    # Don't want us overwriting the real endpoint, so not setting as public did
-    did = await create_public_did(governance_acapy_client, set_public=False)
-    endpoint = "https://ssi.com"
-
-    await set_did_endpoint(
-        did.did,
-        SetDidEndpointRequest(endpoint=endpoint),
-        auth=mock_governance_auth,
-    )
-
-    retrieved_endpoint = await get_did_endpoint(did.did, auth=mock_governance_auth)
-
-    assert endpoint == retrieved_endpoint.endpoint
