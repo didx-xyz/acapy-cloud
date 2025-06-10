@@ -7,10 +7,10 @@ from sqlalchemy.orm import Session
 from shared.models.trustregistry import Actor, Schema
 from trustregistry import crud, db
 from trustregistry.crud import (
-    ActorAlreadyExistsException,
-    ActorDoesNotExistException,
-    SchemaAlreadyExistsException,
-    SchemaDoesNotExistException,
+    ActorAlreadyExistsError,
+    ActorDoesNotExistError,
+    SchemaAlreadyExistsError,
+    SchemaDoesNotExistError,
 )
 
 # pylint: disable=redefined-outer-name
@@ -69,7 +69,7 @@ def test_get_actor_by_did(db_session_mock: Session, expected, actor_did):
 
             assert actor == expected
         else:
-            with pytest.raises(ActorDoesNotExistException):
+            with pytest.raises(ActorDoesNotExistError):
                 crud.get_actor_by_did(db_session_mock, actor_did=actor_did)
 
         select_mock.assert_called_once_with(db.Actor)
@@ -89,7 +89,7 @@ def test_get_actor_by_name(db_session_mock: Session, expected, actor_name):
             db_session_mock.scalars.assert_called_once()
             assert result == expected
         else:
-            with pytest.raises(ActorDoesNotExistException):
+            with pytest.raises(ActorDoesNotExistError):
                 crud.get_actor_by_name(db_session_mock, actor_name=actor_name)
 
         select_mock.assert_called_once_with(db.Actor)
@@ -107,7 +107,7 @@ def test_get_actor_by_id(db_session_mock: Session, expected, actor_id):
             db_session_mock.scalars.assert_called_once()
             assert result == expected
         else:
-            with pytest.raises(ActorDoesNotExistException):
+            with pytest.raises(ActorDoesNotExistError):
                 crud.get_actor_by_id(db_session_mock, actor_id=actor_id)
 
         select_mock.assert_called_once_with(db.Actor)
@@ -143,7 +143,7 @@ def test_create_actor_already_exists(db_session_mock: Session, orig: str):
         orig=orig, params=None, statement=None
     )
 
-    with pytest.raises(ActorAlreadyExistsException):
+    with pytest.raises(ActorAlreadyExistsError):
         crud.create_actor(db_session_mock, actor1)
 
 
@@ -175,7 +175,7 @@ def test_delete_actor(db_session_mock: Session, actor, actor_id):
 
             assert result == actor
         else:
-            with pytest.raises(ActorDoesNotExistException):
+            with pytest.raises(ActorDoesNotExistError):
                 crud.delete_actor(db_session_mock, actor_id=actor_id)
 
 
@@ -184,7 +184,7 @@ def test_update_actor(db_session_mock: Session, new_actor: Actor, old_actor: db.
     db_session_mock.scalars.return_value.one_or_none.return_value = old_actor
 
     if not old_actor:
-        with pytest.raises(ActorDoesNotExistException):
+        with pytest.raises(ActorDoesNotExistError):
             crud.update_actor(db_session_mock, new_actor)
     else:
         with patch("trustregistry.crud.update") as update_mock:
@@ -233,7 +233,7 @@ def test_get_schema_by_id(db_session_mock: Session, expected, schema_id):
 
             assert schema == expected
         else:
-            with pytest.raises(SchemaDoesNotExistException):
+            with pytest.raises(SchemaDoesNotExistError):
                 crud.get_schema_by_id(db_session_mock, schema_id=schema_id)
 
         select_mock.assert_called_once_with(db.Schema)
@@ -247,7 +247,7 @@ def test_create_schema(db_session_mock: Session, old_schema, new_schema):
     schema = db.Schema(**new_schema.model_dump())
     db_session_mock.scalars.return_value.one_or_none.return_value = old_schema
     if old_schema:
-        with pytest.raises(SchemaAlreadyExistsException):
+        with pytest.raises(SchemaAlreadyExistsError):
             crud.create_schema(db_session_mock, new_schema)
     else:
         result = crud.create_schema(db_session_mock, new_schema)
@@ -279,7 +279,7 @@ def test_create_schema(db_session_mock: Session, old_schema, new_schema):
 def test_update_schema(db_session_mock: Session, new_schema, old_schema):
     db_session_mock.scalars.return_value.one_or_none.return_value = old_schema
     if not old_schema:
-        with pytest.raises(SchemaDoesNotExistException):
+        with pytest.raises(SchemaDoesNotExistError):
             crud.update_schema(db_session_mock, new_schema, new_schema.id)
     else:
         with patch("trustregistry.crud.update") as update_mock:
@@ -315,5 +315,5 @@ def test_delete_schema(db_session_mock: Session, schema, schema_id):
 
             assert result == schema
         else:
-            with pytest.raises(SchemaDoesNotExistException):
+            with pytest.raises(SchemaDoesNotExistError):
                 crud.delete_schema(db_session_mock, schema_id)

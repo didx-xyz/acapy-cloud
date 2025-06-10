@@ -90,7 +90,7 @@ lint.select = [
   "E", # pycodestyle errors (style errors)
   "F", # pyflakes (detect invalid Python code)
   "I", # isort (import sorting)
-  # "N",  # pep8-naming (naming conventions)
+  "N",  # pep8-naming (naming conventions)
   # "PL",  # pylint
   "RUF", # ruff-specific rules
   "UP",  # pyupgrade (upgrade syntax)
@@ -113,7 +113,6 @@ lint.ignore = [
   "D415", # First line should end with a period, question mark, or exclamation point
 
   # Fix later:
-  "N818", #  Exception name `SchemaAlreadyExistsException` should be named with an Error suffix
   "C901", # Function complexity is too high
 
   # Fix later by ignoring individual lines (because it's important not to ignore globally)

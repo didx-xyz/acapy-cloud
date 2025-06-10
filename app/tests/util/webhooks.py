@@ -4,7 +4,7 @@ from typing import Any
 import pytest
 from httpx import HTTPError
 
-from app.tests.util.sse_listener import SseListener, SseListenerTimeout
+from app.tests.util.sse_listener import SseListener, SseListenerTimeoutError
 from app.util.tenants import get_wallet_id_from_b64encoded_jwt
 from shared import RichAsyncClient
 from shared.log_config import get_logger
@@ -68,7 +68,7 @@ async def check_webhook_state(
                 pytest.fail(
                     "No longer implemented: cannot wait for event without filter_map"
                 )
-        except SseListenerTimeout:
+        except SseListenerTimeoutError:
             bound_logger.error(
                 "Encountered SSE Timeout (server didn't return expected event in time)."
             )

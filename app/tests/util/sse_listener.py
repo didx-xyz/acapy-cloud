@@ -55,11 +55,11 @@ class SseListener:
                     else:
                         logger.warning("Unexpected SSE line: {}", line)
 
-        raise SseListenerTimeout(
+        raise SseListenerTimeoutError(
             "Requested filtered event was not returned by server. "
             f"Field: {field}, ID: {field_id}, Desired State: {desired_state}"
         )
 
 
-class SseListenerTimeout(Exception):
+class SseListenerTimeoutError(Exception):
     """Exception raised when the Listener times out waiting for a matching event."""

@@ -4,7 +4,7 @@ import pytest
 from fastapi.exceptions import HTTPException
 
 from shared.models.trustregistry import Actor
-from trustregistry.crud import ActorAlreadyExistsException, ActorDoesNotExistException
+from trustregistry.crud import ActorAlreadyExistsError, ActorDoesNotExistError
 from trustregistry.registry import registry_actors
 
 
@@ -30,7 +30,7 @@ async def test_register_actor():
 
 @pytest.mark.anyio
 @pytest.mark.parametrize(
-    "exception, status_code", [(ActorAlreadyExistsException, 409), (Exception, 500)]
+    "exception, status_code", [(ActorAlreadyExistsError, 409), (Exception, 500)]
 )
 async def test_register_actor_x(exception, status_code):
     with patch("trustregistry.registry.registry_actors.crud.create_actor") as mock_crud:
@@ -73,7 +73,7 @@ async def test_update_actor(actor_id: str, actor: Actor):
 async def test_update_actor_x():
     with patch("trustregistry.registry.registry_actors.crud.update_actor") as mock_crud:
         actor = Actor(id="1", name="Alice", roles=["issuer"], did="did:sov:1234")
-        mock_crud.side_effect = ActorDoesNotExistException()
+        mock_crud.side_effect = ActorDoesNotExistError()
         with pytest.raises(HTTPException) as ex:
             await registry_actors.update_actor("1", actor)
 
@@ -98,7 +98,7 @@ async def test_get_actor_by_did_x():
     with patch(
         "trustregistry.registry.registry_actors.crud.get_actor_by_did"
     ) as mock_crud:
-        mock_crud.side_effect = ActorDoesNotExistException()
+        mock_crud.side_effect = ActorDoesNotExistError()
         with pytest.raises(HTTPException) as ex:
             await registry_actors.get_actor_by_did("did:sov:1234")
 
@@ -123,7 +123,7 @@ async def test_get_actor_by_id_x():
     with patch(
         "trustregistry.registry.registry_actors.crud.get_actor_by_id"
     ) as mock_crud:
-        mock_crud.side_effect = ActorDoesNotExistException()
+        mock_crud.side_effect = ActorDoesNotExistError()
         with pytest.raises(HTTPException) as ex:
             await registry_actors.get_actor_by_id("1")
 
@@ -148,7 +148,7 @@ async def test_get_actor_by_name_x():
     with patch(
         "trustregistry.registry.registry_actors.crud.get_actor_by_name"
     ) as mock_crud:
-        mock_crud.side_effect = ActorDoesNotExistException()
+        mock_crud.side_effect = ActorDoesNotExistError()
         with pytest.raises(HTTPException) as ex:
             await registry_actors.get_actor_by_name("Alice")
 
@@ -168,7 +168,7 @@ async def test_delete_actor():
 @pytest.mark.anyio
 async def test_delete_actor_x():
     with patch("trustregistry.registry.registry_actors.crud.delete_actor") as mock_crud:
-        mock_crud.side_effect = ActorDoesNotExistException()
+        mock_crud.side_effect = ActorDoesNotExistError()
         with pytest.raises(HTTPException) as ex:
             await registry_actors.remove_actor("1")
 

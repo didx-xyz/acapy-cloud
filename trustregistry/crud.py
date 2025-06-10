@@ -39,7 +39,7 @@ def get_actor_by_did(db_session: Session, actor_did: str) -> db.Actor:
         bound_logger.debug("Successfully retrieved actor from database.")
     else:
         bound_logger.info("Actor DID not found.")
-        raise ActorDoesNotExistException
+        raise ActorDoesNotExistError
 
     return result
 
@@ -55,7 +55,7 @@ def get_actor_by_id(db_session: Session, actor_id: str) -> db.Actor:
         bound_logger.debug("Successfully retrieved actor from database.")
     else:
         bound_logger.info("Actor ID not found.")
-        raise ActorDoesNotExistException
+        raise ActorDoesNotExistError
 
     return result
 
@@ -71,7 +71,7 @@ def get_actor_by_name(db_session: Session, actor_name: str) -> db.Actor:
         bound_logger.debug("Successfully retrieved actor from database")
     else:
         bound_logger.info("Actor name not found")
-        raise ActorDoesNotExistException
+        raise ActorDoesNotExistError
 
     return result
 
@@ -98,7 +98,7 @@ def create_actor(db_session: Session, actor: Actor) -> db.Actor:
             bound_logger.info(
                 "Bad request: An actor with ID already exists in database."
             )
-            raise ActorAlreadyExistsException(
+            raise ActorAlreadyExistsError(
                 f"Bad request: An actor with ID: `{actor.id}` already exists in database."
             ) from e
 
@@ -106,7 +106,7 @@ def create_actor(db_session: Session, actor: Actor) -> db.Actor:
             bound_logger.info(
                 "Bad request: An actor with name already exists in database."
             )
-            raise ActorAlreadyExistsException(
+            raise ActorAlreadyExistsError(
                 f"Bad request: An actor with name: `{actor.name}` already exists in database."
             ) from e
 
@@ -114,7 +114,7 @@ def create_actor(db_session: Session, actor: Actor) -> db.Actor:
             bound_logger.info(
                 "Bad request: An actor with DIDComm invitation already exists in database."
             )
-            raise ActorAlreadyExistsException(
+            raise ActorAlreadyExistsError(
                 "Bad request: An actor with DIDComm invitation already exists in database."
             ) from e
 
@@ -122,7 +122,7 @@ def create_actor(db_session: Session, actor: Actor) -> db.Actor:
             bound_logger.info(
                 "Bad request: An actor with DID already exists in database."
             )
-            raise ActorAlreadyExistsException(
+            raise ActorAlreadyExistsError(
                 f"Bad request: An actor with DID: `{actor.did}` already exists in database."
             ) from e
 
@@ -130,7 +130,7 @@ def create_actor(db_session: Session, actor: Actor) -> db.Actor:
             bound_logger.error(
                 "Unexpected constraint violation: {}", constraint_violation
             )
-            raise ActorAlreadyExistsException(
+            raise ActorAlreadyExistsError(
                 f"Bad request: Unique constraint violated - {constraint_violation}"
             ) from e
 
@@ -148,7 +148,7 @@ def delete_actor(db_session: Session, actor_id: str) -> db.Actor:
 
     if not db_actor:
         bound_logger.info("Requested actor ID to delete does not exist in database.")
-        raise ActorDoesNotExistException
+        raise ActorDoesNotExistError
 
     bound_logger.debug("Deleting actor")
     query_delete = delete(db.Actor).where(db.Actor.id == actor_id)
@@ -168,7 +168,7 @@ def update_actor(db_session: Session, actor: Actor) -> db.Actor:
 
     if not db_actor:
         bound_logger.info("Requested actor ID to update does not exist in database.")
-        raise ActorDoesNotExistException
+        raise ActorDoesNotExistError
 
     bound_logger.debug("Updating actor")
     update_query = (
@@ -222,7 +222,7 @@ def get_schema_by_id(db_session: Session, schema_id: str) -> db.Schema:
 
     if not result:
         bound_logger.info("Schema does not exist in database.")
-        raise SchemaDoesNotExistException
+        raise SchemaDoesNotExistError
 
     return result
 
@@ -238,7 +238,7 @@ def create_schema(db_session: Session, schema: Schema) -> db.Schema:
 
     if db_schema:
         bound_logger.info("The requested schema ID already exists in database.")
-        raise SchemaAlreadyExistsException
+        raise SchemaAlreadyExistsError
 
     bound_logger.debug("Adding schema to database")
 
@@ -262,7 +262,7 @@ def update_schema(db_session: Session, schema: Schema, schema_id: str) -> db.Sch
         bound_logger.debug(
             "Requested to update a schema that does not exist in database."
         )
-        raise SchemaDoesNotExistException
+        raise SchemaDoesNotExistError
 
     bound_logger.debug("Updating schema on database")
 
@@ -290,7 +290,7 @@ def delete_schema(db_session: Session, schema_id: str) -> db.Schema:
     db_schema = db_session.scalars(query_does_exists).one_or_none()
 
     if not db_schema:
-        raise SchemaDoesNotExistException
+        raise SchemaDoesNotExistError
 
     query_delete = delete(db.Schema).where(db.Schema.id == schema_id)
     bound_logger.debug("Deleting schema from database")
@@ -301,17 +301,17 @@ def delete_schema(db_session: Session, schema_id: str) -> db.Schema:
     return db_schema
 
 
-class ActorAlreadyExistsException(Exception):
+class ActorAlreadyExistsError(Exception):
     """Raised when attempting to create an actor that already exists in the database."""
 
 
-class ActorDoesNotExistException(Exception):
+class ActorDoesNotExistError(Exception):
     """Raised when attempting to delete or update an actor that does not exist in the database."""
 
 
-class SchemaAlreadyExistsException(Exception):
+class SchemaAlreadyExistsError(Exception):
     """Raised when attempting to create a schema that already exists in the database."""
 
 
-class SchemaDoesNotExistException(Exception):
+class SchemaDoesNotExistError(Exception):
     """Raised when attempting to delete or update a schema that does not exist in the database."""
