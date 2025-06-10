@@ -44,7 +44,6 @@ async def sign_sd_jws(
 
     **Notes:**
 
-    - If the issuer uses a `did:sov` DID, ensure that the DID is public.
     - The `headers` field is optional. Custom headers can be specified, but the `typ`, `alg`,
       and `kid` fields are automatically populated by the Aries agent based on the signing method.
     - The `non_sd_list` field specifies attributes that are **not** selectively disclosed.
@@ -61,7 +60,7 @@ async def sign_sd_jws(
     **Example Request Body:**
     ```json
     {
-        "did": "did:sov:39TXHazGAYif5FUFCjQhYX",
+        "did": "did:cheqd:...",
         "payload": {
             "credential_subject": "reference_to_holder",
             "given_name": "John",
