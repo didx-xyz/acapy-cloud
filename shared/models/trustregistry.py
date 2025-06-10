@@ -44,12 +44,12 @@ class Schema(BaseModel):
             values = values.__dict__
 
         try:
-            id = values["id"]
+            schema_id = values["id"]
         except KeyError:
-            id = None
+            schema_id = None
 
         cheqd_did = False
-        if id and id.startswith("did:cheqd:"):
+        if schema_id and schema_id.startswith("did:cheqd:"):
             cheqd_did = True
 
         try:
@@ -67,26 +67,26 @@ class Schema(BaseModel):
             version = None
 
         if cheqd_did:
-            did = id.split("/")[0]
+            did = schema_id.split("/")[0]
             name = values.get("name")
             version = values.get("version")
 
-        elif id is None:
+        elif schema_id is None:
             if None in (did, name, version):
                 raise CloudApiValueError(
                     "Either `id` or all of (`did`, `name`, `version`) must be specified."
                 )
-            id = calc_schema_id(did, name, version)
+            schema_id = calc_schema_id(did, name, version)
         elif None not in (did, name, version):
             expected_id = calc_schema_id(did, name, version)
-            if id != expected_id:
+            if schema_id != expected_id:
                 raise CloudApiValueError(
                     f"Schema's `id` field does not match expected format: `{expected_id}`."
                 )
         else:
             # Extract did, name, and version from id if not specified
             try:
-                did, _, name, version = id.split(":")
+                did, _, name, version = schema_id.split(":")
             except ValueError as e:
                 raise CloudApiValueError(
                     "Invalid `id` field. It does not match the expected format."
@@ -95,7 +95,7 @@ class Schema(BaseModel):
         values["did"] = did
         values["name"] = name
         values["version"] = version
-        values["id"] = id
+        values["id"] = schema_id
         return values
 
     model_config = ConfigDict(validate_assignment=True, from_attributes=True)
