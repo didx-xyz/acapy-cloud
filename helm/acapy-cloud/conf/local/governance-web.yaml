@@ -100,7 +100,6 @@ env:
   TRUST_REGISTRY_URL: http://trust-registry:8000
   OPENAPI_NAME: CloudAPI Governance
   PYTHONPATH: /
-  ACAPY_ENDORSER_ALIAS: endorser
   ROLE: governance
   ROOT_PATH: /governance
   ENABLE_SERIALIZE_LOGS: "FALSE"

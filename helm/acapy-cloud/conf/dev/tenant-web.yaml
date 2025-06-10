@@ -129,7 +129,6 @@ env:
   TRUST_REGISTRY_URL: http://trust-registry:8000
   OPENAPI_NAME: CloudAPI Tenant
   PYTHONPATH: /
-  ACAPY_ENDORSER_ALIAS: endorser
   ROLE: tenant
   ROOT_PATH: /tenant
   ACAPY_TAILS_SERVER_BASE_URL: http://tails-server:6543
