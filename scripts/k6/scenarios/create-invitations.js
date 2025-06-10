@@ -13,7 +13,7 @@ import {
   getIssuerPublicDid,
   createDidExchangeRequest,
   getIssuerConnectionId,
-  genericPolling,
+  pollAndCheck,
   getHolderConnections,
 } from "../libs/functions.js";
 
@@ -225,47 +225,29 @@ export default function (data) {
     holderDid = my_did.split(':').slice(0, 3).join(':');
   }
 
-  const waitForHolderSSEEventResponse = genericPolling({
+  pollAndCheck({
     accessToken: wallet.access_token,
     walletId: wallet.wallet_id,
-    threadId: holderConnectionId,
-    eventType: "completed",
-    sseUrlPath: "connections/connection_id",
     topic: "connections",
-    expectedState: "completed",
-    maxAttempts: 3,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
+    field: "connection_id",
+    fieldId: holderConnectionId,
+    state: "completed",
+    maxAttempts: 3,
     lookBack: 60,
-    sseTag: "connection_ready" // Pass through the tag for metrics/tracing
-  });
+    sseTag: "holder-connection-ready"
+  }, { perspective: "Holder" });
 
-  const sseHolderEventError = "Holder SSE event was not received successfully";
-  const sseHolderCheckMessage = "Holder SSE Event received successfully: connection-ready";
-
-  // Check if the polling was successful, maintaining the same check structure
-  check(waitForHolderSSEEventResponse, {
-    [sseHolderCheckMessage]: (r) => r === true
-  });
-
-  const waitForIssuerSSEEventResponse = genericPolling({
+  pollAndCheck({
     accessToken: issuer.accessToken,
     walletId: issuer.walletId,
-    threadId: holderFullDid,
-    eventType: "completed",
-    sseUrlPath: "connections/their_did",
     topic: "connections",
-    expectedState: "completed",
-    maxAttempts: 3,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
+    field: "their_did",
+    fieldId: holderFullDid,
+    state: "completed",
+    maxAttempts: 3,
     lookBack: 60,
-    sseTag: "connection_ready" // Pass through the tag for metrics/tracing
-  });
-
-  const sseIssuerEventError = "Issuer SSE event was not received successfully";
-  const sseIssuerCheckMessage = "Issuer SSE Event received successfully: connection-ready";
-
-  // Check if the polling was successful, maintaining the same check structure
-  check(waitForIssuerSSEEventResponse, {
-    [sseIssuerCheckMessage]: (r) => r === true
-  });
+    sseTag: "issuer-connection-ready"
+  }, { perspective: "Issuer" });
 
   // Issuer is now going to check
   sleep(2);

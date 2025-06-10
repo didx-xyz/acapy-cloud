@@ -862,19 +862,18 @@ export function checkRevoked(issuerAccessToken, credentialExchangeId) {
 export function genericPolling({
   accessToken,
   walletId,
-  threadId,
-  eventType,
-  sseUrlPath,
   topic,
-  expectedState,
+  field,
+  fieldId,
+  state,
   lookBack = 60,
-  maxAttempts = 4,
+  maxAttempts = 3,
   sseTag,
-  requestTimeout = 14
+  requestTimeout = 14 // max 14s - will need to deal with SSE ping at 15s
 }) {
-  const endpoint = `${__ENV.CLOUDAPI_URL}/tenant/v1/sse/${walletId}/${sseUrlPath}/${threadId}/${eventType}?look_back=${lookBack}`;
+  const endpoint = `${__ENV.CLOUDAPI_URL}/tenant/v1/sse/${walletId}/${topic}/${field}/${fieldId}/${state}?look_back=${lookBack}`;
 
-  // Backoff delays in seconds: 0.5, 1, 2, 5, 10, 15
+  // Backoff delays in seconds: 0.5, 1, 2, 5
   const delays = [0.5, 1, 2, 5];
 
   let attempts = 0;
@@ -893,16 +892,18 @@ export function genericPolling({
         "Content-Type": "application/json"
       },
       timeout: requestTimeout * 1000, // Convert seconds to milliseconds
-      tags: sseTag ? { name: sseTag } : { name: `GET_${eventType}_Event` }
+      tags: sseTag ? { name: sseTag } : { name: `GET_${topic}_${state}_Event` }
     });
-    // console.log(`VU ${__VU}: Iteration ${__ITER}: Attempt: ${attempts} - Polling Response body: ${response.body}`);
+
+    log.debug(`Attempt: ${attempts} - Polling Response body: ${response.body}`);
+
     // TODO: if it is a connection error, back-off, else the fetch timeout serves as a back-off
     // Track success/failure metrics
     if (response.status !== 200) {
       if (attempts === maxAttempts - 1) {
-        console.error(`VU ${__VU}: Iteration ${__ITER}: HTTP request failed with status ${response.status}`);
+        log.error(`HTTP request failed with status ${response.status}`);
       } else if (attempts > 0) {
-        console.warn(`VU ${__VU}: Iteration ${__ITER}: Attempt: ${attempts} HTTP request failed with status ${response.status}. Sleeping for ${currentDelay}s before next attempt`);
+        log.warn(`Attempt: ${attempts} HTTP request failed with status ${response.status}. Sleeping for ${currentDelay}s before next attempt`);
       }
       attempts++;
       sleep(currentDelay);
@@ -923,9 +924,9 @@ export function genericPolling({
         responseData = JSON.parse(response.body);
       } else {
         if (attempts === maxAttempts - 1) {
-          console.error(`VU ${__VU}: Iteration ${__ITER}: Attempt: ${attempts} Response is not parseable: ${trimmedBody}.`);
+          log.error(`Attempt: ${attempts} Response is not parseable: ${trimmedBody}.`);
         } else if (attempts > 0) {
-          console.warn(`VU ${__VU}: Iteration ${__ITER}: Attempt: ${attempts} Response is not parseable: ${trimmedBody}. Sleeping for ${currentDelay}s before next attempt`);
+          log.warn(`Attempt: ${attempts} Response is not parseable: ${trimmedBody}. Sleeping for ${currentDelay}s before next attempt`);
         }
         attempts++;
         sleep(currentDelay);
@@ -935,29 +936,30 @@ export function genericPolling({
       // 1. SSE direct object: {wallet_id, topic, payload}
       if (responseData.topic === topic &&
           responseData.payload &&
-          responseData.payload.state === expectedState) {
+          responseData.payload.state === state) {
         // First attempt - silent success
         if (attempts === 0) {
+          log.debug(`Found direct event match on first attempt`);
           return true;
         }
         // Non-first attempt - log success
-        console.log(`VU ${__VU}: Iteration ${__ITER}: Found direct event match (attempt ${attempts+1})`);
+        log.info(`Found direct event match (attempt ${attempts+1})`);
         return true;
       }
 
       // If we reach here, no matching event was found
       if (attempts === maxAttempts - 1) {
-        console.error(`VU ${__VU}: Iteration ${__ITER}: No matching event found yet (attempt ${attempts+1})`);
+        log.error(`No matching event found yet (attempt ${attempts+1})`);
       } else if (attempts > 0) {
-        console.warn(`VU ${__VU}: Iteration ${__ITER}: No matching event found yet (attempt ${attempts+1})`);
+        log.warn(`No matching event found yet (attempt ${attempts+1})`);
       }
     } catch (error) {
       if (attempts === maxAttempts - 1) {
-        console.error(`VU ${__VU}: Iteration ${__ITER}: Error parsing response: ${error.message}`);
-        console.error(`VU ${__VU}: Iteration ${__ITER}: Response body: ${response.body}`);
+        log.error(`Error parsing response: ${error.message}`);
+        log.error(`Response body: ${response.body}`);
       } else if (attempts > 0) {
-        console.warn(`VU ${__VU}: Iteration ${__ITER}: Error parsing response: ${error.message}`);
-        console.warn(`VU ${__VU}: Iteration ${__ITER}: Response body: ${response.body}`);
+        log.warn(`Error parsing response: ${error.message}`);
+        log.warn(`Response body: ${response.body}`);
       }
       attempts++;
       sleep(currentDelay);
@@ -965,7 +967,7 @@ export function genericPolling({
     }
 
     // Increment attempts and sleep before next attempt
-    console.warn(`VU ${__VU}: Iteration ${__ITER}: Failed to find matching event after ${maxAttempts} attempts. Sleeping for ${currentDelay}s before next attempt`);
+    log.warn(`Failed to find matching event after ${maxAttempts} attempts. Sleeping for ${currentDelay}s before next attempt`);
     attempts++;
     if (attempts < maxAttempts) {
       sleep(currentDelay);
@@ -973,7 +975,7 @@ export function genericPolling({
   }
 
   // If we get here, we've exhausted all attempts
-  console.error(`VU ${__VU}: Iteration ${__ITER}: Failed to find matching event after ${maxAttempts} attempts`);
+  log.error(`Failed to find matching event after ${maxAttempts} attempts`);
   return false;
 }
 
@@ -1197,19 +1199,16 @@ export function retry(fn, retries = 3, delay = 2000, operation = 'Undefined') {
   }
 }
 
-// {
-//   "name": "load_pop",
-//   "version": "0.1.0",
-//   "attribute_names": [
-//     "date_of_birth",
-//     "id_number",
-//     "country_of_birth",
-//     "citizen_status",
-//     "date_of_issue",
-//     "gender",
-//     "surname",
-//     "nationality",
-//     "country_of_birth_iso_code",
-//     "names"
-//   ]
-// }
+export function pollAndCheck(pollingConfig, context) {
+  const response = genericPolling(pollingConfig);
+
+  // Generate check message from perspective, topic, and state
+  // e.g., "Holder credentials done event received successfully"
+  const checkMessage = `${context.perspective} ${pollingConfig.topic} ${pollingConfig.state} event received successfully`;
+
+  check(response, {
+    [checkMessage]: (r) => r === true
+  });
+
+  return response;
+}

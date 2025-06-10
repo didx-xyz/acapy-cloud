@@ -11,8 +11,8 @@ import {
   getProofIdCredentials,
   getWalletIndex,
   sendProofRequest,
-  retry,  // Add this import
-  genericPolling,
+  retry,
+  pollAndCheck,
 } from "../libs/functions.js";
 import { log, shuffleArray } from "../libs/k6Functions.js";
 
@@ -116,25 +116,17 @@ export default function (data) {
 
   const { thread_id: threadId } = JSON.parse(sendProofRequestResponse.body);
 
-  const waitForSSEEventReceivedResponse = genericPolling({
+  pollAndCheck({
     accessToken: wallet.access_token,
     walletId: wallet.wallet_id,
-    threadId: threadId,
-    eventType: "request-received",
-    sseUrlPath: "proofs/thread_id",
     topic: "proofs",
-    expectedState: "request-received",
-    maxAttempts: 1,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
+    field: "thread_id",
+    fieldId: threadId,
+    state: "request-received",
+    maxAttempts: 1,
     lookBack: 60,
     sseTag: "proof_request_received",
-  });
-
-  const sseEventError = "SSE event was not received successfully";
-  const sseCheckMessage = "SSE Event received successfully: request-recevied";
-
-  check(waitForSSEEventReceivedResponse, {
-    [sseCheckMessage]: (r) => r === true
-});
+  }, { perspective: "Holder" });
 
   // TODO: return object and add check for the response
   const proofId = getProofIdByThreadId(wallet.access_token, threadId);
@@ -144,7 +136,7 @@ export default function (data) {
   try {
     credentialId = retry(() => {
       return getProofIdCredentials(wallet.access_token, proofId, epochTimestamp);
-    }, 5, 5000, 'Get credential ID');
+    }, 5, 10000, 'Get credential ID');
   } catch (error) {
     console.error(`Failed to get proof credentials after retries: ${error.message}`);
   }
@@ -186,25 +178,17 @@ export default function (data) {
     },
   });
 
-  const waitForSSEProofDoneRequest = genericPolling({
+  pollAndCheck({
     accessToken: wallet.access_token,
     walletId: wallet.wallet_id,
-    threadId: threadId,
-    eventType: "done",
-    sseUrlPath: "proofs/thread_id",
     topic: "proofs",
-    expectedState: "done",
-    maxAttempts: 1,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
+    field: "thread_id",
+    fieldId: threadId,
+    state: "done",
+    maxAttempts: 1,
     lookBack: 60,
     sseTag: "proof_done",
-  });
-
-  const sseEventErrorProofDone = "SSE event was not received successfully";
-  const sseCheckMessageProofDone = "SSE Event received successfully: done";
-
-  check(waitForSSEProofDoneRequest, {
-    [sseCheckMessageProofDone]: (r) => r === true
-  });
+  }, { perspective: "Holder" });
 
   // const getProofResponse = getProof(issuer.accessToken, wallet.issuer_connection_id, threadId );
   let getProofResponse;
