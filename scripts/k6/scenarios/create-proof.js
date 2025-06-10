@@ -41,7 +41,7 @@ export const options = {
   },
   tags: {
     test_run_id: "phased-issuance",
-    test_phase: "create-proofs",
+    test_phase: __ENV.IS_REVOKED === "true" ? "create-proofs-unverified" : "create-proofs-verified",
     version: `${version}`,
   },
 };
@@ -185,7 +185,7 @@ export default function (data) {
     field: "thread_id",
     fieldId: threadId,
     state: "done",
-    maxAttempts: 1,
+    // maxAttempts: 3,
     lookBack: 60,
     sseTag: "proof_done",
   }, { perspective: "Holder" });
