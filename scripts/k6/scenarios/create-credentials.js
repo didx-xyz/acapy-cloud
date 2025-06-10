@@ -167,6 +167,26 @@ export default function (data) {
     },
   });
 
+  const waitForSSECredentialEventResponse = genericPolling({
+    accessToken: wallet.access_token,
+    walletId: wallet.wallet_id,
+    threadId: holderCredentialExchangeId,
+    eventType: "done",
+    sseUrlPath: "credentials/credential_exchange_id",
+    topic: "credentials",
+    expectedState: "done",
+    maxAttempts: 10,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
+    lookBack: 60,
+    sseTag: "credential_received",
+  });
+
+  const sseCredentialEventError = "SSE event was not received successfully";
+  const sseCredentialCheckMessage = "SSE request received successfully: done";
+
+  check(waitForSSECredentialEventResponse, {
+      [sseCredentialCheckMessage]: (r) => r === true
+  });
+
   const issuerData = JSON.stringify({
     credential_exchange_id: issuerCredentialExchangeId,
     issuer_access_token: wallet.issuer_access_token,
