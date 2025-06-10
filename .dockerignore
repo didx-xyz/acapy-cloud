@@ -6,6 +6,8 @@
 !poetry.lock
 !app/
 !dockerfiles/poetry-requirements.txt
+!dockerfiles/agents/pyproject.toml
+!dockerfiles/agents/poetry.lock
 !scripts/
 !shared/
 !tails/
