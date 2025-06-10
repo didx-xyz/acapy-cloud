@@ -21,6 +21,8 @@ const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
 const testFunctionReqs = new Counter("test_function_reqs");
 const sleepDuration = Number.parseInt(__ENV.SLEEP_DURATION, 0);
 
+const version = __ENV.VERSION;
+
 export const options = {
   scenarios: {
     default: {
@@ -42,6 +44,7 @@ export const options = {
   tags: {
     test_run_id: "phased-issuance",
     test_phase: "publish-revoke",
+    version: `${version}`,
   },
 };
 
@@ -57,6 +60,15 @@ export function setup() {
   ];
 
   for (const issuerToken of uniqueIssuers) {
+    // Find the tenant data for this issuer token to get wallet info
+    const issuerTenant = tenants.find(
+      (tenant) => tenant.issuer_access_token === issuerToken
+    );
+
+    console.log(
+      `Publishing revocation for issuer: ${issuerTenant.walletName} (ID: ${issuerTenant.walletId})`
+    );
+
     const publishRevocationResponse = publishRevocation(issuerToken);
     check(publishRevocationResponse, {
       "Revocation published successfully": (r) => {
