@@ -39,6 +39,8 @@ serviceAccount:
 # This is for setting Kubernetes Annotations to a Pod.
 # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 podAnnotations:
+  # Disable Istio Sidecar injection
+  sidecar.istio.io/inject: "false"
   # https://docs.datadoghq.com/containers/guide/container-discovery-management/?tab=helm#pod-exclude-configuration
   ad.datadoghq.com/exclude: "false"
   ad.datadoghq.com/logs_exclude: "false"
@@ -102,19 +104,20 @@ lbService:
       targetPort: p2p
 
 # This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
+ingressDomain: 127.0.0.1.nip.io
 ingress:
   internal:
     enabled: true
     className: nginx
     annotations: {}
     hosts:
-      - host: api-cheqd.127.0.0.1.nip.io
+      - host: api-cheqd.{{ .Values.ingressDomain }}
         paths:
           - servicePort: "{{ .Values.service.apiPort }}"
-      - host: rpc-cheqd.127.0.0.1.nip.io
+      - host: rpc-cheqd.{{ .Values.ingressDomain }}
         paths:
           - servicePort: "{{ .Values.service.rpcPort }}"
-      - host: grpc-web-cheqd.127.0.0.1.nip.io
+      - host: grpc-web-cheqd.{{ .Values.ingressDomain }}
         paths:
           - servicePort: "{{ .Values.service.grpcWebPort }}"
   grpc-internal:
@@ -123,17 +126,17 @@ ingress:
     annotations:
       nginx.ingress.kubernetes.io/backend-protocol: GRPC
     hosts:
-      - host: grpc-cheqd.127.0.0.1.nip.io
+      - host: grpc-cheqd.{{ .Values.ingressDomain }}
         paths:
           - servicePort: "{{ .Values.service.grpcPort }}"
 
 resources: {}
   # requests:
-  #   cpu: 250m
-  #   memory: 4Gi
+  #   cpu: 50m
+  #   memory: 2Gi
   # limits:
   #   cpu: 4000m
-  #   memory: 5Gi
+  #   memory: 4Gi
 
 # This is to setup the startup, liveness, and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 startupProbe:
@@ -204,6 +207,24 @@ nodeAffinityPreset:
   ##
   values: []
 
+env: {}
+  # FOO: bar
+  # BAZ:
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: example-secret
+  #       key: baz
+
+
+## When doing HA, we need to configure persistent peers to connect to each other.
+## The replicas cannot share the same Node Key, so:
+## 1. Start up all the replicas
+## 2. Get the Node IDs from each replica (':rpcPort/status | jq .result.node_info.id')
+## 3. Populate the nodeIds list with the Node IDs in order of the replicas
+nodeIds: []
+  # - gXh3mApgDI7IgQALqC8iXmUCoV83OvcBYuFTlRMl # cheqd-0
+  # - ibdZDtSVFRhBoOqmgMbnUEOOidC5W3l76lsQemXg # cheqd-1
+
 secrets: {}
   # validatorMnemonic: ""
   # validatorKey:
@@ -223,10 +244,10 @@ network: testnet # localnet, testnet, or mainnet
 networkId: testnet-6 # cheqd (localnet), testnet-6, or mainnet-1
 snapshot:
   # https://snapshots.cheqd.net
-  date: 2025-06-02
+  date: 2025-06-10
   filename: cheqd-{{ .Values.networkId }}_{{ .Values.snapshot.date }}.tar.lz4
   url: https://cheqd-node-backups.ams3.digitaloceanspaces.com/{{ .Values.network }}/{{ .Values.snapshot.date }}/{{ tpl .Values.snapshot.filename . }}
-  checksum: 16b32584657a3c181c5d5d4a50797ec6a5c766bb0b1a2e63d745dd604eb82daf
+  checksum: b188a8605dccffbdaa73ee61397ab7c5de82b59967e70f496c55cb98653ba816
   podLabels: {}
   podAnnotations:
     ad.datadoghq.com/exclude: "true"

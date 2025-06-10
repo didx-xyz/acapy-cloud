@@ -8,6 +8,7 @@ metadata:
     {{- tpl (toYaml .) $ | nindent 4 }}
     {{- end }}
 spec:
+  serviceName: {{ include "cheqd.fullname" . }}-headless
   replicas: {{ .Values.replicaCount }}
   podManagementPolicy: Parallel
   selector:
@@ -202,6 +203,18 @@ spec:
             - name: metrics
               containerPort: {{ .Values.service.metricsPort }}
               protocol: TCP
+          env:
+            - name: CHEQD_NODED_P2P_PERSISTENT_PEERS
+              value: "{{ range $i, $nodeId := .Values.nodeIds }}{{ if $i }},{{ end }}{{ $nodeId }}@{{ include "cheqd.fullname" $ }}-{{ $i }}.{{ include "cheqd.fullname" $ }}-headless.{{ $.Release.Namespace }}.svc.cluster.local:{{ $.Values.service.p2pPort }}{{ end }}"
+            {{- range $k,$v := .Values.env }}
+            - name: {{ $k }}
+              {{- $type := printf "%s" (typeOf $v) }}
+              {{- if or (eq $type "string") (eq $type "float64") (eq $type "bool") }}
+              value: {{ tpl (toString $v) $ | quote }}
+              {{- else }}
+              {{- tpl (toYaml .) $ | nindent 14 }}
+              {{- end }}
+            {{- end }}
           {{- if .Values.startupProbe }}
           startupProbe:
             {{- tpl (toYaml .Values.startupProbe) . | nindent 12 }}
