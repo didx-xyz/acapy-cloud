@@ -55,7 +55,6 @@ async def test_onboard_issuer_public_did_exists(
     ):
         onboard_result = await issuer.onboard_issuer(
             issuer_label="issuer_name",
-            endorser_controller=endorser_controller,
             issuer_controller=mock_agent_controller,
             issuer_wallet_id="issuer_wallet_id",
         )
@@ -117,10 +116,9 @@ async def test_onboard_issuer_no_public_did(
         ) as acapy_wallet_create_did_mock,
     ):
         onboard_result = await issuer.onboard_issuer(
-            issuer_label="issuer_name",
-            endorser_controller=endorser_controller,
             issuer_controller=mock_agent_controller,
             issuer_wallet_id="issuer_wallet_id",
+            issuer_label="issuer_name",
         )
 
     # Assertions

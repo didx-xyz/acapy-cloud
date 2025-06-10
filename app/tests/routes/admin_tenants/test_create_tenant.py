@@ -119,7 +119,6 @@ async def test_create_tenant_success(roles):
             )
             if "issuer" in roles:
                 mock_onboard_issuer.assert_awaited_once_with(
-                    endorser_controller=ANY,
                     issuer_controller=ANY,
                     issuer_wallet_id=wallet_id,
                     issuer_label=wallet_label,
