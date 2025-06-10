@@ -9,4 +9,5 @@ class TrustRegistryException(HTTPException):
         detail: str,
         status_code: int = 403,
     ) -> None:
+        """Initialize the trust registry exception."""
         super().__init__(status_code=status_code, detail=detail)

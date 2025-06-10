@@ -10,6 +10,7 @@ from shared.constants import REGISTRY_CREATION_TIMEOUT
 
 class CredentialDefinitionPublisher:
     def __init__(self, controller: AcaPyClient, logger: Logger):
+        """Initialize the credential definition publisher."""
         self._logger = logger
         self._controller = controller
 

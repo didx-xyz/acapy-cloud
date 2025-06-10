@@ -33,6 +33,7 @@ MAX_ATTEMPTS_BEFORE_ERROR = int(
 
 class NATSStatus:
     def __init__(self):
+        """Initialize the NATS status tracker."""
         self.last_disconnect_time = None
         self.reconnect_attempts = 0
 

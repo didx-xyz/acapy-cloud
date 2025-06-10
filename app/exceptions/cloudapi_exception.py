@@ -11,4 +11,5 @@ class CloudApiException(HTTPException):
         detail: str | dict[str, Any],
         status_code: int = 500,
     ) -> None:
+        """Initialize the CloudAPI exception."""
         super().__init__(status_code=status_code, detail=detail)

@@ -55,6 +55,7 @@ class NatsEventsProcessor:
     """
 
     def __init__(self, jetstream: JetStreamContext):
+        """Initialize the NATS events processor."""
         self.js_context: JetStreamContext = jetstream
 
     def _retry_log(self, bound_logger, retry_state: RetryCallState):

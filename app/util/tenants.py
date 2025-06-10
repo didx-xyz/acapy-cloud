@@ -14,6 +14,7 @@ class WalletNotFoundException(HTTPException):
     """Class that represents a wallet was not found"""
 
     def __init__(self, wallet_id: str) -> None:
+        """Initialize the wallet not found exception."""
         super().__init__(
             status_code=404, detail=f"Wallet with id `{wallet_id}` not found."
         )

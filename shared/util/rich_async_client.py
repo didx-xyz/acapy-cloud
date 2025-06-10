@@ -38,6 +38,7 @@ class RichAsyncClient(AsyncClient):
         retry_wait_seconds: float = 0.5,
         **kwargs,
     ) -> None:
+        """Initialize the rich async client."""
         super().__init__(*args, verify=verify, **kwargs)
         self.name = name + " - HTTP" if name else "HTTP"  # prepended to exceptions
         self.raise_status_error = raise_status_error

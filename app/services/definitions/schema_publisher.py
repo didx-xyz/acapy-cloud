@@ -16,6 +16,7 @@ from app.util.retry_method import coroutine_with_retry_until_value
 
 class SchemaPublisher:
     def __init__(self, controller: AcaPyClient, logger: Logger):
+        """Initialize the schema publisher."""
         self._logger = logger
         self._controller = controller
 

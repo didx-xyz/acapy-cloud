@@ -7,4 +7,5 @@ class CloudApiValueError(HTTPException):
     """Class that represents a validation / value error"""
 
     def __init__(self, detail: str | dict[str, Any]) -> None:
+        """Initialize the CloudAPI value error."""
         super().__init__(status_code=422, detail=detail)
