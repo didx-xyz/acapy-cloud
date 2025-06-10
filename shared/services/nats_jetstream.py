@@ -9,7 +9,6 @@ from nats.errors import (
     AuthorizationError,
     ConnectionClosedError,
     NoServersError,
-    TimeoutError,
     UnexpectedEOF,
 )
 from nats.js.client import JetStreamContext

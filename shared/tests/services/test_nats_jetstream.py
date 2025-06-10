@@ -5,7 +5,6 @@ from nats.errors import (
     AuthorizationError,
     ConnectionClosedError,
     NoServersError,
-    TimeoutError,
     UnexpectedEOF,
 )
 

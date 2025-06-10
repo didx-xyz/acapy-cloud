@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from nats.aio.client import Client as NATSClient
-from nats.errors import BadSubscriptionError, Error, TimeoutError
+from nats.errors import BadSubscriptionError, Error
 from nats.js.client import JetStreamContext
 from nats.js.errors import FetchTimeoutError
 from tenacity import RetryCallState

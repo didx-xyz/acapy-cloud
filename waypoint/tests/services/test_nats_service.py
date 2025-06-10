@@ -10,7 +10,6 @@ from nats.errors import (
     ConnectionClosedError,
     Error,
     NoServersError,
-    TimeoutError,
 )
 from nats.js.api import ConsumerConfig, DeliverPolicy
 from nats.js.client import JetStreamContext
