@@ -7,7 +7,6 @@ from aries_cloudcontroller import (
     TAAInfo,
     TAARecord,
     TAAResult,
-    TxnOrRegisterLedgerNymResponse,
 )
 
 from app.exceptions import CloudApiException
@@ -16,7 +15,6 @@ from app.services.acapy_ledger import (
     accept_taa_if_required,
     get_did_endpoint,
     get_taa,
-    register_nym_on_ledger,
     schema_id_from_credential_definition_id,
 )
 
@@ -81,41 +79,6 @@ async def test_get_did_endpoint_failure(mock_agent_controller: AcaPyClient):
         await get_did_endpoint(mock_agent_controller, "data")
     assert exc.value.status_code == 404
     assert exc.value.detail == "Could not obtain issuer endpoint."
-
-
-@pytest.mark.anyio
-async def test_register_nym_on_ledger_success(mock_agent_controller: AcaPyClient):
-    expected_response = TxnOrRegisterLedgerNymResponse()
-    mock_agent_controller.ledger.register_nym.return_value = expected_response
-
-    response = await register_nym_on_ledger(
-        mock_agent_controller,
-        did="did",
-        verkey="verkey",
-        alias="alias",
-        role="role",
-        connection_id="conn_id",
-        create_transaction_for_endorser="endorser",
-    )
-    assert response == expected_response
-
-
-@pytest.mark.anyio
-async def test_register_nym_on_ledger_failure(mock_agent_controller: AcaPyClient):
-    mock_agent_controller.ledger.register_nym.side_effect = ApiException(status=500)
-
-    with pytest.raises(CloudApiException) as exc:
-        await register_nym_on_ledger(
-            mock_agent_controller,
-            did="did",
-            verkey="verkey",
-            alias="alias",
-            role="role",
-            connection_id="conn_id",
-            create_transaction_for_endorser="endorser",
-        )
-    assert exc.value.status_code == 500
-    assert "Error registering NYM on ledger" in exc.value.detail
 
 
 @pytest.mark.anyio

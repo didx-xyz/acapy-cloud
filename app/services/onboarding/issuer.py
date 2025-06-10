@@ -4,8 +4,8 @@ from aries_cloudcontroller import DID, AcaPyClient, InvitationCreateRequest
 
 from app.exceptions import CloudApiException, handle_acapy_call
 from app.models.tenants import OnboardResult
+from app.models.wallet import DIDCreate
 from app.services import acapy_wallet
-from app.services.onboarding.util.register_issuer_did import register_issuer_did
 from shared.log_config import get_logger
 
 logger = get_logger(__name__)
@@ -19,13 +19,9 @@ async def onboard_issuer(
 ) -> OnboardResult:
     """Onboard the controller as issuer.
 
-    The onboarding will take care of the following:
-      - make sure the issuer has a public did
-      - make sure the issuer has a connection with the endorser
-      - make sure the issuer has set up endorsement with the endorser connection
+    The onboarding will make sure the issuer has a public did.
 
     Args:
-        endorser_controller (AcaPyClient): authenticated ACA-Py client for endorser
         issuer_controller (AcaPyClient): authenticated ACA-Py client for issuer
         issuer_wallet_id (str): wallet id of the issuer
         issuer_label (str): alias for the issuer
@@ -78,16 +74,10 @@ async def onboard_issuer_no_public_did(
     """Onboard an issuer without a public DID.
 
     This function handles the case where the issuer does not have a public DID.
-    It takes care of the following steps:
-      - Create an endorser invitation using the endorser_controller
-      - Wait for the connection between issuer and endorser to complete
-      - Set roles for both issuer and endorser
-      - Configure endorsement for the connection
-      - Register the issuer DID on the ledger
+    It takes care of registering the issuer DID on the ledger.
 
     Args:
         issuer_label (str): Alias of the issuer
-        endorser_controller (AcaPyClient): Authenticated ACA-Py client for endorser
         issuer_controller (AcaPyClient): Authenticated ACA-Py client for issuer
         issuer_wallet_id (str): Wallet id of the issuer
         did_method (Literal["cheqd"]): DID method to use for onboarding the issuer
@@ -101,10 +91,8 @@ async def onboard_issuer_no_public_did(
     )
     bound_logger.debug("Onboarding issuer that has no public DID")
 
-    issuer_did = await register_issuer_did(
-        issuer_controller=issuer_controller,
-        did_method=did_method,
-        logger=bound_logger,
+    issuer_did = await acapy_wallet.create_did(
+        issuer_controller, did_create=DIDCreate(method=did_method)
     )
 
     bound_logger.debug("Successfully registered DID for issuer: {}.", issuer_did)
