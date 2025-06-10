@@ -24,6 +24,8 @@ const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
 const testFunctionReqs = new Counter("test_function_reqs");
 const sleepDuration = Number.parseInt(__ENV.SLEEP_DURATION, 0);
 
+const version = __ENV.VERSION;
+
 export const options = {
   scenarios: {
     default: {
@@ -45,6 +47,7 @@ export const options = {
   tags: {
     test_run_id: "phased-issuance",
     test_phase: "revoke-credentials",
+    version: `${version}`,
   },
 };
 
