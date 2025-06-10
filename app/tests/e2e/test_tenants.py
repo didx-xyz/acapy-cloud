@@ -1,5 +1,6 @@
 import pytest
 from aries_cloudcontroller.acapy_client import AcaPyClient
+from aries_cloudcontroller.exceptions import NotFoundException
 from fastapi import HTTPException
 from uuid_utils import uuid4
 
@@ -695,7 +696,7 @@ async def test_delete_tenant(
     actor = await trust_registry.fetch_actor_by_id(wallet_id)
     assert not actor
 
-    with pytest.raises(HTTPException):
+    with pytest.raises(NotFoundException):
         await tenant_admin_acapy_client.multitenancy.get_wallet(wallet_id=wallet_id)
 
 
