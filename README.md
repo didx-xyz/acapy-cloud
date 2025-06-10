@@ -43,7 +43,7 @@ We simplify several key capabilities, including:
 
 To enable this, the project includes essential supporting services:
 
-- An [Endorser](endorser) agent and service for authorizing ledger transactions
+- A [Tails](tails) service for storing tails files on S3
 - A [Trust Registry](trustregistry) implementation for authorizing valid issuers, verifiers,
   and approved credential schemas
 - A webhooks service ([Waypoint](waypoint)) for real-time, server-sent event
