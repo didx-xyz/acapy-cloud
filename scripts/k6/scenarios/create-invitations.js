@@ -116,6 +116,7 @@ export default function (data) {
 
   let holderConnectionId;
   let holderDid;
+  let holderFullDid;
 
   if (useOobInvitation) {
     // OOB Invitation flow
@@ -191,6 +192,7 @@ export default function (data) {
 
     const { my_did: holderPrivateDidFull } = JSON.parse(getHolderPrivateDidResponse.body);
     holderDid = holderPrivateDidFull.split(':').slice(0, 3).join(':');
+    holderFullDid = holderPrivateDidFull;
   } else {
     // DIDExchange flow
     console.debug("Using DIDExchange flow");
@@ -223,7 +225,7 @@ export default function (data) {
     holderDid = my_did.split(':').slice(0, 3).join(':');
   }
 
-  const waitForSSEEventResponse = genericPolling({
+  const waitForHolderSSEEventResponse = genericPolling({
     accessToken: wallet.access_token,
     walletId: wallet.wallet_id,
     threadId: holderConnectionId,
@@ -236,12 +238,33 @@ export default function (data) {
     sseTag: "connection_ready" // Pass through the tag for metrics/tracing
   });
 
-  const sseEventError = "SSE event was not received successfully";
-  const sseCheckMessage = "SSE Event received successfully: connection-ready";
+  const sseHolderEventError = "Holder SSE event was not received successfully";
+  const sseHolderCheckMessage = "Holder SSE Event received successfully: connection-ready";
 
   // Check if the polling was successful, maintaining the same check structure
-  check(waitForSSEEventResponse, {
-    [sseCheckMessage]: (r) => r === true
+  check(waitForHolderSSEEventResponse, {
+    [sseHolderCheckMessage]: (r) => r === true
+  });
+
+  const waitForIssuerSSEEventResponse = genericPolling({
+    accessToken: issuer.accessToken,
+    walletId: issuer.walletId,
+    threadId: holderFullDid,
+    eventType: "completed",
+    sseUrlPath: "connections/their_did",
+    topic: "connections",
+    expectedState: "completed",
+    maxAttempts: 3,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
+    lookBack: 60,
+    sseTag: "connection_ready" // Pass through the tag for metrics/tracing
+  });
+
+  const sseIssuerEventError = "Issuer SSE event was not received successfully";
+  const sseIssuerCheckMessage = "Issuer SSE Event received successfully: connection-ready";
+
+  // Check if the polling was successful, maintaining the same check structure
+  check(waitForIssuerSSEEventResponse, {
+    [sseIssuerCheckMessage]: (r) => r === true
   });
 
   // Issuer is now going to check
@@ -258,7 +281,7 @@ export default function (data) {
       }
       return response;
     }
-    , 5, 2000, "getIssuerConnectionId");
+    , 5, 1000, "getIssuerConnectionId");
   }
   catch (e) {
     console.error(`Failed after retries: ${e.message}`);
