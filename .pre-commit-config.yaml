@@ -4,8 +4,6 @@ repos:
     rev: v0.11.12
     hooks:
       - id: ruff-check # Run the linter
-      - id: ruff-check # Run import check
-        args: ["--select", "I"]
       - id: ruff-format # Run the formatter
         args: ["--check"]
 

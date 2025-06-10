@@ -35,9 +35,6 @@ jobs:
           experimental: true
           install: true
 
-      - name: Check import style with Ruff
-        run: ruff check --select I
-
       - name: Check code style with Ruff
         run: ruff format --check
 
