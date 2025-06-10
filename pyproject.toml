@@ -123,7 +123,7 @@ lint.ignore = [
   # False positives:
   "PLE1205", # Too many arguments detected for loguru {} formatted strings
 ]
-exclude = [".git/*", "endorser/*", "tilt/.von-network/*"]
+exclude = [".git/*", "endorser/*"]
 
 [build-system]
 requires = ["poetry-core>=2.1"]
