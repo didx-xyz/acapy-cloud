@@ -27,6 +27,9 @@ services:
       - SCHEMA_VERSION=0.1.0
       - DENOMINATOR=1
       - FACTOR=1
+      - OOB_INVITATION=true
+      - USE_AUTO_PUBLISH=true
+      - DEBUG=false
 
   datadog:
     image: datadog/agent:latest
