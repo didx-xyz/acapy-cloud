@@ -6,10 +6,10 @@ COPY poetry.lock cloudapi-tests/
 
 WORKDIR /cloudapi-tests
 
-# Install all dependencies
-ARG POETRY_VERSION=2.1.3
-RUN pip install --no-cache-dir poetry==${POETRY_VERSION}
+COPY dockerfiles/poetry-requirements.txt /cloudapi-tests
+RUN pip install --no-cache-dir -r poetry-requirements.txt
 
+# Install all dependencies
 ENV POETRY_VIRTUALENVS_CREATE=false
 RUN poetry install
 
