@@ -867,9 +867,9 @@ export function genericPolling({
   fieldId,
   state,
   lookBack = 60,
-  maxAttempts = 4,
+  maxAttempts = 3,
   sseTag,
-  requestTimeout = 14
+  requestTimeout = 14 // max 14s - will need to deal with SSE ping at 15s
 }) {
   const endpoint = `${__ENV.CLOUDAPI_URL}/tenant/v1/sse/${walletId}/${topic}/${field}/${fieldId}/${state}?look_back=${lookBack}`;
 

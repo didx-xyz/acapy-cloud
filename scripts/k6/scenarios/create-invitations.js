@@ -228,14 +228,13 @@ export default function (data) {
   const waitForHolderSSEEventResponse = genericPolling({
     accessToken: wallet.access_token,
     walletId: wallet.wallet_id,
-    threadId: holderConnectionId,
-    eventType: "completed",
-    sseUrlPath: "connections/connection_id",
     topic: "connections",
-    expectedState: "completed",
+    field: "connection_id",
+    fieldId: holderConnectionId,
+    state: "completed",
     maxAttempts: 3,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
     lookBack: 60,
-    sseTag: "connection_ready" // Pass through the tag for metrics/tracing
+    sseTag: "holder-connection-ready" // Pass through the tag for metrics/tracing
   });
 
   const sseHolderEventError = "Holder SSE event was not received successfully";
@@ -249,14 +248,13 @@ export default function (data) {
   const waitForIssuerSSEEventResponse = genericPolling({
     accessToken: issuer.accessToken,
     walletId: issuer.walletId,
-    threadId: holderFullDid,
-    eventType: "completed",
-    sseUrlPath: "connections/their_did",
     topic: "connections",
-    expectedState: "completed",
+    field: "their_did",
+    fieldId: holderFullDid,
+    state: "completed",
     maxAttempts: 3,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
     lookBack: 60,
-    sseTag: "connection_ready" // Pass through the tag for metrics/tracing
+    sseTag: "issuer-connection-ready" // Pass through the tag for metrics/tracing
   });
 
   const sseIssuerEventError = "Issuer SSE event was not received successfully";

@@ -121,11 +121,10 @@ export default function (data) {
   const waitForSSEEventResponse = genericPolling({
     accessToken: wallet.access_token,
     walletId: wallet.wallet_id,
-    threadId: threadId,
-    eventType: "offer-received",
-    sseUrlPath: "credentials/thread_id",
     topic: "credentials",
-    expectedState: "offer-received",
+    field: "thread_id",
+    fieldId: threadId,
+    state: "offer-received",
     maxAttempts: 10,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
     lookBack: 60,
     sseTag: "credential_offer_received",
@@ -170,11 +169,10 @@ export default function (data) {
   const waitForSSECredentialEventResponse = genericPolling({
     accessToken: wallet.access_token,
     walletId: wallet.wallet_id,
-    threadId: holderCredentialExchangeId,
-    eventType: "done",
-    sseUrlPath: "credentials/credential_exchange_id",
     topic: "credentials",
-    expectedState: "done",
+    field: "credential_exchange_id",
+    fieldId: holderCredentialExchangeId,
+    state: "done",
     maxAttempts: 10,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
     lookBack: 60,
     sseTag: "credential_received",

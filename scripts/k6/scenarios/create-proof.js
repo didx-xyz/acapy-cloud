@@ -119,11 +119,10 @@ export default function (data) {
   const waitForSSEEventReceivedResponse = genericPolling({
     accessToken: wallet.access_token,
     walletId: wallet.wallet_id,
-    threadId: threadId,
-    eventType: "request-received",
-    sseUrlPath: "proofs/thread_id",
     topic: "proofs",
-    expectedState: "request-received",
+    field: "thread_id",
+    fieldId: threadId,
+    state: "request-received",
     maxAttempts: 1,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
     lookBack: 60,
     sseTag: "proof_request_received",
@@ -144,7 +143,7 @@ export default function (data) {
   try {
     credentialId = retry(() => {
       return getProofIdCredentials(wallet.access_token, proofId, epochTimestamp);
-    }, 5, 5000, 'Get credential ID');
+    }, 5, 10000, 'Get credential ID');
   } catch (error) {
     console.error(`Failed to get proof credentials after retries: ${error.message}`);
   }
@@ -189,11 +188,10 @@ export default function (data) {
   const waitForSSEProofDoneRequest = genericPolling({
     accessToken: wallet.access_token,
     walletId: wallet.wallet_id,
-    threadId: threadId,
-    eventType: "done",
-    sseUrlPath: "proofs/thread_id",
     topic: "proofs",
-    expectedState: "done",
+    field: "thread_id",
+    fieldId: threadId,
+    state: "done",
     maxAttempts: 1,  // Will use backoff: 0.5s, 1s, 2s, 5s, 10s, 15s
     lookBack: 60,
     sseTag: "proof_done",
