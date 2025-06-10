@@ -17,7 +17,6 @@ from app.models.definitions import CreateSchema, CredentialSchema, SchemaType
 from app.routes.trust_registry import get_schemas as get_trust_registry_schemas
 from app.services.definitions.schema_publisher import SchemaPublisher
 from app.util.definitions import anoncreds_schema_from_acapy
-from app.util.did import strip_qualified_did_sov
 from shared.constants import GOVERNANCE_AGENT_URL
 from shared.log_config import get_logger
 
@@ -45,9 +44,7 @@ async def create_schema(
             attr_names=schema.attribute_names,
             name=schema.name,
             version=schema.version,
-            issuer_id=strip_qualified_did_sov(public_did),
-            # See the reason for stripping did:sov from the issuer DID here:
-            # https://github.com/openwallet-foundation/acapy/issues/3540#issuecomment-2686157016
+            issuer_id=public_did,
         )
 
         schema_request = handle_model_with_validation(

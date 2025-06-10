@@ -6,7 +6,6 @@ from app.models.wallet import DIDCreate
 from app.routes.connections import router as connections_router
 from app.services import acapy_wallet
 from app.tests.util.webhooks import check_webhook_state
-from app.util.did import qualified_did_sov
 from shared import RichAsyncClient
 
 CONNECTIONS_BASE_PATH = connections_router.prefix
@@ -27,7 +26,7 @@ async def test_rotate_did(
         controller=faber_anoncreds_acapy_client
     )
 
-    request_data = {"their_public_did": qualified_did_sov(faber_public_did.did)}
+    request_data = {"their_public_did": faber_public_did.did}
     response = await alice_member_client.post(
         f"{CONNECTIONS_BASE_PATH}/did-exchange/create-request", params=request_data
     )
@@ -70,7 +69,7 @@ async def test_hangup_did_rotation(
         controller=faber_anoncreds_acapy_client
     )
 
-    request_data = {"their_public_did": qualified_did_sov(faber_public_did.did)}
+    request_data = {"their_public_did": faber_public_did.did}
     response = await alice_member_client.post(
         f"{CONNECTIONS_BASE_PATH}/did-exchange/create-request", params=request_data
     )

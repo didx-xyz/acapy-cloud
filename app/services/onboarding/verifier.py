@@ -3,7 +3,6 @@ from aries_cloudcontroller import AcaPyClient, InvitationCreateRequest, Invitati
 from app.exceptions import CloudApiException, handle_acapy_call
 from app.models.tenants import OnboardResult
 from app.services import acapy_wallet
-from app.util.did import qualified_did_sov
 from shared.log_config import get_logger
 
 logger = get_logger(__name__)
@@ -31,7 +30,7 @@ async def onboard_verifier(*, verifier_controller: AcaPyClient, verifier_label: 
         bound_logger.debug("Getting public DID for to-be verifier")
         public_did = await acapy_wallet.get_public_did(controller=verifier_controller)
 
-        onboarding_result["did"] = qualified_did_sov(public_did.did)
+        onboarding_result["did"] = public_did.did
     except CloudApiException:
         bound_logger.info(
             "No public DID found for to-be verifier. "

@@ -8,7 +8,6 @@ from app.routes.admin.tenants import router as tenants_router
 from app.routes.connections import router as connections_router
 from app.services import acapy_wallet
 from app.tests.util.webhooks import check_webhook_state, get_wallet_id_from_async_client
-from app.util.did import qualified_did_sov
 from shared import RichAsyncClient
 
 CONNECTIONS_BASE_PATH = connections_router.prefix
@@ -42,7 +41,7 @@ async def test_create_did_exchange_request(
         controller=faber_anoncreds_acapy_client
     )
 
-    request_data = {"their_public_did": qualified_did_sov(faber_public_did.did)}
+    request_data = {"their_public_did": faber_public_did.did}
 
     if use_did:
         new_did = await acapy_wallet.create_did(controller=alice_acapy_client)
@@ -134,7 +133,7 @@ async def test_accept_did_exchange_invitation(
         controller=faber_anoncreds_acapy_client
     )
 
-    request_data = {"their_public_did": qualified_did_sov(faber_public_did.did)}
+    request_data = {"their_public_did": faber_public_did.did}
 
     alice_create_request_response = await alice_member_client.post(
         f"{CONNECTIONS_BASE_PATH}/did-exchange/create-request", params=request_data

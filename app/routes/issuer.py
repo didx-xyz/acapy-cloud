@@ -9,7 +9,7 @@ from app.models.issuer import CreateOffer, SendCredential
 from app.services.acapy_ledger import schema_id_from_credential_definition_id
 from app.services.issuer.acapy_issuer_v2 import IssuerV2
 from app.services.trust_registry.util.issuer import assert_valid_issuer
-from app.util.did import did_from_credential_definition_id, qualified_did_sov
+from app.util.did import did_from_credential_definition_id
 from app.util.pagination import (
     descending_query_parameter,
     limit_query_parameter,
@@ -227,7 +227,6 @@ async def request_credential(  # noqa: D417
             issuer_did = did_from_credential_definition_id(
                 record.credential_definition_id
             )
-            issuer_did = qualified_did_sov(issuer_did)
             schema_id = record.schema_id
         elif record.type == "ld_proof":
             issuer_did = record.did

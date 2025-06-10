@@ -9,7 +9,6 @@ from app.services.onboarding.util.register_issuer_did import (
     create_connection_with_endorser,
     register_issuer_did,
 )
-from app.util.did import qualified_did_sov
 from shared.log_config import get_logger
 
 logger = get_logger(__name__)
@@ -70,7 +69,7 @@ async def onboard_issuer(
     )
 
     return OnboardResult(
-        did=qualified_did_sov(issuer_did.did),
+        did=issuer_did.did,
         didcomm_invitation=invitation.invitation_url,
     )
 

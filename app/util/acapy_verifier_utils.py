@@ -6,7 +6,7 @@ from app.services.acapy_wallet import assert_public_did
 from app.services.trust_registry.actors import fetch_actor_by_did, fetch_actor_by_name
 from app.services.trust_registry.schemas import fetch_schemas
 from app.services.verifier.acapy_verifier_v2 import VerifierV2
-from app.util.did import ed25519_verkey_to_did_key, qualified_did_sov
+from app.util.did import ed25519_verkey_to_did_key
 from app.util.tenants import get_wallet_label_from_controller
 from shared.log_config import get_logger
 from shared.models.trustregistry import Actor
@@ -47,7 +47,7 @@ async def assert_valid_prover(  # pylint: disable=R0912
 
     # Case 1: connection made with public DID
     if connection_record.their_public_did:
-        public_did = qualified_did_sov(connection_record.their_public_did)
+        public_did = connection_record.their_public_did
     # Case 2: connection made without public DID
     elif connection_record.invitation_key:
         invitation_key = connection_record.invitation_key

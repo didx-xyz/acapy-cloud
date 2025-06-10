@@ -21,7 +21,6 @@ from app.exceptions import (
 from app.models.issuer import CredentialBase, CredentialWithConnection
 from app.services.issuer.acapy_issuer import Issuer
 from app.util.credentials import cred_ex_id_no_version
-from app.util.did import strip_qualified_did_sov
 from shared.log_config import get_logger
 from shared.models.credential_exchange import (
     CredentialExchange,
@@ -112,9 +111,7 @@ class IssuerV2(Issuer):
                 logger=bound_logger,
                 model_class=V20CredFilterAnonCreds,
                 cred_def_id=credential.anoncreds_credential_detail.credential_definition_id,
-                issuer_id=strip_qualified_did_sov(
-                    credential.anoncreds_credential_detail.issuer_did
-                ),
+                issuer_id=credential.anoncreds_credential_detail.issuer_did,
             )
             cred_filter = V20CredFilter(anoncreds=anon_model)
 
