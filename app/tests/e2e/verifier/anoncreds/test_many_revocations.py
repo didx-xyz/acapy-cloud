@@ -1,6 +1,5 @@
 import asyncio
 import time
-from typing import List
 
 import pytest
 
@@ -21,7 +20,7 @@ VERIFIER_BASE_PATH = verifier_router.prefix
 @pytest.mark.parametrize("revoke_many", ["auto_publish_true"], indirect=True)
 @pytest.mark.xdist_group(name="issuer_test_group_2")
 async def test_revoke_many_credentials(
-    revoke_many: List[  # pylint: disable=unused-argument, redefined-outer-name
+    revoke_many: list[  # pylint: disable=unused-argument, redefined-outer-name
         CredentialExchange
     ],
     anoncreds_credential_definition_id_revocable: str,
@@ -109,8 +108,8 @@ async def test_revoke_many_credentials(
 async def revoke_many(
     request,
     faber_anoncreds_client: RichAsyncClient,
-    issue_many_creds: List[CredentialExchange],  # pylint: disable=redefined-outer-name
-) -> List[CredentialExchange]:
+    issue_many_creds: list[CredentialExchange],  # pylint: disable=redefined-outer-name
+) -> list[CredentialExchange]:
     auto_publish = True
     if hasattr(request, "param") and request.param == "auto_publish_false":
         auto_publish = False
@@ -133,7 +132,7 @@ async def issue_many_creds(
     alice_member_client: RichAsyncClient,
     anoncreds_credential_definition_id_revocable: str,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
-) -> List[CredentialExchange]:
+) -> list[CredentialExchange]:
     # Fetch existing records so we can filter to exclude them. Necessary to cater for long running / regression tests
     existing_records = (
         await alice_member_client.get(CREDENTIALS_BASE_PATH + "?state=offer-received")

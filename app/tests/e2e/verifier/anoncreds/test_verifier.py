@@ -1,6 +1,5 @@
 import json
 import time
-from typing import Optional
 
 import pytest
 from aries_cloudcontroller import (
@@ -556,8 +555,8 @@ async def test_saving_of_anoncreds_presentation_exchange_records(
     alice_member_client: RichAsyncClient,
     acme_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
-    acme_save_exchange_record: Optional[bool],
-    alice_save_exchange_record: Optional[bool],
+    acme_save_exchange_record: bool | None,
+    alice_save_exchange_record: bool | None,
 ):
     request_body = {
         "connection_id": acme_and_alice_connection.acme_connection_id,

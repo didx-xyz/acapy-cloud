@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Literal
+from typing import Literal
 
 import pytest
 from pydantic import BaseModel
@@ -157,7 +157,7 @@ async def issue_alice_creds(
     alice_member_client: RichAsyncClient,
     credential_definition_id: str,
     faber_and_alice_connection: FaberAliceConnect,
-) -> List[CredentialExchange]:
+) -> list[CredentialExchange]:
     # Fetch existing records so we can filter to exclude them. Necessary to cater for long running / regression tests
     existing_records = (
         await alice_member_client.get(CREDENTIALS_BASE_PATH + "?state=offer-received")
@@ -242,7 +242,7 @@ async def issue_alice_anoncreds(
     alice_member_client: RichAsyncClient,
     anoncreds_credential_definition_id_revocable: str,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
-) -> List[CredentialExchange]:
+) -> list[CredentialExchange]:
     return await issue_alice_creds(
         credential_type="anoncreds",
         faber_client=faber_anoncreds_client,
@@ -254,8 +254,8 @@ async def issue_alice_anoncreds(
 
 async def revoke_alice_creds(
     faber_client: RichAsyncClient,
-    alice_issued_creds: List[CredentialExchange],
-) -> List[CredentialExchange]:
+    alice_issued_creds: list[CredentialExchange],
+) -> list[CredentialExchange]:
     for cred in alice_issued_creds:
         await faber_client.post(
             f"{REVOCATION_BASE_PATH}/revoke",
@@ -271,7 +271,7 @@ async def revoke_alice_creds(
 async def revoke_alice_anoncreds(
     faber_anoncreds_client: RichAsyncClient,
     issue_alice_anoncreds,  # pylint: disable=redefined-outer-name
-) -> List[CredentialExchange]:
+) -> list[CredentialExchange]:
     return await revoke_alice_creds(
         faber_client=faber_anoncreds_client,
         alice_issued_creds=issue_alice_anoncreds,
@@ -281,8 +281,8 @@ async def revoke_alice_anoncreds(
 async def revoke_creds_and_publish(
     request,
     faber_client: RichAsyncClient,
-    issued_creds: List[CredentialExchange],
-) -> List[CredentialExchange]:
+    issued_creds: list[CredentialExchange],
+) -> list[CredentialExchange]:
     auto_publish = False
     if hasattr(request, "param") and request.param == "auto_publish_true":
         auto_publish = True
@@ -313,7 +313,7 @@ async def revoke_alice_anoncreds_and_publish(
     request,
     faber_anoncreds_client: RichAsyncClient,
     issue_alice_anoncreds,  # pylint: disable=redefined-outer-name
-) -> List[CredentialExchange]:
+) -> list[CredentialExchange]:
     return await revoke_creds_and_publish(
         request,
         faber_client=faber_anoncreds_client,
@@ -549,7 +549,7 @@ async def issue_alice_many_creds(
     alice_member_client: RichAsyncClient,
     credential_definition_id: str,
     faber_and_alice_connection: FaberAliceConnect,
-) -> List[CredentialExchange]:
+) -> list[CredentialExchange]:
     faber_conn_id = faber_and_alice_connection.faber_connection_id
 
     faber_cred_ex_ids = []
@@ -622,7 +622,7 @@ async def issue_alice_many_anoncreds(
     alice_member_client: RichAsyncClient,
     anoncreds_credential_definition_id: str,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
-) -> List[CredentialExchange]:
+) -> list[CredentialExchange]:
     return await issue_alice_many_creds(
         credential_type="anoncreds",
         request=request,

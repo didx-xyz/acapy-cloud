@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
 from pydantic import BaseModel, Field
@@ -20,8 +18,8 @@ class SchemaID(BaseModel):
     schema_id: str = Field(..., examples=["WgWxqztrNooG92RXvxSTWv:2:schema_name:1.0"])
 
 
-@router.get("", response_model=List[Schema])
-async def get_schemas(db_session: Session = Depends(get_db)) -> List[Schema]:
+@router.get("", response_model=list[Schema])
+async def get_schemas(db_session: Session = Depends(get_db)) -> list[Schema]:
     logger.debug("GET request received: Fetch all schemas")
     db_schemas = crud.get_schemas(db_session)
 
@@ -134,7 +132,7 @@ async def remove_schema(schema_id: str, db_session: Session = Depends(get_db)) -
         ) from e
 
 
-def _get_schema_attrs(schema_id: SchemaID) -> List[str]:
+def _get_schema_attrs(schema_id: SchemaID) -> list[str]:
     # Split from the back because DID may contain a colon
     if schema_id.schema_id.startswith("did:cheqd:"):
         return []

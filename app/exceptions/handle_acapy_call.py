@@ -1,5 +1,6 @@
+from collections.abc import Callable, Coroutine
 from logging import Logger
-from typing import Any, Callable, Coroutine, TypeVar
+from typing import Any, TypeVar
 
 from aries_cloudcontroller.exceptions import (
     ApiException,

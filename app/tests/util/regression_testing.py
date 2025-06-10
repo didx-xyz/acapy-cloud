@@ -1,5 +1,5 @@
 import os
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
 from app.models.tenants import CreateTenantRequest, CreateTenantResponse
 from app.tests.util.tenants import TENANT_BASE_PATH, delete_tenant, post_tenant_request

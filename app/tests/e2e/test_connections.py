@@ -1,5 +1,4 @@
 import asyncio
-from typing import List
 
 import pytest
 from fastapi import HTTPException
@@ -167,7 +166,7 @@ async def test_get_connections_paginated(
     num_connections_to_test = 5
     test_alias = "test_pagination"
 
-    bob_alice_connections: List[BobAliceConnect] = []
+    bob_alice_connections: list[BobAliceConnect] = []
     try:
         for _ in range(num_connections_to_test):
             bob_and_alice_connection = await create_bob_alice_connection(

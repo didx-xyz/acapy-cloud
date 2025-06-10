@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict
+from typing import Any
 
 from httpx import HTTPError, Timeout
 
@@ -13,8 +13,7 @@ DEFAULT_LISTENER_TIMEOUT = 30  # seconds
 
 
 class SseListener:
-    """
-    A class for listening to SSE events filtered by topic, wallet_id, a field, the field_id, and desired_state.
+    """A class for listening to SSE events filtered by topic, wallet_id, a field, the field_id, and desired_state.
     Events that match the given parameters are processed by a callback function.
     """
 
@@ -36,7 +35,7 @@ class SseListener:
         desired_state,
         timeout: int = DEFAULT_LISTENER_TIMEOUT,
         look_back: int = 15,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Start listening for SSE events. When an event is received that matches the specified parameters."""
         url = f"{waypoint_base_url}/{self.wallet_id}/{self.topic}/{field}/{field_id}/{desired_state}"
         params = {"look_back": look_back}

@@ -1,5 +1,3 @@
-from typing import List
-
 import pytest
 
 from app.routes.verifier import router
@@ -20,7 +18,7 @@ VERIFIER_BASE_PATH = router.prefix
 )
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_limit_and_offset(
-    issue_alice_anoncreds: List[CredentialExchange],  # pylint: disable=unused-argument
+    issue_alice_anoncreds: list[CredentialExchange],  # pylint: disable=unused-argument
     acme_and_alice_connection: AcmeAliceConnect,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,

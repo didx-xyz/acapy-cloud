@@ -1,5 +1,4 @@
 import asyncio
-from typing import Optional
 
 import pytest
 from aries_cloudcontroller import AcaPyClient
@@ -35,8 +34,8 @@ async def test_create_did_exchange_request(
     faber_anoncreds_client: RichAsyncClient,
     alice_acapy_client: AcaPyClient,
     faber_anoncreds_acapy_client: AcaPyClient,
-    use_did: Optional[str],
-    use_did_method: Optional[str],
+    use_did: str | None,
+    use_did_method: str | None,
     use_public_did: bool,
 ):
     faber_public_did = await acapy_wallet.get_public_did(

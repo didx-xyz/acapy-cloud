@@ -1,4 +1,3 @@
-import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -95,7 +94,7 @@ async def test_health_ready_jetstream_not_working(
 async def test_health_ready_timeout(
     nats_events_processor_mock,  # pylint: disable=redefined-outer-name
 ):
-    nats_events_processor_mock.check_jetstream.side_effect = asyncio.TimeoutError()
+    nats_events_processor_mock.check_jetstream.side_effect = TimeoutError()
 
     with pytest.raises(HTTPException) as exc_info:
         await health_ready(nats_processor=nats_events_processor_mock)
@@ -127,8 +126,8 @@ async def test_health_ready_with_timeout(
     nats_events_processor_mock,  # pylint: disable=redefined-outer-name
 ):
     nats_events_processor_mock.check_jetstream.side_effect = (
-        asyncio.TimeoutError
-    )  # Simulate a slow response
+        TimeoutError  # Simulate a slow response
+    )
 
     with pytest.raises(HTTPException) as exc_info:
         await health_ready(nats_processor=nats_events_processor_mock)

@@ -1,6 +1,6 @@
 import asyncio
 import time
-from typing import List, Literal
+from typing import Literal
 
 import pytest
 
@@ -30,7 +30,7 @@ VERIFIER_BASE_PATH = verifier_router.prefix
 )
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_proof_revoked_credential_anoncreds(
-    revoke_alice_anoncreds_and_publish: List[  # pylint: disable=unused-argument
+    revoke_alice_anoncreds_and_publish: list[  # pylint: disable=unused-argument
         CredentialExchange
     ],
     anoncreds_credential_definition_id_revocable: str,

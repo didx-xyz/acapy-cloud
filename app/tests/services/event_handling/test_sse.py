@@ -1,4 +1,5 @@
-from typing import Any, AsyncGenerator, Generator, Optional
+from collections.abc import AsyncGenerator, Generator
+from typing import Any
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -157,7 +158,7 @@ async def test_sse_subscribe_event_with_field_and_state_success(
     configured_async_context_manager_mock,  # pylint: disable=redefined-outer-name
     mock_request,  # pylint: disable=redefined-outer-name
     patch_yield_lines_with_disconnect_check,  # pylint: disable=redefined-outer-name
-    group_id: Optional[str],
+    group_id: str | None,
 ):
     expected_params = {"look_back": 60}
     if group_id:  # Optional param

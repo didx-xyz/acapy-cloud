@@ -1,5 +1,3 @@
-from typing import List, Optional, Set
-
 from aries_cloudcontroller import AcaPyClient, AnonCredsPresSpec
 
 from app.exceptions import CloudApiException, handle_acapy_call
@@ -167,7 +165,7 @@ async def assert_valid_verifier(
     bound_logger.debug("Verifier is valid.")
 
 
-async def are_valid_schemas(schema_ids: List[str]) -> bool:
+async def are_valid_schemas(schema_ids: list[str]) -> bool:
     if not schema_ids:
         return False
 
@@ -200,11 +198,11 @@ async def get_actor_by_name(name: str) -> Actor:
 
 async def get_schema_ids(
     aries_controller: AcaPyClient, presentation: AnonCredsPresSpec
-) -> List[str]:
+) -> list[str]:
     """Get schema ids from credentials that will be revealed in the presentation"""
     bound_logger = logger.bind(body=presentation)
     bound_logger.debug("Get schema ids from presentation")
-    revealed_schema_ids: Set[str] = set()
+    revealed_schema_ids: set[str] = set()
 
     revealed_attr_cred_ids = [
         attr.cred_id
@@ -237,7 +235,7 @@ async def get_schema_ids(
 
 async def get_connection_from_proof(
     aries_controller: AcaPyClient, proof_id: str
-) -> Optional[str]:
+) -> str | None:
     proof_record = await VerifierV2.get_proof_record(
         controller=aries_controller, proof_id=proof_id
     )

@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
@@ -14,8 +12,8 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/registry/actors", tags=["actor"])
 
 
-@router.get("", response_model=List[Actor])
-async def get_actors(db_session: Session = Depends(get_db)) -> List[Actor]:
+@router.get("", response_model=list[Actor])
+async def get_actors(db_session: Session = Depends(get_db)) -> list[Actor]:
     logger.debug("GET request received: Fetch all actors")
     db_actors = crud.get_actors(db_session)
 

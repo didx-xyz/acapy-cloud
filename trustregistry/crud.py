@@ -1,5 +1,3 @@
-from typing import List
-
 from sqlalchemy import ScalarResult, delete, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -11,7 +9,7 @@ from trustregistry import db
 logger = get_logger(__name__)
 
 
-def get_actors(db_session: Session, skip: int = 0, limit: int = 1000) -> List[db.Actor]:
+def get_actors(db_session: Session, skip: int = 0, limit: int = 1000) -> list[db.Actor]:
     logger.info("Querying all actors from database (limit = {})", limit)
 
     query = select(db.Actor).offset(skip).limit(limit)
@@ -197,7 +195,7 @@ def update_actor(db_session: Session, actor: Actor) -> db.Actor:
 
 def get_schemas(
     db_session: Session, skip: int = 0, limit: int = 1000
-) -> List[db.Schema]:
+) -> list[db.Schema]:
     logger.debug("Query all schemas from database (limit = {})", limit)
     query = select(db.Schema).offset(skip).limit(limit)
     result = db_session.scalars(query).all()

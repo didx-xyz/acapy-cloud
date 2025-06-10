@@ -1,5 +1,3 @@
-from typing import List
-
 from aries_cloudcontroller import (
     AcaPyClient,
     UpdateWalletRequestWithGroupId,
@@ -110,7 +108,7 @@ async def handle_tenant_update(
 async def onboard_tenant(
     *,
     tenant_label: str,
-    roles: List[TrustRegistryRole],
+    roles: list[TrustRegistryRole],
     wallet_auth_token: str,
     wallet_id: str,
 ) -> OnboardResult:

@@ -1,5 +1,5 @@
 from logging import Logger
-from typing import Type, TypeVar
+from typing import TypeVar
 
 from pydantic import BaseModel, ValidationError
 
@@ -7,7 +7,7 @@ from pydantic import BaseModel, ValidationError
 T = TypeVar("T", bound=BaseModel)
 
 
-def parse_json_with_error_handling(model: Type[T], data: str, logger: Logger) -> T:
+def parse_json_with_error_handling(model: type[T], data: str, logger: Logger) -> T:
     try:
         return model.model_validate_json(data)
     except ValidationError as e:

@@ -4,7 +4,6 @@ import os
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
-from typing import Optional
 
 import orjson
 from nats.errors import BadSubscriptionError, ConnectionClosedError, Error, TimeoutError
@@ -71,7 +70,7 @@ class NatsEventsProcessor:
     async def _subscribe(
         self,
         *,
-        group_id: Optional[str] = None,
+        group_id: str | None = None,
         wallet_id: str,
         topic: str,
         state: str,
@@ -135,13 +134,13 @@ class NatsEventsProcessor:
     async def process_events(
         self,
         *,
-        group_id: Optional[str] = None,
+        group_id: str | None = None,
         wallet_id: str,
         topic: str,
         state: str,
         stop_event: asyncio.Event,
-        duration: Optional[int] = None,
-        look_back: Optional[int] = None,
+        duration: int | None = None,
+        look_back: int | None = None,
     ):
         duration = duration or SSE_TIMEOUT
         look_back = look_back or SSE_LOOK_BACK

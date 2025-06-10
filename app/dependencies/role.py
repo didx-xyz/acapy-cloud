@@ -14,7 +14,7 @@ class AgentType(NamedTuple):
     base_url: str
     is_multitenant: bool
     is_admin: bool
-    x_api_key: Optional[str]
+    x_api_key: str | None
 
 
 GOVERNANCE_AGENT_TYPE = AgentType(

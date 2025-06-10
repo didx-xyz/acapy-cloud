@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import ssl
-from typing import List, Optional
 
 from fastapi import HTTPException
 from httpx import AsyncClient, ConnectTimeout, HTTPStatusError, Response
@@ -25,16 +24,17 @@ class RichAsyncClient(AsyncClient):
         retries (int): Number of retry attempts for failed requests.
         retry_on (List[int]): List of HTTP status codes that should trigger a retry.
         retry_wait_seconds (float): Number of seconds to wait before retrying.
+
     """
 
     def __init__(
         self,
         *args,
-        name: Optional[str] = None,
+        name: str | None = None,
         verify=ssl_context,
         raise_status_error=True,
         retries: int = 3,
-        retry_on: Optional[List[int]] = None,
+        retry_on: list[int] | None = None,
         retry_wait_seconds: float = 0.5,
         **kwargs,
     ) -> None:

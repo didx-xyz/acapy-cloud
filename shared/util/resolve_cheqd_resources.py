@@ -1,5 +1,3 @@
-from typing import Optional
-
 from fastapi import HTTPException
 
 from shared.constants import RESOLVER_URL
@@ -12,9 +10,8 @@ logger = get_logger(__name__)
 client = RichAsyncClient()
 
 
-async def resolve_cheqd_schema(schema_id: str) -> Optional[dict]:
-    """
-    Resolve a Cheqd schema by its ID.
+async def resolve_cheqd_schema(schema_id: str) -> dict | None:
+    """Resolve a Cheqd schema by its ID.
 
     Parameters:
     schema_id (str): The ID of the schema to resolve.

@@ -1,17 +1,15 @@
-from typing import Dict, Optional
-
 from pydantic import BaseModel, Field, model_validator
 
 from shared.exceptions import CloudApiValueError
 
 
 class JWSCreateRequest(BaseModel):
-    did: Optional[str] = Field(
+    did: str | None = Field(
         None, examples=["did:key:z6MkjCjxuTXxVPWS9JYj2ZiKtKvSS1srC6kBRes4WCB2mSWq"]
     )
-    headers: Dict = Field(default={})
-    payload: Dict = Field(description="Payload to sign")
-    verification_method: Optional[str] = Field(
+    headers: dict = Field(default={})
+    payload: dict = Field(description="Payload to sign")
+    verification_method: str | None = Field(
         None,
         description="Information used for proof verification",
         examples=[
@@ -59,8 +57,8 @@ class JWSVerifyRequest(JWSCreateResponse):
 
 
 class JWSVerifyResponse(BaseModel):
-    error: Optional[str] = Field(default=None, description="Error text")
-    headers: Dict = Field(
+    error: str | None = Field(default=None, description="Error text")
+    headers: dict = Field(
         description="Headers from verified JWT.",
         examples=[
             {
@@ -77,5 +75,5 @@ class JWSVerifyResponse(BaseModel):
             "did:key:z6MkjCjxuTXxVPWS9JYj2ZiKtKvSS1srC6kBRes4WCB2mSWq#z6MkjCjxuTXxVPWS9JYj2ZiKtKvSS1srC6kBRes4WCB2mSWq"
         ],
     )
-    payload: Dict = Field(description="Payload from verified JWT")
+    payload: dict = Field(description="Payload from verified JWT")
     valid: bool = Field(...)

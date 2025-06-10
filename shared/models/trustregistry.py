@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional, Union
+from typing import Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -10,10 +10,10 @@ TrustRegistryRole = Literal["issuer", "verifier"]
 class Actor(BaseModel):
     id: str
     name: str
-    roles: List[TrustRegistryRole]
+    roles: list[TrustRegistryRole]
     did: str
-    didcomm_invitation: Optional[str] = None
-    image_url: Optional[str] = None
+    didcomm_invitation: str | None = None
+    image_url: str | None = None
 
     @field_validator("did")
     @classmethod

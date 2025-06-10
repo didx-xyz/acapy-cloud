@@ -1,5 +1,4 @@
 from logging import Logger
-from typing import Dict, List, Optional
 
 from aries_cloudcontroller import (
     AcaPyClient,
@@ -132,7 +131,7 @@ class IssuerV2(Issuer):
         cls,
         controller: AcaPyClient,
         credential_exchange_id: str,
-        auto_remove: Optional[bool] = None,
+        auto_remove: bool | None = None,
     ) -> CredentialExchange:
         bound_logger = logger.bind(
             body={"credential_exchange_id": credential_exchange_id}
@@ -199,15 +198,15 @@ class IssuerV2(Issuer):
     async def get_records(
         cls,
         controller: AcaPyClient,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-        order_by: Optional[str] = "id",
+        limit: int | None = None,
+        offset: int | None = None,
+        order_by: str | None = "id",
         descending: bool = True,
-        connection_id: Optional[str] = None,
-        role: Optional[str] = None,
-        state: Optional[str] = None,
-        thread_id: Optional[str] = None,
-    ) -> List[CredentialExchange]:
+        connection_id: str | None = None,
+        role: str | None = None,
+        state: str | None = None,
+        thread_id: str | None = None,
+    ) -> list[CredentialExchange]:
         bound_logger = logger.bind(body={"connection_id": connection_id})
         bound_logger.debug("Getting v2 credential records by connection id")
         result = await handle_acapy_call(
@@ -264,7 +263,7 @@ class IssuerV2(Issuer):
     @classmethod
     def __preview_from_attributes(
         cls,
-        attributes: Dict[str, str],
+        attributes: dict[str, str],
     ) -> V20CredPreview:
         return V20CredPreview(
             attributes=[

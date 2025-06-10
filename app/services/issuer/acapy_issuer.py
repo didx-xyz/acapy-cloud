@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
 
 from aries_cloudcontroller import AcaPyClient
 
@@ -58,7 +57,7 @@ class Issuer(ABC):
         cls,
         controller: AcaPyClient,
         credential_exchange_id: str,
-        auto_remove: Optional[bool] = None,
+        auto_remove: bool | None = None,
     ) -> CredentialExchange:
         """
         Request credential
@@ -120,20 +119,19 @@ class Issuer(ABC):
     async def get_records(
         cls,
         controller: AcaPyClient,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-        order_by: Optional[str] = "id",
+        limit: int | None = None,
+        offset: int | None = None,
+        order_by: str | None = "id",
         descending: bool = True,
-        connection_id: Optional[str] = None,
-        role: Optional[str] = None,
-        state: Optional[str] = None,
-        thread_id: Optional[str] = None,
-    ) -> List[CredentialExchange]:
-        """
-        Get a list of credential records.
+        connection_id: str | None = None,
+        role: str | None = None,
+        state: str | None = None,
+        thread_id: str | None = None,
+    ) -> list[CredentialExchange]:
+        """Get a list of credential records.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         controller: AcaPyClient
             The aries_cloudcontroller object used to interact with the ACA-Py API.
         limit: Optional[int]

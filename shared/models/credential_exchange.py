@@ -1,4 +1,4 @@
-from typing import Dict, Literal, Optional, Tuple
+from typing import Literal
 
 from aries_cloudcontroller import V20CredExRecord
 from pydantic import BaseModel, Field
@@ -28,20 +28,20 @@ class CredentialExchange(BaseModel):
     # initiator: Optional[str] = None
 
     # Attributes can be None in proposed state
-    attributes: Optional[Dict[str, str]] = None
+    attributes: dict[str, str] | None = None
     # Connection id can be None in connectionless exchanges
-    connection_id: Optional[str] = None
+    connection_id: str | None = None
     created_at: str
-    credential_definition_id: Optional[str] = None
+    credential_definition_id: str | None = None
     credential_exchange_id: str = Field(...)
-    did: Optional[str] = None
-    error_msg: Optional[str] = None
+    did: str | None = None
+    error_msg: str | None = None
     role: Role
-    schema_id: Optional[str] = None
+    schema_id: str | None = None
     # state can be None in proposed state
-    state: Optional[State] = None
+    state: State | None = None
     # Thread id can be None in connectionless exchanges
-    thread_id: Optional[str] = None
+    thread_id: str | None = None
     type: str = "anoncreds"
     updated_at: str
 
@@ -53,7 +53,7 @@ def credential_record_to_model_v2(record: V20CredExRecord) -> CredentialExchange
 
     # Assume there is one credential type in the record
     cred_type = (
-        list(record.by_format.cred_offer.keys())[0]
+        next(iter(record.by_format.cred_offer.keys()))
         if record.by_format and record.by_format.cred_offer
         else "anoncreds"  # TODO: Fallback if cred_offer is not present
     )
@@ -100,7 +100,7 @@ def credential_record_to_model_v2(record: V20CredExRecord) -> CredentialExchange
 
 def schema_cred_def_from_record(
     record: V20CredExRecord,
-) -> Tuple[Optional[str], Optional[str]]:
+) -> tuple[str | None, str | None]:
     if record.by_format and record.by_format.cred_offer:
         key = list(record.by_format.cred_offer.keys())
         if "ld_proof" in key:
@@ -120,7 +120,7 @@ def schema_cred_def_from_record(
     return schema_id, credential_definition_id
 
 
-def attributes_from_record_v2(record: V20CredExRecord) -> Optional[Dict[str, str]]:
+def attributes_from_record_v2(record: V20CredExRecord) -> dict[str, str] | None:
     preview = None
 
     if record.cred_preview:

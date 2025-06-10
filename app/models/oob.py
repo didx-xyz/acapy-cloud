@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from aries_cloudcontroller import AttachmentDef, InvitationMessage
 from pydantic import BaseModel, model_validator
 
@@ -11,11 +9,11 @@ class ConnectToPublicDid(BaseModel):
 
 
 class CreateOobInvitation(BaseModel):
-    alias: Optional[str] = None
-    multi_use: Optional[bool] = None
-    use_public_did: Optional[bool] = None
-    attachments: Optional[List[AttachmentDef]] = None
-    create_connection: Optional[bool] = None
+    alias: str | None = None
+    multi_use: bool | None = None
+    use_public_did: bool | None = None
+    attachments: list[AttachmentDef] | None = None
+    create_connection: bool | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -29,6 +27,6 @@ class CreateOobInvitation(BaseModel):
 
 
 class AcceptOobInvitation(BaseModel):
-    alias: Optional[str] = None
-    use_existing_connection: Optional[bool] = None
+    alias: str | None = None
+    use_existing_connection: bool | None = None
     invitation: InvitationMessage

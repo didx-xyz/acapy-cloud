@@ -1,4 +1,3 @@
-from typing import Optional
 from unittest.mock import Mock, patch
 
 import pytest
@@ -34,7 +33,7 @@ async def test_get_sse_subscribe_event_with_field_and_state(
     mock_request,  # pylint: disable=redefined-outer-name
     mock_auth,  # pylint: disable=redefined-outer-name
     mock_verify_wallet_access,  # pylint: disable=redefined-outer-name
-    group_id: Optional[str],
+    group_id: str | None,
 ):
     # Mock sse_subscribe_event_with_field_and_state function to not actually attempt to connect to an SSE stream
     sse_subscribe_event_with_field_and_state_mock = Mock()

@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Literal
 
 from aries_cloudcontroller import ConnRecord
 from pydantic import BaseModel
@@ -26,21 +26,21 @@ class Connection(BaseModel):
     # request_id: Optional[str] = None
     # rfc23_state: Optional[str] = None
 
-    alias: Optional[str] = None
-    connection_id: Optional[str] = None
-    connection_protocol: Optional[Protocol] = None
-    created_at: Optional[str] = None
-    error_msg: Optional[str] = None
-    invitation_key: Optional[str] = None
-    invitation_mode: Optional[Literal["once", "multi", "static"]] = None
-    invitation_msg_id: Optional[str] = None
-    my_did: Optional[str] = None
-    state: Optional[str] = None  # not State Literal because we use rfc23_state
-    their_did: Optional[str] = None
-    their_label: Optional[str] = None
-    their_public_did: Optional[str] = None
-    their_role: Optional[Role] = None
-    updated_at: Optional[str] = None
+    alias: str | None = None
+    connection_id: str | None = None
+    connection_protocol: Protocol | None = None
+    created_at: str | None = None
+    error_msg: str | None = None
+    invitation_key: str | None = None
+    invitation_mode: Literal["once", "multi", "static"] | None = None
+    invitation_msg_id: str | None = None
+    my_did: str | None = None
+    state: str | None = None  # not State Literal because we use rfc23_state
+    their_did: str | None = None
+    their_label: str | None = None
+    their_public_did: str | None = None
+    their_role: Role | None = None
+    updated_at: str | None = None
 
 
 def conn_record_to_connection(connection_record: ConnRecord):

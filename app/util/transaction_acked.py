@@ -1,5 +1,3 @@
-import asyncio
-
 from aries_cloudcontroller import AcaPyClient
 
 from app.exceptions import CloudApiException
@@ -29,7 +27,7 @@ async def wait_for_transaction_ack(
             max_attempts=max_attempts,
             retry_delay=retry_delay,
         )
-    except asyncio.TimeoutError as e:
+    except TimeoutError as e:
         raise CloudApiException(
             "Timeout waiting for endorser to accept the endorsement request.",
             504,

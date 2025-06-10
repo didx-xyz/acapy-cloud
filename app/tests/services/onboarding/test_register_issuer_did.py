@@ -1,4 +1,3 @@
-import asyncio
 from logging import Logger
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -81,7 +80,7 @@ async def test_wait_endorser_connection_completed_max_retries_with_exception():
         side_effect=Exception("Persistent failure")
     )
 
-    with pytest.raises(asyncio.TimeoutError):
+    with pytest.raises(TimeoutError):
         await wait_endorser_connection_completed(
             endorser_controller=endorser_controller,
             invitation_msg_id="test_id",
@@ -108,7 +107,7 @@ async def test_wait_endorser_connection_completed_max_retries_no_completion():
         return_value=MagicMock(results=[conn_record])
     )
 
-    with pytest.raises(asyncio.TimeoutError):
+    with pytest.raises(TimeoutError):
         await wait_endorser_connection_completed(
             endorser_controller=endorser_controller,
             invitation_msg_id="test_id",
@@ -183,7 +182,7 @@ async def test_wait_issuer_did_transaction_endorsed_max_retries_with_exception()
         side_effect=Exception("Persistent failure")
     )
 
-    with pytest.raises(asyncio.TimeoutError):
+    with pytest.raises(TimeoutError):
         await wait_transactions_endorsed(
             issuer_controller=issuer_controller,
             issuer_connection_id="test_id",
@@ -210,7 +209,7 @@ async def test_wait_issuer_did_transaction_endorsed_max_retries_no_ack():
         return_value=MagicMock(results=[transaction_record])
     )
 
-    with pytest.raises(asyncio.TimeoutError):
+    with pytest.raises(TimeoutError):
         await wait_transactions_endorsed(
             issuer_controller=issuer_controller,
             issuer_connection_id="test_id",
@@ -234,7 +233,7 @@ async def test_wait_issuer_did_transaction_endorsed_no_transactions():
         return_value=MagicMock(results=[])
     )
 
-    with pytest.raises(asyncio.TimeoutError):
+    with pytest.raises(TimeoutError):
         await wait_transactions_endorsed(
             issuer_controller=issuer_controller,
             issuer_connection_id="test_id",
@@ -263,7 +262,7 @@ async def test_wait_for_connection_completion_timeout():
         "app.services.onboarding.util.register_issuer_did.wait_endorser_connection_completed",
         new_callable=AsyncMock,
     ) as mock_wait_endorser_connection_completed:
-        mock_wait_endorser_connection_completed.side_effect = asyncio.TimeoutError
+        mock_wait_endorser_connection_completed.side_effect = TimeoutError
 
         # Test and assert
         with pytest.raises(CloudApiException) as exc:

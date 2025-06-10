@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
 
 from aries_cloudcontroller import AcaPyClient
 
@@ -109,20 +108,19 @@ class Verifier(ABC):
     async def get_proof_records(
         cls,
         controller: AcaPyClient,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-        order_by: Optional[str] = "id",
+        limit: int | None = None,
+        offset: int | None = None,
+        order_by: str | None = "id",
         descending: bool = True,
-        connection_id: str = None,
-        role: str = None,
-        state: str = None,
-        thread_id: str = None,
-    ) -> List[PresentationExchange]:
-        """
-        Get all proof records.
+        connection_id: str | None = None,
+        role: str | None = None,
+        state: str | None = None,
+        thread_id: str | None = None,
+    ) -> list[PresentationExchange]:
+        """Get all proof records.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         controller: AcaPyClient
             The aries_cloudcontroller object used to interact with the ACA-Py API.
         limit: Optional[int]
@@ -192,12 +190,11 @@ class Verifier(ABC):
     @abstractmethod
     async def get_credentials_by_proof_id(
         cls, controller: AcaPyClient, proof_id: str
-    ) -> List[CredPrecis]:
-        """
-        Retrieve the credentials for a proof
+    ) -> list[CredPrecis]:
+        """Retrieve the credentials for a proof
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         controller: AcaPyClient
             The aries_cloudcontroller object
         proof_id: str

@@ -1,4 +1,3 @@
-import asyncio
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -108,7 +107,7 @@ async def test_publish_revocations_fail_timeout():
         ),
         patch(
             "app.routes.revocation.coroutine_with_retry_until_value",
-            AsyncMock(side_effect=asyncio.TimeoutError()),
+            AsyncMock(side_effect=TimeoutError()),
         ),
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (

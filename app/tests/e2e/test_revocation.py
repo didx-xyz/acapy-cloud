@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Literal
+from typing import Literal
 
 import pytest
 from fastapi import HTTPException
@@ -26,7 +26,7 @@ skip_regression_test_reason = "Skip publish-revocations in regression mode"
 )
 async def test_clear_pending_revokes_anoncreds(
     faber_anoncreds_client: RichAsyncClient,
-    revoke_alice_anoncreds: List[CredentialExchange],
+    revoke_alice_anoncreds: list[CredentialExchange],
 ):
     with pytest.raises(HTTPException) as exc:
         await clear_pending_revokes(faber_anoncreds_client, revoke_alice_anoncreds)
@@ -39,7 +39,7 @@ async def test_clear_pending_revokes_anoncreds(
 
 async def clear_pending_revokes(
     faber_client: RichAsyncClient,
-    revoke_alice_creds: List[CredentialExchange],
+    revoke_alice_creds: list[CredentialExchange],
 ):
     faber_cred_ex_id = revoke_alice_creds[0].credential_exchange_id
     revocation_record_response = await faber_client.get(
@@ -125,7 +125,7 @@ async def test_clear_pending_revokes_bad_payload_anoncreds(
 )
 async def test_publish_all_revocations_for_rev_reg_id_anoncreds(
     faber_anoncreds_client: RichAsyncClient,
-    revoke_alice_anoncreds: List[CredentialExchange],
+    revoke_alice_anoncreds: list[CredentialExchange],
 ):
     await publish_all_revocations_for_rev_reg_id(
         "anoncreds", faber_anoncreds_client, revoke_alice_anoncreds
@@ -135,7 +135,7 @@ async def test_publish_all_revocations_for_rev_reg_id_anoncreds(
 async def publish_all_revocations_for_rev_reg_id(
     credential_type: Literal["anoncreds"],
     faber_client: RichAsyncClient,
-    revoke_alice_creds: List[CredentialExchange],
+    revoke_alice_creds: list[CredentialExchange],
 ):
     faber_cred_ex_id = revoke_alice_creds[0].credential_exchange_id
     response = (
@@ -167,7 +167,7 @@ async def publish_all_revocations_for_rev_reg_id(
 )
 async def test_publish_all_revocations_no_payload_anoncreds(
     faber_anoncreds_client: RichAsyncClient,
-    revoke_alice_anoncreds: List[CredentialExchange],
+    revoke_alice_anoncreds: list[CredentialExchange],
 ):
     await publish_all_revocations_no_payload(
         faber_anoncreds_client, revoke_alice_anoncreds
@@ -176,7 +176,7 @@ async def test_publish_all_revocations_no_payload_anoncreds(
 
 async def publish_all_revocations_no_payload(
     faber_client: RichAsyncClient,
-    revoke_alice_creds: List[CredentialExchange],
+    revoke_alice_creds: list[CredentialExchange],
 ):
     await faber_client.post(
         f"{REVOCATION_BASE_PATH}/publish-revocations",
@@ -188,7 +188,7 @@ async def publish_all_revocations_no_payload(
 
 async def check_revocation_status(
     client: RichAsyncClient,
-    credentials: List[CredentialExchange],
+    credentials: list[CredentialExchange],
     expected_state: str,
 ):
     for cred in credentials:
@@ -210,14 +210,14 @@ async def check_revocation_status(
 )
 async def test_publish_one_revocation_anoncreds(
     faber_anoncreds_client: RichAsyncClient,
-    revoke_alice_anoncreds: List[CredentialExchange],
+    revoke_alice_anoncreds: list[CredentialExchange],
 ):
     await publish_one_revocation(faber_anoncreds_client, revoke_alice_anoncreds)
 
 
 async def publish_one_revocation(
     faber_client: RichAsyncClient,
-    revoke_alice_creds: List[CredentialExchange],
+    revoke_alice_creds: list[CredentialExchange],
 ):
     faber_cred_ex_id = revoke_alice_creds[0].credential_exchange_id
     response = (
@@ -309,7 +309,7 @@ async def publish_revocations_bad_payload(
 )
 async def test_get_pending_revocations_anoncreds(
     faber_anoncreds_client: RichAsyncClient,
-    revoke_alice_anoncreds: List[CredentialExchange],
+    revoke_alice_anoncreds: list[CredentialExchange],
 ):
     faber_cred_ex_id = revoke_alice_anoncreds[0].credential_exchange_id
     revocation_record_response = await faber_anoncreds_client.get(

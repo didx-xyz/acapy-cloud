@@ -99,7 +99,7 @@ async def wait_for_connection_completion(
             invitation_msg_id=invitation_msg_id,
             logger=logger,
         )
-    except asyncio.TimeoutError as e:
+    except TimeoutError as e:
         logger.error("Waiting for invitation complete event has timed out.")
         raise CloudApiException(
             "Timeout occurred while waiting for connection with endorser to complete.",
@@ -236,7 +236,7 @@ async def wait_endorser_connection_completed(
                 logger.error(
                     "Maximum number of retries exceeded with exception. Failing."
                 )
-                raise asyncio.TimeoutError from e  # Raise TimeoutError if max attempts exceeded
+                raise TimeoutError from e  # Raise TimeoutError if max attempts exceeded
 
             logger.warning(
                 (
@@ -253,7 +253,7 @@ async def wait_endorser_connection_completed(
         attempt += 1
 
     logger.error("Maximum number of retries exceeded without returning expected value.")
-    raise asyncio.TimeoutError
+    raise TimeoutError
 
 
 async def wait_transactions_endorsed(
@@ -303,7 +303,7 @@ async def wait_transactions_endorsed(
                 logger.error(
                     "Maximum number of retries exceeded with exception. Failing."
                 )
-                raise asyncio.TimeoutError("Timeout waiting for endorsement") from e
+                raise TimeoutError("Timeout waiting for endorsement") from e
 
             logger.warning(
                 (
@@ -320,4 +320,4 @@ async def wait_transactions_endorsed(
         attempt += 1
 
     logger.error("Maximum number of retries exceeded while waiting for transaction ack")
-    raise asyncio.TimeoutError("Timeout waiting for endorsement")
+    raise TimeoutError("Timeout waiting for endorsement")

@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from aries_cloudcontroller import AcaPyClient
 from httpx import AsyncHTTPTransport
@@ -16,7 +16,7 @@ from shared.constants import (
 )
 
 
-def get_common_settings(api_key: str) -> Dict[str, Any]:
+def get_common_settings(api_key: str) -> dict[str, Any]:
     return {
         "timeout": TEST_CLIENT_TIMEOUT,
         "headers": {
