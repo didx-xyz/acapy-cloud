@@ -12,7 +12,7 @@ from aries_cloudcontroller import (
 
 from app.exceptions import CloudApiException, handle_acapy_call
 from app.models.wallet import DIDCreate
-from app.services import acapy_ledger, acapy_wallet
+from app.services import acapy_wallet
 from app.services.onboarding.util.set_endorser_metadata import (
     set_author_role,
     set_endorser_info,
