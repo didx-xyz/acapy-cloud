@@ -6,7 +6,6 @@
 !poetry.lock
 !app/
 !dockerfiles/poetry-requirements.txt
-!endorser/
 !scripts/
 !shared/
 !tails/

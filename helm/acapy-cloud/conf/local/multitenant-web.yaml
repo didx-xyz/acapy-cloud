@@ -101,7 +101,6 @@ env:
   TRUST_REGISTRY_URL: http://trust-registry:8000
   OPENAPI_NAME: CloudAPI Multitenant Admin
   PYTHONPATH: /
-  ACAPY_ENDORSER_ALIAS: endorser
   ROLE: tenant-admin
   ROOT_PATH: /tenant-admin
   ENABLE_SERIALIZE_LOGS: "FALSE"

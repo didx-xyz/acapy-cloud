@@ -42,7 +42,7 @@ It can be handy to follow the logs of a specific container. A convenient way to 
 kubectl logs -f $(kubectl get pods -l app.kubernetes.io/instance=YOUR_CONTAINER_NAME -o jsonpath="{.items[0].metadata.name}")
 ```
 
-And replacing `YOUR_CONTAINER_NAME` with the name of the container you want to follow (e.g., endorser-web).
+And replacing `YOUR_CONTAINER_NAME` with the name of the container you want to follow (e.g., waypoint-web).
 You can find the container name in the docker-compose.yaml.
 
 ### Authentication

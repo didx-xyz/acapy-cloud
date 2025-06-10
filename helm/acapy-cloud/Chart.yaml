@@ -4,7 +4,6 @@ description: |
   A generic Helm Chart to deploy the DIDx Acapy Cloud stack.
   Due to the similarity between the components, and to reduce duplication, this
   chart can be used to deploy any of the following components:
-    - endorser
     - governance-agent
     - governance-web
     - ledger-browser

@@ -19,7 +19,7 @@ serialize = ENABLE_SERIALIZE_LOGS
 # Create a mapping of module name to color
 color_map = {
     "app": "blue",
-    "endorser": "yellow",
+    "tails": "yellow",
     "trustregistry": "magenta",
     "waypoint": "green",
 }

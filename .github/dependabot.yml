@@ -34,7 +34,6 @@ updates:
     directories:
       - /dockerfiles/agents
       - /dockerfiles/app
-      - /dockerfiles/endorser
       - /dockerfiles/tests
       - /dockerfiles/trustregistry
       - /dockerfiles/waypoint

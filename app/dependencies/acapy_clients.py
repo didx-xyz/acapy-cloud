@@ -5,8 +5,6 @@ from app.dependencies.auth import AcaPyAuth, AcaPyAuthVerified
 from app.dependencies.role import Role
 from shared.constants import GOVERNANCE_LABEL
 
-# todo: remove these defaults by migrating relevant methods to endorser service
-# and refactoring methods using tenant-admin internally
 GOVERNANCE_AUTHED = AcaPyAuthVerified(
     role=Role.GOVERNANCE,
     token=Role.GOVERNANCE.agent_type.x_api_key,

@@ -6,7 +6,6 @@ from aries_cloudcontroller import (
     TAAAccept,
     TAAInfo,
     TAARecord,
-    TxnOrRegisterLedgerNymResponse,
 )
 
 from app.exceptions import CloudApiException, handle_acapy_call
@@ -108,37 +107,6 @@ async def get_did_endpoint(
         raise CloudApiException("Could not obtain issuer endpoint.", 404)
     bound_logger.debug("Successfully fetched DID endpoint.")
     return issuer_endpoint_response
-
-
-async def register_nym_on_ledger(
-    aries_controller: AcaPyClient,
-    *,
-    did: str,
-    verkey: str,
-    alias: str | None = None,
-    role: str | None = None,
-    connection_id: str | None = None,
-    create_transaction_for_endorser: str | None = None,
-) -> TxnOrRegisterLedgerNymResponse:
-    bound_logger = logger.bind(body={"did": did})
-    bound_logger.info("Registering NYM on ledger")
-    try:
-        response = await handle_acapy_call(
-            logger=logger,
-            acapy_call=aries_controller.ledger.register_nym,
-            did=did,
-            verkey=verkey,
-            alias=alias,
-            role=role,
-            conn_id=connection_id,
-            create_transaction_for_endorser=create_transaction_for_endorser,
-        )
-        bound_logger.debug("Successfully registered NYM on ledger.")
-        return response
-    except CloudApiException as e:
-        raise CloudApiException(
-            f"Error registering NYM on ledger: {e.detail}", e.status_code
-        ) from e
 
 
 async def accept_taa_if_required(aries_controller: AcaPyClient) -> None:

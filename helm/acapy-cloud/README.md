@@ -7,7 +7,6 @@ identities and verifiable credentials.
 
 This is a generic Helm chart that can deploy any of the following components:
 
-- endorser
 - governance-agent
 - governance-web
 - ledger-browser
@@ -42,7 +41,7 @@ cd acapy-cloud/helm/acapy-cloud
 helm install my-release . -f ./conf/local/<component>.yaml
 ```
 
-Replace `<component>` with one of the available components (e.g., `endorser`, `governance-agent`, etc.)
+Replace `<component>` with one of the available components (e.g., `waypoint`, `governance-agent`, etc.)
 
 ### Note about Redpanda Connect
 
@@ -117,7 +116,6 @@ ingress:
 
 Each component has its own set of specific parameters defined in their respective values files in the `conf/local` directory:
 
-- [`endorser.yaml`](./conf/local/endorser.yaml)
 - [`governance-agent.yaml`](./conf/local/governance-agent.yaml)
 - [`governance-web.yaml`](./conf/local/governance-web.yaml)
 - [`ledger-browser.yaml`](./conf/local/ledger-browser.yaml)
@@ -136,7 +134,6 @@ The chart deploys several interconnected components:
 
 - **Governance Agent**: Manages the overall governance of the system (endorsing transactions and creating credential schemas)
 - **Multitenant Agent**: Manages all tenant operations
-- **Endorser**: Manages endorsement of ledger operations
 - **Ledger Browser**: Provides a web interface for ledger exploration
 - **Trust Registry**: Maintains the trust framework
 - **Tails Server**: Manages revocation tails files

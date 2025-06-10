@@ -208,7 +208,6 @@ env:
   ACAPY_NO_LEDGER: true
 
   ACAPY_PUBLIC_INVITES: true
-  ACAPY_ENDORSER_ROLE: endorser
   # ## DO NOT CHANGE VARIABLES BELOW
   # ## Unless you know exactly what you are doing
   # ## Changes will probably break CloudAPI

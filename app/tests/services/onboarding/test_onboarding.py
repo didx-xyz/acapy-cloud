@@ -4,19 +4,15 @@ import pytest
 from aries_cloudcontroller import (
     DID,
     AcaPyClient,
-    ConnectionList,
     ConnRecord,
     InvitationCreateRequest,
     InvitationMessage,
     InvitationRecord,
-    TransactionList,
-    TransactionRecord,
 )
 
 from app.exceptions import CloudApiException
 from app.models.wallet import DIDCreate
 from app.services.onboarding import issuer, verifier
-from shared.util.mock_agent_controller import get_mock_agent_controller
 
 did_object = DID(
     did="did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6",
@@ -31,19 +27,6 @@ did_object = DID(
 async def test_onboard_issuer_public_did_exists(
     mock_agent_controller: AcaPyClient,
 ):
-    endorser_controller = get_mock_agent_controller()
-
-    endorser_controller.out_of_band.create_invitation.return_value = InvitationRecord(
-        invitation=InvitationMessage()
-    )
-    mock_agent_controller.out_of_band.receive_invitation.return_value = ConnRecord(
-        connection_id="abc"
-    )
-
-    mock_agent_controller.endorse_transaction.set_endorser_role.return_value = None
-    endorser_controller.endorse_transaction.set_endorser_role.return_value = None
-    mock_agent_controller.endorse_transaction.set_endorser_info.return_value = None
-
     invitation_url = "https://invitation.com/"
 
     mock_agent_controller.out_of_band.create_invitation.return_value = InvitationRecord(
@@ -69,33 +52,10 @@ async def test_onboard_issuer_no_public_did(
     mock_agent_controller: AcaPyClient,
 ):
     issuer_connection_id = "abc"
-    endorser_connection_id = "xyz"
-
-    endorser_controller = get_mock_agent_controller()
 
     # Mock the necessary functions and methods
-    endorser_controller.out_of_band.create_invitation.return_value = InvitationRecord(
-        invitation=InvitationMessage()
-    )
     mock_agent_controller.out_of_band.receive_invitation.return_value = ConnRecord(
         connection_id=issuer_connection_id
-    )
-    endorser_controller.connection.get_connections.return_value = ConnectionList(
-        results=[
-            ConnRecord(connection_id=endorser_connection_id, rfc23_state="completed")
-        ]
-    )
-    mock_agent_controller.endorse_transaction.set_endorser_role.return_value = None
-    endorser_controller.endorse_transaction.set_endorser_role.return_value = None
-    mock_agent_controller.endorse_transaction.set_endorser_info.return_value = None
-    mock_agent_controller.endorse_transaction.get_records.return_value = (
-        TransactionList(
-            results=[
-                TransactionRecord(
-                    connection_id=issuer_connection_id, state="transaction_acked"
-                )
-            ]
-        )
     )
 
     # Create an invitation as well

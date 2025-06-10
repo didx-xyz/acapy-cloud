@@ -38,7 +38,6 @@ TRUST_REGISTRY_FASTAPI_ENDPOINT = os.getenv(
 WAYPOINT_URL = os.getenv("WAYPOINT_URL", f"{URL}:3011")
 
 ACAPY_MULTITENANT_JWT_SECRET = os.getenv("ACAPY_MULTITENANT_JWT_SECRET", "jwtSecret")
-ACAPY_ENDORSER_ALIAS = os.getenv("ACAPY_ENDORSER_ALIAS", "endorser")
 
 ACAPY_TAILS_SERVER_BASE_URL = os.getenv("ACAPY_TAILS_SERVER_BASE_URL", f"{URL}:6543")
 
@@ -59,11 +58,9 @@ SSE_LOOK_BACK = int(
 TEST_CLIENT_TIMEOUT = int(os.getenv("TEST_CLIENT_TIMEOUT", "300"))
 
 # timeout for endorsement events and registry creation
-CRED_DEF_ACK_TIMEOUT = int(os.getenv("CRED_DEF_ACK_TIMEOUT", "60"))
 PUBLISH_REVOCATIONS_TIMEOUT = int(os.getenv("PUBLISH_REVOCATIONS_TIMEOUT", "60"))
 REGISTRY_CREATION_TIMEOUT = int(os.getenv("REGISTRY_CREATION_TIMEOUT", "120"))
 REGISTRY_SIZE = int(os.getenv("REGISTRY_SIZE", "200"))
-ISSUER_DID_ENDORSE_TIMEOUT = int(os.getenv("ISSUER_DID_ENDORSE_TIMEOUT", "60"))
 
 # NATS
 NATS_SERVER = os.getenv("NATS_SERVER", "nats://nats:4222")
@@ -72,7 +69,6 @@ NATS_STREAM = os.getenv("NATS_STREAM", "cloudapi_aries_events")
 NATS_STATE_STREAM = os.getenv("NATS_STATE_STREAM", "cloudapi_aries_state_monitoring")
 NATS_STATE_SUBJECT = os.getenv("NATS_STATE_SUBJECT", "cloudapi.aries.state_monitoring")
 NATS_CREDS_FILE = os.getenv("NATS_CREDS_FILE", "")
-ENDORSER_DURABLE_CONSUMER = os.getenv("ENDORSER_DURABLE_CONSUMER", "endorser")
 
 # S3
 BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "tails-bucket")

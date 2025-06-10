@@ -8,7 +8,7 @@ export ITERATIONS=1
 
 WEBS="governance-ga-web governance-multitenant-web governance-tenant-web governance-public-web"
 AGENT="governance-ga-agent governance-multitenant-agent"
-SERVICE="tails-server governance-trust-registry governance-endorser"
+SERVICE="tails-server governance-trust-registry"
 AUTH="inquisitor"
 TESTS="create-issuers.js create-creddef.js"
 
