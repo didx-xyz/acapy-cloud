@@ -10,7 +10,7 @@ errors = 0
 
 for xml_file in xml_files:
     file_path = os.path.join(dir, xml_file)
-    with open(file_path, "r", encoding="utf-8") as file_read:
+    with open(file_path, encoding="utf-8") as file_read:
         soup = BeautifulSoup(file_read, "xml")
 
         testsuite = soup.find("testsuite")
