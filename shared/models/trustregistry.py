@@ -71,28 +71,26 @@ class Schema(BaseModel):
             name = values.get("name")
             version = values.get("version")
 
+        elif id is None:
+            if None in (did, name, version):
+                raise CloudApiValueError(
+                    "Either `id` or all of (`did`, `name`, `version`) must be specified."
+                )
+            id = calc_schema_id(did, name, version)
+        elif None not in (did, name, version):
+            expected_id = calc_schema_id(did, name, version)
+            if id != expected_id:
+                raise CloudApiValueError(
+                    f"Schema's `id` field does not match expected format: `{expected_id}`."
+                )
         else:
-            if id is None:
-                if None in (did, name, version):
-                    raise CloudApiValueError(
-                        "Either `id` or all of (`did`, `name`, `version`) must be specified."
-                    )
-                id = calc_schema_id(did, name, version)
-            else:
-                if None not in (did, name, version):
-                    expected_id = calc_schema_id(did, name, version)
-                    if id != expected_id:
-                        raise CloudApiValueError(
-                            f"Schema's `id` field does not match expected format: `{expected_id}`."
-                        )
-                else:
-                    # Extract did, name, and version from id if not specified
-                    try:
-                        did, _, name, version = id.split(":")
-                    except ValueError as e:
-                        raise CloudApiValueError(
-                            "Invalid `id` field. It does not match the expected format."
-                        ) from e
+            # Extract did, name, and version from id if not specified
+            try:
+                did, _, name, version = id.split(":")
+            except ValueError as e:
+                raise CloudApiValueError(
+                    "Invalid `id` field. It does not match the expected format."
+                ) from e
 
         values["did"] = did
         values["name"] = name

@@ -91,7 +91,7 @@ lint.select = [
   "F", # pyflakes (detect invalid Python code)
   "I", # isort (import sorting)
   "N",  # pep8-naming (naming conventions)
-  # "PL",  # pylint
+  "PL",  # pylint
   "RUF", # ruff-specific rules
   "UP",  # pyupgrade (upgrade syntax)
   "W",   # pycodestyle warnings (style warnings)
@@ -114,6 +114,9 @@ lint.ignore = [
 
   # Fix later:
   "C901", # Function complexity is too high
+  "PLR0912", # Too many branches
+  "PLR0913", # Too many arguments in function definition
+  "PLR0915", # Too many statements
 
   # Fix later by ignoring individual lines (because it's important not to ignore globally)
   "D417", # Detects missing argument descriptions - route methods have auth param, which we don't want in docstrings
