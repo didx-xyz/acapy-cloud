@@ -11,7 +11,7 @@ from fastapi import HTTPException
 
 from app.routes.connections import accept_did_exchange_request
 
-test_their_public_did = "did:sov:12345"
+test_their_public_did = "did:cheqd:12345"
 created_connection = ConnRecord(
     connection_id="some_connection_id",
     state="request-sent",

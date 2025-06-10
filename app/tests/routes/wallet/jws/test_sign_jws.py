@@ -21,7 +21,8 @@ async def test_sign_jws_success():
     mock_handle_acapy_call = AsyncMock()
     mock_handle_acapy_call.return_value = jws
     request_body = JWSCreateRequest(
-        did="did:sov:AGguR4mc186Tw11KeWd4qq", payload={"test": "test_value"}
+        did="did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6",
+        payload={"test": "test_value"},
     )
 
     payload = JWSCreate(**request_body.model_dump())
@@ -52,7 +53,8 @@ async def test_sign_jws_validation_error():
 
     # Create a request that will trigger a ValidationError
     request_body = JWSCreateRequest(
-        did="did:sov:AGguR4mc186Tw11KeWd4qq", payload={"test": "test_value"}
+        did="did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6",
+        payload={"test": "test_value"},
     )
 
     # Mock the JWSCreate to raise ValidationError

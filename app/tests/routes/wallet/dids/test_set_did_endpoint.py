@@ -12,7 +12,7 @@ from fastapi import HTTPException
 from app.models.wallet import SetDidEndpointRequest
 from app.routes.wallet.dids import set_did_endpoint
 
-did = "did:sov:2cpBmR3FqGKWi5EyUbpRY8"
+did = "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
 
 
 @pytest.mark.anyio

@@ -6,7 +6,7 @@ from aries_cloudcontroller import ConnRecord
 from app.models.oob import ConnectToPublicDid
 from app.routes.oob import connect_to_public_did
 
-test_public_did = "did:sov:12345"
+test_public_did = "did:cheqd:12345"
 created_connection = ConnRecord(
     connection_id="some_connection_id",
     state="request-sent",

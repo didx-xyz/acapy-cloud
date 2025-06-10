@@ -11,10 +11,10 @@ from aries_cloudcontroller.exceptions import (
 from app.routes.wallet.dids import list_dids
 
 sample_did = DID(
-    did="2cpBmR3FqGKWi5EyUbpRY8",
+    did="did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6",
     key_type="ed25519",
-    method="sov",
-    posture="wallet_only",
+    method="cheqd",
+    posture="posted",
     verkey="WgWxqztrNooG92RXvxSTWvWgWxqztrNooG92RXvxSTWv",
 )
 

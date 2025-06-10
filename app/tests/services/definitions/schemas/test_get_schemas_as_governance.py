@@ -96,7 +96,7 @@ async def test_get_schemas_as_governance_with_filters():
     ):
         result = await get_schemas_as_governance(
             mock_aries_controller,
-            schema_issuer_did="did:sov:123",
+            schema_issuer_did="did:cheqd:testnet:123",
             schema_name="Test Schema 1",
             schema_version="1.0",
         )

@@ -11,10 +11,12 @@ from fastapi import HTTPException
 
 from app.routes.wallet.dids import get_public_did
 
+did_cheqd = "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
+
 sample_did = DID(
-    did="2cpBmR3FqGKWi5EyUbpRY8",
+    did=did_cheqd,
     key_type="ed25519",
-    method="sov",
+    method="cheqd",
     posture="posted",
     verkey="WgWxqztrNooG92RXvxSTWvWgWxqztrNooG92RXvxSTWv",
 )

@@ -14,17 +14,20 @@ from app.services import acapy_wallet
 
 @pytest.mark.anyio
 async def test_assert_public_did(mock_agent_controller: AcaPyClient):
-    did = DID(
-        did="Ehx3RZSV38pn3MYvxtHhbQ",
+    did_cheqd = "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
+    did_object = DID(
+        did=did_cheqd,
         verkey="WgWxqztrNooG92RXvxSTWvWgWxqztrNooG92RXvxSTWv",
-        posture="wallet_only",
+        posture="posted",
         key_type="ed25519",
-        method="sov",
+        method="cheqd",
     )
-    mock_agent_controller.wallet.get_public_did.return_value = DIDResult(result=did)
+    mock_agent_controller.wallet.get_public_did.return_value = DIDResult(
+        result=did_object
+    )
 
     did = await acapy_wallet.assert_public_did(mock_agent_controller)
-    assert did == "did:sov:Ehx3RZSV38pn3MYvxtHhbQ"
+    assert did == did_cheqd
 
     with pytest.raises(CloudApiException, match="Agent has no public did"):
         mock_agent_controller.wallet.get_public_did.return_value = DIDResult(

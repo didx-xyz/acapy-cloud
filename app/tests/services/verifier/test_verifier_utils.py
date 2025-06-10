@@ -29,11 +29,13 @@ from app.util.acapy_verifier_utils import (
 from shared.models.presentation_exchange import PresentationExchange
 from shared.models.trustregistry import Actor
 
+sample_did = "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
+
 sample_actor = Actor(
     id="abcde",
     name="Flint",
     roles=["verifier"],
-    did="did:sov:abcde",
+    did=sample_did,
     didcomm_invitation=None,
 )
 
@@ -224,7 +226,7 @@ async def test_assert_valid_prover_public_did(
     mock_agent_controller: AcaPyClient,
 ):
     conn_record = ConnRecord(
-        connection_id=pres_exchange.connection_id, their_public_did="did:sov:123"
+        connection_id=pres_exchange.connection_id, their_public_did=sample_did
     )
 
     presentation = AnonCredsPresSpec(
@@ -603,7 +605,7 @@ async def test_assert_valid_verifier_public_did(mock_agent_controller: AcaPyClie
     with (
         patch(
             "app.util.acapy_verifier_utils.assert_public_did",
-            return_value="did:sov:something",
+            return_value=sample_did,
         ),
         patch("app.util.acapy_verifier_utils.get_actor", return_value=sample_actor),
     ):
@@ -684,7 +686,7 @@ async def test_assert_valid_verifier_could_not_fetch_actor_recover_label(
     with (
         patch(
             "app.util.acapy_verifier_utils.assert_public_did",
-            return_value="did:sov:something",
+            return_value=sample_did,
         ),
         patch(
             "app.util.acapy_verifier_utils.fetch_actor_by_did",
@@ -716,7 +718,7 @@ async def test_assert_valid_verifier_x_could_not_fetch_actor_exc(
     with (
         patch(
             "app.util.acapy_verifier_utils.assert_public_did",
-            return_value="did:sov:something",
+            return_value=sample_did,
         ),
         patch(
             "app.util.acapy_verifier_utils.fetch_actor_by_did",
@@ -752,7 +754,7 @@ async def test_assert_valid_verifier_x_could_not_fetch_actor_exc2(
     with (
         patch(
             "app.util.acapy_verifier_utils.assert_public_did",
-            return_value="did:sov:something",
+            return_value=sample_did,
         ),
         patch(
             "app.util.acapy_verifier_utils.fetch_actor_by_did",
@@ -784,7 +786,7 @@ async def test_assert_valid_verifier_x_could_not_fetch_actor_exc3(
     with (
         patch(
             "app.util.acapy_verifier_utils.assert_public_did",
-            return_value="did:sov:something",
+            return_value=sample_did,
         ),
         patch(
             "app.util.acapy_verifier_utils.fetch_actor_by_did",
@@ -812,7 +814,7 @@ async def test_assert_valid_verifier_x_could_not_fetch_actor_exc4(
     with (
         patch(
             "app.util.acapy_verifier_utils.assert_public_did",
-            return_value="did:sov:something",
+            return_value=sample_did,
         ),
         patch(
             "app.util.acapy_verifier_utils.fetch_actor_by_did",

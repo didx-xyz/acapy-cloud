@@ -10,7 +10,7 @@ from fastapi import HTTPException
 
 from app.routes.wallet.dids import rotate_keypair
 
-did = "did:sov:2cpBmR3FqGKWi5EyUbpRY8"
+did = "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
 
 
 @pytest.mark.anyio
@@ -53,6 +53,6 @@ async def test_rotate_keypair_fail_acapy_error(
             mock_aries_controller
         )
 
-        await rotate_keypair(did="did:sov:12345", auth="mocked_auth")
+        await rotate_keypair(did="did:cheqd:12345", auth="mocked_auth")
 
     assert exc.value.status_code == expected_status_code

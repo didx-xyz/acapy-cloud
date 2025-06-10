@@ -11,12 +11,12 @@ from fastapi import HTTPException
 
 from app.routes.connections import create_did_exchange_request
 
-test_their_public_did = "did:sov:12345"
+test_their_public_did = "did:cheqd:12345"
 test_alias = "Test Alias"
 test_goal = "Test Goal"
 test_goal_code = "TestGoalCode"
 test_my_label = "TestLabel"
-test_use_did = "did:sov:56789"
+test_use_did = "did:cheqd:56789"
 test_use_did_method = "did:peer:2"
 created_connection = ConnRecord(
     connection_id="some_connection_id",

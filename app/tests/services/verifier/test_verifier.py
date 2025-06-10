@@ -36,7 +36,7 @@ actor = Actor(
     id="abcde",
     name="Flint",
     roles=["verifier"],
-    did="did:sov:2cpBmR3FqGKWi5EyUbpRY8",
+    did="did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6",
     didcomm_invitation=None,
 )
 conn_record = ConnRecord(

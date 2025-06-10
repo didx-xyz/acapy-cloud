@@ -24,9 +24,9 @@ async def test_verify_jws_success():
         "headers": {
             "typ": "JWT",
             "alg": "EdDSA",
-            "kid": "did:sov:AGguR4mc186Tw11KeWd4qq#key-1",
+            "kid": "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6#key-1",
         },
-        "kid": "did:sov:AGguR4mc186Tw11KeWd4qq#key-1",
+        "kid": "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6#key-1",
         "valid": True,
         "error": None,
     }

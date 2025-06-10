@@ -16,9 +16,9 @@ def test_jws_create_request():
     # did and verification_method
     with pytest.raises(CloudApiValueError) as exc:
         JWSCreateRequest(
-            did="did:sov:AGguR4mc186Tw11KeWd4qq",
+            did="did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6",
             payload={"test": "test_value"},
-            verification_method="did:sov:AGguR4mc186Tw11KeWd4qq",
+            verification_method="did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6",
         )
 
     assert exc.value.detail == (
@@ -27,6 +27,6 @@ def test_jws_create_request():
 
     # no payload
     with pytest.raises(CloudApiValueError) as exc:
-        JWSCreateRequest(did="did:sov:AGguR4mc186Tw11KeWd4qq")
+        JWSCreateRequest(did="did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6")
 
     assert exc.value.detail == ("`payload` must be populated.")

@@ -30,13 +30,6 @@ from app.routes.wallet.dids import create_did
             ),
         ),
         (
-            DIDCreate(method="sov"),
-            DIDCreateAcaPy(
-                method="sov",
-                options={"key_type": "ed25519"},
-            ),
-        ),
-        (
             DIDCreate(method="did:peer:2"),
             DIDCreateAcaPy(
                 method="did:peer:2",
@@ -54,13 +47,6 @@ from app.routes.wallet.dids import create_did
             DIDCreate(method="key", key_type="bls12381g2"),
             DIDCreateAcaPy(
                 method="key",
-                options={"key_type": "bls12381g2"},
-            ),
-        ),
-        (
-            DIDCreate(method="sov", key_type="bls12381g2"),
-            DIDCreateAcaPy(
-                method="sov",
                 options={"key_type": "bls12381g2"},
             ),
         ),
