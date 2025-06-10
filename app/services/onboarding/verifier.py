@@ -18,6 +18,7 @@ async def onboard_verifier(*, verifier_controller: AcaPyClient, verifier_label: 
     Args:
         verifier_controller (AcaPyClient): authenticated ACA-Py client for verifier
         verifier_label (str): alias for the verifier
+
     """
     bound_logger = logger.bind(body={"verifier_label": verifier_label})
     bound_logger.info("Onboarding verifier")

@@ -17,8 +17,7 @@ async def send_messages(
     message: Message,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> None:
-    """
-    Send basic message
+    """Send basic message
     ---
 
     Send a message to a tenant via a connection. The other tenant will receive
@@ -36,9 +35,10 @@ async def send_messages(
             content: str
                 The message to send.
 
-    Returns:
-    ---
+    Returns
+    -------
         Status code 204
+
     """
     logger.debug("POST request received: Send message")
     request_body = SendMessage(content=message.content)
@@ -59,8 +59,7 @@ async def send_trust_ping(
     trustping_msg: TrustPingMsg,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> PingRequestResponse:
-    """
-    Send trust ping
+    """Send trust ping
     ---
     Send a trust ping to a connection to ensure that the connection is active and ready.
 
@@ -76,11 +75,12 @@ async def send_trust_ping(
             comment: str
                 Comment to include in the trust ping.
 
-    Returns:
-    ---
+    Returns
+    -------
         PingRequestResponse
             thread_id: str
                 Thread ID of the ping message
+
     """
     logger.debug("POST request received: Send trust ping")
     request_body = PingRequest(comment=trustping_msg.comment)

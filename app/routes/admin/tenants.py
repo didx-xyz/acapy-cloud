@@ -1,5 +1,4 @@
 from secrets import token_urlsafe
-from typing import List, Optional
 
 import base58
 from aries_cloudcontroller import (
@@ -53,7 +52,7 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/v1/tenants", tags=["admin: tenants"])
 
 
-group_id_query: Optional[str] = Query(
+group_id_query: str | None = Query(
     default=None,
     description="Group ID to which the wallet belongs",
     include_in_schema=False,
@@ -65,8 +64,7 @@ async def create_tenant(
     body: CreateTenantRequest,
     admin_auth: AcaPyAuthVerified = Depends(acapy_auth_tenant_admin),
 ) -> CreateTenantResponse:
-    """
-    Create a New Tenant
+    """Create a New Tenant
     ---
 
     Use this endpoint to create a new Tenant, which is the same as creating a new Wallet.
@@ -245,11 +243,10 @@ async def create_tenant(
 @router.delete("/{wallet_id}", summary="Delete a Tenant by Wallet ID", status_code=204)
 async def delete_tenant_by_id(
     wallet_id: str,
-    group_id: Optional[str] = group_id_query,
+    group_id: str | None = group_id_query,
     admin_auth: AcaPyAuthVerified = Depends(acapy_auth_tenant_admin),
 ) -> None:
-    """
-    Delete Tenant by ID
+    """Delete Tenant by ID
     ---
 
     Use this endpoint to delete a Tenant by its Wallet ID. This action will remove the Tenant's Wallet,
@@ -304,11 +301,10 @@ async def delete_tenant_by_id(
 )
 async def post_wallet_auth_token(
     wallet_id: str,
-    group_id: Optional[str] = group_id_query,
+    group_id: str | None = group_id_query,
     admin_auth: AcaPyAuthVerified = Depends(acapy_auth_tenant_admin),
 ) -> TenantAuth:
-    """
-    Rotate and get new access token for Wallet
+    """Rotate and get new access token for Wallet
     ---
 
     Calling this endpoint will invalidate the previous access token for the Wallet, and return a new one.
@@ -352,11 +348,10 @@ async def post_wallet_auth_token(
 async def update_tenant(
     wallet_id: str,
     body: UpdateTenantRequest,
-    group_id: Optional[str] = group_id_query,
+    group_id: str | None = group_id_query,
     admin_auth: AcaPyAuthVerified = Depends(acapy_auth_tenant_admin),
 ) -> Tenant:
-    """
-    Update Tenant by Wallet ID
+    """Update Tenant by Wallet ID
     ---
 
     Update a Tenant's details based on their Wallet ID.
@@ -414,11 +409,10 @@ async def update_tenant(
 @router.get("/{wallet_id}", response_model=Tenant, summary="Get Tenant by Wallet ID")
 async def get_tenant(
     wallet_id: str,
-    group_id: Optional[str] = group_id_query,
+    group_id: str | None = group_id_query,
     admin_auth: AcaPyAuthVerified = Depends(acapy_auth_tenant_admin),
 ) -> Tenant:
-    """
-    Fetch Tenant info by ID
+    """Fetch Tenant info by ID
     ---
 
     Use this endpoint to fetch Tenant info by Wallet ID.
@@ -455,18 +449,17 @@ async def get_tenant(
     return response
 
 
-@router.get("", response_model=List[Tenant], summary="Fetch Tenants")
+@router.get("", response_model=list[Tenant], summary="Fetch Tenants")
 async def get_tenants(
-    wallet_name: Optional[str] = None,
-    group_id: Optional[str] = group_id_query,
-    limit: Optional[int] = limit_query_parameter,
-    offset: Optional[int] = offset_query_parameter,
-    order_by: Optional[str] = order_by_query_parameter,
+    wallet_name: str | None = None,
+    group_id: str | None = group_id_query,
+    limit: int | None = limit_query_parameter,
+    offset: int | None = offset_query_parameter,
+    order_by: str | None = order_by_query_parameter,
     descending: bool = descending_query_parameter,
     admin_auth: AcaPyAuthVerified = Depends(acapy_auth_tenant_admin),
-) -> List[Tenant]:
-    """
-    Fetch all Tenants (paginated), or Fetch by Wallet Name
+) -> list[Tenant]:
+    """Fetch all Tenants (paginated), or Fetch by Wallet Name
     ---
 
     Use this endpoint to fetch all tenants (using pagination), or filter by wallet name.

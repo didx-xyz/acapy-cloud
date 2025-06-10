@@ -1,5 +1,3 @@
-from typing import Optional
-
 from aries_cloudcontroller import InvitationCreateRequest, InvitationRecord, OobRecord
 from fastapi import APIRouter, Depends
 
@@ -22,11 +20,10 @@ router = APIRouter(prefix="/v1/oob", tags=["out-of-band"])
     response_model=InvitationRecord,
 )
 async def create_oob_invitation(
-    body: Optional[CreateOobInvitation] = None,
+    body: CreateOobInvitation | None = None,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> InvitationRecord:
-    """
-    Create an out-of-band invitation
+    """Create an out-of-band invitation
     ---
 
     The attachment field is used to include a credential offer or a proof request in the invitation.
@@ -50,10 +47,11 @@ async def create_oob_invitation(
             attachments: Optional[List[Attachment]]
             create_connection: Optional[bool]
 
-    Returns:
-    ---
+    Returns
+    -------
         InvitationRecord
             The invitation record
+
     """
     bound_logger = logger.bind(body=body)
     bound_logger.debug("POST request received: Create OOB invitation")
@@ -106,8 +104,7 @@ async def accept_oob_invitation(
     body: AcceptOobInvitation,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> OobRecord:
-    """
-    Accept out-of-band invitation
+    """Accept out-of-band invitation
     ---
 
     As with the accept connection invitation endpoint, the invitation object from the create-invitation endpoint
@@ -123,10 +120,11 @@ async def accept_oob_invitation(
             use_existing_connection: Optional[bool]
             invitation: InvitationMessage
 
-    Returns:
-    ---
+    Returns
+    -------
         OobRecord
             The out-of-band record
+
     """
     bound_logger = logger.bind(body=body)
     bound_logger.debug("POST request received: Accept OOB invitation")
@@ -151,8 +149,7 @@ async def connect_to_public_did(
     body: ConnectToPublicDid,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> Connection:
-    """
-    Connect using public DID as implicit invitation
+    """Connect using public DID as implicit invitation
     ---
 
     A connection will automatically be established with the public DID.
@@ -162,10 +159,11 @@ async def connect_to_public_did(
         body: ConnectToPublicDid
             public_did: str
 
-    Returns:
-    ---
+    Returns
+    -------
         Connection
             The connection record
+
     """
     bound_logger = logger.bind(body=body)
     bound_logger.debug("POST request received: Connect to public DID")

@@ -1,6 +1,3 @@
-import asyncio
-from typing import Optional
-
 from aries_cloudcontroller import IssuerCredRevRecord
 from fastapi import APIRouter, Depends
 
@@ -31,8 +28,7 @@ async def revoke_credential(
     body: RevokeCredential,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> RevokedResponse:
-    """
-    Revoke a credential
+    """Revoke a credential
     ---
     Revoke a credential by providing the identifier of the exchange.
 
@@ -50,12 +46,13 @@ async def revoke_credential(
             - auto_publish_on_ledger (bool): (True) publish revocation to ledger immediately, or
                 (default, False) mark it pending
 
-    Returns:
-    ---
+    Returns
+    -------
         RevokedResponse:
             revoked_cred_rev_ids:
               The revocation registry indexes that were revoked.
               Will be empty if the revocation was marked as pending.
+
     """
     bound_logger = logger.bind(body=body)
     bound_logger.debug("POST request received: Revoke credential")
@@ -78,13 +75,12 @@ async def revoke_credential(
     response_model=IssuerCredRevRecord,
 )
 async def get_credential_revocation_record(
-    credential_exchange_id: Optional[str] = None,
-    credential_revocation_id: Optional[str] = None,
-    revocation_registry_id: Optional[str] = None,
+    credential_exchange_id: str | None = None,
+    credential_revocation_id: str | None = None,
+    revocation_registry_id: str | None = None,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> IssuerCredRevRecord:
-    """
-    Get a credential revocation record
+    """Get a credential revocation record
     ---
     Fetch a credential revocation record by providing the credential exchange id.
     Records can also be fetched by providing the credential revocation id and revocation registry id.
@@ -95,21 +91,22 @@ async def get_credential_revocation_record(
     The revocation registry id (rev_reg_id) and credential revocation id (cred_rev_id) can be found
     in this record if you have the credential exchange id.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         credential_exchange_id: str
         credential_revocation_id: str
         revocation_registry_id: str
 
-    Returns:
-    ---
+    Returns
+    -------
         IssuerCredRevRecord
             The credential revocation record
 
-    Raises:
-    ---
+    Raises
+    ------
         CloudApiException: 400
             If credential_exchange_id is not provided, both credential_revocation_id and revocation_registry_id must be.
+
     """
     bound_logger = logger.bind(
         body={
@@ -147,8 +144,7 @@ async def publish_revocations(
     publish_request: PublishRevocationsRequest,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> RevokedResponse:
-    """
-    Write pending revocations to the ledger
+    """Write pending revocations to the ledger
     ---
     Revocations that are in a pending state can be published to the ledger.
 
@@ -176,12 +172,13 @@ async def publish_revocations(
             publish all pending revocations for that ID. An empty dictionary signifies that all pending
             revocations across all registry IDs should be published.
 
-    Returns:
-    ---
+    Returns
+    -------
         RevokedResponse:
             revoked_cred_rev_ids:
               The revocation registry indexes that were revoked.
               Will be empty if there were no revocations to publish.
+
     """
     bound_logger = logger.bind(body=publish_request)
     bound_logger.debug("POST request received: Publish revocations")
@@ -216,7 +213,7 @@ async def publish_revocations(
                     max_attempts=PUBLISH_REVOCATIONS_TIMEOUT,
                     retry_delay=1,
                 )
-            except asyncio.TimeoutError as e:
+            except TimeoutError as e:
                 raise CloudApiException(
                     "Timeout waiting for endorser to accept the revocations request.",
                     504,
@@ -235,8 +232,7 @@ async def clear_pending_revocations(
     clear_pending_request: ClearPendingRevocationsRequest,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> ClearPendingRevocationsResult:
-    """
-    Clear pending revocations
+    """Clear pending revocations
     ---
 
     Note: This endpoint is not supported for the 'askar-anoncreds' wallet type.
@@ -267,10 +263,11 @@ async def clear_pending_revocations(
             clear all pending revocations for that ID. An empty dictionary signifies that all pending
             revocations across all registry IDs should be cleared.
 
-    Returns:
-    ---
+    Returns
+    -------
         ClearPendingRevocationsResult
             The revocations that are still pending after the clear request is performed
+
     """
     raise CloudApiException(
         "Clearing pending revocations is not yet supported for AnonCreds.", 501
@@ -297,20 +294,20 @@ async def get_pending_revocations(
     revocation_registry_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> PendingRevocations:
-    """
-    Get pending revocations
+    """Get pending revocations
     ---
     Get the pending revocations for a given revocation registry ID.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         revocation_registry_id: str
             The ID of the revocation registry for which to fetch pending revocations
 
-    Returns:
-    ---
+    Returns
+    -------
         PendingRevocations:
             A list of cred_rev_ids pending revocation for a given revocation registry ID
+
     """
     bound_logger = logger.bind(body={"revocation_registry_id": revocation_registry_id})
     bound_logger.debug("GET request received: Get pending revocations")
@@ -334,8 +331,7 @@ async def fix_revocation_registry_entry_state(
     apply_ledger_update: bool = False,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> RevRegWalletUpdatedResult:
-    """
-    Fix Revocation Registry Entry State
+    """Fix Revocation Registry Entry State
     ---
     Fix the revocation registry entry state for a given revocation registry ID.
 
@@ -353,12 +349,13 @@ async def fix_revocation_registry_entry_state(
             Apply changes to ledger (default: False). If False, only computes the difference
             between the wallet and ledger state.
 
-    Returns:
-    ---
+    Returns
+    -------
         RevRegWalletUpdatedResult:
             accum_calculated: The calculated accumulator value for any revocations not yet published to ledger
             accum_fixed: The result of applying the ledger transaction to synchronize revocation state
             rev_reg_delta: The delta between wallet and ledger state for this revocation registry
+
     """
     bound_logger = logger.bind(
         body={

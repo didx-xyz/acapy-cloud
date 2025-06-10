@@ -1,5 +1,3 @@
-from typing import Optional, Tuple
-
 from aiocache import SimpleMemoryCache, cached
 from aries_cloudcontroller import (
     AcaPyClient,
@@ -17,19 +15,19 @@ from shared.log_config import get_logger
 logger = get_logger(__name__)
 
 
-async def get_taa(controller: AcaPyClient) -> Tuple[TAAInfo, str]:
-    """
-    Obtains the TAA from the ledger
+async def get_taa(controller: AcaPyClient) -> tuple[TAAInfo, str]:
+    """Obtains the TAA from the ledger
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     controller: AcaPyClient
         The aries_cloudcontroller object
 
-    Returns:
-    --------
+    Returns
+    -------
     taa: Tuple[TAAInfo, str]
         The TAAInfo object, with the mechanism
+
     """
     logger.debug("Fetching TAA")
     taa_response = await handle_acapy_call(
@@ -51,19 +49,19 @@ async def get_taa(controller: AcaPyClient) -> Tuple[TAAInfo, str]:
 
 
 async def accept_taa(
-    controller: AcaPyClient, taa: TAARecord, mechanism: Optional[str] = None
+    controller: AcaPyClient, taa: TAARecord, mechanism: str | None = None
 ) -> None:
-    """
-    Accept the TAA
+    """Accept the TAA
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     controller: AcaPyClient
         The aries_cloudcontroller object
     taa:
         The TAA object we want to agree to
     mechanism:
         An optional mechanism to specify
+
     """
     logger.bind(body=taa).debug("Accepting TAA")
     request_body = TAAAccept(**taa.to_dict(), mechanism=mechanism)
@@ -83,21 +81,21 @@ async def accept_taa(
 async def get_did_endpoint(
     controller: AcaPyClient, issuer_nym: str
 ) -> GetDIDEndpointResponse:
-    """
-    Obtains the public DID endpoint
+    """Obtains the public DID endpoint
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     controller: AcaPyClient
         The aries_cloudcontroller object
     issuer_nym: str
         The issuer's Verinym
 
-    Returns:
-    --------
+    Returns
+    -------
     GetDIDEndpointResponse
         The response from getting the public endpoint associated with
         the issuer's Verinym from the ledger
+
     """
     bound_logger = logger.bind(body={"issuer_nym": issuer_nym})
     bound_logger.debug("Fetching DID endpoint")
@@ -117,10 +115,10 @@ async def register_nym_on_ledger(
     *,
     did: str,
     verkey: str,
-    alias: Optional[str] = None,
-    role: Optional[str] = None,
-    connection_id: Optional[str] = None,
-    create_transaction_for_endorser: Optional[str] = None,
+    alias: str | None = None,
+    role: str | None = None,
+    connection_id: str | None = None,
+    create_transaction_for_endorser: str | None = None,
 ) -> TxnOrRegisterLedgerNymResponse:
     bound_logger = logger.bind(body={"did": did})
     bound_logger.info("Registering NYM on ledger")
@@ -161,22 +159,22 @@ async def schema_id_from_credential_definition_id(
     controller: AcaPyClient,
     credential_definition_id: str,
 ) -> str:
-    """
-    From a credential definition, get the identifier for its schema.
+    """From a credential definition, get the identifier for its schema.
 
     Taken from ACA-Py implementation:
     https://github.com/openwallet-foundation/acapy/blob/f9506df755e46c5be93b228c8811276b743a1adc/aries_cloudagent/ledger/indy.py#L790
 
-    Parameters:
+    Parameters
     ----------
     controller: AcaPyClient
         The aries_cloudcontroller object
     credential_definition_id: The identifier of the credential definition
             from which to identify a schema
 
-    Returns:
+    Returns
     -------
     schema_id : string
+
     """
     bound_logger = logger.bind(
         body={"credential_definition_id": credential_definition_id}

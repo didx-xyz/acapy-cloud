@@ -1,4 +1,3 @@
-from typing import List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -38,8 +37,7 @@ async def send_proof_request(
     body: SendProofRequest,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> PresentationExchange:
-    """
-    Send proof request
+    """Send proof request
     ---
     NB: Only a tenant with the verifier role can send a proof request.
 
@@ -65,10 +63,11 @@ async def send_proof_request(
         body: SendProofRequest
             The proof request object
 
-    Returns:
-    ---
+    Returns
+    -------
         PresentationExchange
             The presentation exchange record for this request
+
     """
     bound_logger = logger.bind(body=body)
     bound_logger.debug("POST request received: Send proof request")
@@ -104,8 +103,7 @@ async def create_proof_request(
     body: CreateProofRequest,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> PresentationExchange:
-    """
-    Creates a presentation request that is not bound to any specific proposal or connection
+    """Creates a presentation request that is not bound to any specific proposal or connection
     ---
     This endpoint is used to create a proof request that is not bound to a connection. This means the proof request is
     not sent directly, but it will do the initial step of creating a proof exchange record,
@@ -133,10 +131,11 @@ async def create_proof_request(
         body: CreateProofRequest
             The proof request object
 
-    Returns:
-    ---
+    Returns
+    -------
         PresentationExchange
             The presentation exchange record for this request
+
     """
     bound_logger = logger.bind(body=body)
     bound_logger.debug("POST request received: Create proof request")
@@ -167,8 +166,7 @@ async def accept_proof_request(
     body: AcceptProofRequest,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> PresentationExchange:
-    """
-    Accept proof request
+    """Accept proof request
     ---
     A prover uses this endpoint to respond to a proof request, by sending a presentation to the verifier.
 
@@ -212,10 +210,11 @@ async def accept_proof_request(
         body: AcceptProofRequest
             The proof request object
 
-    Returns:
-    ---
+    Returns
+    -------
         PresentationExchange
             The prover's updated presentation exchange record after responding to the proof request.
+
     """
     bound_logger = logger.bind(body=body)
     bound_logger.debug("POST request received: Accept proof request")
@@ -257,8 +256,7 @@ async def reject_proof_request(
     body: RejectProofRequest,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> None:
-    """
-    Reject proof request
+    """Reject proof request
     ---
     A prover uses this endpoint to notify the verifier that they cannot or refuse to respond to a proof request.
 
@@ -275,9 +273,10 @@ async def reject_proof_request(
             delete_proof_record: bool (default: False)
                 Can be set to true if the prover wishes to delete their record of the rejected presentation exchange.
 
-    Returns:
-    ---
+    Returns
+    -------
         status_code: 204
+
     """
     bound_logger = logger.bind(body=body)
     bound_logger.debug("POST request received: Reject proof request")
@@ -311,21 +310,20 @@ async def reject_proof_request(
 @router.get(
     "/proofs",
     summary="Get Presentation Exchange Records",
-    response_model=List[PresentationExchange],
+    response_model=list[PresentationExchange],
 )
 async def get_proof_records(
-    limit: Optional[int] = limit_query_parameter,
-    offset: Optional[int] = offset_query_parameter,
-    order_by: Optional[str] = order_by_query_parameter,
+    limit: int | None = limit_query_parameter,
+    offset: int | None = offset_query_parameter,
+    order_by: str | None = order_by_query_parameter,
     descending: bool = descending_query_parameter,
-    connection_id: Optional[str] = None,
-    role: Optional[Role] = None,
-    state: Optional[State] = None,
-    thread_id: Optional[UUID] = None,
+    connection_id: str | None = None,
+    role: Role | None = None,
+    state: State | None = None,
+    thread_id: UUID | None = None,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
-) -> List[PresentationExchange]:
-    """
-    Get all presentation exchange records for this tenant
+) -> list[PresentationExchange]:
+    """Get all presentation exchange records for this tenant
     ---
     These records contains information about proof requests and presentations.
 
@@ -342,8 +340,8 @@ async def get_proof_records(
                         "request-received", "request-sent", "abandoned", "done"
         thread_id: UUID
 
-    Returns:
-    ---
+    Returns
+    -------
         List[PresentationExchange]
             The list of presentation exchange records
 
@@ -384,20 +382,20 @@ async def get_proof_record(
     proof_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> PresentationExchange:
-    """
-    Get a specific presentation exchange record
+    """Get a specific presentation exchange record
     ---
     This fetches a specific presentation exchange record by providing the proof ID.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         proof_id: str
             The proof ID for the presentation request of interest
 
-    Returns:
-    ---
+    Returns
+    -------
         PresentationExchange
             The presentation exchange record for the proof ID
+
     """
     bound_logger = logger.bind(body={"proof_id": proof_id})
     bound_logger.debug("GET request received: Get proof record by id")
@@ -428,19 +426,19 @@ async def delete_proof(
     proof_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> None:
-    """
-    Delete a presentation exchange record
+    """Delete a presentation exchange record
     ---
     This will remove a specific presentation exchange from your storage records.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         proof_id: str
             The identifier of the presentation exchange record that you want to delete
 
-    Returns:
-    ---
+    Returns
+    -------
         status_code: 204
+
     """
     bound_logger = logger.bind(body={"proof_id": proof_id})
     bound_logger.debug("DELETE request received: Delete proof record by id")
@@ -461,25 +459,24 @@ async def delete_proof(
 @router.get(
     "/proofs/{proof_id}/credentials",
     summary="Get Matching Credentials for a Proof",
-    response_model=List[CredPrecis],
+    response_model=list[CredPrecis],
 )
 async def get_credentials_by_proof_id(
     proof_id: str,
-    referent: Optional[str] = None,
-    limit: Optional[int] = limit_query_parameter,
-    offset: Optional[int] = offset_query_parameter,
+    referent: str | None = None,
+    limit: int | None = limit_query_parameter,
+    offset: int | None = offset_query_parameter,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
-) -> List[CredPrecis]:
-    """
-    Get matching credentials for a presentation exchange
+) -> list[CredPrecis]:
+    """Get matching credentials for a presentation exchange
     ---
     This endpoint returns a list of possible credentials that the prover can use to respond to a given proof request.
 
     The `presentation_referents` field (in the response) indicates which of the fields
     in the proof request that credential satisfies.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         proof_id: str
             The relevant proof exchange ID for the prover
         referent: Optional str
@@ -489,10 +486,11 @@ async def get_credentials_by_proof_id(
         offset: Optional int
             The index to start fetching credentials from
 
-    Returns:
-    ---
+    Returns
+    -------
         List[CredPrecis]
             A list of applicable credentials
+
     """
     bound_logger = logger.bind(body={"proof_id": proof_id})
     bound_logger.debug("GET request received: Get credentials for a proof request")

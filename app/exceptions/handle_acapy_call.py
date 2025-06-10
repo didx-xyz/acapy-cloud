@@ -20,8 +20,7 @@ T = TypeVar("T", bound=Any)
 async def handle_acapy_call(
     logger: Logger, acapy_call: Callable[..., Coroutine[Any, Any, T]], *args, **kwargs
 ) -> T:
-    """
-    Executes an ACA-Py client call with standardized error handling.
+    """Executes an ACA-Py client call with standardized error handling.
 
     This function wraps ACA-Py client calls to catch and log exceptions in a standardized manner.
     It re-raises exceptions as CloudApiException for API error responses.
@@ -37,6 +36,7 @@ async def handle_acapy_call(
 
     Raises:
         CloudApiException: Custom API exception with status code and detail when API calls fail.
+
     """
     method_identifier = acapy_call.__name__
     try:

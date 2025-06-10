@@ -17,6 +17,7 @@ async def actor_has_role(actor_id: str, role: TrustRegistryRole) -> bool:
 
     Returns:
         bool: Whether the actor with specified id has specified role
+
     """
     bound_logger = logger.bind(body={"actor_id": actor_id, "role": role})
     bound_logger.debug("Asserting actor has role")
@@ -45,6 +46,7 @@ async def assert_actor_name(actor_name: str) -> bool:
 
     Returns:
         Bool: if actor exists
+
     """
     bound_logger = logger.bind(body={"actor_name": actor_name})
     bound_logger.debug("Fetching actor by name from trust registry")

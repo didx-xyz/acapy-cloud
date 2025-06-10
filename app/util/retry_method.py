@@ -46,8 +46,7 @@ async def coroutine_with_retry_until_value(
     max_attempts: int = 5,
     retry_delay: int = 2,
 ) -> T:
-    """
-    Executes a coroutine function with retries until it returns an expected value
+    """Executes a coroutine function with retries until it returns an expected value
     or until a maximum number of attempts is reached.
 
     Args:
@@ -65,6 +64,7 @@ async def coroutine_with_retry_until_value(
 
     Raises:
         Exception: Re-raises any exception encountered on the final attempt.
+
     """
     for attempt in range(max_attempts):
         try:
@@ -73,9 +73,8 @@ async def coroutine_with_retry_until_value(
             if field_name:
                 if getattr(result, field_name, None) == expected_value:
                     return result
-            else:
-                if result == expected_value:
-                    return result
+            elif result == expected_value:
+                return result
 
             if attempt + 1 < max_attempts:
                 logger.debug(

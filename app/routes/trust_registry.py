@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from fastapi import APIRouter, HTTPException
 
 import app.services.trust_registry.actors as registry_actors
@@ -12,14 +10,14 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/v1/trust-registry", tags=["trust-registry"])
 
 
-@router.get("/schemas", response_model=List[Schema])
-async def get_schemas() -> List[Schema]:
-    """
-    Fetch the schemas from the trust registry.
+@router.get("/schemas", response_model=list[Schema])
+async def get_schemas() -> list[Schema]:
+    """Fetch the schemas from the trust registry.
 
-    Returns:
-    ---------
+    Returns
+    -------
     Only the schemas from the trust registry
+
     """
     logger.debug("GET request received: Fetch schemas from the trust registry")
     schemas = await registry_schemas.fetch_schemas()
@@ -30,16 +28,16 @@ async def get_schemas() -> List[Schema]:
 
 @router.get("/schemas/{schema_id:path}", response_model=Schema)
 async def get_schema_by_id(schema_id: str) -> Schema:
-    """
-    Retrieve schema by id.
+    """Retrieve schema by id.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     schema_id: str
 
-    Returns:
-    -----------
+    Returns
+    -------
     A schema from the trust registry
+
     """
     bound_logger = logger.bind(body={"schema_id": schema_id})
     bound_logger.debug("GET request received: Fetch schema by id")
@@ -53,27 +51,27 @@ async def get_schema_by_id(schema_id: str) -> Schema:
         raise HTTPException(404, f"Schema with id: {schema_id} not found")
 
 
-@router.get("/actors", response_model=List[Actor])
+@router.get("/actors", response_model=list[Actor])
 async def get_actors(
-    actor_did: Optional[str] = None,
-    actor_id: Optional[str] = None,
-    actor_name: Optional[str] = None,
-) -> List[Actor]:
-    """
-    Fetch all actors from the trust registry.
+    actor_did: str | None = None,
+    actor_id: str | None = None,
+    actor_name: str | None = None,
+) -> list[Actor]:
+    """Fetch all actors from the trust registry.
     Alternatively, provide one of: did, id, or name, to fetch corresponding actor.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     actor_did: str (Optional) - DID of the Actor
 
     actor_id: str (Optional) - Wallet ID of the Actor
 
     actor_name: str (Optional) - Alias of the Actor
 
-    Returns:
-    ---------
+    Returns
+    -------
     All actors from the trust registry, or one actor if a query parameter is passed
+
     """
     param_count = sum(1 for var in [actor_did, actor_name, actor_id] if var)
 
@@ -121,14 +119,14 @@ async def get_actors(
         raise HTTPException(404, "Actor not found")
 
 
-@router.get("/actors/issuers", response_model=List[Actor])
-async def get_issuers() -> List[Actor]:
-    """
-    Fetch the issuers from the trust registry.
+@router.get("/actors/issuers", response_model=list[Actor])
+async def get_issuers() -> list[Actor]:
+    """Fetch the issuers from the trust registry.
 
-    Returns:
-    ---------
+    Returns
+    -------
     List of issuer actors
+
     """
     logger.debug("GET request received: Fetch the issuers from the trust registry")
     issuers = await registry_actors.fetch_actors_with_role("issuer")
@@ -137,14 +135,14 @@ async def get_issuers() -> List[Actor]:
     return issuers
 
 
-@router.get("/actors/verifiers", response_model=List[Actor])
-async def get_verifiers() -> List[Actor]:
-    """
-    Fetch the verifiers from the trust registry.
+@router.get("/actors/verifiers", response_model=list[Actor])
+async def get_verifiers() -> list[Actor]:
+    """Fetch the verifiers from the trust registry.
 
-    Returns:
-    ---------
+    Returns
+    -------
     List of verifier actors
+
     """
     logger.debug("GET request received: Fetch the verifiers from the trust registry")
     verifiers = await registry_actors.fetch_actors_with_role("verifier")

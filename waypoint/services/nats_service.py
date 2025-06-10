@@ -48,16 +48,17 @@ if HEARTBEAT >= TIMEOUT / 2:
 
 
 class NatsEventsProcessor:
-    """
-    Class to handle processing of NATS events. Calling the process_events method will
-    subscribe to the NATS server and return an async generator that will yield events
+    """Class to handle processing of NATS events.
+
+    Calling the process_events method will subscribe to the NATS server and
+    return an async generator that will yield events.
     """
 
     def __init__(self, jetstream: JetStreamContext):
         self.js_context: JetStreamContext = jetstream
 
     def _retry_log(self, bound_logger, retry_state: RetryCallState):
-        """Custom logging for retry attempts."""
+        """Log retry attempts."""
         if retry_state.outcome.failed:
             exception = retry_state.outcome.exception()
             bound_logger.warning(

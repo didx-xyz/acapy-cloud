@@ -48,7 +48,7 @@ class CredentialDefinitionPublisher:
                 wait_for_active_registry(self._controller, credential_definition_id),
                 timeout=REGISTRY_CREATION_TIMEOUT,
             )
-        except asyncio.TimeoutError as e:
+        except TimeoutError as e:
             self._logger.error("Timeout waiting for revocation registry creation.")
             raise CloudApiException(
                 "Timeout waiting for revocation registry creation.",

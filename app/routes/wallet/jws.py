@@ -28,8 +28,7 @@ async def sign_jws(
     body: JWSCreateRequest,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> JWSCreateResponse:
-    """
-    Sign a JSON Web Signature (JWS).
+    """Sign a JSON Web Signature (JWS).
     ---
 
     This endpoint allows users to sign a JSON payload, creating a JWS,
@@ -126,8 +125,7 @@ async def verify_jws(
     body: JWSVerifyRequest,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> JWSVerifyResponse:
-    """
-    Verify a JSON Web Signature (JWS)
+    """Verify a JSON Web Signature (JWS)
     ---
 
     This endpoint allows users to verify the authenticity and integrity of a JWS string previously generated
@@ -138,8 +136,8 @@ async def verify_jws(
         JWSVerifyRequest: The JWS to verify.
             jws: str
 
-    Returns:
-    ---
+    Returns
+    -------
         JWSVerifyResponse
             payload: dict:
               The payload of the JWS.
@@ -155,6 +153,7 @@ async def verify_jws(
     **References:**
 
     - [JSON Web Signature (JWS) Specification](https://www.rfc-editor.org/rfc/rfc7515.html)
+
     """
     bound_logger = logger.bind(body=body)
     bound_logger.debug("POST request received: Verify JWS")

@@ -1,5 +1,3 @@
-from typing import Optional
-
 from aries_cloudcontroller import DID, AcaPyClient, CreateCheqdDIDRequest
 
 from app.exceptions import CloudApiException, handle_acapy_call
@@ -18,6 +16,7 @@ async def assert_public_did(aries_controller: AcaPyClient) -> str:
 
     Returns:
         str: the public did formatted as fully qualified did
+
     """
     # Assert the agent has a public did
     logger.debug("Fetching public DID")
@@ -34,7 +33,7 @@ async def assert_public_did(aries_controller: AcaPyClient) -> str:
 
 
 async def create_did(
-    controller: AcaPyClient, did_create: Optional[DIDCreate] = None
+    controller: AcaPyClient, did_create: DIDCreate | None = None
 ) -> DID:
     """Create a local did
 
@@ -47,6 +46,7 @@ async def create_did(
 
     Returns:
         DID: The created did
+
     """
     logger.debug("Creating local DID")
 
@@ -121,6 +121,7 @@ async def set_public_did(
 
     Returns:
         DID: the did
+
     """
     logger.debug("Setting public DID")
     did_response = await handle_acapy_call(
@@ -150,6 +151,7 @@ async def get_public_did(controller: AcaPyClient) -> DID:
 
     Returns:
         DID: the public did
+
     """
     logger.debug("Fetching public DID")
     did_response = await handle_acapy_call(

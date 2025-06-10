@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from aries_cloudcontroller import (
     AttributeMimeTypesResult,
     CredRevokedResult,
@@ -25,13 +23,12 @@ router = APIRouter(prefix="/v1/wallet/credentials", tags=["wallet"])
     summary="Fetch a list of credentials from the wallet",
 )
 async def list_credentials(
-    limit: Optional[int] = limit_query_parameter,
-    offset: Optional[int] = offset_query_parameter,
-    wql: Optional[str] = None,
+    limit: int | None = limit_query_parameter,
+    offset: int | None = offset_query_parameter,
+    wql: str | None = None,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> CredInfoList:
-    """
-    Fetch a list of credentials from the wallet
+    """Fetch a list of credentials from the wallet
     ---
 
     The `wql` (Wallet Query Language) parameter can be used to filter credentials returned from the wallet.
@@ -49,10 +46,11 @@ async def list_credentials(
         wql: str
             A WQL query to filter records.
 
-    Returns:
-    ---
+    Returns
+    -------
         CredInfoList
             A list of credential records.
+
     """
     logger.debug("GET request received: List credentials")
 
@@ -79,19 +77,19 @@ async def get_credential_record(
     credential_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> CredInfo:
-    """
-    Fetch a specific credential by ID
+    """Fetch a specific credential by ID
     ---
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         credential_id: str
             The ID of the credential to fetch.
 
-    Returns:
-    ---
+    Returns
+    -------
         CredInfo
             The credential record.
+
     """
     bound_logger = logger.bind(credential_id=credential_id)
     bound_logger.debug("GET request received: Fetch specific credential by ID")
@@ -113,18 +111,18 @@ async def delete_credential(
     credential_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> None:
-    """
-    Remove a specific credential from the wallet by ID
+    """Remove a specific credential from the wallet by ID
     ---
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         credential_id: str
             The ID of the credential to delete.
 
-    Returns:
-    ---
+    Returns
+    -------
         status_code: 204
+
     """
     bound_logger = logger.bind(credential_id=credential_id)
     bound_logger.debug("DELETE request received: Remove specific credential by ID")
@@ -149,19 +147,19 @@ async def get_credential_mime_types(
     credential_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> AttributeMimeTypesResult:
-    """
-    Retrieve attribute MIME types of a specific credential by ID
+    """Retrieve attribute MIME types of a specific credential by ID
     ---
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         credential_id: str
             The ID of the credential to fetch attribute MIME types for.
 
-    Returns:
-    ---
+    Returns
+    -------
         AttributeMimeTypesResult
             The attribute MIME types of the credential.
+
     """
     bound_logger = logger.bind(credential_id=credential_id)
     bound_logger.debug(
@@ -187,20 +185,19 @@ async def get_credential_mime_types(
 )
 async def get_credential_revocation_status(
     credential_id: str,
-    from_: Optional[str] = None,
-    to: Optional[str] = None,
+    from_: str | None = None,
+    to: str | None = None,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> CredRevokedResult:
-    """
-    Query the revocation status of a specific credential by ID
+    """Query the revocation status of a specific credential by ID
     ---
 
     The revocation status of a credential can be queried over a specific time range
     by passing unix timestamps to the `from_` and `to` parameters.
     Leaving these parameters blank will return the current revocation status.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         credential_id: str
             The ID of the credential to query revocation status for.
         from_: Optional[str]
@@ -208,10 +205,11 @@ async def get_credential_revocation_status(
         to: Optional[str]
             The timestamp to end the query at.
 
-    Returns:
-    ---
+    Returns
+    -------
         CredRevokedResult
             The revocation status of the credential.
+
     """
     bound_logger = logger.bind(credential_id=credential_id)
     bound_logger.debug(
@@ -238,13 +236,12 @@ async def get_credential_revocation_status(
     summary="Fetch a list of W3C credentials from the wallet",
 )
 async def list_w3c_credentials(
-    limit: Optional[int] = None,
-    issuer_did: Optional[str] = None,
-    schema_ids: Optional[List[str]] = None,
+    limit: int | None = None,
+    issuer_did: str | None = None,
+    schema_ids: list[str] | None = None,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> VCRecordList:
-    """
-    Fetch a list of W3C credentials from the wallet
+    """Fetch a list of W3C credentials from the wallet
     ---
 
     The W3C credentials can be filtered by the parameters provided.
@@ -258,10 +255,11 @@ async def list_w3c_credentials(
         schema_ids: List[str]
             Schema identifiers to match
 
-    Returns:
-    ---
+    Returns
+    -------
         VCRecordList
             A list of W3C credential records.
+
     """
     logger.debug("GET request received: List W3C credentials")
 
@@ -292,19 +290,19 @@ async def get_w3c_credential(
     credential_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> VCRecord:
-    """
-    Fetch a specific W3C credential by ID
+    """Fetch a specific W3C credential by ID
     ---
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         credential_id: str
             The ID of the W3C credential to fetch.
 
-    Returns:
-    ---
+    Returns
+    -------
         VCRecord
             The W3C credential.
+
     """
     bound_logger = logger.bind(credential_id=credential_id)
     bound_logger.debug("GET request received: Fetch specific W3C credential by ID")
@@ -326,18 +324,18 @@ async def delete_w3c_credential(
     credential_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> None:
-    """
-    Remove a specific W3C credential from the wallet by ID
+    """Remove a specific W3C credential from the wallet by ID
     ---
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         credential_id: str
             The ID of the W3C credential to delete.
 
-    Returns:
-    ---
+    Returns
+    -------
         status_code: 204
+
     """
     bound_logger = logger.bind(credential_id=credential_id)
     bound_logger.debug("DELETE request received: Remove specific W3C credential by ID")

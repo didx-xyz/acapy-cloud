@@ -22,20 +22,20 @@ class Verifier(ABC):
         controller: AcaPyClient,
         create_proof_request: CreateProofRequest,
     ) -> PresentationExchange:
-        """
-        Create proof request
+        """Create proof request
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         controller: AcaPyClient
             The aries_cloudcontroller object
         create_proof_request: CreateProofRequest
             The proof request object
 
-        Returns:
-        --------
+        Returns
+        -------
         exchange_record: PresentationExchange
             The proof exchange record
+
         """
 
     @classmethod
@@ -45,20 +45,20 @@ class Verifier(ABC):
         controller: AcaPyClient,
         send_proof_request: SendProofRequest,
     ) -> PresentationExchange:
-        """
-        Request proof from a connection ID.
+        """Request proof from a connection ID.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         controller: AcaPyClient
             The aries_cloudcontroller object
         send_proof_request: SendProofRequest
             The proof request object
 
-        Returns:
-        --------
+        Returns
+        -------
         exchange_record: PresentationExchange
             The proof exchange record
+
         """
 
     @classmethod
@@ -66,20 +66,20 @@ class Verifier(ABC):
     async def accept_proof_request(
         cls, controller: AcaPyClient, accept_proof_request: AcceptProofRequest
     ) -> PresentationExchange:
-        """
-        Accept proof request
+        """Accept proof request
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         controller: AcaPyClient
             The aries_cloudcontroller object
         accept_proof_request: AcceptProofRequest
             The proof request object
 
-        Returns:
-        --------
+        Returns
+        -------
         exchange_record: PresentationExchange
             The proof exchange record
+
         """
 
     @classmethod
@@ -87,20 +87,20 @@ class Verifier(ABC):
     async def reject_proof_request(
         cls, controller: AcaPyClient, reject_proof_request: RejectProofRequest
     ) -> None:
-        """
-        Reject proof request
+        """Reject proof request
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         controller: AcaPyClient
             The aries_cloudcontroller object
         reject_proof_request: RejectProofRequest
             The proof request object
 
-        Returns:
-        --------
+        Returns
+        -------
         None
             Returns None on successful request rejection.
+
         """
 
     @classmethod
@@ -140,10 +140,11 @@ class Verifier(ABC):
         thread_id: Optional[str]
             Filter by the thread ID associated with the proof exchange.
 
-        Returns:
-        --------
+        Returns
+        -------
         List[PresentationExchange]
             A list of presentation exchange records.
+
         """
 
     @classmethod
@@ -151,39 +152,39 @@ class Verifier(ABC):
     async def get_proof_record(
         cls, controller: AcaPyClient, proof_id: str
     ) -> PresentationExchange:
-        """
-        Get a specific proof record
+        """Get a specific proof record
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         controller: AcaPyClient
             The aries_cloudcontroller object
         proof_id: str
             The presentation exchange ID
 
-        Returns:
-        --------
+        Returns
+        -------
         PresentationExchange
             A presentation exchange records
+
         """
 
     @classmethod
     @abstractmethod
     async def delete_proof(cls, controller: AcaPyClient, proof_id: str) -> None:
-        """
-        Delete proof request
+        """Delete proof request
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         controller: AcaPyClient
             The aries_cloudcontroller object
         proof_id: str
             The proof record exchange id
 
-        Returns:
-        --------
+        Returns
+        -------
         None
             Returns None on successful record deletion.
+
         """
 
     @classmethod
@@ -200,8 +201,9 @@ class Verifier(ABC):
         proof_id: str
             The proof id
 
-        Returns:
-        --------
+        Returns
+        -------
         [CredPrecis]
             A list of presentation exchange records
+
         """

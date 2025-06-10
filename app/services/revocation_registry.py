@@ -1,5 +1,4 @@
 import asyncio
-from typing import Dict, List, Optional
 
 from aries_cloudcontroller import (
     AcaPyClient,
@@ -32,8 +31,7 @@ async def revoke_credential(
     credential_exchange_id: str,
     auto_publish_to_ledger: bool = False,
 ) -> RevokedResponse:
-    """
-        Revoke an issued credential
+    """Revoke an issued credential
 
     Args:
         controller (AcaPyClient): aca-py client
@@ -46,6 +44,7 @@ async def revoke_credential(
 
     Returns:
         result (None): Successful execution returns None.
+
     """
     bound_logger = logger.bind(
         body={
@@ -121,10 +120,9 @@ async def revoke_credential(
 
 
 async def publish_pending_revocations(
-    controller: AcaPyClient, revocation_registry_credential_map: Dict[str, List[str]]
-) -> Optional[TxnOrPublishRevocationsResult]:
-    """
-        Publish pending revocations
+    controller: AcaPyClient, revocation_registry_credential_map: dict[str, list[str]]
+) -> TxnOrPublishRevocationsResult | None:
+    """Publish pending revocations
 
     Args:
         controller (AcaPyClient): aca-py client
@@ -136,6 +134,7 @@ async def publish_pending_revocations(
 
     Returns:
         result (str): Successful execution returns the endorser transaction id.
+
     """
     bound_logger = logger.bind(body=revocation_registry_credential_map)
 
@@ -181,10 +180,9 @@ async def publish_pending_revocations(
 
 
 async def clear_pending_revocations(
-    controller: AcaPyClient, revocation_registry_credential_map: Dict[str, List[str]]
+    controller: AcaPyClient, revocation_registry_credential_map: dict[str, list[str]]
 ) -> ClearPendingRevocationsResult:
-    """
-        Clear pending revocations
+    """Clear pending revocations
 
     Args:
         controller (AcaPyClient): aca-py client
@@ -196,6 +194,7 @@ async def clear_pending_revocations(
 
     Returns:
         ClearPendingRevocationsResult: The outstanding revocations after completing the clear request.
+
     """
     bound_logger = logger.bind(body=revocation_registry_credential_map)
 
@@ -228,12 +227,11 @@ async def clear_pending_revocations(
 
 async def get_credential_revocation_record(
     controller: AcaPyClient,
-    credential_exchange_id: Optional[str] = None,
-    credential_revocation_id: Optional[str] = None,
-    revocation_registry_id: Optional[str] = None,
+    credential_exchange_id: str | None = None,
+    credential_revocation_id: str | None = None,
+    revocation_registry_id: str | None = None,
 ) -> IssuerCredRevRecord:
-    """
-        Get the revocation status for a credential
+    """Get the revocation status for a credential
 
     Args:
         controller (AcaPyClient): aca-py client
@@ -246,6 +244,7 @@ async def get_credential_revocation_record(
 
     Returns:
         IssuerCredRevRecord: The requested credential revocation record.
+
     """
     bound_logger = logger.bind(
         body={
@@ -269,9 +268,7 @@ async def get_credential_revocation_record(
             f"Failed to get revocation status: {e.detail}", e.status_code
         ) from e
 
-    if not isinstance(
-        result, (CredRevRecordResultSchemaAnonCreds, CredRevRecordResult)
-    ):
+    if not isinstance(result, CredRevRecordResultSchemaAnonCreds | CredRevRecordResult):
         bound_logger.error(
             "Unexpected type returned from get_revocation_status: `{}`.", result
         )
@@ -288,9 +285,8 @@ async def get_credential_revocation_record(
 
 async def get_credential_definition_id_from_exchange_id(
     controller: AcaPyClient, credential_exchange_id: str
-) -> Optional[str]:
-    """
-        Get the credential definition id from the credential exchange id.
+) -> str | None:
+    """Get the credential definition id from the credential exchange id.
 
     Args:
         controller (AcaPyClient): aca-py client
@@ -298,6 +294,7 @@ async def get_credential_definition_id_from_exchange_id(
 
     Returns:
         credential_definition_id (Optional[str]): The credential definition ID or None.
+
     """
     bound_logger = logger.bind(body={"credential_exchange_id": credential_exchange_id})
     bound_logger.debug("Fetching credential definition id from exchange id")
@@ -340,10 +337,9 @@ async def get_credential_definition_id_from_exchange_id(
 
 
 async def validate_rev_reg_ids(
-    controller: AcaPyClient, revocation_registry_credential_map: Dict[str, List[str]]
+    controller: AcaPyClient, revocation_registry_credential_map: dict[str, list[str]]
 ) -> None:
-    """
-        Validate revocation registry ids
+    """Validate revocation registry ids
 
     Args:
         controller (AcaPyClient): aca-py client
@@ -427,7 +423,7 @@ async def validate_rev_reg_ids(
 async def get_created_active_registries(
     controller: AcaPyClient,
     cred_def_id: str,
-) -> List[str]:
+) -> list[str]:
     """Get the active revocation registries for a credential definition with state active."""
     bound_logger = logger.bind(body={"cred_def_id": cred_def_id})
     try:
@@ -450,7 +446,7 @@ async def get_created_active_registries(
 async def wait_for_active_registry(
     controller: AcaPyClient,
     cred_def_id: str,
-) -> List[str]:
+) -> list[str]:
     active_registries = []
     sleep_duration = 0  # First sleep should be 0
 
@@ -465,9 +461,8 @@ async def wait_for_active_registry(
 
 async def get_pending_revocations(
     controller: AcaPyClient, rev_reg_id: str
-) -> List[int]:
-    """
-    Get the pending revocations for a revocation registry.
+) -> list[int]:
+    """Get the pending revocations for a revocation registry.
 
     Args:
         controller (AcaPyClient): aca-py client
@@ -478,6 +473,7 @@ async def get_pending_revocations(
 
     Returns:
         pending_revocations (List[int]): The pending revocations.
+
     """
     bound_logger = logger.bind(body={"rev_reg_id": rev_reg_id})
     bound_logger.debug("Fetching pending revocations for a revocation registry")

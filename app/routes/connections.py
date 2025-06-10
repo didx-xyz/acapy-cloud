@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from aries_cloudcontroller import (
     DIDRotateRequestJSON,
     DIDXRejectRequest,
@@ -31,25 +29,24 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/v1/connections", tags=["connections"])
 
 
-@router.get("", summary="Fetch Connection Records", response_model=List[Connection])
+@router.get("", summary="Fetch Connection Records", response_model=list[Connection])
 async def get_connections(  # pylint: disable=R0913,R0917
-    limit: Optional[int] = limit_query_parameter,
-    offset: Optional[int] = offset_query_parameter,
-    order_by: Optional[str] = order_by_query_parameter,
+    limit: int | None = limit_query_parameter,
+    offset: int | None = offset_query_parameter,
+    order_by: str | None = order_by_query_parameter,
     descending: bool = descending_query_parameter,
-    alias: Optional[str] = None,
-    connection_protocol: Optional[Protocol] = None,
-    invitation_key: Optional[str] = None,
-    invitation_msg_id: Optional[str] = None,
-    my_did: Optional[str] = None,
-    state: Optional[State] = None,
-    their_did: Optional[str] = None,
-    their_public_did: Optional[str] = None,
-    their_role: Optional[Role] = None,
+    alias: str | None = None,
+    connection_protocol: Protocol | None = None,
+    invitation_key: str | None = None,
+    invitation_msg_id: str | None = None,
+    my_did: str | None = None,
+    state: State | None = None,
+    their_did: str | None = None,
+    their_public_did: str | None = None,
+    their_role: Role | None = None,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
-) -> List[Connection]:
-    """
-    Fetch a list of connection records
+) -> list[Connection]:
+    """Fetch a list of connection records
     ---
     The records contain information about connections with other tenants, such as the state of the connection,
     the alias of the connection, the label and the did of the other party, and other metadata.
@@ -71,10 +68,11 @@ async def get_connections(  # pylint: disable=R0913,R0917
         their_public_did: str
         their_role: Role: "invitee", "requester", "inviter", "responder"
 
-    Returns:
-    ---
+    Returns
+    -------
         List[Connection]
             A list of connection records
+
     """
     logger.debug("GET request received: Get connections")
 
@@ -113,21 +111,21 @@ async def get_connection_by_id(
     connection_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> Connection:
-    """
-    Fetch a connection record by id
+    """Fetch a connection record by id
     ---
     A connection record contains information about a connection with other tenants, such as the state of the connection,
     the alias of the connection, the label and the did of the other party, and other metadata.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         connection_id: str
             The identifier of the connection record that you want to fetch
 
-    Returns:
-    ---
+    Returns
+    -------
         Connection
             The connection record
+
     """
     bound_logger = logger.bind(body={"connection_id": connection_id})
     bound_logger.debug("GET request received: Get connection by ID")
@@ -150,22 +148,22 @@ async def delete_connection_by_id(
     connection_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> None:
-    """
-    Delete connection record by id
+    """Delete connection record by id
     ---
     This endpoint deletes a connection record by id.
 
     If the connection uses the didexchange protocol, then we hangup the connection, such that the other party also has
     their record deleted.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         connection_id: str
             The identifier of the connection record that you want to delete
 
-    Returns:
-    ---
+    Returns
+    -------
         status_code: 204
+
     """
     bound_logger = logger.bind(body={"connection_id": connection_id})
     bound_logger.debug("DELETE request received: Delete connection by ID")
@@ -205,17 +203,16 @@ async def delete_connection_by_id(
 )
 async def create_did_exchange_request(
     their_public_did: str,
-    alias: Optional[str] = None,
-    goal: Optional[str] = None,
-    goal_code: Optional[str] = None,
-    my_label: Optional[str] = None,
-    use_did: Optional[str] = None,
-    use_did_method: Optional[str] = None,
+    alias: str | None = None,
+    goal: str | None = None,
+    goal_code: str | None = None,
+    my_label: str | None = None,
+    use_did: str | None = None,
+    use_did_method: str | None = None,
     use_public_did: bool = False,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> Connection:
-    """
-    Create a DID Exchange request
+    """Create a DID Exchange request
     ---
     This endpoint allows you to initiate a DID Exchange request with another party using their public DID.
 
@@ -224,8 +221,8 @@ async def create_did_exchange_request(
     Only one of `use_did`, `use_did_method` or `use_public_did` should be specified. If none of these are specified,
     a new local DID will be created for this connection.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         their_public_did: str
             The DID of the party you want to connect to.
         alias: str, optional
@@ -243,10 +240,11 @@ async def create_did_exchange_request(
         use_public_did: bool
             Use your public DID for this connection. Defaults to False.
 
-    Returns:
-    ---
+    Returns
+    -------
         Connection
             The connection record created by the DID exchange request.
+
     """
     bound_logger = logger.bind(
         body={
@@ -292,20 +290,20 @@ async def accept_did_exchange_request(
     connection_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> Connection:
-    """
-    Accept a stored DID Exchange request
+    """Accept a stored DID Exchange request
     ---
     This endpoint allows you to accept a request by providing the connection ID.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         connection_id: str
             The ID of the connection request you want to accept.
 
-    Returns:
-    ---
+    Returns
+    -------
         Connection
             The connection record created by accepting the DID exchange request.
+
     """
     bound_logger = logger.bind(body={"connection_id": connection_id})
     bound_logger.debug("POST request received: Accept DID exchange request")
@@ -332,19 +330,19 @@ async def accept_did_exchange_request(
 )
 async def reject_did_exchange(
     connection_id: str,
-    body: Optional[DIDXRejectRequest] = None,
+    body: DIDXRejectRequest | None = None,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> Connection:
-    """
-    Reject or abandon a DID Exchange
+    """Reject or abandon a DID Exchange
     ---
     This endpoint allows you to reject or abandon a DID Exchange request. You can optionally provide a reason
     for the rejection.
 
-    Returns:
-    ---
+    Returns
+    -------
         Connection
             The connection record after rejecting the DID exchange request.
+
     """
     bound_logger = logger.bind(body={"connection_id": connection_id})
     bound_logger.debug("POST request received: Reject DID exchange")
@@ -372,23 +370,23 @@ async def rotate_did(
     to_did: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> Rotate:
-    """
-    Begin the rotation of a DID as a rotator.
+    """Begin the rotation of a DID as a rotator.
     ---
     This endpoint allows you to begin the DID rotation for an existing connection. The `to_did` parameter specifies
     the new DID that the rotating party is rotating to.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         connection_id: str
             The ID of the connection for which the DID is to be rotated.
         to_did: str
             The new DID that the rotating party is rotating to.
 
-    Returns:
-    ---
+    Returns
+    -------
         Rotate
             The record after the DID rotation is initiated.
+
     """
     bound_logger = logger.bind(body={"connection_id": connection_id, "to_did": to_did})
     bound_logger.debug("POST request received: Rotate DID")
@@ -414,20 +412,20 @@ async def hangup_did_rotation(
     connection_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> Hangup:
-    """
-    Send a hangup for a DID rotation as the rotator.
+    """Send a hangup for a DID rotation as the rotator.
     ---
     This endpoint allows you to hangup a DID rotation process for an existing connection.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         connection_id: str
             The ID of the connection for which the DID rotation is being hung up.
 
-    Returns:
-    ---
+    Returns
+    -------
         Hangup
             The record after the DID rotation is hung up.
+
     """
     bound_logger = logger.bind(body={"connection_id": connection_id})
     bound_logger.debug("POST request received: Hangup DID rotation")
