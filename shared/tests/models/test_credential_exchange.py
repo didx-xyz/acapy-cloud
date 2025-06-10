@@ -23,7 +23,7 @@ def test_credential_exchange_model():
         created_at="2023-01-01T00:00:00Z",
         credential_definition_id="cred-def-id",
         credential_exchange_id="cred-ex-id",
-        did="did:sov:123",
+        did="did:cheqd:testnet:123",
         error_msg=None,
         role="issuer",
         schema_id="schema-id",
@@ -38,7 +38,7 @@ def test_credential_exchange_model():
     assert exchange.created_at == "2023-01-01T00:00:00Z"
     assert exchange.credential_definition_id == "cred-def-id"
     assert exchange.credential_exchange_id == "cred-ex-id"
-    assert exchange.did == "did:sov:123"
+    assert exchange.did == "did:cheqd:testnet:123"
     assert exchange.error_msg is None
     assert exchange.role == "issuer"
     assert exchange.schema_id == "schema-id"

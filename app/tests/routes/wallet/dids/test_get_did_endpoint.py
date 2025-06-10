@@ -11,7 +11,7 @@ from fastapi import HTTPException
 
 from app.routes.wallet.dids import get_did_endpoint
 
-did = "did:sov:2cpBmR3FqGKWi5EyUbpRY8"
+did = "did:cheqd:2cpBmR3FqGKWi5EyUbpRY8"
 
 
 @pytest.mark.anyio
@@ -58,6 +58,6 @@ async def test_get_did_endpoint_fail_acapy_error(
             mock_aries_controller
         )
 
-        await get_did_endpoint(did="did:sov:12345", auth="mocked_auth")
+        await get_did_endpoint(did=did, auth="mocked_auth")
 
     assert exc.value.status_code == expected_status_code

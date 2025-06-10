@@ -9,7 +9,7 @@ from aries_cloudcontroller.exceptions import (
 
 from app.routes.wallet.dids import set_public_did
 
-did = "did:sov:2cpBmR3FqGKWi5EyUbpRY8"
+did = "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
 
 
 @pytest.mark.anyio
@@ -56,6 +56,6 @@ async def test_set_public_did_fail_acapy_error(
             mock_aries_controller
         )
 
-        await set_public_did(did="did:sov:12345", auth="mocked_auth")
+        await set_public_did(did="did:cheqd:12345", auth="mocked_auth")
 
     assert exc.value.status == expected_status_code

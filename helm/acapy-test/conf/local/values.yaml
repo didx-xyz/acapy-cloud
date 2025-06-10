@@ -14,7 +14,6 @@ env:
   CLOUDAPI_URL: http://tenant-web:8000/tenant
   GOVERNANCE_ACAPY_LABEL: Governance
   GOVERNANCE_FASTAPI_ENDPOINT: http://governance-web:8000/governance
-  LEDGER_REGISTRATION_URL: http://ledger-browser:8000/register
   REGISTRY_CREATION_TIMEOUT: 120
   SKIP_SET_PUBLIC_DID: true # skip set_public_did test to avoid conflict with two public dids, different seed
   TENANT_ADMIN_FASTAPI_ENDPOINT: http://multitenant-web:8000/tenant-admin

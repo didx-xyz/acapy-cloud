@@ -15,7 +15,7 @@ async def assert_valid_issuer(did: str, schema_id: str | None = None) -> None:
     Raises an exception if one of the assertions fail.
 
     NOTE: the dids in the registry are registered as fully qualified dids. This means
-    when passing a did to this method it must also be fully qualified (e.g. `did:sov:xxxx`)
+    when passing a did to this method it must also be fully qualified.
 
     Args:
         did (str): the did of the issuer in fully qualified format.

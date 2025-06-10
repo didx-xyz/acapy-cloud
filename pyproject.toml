@@ -84,13 +84,13 @@ line-length = 88
 lint.pycodestyle.max-line-length = 120
 target-version = "py312"
 lint.select = [
-  "B", # flake8-bugbear (detect likely bugs)
-  "C", # mccabe (code complexity)
-  "D", # pydocstyle (docstring style)
-  "E", # pycodestyle errors (style errors)
-  "F", # pyflakes (detect invalid Python code)
-  "I", # isort (import sorting)
-  "N",  # pep8-naming (naming conventions)
+  "B",   # flake8-bugbear (detect likely bugs)
+  "C",   # mccabe (code complexity)
+  "D",   # pydocstyle (docstring style)
+  "E",   # pycodestyle errors (style errors)
+  "F",   # pyflakes (detect invalid Python code)
+  "I",   # isort (import sorting)
+  "N",   # pep8-naming (naming conventions)
   "PL",  # pylint
   "RUF", # ruff-specific rules
   "UP",  # pyupgrade (upgrade syntax)
@@ -111,14 +111,16 @@ lint.ignore = [
   "D415", # First line should end with a period, question mark, or exclamation point
 
   # Fix later:
-  "C901", # Function complexity is too high
+  "C901",    # Function complexity is too high
   "PLR0912", # Too many branches
   "PLR0913", # Too many arguments in function definition
   "PLR0915", # Too many statements
 
-  # Won't fix:
-  "B008",    # Do not perform function call `Depends` in argument defaults; instead, perform the call within the function, or read the default from a module-level singleton variable
+  # Maybe fix:
   "PLR2004", # Magic value used in comparison, consider replacing `500` with a constant variable
+
+  # Won't fix:
+  "B008", # Do not perform function call `Depends` in argument defaults
 
   # False positives:
   "PLE1205", # Too many arguments detected for loguru {} formatted strings

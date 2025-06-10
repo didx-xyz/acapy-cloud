@@ -19,11 +19,11 @@ from app.services.onboarding import issuer, verifier
 from shared.util.mock_agent_controller import get_mock_agent_controller
 
 did_object = DID(
-    did="WgWxqztrNooG92RXvxSTWv",
+    did="did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6",
     verkey="WgWxqztrNooG92RXvxSTWvWgWxqztrNooG92RXvxSTWv",
-    posture="wallet_only",
+    posture="posted",
     key_type="ed25519",
-    method="sov",
+    method="cheqd",
 )
 
 
@@ -55,12 +55,13 @@ async def test_onboard_issuer_public_did_exists(
     ):
         onboard_result = await issuer.onboard_issuer(
             issuer_label="issuer_name",
-            endorser_controller=endorser_controller,
             issuer_controller=mock_agent_controller,
             issuer_wallet_id="issuer_wallet_id",
         )
 
-    assert onboard_result.did == "did:sov:WgWxqztrNooG92RXvxSTWv"
+    assert (
+        onboard_result.did == "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
+    )
 
 
 @pytest.mark.anyio
@@ -117,14 +118,15 @@ async def test_onboard_issuer_no_public_did(
         ) as acapy_wallet_create_did_mock,
     ):
         onboard_result = await issuer.onboard_issuer(
-            issuer_label="issuer_name",
-            endorser_controller=endorser_controller,
             issuer_controller=mock_agent_controller,
             issuer_wallet_id="issuer_wallet_id",
+            issuer_label="issuer_name",
         )
 
     # Assertions
-    assert onboard_result.did == "did:sov:WgWxqztrNooG92RXvxSTWv"  # TODO: cheqd
+    assert (
+        onboard_result.did == "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
+    )  # TODO: cheqd
     acapy_wallet_create_did_mock.assert_called_once_with(
         mock_agent_controller, did_create=DIDCreate(method="cheqd")
     )
@@ -140,7 +142,9 @@ async def test_onboard_verifier_public_did_exists(mock_agent_controller: AcaPyCl
             verifier_label="verifier_name", verifier_controller=mock_agent_controller
         )
 
-    assert onboard_result.did == "did:sov:WgWxqztrNooG92RXvxSTWv"
+    assert (
+        onboard_result.did == "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
+    )
     acapy_wallet_get_public_did_mock.assert_called_once_with(
         controller=mock_agent_controller
     )

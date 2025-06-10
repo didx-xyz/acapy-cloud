@@ -12,7 +12,7 @@ from aries_cloudcontroller import (
 
 from app.exceptions import CloudApiException, handle_acapy_call
 from app.models.wallet import DIDCreate
-from app.services import acapy_ledger, acapy_wallet
+from app.services import acapy_wallet
 from app.services.onboarding.util.set_endorser_metadata import (
     set_author_role,
     set_endorser_info,
@@ -162,8 +162,6 @@ async def configure_endorsement(
 async def register_issuer_did(
     *,
     issuer_controller: AcaPyClient,
-    issuer_label: str,
-    issuer_endorser_connection_id: str,
     did_method: Literal["cheqd"] = "cheqd",
     logger: Logger,
 ) -> DID:
@@ -171,40 +169,6 @@ async def register_issuer_did(
     issuer_did = await acapy_wallet.create_did(
         issuer_controller, did_create=DIDCreate(method=did_method)
     )
-
-    if did_method == "sov":
-        logger.debug("Accepting TAA on behalf of issuer")
-        await acapy_ledger.accept_taa_if_required(issuer_controller)
-
-        await acapy_ledger.register_nym_on_ledger(
-            issuer_controller,
-            did=issuer_did.did,
-            verkey=issuer_did.verkey,
-            alias=issuer_label,
-            create_transaction_for_endorser=True,
-        )
-
-        logger.debug("Waiting for issuer DID transaction to be endorsed")
-        await wait_transactions_endorsed(  # Needs to be endorsed before setting public DID
-            issuer_controller=issuer_controller,
-            issuer_connection_id=issuer_endorser_connection_id,
-            logger=logger,
-        )
-
-        logger.debug("Setting public DID for issuer")
-        await acapy_wallet.set_public_did(
-            issuer_controller,
-            did=issuer_did.did,
-            create_transaction_for_endorser=True,
-        )
-
-        logger.debug("Waiting for ATTRIB transaction to be endorsed")
-        await wait_transactions_endorsed(  # Needs to be endorsed before continuing
-            issuer_controller=issuer_controller,
-            issuer_connection_id=issuer_endorser_connection_id,
-            logger=logger,
-        )
-
     logger.debug("Issuer DID registered.")
     return issuer_did
 

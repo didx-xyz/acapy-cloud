@@ -27,6 +27,8 @@ from app.services.trust_registry.util.schema import registry_has_schema
 from shared.constants import TRUST_REGISTRY_URL
 from shared.models.trustregistry import Actor
 
+sample_did = "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
+
 
 @pytest.mark.anyio
 async def test_assert_valid_issuer(
@@ -39,8 +41,7 @@ async def test_assert_valid_issuer(
     patch_client_actors = mocker.patch(f"{actors_path}.RichAsyncClient")
     patch_client_schema = mocker.patch(f"{schema_path}.RichAsyncClient")
 
-    did = "did:sov:xxxx"
-    actor = Actor(id="actor-id", roles=["issuer"], did=did, name="abc")
+    actor = Actor(id="actor-id", roles=["issuer"], did=sample_did, name="abc")
     schema_id = "a_schema_id"
 
     # Mock the actor_by_did and registry_has_schema calls
@@ -52,13 +53,13 @@ async def test_assert_valid_issuer(
     mocked_client_get_schema = Mock()
     response_schema = Response(
         status_code=200,
-        json={"id": schema_id, "did": did, "version": "1.0", "name": "name"},
+        json={"id": schema_id, "did": sample_did, "version": "1.0", "name": "name"},
     )
     mocked_client_get_schema.get = AsyncMock(return_value=response_schema)
     patch_client_schema.return_value.__aenter__.return_value = mocked_client_get_schema
 
     # Valid issuer and schema
-    await assert_valid_issuer(did=did, schema_id=schema_id)
+    await assert_valid_issuer(did=sample_did, schema_id=schema_id)
 
     # Schema is not registered in registry
     not_found_response = HTTPException(status_code=404)
@@ -68,16 +69,16 @@ async def test_assert_valid_issuer(
         TrustRegistryException,
         match=f"Schema with id {schema_id} is not registered in trust registry.",
     ):
-        await assert_valid_issuer(did=did, schema_id=schema_id)
+        await assert_valid_issuer(did=sample_did, schema_id=schema_id)
 
     # No actor with specified did
     mocked_client_get_did.get = AsyncMock(return_value=Response(404))
     with pytest.raises(TrustRegistryException):
-        await assert_valid_issuer(did=did, schema_id=schema_id)
+        await assert_valid_issuer(did=sample_did, schema_id=schema_id)
 
     # Actor does not have required role 'issuer'
     actor_without_issuer_role = Actor(
-        id="actor-id", roles=["verifier"], did=did, name="abc"
+        id="actor-id", roles=["verifier"], did=sample_did, name="abc"
     )
     response_actor_without_issuer_role = Response(
         200, json=actor_without_issuer_role.model_dump()
@@ -89,7 +90,7 @@ async def test_assert_valid_issuer(
         TrustRegistryException,
         match="Actor actor-id does not have required role 'issuer'.",
     ):
-        await assert_valid_issuer(did=did, schema_id=schema_id)
+        await assert_valid_issuer(did=sample_did, schema_id=schema_id)
 
 
 @pytest.mark.anyio
@@ -100,8 +101,8 @@ async def test_actor_has_role(
     mock_async_client: Mock,  # pylint: disable=redefined-outer-name
 ):
     actor_id = "id"
-    verifier = Actor(id=actor_id, name="abc", roles=["verifier"], did="did:xxx")
-    issuer = Actor(id=actor_id, name="abc", roles=["issuer"], did="did:xxx")
+    verifier = Actor(id=actor_id, name="abc", roles=["verifier"], did=sample_did)
+    issuer = Actor(id=actor_id, name="abc", roles=["issuer"], did=sample_did)
     mock_async_client.get = AsyncMock(
         return_value=Response(200, json=verifier.model_dump())
     )
@@ -216,11 +217,10 @@ async def test_registry_has_schema(
     mock_async_client: Mock,  # pylint: disable=redefined-outer-name
 ):
     schema_id = "did:name:version"
-    did = "did:sov:xxxx"
     # mock has schema
     response = Response(
         status_code=200,
-        json={"id": schema_id, "did": did, "version": "1.0", "name": "name"},
+        json={"id": schema_id, "did": sample_did, "version": "1.0", "name": "name"},
     )
     mock_async_client.get = AsyncMock(return_value=response)
     assert await registry_has_schema(schema_id) is True
@@ -351,7 +351,7 @@ async def test_update_actor(
         id=actor_id,
         name="actor-name",
         roles=["issuer", "verifier"],
-        did="did:actor-did",
+        did=sample_did,
         didcomm_invitation="actor-didcomm-invitation",
     )
 
@@ -388,7 +388,7 @@ async def test_assert_actor_name(
         id="some_id",
         name=name,
         roles=["issuer", "verifier"],
-        did="did:actor-did",
+        did=sample_did,
         didcomm_invitation="actor-didcomm-invitation",
     )
     mock_async_client.get = AsyncMock(
@@ -481,7 +481,6 @@ async def test_get_schema_by_id(
 async def test_get_actor(
     mock_async_client: Mock,  # pylint: disable=redefined-outer-name
 ):
-    actor_did = "did:sov:2kzVyyTsHmt4WrJLXXRqQU"
     actor_id = "418bec12-7252-4edf-8bef-ee8dd661f934"
     actor_name = "faber_GWNKQ"
 
@@ -489,7 +488,7 @@ async def test_get_actor(
         id=actor_id,
         name=actor_name,
         roles=["issuer"],
-        did=actor_did,
+        did=sample_did,
         didcomm_invitation="https://governance-multitenant-agent:3020?oob=eyJAdHlwZ",
     ).model_dump()
 
@@ -501,9 +500,9 @@ async def test_get_actor(
     # Following methods get 1 actor
     mock_async_client.get = AsyncMock(return_value=Response(200, json=actor))
 
-    await get_actors(actor_did=actor_did)
+    await get_actors(actor_did=sample_did)
     mock_async_client.get.assert_called_with(
-        f"{TRUST_REGISTRY_URL}/registry/actors/did/{actor_did}"
+        f"{TRUST_REGISTRY_URL}/registry/actors/did/{sample_did}"
     )
 
     await get_actors(actor_name=actor_name)
@@ -522,7 +521,7 @@ async def test_get_actor(
         )
     )
     with pytest.raises(HTTPException):
-        await get_actors(actor_id=actor_id, actor_did=actor_did)
+        await get_actors(actor_id=actor_id, actor_did=sample_did)
 
     mock_async_client.get = AsyncMock(
         return_value=Response(404, json={"error": "Actor not found"})
@@ -543,7 +542,7 @@ async def test_get_issuers(
             id="418bec12-7252-4edf-8bef-ee8dd661f934",
             name="faber_GWNKQ",
             roles=["issuer"],
-            did="did:sov:2kzVyyTsHmt4WrJLXXRqQU",
+            did=sample_did,
             didcomm_invitation="https://governance-multitenant-agent:3020?oob=eyJAdHlwZ",
         ).model_dump()
     ]
@@ -568,7 +567,7 @@ async def test_get_verifiers(
             id="418bec12-7252-4edf-8bef-ee8dd661f934",
             name="faber_GWNKQ",
             roles=["verifier"],
-            did="did:sov:2kzVyyTsHmt4WrJLXXRqQU",
+            did=sample_did,
             didcomm_invitation="https://governance-multitenant-agent:3020?oob=eyJAdHlwZ",
         ).model_dump()
     ]

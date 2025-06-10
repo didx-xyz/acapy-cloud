@@ -428,7 +428,6 @@ services:
       GOVERNANCE_ACAPY_API_KEY: adminApiKey
       TENANT_FASTAPI_ENDPOINT: http://governance-multitenant-web:8000
       TENANT_ACAPY_API_KEY: adminApiKey
-      LEDGER_REGISTRATION_URL: http://ledger-browser:8000/register
     volumes:
       - ./logs/containerized-tests:/tests/outputs
       - ./scripts/test_runner.sh:/tests/test_runner.sh
@@ -461,7 +460,6 @@ services:
       GOVERNANCE_ACAPY_API_KEY: adminApiKey
       TENANT_FASTAPI_ENDPOINT: http://governance-multitenant-web:8000
       TENANT_ACAPY_API_KEY: adminApiKey
-      LEDGER_REGISTRATION_URL: http://ledger-browser:8000/register
     volumes:
       - ./logs/containerized-tests:/tests/outputs
       - ./scripts/test_runner.sh:/tests/test_runner.sh

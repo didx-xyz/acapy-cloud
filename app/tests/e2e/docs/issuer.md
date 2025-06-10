@@ -156,8 +156,8 @@ Faber send `ld_proof/json_ld` credential, with `ed25519` signature did but `"pro
 
 Expect failure as did signature type does not match proof type.
 
-## LD_proof did:sov
+## LD_proof did:cheqd
 
-Find test file [here](/app/tests/e2e/issuer/ld_proof/test_ld_proof_did_sov.py)
+Find test file [here](/app/tests/e2e/issuer/ld_proof/test_ld_proof_did_cheqd.py)
 
-Same as `app/tests/e2e/issuer/ld_proof/test_ld_proof_did_key_ed25519.py` section above just with default sov did.
+Same as `app/tests/e2e/issuer/ld_proof/test_ld_proof_did_key_ed25519.py` section above just with cheqd did.

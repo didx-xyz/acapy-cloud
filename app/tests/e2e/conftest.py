@@ -4,7 +4,7 @@ import pytest
 from aries_cloudcontroller import AcaPyClient
 
 from app.exceptions import CloudApiException
-from app.services.acapy_wallet import get_public_did
+from app.services.acapy_wallet import create_did, get_public_did
 from app.services.trust_registry.actors import (
     fetch_actor_by_id,
     register_actor,
@@ -27,7 +27,6 @@ from app.tests.fixtures.definitions import (
     anoncreds_schema_definition_alt,
     meld_co_anoncreds_credential_definition_id,
 )
-from app.tests.util.ledger import create_public_did
 from shared.log_config import get_logger
 
 __all__ = [
@@ -62,14 +61,17 @@ async def governance_public_did(
     try:
         response = await get_public_did(governance_acapy_client)
         if not response.did.startswith("did:cheqd:"):
+            logger.error(
+                "Governance has other did ({}); creating did:cheqd", response.did
+            )
             raise CloudApiException(
                 status_code=404,
-                detail="Governance has did:sov; creating did:cheqd",
+                detail="Governance has other did; creating did:cheqd",
             )
     except CloudApiException as e:
         if e.status_code == 404:
             # Did not found, create and publish
-            response = await create_public_did(governance_acapy_client, set_public=True)
+            response = await create_did(governance_acapy_client)
         else:
             logger.error(
                 "Something went wrong when fetching public did for governance: {}", e

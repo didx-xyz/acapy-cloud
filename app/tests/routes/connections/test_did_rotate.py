@@ -14,7 +14,7 @@ from app.routes.connections import rotate_did
 
 @pytest.mark.anyio
 async def test_rotate_did_success():
-    rotate_response = Rotate(to_did="did:sov:12345")
+    rotate_response = Rotate(to_did="did:cheqd:12345")
     mock_aries_controller = AsyncMock()
     mock_aries_controller.did_rotate.rotate = AsyncMock(return_value=rotate_response)
 
@@ -28,7 +28,7 @@ async def test_rotate_did_success():
 
         response = await rotate_did(
             connection_id="some_connection_id",
-            to_did="did:sov:12345",
+            to_did="did:cheqd:12345",
             auth="mocked_auth",
         )
 
@@ -36,7 +36,7 @@ async def test_rotate_did_success():
 
         mock_aries_controller.did_rotate.rotate.assert_awaited_once_with(
             conn_id="some_connection_id",
-            body=DIDRotateRequestJSON(to_did="did:sov:12345"),
+            body=DIDRotateRequestJSON(to_did="did:cheqd:12345"),
         )
 
 
@@ -67,7 +67,7 @@ async def test_rotate_did_fail_acapy_error(
 
         await rotate_did(
             connection_id="some_connection_id",
-            to_did="did:sov:12345",
+            to_did="did:cheqd:12345",
             auth="mocked_auth",
         )
 

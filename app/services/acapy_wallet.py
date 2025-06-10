@@ -2,7 +2,6 @@ from aries_cloudcontroller import DID, AcaPyClient, CreateCheqdDIDRequest
 
 from app.exceptions import CloudApiException, handle_acapy_call
 from app.models.wallet import DIDCreate
-from app.util.did import qualified_did_sov
 from shared.log_config import get_logger
 
 logger = get_logger(__name__)
@@ -29,7 +28,7 @@ async def assert_public_did(aries_controller: AcaPyClient) -> str:
 
     logger.debug("Successfully fetched public DID.")
 
-    return qualified_did_sov(public_did.result.did)
+    return public_did.result.did
 
 
 async def create_did(

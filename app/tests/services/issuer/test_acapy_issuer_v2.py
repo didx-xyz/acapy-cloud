@@ -187,7 +187,7 @@ async def test_send_credential(mock_agent_controller: AcaPyClient):
         connection_id=v2_record.cred_ex_record.connection_id,
         anoncreds_credential_detail=AnonCredsCredential(
             credential_definition_id=cred_def_id_1,
-            issuer_did="did:sov:WgWxqztrNooG92RXvxSTWv",
+            issuer_did="did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6",
             attributes={
                 attr.name: attr.value
                 for attr in v2_record.cred_ex_record.cred_preview.attributes

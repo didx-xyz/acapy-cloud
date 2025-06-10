@@ -28,20 +28,6 @@ def ed25519_verkey_to_did_key(key: str) -> str:
     return did_key
 
 
-def qualified_did_sov(did: str) -> str:
-    if not did.startswith("did:"):
-        return f"did:sov:{did}"
-
-    return did
-
-
-def strip_qualified_did_sov(did: str) -> str:
-    if did.startswith("did:sov:"):
-        return did[len("did:sov:") :]
-
-    return did
-
-
 def did_from_credential_definition_id(credential_definition_id: str) -> str:
     if credential_definition_id.startswith("did:cheqd"):
         parts = credential_definition_id.split("/")

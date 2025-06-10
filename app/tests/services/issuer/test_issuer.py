@@ -13,7 +13,7 @@ from app.services.issuer.acapy_issuer_v2 import IssuerV2
 from shared.models.credential_exchange import CredentialExchange
 from shared.util.mock_agent_controller import MockContextManagedController
 
-did = "did:sov:WgWxqztrNooG92RXvxSTWv"
+did = "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
 cred_def_id = "WgWxqztrNooG92RXvxSTWv:1:12345:tag"
 
 
@@ -228,7 +228,9 @@ async def test_request_credential(
     v2_record = MagicMock(spec=CredentialExchange)
     ld_record = MagicMock(spec=CredentialExchange)
 
-    v2_record.credential_definition_id = "WgWxqztrNooG92RXvxSTWv:other:parts"
+    v2_record.credential_definition_id = (
+        "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6/other/parts"
+    )
     v2_record.schema_id = "schema_id2"
     v2_record.type = "anoncreds"
 

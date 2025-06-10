@@ -22,9 +22,9 @@ async def test_verify_jws_success():
         "headers": {
             "typ": "JWT",
             "alg": "EdDSA",
-            "kid": "did:sov:ULAXi4asp1MCvFg3QAFpxt#key-1",
+            "kid": "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6#key-1",
         },
-        "kid": "did:sov:ULAXi4asp1MCvFg3QAFpxt#key-1",
+        "kid": "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6#key-1",
         "payload": {
             "_sd": [
                 "EC11V8vqqgEzOa3AN8yVLXRxccwlvgsLnnE65sswodc",

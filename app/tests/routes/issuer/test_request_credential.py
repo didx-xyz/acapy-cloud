@@ -34,7 +34,6 @@ async def test_request_credential_success(record_type, save_exchange_record):
             "app.routes.issuer.did_from_credential_definition_id",
             return_value="issuer_did",
         ),
-        patch("app.routes.issuer.qualified_did_sov", return_value="qualified_did_sov"),
         patch("app.routes.issuer.assert_valid_issuer"),
         patch("app.services.issuer.acapy_issuer_v2.credential_record_to_model_v2"),
     ):
@@ -101,7 +100,6 @@ async def test_request_credential_fail_acapy_error(
             "app.routes.issuer.did_from_credential_definition_id",
             return_value="issuer_did",
         ),
-        patch("app.routes.issuer.qualified_did_sov", return_value="qualified_did_sov"),
         patch("app.routes.issuer.assert_valid_issuer"),
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (

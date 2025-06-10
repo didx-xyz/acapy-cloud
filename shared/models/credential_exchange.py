@@ -77,10 +77,6 @@ def credential_record_to_model_v2(record: V20CredExRecord) -> CredentialExchange
             credential = cred_offer.get("credential", {})
             issuer_did = credential.get("issuer")
 
-        if issuer_did and not issuer_did.startswith("did:"):
-            # anoncreds module provides did:sov's in unqualified form
-            issuer_did = f"did:sov:{issuer_did}"
-
     return CredentialExchange(
         attributes=attributes,
         connection_id=record.connection_id,

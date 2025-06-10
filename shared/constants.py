@@ -44,10 +44,6 @@ ACAPY_TAILS_SERVER_BASE_URL = os.getenv("ACAPY_TAILS_SERVER_BASE_URL", f"{URL}:6
 
 RESOLVER_URL = os.getenv("RESOLVER_URL", "http://did-resolver:8080/1.0/identifiers")
 
-# For testing ledger
-LEDGER_TYPE: str = "von"
-LEDGER_REGISTRATION_URL = os.getenv("LEDGER_REGISTRATION_URL", f"{URL}:9000/register")
-
 # Sse
 SSE_TIMEOUT = int(
     os.getenv("SSE_TIMEOUT", "30")

@@ -1,6 +1,6 @@
 import pytest
 
-from app.util.did import ed25519_verkey_to_did_key, qualified_did_sov
+from app.util.did import ed25519_verkey_to_did_key
 from shared.exceptions import CloudApiValueError
 
 
@@ -36,11 +36,3 @@ def test_ed25519_verkey_to_did_key():
         ed25519_verkey_to_did_key(
             "abcdefghijkmnopqrstuvwxyz123456789ABCDEFGHJ0"
         )  # invalid character 0
-
-
-def test_qualified_did_sov():
-    unqualified_did = "8HH5gYEeNc3z7PYX"
-    qualified_did = f"did:sov:{unqualified_did}"
-
-    assert qualified_did_sov(unqualified_did) == qualified_did
-    assert qualified_did_sov(qualified_did) == qualified_did

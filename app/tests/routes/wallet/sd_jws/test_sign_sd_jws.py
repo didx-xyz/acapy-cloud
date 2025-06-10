@@ -20,7 +20,7 @@ async def test_sign_jws_success():
     mock_handle_acapy_call = AsyncMock()
     mock_handle_acapy_call.return_value = sd_jws
     request_body = SDJWSCreateRequest(
-        did="did:sov:ULAXi4asp1MCvFg3QAFpxt",
+        did="did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6",
         payload={
             "sub": "6c5c0a49-b589-431d-bae7-219122a9ec2c",
             "given_name": "John",
@@ -64,7 +64,7 @@ async def test_sign_jws_validation_error():
     error_msg = "Validation error message"
 
     request_body = SDJWSCreateRequest(
-        did="did:sov:ULAXi4asp1MCvFg3QAFpxt",
+        did="did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6",
         payload={
             "sub": "6c5c0a49-b589-431d-bae7-219122a9ec2c",
             "given_name": "John",

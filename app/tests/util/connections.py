@@ -11,7 +11,6 @@ from app.tests.util.regression_testing import (
     assert_fail_on_recreating_fixtures,
 )
 from app.tests.util.webhooks import assert_both_webhooks_received, check_webhook_state
-from app.util.did import qualified_did_sov
 from app.util.string import base64_to_json
 from shared import RichAsyncClient
 from shared.models.connection_record import Connection
@@ -295,7 +294,7 @@ async def create_did_exchange_w_public_did(
     # Get Bob's public DID. Bob is the issuer in this case i.e. should have public DID
     did_response = (await bob_member_client.get(f"{DID_BASE_PATH}/public")).json()
 
-    bob_public_did = qualified_did_sov(did_response["did"])
+    bob_public_did = did_response["did"]
 
     # Alice create invitation
     alice_connection = (

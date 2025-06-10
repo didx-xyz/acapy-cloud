@@ -5,10 +5,7 @@ from aries_cloudcontroller import (
 )
 from fastapi.exceptions import HTTPException
 
-from app.dependencies.acapy_clients import (
-    get_governance_controller,
-    get_tenant_controller,
-)
+from app.dependencies.acapy_clients import get_tenant_controller
 from app.exceptions import (
     CloudApiException,
     handle_acapy_call,
@@ -119,13 +116,9 @@ async def onboard_tenant(
 
     if "issuer" in roles:
         bound_logger.debug("Tenant has 'issuer' role, onboarding as issuer")
-        # Get governance and tenant controllers, onboard issuer
-        async with (
-            get_governance_controller() as governance_controller,
-            get_tenant_controller(wallet_auth_token) as tenant_controller,
-        ):
+
+        async with get_tenant_controller(wallet_auth_token) as tenant_controller:
             onboard_result = await onboard_issuer(
-                endorser_controller=governance_controller,
                 issuer_controller=tenant_controller,
                 issuer_wallet_id=wallet_id,
                 issuer_label=tenant_label,

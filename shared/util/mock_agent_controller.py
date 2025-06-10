@@ -57,7 +57,6 @@ class MockContextManagedController:
 
     async def __aexit__(self, exc_type, exc, tb):
         """Exit mock context manager"""
-        pass
 
 
 @pytest.fixture
