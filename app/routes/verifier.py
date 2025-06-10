@@ -378,7 +378,7 @@ async def get_proof_records(
     summary="Get a Presentation Exchange Record",
     response_model=PresentationExchange,
 )
-async def get_proof_record(
+async def get_proof_record(  # noqa: D417
     proof_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> PresentationExchange:
@@ -422,7 +422,7 @@ async def get_proof_record(
     summary="Delete a Presentation Exchange Record",
     status_code=204,
 )
-async def delete_proof(
+async def delete_proof(  # noqa: D417
     proof_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> None:
@@ -461,7 +461,7 @@ async def delete_proof(
     summary="Get Matching Credentials for a Proof",
     response_model=list[CredPrecis],
 )
-async def get_credentials_by_proof_id(
+async def get_credentials_by_proof_id(  # noqa: D417
     proof_id: str,
     referent: str | None = None,
     limit: int | None = limit_query_parameter,

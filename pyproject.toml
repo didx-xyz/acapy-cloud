@@ -118,9 +118,6 @@ lint.ignore = [
   "PLR0913", # Too many arguments in function definition
   "PLR0915", # Too many statements
 
-  # Fix later by ignoring individual lines (because it's important not to ignore globally)
-  "D417", # Detects missing argument descriptions - route methods have auth param, which we don't want in docstrings
-
   # Won't fix:
   "B008",    # Do not perform function call `Depends` in argument defaults; instead, perform the call within the function, or read the default from a module-level singleton variable
   "PLR2004", # Magic value used in comparison, consider replacing `503` with a constant variable

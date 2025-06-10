@@ -183,7 +183,7 @@ async def create_offer(
     summary="Accept a Credential Offer",
     response_model=CredentialExchange,
 )
-async def request_credential(
+async def request_credential(  # noqa: D417
     credential_exchange_id: str,
     save_exchange_record: bool | None = save_exchange_record_query,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
@@ -257,7 +257,7 @@ async def request_credential(
     summary="Store a Received Credential in Wallet",
     response_model=CredentialExchange,
 )
-async def store_credential(
+async def store_credential(  # noqa: D417
     credential_exchange_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> CredentialExchange:
@@ -375,7 +375,7 @@ async def get_credentials(
     summary="Fetch a single Credential Exchange Record",
     response_model=CredentialExchange,
 )
-async def get_credential(
+async def get_credential(  # noqa: D417
     credential_exchange_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> CredentialExchange:
@@ -422,7 +422,7 @@ async def get_credential(
 @router.delete(
     "/{credential_exchange_id}", summary="Delete an Exchange Record", status_code=204
 )
-async def remove_credential_exchange_record(
+async def remove_credential_exchange_record(  # noqa: D417
     credential_exchange_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> None:

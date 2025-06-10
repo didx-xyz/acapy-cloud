@@ -27,7 +27,7 @@ group_id_query: str | None = Query(
     response_class=StreamingResponse,
     name="Subscribe to a Wallet Event by Topic, Field, and Desired State",
 )
-async def get_sse_subscribe_event_with_field_and_state(
+async def get_sse_subscribe_event_with_field_and_state(  # noqa: D417
     request: Request,
     wallet_id: str,
     topic: str,

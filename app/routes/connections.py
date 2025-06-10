@@ -107,7 +107,7 @@ async def get_connections(  # pylint: disable=R0913,R0917
 @router.get(
     "/{connection_id}", summary="Fetch a Connection Record", response_model=Connection
 )
-async def get_connection_by_id(
+async def get_connection_by_id(  # noqa: D417
     connection_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> Connection:
@@ -144,7 +144,7 @@ async def get_connection_by_id(
 @router.delete(
     "/{connection_id}", summary="Delete a Connection Record", status_code=204
 )
-async def delete_connection_by_id(
+async def delete_connection_by_id(  # noqa: D417
     connection_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> None:
@@ -201,7 +201,7 @@ async def delete_connection_by_id(
     summary="Create a DID Exchange Request",
     response_model=Connection,
 )
-async def create_did_exchange_request(
+async def create_did_exchange_request(  # noqa: D417
     their_public_did: str,
     alias: str | None = None,
     goal: str | None = None,
@@ -286,7 +286,7 @@ async def create_did_exchange_request(
     summary="Accept a DID Exchange Request",
     response_model=Connection,
 )
-async def accept_did_exchange_request(
+async def accept_did_exchange_request(  # noqa: D417
     connection_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> Connection:
@@ -365,7 +365,7 @@ async def reject_did_exchange(
     summary="Begin DID Rotation",
     response_model=Rotate,
 )
-async def rotate_did(
+async def rotate_did(  # noqa: D417
     connection_id: str,
     to_did: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
@@ -408,7 +408,7 @@ async def rotate_did(
     summary="Hangup DID Rotation",
     response_model=Hangup,
 )
-async def hangup_did_rotation(
+async def hangup_did_rotation(  # noqa: D417
     connection_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> Hangup:

@@ -15,7 +15,8 @@ async def resolve_cheqd_schema(schema_id: str) -> dict | None:
 
     Parameters
     ----------
-    schema_id (str): The ID of the schema to resolve.
+    schema_id : str
+        The ID of the schema to resolve.
 
     Returns
     -------

@@ -174,7 +174,7 @@ async def get_schemas(
     summary="Get a Schema",
     response_model=CredentialSchema,
 )
-async def get_schema(
+async def get_schema(  # noqa: D417
     schema_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> CredentialSchema:
@@ -358,7 +358,7 @@ async def get_credential_definitions(
     summary="Get a Credential Definition",
     response_model=CredentialDefinition,
 )
-async def get_credential_definition_by_id(
+async def get_credential_definition_by_id(  # noqa: D417
     credential_definition_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> CredentialDefinition:

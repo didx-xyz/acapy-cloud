@@ -27,7 +27,7 @@ async def get_schemas() -> list[Schema]:
 
 
 @router.get("/schemas/{schema_id:path}", response_model=Schema)
-async def get_schema_by_id(schema_id: str) -> Schema:
+async def get_schema_by_id(schema_id: str) -> Schema:  # noqa: D417
     """Retrieve schema by id.
 
     Parameters
@@ -52,7 +52,7 @@ async def get_schema_by_id(schema_id: str) -> Schema:
 
 
 @router.get("/actors", response_model=list[Actor])
-async def get_actors(
+async def get_actors(  # noqa: D417
     actor_did: str | None = None,
     actor_id: str | None = None,
     actor_name: str | None = None,

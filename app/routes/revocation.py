@@ -74,7 +74,7 @@ async def revoke_credential(
     summary="Fetch a Revocation Record",
     response_model=IssuerCredRevRecord,
 )
-async def get_credential_revocation_record(
+async def get_credential_revocation_record(  # noqa: D417
     credential_exchange_id: str | None = None,
     credential_revocation_id: str | None = None,
     revocation_registry_id: str | None = None,
@@ -290,7 +290,7 @@ async def clear_pending_revocations(
     "/get-pending-revocations/{revocation_registry_id:path}",
     summary="Get Pending Revocations",
 )
-async def get_pending_revocations(
+async def get_pending_revocations(  # noqa: D417
     revocation_registry_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> PendingRevocations:

@@ -73,7 +73,7 @@ async def list_credentials(
     response_model=CredInfo,
     summary="Fetch a credential by ID",
 )
-async def get_credential_record(
+async def get_credential_record(  # noqa: D417
     credential_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> CredInfo:
@@ -107,7 +107,7 @@ async def get_credential_record(
 
 
 @router.delete("/{credential_id}", status_code=204, summary="Delete a credential by ID")
-async def delete_credential(
+async def delete_credential(  # noqa: D417
     credential_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> None:
@@ -143,7 +143,7 @@ async def delete_credential(
     response_model=AttributeMimeTypesResult,
     summary="Retrieve attribute MIME types of a credential",
 )
-async def get_credential_mime_types(
+async def get_credential_mime_types(  # noqa: D417
     credential_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> AttributeMimeTypesResult:
@@ -183,7 +183,7 @@ async def get_credential_mime_types(
     response_model=CredRevokedResult,
     summary="Get revocation status of a credential",
 )
-async def get_credential_revocation_status(
+async def get_credential_revocation_status(  # noqa: D417
     credential_id: str,
     from_: str | None = None,
     to: str | None = None,
@@ -286,7 +286,7 @@ async def list_w3c_credentials(
     response_model=VCRecord,
     summary="Fetch a W3C credential by ID",
 )
-async def get_w3c_credential(
+async def get_w3c_credential(  # noqa: D417
     credential_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> VCRecord:
@@ -320,7 +320,7 @@ async def get_w3c_credential(
 
 
 @router.delete("/w3c/{credential_id}", status_code=204, summary="Delete W3C credential")
-async def delete_w3c_credential(
+async def delete_w3c_credential(  # noqa: D417
     credential_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> None:

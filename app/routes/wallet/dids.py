@@ -115,7 +115,7 @@ async def get_public_did(
 
 
 @router.put("/public", response_model=DID, summary="Set Public DID")
-async def set_public_did(
+async def set_public_did(  # noqa: D417
     did: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> DID:
@@ -147,7 +147,7 @@ async def set_public_did(
 
 
 @router.patch("/{did}/rotate-keypair", status_code=204, summary="Rotate Key Pair")
-async def rotate_keypair(
+async def rotate_keypair(  # noqa: D417
     did: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> None:
@@ -177,7 +177,7 @@ async def rotate_keypair(
 
 
 @router.get("/{did}/endpoint", response_model=DIDEndpoint, summary="Get DID Endpoint")
-async def get_did_endpoint(
+async def get_did_endpoint(  # noqa: D417
     did: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> DIDEndpoint:
@@ -208,7 +208,7 @@ async def get_did_endpoint(
 
 
 @router.post("/{did}/endpoint", status_code=204, summary="Set DID Endpoint")
-async def set_did_endpoint(
+async def set_did_endpoint(  # noqa: D417
     did: str,
     body: SetDidEndpointRequest,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
