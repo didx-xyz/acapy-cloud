@@ -219,14 +219,14 @@ async def test_publish_anoncreds_schema_unexpected_state(publisher):
 @pytest.mark.anyio
 async def test_handle_existing_anoncreds_schema_success(publisher):
     mock_schema_request = anoncreds_schema_request
-    mock_pub_did = MagicMock()
-    mock_pub_did.result.did = "test_did"
-
-    mock_schema = anoncreds_get_schema_result
+    # Only return a schema with a valid var_schema
     with (
         patch(
             "app.services.definitions.schema_publisher.handle_acapy_call",
-            side_effect=[mock_pub_did, mock_schema],
+            side_effect=[
+                MagicMock(schema_ids=[sample_schema_id]),  # get_schemas
+                anoncreds_get_schema_result,  # get_schema
+            ],
         ),
         patch(
             "app.services.definitions.schema_publisher.anoncreds_credential_schema",
@@ -234,16 +234,13 @@ async def test_handle_existing_anoncreds_schema_success(publisher):
         ),
     ):
         result = await publisher._handle_existing_anoncreds_schema(mock_schema_request)
-
         assert isinstance(result, CredentialSchema)
 
 
 @pytest.mark.anyio
 async def test_handle_existing_anoncreds_schema_different_attributes(publisher):
     mock_schema_request = anoncreds_schema_request
-    mock_pub_did = MagicMock()
-    mock_pub_did.result.did = "test_did"
-
+    # Only return a schema with a valid var_schema but different attributes
     mock_schema = GetSchemaResult(
         schema_id=sample_schema_id,
         var_schema=AnonCredsSchema(
@@ -255,72 +252,31 @@ async def test_handle_existing_anoncreds_schema_different_attributes(publisher):
     )
     with patch(
         "app.services.definitions.schema_publisher.handle_acapy_call",
-        side_effect=[mock_pub_did, mock_schema],
+        side_effect=[
+            MagicMock(schema_ids=[sample_schema_id]),  # get_schemas
+            mock_schema,  # get_schema
+        ],
     ):
         with pytest.raises(CloudApiException) as exc_info:
             await publisher._handle_existing_anoncreds_schema(mock_schema_request)
-
         assert "Schema already exists with different attribute names" in str(
             exc_info.value
         )
-
-
-@pytest.mark.anyio
-async def test_handle_existing_anoncreds_schema_changed_did(publisher):
-    mock_schema_request = anoncreds_schema_request
-    mock_pub_did = MagicMock()
-    mock_pub_did.result.did = "test_did"
-
-    mock_schema_none = GetSchemaResult(
-        var_schema=AnonCredsSchema(
-            name=sample_schema_name,
-            version=sample_schema_version,
-            attr_names=sample_attribute_names,
-            issuer_id="test_did",
-        )
-    )
-    mock_schemas_created_ids = MagicMock()
-    mock_schemas_created_ids.schema_ids = ["schema_id_1"]
-
-    mock_schema = anoncreds_schema_result
-    with (
-        patch(
-            "app.services.definitions.schema_publisher.handle_acapy_call",
-            side_effect=[
-                mock_pub_did,
-                mock_schema_none,
-                mock_schemas_created_ids,
-                mock_schema,
-            ],
-        ),
-        patch(
-            "app.services.definitions.schema_publisher.anoncreds_credential_schema",
-            return_value=MagicMock(spec=CredentialSchema),
-        ),
-    ):
-        result = await publisher._handle_existing_anoncreds_schema(mock_schema_request)
-
-        assert isinstance(result, CredentialSchema)
+        assert exc_info.value.status_code == 409
 
 
 @pytest.mark.anyio
 async def test_handle_existing_anoncreds_schema_no_schemas_found(publisher):
     mock_schema_request = anoncreds_schema_request
-
-    mock_pub_did = MagicMock()
-    mock_pub_did.result.did = "test_did"
-
-    mock_schema_none = GetSchemaResult(var_schema=None)
-    mock_schemas_created_ids = MagicMock()
-    mock_schemas_created_ids.schema_ids = []
-
+    # Return empty schema_ids list
     with patch(
         "app.services.definitions.schema_publisher.handle_acapy_call",
-        side_effect=[mock_pub_did, mock_schema_none, mock_schemas_created_ids],
+        side_effect=[
+            MagicMock(schema_ids=[]),  # get_schemas
+        ],
     ):
         with pytest.raises(CloudApiException) as exc_info:
             await publisher._handle_existing_anoncreds_schema(mock_schema_request)
-
         assert str(exc_info.value) == "500: Could not publish schema."
         assert exc_info.value.status_code == 500
 
@@ -328,49 +284,15 @@ async def test_handle_existing_anoncreds_schema_no_schemas_found(publisher):
 @pytest.mark.anyio
 async def test_handle_existing_anoncreds_schema_multiple_schemas_found(publisher):
     mock_schema_request = anoncreds_schema_request
-
-    mock_pub_did = MagicMock()
-    mock_pub_did.result.did = "test_did"
-
-    mock_schema_none = GetSchemaResult(var_schema=None)
-    mock_schemas_created_ids = MagicMock()
-    mock_schemas_created_ids.schema_ids = [
-        sample_schema_id,
-        "aeXh23fv8bp43VxFesQXC:2:test_schema:1.0",
-    ]
-    mock_schemas = [
-        GetSchemaResult(
-            schema_id=sample_schema_id,
-            var_schema=AnonCredsSchema(
-                issuer_id=sample_issuer_id,
-                name=sample_schema_name,
-                version=sample_schema_version,
-                attr_names=sample_attribute_names,
-            ),
-        ),
-        GetSchemaResult(
-            schema_id="aeXh23fv8bp43VxFesQXC:2:test_schema:1.0",
-            var_schema=AnonCredsSchema(
-                issuer_id="aeXh23fv8bp43VxFesQXC",
-                name=sample_schema_name,
-                version=sample_schema_version,
-                attr_names=["attr3", "attr4"],
-            ),
-        ),
-    ]
+    # Return two schema_ids; only one call to handle_acapy_call is expected
     with patch(
         "app.services.definitions.schema_publisher.handle_acapy_call",
-        side_effect=[
-            mock_pub_did,
-            mock_schema_none,
-            mock_schemas_created_ids,
-            mock_schemas[0],
-            mock_schemas[1],
-        ],
+        return_value=MagicMock(
+            schema_ids=[sample_schema_id, "aeXh23fv8bp43VxFesQXC:2:test_schema:1.0"]
+        ),
     ):
         with pytest.raises(CloudApiException) as exc_info:
             await publisher._handle_existing_anoncreds_schema(mock_schema_request)
-
         assert str(exc_info.value).startswith(
             "409: Multiple schemas with name test_schema"
         )
@@ -380,31 +302,20 @@ async def test_handle_existing_anoncreds_schema_multiple_schemas_found(publisher
 @pytest.mark.anyio
 async def test_handle_existing_anoncreds_schema_new_did_one_schema_found(publisher):
     mock_schema_request = anoncreds_schema_request
-
-    mock_pub_did = MagicMock()
-    mock_pub_did.result.did = "test_did"
-
-    mock_schema_none = GetSchemaResult(var_schema=None)
-    mock_schemas_created_ids = MagicMock()
-    mock_schemas_created_ids.schema_ids = [sample_schema_id]
-    mock_schemas = [
-        GetSchemaResult(
-            schema_id=sample_schema_id,
-            var_schema=AnonCredsSchema(
-                issuer_id=sample_issuer_id,
-                name=sample_schema_name,
-                version=sample_schema_version,
-                attr_names=sample_attribute_names,
-            ),
-        )
-    ]
+    # Only return a schema with a valid var_schema
     with patch(
         "app.services.definitions.schema_publisher.handle_acapy_call",
         side_effect=[
-            mock_pub_did,
-            mock_schema_none,
-            mock_schemas_created_ids,
-            mock_schemas[0],
+            MagicMock(schema_ids=[sample_schema_id]),  # get_schemas
+            GetSchemaResult(
+                schema_id=sample_schema_id,
+                var_schema=AnonCredsSchema(
+                    issuer_id=sample_issuer_id,
+                    name=sample_schema_name,
+                    version=sample_schema_version,
+                    attr_names=sample_attribute_names,
+                ),
+            ),
         ],
     ):
         result = await publisher._handle_existing_anoncreds_schema(mock_schema_request)
