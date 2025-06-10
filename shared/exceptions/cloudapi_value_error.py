@@ -1,4 +1,4 @@
-from typing import Any, Dict, Union
+from typing import Any
 
 from fastapi import HTTPException
 
@@ -6,5 +6,6 @@ from fastapi import HTTPException
 class CloudApiValueError(HTTPException):
     """Class that represents a validation / value error"""
 
-    def __init__(self, detail: Union[str, Dict[str, Any]]) -> None:
+    def __init__(self, detail: str | dict[str, Any]) -> None:
+        """Initialize the CloudAPI value error."""
         super().__init__(status_code=422, detail=detail)

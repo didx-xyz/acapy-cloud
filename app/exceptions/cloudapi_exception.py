@@ -1,4 +1,4 @@
-from typing import Any, Dict, Union
+from typing import Any
 
 from fastapi import HTTPException
 
@@ -8,7 +8,8 @@ class CloudApiException(HTTPException):
 
     def __init__(
         self,
-        detail: Union[str, Dict[str, Any]],
+        detail: str | dict[str, Any],
         status_code: int = 500,
     ) -> None:
+        """Initialize the CloudAPI exception."""
         super().__init__(status_code=status_code, detail=detail)

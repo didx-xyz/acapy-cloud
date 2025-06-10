@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
 
 from aries_cloudcontroller import AcaPyClient
 
@@ -15,20 +14,20 @@ class Issuer(ABC):
     async def send_credential(
         cls, controller: AcaPyClient, credential: CredentialWithConnection
     ) -> CredentialExchange:
-        """
-        Create and send credential using Issue Credential protocol. Automating the entire flow.
+        """Create and send credential using Issue Credential protocol. Automating the entire flow.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         controller: AcaPyClient
             The aries_cloudcontroller object
         credential: Credential
             Credential to issue
 
-        Returns:
-        --------
+        Returns
+        -------
         cred_ex_record:
             The credential record
+
         """
 
     @classmethod
@@ -36,20 +35,20 @@ class Issuer(ABC):
     async def create_offer(
         cls, controller: AcaPyClient, credential: CredentialBase
     ) -> CredentialExchange:
-        """
-        Create a credential offer not bound to a connection.
+        """Create a credential offer not bound to a connection.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         controller: AcaPyClient
             The aries_cloudcontroller object
         credential: CredentialNoConnection
             Credential offer to create
 
-        Returns:
-        --------
+        Returns
+        -------
         cred_ex_record:
             The credential record
+
         """
 
     @classmethod
@@ -58,13 +57,12 @@ class Issuer(ABC):
         cls,
         controller: AcaPyClient,
         credential_exchange_id: str,
-        auto_remove: Optional[bool] = None,
+        auto_remove: bool | None = None,
     ) -> CredentialExchange:
-        """
-        Request credential
+        """Request credential
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         controller: AcaPyClient
             The aries_cloudcontroller object
         credential_exchange_id: str
@@ -73,10 +71,11 @@ class Issuer(ABC):
             Whether to override environment setting for auto-deleting cred ex records. Default is None (use environment
             setting)
 
-        Returns:
-        --------
+        Returns
+        -------
         cred_ex_record:
             The credential record
+
         """
 
     @classmethod
@@ -84,20 +83,20 @@ class Issuer(ABC):
     async def store_credential(
         cls, controller: AcaPyClient, credential_exchange_id: str
     ) -> CredentialExchange:
-        """
-        Store credential
+        """Store credential
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         controller: AcaPyClient
             The aries_cloudcontroller object
         credential_exchange_id:
             The credential_exchange_id of the exchange
 
-        Returns:
-        --------
+        Returns
+        -------
         cred_ex_record:
             The credential record
+
         """
 
     @classmethod
@@ -107,12 +106,13 @@ class Issuer(ABC):
     ) -> None:
         """Delete credential record.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         controller: AcaPyClient
             The aries_cloudcontroller object
         credential_exchange_id:
             The credential_exchange_id of the exchange
+
         """
 
     @classmethod
@@ -120,20 +120,19 @@ class Issuer(ABC):
     async def get_records(
         cls,
         controller: AcaPyClient,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-        order_by: Optional[str] = "id",
+        limit: int | None = None,
+        offset: int | None = None,
+        order_by: str | None = "id",
         descending: bool = True,
-        connection_id: Optional[str] = None,
-        role: Optional[str] = None,
-        state: Optional[str] = None,
-        thread_id: Optional[str] = None,
-    ) -> List[CredentialExchange]:
-        """
-        Get a list of credential records.
+        connection_id: str | None = None,
+        role: str | None = None,
+        state: str | None = None,
+        thread_id: str | None = None,
+    ) -> list[CredentialExchange]:
+        """Get a list of credential records.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         controller: AcaPyClient
             The aries_cloudcontroller object used to interact with the ACA-Py API.
         limit: Optional[int]
@@ -153,10 +152,11 @@ class Issuer(ABC):
         thread_id: Optional[str]
             Filter by the thread ID associated with the credential exchange.
 
-        Returns:
-        --------
+        Returns
+        -------
         List[CredentialExchange]
             A list of credential exchange records.
+
         """
 
     @classmethod
@@ -166,10 +166,11 @@ class Issuer(ABC):
     ) -> CredentialExchange:
         """Get credential record.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         controller: AcaPyClient
             The aries_cloudcontroller object
         credential_exchange_id:
             The credential_exchange_id of the exchange
+
         """

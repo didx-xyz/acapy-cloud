@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from fastapi import HTTPException
 
 from app.exceptions import TrustRegistryException
@@ -19,6 +17,7 @@ async def register_schema(schema_id: str) -> None:
 
     Raises:
         TrustRegistryException: If an error occurred while registering the schema
+
     """
     bound_logger = logger.bind(body={"schema_id": schema_id})
     bound_logger.debug("Registering schema on trust registry")
@@ -41,7 +40,7 @@ async def register_schema(schema_id: str) -> None:
     bound_logger.debug("Successfully registered schema on trust registry.")
 
 
-async def fetch_schemas() -> List[Schema]:
+async def fetch_schemas() -> list[Schema]:
     """Retrieve all schemas from the trust registry
 
     Raises:
@@ -49,6 +48,7 @@ async def fetch_schemas() -> List[Schema]:
 
     Returns:
         A list of schemas
+
     """
     logger.debug("Fetching all schemas from trust registry")
     async with RichAsyncClient() as client:
@@ -69,7 +69,7 @@ async def fetch_schemas() -> List[Schema]:
     return result
 
 
-async def get_schema_by_id(schema_id: str) -> Optional[Schema]:
+async def get_schema_by_id(schema_id: str) -> Schema | None:
     """Retrieve a schemas from the trust registry
 
     Raises:
@@ -77,6 +77,7 @@ async def get_schema_by_id(schema_id: str) -> Optional[Schema]:
 
     Returns:
         A schema
+
     """
     bound_logger = logger.bind(body={"schema_id": schema_id})
     bound_logger.debug("Fetching schema from trust registry")
@@ -114,6 +115,7 @@ async def remove_schema_by_id(schema_id: str) -> None:
 
     Raises:
         TrustRegistryException: If an error occurred while removing the schema
+
     """
     bound_logger = logger.bind(body={"schema_id": schema_id})
     bound_logger.info("Removing schema from trust registry")

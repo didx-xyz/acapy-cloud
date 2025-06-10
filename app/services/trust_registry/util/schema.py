@@ -18,6 +18,7 @@ async def registry_has_schema(schema_id: str) -> bool:
 
     Returns:
         bool: whether the schema exists in the trust registry
+
     """
     bound_logger = logger.bind(body={"schema_id": schema_id})
     bound_logger.debug(

@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from aries_cloudcontroller import DID, DIDEndpoint, DIDEndpointWithType
 from fastapi import APIRouter, Depends
 
@@ -21,11 +19,10 @@ router = APIRouter(prefix="/v1/wallet/dids", tags=["wallet"])
 
 @router.post("", response_model=DID, summary="Create Local DID")
 async def create_did(
-    did_create: Optional[DIDCreate] = None,
+    did_create: DIDCreate | None = None,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> DID:
-    """
-    Create Local DID
+    """Create Local DID
     ---
 
     This endpoint allows you to create a new DID in the wallet.
@@ -59,12 +56,11 @@ async def create_did(
     return result
 
 
-@router.get("", response_model=List[DID], summary="List DIDs")
+@router.get("", response_model=list[DID], summary="List DIDs")
 async def list_dids(
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
-) -> List[DID]:
-    """
-    Retrieve List of DIDs
+) -> list[DID]:
+    """Retrieve List of DIDs
     ---
 
     This endpoint allows you to retrieve a list of DIDs in the wallet.
@@ -93,8 +89,7 @@ async def list_dids(
 async def get_public_did(
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> DID:
-    """
-    Fetch the Current Public DID
+    """Fetch the Current Public DID
     ---
 
     This endpoint allows you to fetch the current public DID.
@@ -120,12 +115,11 @@ async def get_public_did(
 
 
 @router.put("/public", response_model=DID, summary="Set Public DID")
-async def set_public_did(
+async def set_public_did(  # noqa: D417
     did: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> DID:
-    """
-    Set the Current Public DID
+    """Set the Current Public DID
     ---
 
     This endpoint allows you to set the current public DID.
@@ -133,13 +127,14 @@ async def set_public_did(
     **Note:**
         - By default, only issuers can have and update public DIDs.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         did: str
 
     Response:
     ---
         Returns the public DID.
+
     """
     logger.debug("PUT request received: Set public DID")
 
@@ -152,23 +147,23 @@ async def set_public_did(
 
 
 @router.patch("/{did}/rotate-keypair", status_code=204, summary="Rotate Key Pair")
-async def rotate_keypair(
+async def rotate_keypair(  # noqa: D417
     did: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> None:
-    """
-    Rotate Key Pair for DID
+    """Rotate Key Pair for DID
     ---
 
     This endpoint allows you to rotate the key pair for a DID.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         did: str
 
     Response:
     ---
         204 No Content
+
     """
     bound_logger = logger.bind(body={"did": did})
     bound_logger.debug("PATCH request received: Rotate keypair for DID")
@@ -182,23 +177,23 @@ async def rotate_keypair(
 
 
 @router.get("/{did}/endpoint", response_model=DIDEndpoint, summary="Get DID Endpoint")
-async def get_did_endpoint(
+async def get_did_endpoint(  # noqa: D417
     did: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> DIDEndpoint:
-    """
-    Get DID Endpoint
+    """Get DID Endpoint
     ---
 
     This endpoint allows you to fetch the endpoint for a DID.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         did: str
 
     Response:
     ---
         Returns the endpoint for the DID.
+
     """
     bound_logger = logger.bind(body={"did": did})
     bound_logger.debug("GET request received: Get endpoint for DID")
@@ -213,25 +208,25 @@ async def get_did_endpoint(
 
 
 @router.post("/{did}/endpoint", status_code=204, summary="Set DID Endpoint")
-async def set_did_endpoint(
+async def set_did_endpoint(  # noqa: D417
     did: str,
     body: SetDidEndpointRequest,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> None:
-    """
-    Update Endpoint of DID in Wallet (and on Ledger, if it is a Public DID)
+    """Update Endpoint of DID in Wallet (and on Ledger, if it is a Public DID)
     ---
 
     This endpoint allows you to update the endpoint for a DID.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         did: str
 
     Request Body:
     ---
         SetDidEndpointRequest:
             endpoint: str
+
     """
     # "Endpoint" type is for making connections using public DIDs
     bound_logger = logger.bind(body={"did": did, "body": body})

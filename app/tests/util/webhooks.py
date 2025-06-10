@@ -1,10 +1,10 @@
 import asyncio
-from typing import Any, Dict, Optional
+from typing import Any
 
 import pytest
 from httpx import HTTPError
 
-from app.tests.util.sse_listener import SseListener, SseListenerTimeout
+from app.tests.util.sse_listener import SseListener, SseListenerTimeoutError
 from app.util.tenants import get_wallet_id_from_b64encoded_jwt
 from shared import RichAsyncClient
 from shared.log_config import get_logger
@@ -28,12 +28,12 @@ async def check_webhook_state(
     client: RichAsyncClient,
     topic: CloudApiTopics,
     state: str,
-    filter_map: Optional[Dict[str, str]] = None,
+    filter_map: dict[str, str] | None = None,
     max_duration: int = 45,
     max_tries: int = 2,
     delay: float = 0.5,
     look_back: int = 15,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     assert max_duration >= 0, "Poll duration cannot be negative"
 
     wallet_id = get_wallet_id_from_async_client(client)
@@ -49,7 +49,7 @@ async def check_webhook_state(
         try:
             if filter_map:
                 # Assuming that filter_map contains 1 key-value pair
-                field, field_id = list(filter_map.items())[0]
+                field, field_id = next(iter(filter_map.items()))
 
                 bound_logger.info(
                     "Waiting for event with field:field_id {}:{}, and state {}",
@@ -68,7 +68,7 @@ async def check_webhook_state(
                 pytest.fail(
                     "No longer implemented: cannot wait for event without filter_map"
                 )
-        except SseListenerTimeout:
+        except SseListenerTimeoutError:
             bound_logger.error(
                 "Encountered SSE Timeout (server didn't return expected event in time)."
             )

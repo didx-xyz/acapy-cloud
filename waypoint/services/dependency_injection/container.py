@@ -5,7 +5,7 @@ from waypoint.services.nats_service import NatsEventsProcessor
 
 
 class Container(containers.DeclarativeContainer):
-    """Dependency injection container for the waypoint service"""
+    """Dependency injection container for the waypoint service."""
 
     jetstream = providers.Resource(init_nats_client)
 

@@ -1,5 +1,5 @@
 from logging import Logger
-from typing import Type, TypeVar
+from typing import TypeVar
 
 from pydantic import BaseModel, ValidationError
 
@@ -9,9 +9,8 @@ from shared.exceptions import CloudApiValueError
 T = TypeVar("T", bound=BaseModel)
 
 
-def handle_model_with_validation(logger: Logger, model_class: Type[T], **kwargs) -> T:
-    """
-    Attempts to create an instance of a Pydantic model with the given arguments.
+def handle_model_with_validation(logger: Logger, model_class: type[T], **kwargs) -> T:
+    """Attempts to create an instance of a Pydantic model with the given arguments.
     Logs and raises an CloudApiException if a ValidationError occurs.
 
     Args:
@@ -24,6 +23,7 @@ def handle_model_with_validation(logger: Logger, model_class: Type[T], **kwargs)
 
     Raises:
         CloudApiException with status_code=422 if validation fails.
+
     """
     try:
         model_instance = model_class(**kwargs)

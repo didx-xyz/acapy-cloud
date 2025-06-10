@@ -4,13 +4,12 @@ import json
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from nats.aio.client import Client as NATS
+from nats.aio.client import Client as NATSClient
 from nats.errors import (
     BadSubscriptionError,
     ConnectionClosedError,
     Error,
     NoServersError,
-    TimeoutError,
 )
 from nats.js.api import ConsumerConfig, DeliverPolicy
 from nats.js.client import JetStreamContext
@@ -33,7 +32,7 @@ sample_message_data = {
 @pytest.fixture
 async def mock_nats_client():
     with patch("nats.connect") as mock_connect:
-        mock_nats = AsyncMock(spec=NATS)
+        mock_nats = AsyncMock(spec=NATSClient)
         mock_jetstream = AsyncMock(spec=JetStreamContext)
         mock_nats.jetstream.return_value = mock_jetstream
         mock_connect.return_value = mock_nats
@@ -43,7 +42,7 @@ async def mock_nats_client():
 @pytest.mark.anyio
 @pytest.mark.parametrize("nats_creds_file", [None, "some_file"])
 async def test_init_nats_client(nats_creds_file):
-    mock_nats_client = AsyncMock(spec=NATS)  # pylint: disable=redefined-outer-name
+    mock_nats_client = AsyncMock(spec=NATSClient)  # pylint: disable=redefined-outer-name
 
     with (
         patch("nats.connect", return_value=mock_nats_client),
@@ -327,12 +326,12 @@ async def test_process_events_base_exception(
     mock_nats_client.pull_subscribe.return_value = mock_subscription
 
     # Mock fetch to raise a generic exception
-    mock_subscription.fetch.side_effect = Exception("Test base exception")
+    mock_subscription.fetch.side_effect = ArithmeticError("Test base exception")
 
     stop_event = asyncio.Event()
 
     # Process events
-    with pytest.raises(Exception):
+    with pytest.raises(ArithmeticError):
         async with processor.process_events(
             group_id="group_id",
             wallet_id="wallet_id",

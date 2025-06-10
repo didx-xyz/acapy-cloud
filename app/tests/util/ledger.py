@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Literal
 
 from aries_cloudcontroller import DID, AcaPyClient
 from fastapi import HTTPException
@@ -15,21 +15,21 @@ logger = get_logger(__name__)
 
 
 class LedgerRequestSovrin(BaseModel):
-    network: Optional[str] = Field(None)
-    did: Optional[str] = Field(None)
-    verkey: Optional[str] = Field(None)
-    payment_address: Optional[str] = Field(None, alias="paymentaddr")
+    network: str | None = Field(None)
+    did: str | None = Field(None)
+    verkey: str | None = Field(None)
+    payment_address: str | None = Field(None, alias="paymentaddr")
 
 
 class LedgerRequestVon(BaseModel):
-    did: Optional[str] = Field(None)
-    seed: Optional[str] = Field(None)
-    verkey: Optional[str] = Field(None)
-    role: Optional[str] = Field(None)
+    did: str | None = Field(None)
+    seed: str | None = Field(None)
+    verkey: str | None = Field(None)
+    role: str | None = Field(None)
 
 
 async def post_to_ledger(
-    did: str, verkey: str, role: Optional[Literal["ENDORSER"]] = "ENDORSER"
+    did: str, verkey: str, role: Literal["ENDORSER"] | None = "ENDORSER"
 ) -> None:
     if LEDGER_TYPE == "sovrin":
         payload = LedgerRequestSovrin(

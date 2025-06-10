@@ -1,6 +1,4 @@
-import asyncio
 from logging import Logger
-from typing import List
 
 from aries_cloudcontroller import (
     AcaPyClient,
@@ -18,6 +16,7 @@ from app.util.retry_method import coroutine_with_retry_until_value
 
 class SchemaPublisher:
     def __init__(self, controller: AcaPyClient, logger: Logger):
+        """Initialize the schema publisher."""
         self._logger = logger
         self._controller = controller
 
@@ -86,7 +85,7 @@ class SchemaPublisher:
                     max_attempts=max_retries,
                     retry_delay=retry_sleep_duration,
                 )
-            except asyncio.TimeoutError as e:
+            except TimeoutError as e:
                 raise CloudApiException(
                     "Timed out waiting for schema to be published.", 504
                 ) from e
@@ -116,7 +115,7 @@ class SchemaPublisher:
             fetched_schema_ids,
         )
 
-        fetch_schemas: List[GetSchemaResult] = [
+        fetch_schemas: list[GetSchemaResult] = [
             await handle_acapy_call(
                 logger=self._logger,
                 acapy_call=self._controller.anoncreds_schemas.get_schema,
@@ -132,7 +131,7 @@ class SchemaPublisher:
             error_message = (
                 f"Multiple schemas with name {schema.var_schema.name} "
                 f"and version {schema.var_schema.version} exist."
-                f"These are: `{str(fetched_schema_ids.schema_ids)}`."
+                f"These are: `{fetched_schema_ids.schema_ids!s}`."
             )
             raise CloudApiException(error_message, 409)
         fetched_schema: GetSchemaResult = fetch_schemas[0]
@@ -143,8 +142,8 @@ class SchemaPublisher:
         ):
             error_message = (
                 "Error creating schema: Schema already exists with different attribute "
-                f"names. Given: `{str(set(schema.var_schema.attr_names))}`. "
-                f"Found: `{str(set(fetched_schema.var_schema.attr_names))}`."
+                f"names. Given: `{set(schema.var_schema.attr_names)!s}`. "
+                f"Found: `{set(fetched_schema.var_schema.attr_names)!s}`."
             )
             raise CloudApiException(error_message, 409)
 

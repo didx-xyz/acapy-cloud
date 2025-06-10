@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional
+from typing import Literal
 
 from aries_cloudcontroller.models.did_create import DIDCreate as DIDCreateAcaPy
 from aries_cloudcontroller.models.did_create_options import DIDCreateOptions
@@ -24,11 +24,11 @@ class VCRecord(VCRecordAcaPy):
 
 
 class VCRecordList(BaseModel):
-    results: Optional[List[VCRecord]] = None
+    results: list[VCRecord] | None = None
 
 
 class CredInfoList(BaseModel):
-    results: Optional[List[CredInfo]] = None
+    results: list[CredInfo] | None = None
 
 
 class DIDCreate(BaseModel):
@@ -38,7 +38,7 @@ class DIDCreate(BaseModel):
 
     _supported_methods = ["cheqd", "key", "web", "did:peer:2", "did:peer:4"]
 
-    method: Optional[StrictStr] = Field(
+    method: StrictStr | None = Field(
         default="cheqd",
         description=(
             "Method for the requested DID. Supported methods are "
@@ -46,31 +46,31 @@ class DIDCreate(BaseModel):
         ),
         examples=_supported_methods,
     )
-    seed: Optional[StrictStr] = Field(
+    seed: StrictStr | None = Field(
         default=None,
         description="Optional seed to use for DID. Must be enabled in configuration before use.",
     )
-    key_type: Optional[StrictStr] = Field(
+    key_type: StrictStr | None = Field(
         default="ed25519",
         description="Key type to use for the DID key_pair. Validated with the chosen DID method's supported key types.",
         examples=["ed25519", "bls12381g2"],
     )
-    did: Optional[StrictStr] = Field(
+    did: StrictStr | None = Field(
         default=None,
         description="Specify the final value of DID (including `did:<method>:` prefix) if the method supports it.",
     )
-    network: Optional[Literal["mainnet", "testnet"]] = Field(
+    network: Literal["mainnet", "testnet"] | None = Field(
         default=None,
         description="Specify the network to use for Cheqd DIDs. Valid values are `mainnet` and `testnet`.",
         examples=["mainnet", "testnet"],
     )
 
     def to_acapy_options(self) -> DIDCreateOptions:
-        """
-        Convert the model's fields into the `DIDCreateOptions` structure expected by ACA-Py.
+        """Convert the model's fields into the `DIDCreateOptions` structure expected by ACA-Py.
 
         Returns:
             An instance of `DIDCreateOptions` populated with `key_type` and `did`.
+
         """
         return DIDCreateOptions(key_type=self.key_type, did=self.did)
 

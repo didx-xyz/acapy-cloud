@@ -20,7 +20,7 @@ async def onboard_issuer(
     endorser_controller: AcaPyClient,
     issuer_controller: AcaPyClient,
     issuer_wallet_id: str,
-    issuer_label: str = None,
+    issuer_label: str | None = None,
 ) -> OnboardResult:
     """Onboard the controller as issuer.
 
@@ -37,6 +37,7 @@ async def onboard_issuer(
 
     Returns:
         OnboardResult: The result of the onboarding process
+
     """
     bound_logger = logger.bind(
         body={"issuer_label": issuer_label, "issuer_wallet_id": issuer_wallet_id}
@@ -81,8 +82,7 @@ async def onboard_issuer_no_public_did(
     issuer_label: str,
     did_method: Literal["cheqd"] = "cheqd",
 ) -> DID:
-    """
-    Onboard an issuer without a public DID.
+    """Onboard an issuer without a public DID.
 
     This function handles the case where the issuer does not have a public DID.
     It takes care of the following steps:
@@ -101,6 +101,7 @@ async def onboard_issuer_no_public_did(
 
     Returns:
         issuer_did (DID): The issuer's DID after completing the onboarding process
+
     """
     bound_logger = logger.bind(
         body={"issuer_label": issuer_label, "issuer_wallet_id": issuer_wallet_id}
@@ -131,7 +132,7 @@ async def onboard_issuer_no_public_did(
         except Exception as e:
             bound_logger.exception("Could not create connection with endorser.")
             raise CloudApiException(
-                f"Error creating connection with endorser: {str(e)}",
+                f"Error creating connection with endorser: {e!s}",
             ) from e
 
     issuer_did = await register_issuer_did(

@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional, Union
+from typing import Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -10,10 +10,10 @@ TrustRegistryRole = Literal["issuer", "verifier"]
 class Actor(BaseModel):
     id: str
     name: str
-    roles: List[TrustRegistryRole]
+    roles: list[TrustRegistryRole]
     did: str
-    didcomm_invitation: Optional[str] = None
-    image_url: Optional[str] = None
+    didcomm_invitation: str | None = None
+    image_url: str | None = None
 
     @field_validator("did")
     @classmethod
@@ -44,12 +44,12 @@ class Schema(BaseModel):
             values = values.__dict__
 
         try:
-            id = values["id"]
+            schema_id = values["id"]
         except KeyError:
-            id = None
+            schema_id = None
 
         cheqd_did = False
-        if id and id.startswith("did:cheqd:"):
+        if schema_id and schema_id.startswith("did:cheqd:"):
             cheqd_did = True
 
         try:
@@ -67,37 +67,35 @@ class Schema(BaseModel):
             version = None
 
         if cheqd_did:
-            did = id.split("/")[0]
+            did = schema_id.split("/")[0]
             name = values.get("name")
             version = values.get("version")
 
+        elif schema_id is None:
+            if None in (did, name, version):
+                raise CloudApiValueError(
+                    "Either `id` or all of (`did`, `name`, `version`) must be specified."
+                )
+            schema_id = calc_schema_id(did, name, version)
+        elif None not in (did, name, version):
+            expected_id = calc_schema_id(did, name, version)
+            if schema_id != expected_id:
+                raise CloudApiValueError(
+                    f"Schema's `id` field does not match expected format: `{expected_id}`."
+                )
         else:
-            if id is None:
-                if None in (did, name, version):
-                    raise CloudApiValueError(
-                        "Either `id` or all of (`did`, `name`, `version`) must be specified."
-                    )
-                id = calc_schema_id(did, name, version)
-            else:
-                if None not in (did, name, version):
-                    expected_id = calc_schema_id(did, name, version)
-                    if id != expected_id:
-                        raise CloudApiValueError(
-                            f"Schema's `id` field does not match expected format: `{expected_id}`."
-                        )
-                else:
-                    # Extract did, name, and version from id if not specified
-                    try:
-                        did, _, name, version = id.split(":")
-                    except ValueError as e:
-                        raise CloudApiValueError(
-                            "Invalid `id` field. It does not match the expected format."
-                        ) from e
+            # Extract did, name, and version from id if not specified
+            try:
+                did, _, name, version = schema_id.split(":")
+            except ValueError as e:
+                raise CloudApiValueError(
+                    "Invalid `id` field. It does not match the expected format."
+                ) from e
 
         values["did"] = did
         values["name"] = name
         values["version"] = version
-        values["id"] = id
+        values["id"] = schema_id
         return values
 
     model_config = ConfigDict(validate_assignment=True, from_attributes=True)

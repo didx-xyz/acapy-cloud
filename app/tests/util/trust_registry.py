@@ -1,6 +1,6 @@
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from random import random
-from typing import AsyncGenerator
 
 from app.routes.wallet.dids import router as wallet_router
 from app.services.trust_registry.actors import register_actor, remove_actor_by_id

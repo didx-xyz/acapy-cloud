@@ -1,5 +1,4 @@
 import asyncio
-from typing import List, Optional
 
 from aries_cloudcontroller import (
     AcaPyClient,
@@ -28,10 +27,9 @@ logger = get_logger(__name__)
 async def create_schema(
     aries_controller: AcaPyClient,
     schema: CreateSchema,
-    public_did: Optional[str] = None,  # Required for anoncreds schemas
+    public_did: str | None = None,  # Required for anoncreds schemas
 ) -> CredentialSchema:
-    """
-    Create a schema and register it in the trust registry
+    """Create a schema and register it in the trust registry
 
     NB: Auth is handled in the route, so we assume the request is valid:
     - AnonCreds schemas are only created by governance agents
@@ -69,10 +67,10 @@ async def create_schema(
 
 async def get_schemas_as_tenant(
     aries_controller: AcaPyClient,
-    schema_issuer_did: Optional[str] = None,
-    schema_name: Optional[str] = None,
-    schema_version: Optional[str] = None,
-) -> List[CredentialSchema]:
+    schema_issuer_did: str | None = None,
+    schema_name: str | None = None,
+    schema_version: str | None = None,
+) -> list[CredentialSchema]:
     """Allows tenants to get all schemas from trust registry"""
     bound_logger = logger.bind(
         body={
@@ -106,10 +104,10 @@ async def get_schemas_as_tenant(
 
 async def get_schemas_as_governance(
     aries_controller: AcaPyClient,
-    schema_issuer_did: Optional[str] = None,
-    schema_name: Optional[str] = None,
-    schema_version: Optional[str] = None,
-) -> List[CredentialSchema]:
+    schema_issuer_did: str | None = None,
+    schema_name: str | None = None,
+    schema_version: str | None = None,
+) -> list[CredentialSchema]:
     """Governance agents gets all schemas created by itself"""
     bound_logger = logger.bind(
         body={
@@ -149,10 +147,9 @@ async def get_schemas_as_governance(
 
 async def get_schemas_by_id(
     aries_controller: AcaPyClient,
-    schema_ids: List[str],
-) -> List[CredentialSchema]:
-    """
-    Fetch schemas with attributes using schema IDs.
+    schema_ids: list[str],
+) -> list[CredentialSchema]:
+    """Fetch schemas with attributes using schema IDs.
     The following logic applies to both governance and tenant calls.
     Retrieve the relevant schemas from the ledger:
     """
@@ -169,7 +166,7 @@ async def get_schemas_by_id(
     # Wait for completion of futures
     if get_schema_futures:
         logger.debug("Fetching each of the created schemas")
-        schema_results: List[GetSchemaResult] = await asyncio.gather(
+        schema_results: list[GetSchemaResult] = await asyncio.gather(
             *get_schema_futures
         )
     else:

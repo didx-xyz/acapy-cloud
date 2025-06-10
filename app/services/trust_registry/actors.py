@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from app.exceptions import TrustRegistryException
 from shared.constants import TRUST_REGISTRY_URL
 from shared.log_config import get_logger
@@ -17,6 +15,7 @@ async def register_actor(actor: Actor) -> None:
 
     Raises:
         TrustRegistryException: If an error occurred while registering the schema
+
     """
     bound_logger = logger.bind(body={"actor": actor})
     bound_logger.debug("Registering actor on trust registry")
@@ -78,7 +77,7 @@ async def update_actor(actor: Actor) -> None:
         )
 
 
-async def fetch_all_actors() -> List[Actor]:
+async def fetch_all_actors() -> list[Actor]:
     """Fetch all actors from the trust registry
 
     Raises:
@@ -86,6 +85,7 @@ async def fetch_all_actors() -> List[Actor]:
 
     Returns:
         List[Actor]: List of actors
+
     """
     logger.debug("Fetching all actors from trust registry")
     async with RichAsyncClient(raise_status_error=False) as client:
@@ -112,7 +112,7 @@ async def fetch_all_actors() -> List[Actor]:
     return actors
 
 
-async def fetch_actor_by_did(did: str) -> Optional[Actor]:
+async def fetch_actor_by_did(did: str) -> Actor | None:
     """Retrieve actor by did from trust registry
 
     Args:
@@ -123,6 +123,7 @@ async def fetch_actor_by_did(did: str) -> Optional[Actor]:
 
     Returns:
         Actor: The actor with specified did.
+
     """
     bound_logger = logger.bind(body={"did": did})
     bound_logger.debug("Fetching actor by DID from trust registry")
@@ -149,7 +150,7 @@ async def fetch_actor_by_did(did: str) -> Optional[Actor]:
     return Actor.model_validate(actor_response.json())
 
 
-async def fetch_actor_by_id(actor_id: str) -> Optional[Actor]:
+async def fetch_actor_by_id(actor_id: str) -> Actor | None:
     """Retrieve actor by id from trust registry
 
     Args:
@@ -160,6 +161,7 @@ async def fetch_actor_by_id(actor_id: str) -> Optional[Actor]:
 
     Returns:
         Actor: The actor with specified id.
+
     """
     bound_logger = logger.bind(body={"actor_id": actor_id})
     bound_logger.debug("Fetching actor by ID from trust registry")
@@ -186,7 +188,7 @@ async def fetch_actor_by_id(actor_id: str) -> Optional[Actor]:
     return Actor.model_validate(actor_response.json())
 
 
-async def fetch_actor_by_name(actor_name: str) -> Optional[Actor]:
+async def fetch_actor_by_name(actor_name: str) -> Actor | None:
     """Retrieve actor by name from trust registry
 
     Args:
@@ -197,6 +199,7 @@ async def fetch_actor_by_name(actor_name: str) -> Optional[Actor]:
 
     Returns:
         Actor: The actor with specified name.
+
     """
     bound_logger = logger.bind(body={"actor_id": actor_name})
     bound_logger.debug("Fetching actor by NAME from trust registry")
@@ -223,7 +226,7 @@ async def fetch_actor_by_name(actor_name: str) -> Optional[Actor]:
     return Actor.model_validate(actor_response.json())
 
 
-async def fetch_actors_with_role(role: TrustRegistryRole) -> List[Actor]:
+async def fetch_actors_with_role(role: TrustRegistryRole) -> list[Actor]:
     """Fetch all actors from the trust registry by role
 
     Args:
@@ -234,6 +237,7 @@ async def fetch_actors_with_role(role: TrustRegistryRole) -> List[Actor]:
 
     Returns:
         List[Actor]: List of actors with specified role
+
     """
     bound_logger = logger.bind(body={"role": role})
     bound_logger.debug("Fetching all actors with requested role from trust registry")
@@ -270,6 +274,7 @@ async def remove_actor_by_id(actor_id: str) -> None:
 
     Raises:
         TrustRegistryException: If an error occurred while removing the actor
+
     """
     bound_logger = logger.bind(body={"actor_id": actor_id})
     bound_logger.info("Removing actor from trust registry")

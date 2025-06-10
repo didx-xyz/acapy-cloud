@@ -1,5 +1,3 @@
-from typing import Optional
-
 from fastapi import Query
 from pydantic import BaseModel, Field
 
@@ -20,10 +18,10 @@ save_exchange_record_query = Query(
 
 
 class SaveExchangeRecordField(BaseModel):
-    save_exchange_record: Optional[bool] = save_exchange_record_field
+    save_exchange_record: bool | None = save_exchange_record_field
 
     @property
-    def auto_remove(self) -> Optional[bool]:
+    def auto_remove(self) -> bool | None:
         """Returns the inverse of save_exchange_record if set, otherwise None."""
         if isinstance(self.save_exchange_record, bool):
             return not self.save_exchange_record

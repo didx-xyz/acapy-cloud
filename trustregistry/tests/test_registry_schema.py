@@ -4,7 +4,7 @@ import pytest
 from fastapi.exceptions import HTTPException
 
 from shared.models.trustregistry import Schema
-from trustregistry.crud import SchemaAlreadyExistsException, SchemaDoesNotExistException
+from trustregistry.crud import SchemaAlreadyExistsError, SchemaDoesNotExistError
 from trustregistry.registry import registry_schemas
 
 
@@ -85,7 +85,7 @@ async def test_register_schema_x():
         schema_id = registry_schemas.SchemaID(
             schema_id="WgWxqztrNooG92RXvxSTWv:2:schema_name:1.0"
         )
-        mock_crud.side_effect = SchemaAlreadyExistsException()
+        mock_crud.side_effect = SchemaAlreadyExistsError()
         with pytest.raises(HTTPException) as ex:
             await registry_schemas.register_schema(schema_id)
 
@@ -143,7 +143,7 @@ async def test_update_schema_x():
         new_schema_id = registry_schemas.SchemaID(
             schema_id="WgWxqztrNooG92RXvxSTWv:2:schema_name:1.1"
         )
-        mock_crud.side_effect = SchemaDoesNotExistException()
+        mock_crud.side_effect = SchemaDoesNotExistError()
         with pytest.raises(HTTPException) as ex:
             await registry_schemas.update_schema(schema_id, new_schema_id)
 
@@ -175,7 +175,7 @@ async def test_get_schema_by_id_x():
     with patch(
         "trustregistry.registry.registry_schemas.crud.get_schema_by_id"
     ) as mock_crud:
-        mock_crud.side_effect = SchemaDoesNotExistException()
+        mock_crud.side_effect = SchemaDoesNotExistError()
         with pytest.raises(HTTPException) as ex:
             await registry_schemas.get_schema(
                 "WgWxqztrNooG92RXvxSTWv:2:schema_name:1.0"
@@ -209,7 +209,7 @@ async def test_remove_schema_x():
     with patch(
         "trustregistry.registry.registry_schemas.crud.delete_schema"
     ) as mock_crud:
-        mock_crud.side_effect = SchemaDoesNotExistException()
+        mock_crud.side_effect = SchemaDoesNotExistError()
         with pytest.raises(HTTPException) as ex:
             await registry_schemas.remove_schema(
                 "WgWxqztrNooG92RXvxSTWv:2:schema_name:1.0"

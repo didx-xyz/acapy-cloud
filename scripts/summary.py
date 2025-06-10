@@ -3,14 +3,14 @@ import os
 from bs4 import BeautifulSoup
 
 fail_json = {}
-dir = "logs/containerized-tests/"
-xml_files = [filename for filename in os.listdir(dir) if filename.endswith(".xml")]
+log_dir = "logs/containerized-tests/"
+xml_files = [filename for filename in os.listdir(log_dir) if filename.endswith(".xml")]
 failures = 0
 errors = 0
 
 for xml_file in xml_files:
-    file_path = os.path.join(dir, xml_file)
-    with open(file_path, "r", encoding="utf-8") as file_read:
+    file_path = os.path.join(log_dir, xml_file)
+    with open(file_path, encoding="utf-8") as file_read:
         soup = BeautifulSoup(file_read, "xml")
 
         testsuite = soup.find("testsuite")
@@ -45,7 +45,7 @@ sorted_test_cases = sorted(fail_json.keys(), key=sorting_key, reverse=True)
 sorted_data = {test_fail: fail_json[test_fail] for test_fail in sorted_test_cases}
 
 
-with open(dir + "summary.txt", "w", encoding="utf-8") as file_write:
+with open(log_dir + "summary.txt", "w", encoding="utf-8") as file_write:
     file_write.write("Summary: \n")
     file_write.write(f"\tFailures = {failures} \n")
     file_write.write(f"\tErrors = {errors} \n")

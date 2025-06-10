@@ -48,12 +48,15 @@ def get_mock_agent_controller() -> AcaPyClient:
 
 class MockContextManagedController:
     def __init__(self, controller):
+        """Initialize the mock context managed controller."""
         self.controller = controller
 
     async def __aenter__(self):
+        """Enter mock context manager"""
         return self.controller
 
     async def __aexit__(self, exc_type, exc, tb):
+        """Exit mock context manager"""
         pass
 
 

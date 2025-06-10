@@ -1,5 +1,3 @@
-from typing import Union
-
 from aries_cloudcontroller import AcaPyClient
 from fastapi import HTTPException
 
@@ -47,7 +45,7 @@ def get_tenant_controller(auth_token: str) -> AcaPyClient:
     )
 
 
-def client_from_auth(auth: Union[AcaPyAuth, AcaPyAuthVerified]) -> AcaPyClient:
+def client_from_auth(auth: AcaPyAuth | AcaPyAuthVerified) -> AcaPyClient:
     if not auth or not auth.token:
         raise HTTPException(403, "Missing authorization key.")
 

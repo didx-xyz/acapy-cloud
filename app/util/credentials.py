@@ -1,5 +1,3 @@
-from typing import Optional
-
 from shared.exceptions import CloudApiValueError
 
 
@@ -13,11 +11,11 @@ def cred_ex_id_no_version(cred_ex_id: str) -> str:
         raise CloudApiValueError("credential_exchange_id must start with prefix `v2-`.")
 
 
-def strip_protocol_prefix(id: Optional[str]):
-    if id is None:
+def strip_protocol_prefix(cred_ex_id: str | None):
+    if cred_ex_id is None:
         return None
 
-    if id.startswith("v2-"):
-        return id[3:]
+    if cred_ex_id.startswith("v2-"):
+        return cred_ex_id[3:]
     else:
-        return id
+        return cred_ex_id

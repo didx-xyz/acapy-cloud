@@ -1,4 +1,3 @@
-import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -97,7 +96,7 @@ async def test_wait_for_revocation_registry_timeout(publisher):
     with (
         patch(
             "app.services.definitions.credential_definition_publisher.wait_for_active_registry",
-            side_effect=asyncio.TimeoutError,
+            side_effect=TimeoutError,
         ),
         patch(
             "app.services.definitions.credential_definition_publisher.REGISTRY_CREATION_TIMEOUT",

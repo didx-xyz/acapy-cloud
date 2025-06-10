@@ -1,5 +1,3 @@
-from typing import Optional
-
 from fastapi import HTTPException
 
 from shared.constants import RESOLVER_URL
@@ -12,15 +10,18 @@ logger = get_logger(__name__)
 client = RichAsyncClient()
 
 
-async def resolve_cheqd_schema(schema_id: str) -> Optional[dict]:
-    """
-    Resolve a Cheqd schema by its ID.
+async def resolve_cheqd_schema(schema_id: str) -> dict | None:
+    """Resolve a Cheqd schema by its ID.
 
-    Parameters:
-    schema_id (str): The ID of the schema to resolve.
+    Parameters
+    ----------
+    schema_id : str
+        The ID of the schema to resolve.
 
-    Returns:
+    Returns
+    -------
     dict: The resolved schema.
+
     """
     try:
         logger.debug(f"Resolving Cheqd schema with schema_id: {schema_id}")
@@ -33,7 +34,7 @@ async def resolve_cheqd_schema(schema_id: str) -> Optional[dict]:
         raise e
     except Exception as e:
         logger.error(
-            f"Unexpected error while resolving schema with schema_id {schema_id}: {str(e)}"
+            f"Unexpected error while resolving schema with schema_id {schema_id}: {e!s}"
         )
         raise HTTPException(status_code=500, detail="Internal Server Error") from e
 

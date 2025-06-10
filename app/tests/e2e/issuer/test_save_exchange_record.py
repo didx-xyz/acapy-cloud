@@ -1,6 +1,5 @@
 import asyncio
 import json
-from typing import Optional
 
 import pytest
 from fastapi import HTTPException
@@ -23,7 +22,7 @@ async def test_issue_credential_with_save_exchange_record(
     anoncreds_credential_definition_id: str,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
     alice_member_client: RichAsyncClient,
-    save_exchange_record: Optional[bool],
+    save_exchange_record: bool | None,
 ) -> CredentialExchange:
     credential = {
         "connection_id": faber_anoncreds_and_alice_connection.faber_connection_id,

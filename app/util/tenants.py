@@ -1,7 +1,6 @@
 import base64
 import json
 from logging import Logger
-from typing import Optional
 
 from aries_cloudcontroller import AcaPyClient, WalletRecordWithGroupId
 from fastapi import HTTPException
@@ -15,6 +14,7 @@ class WalletNotFoundException(HTTPException):
     """Class that represents a wallet was not found"""
 
     def __init__(self, wallet_id: str) -> None:
+        """Initialize the wallet not found exception."""
         super().__init__(
             status_code=404, detail=f"Wallet with id `{wallet_id}` not found."
         )
@@ -23,8 +23,8 @@ class WalletNotFoundException(HTTPException):
 def tenant_from_wallet_record(wallet_record: WalletRecordWithGroupId) -> Tenant:
     label: str = wallet_record.settings.get("default_label") or ""
     wallet_name: str = wallet_record.settings.get("wallet.name") or ""
-    image_url: Optional[str] = wallet_record.settings.get("image_url")
-    group_id: Optional[str] = wallet_record.settings.get("wallet.group_id")
+    image_url: str | None = wallet_record.settings.get("image_url")
+    group_id: str | None = wallet_record.settings.get("wallet.group_id")
 
     return Tenant(
         wallet_id=wallet_record.wallet_id,
@@ -62,7 +62,7 @@ async def get_wallet_label_from_controller(aries_controller: AcaPyClient) -> str
 async def get_wallet_and_assert_valid_group(
     admin_controller: AcaPyClient,
     wallet_id: str,
-    group_id: Optional[str],
+    group_id: str | None,
     logger: Logger,
 ) -> WalletRecordWithGroupId:
     """Fetch the wallet record for wallet_id, and assert it exists and belongs to group.
@@ -78,6 +78,7 @@ async def get_wallet_and_assert_valid_group(
 
     Returns:
         WalletRecordWithGroupId: When assertions pass, returns the wallet record.
+
     """
     logger.debug("Retrieving the wallet record for {}", wallet_id)
     wallet = await handle_acapy_call(
@@ -100,7 +101,7 @@ async def get_wallet_and_assert_valid_group(
 def assert_valid_group(
     wallet: WalletRecordWithGroupId,
     wallet_id: str,
-    group_id: Optional[str],
+    group_id: str | None,
     logger: Logger,
 ) -> None:
     """Assert that wallet record belongs to group, and raise exception if not.
@@ -113,6 +114,7 @@ def assert_valid_group(
 
     Raises:
         HTTPException: If the wallet does not belong to the group_id.
+
     """
     wallet_group_id = wallet.settings.get("wallet.group_id")
     if group_id and wallet_group_id != group_id:

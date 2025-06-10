@@ -2,7 +2,7 @@ import asyncio
 from typing import List, NoReturn
 
 from aries_cloudcontroller import AcaPyClient
-from nats.errors import BadSubscriptionError, Error, TimeoutError
+from nats.errors import BadSubscriptionError, Error
 from nats.js.client import JetStreamContext
 from nats.js.errors import FetchTimeoutError
 from tenacity import (

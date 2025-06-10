@@ -1,4 +1,3 @@
-from typing import List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
@@ -32,8 +31,7 @@ async def send_credential(
     credential: SendCredential,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> CredentialExchange:
-    """
-    Create and send a credential, automating the issuer-side flow
+    """Create and send a credential, automating the issuer-side flow
     ---
     NB: Only a tenant with the issuer role can send credentials.
 
@@ -57,10 +55,11 @@ async def send_credential(
         credential: SendCredential
             The payload for sending a credential
 
-    Returns:
-    ---
+    Returns
+    -------
         CredentialExchange
             A record of this credential exchange
+
     """
     credential_type = credential.get_credential_type()
     bound_logger = logger.bind(
@@ -111,8 +110,7 @@ async def create_offer(
     credential: CreateOffer,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> CredentialExchange:
-    """
-    Create a credential offer, not bound to any connection
+    """Create a credential offer, not bound to any connection
     ---
     NB: Only a tenant with the issuer role can send credentials.
 
@@ -139,10 +137,11 @@ async def create_offer(
         credential: CreateOffer
             The payload for creating a credential offer
 
-    Returns:
-    ---
+    Returns
+    -------
         CredentialExchange
             A record of this credential exchange
+
     """
     credential_type = credential.get_credential_type()
     bound_logger = logger.bind(
@@ -184,31 +183,31 @@ async def create_offer(
     summary="Accept a Credential Offer",
     response_model=CredentialExchange,
 )
-async def request_credential(
+async def request_credential(  # noqa: D417
     credential_exchange_id: str,
-    save_exchange_record: Optional[bool] = save_exchange_record_query,
+    save_exchange_record: bool | None = save_exchange_record_query,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> CredentialExchange:
-    """
-    Sends a request to accept a credential offer
+    """Sends a request to accept a credential offer
     ---
     The holder uses this endpoint to accept an offer from an issuer.
 
     In technical terms, when a holder has a credential exchange record with a state 'offer-received', then they can use
     this endpoint to accept that credential offer, and store the credential in their wallet.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         credential_exchange_id: str
             The holder's reference to the credential exchange that they want to accept
         save_exchange_record: Optional[bool]
             Whether to override environment setting for saving credential exchange records. Default is None (use
             environment setting). True means save record, False means delete record.
 
-    Returns:
-    ---
+    Returns
+    -------
         CredentialExchange
             An updated record of this credential exchange
+
     """
     bound_logger = logger.bind(body={"credential_exchange_id": credential_exchange_id})
     bound_logger.debug("POST request received: Send credential request")
@@ -258,12 +257,11 @@ async def request_credential(
     summary="Store a Received Credential in Wallet",
     response_model=CredentialExchange,
 )
-async def store_credential(
+async def store_credential(  # noqa: D417
     credential_exchange_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> CredentialExchange:
-    """
-    Store a received credential in wallet
+    """Store a received credential in wallet
     ---
     Store a received credential in wallet by providing the credential exchange id.
 
@@ -274,15 +272,16 @@ async def store_credential(
 
     The holder can store the credential in their wallet after receiving it from the issuer.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         credential_exchange_id: str
             credential exchange record identifier
 
-    Returns:
-    ---
+    Returns
+    -------
         CredentialExchange
             An updated record of this credential exchange
+
     """
     bound_logger = logger.bind(body={"credential_exchange_id": credential_exchange_id})
     bound_logger.debug("POST request received: Store credential")
@@ -300,21 +299,20 @@ async def store_credential(
 @router.get(
     "",
     summary="Fetch Credential Exchange Records",
-    response_model=List[CredentialExchange],
+    response_model=list[CredentialExchange],
 )
 async def get_credentials(
-    limit: Optional[int] = limit_query_parameter,
-    offset: Optional[int] = offset_query_parameter,
-    order_by: Optional[str] = order_by_query_parameter,
+    limit: int | None = limit_query_parameter,
+    offset: int | None = offset_query_parameter,
+    order_by: str | None = order_by_query_parameter,
     descending: bool = descending_query_parameter,
-    connection_id: Optional[str] = Query(None),
-    role: Optional[Role] = Query(None),
-    state: Optional[State] = Query(None),
-    thread_id: Optional[UUID] = Query(None),
+    connection_id: str | None = Query(None),
+    role: Role | None = Query(None),
+    state: State | None = Query(None),
+    thread_id: UUID | None = Query(None),
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
-) -> List[CredentialExchange]:
-    """
-    Get a list of credential exchange records
+) -> list[CredentialExchange]:
+    """Get a list of credential exchange records
     ---
     Both holders and issuers can call this endpoint, because they each have their own records of a credential exchange.
 
@@ -342,10 +340,11 @@ async def get_credentials(
                                  "credential-revoked", "abandoned", "done"
         thread_id: UUID
 
-    Returns:
-    ---
+    Returns
+    -------
         List[CredentialExchange]
             A list of credential exchange records
+
     """
     bound_logger = logger.bind(body={"connection_id": connection_id})
     bound_logger.debug("GET request received: Get credentials")
@@ -376,12 +375,11 @@ async def get_credentials(
     summary="Fetch a single Credential Exchange Record",
     response_model=CredentialExchange,
 )
-async def get_credential(
+async def get_credential(  # noqa: D417
     credential_exchange_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> CredentialExchange:
-    """
-    Get a credential exchange record by credential id
+    """Get a credential exchange record by credential id
     ---
     Both holders and issuers can call this endpoint, because they each have their own records of a credential exchange.
 
@@ -397,15 +395,16 @@ async def get_credential(
 
     The following parameters can be set to filter the fetched exchange records: connection_id, role, state, thread_id.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         credential_exchange_id: str
             The identifier of the credential exchange record that you want to fetch
 
-    Returns:
-    ---
+    Returns
+    -------
         CredentialExchange
             The credential exchange record
+
     """
     bound_logger = logger.bind(body={"credential_exchange_id": credential_exchange_id})
     bound_logger.debug("GET request received: Get credentials by credential id")
@@ -423,23 +422,23 @@ async def get_credential(
 @router.delete(
     "/{credential_exchange_id}", summary="Delete an Exchange Record", status_code=204
 )
-async def remove_credential_exchange_record(
+async def remove_credential_exchange_record(  # noqa: D417
     credential_exchange_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> None:
-    """
-    Delete a credential exchange record
+    """Delete a credential exchange record
     ---
     This will remove a specific credential exchange from your storage records.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         credential_exchange_id: str
             The identifier of the credential exchange record that you want to delete
 
-    Returns:
-    ---
+    Returns
+    -------
         status_code: 204
+
     """
     bound_logger = logger.bind(body={"credential_exchange_id": credential_exchange_id})
     bound_logger.debug(

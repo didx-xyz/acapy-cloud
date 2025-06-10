@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
 from aries_cloudcontroller import SignatureOptions
 from pydantic import BaseModel, model_validator
@@ -7,11 +7,11 @@ from shared.exceptions.cloudapi_value_error import CloudApiValueError
 
 
 class JsonLdSignRequest(BaseModel):
-    credential_id: Optional[str] = None
-    credential: Optional[Dict[str, Any]] = None
-    verkey: Optional[str] = None
-    pub_did: Optional[str] = None
-    signature_options: Optional[SignatureOptions] = None
+    credential_id: str | None = None
+    credential: dict[str, Any] | None = None
+    verkey: str | None = None
+    pub_did: str | None = None
+    signature_options: SignatureOptions | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -35,9 +35,9 @@ class JsonLdSignRequest(BaseModel):
 
 
 class JsonLdVerifyRequest(BaseModel):
-    doc: Dict[str, Any]
-    public_did: Optional[str] = None
-    verkey: Optional[str] = None
+    doc: dict[str, Any]
+    public_did: str | None = None
+    verkey: str | None = None
 
     @model_validator(mode="before")
     @classmethod

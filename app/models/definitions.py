@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import List
 
 from pydantic import BaseModel, Field
 
@@ -34,11 +33,11 @@ class CreateSchema(BaseModel):
     )
     name: str = Field(..., examples=[sample_name])
     version: str = Field(..., examples=[sample_version])
-    attribute_names: List[str] = Field(..., examples=[sample_attribute_names])
+    attribute_names: list[str] = Field(..., examples=[sample_attribute_names])
 
 
 class CredentialSchema(BaseModel):
     id: str = Field(..., examples=[sample_schema_id])
     name: str = Field(..., examples=[sample_name])
     version: str = Field(..., examples=[sample_version])
-    attribute_names: List[str] = Field(..., examples=[sample_attribute_names])
+    attribute_names: list[str] = Field(..., examples=[sample_attribute_names])

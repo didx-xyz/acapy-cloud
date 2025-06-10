@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from aries_cloudcontroller import (
     AcaPyClient,
     V20PresCreateRequestRequest,
@@ -210,15 +208,15 @@ class VerifierV2(Verifier):
     async def get_proof_records(
         cls,
         controller: AcaPyClient,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-        order_by: Optional[str] = "id",
+        limit: int | None = None,
+        offset: int | None = None,
+        order_by: str | None = "id",
         descending: bool = True,
-        connection_id: str = None,
-        role: str = None,
-        state: str = None,
-        thread_id: str = None,
-    ) -> List[PresentationExchange]:
+        connection_id: str | None = None,
+        role: str | None = None,
+        state: str | None = None,
+        thread_id: str | None = None,
+    ) -> list[PresentationExchange]:
         try:
             logger.debug("Fetching v2 present-proof exchange records")
             presentation_exchange = await handle_acapy_call(
@@ -291,10 +289,10 @@ class VerifierV2(Verifier):
         cls,
         controller: AcaPyClient,
         proof_id: str,
-        referent: Optional[str] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[CredPrecis]:
+        referent: str | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> list[CredPrecis]:
         bound_logger = logger.bind(body={"proof_id": proof_id})
         pres_ex_id = pres_id_no_version(proof_id=proof_id)
 

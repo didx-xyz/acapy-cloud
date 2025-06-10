@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Literal
 
 from aries_cloudcontroller import LDProofVCDetail, TxnOrPublishRevocationsResult
 from pydantic import BaseModel, Field, model_validator
@@ -9,19 +9,19 @@ from shared.exceptions import CloudApiValueError
 
 class AnonCredsCredential(BaseModel):
     credential_definition_id: str
-    issuer_did: Optional[str] = Field(
+    issuer_did: str | None = Field(
         default=None,
         description=(
             "The DID to use as the issuer of the credential. "
             "If not provided, the public DID of the issuer wallet will be used."
         ),
     )
-    attributes: Dict[str, str]
+    attributes: dict[str, str]
 
 
 class CredentialBase(SaveExchangeRecordField):
-    ld_credential_detail: Optional[LDProofVCDetail] = None
-    anoncreds_credential_detail: Optional[AnonCredsCredential] = None
+    ld_credential_detail: LDProofVCDetail | None = None
+    anoncreds_credential_detail: AnonCredsCredential | None = None
 
     @model_validator(mode="after")
     def check_credential_detail(self):
@@ -70,7 +70,7 @@ class RevokeCredential(BaseModel):
 
 
 class PublishRevocationsRequest(BaseModel):
-    revocation_registry_credential_map: Dict[str, List[str]] = Field(
+    revocation_registry_credential_map: dict[str, list[str]] = Field(
         default={},
         description=(
             "A map of revocation registry IDs to lists of credential revocation IDs that should be published. "
@@ -82,7 +82,7 @@ class PublishRevocationsRequest(BaseModel):
 
 
 class ClearPendingRevocationsRequest(BaseModel):
-    revocation_registry_credential_map: Dict[str, List[str]] = Field(
+    revocation_registry_credential_map: dict[str, list[str]] = Field(
         default={},
         description=(
             "A map of revocation registry IDs to lists of credential revocation IDs for which pending revocations "
@@ -94,7 +94,7 @@ class ClearPendingRevocationsRequest(BaseModel):
 
 
 class ClearPendingRevocationsResult(BaseModel):
-    revocation_registry_credential_map: Dict[str, List[str]] = Field(
+    revocation_registry_credential_map: dict[str, list[str]] = Field(
         description=(
             "The resulting revocations that are still pending after a clear-pending request has been completed."
         ),
@@ -102,7 +102,7 @@ class ClearPendingRevocationsResult(BaseModel):
 
 
 class RevokedResponse(BaseModel):
-    cred_rev_ids_published: Dict[str, List[int]] = Field(
+    cred_rev_ids_published: dict[str, list[int]] = Field(
         default_factory=dict,
         description=(
             "A map of revocation registry IDs to lists of credential revocation IDs "
@@ -116,10 +116,10 @@ class RevokedResponse(BaseModel):
     @classmethod
     def extract_revoked_info(
         cls, values: TxnOrPublishRevocationsResult
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if isinstance(values, dict) and "txn" in values:
             # This is a List of TransactionRecord
-            txn_list: List[Dict[str, Any]] = values.get("txn") or []
+            txn_list: list[dict[str, Any]] = values.get("txn") or []
             cred_rev_ids_published = {}
 
             for txn in txn_list:
@@ -137,4 +137,4 @@ class RevokedResponse(BaseModel):
 
 
 class PendingRevocations(BaseModel):
-    pending_cred_rev_ids: list[Optional[int]] = []
+    pending_cred_rev_ids: list[int | None] = []

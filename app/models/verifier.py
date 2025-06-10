@@ -1,4 +1,4 @@
-from typing import Any, Literal, Optional, Union
+from typing import Any, Literal, Union
 
 from aries_cloudcontroller import (
     AnonCredsPresentationRequest as AcaPyAnonCredsPresentationRequest,
@@ -21,8 +21,8 @@ class AnonCredsPresentationRequest(AcaPyAnonCredsPresentationRequest):
 
 
 class ProofRequestBase(BaseModel):
-    anoncreds_proof_request: Optional[AnonCredsPresentationRequest] = None
-    dif_proof_request: Optional[DIFProofRequest] = None
+    anoncreds_proof_request: AnonCredsPresentationRequest | None = None
+    dif_proof_request: DIFProofRequest | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -56,7 +56,7 @@ class ProofRequestBase(BaseModel):
 
 
 class ProofRequestMetadata(BaseModel):
-    comment: Optional[str] = None
+    comment: str | None = None
 
 
 class CreateProofRequest(
@@ -74,8 +74,8 @@ class ProofId(BaseModel):
 
 
 class AcceptProofRequest(ProofId, SaveExchangeRecordField):
-    anoncreds_presentation_spec: Optional[AnonCredsPresSpec] = None
-    dif_presentation_spec: Optional[DIFPresSpec] = None
+    anoncreds_presentation_spec: AnonCredsPresSpec | None = None
+    dif_presentation_spec: DIFPresSpec | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -130,25 +130,25 @@ class RejectProofRequest(ProofId):
 
 
 class CredInfo(BaseModel):
-    attrs: Optional[dict[str, Any]] = Field(
+    attrs: dict[str, Any] | None = Field(
         default=None, description="Attribute names and value"
     )
-    cred_def_id: Optional[str] = Field(
+    cred_def_id: str | None = Field(
         default=None, description="Credential definition identifier"
     )
-    referent: Optional[str] = Field(
+    referent: str | None = Field(
         default=None, description="removed - renamed to credential_id", exclude=True
     )
-    credential_id: Optional[str] = Field(
+    credential_id: str | None = Field(
         default=None, description="Credential identifier", validation_alias="referent"
     )
-    cred_rev_id: Optional[str] = Field(
+    cred_rev_id: str | None = Field(
         default=None, description="Credential revocation identifier"
     )
-    rev_reg_id: Optional[str] = Field(
+    rev_reg_id: str | None = Field(
         default=None, description="Revocation registry identifier"
     )
-    schema_id: Optional[str] = Field(default=None, description="Schema identifier")
+    schema_id: str | None = Field(default=None, description="Schema identifier")
 
 
 class NonRevocationInterval(IndyNonRevocationInterval):
@@ -158,9 +158,9 @@ class NonRevocationInterval(IndyNonRevocationInterval):
 
 class CredPrecis(BaseModel):
     cred_info: CredInfo = Field(description="Credential info")
-    interval: Optional[NonRevocationInterval] = Field(
+    interval: NonRevocationInterval | None = Field(
         default=None, description="Non-revocation interval from presentation request"
     )
-    presentation_referents: Optional[list[str]] = Field(
+    presentation_referents: list[str] | None = Field(
         default=None, description="Presentation referents"
     )

@@ -1,5 +1,5 @@
 import asyncio
-from typing import AsyncGenerator, Optional
+from collections.abc import AsyncGenerator
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import BackgroundTasks, Depends, Query, Request
@@ -38,8 +38,8 @@ async def nats_event_stream_generator(
     field: str,
     field_id: str,
     desired_state: str,
-    group_id: Optional[str] = None,
-    look_back: Optional[int] = None,
+    group_id: str | None = None,
+    look_back: int | None = None,
 ) -> AsyncGenerator[str, None]:
     """Generator for NATS events."""
     logger.debug("Starting NATS event stream generator")
@@ -90,10 +90,10 @@ async def sse_wait_for_event_with_field_and_state(
     field: str,
     field_id: str,
     desired_state: str,
-    group_id: Optional[str] = Query(
+    group_id: str | None = Query(
         default=None, description="Group ID to which the wallet belongs"
     ),
-    look_back: Optional[int] = Query(
+    look_back: int | None = Query(
         default=SSE_LOOK_BACK,
         description="Number of seconds to look back for events before subscribing",
     ),

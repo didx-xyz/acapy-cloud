@@ -1,4 +1,3 @@
-from typing import List
 from unittest.mock import AsyncMock, Mock
 
 import pytest
@@ -160,7 +159,7 @@ async def test_actor_by_did(
     assert fetched_actor is None
 
 
-def dump_json(input_list: List[Actor]):
+def dump_json(input_list: list[Actor]):
     return [item.model_dump() for item in input_list]
 
 

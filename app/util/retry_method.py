@@ -1,13 +1,14 @@
 import asyncio
+from collections.abc import Callable, Coroutine
 from logging import Logger
-from typing import Any, Callable, Coroutine, Optional, Tuple, TypeVar
+from typing import Any, TypeVar
 
 T = TypeVar("T", bound=Any)
 
 
 async def coroutine_with_retry(
     coroutine_func: Callable[..., Coroutine[Any, Any, T]],
-    args: Tuple,
+    args: tuple,
     logger: Logger,
     max_attempts=5,
     retry_delay=2,
@@ -38,15 +39,14 @@ async def coroutine_with_retry(
 
 async def coroutine_with_retry_until_value(
     coroutine_func: Callable[..., Coroutine[Any, Any, T]],
-    args: Tuple,
-    field_name: Optional[str],
+    args: tuple,
+    field_name: str | None,
     expected_value: Any,
     logger: Logger,
     max_attempts: int = 5,
     retry_delay: int = 2,
 ) -> T:
-    """
-    Executes a coroutine function with retries until it returns an expected value
+    """Executes a coroutine function with retries until it returns an expected value
     or until a maximum number of attempts is reached.
 
     Args:
@@ -64,6 +64,7 @@ async def coroutine_with_retry_until_value(
 
     Raises:
         Exception: Re-raises any exception encountered on the final attempt.
+
     """
     for attempt in range(max_attempts):
         try:
@@ -72,9 +73,8 @@ async def coroutine_with_retry_until_value(
             if field_name:
                 if getattr(result, field_name, None) == expected_value:
                     return result
-            else:
-                if result == expected_value:
-                    return result
+            elif result == expected_value:
+                return result
 
             if attempt + 1 < max_attempts:
                 logger.debug(
@@ -91,14 +91,14 @@ async def coroutine_with_retry_until_value(
                 logger.error(
                     "Maximum number of retries exceeded without returning expected value."
                 )
-                raise asyncio.TimeoutError
+                raise TimeoutError
 
         except Exception as e:  # pylint: disable=W0718
             if attempt + 1 == max_attempts:
                 logger.error(
                     "Maximum number of retries exceeded with exception. Failing."
                 )
-                raise asyncio.TimeoutError from e  # Raise TimeoutError if max attempts exceeded
+                raise TimeoutError from e  # Raise TimeoutError if max attempts exceeded
 
             logger.warning(
                 (

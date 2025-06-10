@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from fastapi import APIRouter, Depends, HTTPException
 
 import app.services.definitions.credential_definitions as cred_def_service
@@ -41,8 +39,7 @@ async def create_schema(
     schema: CreateSchema,
     auth: AcaPyAuthVerified = Depends(acapy_auth_verified),
 ) -> CredentialSchema:
-    """
-    Create and publish a new schema to the ledger
+    """Create and publish a new schema to the ledger
     ---
     **NB**: Only governance can create schemas.
 
@@ -64,10 +61,11 @@ async def create_schema(
             attribute_names: List[str]
                 The attribute names of the schema.
 
-    Returns:
-    ---
+    Returns
+    -------
         CredentialSchema
             The created schema object
+
     """
     bound_logger = logger.bind(body=schema)
     bound_logger.debug("POST request received: Create schema (publish and register)")
@@ -99,16 +97,15 @@ async def create_schema(
 @router.get(
     "/schemas",
     summary="Get Created Schemas",
-    response_model=List[CredentialSchema],
+    response_model=list[CredentialSchema],
 )
 async def get_schemas(
-    schema_issuer_did: Optional[str] = None,
-    schema_name: Optional[str] = None,
-    schema_version: Optional[str] = None,
+    schema_issuer_did: str | None = None,
+    schema_name: str | None = None,
+    schema_version: str | None = None,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
-) -> List[CredentialSchema]:
-    """
-    Get created schemas
+) -> list[CredentialSchema]:
+    """Get created schemas
     ---
     All tenants can call this endpoint to view available schemas.
 
@@ -127,10 +124,11 @@ async def get_schemas(
         schema_name: str
         schema_version: str
 
-    Returns:
-    ---
+    Returns
+    -------
         List[CredentialSchema]
             A list of created schemas
+
     """
     is_governance = auth.role == Role.GOVERNANCE
     bound_logger = logger.bind(
@@ -176,27 +174,27 @@ async def get_schemas(
     summary="Get a Schema",
     response_model=CredentialSchema,
 )
-async def get_schema(
+async def get_schema(  # noqa: D417
     schema_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> CredentialSchema:
-    """
-    Retrieve schema by id
+    """Retrieve schema by id
     ---
     This endpoint fetches a schema from the ledger, using the schema_id.
 
     Any tenant can call this endpoint to retrieve a schema.
     This endpoint will list all the attributes of the schema.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         schema_id: str
             schema id
 
-    Returns:
-    ---
+    Returns
+    -------
         CredentialSchema
             The schema object
+
     """
     bound_logger = logger.bind(body={"schema_id": schema_id})
     bound_logger.debug("GET request received: Get schema by id")
@@ -226,8 +224,7 @@ async def create_credential_definition(
     credential_definition: CreateCredentialDefinition,
     auth: AcaPyAuthVerified = Depends(acapy_auth_verified),
 ) -> CredentialDefinition:
-    """
-    Create a credential definition
+    """Create a credential definition
     ---
     Only issuers can create credential definitions.
 
@@ -247,10 +244,11 @@ async def create_credential_definition(
             support_revocation: bool
                 Whether you want credentials using this definition to be revocable or not
 
-    Returns:
-    ---
+    Returns
+    -------
         CredentialDefinition
             The created credential definition
+
     """
     bound_logger = logger.bind(
         body={
@@ -289,19 +287,18 @@ async def create_credential_definition(
 @router.get(
     "/credentials",
     summary="Get Created Credential Definitions",
-    response_model=List[CredentialDefinition],
+    response_model=list[CredentialDefinition],
 )
 async def get_credential_definitions(
-    issuer_did: Optional[str] = None,
-    credential_definition_id: Optional[str] = None,
-    schema_id: Optional[str] = None,
-    schema_issuer_did: Optional[str] = None,
-    schema_name: Optional[str] = None,
-    schema_version: Optional[str] = None,
+    issuer_did: str | None = None,
+    credential_definition_id: str | None = None,
+    schema_id: str | None = None,
+    schema_issuer_did: str | None = None,
+    schema_name: str | None = None,
+    schema_version: str | None = None,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
-) -> List[CredentialDefinition]:
-    """
-    Get credential definitions created by the tenant
+) -> list[CredentialDefinition]:
+    """Get credential definitions created by the tenant
     ---
     This endpoint returns all credential definitions created by the tenant. Only issuers can create
     credential definitions, and so only issuers will get results from this endpoint.
@@ -316,10 +313,11 @@ async def get_credential_definitions(
         schema_issuer_did: str
         schema_version: str
 
-    Returns:
-    ---
+    Returns
+    -------
         List[CredentialDefinition]
             A list of created credential definitions
+
     """
     bound_logger = logger.bind(
         body={
@@ -360,27 +358,27 @@ async def get_credential_definitions(
     summary="Get a Credential Definition",
     response_model=CredentialDefinition,
 )
-async def get_credential_definition_by_id(
+async def get_credential_definition_by_id(  # noqa: D417
     credential_definition_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> CredentialDefinition:
-    """
-    Get credential definition by id
+    """Get credential definition by id
     ---
     This endpoint returns information for a credential definition.
 
     Anyone can call this, whether they created the requested credential definition or not.
     Practically it will just reveal the schema that was used for the credential definition.
 
-    Parameters:
-    ---
+    Parameters
+    ----------
         credential_definition_id: str
             credential definition id
 
-    Returns:
-    ---
+    Returns
+    -------
         CredentialDefinition
             The credential definition
+
     """
     bound_logger = logger.bind(
         body={"credential_definition_id": credential_definition_id}

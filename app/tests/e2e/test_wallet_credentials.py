@@ -81,7 +81,7 @@ async def test_get_credential_record_with_limit(
 
     expected_length = [1, 2, 3, 3, 0, 1]
 
-    for params, length in zip(valid_params, expected_length):
+    for params, length in zip(valid_params, expected_length, strict=False):
         response = (
             await alice_member_client.get(WALLET_CREDENTIALS_PATH, params=params)
         ).json()

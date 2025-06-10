@@ -4,10 +4,9 @@ import os
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
-from typing import Optional
 
 import orjson
-from nats.errors import BadSubscriptionError, ConnectionClosedError, Error, TimeoutError
+from nats.errors import BadSubscriptionError, ConnectionClosedError, Error
 from nats.js.api import ConsumerConfig, DeliverPolicy
 from nats.js.client import JetStreamContext
 from nats.js.errors import FetchTimeoutError
@@ -49,16 +48,18 @@ if HEARTBEAT >= TIMEOUT / 2:
 
 
 class NatsEventsProcessor:
-    """
-    Class to handle processing of NATS events. Calling the process_events method will
-    subscribe to the NATS server and return an async generator that will yield events
+    """Class to handle processing of NATS events.
+
+    Calling the process_events method will subscribe to the NATS server and
+    return an async generator that will yield events.
     """
 
     def __init__(self, jetstream: JetStreamContext):
+        """Initialize the NATS events processor."""
         self.js_context: JetStreamContext = jetstream
 
     def _retry_log(self, bound_logger, retry_state: RetryCallState):
-        """Custom logging for retry attempts."""
+        """Log retry attempts."""
         if retry_state.outcome.failed:
             exception = retry_state.outcome.exception()
             bound_logger.warning(
@@ -71,7 +72,7 @@ class NatsEventsProcessor:
     async def _subscribe(
         self,
         *,
-        group_id: Optional[str] = None,
+        group_id: str | None = None,
         wallet_id: str,
         topic: str,
         state: str,
@@ -135,13 +136,13 @@ class NatsEventsProcessor:
     async def process_events(
         self,
         *,
-        group_id: Optional[str] = None,
+        group_id: str | None = None,
         wallet_id: str,
         topic: str,
         state: str,
         stop_event: asyncio.Event,
-        duration: Optional[int] = None,
-        look_back: Optional[int] = None,
+        duration: int | None = None,
+        look_back: int | None = None,
     ):
         duration = duration or SSE_TIMEOUT
         look_back = look_back or SSE_LOOK_BACK

@@ -1,5 +1,6 @@
 import pytest
 from aries_cloudcontroller.acapy_client import AcaPyClient
+from aries_cloudcontroller.exceptions import NotFoundException
 from fastapi import HTTPException
 from uuid_utils import uuid4
 
@@ -695,7 +696,7 @@ async def test_delete_tenant(
     actor = await trust_registry.fetch_actor_by_id(wallet_id)
     assert not actor
 
-    with pytest.raises(Exception):
+    with pytest.raises(NotFoundException):
         await tenant_admin_acapy_client.multitenancy.get_wallet(wallet_id=wallet_id)
 
 
@@ -742,7 +743,7 @@ async def test_extra_settings(
         assert updated_wallet_record.settings["debug.auto_accept_invites"] is False
 
         # Assert bad request is raised for invalid extra_settings
-        with pytest.raises(Exception):
+        with pytest.raises(HTTPException):
             bad_response = await tenant_admin_client.post(
                 TENANTS_BASE_PATH,
                 json={
@@ -789,7 +790,7 @@ async def test_create_tenant_validation(tenant_admin_client: RichAsyncClient):
         "?",
     ]:
         # Assert bad requests for wallet label
-        with pytest.raises(Exception):
+        with pytest.raises(HTTPException):
             bad_label_response = await tenant_admin_client.post(
                 TENANTS_BASE_PATH,
                 json={"wallet_label": uuid4().hex + char},
@@ -799,7 +800,7 @@ async def test_create_tenant_validation(tenant_admin_client: RichAsyncClient):
             assert "wallet_label" in bad_label_response.json()
 
         # Assert bad requests for wallet name
-        with pytest.raises(Exception):
+        with pytest.raises(HTTPException):
             bad_name_response = await tenant_admin_client.post(
                 TENANTS_BASE_PATH,
                 json={"wallet_label": uuid4().hex, "wallet_name": char},
@@ -809,7 +810,7 @@ async def test_create_tenant_validation(tenant_admin_client: RichAsyncClient):
             assert "wallet_name" in bad_label_response.json()
 
         # Assert bad requests for group_id
-        with pytest.raises(Exception):
+        with pytest.raises(HTTPException):
             bad_group_response = await tenant_admin_client.post(
                 TENANTS_BASE_PATH,
                 json={"wallet_label": uuid4().hex, "group_id": char},
@@ -822,7 +823,7 @@ async def test_create_tenant_validation(tenant_admin_client: RichAsyncClient):
     very_long_string = 101 * "a"
 
     # for wallet label
-    with pytest.raises(Exception):
+    with pytest.raises(HTTPException):
         bad_label_response = await tenant_admin_client.post(
             TENANTS_BASE_PATH,
             json={"wallet_label": very_long_string},
@@ -832,7 +833,7 @@ async def test_create_tenant_validation(tenant_admin_client: RichAsyncClient):
         assert "wallet_label" in bad_label_response.json()
 
     # for wallet name
-    with pytest.raises(Exception):
+    with pytest.raises(HTTPException):
         bad_name_response = await tenant_admin_client.post(
             TENANTS_BASE_PATH,
             json={"wallet_label": uuid4().hex, "wallet_name": very_long_string},

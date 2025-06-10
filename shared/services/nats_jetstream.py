@@ -1,14 +1,14 @@
 import os
 import time
-from typing import Any, AsyncGenerator
+from collections.abc import AsyncGenerator
+from typing import Any
 
 import nats
-from nats.aio.client import Client as NATS
+from nats.aio.client import Client as NATSClient
 from nats.errors import (
     AuthorizationError,
     ConnectionClosedError,
     NoServersError,
-    TimeoutError,
     UnexpectedEOF,
 )
 from nats.js.client import JetStreamContext
@@ -32,6 +32,7 @@ MAX_ATTEMPTS_BEFORE_ERROR = int(
 
 class NATSStatus:
     def __init__(self):
+        """Initialize the NATS status tracker."""
         self.last_disconnect_time = None
         self.reconnect_attempts = 0
 
@@ -42,25 +43,24 @@ class NATSStatus:
         error_str = str(e).lower()
         if isinstance(e, UnexpectedEOF):
             logger.warning("NATS unexpected EOF error: {}", e)
-        elif isinstance(e, (NoServersError, TimeoutError, ConnectionClosedError)):
+        elif isinstance(e, NoServersError | TimeoutError | ConnectionClosedError):
             logger.error("Critical NATS connection issue: {}", e)
         elif isinstance(e, AuthorizationError):
             logger.error("NATS authentication/authorization failure: {}", e)
         elif "empty response from server" in error_str:
             logger.error("NATS server unavailable during connection attempt: {}", e)
+        elif self.last_disconnect_time is None:
+            logger.error("NATS operational error: {}", e)
         else:
-            if self.last_disconnect_time is None:
-                logger.error("NATS operational error: {}", e)
+            seconds_since_disconnect = time.time() - self.last_disconnect_time
+            if seconds_since_disconnect < RECONNECT_THRESHOLD:
+                logger.warning("NATS operational error during reconnection: {}", e)
             else:
-                seconds_since_disconnect = time.time() - self.last_disconnect_time
-                if seconds_since_disconnect < RECONNECT_THRESHOLD:
-                    logger.warning("NATS operational error during reconnection: {}", e)
-                else:
-                    logger.error(
-                        "NATS operational error. Exceeded reconnect ({}s): {}",
-                        seconds_since_disconnect,
-                        e,
-                    )
+                logger.error(
+                    "NATS operational error. Exceeded reconnect ({}s): {}",
+                    seconds_since_disconnect,
+                    e,
+                )
 
     async def disconnected_callback(self):
         self.last_disconnect_time = time.time()
@@ -125,7 +125,7 @@ async def init_nats_client() -> AsyncGenerator[JetStreamContext, Any]:
     logger.info("Connecting to NATS server with kwargs {} ...", connect_kwargs)
 
     try:
-        nats_client: NATS = await nats.connect(**connect_kwargs)
+        nats_client: NATSClient = await nats.connect(**connect_kwargs)
     except (NoServersError, TimeoutError, ConnectionClosedError) as e:
         logger.error("Failed to establish initial NATS connection: {}", e)
         raise e  # Initial failure is always an error

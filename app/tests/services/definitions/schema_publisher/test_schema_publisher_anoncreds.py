@@ -1,4 +1,3 @@
-import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -162,7 +161,7 @@ async def test_publish_anoncreds_schema_timeout_error(publisher):
         ),
         patch(
             "app.services.definitions.schema_publisher.coroutine_with_retry_until_value",
-            side_effect=asyncio.TimeoutError,
+            side_effect=TimeoutError,
         ),
     ):
         with pytest.raises(CloudApiException) as exc_info:

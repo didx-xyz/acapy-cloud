@@ -69,8 +69,8 @@ async def get_file_by_hash(
 
     except ClientError as e:
         if e.response["Error"]["Code"] == "404":
-            raise HTTPException(status_code=404, detail="File not found")
-        raise HTTPException(status_code=500, detail=f"S3 download failed: {str(e)}")
+            raise HTTPException(status_code=404, detail="File not found") from e
+        raise HTTPException(status_code=500, detail=f"S3 download failed: {e!s}") from e
 
 
 @router.put("/hash/{tails_hash}")
@@ -95,10 +95,10 @@ async def put_file_by_hash(
             )
         except ClientError as e:
             if e.response["Error"]["Code"] != "404":
-                logger.error(f"Error checking file existence: {str(e)}")
+                logger.error(f"Error checking file existence: {e!s}")
                 raise HTTPException(
-                    status_code=500, detail=f"Error checking file existence: {str(e)}"
-                )
+                    status_code=500, detail=f"Error checking file existence: {e!s}"
+                ) from e
 
         # Use temporary file to calculate hash and validate content
         with tempfile.TemporaryFile() as tmp_file:
@@ -165,8 +165,8 @@ async def put_file_by_hash(
             },
         )
     except ClientError as e:
-        raise HTTPException(status_code=500, detail=f"S3 upload failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"S3 upload failed: {e!s}") from e
     except HTTPException as e:
         raise e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Upload failed: {e!s}") from e

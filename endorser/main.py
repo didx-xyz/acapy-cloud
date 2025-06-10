@@ -95,7 +95,7 @@ async def health_ready(
         jetstream_status = await asyncio.wait_for(
             endorsement_processor.check_jetstream(), timeout=5.0
         )
-    except asyncio.TimeoutError:
+    except TimeoutError:
         raise HTTPException(
             status_code=503,
             detail={"status": "not ready", "error": "JetStream health check timed out"},

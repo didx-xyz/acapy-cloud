@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from app.models.tenants import CreateTenantResponse
 from app.routes.connections import router as conn_router
@@ -114,10 +113,10 @@ async def create_bob_alice_connection(
 
 async def fetch_existing_connection_by_alias(
     member_client: RichAsyncClient,
-    alias: Optional[str] = None,
-    their_label: Optional[str] = None,
-    their_did: Optional[str] = None,
-) -> Optional[Connection]:
+    alias: str | None = None,
+    their_label: str | None = None,
+    their_did: str | None = None,
+) -> Connection | None:
     params = {"state": "completed", "limit": 10000}
     if alias:
         params.update({"alias": alias})
@@ -203,7 +202,7 @@ async def create_connection_by_test_mode(
             connection_alias=f"{connection_alias_prefix}-{alias}",
         )
     else:
-        assert False, f"unknown test mode: {test_mode}"
+        raise AssertionError(f"unknown test mode: {test_mode}")
 
 
 async def connect_using_trust_registry_invite(

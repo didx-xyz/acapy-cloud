@@ -1,4 +1,4 @@
-from typing import AsyncGenerator, Optional
+from collections.abc import AsyncGenerator
 
 from fastapi import Request
 from httpx import HTTPError, Response, Timeout
@@ -27,7 +27,7 @@ async def yield_lines_with_disconnect_check(
 async def sse_subscribe_event_with_field_and_state(
     *,
     request: Request,
-    group_id: Optional[str],
+    group_id: str | None,
     wallet_id: str,
     topic: str,
     field: str,
@@ -35,8 +35,7 @@ async def sse_subscribe_event_with_field_and_state(
     desired_state: str,
     look_back: int = 60,
 ) -> AsyncGenerator[str, None]:
-    """
-    Subscribe to server-side events for a specific wallet ID and topic.
+    """Subscribe to server-side events for a specific wallet ID and topic.
 
     Args:
         request: The request object.
@@ -50,6 +49,7 @@ async def sse_subscribe_event_with_field_and_state(
 
     Returns:
         AsyncGenerator[str, None]: A generator that yields the events.
+
     """
     bound_logger = logger.bind(
         body={

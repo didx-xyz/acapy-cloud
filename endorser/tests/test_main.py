@@ -114,7 +114,7 @@ async def test_health_ready_jetstream_not_working():
 async def test_health_ready_timeout():
     endorsement_processor_mock = AsyncMock(spec=EndorsementProcessor)
 
-    endorsement_processor_mock.check_jetstream.side_effect = asyncio.TimeoutError()
+    endorsement_processor_mock.check_jetstream.side_effect = TimeoutError()
 
     with pytest.raises(HTTPException) as exc_info:
         await health_ready(endorsement_processor=endorsement_processor_mock)
@@ -146,7 +146,7 @@ async def test_health_ready_with_timeout():
     endorsement_processor_mock = AsyncMock(spec=EndorsementProcessor)
 
     endorsement_processor_mock.check_jetstream.side_effect = (
-        asyncio.TimeoutError
+        TimeoutError
     )  # Simulate a slow response
 
     with pytest.raises(HTTPException) as exc_info:

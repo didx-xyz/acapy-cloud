@@ -1,5 +1,5 @@
 import re
-from typing import Dict, List, Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -52,16 +52,16 @@ class CreateTenantRequest(BaseModel):
     wallet_label: str = Field(
         ..., description=label_description, examples=label_examples
     )
-    wallet_name: Optional[str] = Field(
+    wallet_name: str | None = Field(
         None,
         description="An optional wallet name. Useful with `get_tenants` to fetch wallets by wallet name. "
         "If selected, must be unique. Otherwise, randomly generated.",
         examples=["Unique name"],
     )
-    roles: Optional[List[TrustRegistryRole]] = None
-    group_id: Optional[str] = group_id_field
-    image_url: Optional[str] = image_url_field
-    extra_settings: Optional[Dict[ExtraSettings, bool]] = ExtraSettings_field
+    roles: list[TrustRegistryRole] | None = None
+    group_id: str | None = group_id_field
+    image_url: str | None = image_url_field
+    extra_settings: dict[ExtraSettings, bool] | None = ExtraSettings_field
 
     @field_validator("wallet_label", mode="before")
     @classmethod
@@ -110,12 +110,12 @@ class CreateTenantRequest(BaseModel):
 
 
 class UpdateTenantRequest(BaseModel):
-    wallet_label: Optional[str] = Field(
+    wallet_label: str | None = Field(
         None, description=label_description, examples=label_examples
     )
-    roles: Optional[List[TrustRegistryRole]] = None
-    image_url: Optional[str] = image_url_field
-    extra_settings: Optional[Dict[ExtraSettings, bool]] = ExtraSettings_field
+    roles: list[TrustRegistryRole] | None = None
+    image_url: str | None = image_url_field
+    extra_settings: dict[ExtraSettings, bool] | None = ExtraSettings_field
 
     @field_validator("wallet_label", mode="before")
     @classmethod
@@ -136,9 +136,9 @@ class Tenant(BaseModel):
     wallet_label: str = Field(..., examples=["Alice"])
     wallet_name: str = Field(..., examples=["SomeWalletName"])
     created_at: str = Field(...)
-    updated_at: Optional[str] = Field(None)
-    image_url: Optional[str] = image_url_field
-    group_id: Optional[str] = group_id_field
+    updated_at: str | None = Field(None)
+    image_url: str | None = image_url_field
+    group_id: str | None = group_id_field
 
 
 class TenantAuth(BaseModel):
@@ -151,4 +151,4 @@ class CreateTenantResponse(Tenant, TenantAuth):
 
 class OnboardResult(BaseModel):
     did: str
-    didcomm_invitation: Optional[str] = None
+    didcomm_invitation: str | None = None

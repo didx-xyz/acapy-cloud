@@ -1,5 +1,3 @@
-from typing import Optional
-
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import StreamingResponse
 
@@ -17,7 +15,7 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/v1/sse", tags=["sse"])
 
 
-group_id_query: Optional[str] = Query(
+group_id_query: str | None = Query(
     default=None,
     description="Group ID to which the wallet belongs",
     include_in_schema=False,
@@ -29,21 +27,20 @@ group_id_query: Optional[str] = Query(
     response_class=StreamingResponse,
     name="Subscribe to a Wallet Event by Topic, Field, and Desired State",
 )
-async def get_sse_subscribe_event_with_field_and_state(
+async def get_sse_subscribe_event_with_field_and_state(  # noqa: D417
     request: Request,
     wallet_id: str,
     topic: str,
     field: str,
     field_id: str,
     desired_state: str,
-    group_id: Optional[str] = group_id_query,
-    look_back: Optional[int] = Query(
+    group_id: str | None = group_id_query,
+    look_back: int | None = Query(
         default=SSE_LOOK_BACK, description="Number of seconds to look back for events"
     ),
     auth: AcaPyAuthVerified = Depends(acapy_auth_verified),
 ) -> StreamingResponse:
-    """
-    Subscribe to SSE events wait for a desired state with a field filter.
+    """Subscribe to SSE events wait for a desired state with a field filter.
     ---
     ***This endpoint can't be called on the swagger UI, as it requires a stream response.***
 
@@ -55,8 +52,8 @@ async def get_sse_subscribe_event_with_field_and_state(
     The field and field ID pair must be present in the payload (other than state) for the event to be streamed.
     The stream will be closed after the event is returned.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
         wallet_id:
             The ID of the wallet subscribing to the events.
         topic:
@@ -69,6 +66,7 @@ async def get_sse_subscribe_event_with_field_and_state(
             The desired state to be reached.
         look_back:
             Number of seconds to look back for events before subscribing.
+
     """
     logger.bind(
         body={

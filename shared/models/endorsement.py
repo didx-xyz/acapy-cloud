@@ -1,5 +1,5 @@
 from logging import Logger
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Literal
 
 import orjson
 from pydantic import BaseModel
@@ -21,8 +21,8 @@ class Endorsement(BaseModel):
 
 
 def extract_operation_type_from_endorsement_payload(
-    payload: Dict[str, Any], logger: Logger
-) -> Optional[str]:
+    payload: dict[str, Any], logger: Logger
+) -> str | None:
     """Safely extracts the 'type' value from a nested endorsement payload.
 
     Args:
@@ -31,6 +31,7 @@ def extract_operation_type_from_endorsement_payload(
 
     Returns:
         Optional[str]: The extracted type value, or None if not found.
+
     """
     # Attempt to navigate through the nested structure
     messages_attach = payload.get("messages_attach", [])
@@ -90,7 +91,7 @@ valid_operation_types = [
 ]
 
 
-def payload_is_applicable_for_endorser(payload: Dict[str, Any], logger: Logger) -> bool:
+def payload_is_applicable_for_endorser(payload: dict[str, Any], logger: Logger) -> bool:
     transaction_id = payload.get("transaction_id")
     if not transaction_id:
         logger.warning("No transaction id associated with this endorsement event")
@@ -125,8 +126,8 @@ def payload_is_applicable_for_endorser(payload: Dict[str, Any], logger: Logger) 
 
 
 def obfuscate_primary_data_in_payload(
-    payload: Dict[str, Any], logger: Logger
-) -> Dict[str, Any]:
+    payload: dict[str, Any], logger: Logger
+) -> dict[str, Any]:
     # Endorsement event payloads can contain a key called "master_secret", which we will obfuscate.
     # This value is deeply nested in the payload, as part of the `json` string
     # within `messages_attach: [{`data`:{...}}]`, or in `signature_response: [{signature: {"<did>: {...}}]`

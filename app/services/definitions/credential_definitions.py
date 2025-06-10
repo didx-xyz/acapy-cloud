@@ -1,5 +1,4 @@
 import asyncio
-from typing import List, Optional
 
 from aries_cloudcontroller import (
     AcaPyClient,
@@ -82,13 +81,13 @@ async def create_credential_definition(
 
 async def get_credential_definitions(
     aries_controller: AcaPyClient,
-    issuer_did: Optional[str] = None,
-    credential_definition_id: Optional[str] = None,
-    schema_id: Optional[str] = None,
-    schema_issuer_did: Optional[str] = None,
-    schema_name: Optional[str] = None,
-    schema_version: Optional[str] = None,
-) -> List[CredentialDefinition]:
+    issuer_did: str | None = None,
+    credential_definition_id: str | None = None,
+    schema_id: str | None = None,
+    schema_issuer_did: str | None = None,
+    schema_name: str | None = None,
+    schema_version: str | None = None,
+) -> list[CredentialDefinition]:
     """Get credential definitions"""
     bound_logger = logger.bind(
         body={

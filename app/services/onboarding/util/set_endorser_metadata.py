@@ -1,7 +1,7 @@
 import asyncio
 import os
+from collections.abc import Callable
 from logging import Logger
-from typing import Callable
 
 from aries_cloudcontroller import AcaPyClient
 
@@ -114,6 +114,7 @@ async def assert_metadata_set(
 
     Returns:
         True if condition is met, raises an exception otherwise.
+
     """
     for _ in range(num_tries):
         # Delay is placed at the start to avoid race condition in ACA-Py, where reading metadata causes duplicate

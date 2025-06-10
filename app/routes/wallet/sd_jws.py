@@ -28,8 +28,7 @@ async def sign_sd_jws(
     body: SDJWSCreateRequest,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> SDJWSCreateResponse:
-    """
-    Sign a Selective Disclosure JSON Web Signature (SD-JWS).
+    """Sign a Selective Disclosure JSON Web Signature (SD-JWS).
     ---
 
     This endpoint allows users to create a Selective Disclosure JSON Web Signature (SD-JWS).
@@ -145,8 +144,7 @@ async def verify_sd_jws(
     body: SDJWSVerifyRequest,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> SDJWSVerifyResponse:
-    """
-    Verify a Selective Disclosure JSON Web Signature (SD-JWS).
+    """Verify a Selective Disclosure JSON Web Signature (SD-JWS).
     ---
 
     This endpoint allows users to verify the authenticity and integrity of a Selective Disclosure
