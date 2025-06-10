@@ -2,12 +2,16 @@ FROM ghcr.io/didx-xyz/acapy-agent:py3.12-1.3.0-20250609@sha256:04b1b617c730fbefe
 
 USER root
 
-# Copy plugin dependencies
+# Copy agent dependency definitions
+COPY dockerfiles/poetry-requirements.txt /plugin-deps/poetry-requirements.txt
 COPY dockerfiles/agents/pyproject.toml /plugin-deps/pyproject.toml
 COPY dockerfiles/agents/poetry.lock /plugin-deps/poetry.lock
 WORKDIR /plugin-deps
 
-# Install dependencies (ACA-Py has poetry pre-installed)
+# Install poetry with pinned hashes
+RUN pip install --no-cache-dir -r poetry-requirements.txt --require-hashes
+
+# Install dependencies
 ENV POETRY_VIRTUALENVS_CREATE=false
 RUN poetry install
 
