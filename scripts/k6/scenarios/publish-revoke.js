@@ -117,6 +117,6 @@ export default function (data) {
     },
   });
 
-  sleep(sleepDuration);
+  // sleep(sleepDuration);
   testFunctionReqs.add(1);
 }
