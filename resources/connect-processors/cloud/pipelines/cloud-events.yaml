@@ -28,7 +28,7 @@ pipeline:
         root.payload = $payload
 
         let topic_mapping = {
-            "basicmessages": "basic-messages",
+            "basicmessage": "basic-message",
             "connections": "connections",
             "endorse_transaction": "endorsements",
             "credential": "deleted_credential",
