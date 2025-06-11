@@ -1,16 +1,30 @@
 input:
-  label: acapy_events
-  nats_jetstream:
-    urls:
-      - ${NATS_URL:nats://nats:4222}
-    subject: ${CLOUD_EVENTS_CREATE_NATS_INPUT_SUBJECT_PREFIX:acapy.record-with-state}.${CLOUD_EVENTS_CREATE_NATS_INPUT_TOPIC:*}
-    stream: ${CLOUD_EVENTS_CREATE_NATS_INPUT_STREAM:"acapy_events"}
-    durable: ${CLOUD_EVENTS_CREATE_NATS_INPUT_CONSUMER_NAME:acapy-events-processor}
-    queue: ${CLOUD_EVENTS_CREATE_NATS_INPUT_QUEUE_GROUP:""}
-    bind: ${CLOUD_EVENTS_CREATE_NATS_INPUT_BIND:false}
-    deliver: ${CLOUD_EVENTS_CREATE_NATS_INPUT_DELIVER:"all"}
-    auth:
-      user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+  broker:
+    inputs:
+      - label: acapy_events
+        nats_jetstream:
+          urls:
+            - ${NATS_URL:nats://nats:4222}
+          subject: ${CLOUD_EVENTS_CREATE_NATS_INPUT_SUBJECT_PREFIX:acapy.record-with-state}.${CLOUD_EVENTS_CREATE_NATS_INPUT_TOPIC:*}
+          stream: ${CLOUD_EVENTS_CREATE_NATS_INPUT_STREAM:"acapy_events"}
+          durable: ${CLOUD_EVENTS_CREATE_NATS_INPUT_CONSUMER_NAME:acapy-events-processor}
+          queue: ${CLOUD_EVENTS_CREATE_NATS_INPUT_QUEUE_GROUP:""}
+          bind: ${CLOUD_EVENTS_CREATE_NATS_INPUT_BIND:false}
+          deliver: ${CLOUD_EVENTS_CREATE_NATS_INPUT_DELIVER:"all"}
+          auth:
+            user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+      - label: acapy_messages
+        nats_jetstream:
+          urls:
+            - ${NATS_URL:nats://nats:4222}
+          subject: ${CLOUD_EVENTS_CREATE_NATS_INPUT_SUBJECT_MESSAGE_PREFIX:acapy.basicmessage.received}
+          stream: ${CLOUD_EVENTS_CREATE_NATS_INPUT_STREAM:"acapy_events"}
+          durable: ${CLOUD_EVENTS_CREATE_NATS_INPUT_CONSUMER_NAME:acapy-message-processor}
+          queue: ${CLOUD_EVENTS_CREATE_NATS_INPUT_QUEUE_GROUP:""}
+          bind: ${CLOUD_EVENTS_CREATE_NATS_INPUT_BIND:false}
+          deliver: ${CLOUD_EVENTS_CREATE_NATS_INPUT_DELIVER:"all"}
+          auth:
+            user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
 
 pipeline:
   threads: ${CLOUD_EVENTS_CREATE_PIPELINE_THREADS:-1}
