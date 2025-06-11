@@ -37,7 +37,7 @@ _.python.venv = { path = ".venv", create = true }
 
 [tasks."poetry:install"]
 description = "Poetry Install all dependencies"
-run = "poetry install"
+run = "poetry install --with dev"
 
 [tasks."poetry:update"]
 description = "Poetry Update lock file"

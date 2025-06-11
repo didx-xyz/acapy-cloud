@@ -2,15 +2,18 @@
 **
 
 # Except the following
-!pyproject.toml
-!poetry.lock
 !app/
 !dockerfiles/poetry-requirements.txt
+!dockerfiles/agents/pyproject.toml
+!dockerfiles/agents/poetry.lock
 !scripts/
 !shared/
 !tails/
 !trustregistry/
 !waypoint/
+
 !LICENSE
+!pyproject.toml
+!poetry.lock
 
 **/__pycache__/

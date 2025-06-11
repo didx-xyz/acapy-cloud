@@ -6,7 +6,7 @@ COPY poetry.lock /waypoint
 COPY pyproject.toml /waypoint
 
 COPY dockerfiles/poetry-requirements.txt /waypoint
-RUN pip install --no-cache-dir -r poetry-requirements.txt
+RUN pip install --no-cache-dir -r poetry-requirements.txt --require-hashes
 
 # Set Poetry's cache and virtualenvs path to a writable directory
 ENV POETRY_CACHE_DIR=/poetry

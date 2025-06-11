@@ -114,7 +114,6 @@ jobs:
       - name: Install coverage and generate report
         run: |
           source .venv/bin/activate
-          pip install coverage
           coverage report
           coverage xml
           sudo rm -rf tilt/docker

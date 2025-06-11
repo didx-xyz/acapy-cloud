@@ -2,14 +2,20 @@ FROM ghcr.io/didx-xyz/acapy-agent:py3.12-1.3.0-20250609@sha256:04b1b617c730fbefe
 
 USER root
 
-# Install Google Protobuf and Plugins
-ARG PROTOBUF_VERSION=5.29.3
-RUN echo "Installing Plugins"
-RUN pip install --no-cache-dir protobuf==${PROTOBUF_VERSION} \
-  acapy-wallet-groups-plugin==1.3.0.post20250526 \
-  git+https://github.com/didx-xyz/aries-acapy-plugins@1.3.0-20250526#subdirectory=nats_events \
-  git+https://github.com/didx-xyz/aries-acapy-plugins@e3109b8ec#subdirectory=cheqd
+# Copy agent dependency definitions
+COPY dockerfiles/poetry-requirements.txt /plugin-deps/poetry-requirements.txt
+COPY dockerfiles/agents/pyproject.toml /plugin-deps/pyproject.toml
+COPY dockerfiles/agents/poetry.lock /plugin-deps/poetry.lock
+WORKDIR /plugin-deps
 
+# Install poetry with pinned hashes
+RUN pip install --no-cache-dir -r poetry-requirements.txt --require-hashes
+
+# Install dependencies
+ENV POETRY_VIRTUALENVS_CREATE=false
+RUN poetry install
+
+WORKDIR /
 COPY scripts/startup.sh startup.sh
 RUN chmod +x ./startup.sh
 

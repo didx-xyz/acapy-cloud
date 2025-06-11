@@ -29,6 +29,14 @@ updates:
       day: saturday
       time: "07:00"
 
+  # Maintain hashes for the Docker image agent dependencies
+  - package-ecosystem: pip
+    directory: /dockerfiles/agents
+    schedule:
+      interval: weekly
+      day: saturday
+      time: "07:00"
+
   # Maintain dependencies for Docker (Python)
   - package-ecosystem: docker
     directories:
