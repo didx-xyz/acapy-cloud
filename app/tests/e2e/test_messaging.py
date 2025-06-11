@@ -1,3 +1,5 @@
+import time
+
 import pytest
 
 from app.models.messaging import Message, TrustPingMsg
@@ -23,6 +25,7 @@ async def test_send_trust_ping(
 
     assert response.status_code == 200
     assert "thread_id" in response_data
+    time.sleep(1)  # Wait for ping to be sent before deleting wallet
 
 
 @pytest.mark.anyio
