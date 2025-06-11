@@ -66,6 +66,8 @@ podAnnotations:
   admission.datadoghq.com/python-lib.version: v3.8.1
   ad.datadoghq.com/istio-proxy.logs: '[{ "source": "envoy", "service": "{{ include "acapy-cloud.fullname" . }}" }]'
   ad.datadoghq.com/istio-init.logs: '[{ "source": "envoy", "service": "{{ include "acapy-cloud.fullname" . }}" }]'
+  sidecar.istio.io/agentLogLevel: warn # debug|info|warn|error|fatal|none
+  sidecar.istio.io/logLevel: warning # trace|debug|info|warning|error|critical|off
 
 podSecurityContext: {}
   # fsGroup: 2000
