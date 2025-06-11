@@ -145,6 +145,22 @@ async def test_send_credential_and_request(
                 "thread_id": thread_id,
             },
         ),
+        check_webhook_state(
+            client=alice_member_client,
+            topic="credentials",
+            state="done",
+            filter_map={
+                "thread_id": thread_id,
+            },
+        ),
+        check_webhook_state(
+            client=faber_anoncreds_client,
+            topic="credentials",
+            state="done",
+            filter_map={
+                "thread_id": thread_id,
+            },
+        ),
     )
     assert all(result), "An expected webhook event was not returned"
 
