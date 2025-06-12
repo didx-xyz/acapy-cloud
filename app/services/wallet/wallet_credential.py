@@ -3,6 +3,7 @@ from logging import Logger
 from aries_cloudcontroller import AcaPyClient
 
 from app.exceptions.handle_acapy_call import handle_acapy_call
+from app.models.verifier import Status
 from app.models.wallet import CredInfoList
 
 
@@ -21,7 +22,9 @@ async def add_revocation_info(
                     acapy_call=aries_controller.credentials.get_revocation_status,
                     credential_id=cred_info.credential_id,
                 )
-                cred_info.revoked = rev_status.revoked
+                cred_info.revocation_status = (
+                    Status.REVOKED if rev_status.revoked else Status.VALID
+                )
             except Exception as e:
                 # Log the error and continue
                 logger.error(
@@ -29,5 +32,6 @@ async def add_revocation_info(
                     cred_info.credential_id,
                     e,
                 )
-                cred_info.revoked = None
+                cred_info.revocation_status = Status.CHECK_FAILED
+    return cred_info_list
     return cred_info_list
