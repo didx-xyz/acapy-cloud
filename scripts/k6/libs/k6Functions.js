@@ -8,6 +8,8 @@
  * and iteration tracking. All log messages are prefixed with [VU:x|Iter:y] for easy
  * identification during test execution.
  *
+ * During setup/teardown phases where VU/ITER are not available, only timestamp is shown.
+ *
  * Debug logging can be controlled via the DEBUG environment variable:
  * - Set DEBUG=true or DEBUG=1 to enable debug messages
  * - Debug messages are filtered out when DEBUG is not enabled
@@ -15,7 +17,8 @@
  * Usage:
  *   import { log } from './libs/k6Functions.js';
  *
- *   log.info('Test started');              // [VU:1|Iter:1] Test started
+ *   log.info('Test started');              // [VU:1|Iter:1] Test started (during test)
+ *   log.info('Setup complete');            // Setup complete (during setup/teardown)
  *   log.debug('Debug info', data);         // [VU:1|Iter:1] DEBUG: Debug info {data}
  *   log.error('Something failed');         // [VU:1|Iter:1] Something failed
  *   log.warn('Warning message');          // [VU:1|Iter:1] Warning message
@@ -28,9 +31,15 @@ const DEBUG_ENABLED = __ENV.DEBUG === 'true' || __ENV.DEBUG === '1';
 // Helper function to generate prefix with timestamp
 function getLogPrefix(includeLevel = false) {
   const timestamp = new Date().toISOString();
-  const vuInfo = `[VU:${__VU}|Iter:${__ITER}]`;
+
+  // Check if VU and ITER are available (they're undefined during setup/teardown)
+  let vuInfo = '';
+  if (typeof __VU !== 'undefined' && typeof __ITER !== 'undefined') {
+    vuInfo = `[VU:${__VU}|Iter:${__ITER}] `;
+  }
+
   const levelSuffix = includeLevel ? ' DEBUG:' : '';
-  return `${timestamp} ${vuInfo}${levelSuffix}`;
+  return `${timestamp} ${vuInfo}${levelSuffix}`.trim();
 }
 
 const log = {
