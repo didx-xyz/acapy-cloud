@@ -9,6 +9,7 @@ from app.dependencies.acapy_clients import client_from_auth
 from app.dependencies.auth import AcaPyAuth, acapy_auth_from_header
 from app.exceptions import handle_acapy_call
 from app.models.wallet import CredInfo, CredInfoList, VCRecord, VCRecordList
+from app.services.wallet.wallet_credential import add_revocation_info
 from app.util.pagination import limit_query_parameter, offset_query_parameter
 from shared.log_config import get_logger
 
@@ -62,9 +63,17 @@ async def list_credentials(
             offset=offset,
             wql=wql,
         )
+        no_revoked_status = CredInfoList.model_validate(results.model_dump())
+
+        logger.debug("Adding revocation information to credentials")
+        revoked_status_added = await add_revocation_info(
+            cred_info_list=no_revoked_status,
+            aries_controller=aries_controller,
+            logger=logger,
+        )
 
     logger.debug("Successfully listed credentials.")
-    return results
+    return revoked_status_added
 
 
 @router.get(
