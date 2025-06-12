@@ -47,10 +47,10 @@ export const options = {
   },
 };
 
-const inputFilepath = `../output/${outputPrefix}-create-invitation.json`;
+const inputFilepath = `../output/${outputPrefix}-create-invitation.jsonl`;
 const data = open(inputFilepath, "r");
-const outputFilepath = `output/${outputPrefix}-create-credentials.json`;
-const epochOutputFilepath = `output/${outputPrefix}-epoch-timestamps.json`;
+const outputFilepath = `output/${outputPrefix}-create-credentials.jsonl`;
+const epochOutputFilepath = `output/${outputPrefix}-epoch-timestamps.jsonl`;
 
 // Helper function to get the issuer index using pre-calculated assignments
 function getIssuerIndex(vu, iter) {

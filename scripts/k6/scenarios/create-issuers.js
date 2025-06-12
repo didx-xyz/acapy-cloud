@@ -18,7 +18,7 @@ const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
 const issuerPrefix = __ENV.ISSUER_PREFIX;
 const outputPrefix = `${issuerPrefix}`;
 // const holderPrefix = __ENV.HOLDER_PREFIX;
-const filepath = `output/${outputPrefix}-create-issuers.json`;
+const filepath = `output/${outputPrefix}-create-issuers.jsonl`;
 
 export const options = {
   scenarios: {

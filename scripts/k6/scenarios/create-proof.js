@@ -48,10 +48,10 @@ export const options = {
 
 const testFunctionReqs = new Counter("test_function_reqs");
 
-const inputFilepath = `../output/${outputPrefix}-create-invitation.json`;
+const inputFilepath = `../output/${outputPrefix}-create-invitation.jsonl`;
 const data = open(inputFilepath, "r");
 // Add path to epoch timestamps file
-const epochInputFilepath = `../output/${outputPrefix}-epoch-timestamps.json`;
+const epochInputFilepath = `../output/${outputPrefix}-epoch-timestamps.jsonl`;
 // Read epoch data in init stage
 let epochData = null;
 try {

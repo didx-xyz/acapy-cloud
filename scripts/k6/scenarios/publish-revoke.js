@@ -15,7 +15,7 @@ const holderPrefix = __ENV.HOLDER_PREFIX;
 const issuerPrefix = __ENV.ISSUER_PREFIX;
 const outputPrefix = `${issuerPrefix}-${holderPrefix}`;
 
-const inputFilepath = `../output/${outputPrefix}-create-credentials.json`;
+const inputFilepath = `../output/${outputPrefix}-create-credentials.jsonl`;
 const data = open(inputFilepath, "r");
 
 const vus = Number.parseInt(__ENV.VUS, 10);

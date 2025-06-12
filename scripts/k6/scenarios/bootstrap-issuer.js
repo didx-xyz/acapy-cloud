@@ -12,7 +12,7 @@ const numIssuers = __ENV.NUM_ISSUERS;
 const holderPrefix = __ENV.HOLDER_PREFIX;
 const outputPrefix = `${issuerPrefix}`;
 
-const filepath = `output/${outputPrefix}-create-issuers.json`;
+const filepath = `output/${outputPrefix}-create-issuers.jsonl`;
 export function setup() {
   file.writeString(filepath, "");
 }
