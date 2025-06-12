@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Any, Literal, Union
 
 from aries_cloudcontroller import (
@@ -13,6 +14,14 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.util.save_exchange_record import SaveExchangeRecordField
 from shared.exceptions import CloudApiValueError
+
+
+class Status(str, Enum):
+    VALID: str = "valid"
+    REVOKED: str = "revoked"
+    NON_REVOKABLE: str = "non-revokable"
+    NOT_CHECKED: str = "not-checked"
+    CHECK_FAILED: str = "check-failed"
 
 
 class AnonCredsPresentationRequest(AcaPyAnonCredsPresentationRequest):
@@ -149,8 +158,8 @@ class CredInfo(BaseModel):
         default=None, description="Revocation registry identifier"
     )
     schema_id: str | None = Field(default=None, description="Schema identifier")
-    revoked: bool | None = Field(
-        default=None, description="Revoked status of the credential"
+    revocation_status: Status = Field(
+        default="not-checked", description="Revoked status of the credential"
     )
 
 
