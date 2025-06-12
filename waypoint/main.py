@@ -2,6 +2,7 @@ import asyncio
 import os
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from typing import Any
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import Depends, FastAPI, HTTPException
@@ -83,7 +84,7 @@ async def health_ready(
     nats_processor: NatsEventsProcessor = Depends(
         Provide[Container.nats_events_processor]
     ),
-) -> dict[str, str]:
+) -> dict[str, Any]:
     try:
         jetstream_status = await asyncio.wait_for(
             nats_processor.check_jetstream(), timeout=2.0
