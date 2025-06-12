@@ -21,7 +21,7 @@ run_test() {
 
 should_create_holders() {
   local holder_prefix="$1"
-  ! [[ -f "./output/${holder_prefix}-create-holders.json" ]]
+  ! [[ -f "./output/${holder_prefix}-create-holders.jsonl" ]]
 }
 
 # Single issuer, multiple holder tests
