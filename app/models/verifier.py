@@ -149,6 +149,9 @@ class CredInfo(BaseModel):
         default=None, description="Revocation registry identifier"
     )
     schema_id: str | None = Field(default=None, description="Schema identifier")
+    revoked: bool | None = Field(
+        default=None, description="Revoked status of the credential"
+    )
 
 
 class NonRevocationInterval(IndyNonRevocationInterval):
