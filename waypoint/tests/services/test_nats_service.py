@@ -326,6 +326,7 @@ async def test_process_events_base_exception(
 
     # Process events
     with pytest.raises(ArithmeticError):
+        events = []
         async with processor.process_events(
             group_id="group_id",
             wallet_id="wallet_id",
@@ -435,6 +436,7 @@ async def test_general_error_handling(
     stop_event = asyncio.Event()
 
     with pytest.raises(Error):
+        events = []
         async with processor.process_events(
             group_id="group_id",
             wallet_id="wallet_id",

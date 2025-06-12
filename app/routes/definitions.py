@@ -34,7 +34,7 @@ router = APIRouter(
 )
 
 
-@router.post("/schemas", summary="Create a new Schema", response_model=CredentialSchema)
+@router.post("/schemas", summary="Create a new Schema")
 async def create_schema(
     schema: CreateSchema,
     auth: AcaPyAuthVerified = Depends(acapy_auth_verified),
@@ -97,7 +97,6 @@ async def create_schema(
 @router.get(
     "/schemas",
     summary="Get Created Schemas",
-    response_model=list[CredentialSchema],
 )
 async def get_schemas(
     schema_issuer_did: str | None = None,
@@ -172,7 +171,6 @@ async def get_schemas(
 @router.get(
     "/schemas/{schema_id:path}",
     summary="Get a Schema",
-    response_model=CredentialSchema,
 )
 async def get_schema(  # noqa: D417
     schema_id: str,
@@ -218,7 +216,6 @@ async def get_schema(  # noqa: D417
 @router.post(
     "/credentials",
     summary="Create a new Credential Definition",
-    response_model=CredentialDefinition,
 )
 async def create_credential_definition(
     credential_definition: CreateCredentialDefinition,
@@ -287,7 +284,6 @@ async def create_credential_definition(
 @router.get(
     "/credentials",
     summary="Get Created Credential Definitions",
-    response_model=list[CredentialDefinition],
 )
 async def get_credential_definitions(
     issuer_did: str | None = None,
@@ -356,7 +352,6 @@ async def get_credential_definitions(
 @router.get(
     "/credentials/{credential_definition_id:path}",
     summary="Get a Credential Definition",
-    response_model=CredentialDefinition,
 )
 async def get_credential_definition_by_id(  # noqa: D417
     credential_definition_id: str,

@@ -90,18 +90,21 @@ async def test_sse_event_stream_generator_wallet_id_topic_field_desired_state(
         mock_event_generator()
     )
 
-    events = [event async for event in nats_event_stream_generator(
-        request=request_mock,
-        background_tasks=BackgroundTasks(),
-        wallet_id=wallet_id,
-        topic=topic,
-        field=field,
-        field_id=field_id,
-        desired_state=desired_state,
-        group_id=group_id,
-        nats_processor=nats_processor_mock,
-        look_back=300,
-    )]
+    events = [
+        event
+        async for event in nats_event_stream_generator(
+            request=request_mock,
+            background_tasks=BackgroundTasks(),
+            wallet_id=wallet_id,
+            topic=topic,
+            field=field,
+            field_id=field_id,
+            desired_state=desired_state,
+            group_id=group_id,
+            nats_processor=nats_processor_mock,
+            look_back=300,
+        )
+    ]
 
     assert len(events) == 1
     assert events[0] == expected_cloudapi_event.model_dump_json()

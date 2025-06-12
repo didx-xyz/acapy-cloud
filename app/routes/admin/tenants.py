@@ -59,7 +59,7 @@ group_id_query: str | None = Query(
 )
 
 
-@router.post("", response_model=CreateTenantResponse, summary="Create New Tenant")
+@router.post("", summary="Create New Tenant")
 async def create_tenant(
     body: CreateTenantRequest,
     admin_auth: AcaPyAuthVerified = Depends(acapy_auth_tenant_admin),
@@ -296,7 +296,6 @@ async def delete_tenant_by_id(
 
 @router.post(
     "/{wallet_id}/access-token",
-    response_model=TenantAuth,
     summary="Rotate and Get New Access Token for Wallet",
 )
 async def post_wallet_auth_token(
@@ -344,7 +343,7 @@ async def post_wallet_auth_token(
     return response
 
 
-@router.put("/{wallet_id}", response_model=Tenant, summary="Update Tenant by Wallet ID")
+@router.put("/{wallet_id}", summary="Update Tenant by Wallet ID")
 async def update_tenant(
     wallet_id: str,
     body: UpdateTenantRequest,
@@ -406,7 +405,7 @@ async def update_tenant(
     return response
 
 
-@router.get("/{wallet_id}", response_model=Tenant, summary="Get Tenant by Wallet ID")
+@router.get("/{wallet_id}", summary="Get Tenant by Wallet ID")
 async def get_tenant(
     wallet_id: str,
     group_id: str | None = group_id_query,
@@ -449,7 +448,7 @@ async def get_tenant(
     return response
 
 
-@router.get("", response_model=list[Tenant], summary="Fetch Tenants")
+@router.get("", summary="Fetch Tenants")
 async def get_tenants(
     wallet_name: str | None = None,
     group_id: str | None = group_id_query,

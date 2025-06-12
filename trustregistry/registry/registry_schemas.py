@@ -18,7 +18,7 @@ class SchemaID(BaseModel):
     schema_id: str = Field(..., examples=["WgWxqztrNooG92RXvxSTWv:2:schema_name:1.0"])
 
 
-@router.get("", response_model=list[Schema])
+@router.get("")
 async def get_schemas(db_session: Session = Depends(get_db)) -> list[Schema]:
     logger.debug("GET request received: Fetch all schemas")
     db_schemas = crud.get_schemas(db_session)
@@ -26,7 +26,7 @@ async def get_schemas(db_session: Session = Depends(get_db)) -> list[Schema]:
     return db_schemas
 
 
-@router.post("", response_model=Schema)
+@router.post("")
 async def register_schema(
     schema_id: SchemaID, db_session: Session = Depends(get_db)
 ) -> Schema:
@@ -61,7 +61,7 @@ async def register_schema(
     return create_schema_res
 
 
-@router.put("/{schema_id}", response_model=Schema)
+@router.put("/{schema_id}")
 async def update_schema(
     schema_id: str, new_schema_id: SchemaID, db_session: Session = Depends(get_db)
 ) -> Schema:
@@ -102,7 +102,7 @@ async def update_schema(
     return update_schema_res
 
 
-@router.get("/{schema_id:path}", response_model=Schema)
+@router.get("/{schema_id:path}")
 async def get_schema(schema_id: str, db_session: Session = Depends(get_db)) -> Schema:
     bound_logger = logger.bind(body={"schema_id": schema_id})
     bound_logger.debug("GET request received: Fetch schema")

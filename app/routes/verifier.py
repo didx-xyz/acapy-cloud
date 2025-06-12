@@ -31,7 +31,6 @@ router = APIRouter(prefix="/v1/verifier", tags=["verifier"])
 @router.post(
     "/send-request",
     summary="Send a Proof Request to a connection",
-    response_model=PresentationExchange,
 )
 async def send_proof_request(
     body: SendProofRequest,
@@ -97,7 +96,6 @@ async def send_proof_request(
 @router.post(
     "/create-request",
     summary="Create a Proof Request (not bound to a connection)",
-    response_model=PresentationExchange,
 )
 async def create_proof_request(
     body: CreateProofRequest,
@@ -160,7 +158,6 @@ async def create_proof_request(
 @router.post(
     "/accept-request",
     summary="Accept a Proof Request",
-    response_model=PresentationExchange,
 )
 async def accept_proof_request(
     body: AcceptProofRequest,
@@ -310,7 +307,6 @@ async def reject_proof_request(
 @router.get(
     "/proofs",
     summary="Get Presentation Exchange Records",
-    response_model=list[PresentationExchange],
 )
 async def get_proof_records(
     limit: int | None = limit_query_parameter,
@@ -376,7 +372,6 @@ async def get_proof_records(
 @router.get(
     "/proofs/{proof_id}",
     summary="Get a Presentation Exchange Record",
-    response_model=PresentationExchange,
 )
 async def get_proof_record(  # noqa: D417
     proof_id: str,
@@ -459,7 +454,6 @@ async def delete_proof(  # noqa: D417
 @router.get(
     "/proofs/{proof_id}/credentials",
     summary="Get Matching Credentials for a Proof",
-    response_model=list[CredPrecis],
 )
 async def get_credentials_by_proof_id(  # noqa: D417
     proof_id: str,

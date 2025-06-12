@@ -29,7 +29,7 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/v1/connections", tags=["connections"])
 
 
-@router.get("", summary="Fetch Connection Records", response_model=list[Connection])
+@router.get("", summary="Fetch Connection Records")
 async def get_connections(  # pylint: disable=R0913,R0917
     limit: int | None = limit_query_parameter,
     offset: int | None = offset_query_parameter,
@@ -104,9 +104,7 @@ async def get_connections(  # pylint: disable=R0913,R0917
     return result
 
 
-@router.get(
-    "/{connection_id}", summary="Fetch a Connection Record", response_model=Connection
-)
+@router.get("/{connection_id}", summary="Fetch a Connection Record")
 async def get_connection_by_id(  # noqa: D417
     connection_id: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
@@ -199,7 +197,6 @@ async def delete_connection_by_id(  # noqa: D417
 @router.post(
     "/did-exchange/create-request",
     summary="Create a DID Exchange Request",
-    response_model=Connection,
 )
 async def create_did_exchange_request(  # noqa: D417
     their_public_did: str,
@@ -284,7 +281,6 @@ async def create_did_exchange_request(  # noqa: D417
 @router.post(
     "/did-exchange/accept-request",
     summary="Accept a DID Exchange Request",
-    response_model=Connection,
 )
 async def accept_did_exchange_request(  # noqa: D417
     connection_id: str,
@@ -326,7 +322,6 @@ async def accept_did_exchange_request(  # noqa: D417
 @router.post(
     "/did-exchange/reject",
     summary="Reject or Abandon a DID Exchange",
-    response_model=Connection,
 )
 async def reject_did_exchange(
     connection_id: str,
@@ -363,7 +358,6 @@ async def reject_did_exchange(
 @router.post(
     "/did-rotate",
     summary="Begin DID Rotation",
-    response_model=Rotate,
 )
 async def rotate_did(  # noqa: D417
     connection_id: str,
@@ -406,7 +400,6 @@ async def rotate_did(  # noqa: D417
 @router.post(
     "/did-rotate/hangup",
     summary="Hangup DID Rotation",
-    response_model=Hangup,
 )
 async def hangup_did_rotation(  # noqa: D417
     connection_id: str,

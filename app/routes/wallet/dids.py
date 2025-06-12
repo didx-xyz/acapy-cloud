@@ -17,7 +17,7 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/v1/wallet/dids", tags=["wallet"])
 
 
-@router.post("", response_model=DID, summary="Create Local DID")
+@router.post("", summary="Create Local DID")
 async def create_did(
     did_create: DIDCreate | None = None,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
@@ -56,7 +56,7 @@ async def create_did(
     return result
 
 
-@router.get("", response_model=list[DID], summary="List DIDs")
+@router.get("", summary="List DIDs")
 async def list_dids(
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> list[DID]:
@@ -85,7 +85,7 @@ async def list_dids(
     return did_result.results
 
 
-@router.get("/public", response_model=DID, summary="Fetch Public DID")
+@router.get("/public", summary="Fetch Public DID")
 async def get_public_did(
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> DID:
@@ -114,7 +114,7 @@ async def get_public_did(
     return result.result
 
 
-@router.put("/public", response_model=DID, summary="Set Public DID")
+@router.put("/public", summary="Set Public DID")
 async def set_public_did(  # noqa: D417
     did: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
@@ -176,7 +176,7 @@ async def rotate_keypair(  # noqa: D417
     bound_logger.debug("Successfully rotated keypair.")
 
 
-@router.get("/{did}/endpoint", response_model=DIDEndpoint, summary="Get DID Endpoint")
+@router.get("/{did}/endpoint", summary="Get DID Endpoint")
 async def get_did_endpoint(  # noqa: D417
     did: str,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
