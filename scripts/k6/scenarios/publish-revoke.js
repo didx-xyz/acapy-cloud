@@ -66,6 +66,8 @@ export function setup() {
       (tenant) => tenant.issuer_access_token === issuerToken
     );
 
+    log.info(`Sleeping for 15s before publishing revocation...`);
+    sleep(15); // Sleep for 15 seconds before publishing revocation
     log.info(`Publishing revocation for issuer: ${issuerTenant.issuer_wallet_name} (ID: ${issuerTenant.issuer_wallet_id})`);
 
     let publishRevocationResponse;
