@@ -30,7 +30,7 @@ async def test_send_jsonld_credential_cheqd(
     faber_anoncreds_acapy_client: AcaPyClient,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
     alice_member_client: RichAsyncClient,
-):
+) -> None:
     alice_connection_id = faber_anoncreds_and_alice_connection.alice_connection_id
     faber_connection_id = faber_anoncreds_and_alice_connection.faber_connection_id
 
@@ -93,7 +93,7 @@ async def test_send_jsonld_oob_cheqd(
     faber_anoncreds_acapy_client: AcaPyClient,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
     alice_member_client: RichAsyncClient,
-):
+) -> None:
     faber_connection_id = faber_anoncreds_and_alice_connection.faber_connection_id
 
     faber_pub_did = (
@@ -164,7 +164,7 @@ async def test_send_jsonld_request_cheqd(
     faber_anoncreds_client: RichAsyncClient,
     faber_anoncreds_acapy_client: AcaPyClient,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
-):
+) -> None:
     faber_connection_id = faber_anoncreds_and_alice_connection.faber_connection_id
 
     faber_pub_did = (
@@ -240,7 +240,7 @@ async def test_issue_jsonld_cheqd(
     faber_anoncreds_client: RichAsyncClient,
     faber_anoncreds_acapy_client: AcaPyClient,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
-):
+) -> None:
     faber_connection_id = faber_anoncreds_and_alice_connection.faber_connection_id
 
     faber_pub_did = (

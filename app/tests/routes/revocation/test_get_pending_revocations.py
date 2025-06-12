@@ -14,7 +14,7 @@ rev_reg_id = "mocked_rev_reg_id"
 
 
 @pytest.mark.anyio
-async def test_get_pending_revocations_success():
+async def test_get_pending_revocations_success() -> None:
     mock_aries_controller = AsyncMock()
     mock_get_pending_revocations = AsyncMock(return_value=[1, 2, 3])
 
@@ -49,7 +49,7 @@ async def test_get_pending_revocations_success():
 )
 async def test_get_pending_revocations_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-):
+) -> None:
     mock_aries_controller = AsyncMock()
     mock_aries_controller.anoncreds_revocation.get_revocation_registry = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)

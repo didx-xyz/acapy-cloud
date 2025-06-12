@@ -33,7 +33,7 @@ cred_def_response = [
         ({"credential_definition_id": "not_found_id"}, []),
     ],
 )
-async def test_get_credential_definitions_success(params, response):
+async def test_get_credential_definitions_success(params, response) -> None:
     mock_aries_controller = AsyncMock()
 
     with (
@@ -75,7 +75,7 @@ async def test_get_credential_definitions_success(params, response):
 )
 async def test_get_credential_definitions_fail_acapy_error(
     expected_status_code, expected_detail
-):
+) -> None:
     mock_aries_controller = AsyncMock()
 
     with (

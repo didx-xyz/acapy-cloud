@@ -29,7 +29,7 @@ class TestMode:
     )
 
 
-def assert_fail_on_recreating_fixtures(extra_context: str = ""):
+def assert_fail_on_recreating_fixtures(extra_context: str = "") -> None:
     assert RegressionTestConfig.fail_on_recreating_fixtures is False, (
         f"Fixture is being recreated. {extra_context}"
     )

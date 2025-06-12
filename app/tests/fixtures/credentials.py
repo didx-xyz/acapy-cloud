@@ -445,7 +445,7 @@ async def get_or_issue_regression_cred_valid(
     alice_member_client: RichAsyncClient,
     credential_definition_id_revocable: str,
     faber_and_alice_connection: FaberAliceConnect,
-):
+) -> CredentialIdCredDef:
     valid_credential_attribute_name = f"Alice-valid-{credential_type}"
 
     # Wallet Query to fetch credential with this attribute name
@@ -532,7 +532,7 @@ async def get_or_issue_regression_anoncreds_valid(
     alice_member_client: RichAsyncClient,
     anoncreds_credential_definition_id_revocable: str,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
-):
+) -> CredentialIdCredDef:
     return await get_or_issue_regression_cred_valid(
         credential_type="anoncreds",
         faber_client=faber_anoncreds_client,

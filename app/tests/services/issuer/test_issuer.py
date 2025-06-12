@@ -23,7 +23,7 @@ async def test_send_credential(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     cred_ex = MagicMock(spec=CredentialExchange)
 
     mocker.patch.object(
@@ -90,7 +90,7 @@ async def test_get_credentials(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         test_module,
         "client_from_auth",
@@ -165,7 +165,7 @@ async def test_get_credential(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         test_module,
         "client_from_auth",
@@ -192,7 +192,7 @@ async def test_remove_credential_exchange_record(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         test_module,
         "client_from_auth",
@@ -218,7 +218,7 @@ async def test_request_credential(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         test_module,
         "client_from_auth",
@@ -270,7 +270,9 @@ async def test_request_credential(
 
 
 @pytest.mark.anyio
-async def test_request_credential_x_no_schema_cred_def(mock_tenant_auth: AcaPyAuth):
+async def test_request_credential_x_no_schema_cred_def(
+    mock_tenant_auth: AcaPyAuth,
+) -> None:
     v2_record = MagicMock(spec=CredentialExchange)
 
     v2_record.credential_definition_id = None
@@ -295,7 +297,7 @@ async def test_store_credential(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         test_module,
         "client_from_auth",
@@ -319,7 +321,7 @@ async def test_create_offer(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         test_module,
         "client_from_auth",

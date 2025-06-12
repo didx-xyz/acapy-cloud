@@ -1,6 +1,7 @@
 import os
 
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from scalar_fastapi import get_scalar_api_reference
 
 from shared.constants import BUCKET_NAME, PROJECT_VERSION
@@ -36,7 +37,7 @@ app = create_app()
 
 # Use Scalar instead of Swagger
 @app.get("/docs", include_in_schema=False)
-async def scalar_html():
+async def scalar_html() -> HTMLResponse:
     return get_scalar_api_reference(
         openapi_url=app.openapi_url,
         title=app.title,
@@ -44,12 +45,12 @@ async def scalar_html():
 
 
 @app.get("/health/live")
-async def health_live():
+async def health_live() -> dict[str, str]:
     return {"status": "live"}
 
 
 @app.get("/health/ready")
-async def health_ready():
+async def health_ready() -> dict[str, str]:
     """Health check endpoint"""
     try:
         s3_client = get_s3_client()

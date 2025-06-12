@@ -6,7 +6,7 @@ from trustregistry.main import create_app
 from trustregistry.registry import registry_actors, registry_schemas
 
 
-def test_create_app():
+def test_create_app() -> None:
     app = create_app()
     assert app.title == "Trust Registry"
 
@@ -20,7 +20,7 @@ def test_create_app():
 
 
 @pytest.mark.anyio
-async def test_root():
+async def test_root() -> None:
     async with RichAsyncClient() as client:
         response = await client.get(TRUST_REGISTRY_URL)
 
@@ -30,7 +30,7 @@ async def test_root():
 
 
 @pytest.mark.anyio
-async def test_registry():
+async def test_registry() -> None:
     async with RichAsyncClient() as client:
         response = await client.get(f"{TRUST_REGISTRY_URL}/registry")
 

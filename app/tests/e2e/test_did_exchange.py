@@ -36,7 +36,7 @@ async def test_create_did_exchange_request(
     use_did: str | None,
     use_did_method: str | None,
     use_public_did: bool,
-):
+) -> None:
     faber_public_did = await acapy_wallet.get_public_did(
         controller=faber_anoncreds_acapy_client
     )
@@ -121,7 +121,7 @@ async def test_accept_did_exchange_invitation(
     tenant_admin_client: RichAsyncClient,
     faber_anoncreds_acapy_client: AcaPyClient,
     use_public_did: bool,
-):
+) -> None:
     # First disable auto-accept invites for Faber
     faber_wallet_id = get_wallet_id_from_async_client(client=faber_anoncreds_client)
     await tenant_admin_client.put(

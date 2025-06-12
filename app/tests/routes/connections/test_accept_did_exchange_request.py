@@ -20,7 +20,7 @@ created_connection = ConnRecord(
 
 
 @pytest.mark.anyio
-async def test_accept_did_exchange_request_success():
+async def test_accept_did_exchange_request_success() -> None:
     mock_aries_controller = AsyncMock()
     mock_aries_controller.did_exchange.accept_request = AsyncMock(
         return_value=created_connection
@@ -61,7 +61,7 @@ async def test_accept_did_exchange_request_success():
 )
 async def test_accept_did_exchange_request_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-):
+) -> None:
     mock_aries_controller = AsyncMock()
     mock_aries_controller.did_exchange.accept_request = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)

@@ -4,7 +4,7 @@ from app.models.jws import JWSCreateRequest
 from shared.exceptions.cloudapi_value_error import CloudApiValueError
 
 
-def test_jws_create_request():
+def test_jws_create_request() -> None:
     # no did or verification_method
     with pytest.raises(CloudApiValueError) as exc:
         JWSCreateRequest(payload={"test": "test_value"})

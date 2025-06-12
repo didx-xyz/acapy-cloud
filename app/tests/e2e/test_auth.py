@@ -25,7 +25,7 @@ skip_regression_test_reason = "Don't need to cover auth tests in regression mode
     reason=skip_regression_test_reason,
 )
 @pytest.mark.anyio
-async def test_invalid_acapy_auth_header(alice_acapy_client: AcaPyClient):
+async def test_invalid_acapy_auth_header(alice_acapy_client: AcaPyClient) -> None:
     # Modify the AcaPyClient to use the wrong header -- assert ACA-Py auth error
     existing_token = alice_acapy_client.api_client.default_headers[
         "Authorization"
@@ -46,7 +46,7 @@ async def test_invalid_acapy_auth_header(alice_acapy_client: AcaPyClient):
     TestMode.regression_run in TestMode.fixture_params,
     reason=skip_regression_test_reason,
 )
-async def test_jwt_invalid_token_error(tenant_admin_client: RichAsyncClient):
+async def test_jwt_invalid_token_error(tenant_admin_client: RichAsyncClient) -> None:
     # Step 1: Create a tenant and get a valid access token
     response = await tenant_admin_client.post(
         TENANTS_BASE_PATH,
@@ -99,7 +99,9 @@ async def test_jwt_invalid_token_error(tenant_admin_client: RichAsyncClient):
     TestMode.regression_run in TestMode.fixture_params,
     reason=skip_regression_test_reason,
 )
-async def test_invalid_token_error_after_rotation(tenant_admin_client: RichAsyncClient):
+async def test_invalid_token_error_after_rotation(
+    tenant_admin_client: RichAsyncClient,
+) -> None:
     # Step 1: Create a tenant and get a valid access token
     response = await tenant_admin_client.post(
         TENANTS_BASE_PATH,

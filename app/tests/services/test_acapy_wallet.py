@@ -13,7 +13,7 @@ from app.services import acapy_wallet
 
 
 @pytest.mark.anyio
-async def test_assert_public_did(mock_agent_controller: AcaPyClient):
+async def test_assert_public_did(mock_agent_controller: AcaPyClient) -> None:
     did_cheqd = "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
     did_object = DID(
         did=did_cheqd,
@@ -37,7 +37,7 @@ async def test_assert_public_did(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_error_on_get_pub_did(mock_agent_controller: AcaPyClient):
+async def test_error_on_get_pub_did(mock_agent_controller: AcaPyClient) -> None:
     mock_agent_controller.wallet.get_public_did.return_value = DIDResult(result=None)
 
     with pytest.raises(CloudApiException) as exc:
@@ -47,7 +47,7 @@ async def test_error_on_get_pub_did(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_error_on_assign_pub_did(mock_agent_controller: AcaPyClient):
+async def test_error_on_assign_pub_did(mock_agent_controller: AcaPyClient) -> None:
     mock_agent_controller.wallet.set_public_did.return_value = DIDResult(result=None)
 
     with pytest.raises(CloudApiException) as exc:
@@ -57,7 +57,7 @@ async def test_error_on_assign_pub_did(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_create_cheqd_did_success(mock_agent_controller: AcaPyClient):
+async def test_create_cheqd_did_success(mock_agent_controller: AcaPyClient) -> None:
     did_create_request = DIDCreate(
         method="cheqd",
         seed="testseed000000000000000000000001",
@@ -93,7 +93,9 @@ async def test_create_cheqd_did_success(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_create_cheqd_did_success_no_seed(mock_agent_controller: AcaPyClient):
+async def test_create_cheqd_did_success_no_seed(
+    mock_agent_controller: AcaPyClient,
+) -> None:
     did_create_request = DIDCreate(method="cheqd")
 
     expected_did = "did:cheqd:testnet:zxywv987654321"
@@ -124,7 +126,9 @@ async def test_create_cheqd_did_success_no_seed(mock_agent_controller: AcaPyClie
 
 
 @pytest.mark.anyio
-async def test_create_cheqd_did_fail_missing_did(mock_agent_controller: AcaPyClient):
+async def test_create_cheqd_did_fail_missing_did(
+    mock_agent_controller: AcaPyClient,
+) -> None:
     did_create_request = DIDCreate(method="cheqd", options={"network": "testnet"})
 
     mock_agent_controller.did.did_cheqd_create_post.return_value = (
@@ -138,7 +142,9 @@ async def test_create_cheqd_did_fail_missing_did(mock_agent_controller: AcaPyCli
 
 
 @pytest.mark.anyio
-async def test_create_cheqd_did_fail_missing_verkey(mock_agent_controller: AcaPyClient):
+async def test_create_cheqd_did_fail_missing_verkey(
+    mock_agent_controller: AcaPyClient,
+) -> None:
     did_create_request = DIDCreate(method="cheqd", options={"network": "testnet"})
 
     mock_agent_controller.did.did_cheqd_create_post.return_value = (

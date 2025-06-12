@@ -8,7 +8,9 @@ from shared.log_config import get_logger
 logger = get_logger(__name__)
 
 
-async def onboard_verifier(*, verifier_controller: AcaPyClient, verifier_label: str):
+async def onboard_verifier(
+    *, verifier_controller: AcaPyClient, verifier_label: str
+) -> OnboardResult:
     """Onboard the controller as verifier.
 
     The onboarding will take care of the following:

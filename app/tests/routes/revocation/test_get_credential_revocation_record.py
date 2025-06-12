@@ -18,7 +18,7 @@ from app.routes.revocation import get_credential_revocation_record
 )
 async def test_get_credential_revocation_record_success(
     credential_exchange_id, credential_revocation_id, revocation_registry_id
-):
+) -> None:
     mock_aries_controller = AsyncMock()
     mock_get_revocation_record = AsyncMock()
 
@@ -59,7 +59,7 @@ async def test_get_credential_revocation_record_success(
 )
 async def test_get_credential_revocation_record_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-):
+) -> None:
     mock_aries_controller = AsyncMock()
     mock_aries_controller.anoncreds_revocation.get_cred_rev_record = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
@@ -87,7 +87,7 @@ async def test_get_credential_revocation_record_fail_acapy_error(
 )
 async def test_get_credential_revocation_record_fail_bad_request(
     credential_exchange_id, credential_revocation_id, revocation_registry_id
-):
+) -> None:
     with pytest.raises(
         HTTPException,
         match="If credential_exchange_id is not provided then both "

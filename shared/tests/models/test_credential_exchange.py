@@ -15,7 +15,7 @@ from shared.models.credential_exchange import (
 )
 
 
-def test_credential_exchange_model():
+def test_credential_exchange_model() -> None:
     # Test creating a CredentialExchange instance
     exchange = CredentialExchange(
         attributes={"name": "Alice"},
@@ -48,7 +48,7 @@ def test_credential_exchange_model():
     assert exchange.updated_at == "2023-01-01T01:00:00Z"
 
 
-def test_credential_record_to_model_v2():
+def test_credential_record_to_model_v2() -> None:
     # Mock a V20CredExRecord
     record = V20CredExRecord(
         cred_ex_id="cred-ex-id",
@@ -80,7 +80,7 @@ def test_credential_record_to_model_v2():
     assert model.type == "anoncreds"
 
 
-def test_schema_cred_def_from_record():
+def test_schema_cred_def_from_record() -> None:
     # Test with a record having cred_offer
     record = V20CredExRecord(
         by_format={
@@ -128,7 +128,7 @@ def test_schema_cred_def_from_record():
     assert cred_def_id is None
 
 
-def test_attributes_from_record_v2():
+def test_attributes_from_record_v2() -> None:
     # Test with cred_preview
     record = V20CredExRecord(
         cred_preview=V20CredPreview(

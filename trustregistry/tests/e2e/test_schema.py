@@ -12,14 +12,14 @@ updated_schema_id = "string_updated:2:string_updated:string_updated"
 
 
 @pytest.mark.anyio
-async def test_get_schemas():
+async def test_get_schemas() -> None:
     async with RichAsyncClient() as client:
         response = await client.get(f"{TRUST_REGISTRY_URL}/registry/schemas")
     assert response.status_code == 200
 
 
 @pytest.mark.anyio
-async def test_register_schema():
+async def test_register_schema() -> None:
     schema_dict = {
         "id": schema_id,
         "did": "string",
@@ -53,7 +53,7 @@ async def test_register_schema():
 
 
 @pytest.mark.anyio
-async def test_get_schema_by_id():
+async def test_get_schema_by_id() -> None:
     schema_dict = {
         "id": schema_id,
         "did": "string",
@@ -76,7 +76,7 @@ async def test_get_schema_by_id():
 
 
 @pytest.mark.anyio
-async def test_update_schema():
+async def test_update_schema() -> None:
     schema_dict = {
         "id": updated_schema_id,
         "did": "string_updated",
@@ -109,7 +109,7 @@ async def test_update_schema():
 
 
 @pytest.mark.anyio
-async def test_remove_schema():
+async def test_remove_schema() -> None:
     async with RichAsyncClient(raise_status_error=False) as client:
         response = await client.delete(
             f"{TRUST_REGISTRY_URL}/registry/schemas/{updated_schema_id}"
@@ -124,7 +124,7 @@ async def test_remove_schema():
         assert "Schema not found" in response.json()["detail"]
 
 
-def test__get_schema_attrs():
+def test__get_schema_attrs() -> None:
     res = _get_schema_attrs(schema_id=SchemaID(schema_id="abc:2:Peter Parker:0.4.20"))
 
     assert res == ["abc", "2", "Peter Parker", "0.4.20"]

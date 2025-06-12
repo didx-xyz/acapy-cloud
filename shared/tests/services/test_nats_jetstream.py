@@ -16,7 +16,7 @@ from shared.services.nats_jetstream import (
 
 
 @pytest.mark.anyio
-async def test_nats_status_error_callback():
+async def test_nats_status_error_callback() -> None:
     nats_status = NATSStatus()
     with patch("shared.services.nats_jetstream.logger") as mock_logger:
         await nats_status.error_callback(Exception("Test error"))
@@ -24,7 +24,7 @@ async def test_nats_status_error_callback():
 
 
 @pytest.mark.anyio
-async def test_nats_status_disconnected_callback():
+async def test_nats_status_disconnected_callback() -> None:
     nats_status = NATSStatus()
     with patch("shared.services.nats_jetstream.logger") as mock_logger:
         await nats_status.disconnected_callback()
@@ -32,7 +32,7 @@ async def test_nats_status_disconnected_callback():
 
 
 @pytest.mark.anyio
-async def test_nats_status_reconnected_callback():
+async def test_nats_status_reconnected_callback() -> None:
     nats_status = NATSStatus()
     with patch("shared.services.nats_jetstream.logger") as mock_logger:
         await nats_status.reconnected_callback()
@@ -40,7 +40,7 @@ async def test_nats_status_reconnected_callback():
 
 
 @pytest.mark.anyio
-async def test_nats_status_closed_callback():
+async def test_nats_status_closed_callback() -> None:
     nats_status = NATSStatus()
     with patch("shared.services.nats_jetstream.logger") as mock_logger:
         await nats_status.closed_callback()
@@ -48,7 +48,7 @@ async def test_nats_status_closed_callback():
 
 
 @pytest.mark.anyio
-async def test_init_nats_client_with_creds():
+async def test_init_nats_client_with_creds() -> None:
     with (
         patch("shared.services.nats_jetstream.NATS_CREDS_FILE", "test_creds.conf"),
         patch("shared.services.nats_jetstream.nats.connect") as mock_connect,
@@ -66,7 +66,7 @@ async def test_init_nats_client_with_creds():
 
 
 @pytest.mark.anyio
-async def test_init_nats_client_without_creds():
+async def test_init_nats_client_without_creds() -> None:
     with (
         patch("shared.services.nats_jetstream.NATS_CREDS_FILE", None),
         patch(
@@ -90,7 +90,7 @@ async def test_init_nats_client_without_creds():
 
 
 @pytest.mark.anyio
-async def test_init_nats_client_connection_error():
+async def test_init_nats_client_connection_error() -> None:
     with (
         patch("shared.services.nats_jetstream.NATS_CREDS_FILE", None),
         patch("shared.services.nats_jetstream.nats.connect") as mock_connect,
@@ -108,7 +108,7 @@ async def test_init_nats_client_connection_error():
 
 
 @pytest.mark.anyio
-async def test_nats_status_error_callback_unexpected_eof():
+async def test_nats_status_error_callback_unexpected_eof() -> None:
     nats_status = NATSStatus()
     with patch("shared.services.nats_jetstream.logger") as mock_logger:
         exc = UnexpectedEOF()
@@ -120,7 +120,7 @@ async def test_nats_status_error_callback_unexpected_eof():
     "exc", [NoServersError(), TimeoutError(), ConnectionClosedError()]
 )
 @pytest.mark.anyio
-async def test_nats_status_error_callback_connection_issues(exc):
+async def test_nats_status_error_callback_connection_issues(exc) -> None:
     nats_status = NATSStatus()
     with patch("shared.services.nats_jetstream.logger") as mock_logger:
         await nats_status.error_callback(exc)
@@ -128,7 +128,7 @@ async def test_nats_status_error_callback_connection_issues(exc):
 
 
 @pytest.mark.anyio
-async def test_nats_status_error_callback_auth_error():
+async def test_nats_status_error_callback_auth_error() -> None:
     nats_status = NATSStatus()
     with patch("shared.services.nats_jetstream.logger") as mock_logger:
         exc = AuthorizationError()
@@ -139,7 +139,7 @@ async def test_nats_status_error_callback_auth_error():
 
 
 @pytest.mark.anyio
-async def test_nats_status_error_callback_empty_response():
+async def test_nats_status_error_callback_empty_response() -> None:
     nats_status = NATSStatus()
     with patch("shared.services.nats_jetstream.logger") as mock_logger:
         exc = Exception("empty response from server")
@@ -152,7 +152,7 @@ async def test_nats_status_error_callback_empty_response():
 
 @patch("shared.services.nats_jetstream.time.time", return_value=1000)
 @pytest.mark.anyio
-async def test_nats_status_error_callback_during_reconnect(mock_time):
+async def test_nats_status_error_callback_during_reconnect(mock_time) -> None:
     nats_status = NATSStatus()
     nats_status.last_disconnect_time = 1000 - 2  # 2 seconds ago
     with patch("shared.services.nats_jetstream.logger") as mock_logger:
@@ -166,7 +166,7 @@ async def test_nats_status_error_callback_during_reconnect(mock_time):
 
 @patch("shared.services.nats_jetstream.time.time", return_value=1000)
 @pytest.mark.anyio
-async def test_nats_status_error_callback_after_reconnect_threshold(mock_time):
+async def test_nats_status_error_callback_after_reconnect_threshold(mock_time) -> None:
     nats_status = NATSStatus()
     nats_status.last_disconnect_time = 1000 - 10  # 10 seconds ago
     with patch("shared.services.nats_jetstream.logger") as mock_logger:
@@ -181,7 +181,7 @@ async def test_nats_status_error_callback_after_reconnect_threshold(mock_time):
 
 
 @pytest.mark.anyio
-async def test_nats_status_disconnected_callback_max_attempts():
+async def test_nats_status_disconnected_callback_max_attempts() -> None:
     nats_status = NATSStatus()
     nats_status.reconnect_attempts = MAX_ATTEMPTS_BEFORE_ERROR
     with patch("shared.services.nats_jetstream.logger") as mock_logger:
@@ -194,7 +194,7 @@ async def test_nats_status_disconnected_callback_max_attempts():
 
 @patch("shared.services.nats_jetstream.time.time", return_value=1000)
 @pytest.mark.anyio
-async def test_nats_status_reconnected_callback_within_threshold(mock_time):
+async def test_nats_status_reconnected_callback_within_threshold(mock_time) -> None:
     nats_status = NATSStatus()
     nats_status.last_disconnect_time = 1000 - 1  # 1 second ago
     nats_status.reconnect_attempts = 0
@@ -209,7 +209,7 @@ async def test_nats_status_reconnected_callback_within_threshold(mock_time):
 
 @patch("shared.services.nats_jetstream.time.time", return_value=1000)
 @pytest.mark.anyio
-async def test_nats_status_reconnected_callback_after_delay(mock_time):
+async def test_nats_status_reconnected_callback_after_delay(mock_time) -> None:
     nats_status = NATSStatus()
     nats_status.last_disconnect_time = 1000 - 10  # 10 seconds ago
     nats_status.reconnect_attempts = 2

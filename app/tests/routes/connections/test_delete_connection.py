@@ -15,7 +15,7 @@ connection_id = "test_connection_id"
 
 
 @pytest.mark.anyio
-async def test_delete_connection_by_id_success():
+async def test_delete_connection_by_id_success() -> None:
     mock_aries_controller = AsyncMock()
 
     mock_aries_controller.connection.get_connection = AsyncMock(
@@ -46,7 +46,7 @@ async def test_delete_connection_by_id_success():
 
 
 @pytest.mark.anyio
-async def test_delete_connection_by_id_success_did_exchange():
+async def test_delete_connection_by_id_success_did_exchange() -> None:
     mock_aries_controller = AsyncMock()
 
     # Mock to return a connection that uses the didexchange protocol
@@ -91,7 +91,7 @@ async def test_delete_connection_by_id_success_did_exchange():
 )
 async def test_delete_connection_by_id_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-):
+) -> None:
     mock_aries_controller = AsyncMock()
     mock_aries_controller.connection.delete_connection = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)

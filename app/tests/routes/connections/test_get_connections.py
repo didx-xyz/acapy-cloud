@@ -39,7 +39,7 @@ connections_response = ConnectionList(
         {"descending": True},
     ],
 )
-async def test_get_connections_success(params):
+async def test_get_connections_success(params) -> None:
     mock_aries_controller = AsyncMock()
     mock_aries_controller.connection.get_connections = AsyncMock(
         return_value=connections_response
@@ -102,7 +102,7 @@ async def test_get_connections_success(params):
 )
 async def test_get_connections_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-):
+) -> None:
     mock_aries_controller = AsyncMock()
     mock_aries_controller.connection.get_connections = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)

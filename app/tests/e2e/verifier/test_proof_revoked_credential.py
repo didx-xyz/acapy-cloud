@@ -37,7 +37,7 @@ async def test_proof_revoked_credential_anoncreds(
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
-):
+) -> None:
     await proof_revoked_credential(
         proof_type="anoncreds",
         credential_definition_id=anoncreds_credential_definition_id_revocable,
@@ -53,7 +53,7 @@ async def proof_revoked_credential(
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
-):
+) -> None:
     await asyncio.sleep(14)  # moment for revocation registry to update
     # todo: remove sleep when issue resolved: https://github.com/openwallet-foundation/acapy/issues/3018
 
@@ -139,7 +139,7 @@ async def test_regression_proof_revoked_anoncreds_credential(
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
-):
+) -> None:
     await regression_proof_revoked_credential(
         "anoncreds",
         get_or_issue_regression_anoncreds_revoked,
@@ -155,7 +155,7 @@ async def regression_proof_revoked_credential(
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
-):
+) -> None:
     await asyncio.sleep(14)  # moment for revocation registry to update
     # todo: remove sleep when issue resolved: https://github.com/openwallet-foundation/acapy/issues/3018
 

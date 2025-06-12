@@ -8,7 +8,7 @@ CONNECTIONS_BASE_PATH = router.prefix
 
 
 @pytest.mark.anyio
-async def test_error_handler():
+async def test_error_handler() -> None:
     async with RichAsyncClient(
         base_url=TENANT_FASTAPI_ENDPOINT, raise_status_error=False
     ) as client:

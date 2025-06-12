@@ -11,7 +11,7 @@ credential_exchange_id = "v2-db9d7025-b276-4c32-ae38-fbad41864112"
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("auto_publish_to_ledger", [True, False])
-async def test_revoke_credential_success(auto_publish_to_ledger):
+async def test_revoke_credential_success(auto_publish_to_ledger) -> None:
     mock_aries_controller = AsyncMock()
     mock_revoke_credential = AsyncMock()
     with (
@@ -49,7 +49,7 @@ async def test_revoke_credential_success(auto_publish_to_ledger):
 )
 async def test_revoke_credential_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-):
+) -> None:
     mock_aries_controller = AsyncMock()
     mock_revoke_credential = AsyncMock(
         side_effect=exception_class(

@@ -31,15 +31,15 @@ MAX_ATTEMPTS_BEFORE_ERROR = int(
 
 
 class NATSStatus:
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the NATS status tracker."""
         self.last_disconnect_time = None
         self.reconnect_attempts = 0
 
-    def _reset(self):
+    def _reset(self) -> None:
         self.__init__()
 
-    async def error_callback(self, e):
+    async def error_callback(self, e: Exception) -> None:
         error_str = str(e).lower()
         if isinstance(e, UnexpectedEOF):
             logger.warning("NATS unexpected EOF error: {}", e)
@@ -62,7 +62,7 @@ class NATSStatus:
                     e,
                 )
 
-    async def disconnected_callback(self):
+    async def disconnected_callback(self) -> None:
         self.last_disconnect_time = time.time()
         self.reconnect_attempts += 1
         if self.reconnect_attempts >= MAX_ATTEMPTS_BEFORE_ERROR:
@@ -75,7 +75,7 @@ class NATSStatus:
                 "Disconnected from NATS server; attempting reconnect (possibly due to scale-down)"
             )
 
-    async def reconnected_callback(self):
+    async def reconnected_callback(self) -> None:
         if self.last_disconnect_time:
             seconds_since_disconnect = time.time() - self.last_disconnect_time
             if (
@@ -97,7 +97,7 @@ class NATSStatus:
         # Reset state on successful reconnect
         self._reset()
 
-    async def closed_callback(self):
+    async def closed_callback(self) -> None:
         logger.info("NATS connection closed")
 
 

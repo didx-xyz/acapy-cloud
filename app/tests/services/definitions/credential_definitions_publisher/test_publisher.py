@@ -12,22 +12,22 @@ from app.services.definitions.credential_definition_publisher import (
 
 
 @pytest.fixture
-def mock_logger():
+def mock_logger() -> MagicMock:
     return MagicMock()
 
 
 @pytest.fixture
-def mock_controller():
+def mock_controller() -> AsyncMock:
     return AsyncMock()
 
 
 @pytest.fixture
-def publisher(mock_controller, mock_logger):
+def publisher(mock_controller, mock_logger) -> CredentialDefinitionPublisher:
     return CredentialDefinitionPublisher(mock_controller, mock_logger)
 
 
 @pytest.mark.anyio
-async def test_publish_anoncreds_credential_definition_success(publisher):
+async def test_publish_anoncreds_credential_definition_success(publisher) -> None:
     mock_request_body = MagicMock()
     mock_result = MagicMock()
 
@@ -42,7 +42,9 @@ async def test_publish_anoncreds_credential_definition_success(publisher):
 
 
 @pytest.mark.anyio
-async def test_publish_anoncreds_credential_definition_already_exists(publisher):
+async def test_publish_anoncreds_credential_definition_already_exists(
+    publisher,
+) -> None:
     mock_request_body = MagicMock()
 
     with patch(
@@ -56,7 +58,7 @@ async def test_publish_anoncreds_credential_definition_already_exists(publisher)
 
 
 @pytest.mark.anyio
-async def test_publish_anoncreds_credential_definition_other_error(publisher):
+async def test_publish_anoncreds_credential_definition_other_error(publisher) -> None:
     mock_request_body = MagicMock()
 
     with patch(
@@ -73,7 +75,7 @@ async def test_publish_anoncreds_credential_definition_other_error(publisher):
 
 
 @pytest.mark.anyio
-async def test_wait_for_revocation_registry_success(publisher):
+async def test_wait_for_revocation_registry_success(publisher) -> None:
     mock_cred_def_id = "test_cred_def_id"
 
     with (
@@ -90,7 +92,7 @@ async def test_wait_for_revocation_registry_success(publisher):
 
 
 @pytest.mark.anyio
-async def test_wait_for_revocation_registry_timeout(publisher):
+async def test_wait_for_revocation_registry_timeout(publisher) -> None:
     mock_cred_def_id = "test_cred_def_id"
 
     with (

@@ -89,11 +89,11 @@ def acapy_auth_tenant_admin(
         raise HTTPException(403, "Unauthorized")
 
 
-def verify_wallet_access(auth: AcaPyAuthVerified, wallet_id: str):
+def verify_wallet_access(auth: AcaPyAuthVerified, wallet_id: str) -> None:
     if auth.wallet_id not in ("admin", wallet_id):
         raise HTTPException(403, "Unauthorized")
 
 
-def tenant_api_key(tenant_token: str):
+def tenant_api_key(tenant_token: str) -> str:
     """Get the cloud api key for a tenant with specified role."""
     return f"tenant.{tenant_token}"

@@ -18,7 +18,7 @@ mock_schemas = [
 
 
 @pytest.mark.anyio
-async def test_get_schemas_as_governance_success():
+async def test_get_schemas_as_governance_success() -> None:
     mock_aries_controller = AsyncMock()
     mock_aries_controller.configuration.host = "https://governance-agent-url"
     mock_aries_controller.server.get_config = AsyncMock(
@@ -51,7 +51,7 @@ async def test_get_schemas_as_governance_success():
 
 
 @pytest.mark.anyio
-async def test_get_schemas_as_governance_non_governance_agent():
+async def test_get_schemas_as_governance_non_governance_agent() -> None:
     mock_aries_controller = AsyncMock()
     mock_aries_controller.configuration.host = "https://non-governance-agent-url"
 
@@ -69,7 +69,7 @@ async def test_get_schemas_as_governance_non_governance_agent():
 
 
 @pytest.mark.anyio
-async def test_get_schemas_as_governance_with_filters():
+async def test_get_schemas_as_governance_with_filters() -> None:
     mock_aries_controller = AsyncMock()
     mock_aries_controller.configuration.host = "https://governance-agent-url"
     mock_aries_controller.server.get_config = AsyncMock(
@@ -108,7 +108,7 @@ async def test_get_schemas_as_governance_with_filters():
 
 
 @pytest.mark.anyio
-async def test_get_schemas_as_governance_no_schemas():
+async def test_get_schemas_as_governance_no_schemas() -> None:
     mock_aries_controller = AsyncMock()
     mock_aries_controller.configuration.host = "https://governance-agent-url"
     mock_aries_controller.server.get_config = AsyncMock(
@@ -134,7 +134,7 @@ async def test_get_schemas_as_governance_no_schemas():
 
 
 @pytest.mark.anyio
-async def test_get_schemas_as_governance_anoncreds():
+async def test_get_schemas_as_governance_anoncreds() -> None:
     mock_aries_controller = AsyncMock()
     mock_aries_controller.configuration.host = "https://governance-agent-url"
     mock_aries_controller.server.get_config = AsyncMock(

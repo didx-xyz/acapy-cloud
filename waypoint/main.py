@@ -1,9 +1,11 @@
 import asyncio
 import os
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 from scalar_fastapi import get_scalar_api_reference
 
 from shared.constants import PROJECT_VERSION
@@ -19,7 +21,7 @@ logger = get_logger(__name__)
 
 
 @asynccontextmanager
-async def app_lifespan(_: FastAPI):
+async def app_lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Waypoint Service startup")
 
     container = Container()
@@ -63,7 +65,7 @@ app = create_app()
 
 # Use Scalar instead of Swagger
 @app.get("/docs", include_in_schema=False)
-async def scalar_html():
+async def scalar_html() -> HTMLResponse:
     return get_scalar_api_reference(
         openapi_url=app.openapi_url,
         title=app.title,
@@ -71,7 +73,7 @@ async def scalar_html():
 
 
 @app.get("/health/live")
-async def health_live():
+async def health_live() -> dict[str, str]:
     return {"status": "live"}
 
 
@@ -81,7 +83,7 @@ async def health_ready(
     nats_processor: NatsEventsProcessor = Depends(
         Provide[Container.nats_events_processor]
     ),
-):
+) -> dict[str, str]:
     try:
         jetstream_status = await asyncio.wait_for(
             nats_processor.check_jetstream(), timeout=2.0

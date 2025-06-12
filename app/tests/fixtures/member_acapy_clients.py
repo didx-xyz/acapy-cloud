@@ -24,7 +24,7 @@ async def tenant_admin_acapy_client() -> AsyncGenerator[AcaPyClient, Any]:
         yield acapy_client
 
 
-def get_token(client):
+def get_token(client: RichAsyncClient) -> str:
     # We extract the token from the x-api-key header as that's the easiest
     # method to create an AcaPyClient from an AsyncClient
     [_, token] = client.headers.get("x-api-key").split(".", maxsplit=1)

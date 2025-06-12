@@ -13,7 +13,7 @@ from app.routes.connections import hangup_did_rotation
 
 
 @pytest.mark.anyio
-async def test_hangup_did_rotation_success():
+async def test_hangup_did_rotation_success() -> None:
     hangup_response = Hangup()
     mock_aries_controller = AsyncMock()
     mock_aries_controller.did_rotate.hangup = AsyncMock(return_value=hangup_response)
@@ -49,7 +49,7 @@ async def test_hangup_did_rotation_success():
 )
 async def test_hangup_did_rotation_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-):
+) -> None:
     mock_aries_controller = AsyncMock()
     mock_aries_controller.did_rotate.hangup = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)

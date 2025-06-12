@@ -105,7 +105,7 @@ async def assert_valid_prover(  # pylint: disable=R0912
 async def assert_valid_verifier(
     aries_controller: AcaPyClient,
     proof_request: SendProofRequest,
-):
+) -> None:
     """Check transaction requirements against trust registry for verifier."""
     # 1. Check agent has public did
     # CASE: Agent has public DID

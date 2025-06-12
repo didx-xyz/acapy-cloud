@@ -8,7 +8,7 @@ from shared.util.rich_async_client import RichAsyncClient
 
 
 @pytest.mark.anyio
-async def test_sign_sdjws_success(alice_member_client: RichAsyncClient):
+async def test_sign_sdjws_success(alice_member_client: RichAsyncClient) -> None:
     # Create DID:key for Alice
     did_info = await alice_member_client.post(
         "v1/wallet/dids", json=DIDCreate(method="key").model_dump()
@@ -31,7 +31,7 @@ async def test_sign_sdjws_success(alice_member_client: RichAsyncClient):
 
 
 @pytest.mark.anyio
-async def test_sign_sdjws_x(alice_member_client: RichAsyncClient):
+async def test_sign_sdjws_x(alice_member_client: RichAsyncClient) -> None:
     with pytest.raises(CloudApiValueError):
         # Requires at least one of did or verification method
         SDJWSCreateRequest(
@@ -58,7 +58,9 @@ async def test_sign_sdjws_x(alice_member_client: RichAsyncClient):
 
 
 @pytest.mark.anyio
-async def test_sign_and_verify_sdjws_success(alice_member_client: RichAsyncClient):
+async def test_sign_and_verify_sdjws_success(
+    alice_member_client: RichAsyncClient,
+) -> None:
     # Create DID:key for Alice
     did_info = await alice_member_client.post(
         "v1/wallet/dids", json=DIDCreate(method="key").model_dump()
@@ -86,7 +88,7 @@ async def test_sign_and_verify_sdjws_success(alice_member_client: RichAsyncClien
 
 
 @pytest.mark.anyio
-async def test_verify_sdjws_x(alice_member_client: RichAsyncClient):
+async def test_verify_sdjws_x(alice_member_client: RichAsyncClient) -> None:
     with pytest.raises(HTTPException) as exc_info:
         await alice_member_client.post(
             "/v1/wallet/sd-jws/verify", json={"sd_jws": "bad value"}

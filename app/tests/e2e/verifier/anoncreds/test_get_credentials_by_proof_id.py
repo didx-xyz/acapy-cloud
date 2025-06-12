@@ -22,7 +22,7 @@ async def test_limit_and_offset(
     acme_and_alice_connection: AcmeAliceConnect,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-):
+) -> None:
     request_body = {
         "connection_id": acme_and_alice_connection.acme_connection_id,
         "anoncreds_proof_request": {

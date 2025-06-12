@@ -6,7 +6,7 @@ from shared import RichAsyncClient
 TENANT_BASE_PATH = router.prefix
 
 
-def append_random_string(name):
+def append_random_string(name) -> str:
     return f"{name}_{random_string(5)}"
 
 
@@ -17,7 +17,9 @@ async def post_tenant_request(
     return CreateTenantResponse.model_validate_json(response.text)
 
 
-async def create_issuer_tenant(admin_client: RichAsyncClient, name: str):
+async def create_issuer_tenant(
+    admin_client: RichAsyncClient, name: str
+) -> CreateTenantResponse:
     request = CreateTenantRequest(
         wallet_label=append_random_string(name),
         roles=["issuer"],
@@ -26,7 +28,9 @@ async def create_issuer_tenant(admin_client: RichAsyncClient, name: str):
     return await post_tenant_request(admin_client, request)
 
 
-async def create_verifier_tenant(admin_client: RichAsyncClient, name: str):
+async def create_verifier_tenant(
+    admin_client: RichAsyncClient, name: str
+) -> CreateTenantResponse:
     request = CreateTenantRequest(
         wallet_label=append_random_string(name),
         roles=["verifier"],
@@ -35,7 +39,9 @@ async def create_verifier_tenant(admin_client: RichAsyncClient, name: str):
     return await post_tenant_request(admin_client, request)
 
 
-async def create_issuer_and_verifier_tenant(admin_client: RichAsyncClient, name: str):
+async def create_issuer_and_verifier_tenant(
+    admin_client: RichAsyncClient, name: str
+) -> CreateTenantResponse:
     request = CreateTenantRequest(
         wallet_label=append_random_string(name),
         roles=["issuer", "verifier"],
@@ -44,7 +50,9 @@ async def create_issuer_and_verifier_tenant(admin_client: RichAsyncClient, name:
     return await post_tenant_request(admin_client, request)
 
 
-async def create_tenant(admin_client: RichAsyncClient, name: str):
+async def create_tenant(
+    admin_client: RichAsyncClient, name: str
+) -> CreateTenantResponse:
     request = CreateTenantRequest(
         image_url="https://aries.ca/images/sample.png",
         wallet_label=append_random_string(name),
@@ -53,5 +61,5 @@ async def create_tenant(admin_client: RichAsyncClient, name: str):
     return await post_tenant_request(admin_client, request)
 
 
-async def delete_tenant(admin_client: RichAsyncClient, wallet_id: str):
+async def delete_tenant(admin_client: RichAsyncClient, wallet_id: str) -> None:
     await admin_client.delete(f"{TENANT_BASE_PATH}/{wallet_id}")

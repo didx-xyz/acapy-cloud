@@ -1,9 +1,11 @@
 import hashlib
 import os
 import tempfile
+from collections.abc import Generator
 
 import base58
 from boto3 import client as boto_client
+from botocore.client import BaseClient
 from botocore.exceptions import ClientError
 from fastapi import File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -20,7 +22,7 @@ router = APIRouter(
 
 
 # Initialize S3 client
-def get_s3_client():
+def get_s3_client() -> BaseClient:
     return boto_client(
         "s3",
         endpoint_url=os.getenv("S3_ENDPOINT_URL", None),
@@ -30,7 +32,7 @@ def get_s3_client():
 @router.get("/hash/{tails_hash}")
 async def get_file_by_hash(
     tails_hash: str,
-):
+) -> StreamingResponse:
     """Stream file content from S3"""
     try:
         s3_client = get_s3_client()
@@ -44,7 +46,7 @@ async def get_file_by_hash(
         s3_response = s3_client.get_object(Bucket=BUCKET_NAME, Key=tails_hash)
 
         # Create streaming response
-        def generate():
+        def generate() -> Generator[bytes, None, None]:
             try:
                 # Read in chunks to avoid loading entire file into memory
                 while True:
@@ -77,7 +79,7 @@ async def get_file_by_hash(
 async def put_file_by_hash(
     tails_hash: str,
     tails: UploadFile = File(...),
-):
+) -> JSONResponse:
     """Upload a single file to S3."""
     sha256 = hashlib.sha256()
 

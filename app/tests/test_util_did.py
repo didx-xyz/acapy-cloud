@@ -4,7 +4,7 @@ from app.util.did import ed25519_verkey_to_did_key
 from shared.exceptions import CloudApiValueError
 
 
-def test_ed25519_verkey_to_did_key():
+def test_ed25519_verkey_to_did_key() -> None:
     verkey = "8HH5gYEeNc3z7PYXmd54d4x6qAfCNrqQqEB3nS7Zfu7K"
     did_key = "did:key:z6MkmjY8GnV5i9YTDtPETC2uUAW6ejw3nk5mXF5yci5ab7th"
 

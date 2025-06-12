@@ -6,7 +6,7 @@ from app.util.definitions import (
 )
 
 
-def test_credential_schema_from_acapy():
+def test_credential_schema_from_acapy() -> None:
     acapy_schema = ModelSchema(
         attr_names=["first", "second"],
         id="WgWxqztrNooG92RXvxSTWv:2:schema_name:1.1",
@@ -26,7 +26,7 @@ def test_credential_schema_from_acapy():
     }
 
 
-def test_credential_definition_from_acapy():
+def test_credential_definition_from_acapy() -> None:
     acapy_cred_def = GetCredDefResult(
         credential_definition_id="WgWxqztrNooG92RXvxSTWv:3:CL:20:tag2",
         credential_definition=CredDef(

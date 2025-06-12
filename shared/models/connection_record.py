@@ -43,7 +43,7 @@ class Connection(BaseModel):
     updated_at: str | None = None
 
 
-def conn_record_to_connection(connection_record: ConnRecord):
+def conn_record_to_connection(connection_record: ConnRecord) -> Connection:
     return Connection(
         alias=connection_record.alias,
         connection_id=connection_record.connection_id,

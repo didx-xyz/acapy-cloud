@@ -24,7 +24,7 @@ sample_did = DID(
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("expected_result", [DIDResult(), DIDResult(result=sample_did)])
-async def test_get_public_did_success(expected_result):
+async def test_get_public_did_success(expected_result) -> None:
     mock_aries_controller = AsyncMock()
     mock_aries_controller.wallet.get_public_did = AsyncMock(
         return_value=expected_result
@@ -56,7 +56,7 @@ async def test_get_public_did_success(expected_result):
 )
 async def test_get_public_did_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-):
+) -> None:
     mock_aries_controller = AsyncMock()
     mock_aries_controller.wallet.get_public_did = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)

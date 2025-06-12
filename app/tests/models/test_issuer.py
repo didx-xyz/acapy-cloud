@@ -8,7 +8,7 @@ from app.models.issuer import (
 from shared.exceptions.cloudapi_value_error import CloudApiValueError
 
 
-def test_credential_base_model():
+def test_credential_base_model() -> None:
     # valid ld_proof
     CredentialBase(
         ld_credential_detail=LDProofVCDetail(

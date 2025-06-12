@@ -10,7 +10,7 @@ WALLET_CREDENTIALS_PATH = router.prefix
 
 
 @pytest.mark.anyio
-async def test_get_credentials(alice_member_client: RichAsyncClient):
+async def test_get_credentials(alice_member_client: RichAsyncClient) -> None:
     # Assert empty list is returned for empty wallet when fetching all credentials
     response = await alice_member_client.get(WALLET_CREDENTIALS_PATH)
     assert response.status_code == 200
@@ -25,7 +25,7 @@ async def test_get_credentials(alice_member_client: RichAsyncClient):
 async def test_get_and_delete_credential_record(
     alice_member_client: RichAsyncClient,
     issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
-):
+) -> None:
     credentials_response = await alice_member_client.get(WALLET_CREDENTIALS_PATH)
 
     assert credentials_response.status_code == 200
@@ -69,7 +69,7 @@ async def test_get_and_delete_credential_record(
 async def test_get_credential_record_with_limit(
     alice_member_client: RichAsyncClient,
     issue_alice_many_anoncreds,  # pylint: disable=unused-argument
-):
+) -> None:
     valid_params = [
         {"limit": 1},
         {"limit": 2},

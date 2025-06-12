@@ -4,7 +4,7 @@ from app.models.oob import CreateOobInvitation
 from shared.exceptions.cloudapi_value_error import CloudApiValueError
 
 
-def test_create_oob_invitation_model():
+def test_create_oob_invitation_model() -> None:
     CreateOobInvitation(create_connection=True)
 
     with pytest.raises(CloudApiValueError) as exc:

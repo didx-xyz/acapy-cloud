@@ -81,7 +81,7 @@ v2_record = v2_credential_exchange_records[0]
 
 
 @pytest.mark.anyio
-async def test_get_records(mock_agent_controller: AcaPyClient):
+async def test_get_records(mock_agent_controller: AcaPyClient) -> None:
     mock_agent_controller.issue_credential_v2_0.get_records.return_value = (
         V20CredExRecordListResult(results=v2_credential_exchange_records)
     )
@@ -96,7 +96,7 @@ async def test_get_records(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_get_records_empty(mock_agent_controller: AcaPyClient):
+async def test_get_records_empty(mock_agent_controller: AcaPyClient) -> None:
     mock_agent_controller.issue_credential_v2_0.get_records.return_value = (
         V20CredExRecordListResult(results=[])
     )
@@ -107,7 +107,9 @@ async def test_get_records_empty(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_get_records_with_query_params(mock_agent_controller: AcaPyClient):
+async def test_get_records_with_query_params(
+    mock_agent_controller: AcaPyClient,
+) -> None:
     mock_agent_controller.issue_credential_v2_0.get_records.return_value = (
         V20CredExRecordListResult(results=[v2_record])
     )
@@ -131,7 +133,7 @@ async def test_get_records_with_query_params(mock_agent_controller: AcaPyClient)
 
 
 @pytest.mark.anyio
-async def test_get_record(mock_agent_controller: AcaPyClient):
+async def test_get_record(mock_agent_controller: AcaPyClient) -> None:
     mock_agent_controller.issue_credential_v2_0.get_record.return_value = v2_record
 
     record = await IssuerV2.get_record(
@@ -153,7 +155,7 @@ async def test_get_record(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_get_record_no_cred_ex_record(mock_agent_controller: AcaPyClient):
+async def test_get_record_no_cred_ex_record(mock_agent_controller: AcaPyClient) -> None:
     mock_agent_controller.issue_credential_v2_0.get_record.return_value = (
         V20CredExRecordDetail()
     )
@@ -171,7 +173,7 @@ async def test_get_record_no_cred_ex_record(mock_agent_controller: AcaPyClient):
 @pytest.mark.anyio
 async def test_delete_credential_exchange(
     mock_agent_controller: AcaPyClient,
-):
+) -> None:
     cred_ex_record = v2_credential_exchange_records[1]
 
     mock_agent_controller.issue_credential_v2_0.delete_record.return_value = None
@@ -182,7 +184,7 @@ async def test_delete_credential_exchange(
 
 
 @pytest.mark.anyio
-async def test_send_credential(mock_agent_controller: AcaPyClient):
+async def test_send_credential(mock_agent_controller: AcaPyClient) -> None:
     credential = CredentialWithConnection(
         connection_id=v2_record.cred_ex_record.connection_id,
         anoncreds_credential_detail=AnonCredsCredential(
@@ -218,7 +220,7 @@ async def test_send_credential(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_store_credential(mock_agent_controller: AcaPyClient):
+async def test_store_credential(mock_agent_controller: AcaPyClient) -> None:
     mock_agent_controller.issue_credential_v2_0.store_credential.return_value = (
         v2_record
     )
@@ -235,7 +237,7 @@ async def test_store_credential(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_store_credential_no_record(mock_agent_controller: AcaPyClient):
+async def test_store_credential_no_record(mock_agent_controller: AcaPyClient) -> None:
     mock_agent_controller.issue_credential_v2_0.store_credential.return_value = (
         V20CredExRecordDetail()
     )
@@ -251,7 +253,7 @@ async def test_store_credential_no_record(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_request_credential(mock_agent_controller: AcaPyClient):
+async def test_request_credential(mock_agent_controller: AcaPyClient) -> None:
     mock_agent_controller.issue_credential_v2_0.send_request.return_value = (
         v2_record.cred_ex_record
     )
@@ -268,7 +270,7 @@ async def test_request_credential(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_create_offer_ld_proof(mock_agent_controller: AcaPyClient):
+async def test_create_offer_ld_proof(mock_agent_controller: AcaPyClient) -> None:
     credential = CredentialWithConnection(
         ld_credential_detail=ld_cred,
         connection_id="abc",
@@ -283,7 +285,7 @@ async def test_create_offer_ld_proof(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_create_offer_anoncreds(mock_agent_controller: AcaPyClient):
+async def test_create_offer_anoncreds(mock_agent_controller: AcaPyClient) -> None:
     credential = CredentialWithConnection(
         anoncreds_credential_detail=AnonCredsCredential(
             credential_definition_id="WgWxqztrNooG92RXvxSTWv:3:CL:20:tag",

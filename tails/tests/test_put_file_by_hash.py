@@ -9,7 +9,7 @@ from tails.routers.tails import put_file_by_hash
 
 
 @pytest.mark.anyio
-async def test_put_file_by_hash_success():
+async def test_put_file_by_hash_success() -> None:
     tails_hash = "testhash"
     file_content = b"\x00\x02" + b"a" * 128  # valid start, valid size
     mock_upload_file = AsyncMock()
@@ -55,7 +55,7 @@ async def test_put_file_by_hash_success():
 
 
 @pytest.mark.anyio
-async def test_put_file_by_hash_already_exists():
+async def test_put_file_by_hash_already_exists() -> None:
     """Test that we get 409 when file already exists"""
     tails_hash = "existinghash"
     file_content = b"\x00\x02" + b"a" * 128
@@ -75,7 +75,7 @@ async def test_put_file_by_hash_already_exists():
 
 
 @pytest.mark.anyio
-async def test_put_file_by_hash_hash_mismatch():
+async def test_put_file_by_hash_hash_mismatch() -> None:
     tails_hash = "expectedhash"
     file_content = b"\x00\x02" + b"a" * 128
     mock_upload_file = AsyncMock()
@@ -113,7 +113,7 @@ async def test_put_file_by_hash_hash_mismatch():
 
 
 @pytest.mark.anyio
-async def test_put_file_by_hash_invalid_start():
+async def test_put_file_by_hash_invalid_start() -> None:
     tails_hash = "testhash"
     file_content = b"\x01\x02" + b"a" * 128  # invalid start
     mock_upload_file = AsyncMock()
@@ -152,7 +152,7 @@ async def test_put_file_by_hash_invalid_start():
 
 
 @pytest.mark.anyio
-async def test_put_file_by_hash_invalid_size():
+async def test_put_file_by_hash_invalid_size() -> None:
     tails_hash = "testhash"
     file_content = b"\x00\x02" + b"a" * 127  # not a multiple of 128 after 2 bytes
     mock_upload_file = AsyncMock()
@@ -190,7 +190,7 @@ async def test_put_file_by_hash_invalid_size():
 
 
 @pytest.mark.anyio
-async def test_put_file_by_hash_s3_error():
+async def test_put_file_by_hash_s3_error() -> None:
     tails_hash = "testhash"
     file_content = b"\x00\x02" + b"a" * 128
     mock_upload_file = AsyncMock()
@@ -236,7 +236,7 @@ async def test_put_file_by_hash_s3_error():
 
 
 @pytest.mark.anyio
-async def test_put_file_by_hash_generic_error():
+async def test_put_file_by_hash_generic_error() -> None:
     tails_hash = "testhash"
     file_content = b"\x00\x02" + b"a" * 128
     mock_upload_file = AsyncMock()
@@ -251,7 +251,7 @@ async def test_put_file_by_hash_generic_error():
 
 
 @pytest.mark.anyio
-async def test_put_file_by_hash_head_object_other_error():
+async def test_put_file_by_hash_head_object_other_error() -> None:
     """Test that non-404 errors from head_object are handled properly"""
     tails_hash = "testhash"
     file_content = b"\x00\x02" + b"a" * 128

@@ -24,7 +24,7 @@ async def test_get_presentation_exchange_records_paginated(
     alice_member_client: RichAsyncClient,
     anoncreds_credential_definition_id: str,
     acme_and_alice_connection: AcmeAliceConnect,
-):
+) -> None:
     num_presentation_requests_to_test = 5
 
     acme_proof_ids = []

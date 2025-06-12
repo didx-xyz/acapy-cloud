@@ -21,7 +21,7 @@ create_anoncreds_schema_response = CredentialSchema(
 
 
 @pytest.mark.anyio
-async def test_create_schema_success(mock_governance_auth):
+async def test_create_schema_success(mock_governance_auth) -> None:
     mock_aries_controller = AsyncMock()
     mock_create_schema_service = AsyncMock()
 
@@ -58,7 +58,7 @@ async def test_create_schema_success(mock_governance_auth):
 @pytest.mark.anyio
 async def test_create_schema_unauthorized_for_non_governance(
     mock_admin_auth, mock_tenant_auth_verified
-):
+) -> None:
     for auth in [mock_admin_auth, mock_tenant_auth_verified]:
         with pytest.raises(CloudApiException) as exc_info:
             await create_schema(schema=create_anoncreds_schema_body, auth=auth)
@@ -67,7 +67,7 @@ async def test_create_schema_unauthorized_for_non_governance(
 
 
 @pytest.mark.anyio
-async def test_create_schema_assert_public_did_failure(mock_governance_auth):
+async def test_create_schema_assert_public_did_failure(mock_governance_auth) -> None:
     mock_aries_controller = AsyncMock()
     mock_create_schema_service = AsyncMock()
 
@@ -106,7 +106,7 @@ async def test_create_schema_assert_public_did_failure(mock_governance_auth):
 )
 async def test_create_schema_failure(
     mock_governance_auth, expected_status_code, expected_detail
-):
+) -> None:
     mock_aries_controller = AsyncMock()
     mock_create_schema_service = AsyncMock()
 

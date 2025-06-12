@@ -29,7 +29,7 @@ async def test_send_jsonld_key_ed25519(
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
     alice_member_client: RichAsyncClient,
     register_issuer_key_ed25519: str,
-):
+) -> None:
     alice_connection_id = faber_anoncreds_and_alice_connection.alice_connection_id
     faber_connection_id = faber_anoncreds_and_alice_connection.faber_connection_id
 
@@ -88,7 +88,7 @@ async def test_send_jsonld_oob(
     faber_anoncreds_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     register_issuer_key_ed25519: str,
-):
+) -> None:
     invitation_response = await faber_anoncreds_client.post(
         OOB_BASE_PATH + "/create-invitation",
         json={
@@ -169,7 +169,7 @@ async def test_send_jsonld_request(
     faber_anoncreds_client: RichAsyncClient,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
     register_issuer_key_ed25519: str,
-):
+) -> None:
     faber_connection_id = faber_anoncreds_and_alice_connection.faber_connection_id
 
     # Updating JSON-LD credential did:key with proofType ed25519
@@ -236,7 +236,7 @@ async def test_issue_jsonld_ed(
     faber_anoncreds_client: RichAsyncClient,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
     register_issuer_key_ed25519: str,
-):
+) -> None:
     faber_connection_id = faber_anoncreds_and_alice_connection.faber_connection_id
 
     # Updating JSON-LD credential did:key with proofType ed25519
@@ -305,7 +305,7 @@ async def test_send_jsonld_mismatch_ed_bbs(
     faber_anoncreds_client: RichAsyncClient,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
     register_issuer_key_ed25519: str,
-):
+) -> None:
     faber_connection_id = faber_anoncreds_and_alice_connection.faber_connection_id
 
     # Creating JSON-LD credential did:key with proofType: BbsBlsSignature2020

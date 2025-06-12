@@ -5,7 +5,7 @@ import string
 from random import randint
 
 
-def random_string(length: int):
+def random_string(length: int) -> str:
     letters = string.ascii_uppercase
     return "".join(random.choice(letters) for _ in range(length))
 
@@ -16,9 +16,9 @@ def pad(val: str) -> str:
     return val if pad_length > 2 else (val + "=" * pad_length)
 
 
-def base64_to_json(value: str):
+def base64_to_json(value: str) -> dict:
     return json.loads(base64.urlsafe_b64decode(pad(value)).decode("utf-8"))
 
 
-def random_version():
+def random_version() -> str:
     return f"{randint(1, 100)}.{randint(1, 100)}.{randint(1, 100)}"

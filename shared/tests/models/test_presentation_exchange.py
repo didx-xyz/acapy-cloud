@@ -32,7 +32,7 @@ anoncreds_pres_request = V20PresRequest(
 )
 
 
-def test_presentation_exchange_model():
+def test_presentation_exchange_model() -> None:
     # Test creating a PresentationExchange instance
     exchange = PresentationExchange(
         connection_id="conn-id",
@@ -71,7 +71,7 @@ def test_presentation_exchange_model():
     assert exchange.verified is True
 
 
-def test_presentation_record_to_model():
+def test_presentation_record_to_model() -> None:
     # Mock a V20PresExRecord
     record = V20PresExRecord(
         pres_ex_id="pres-ex-id",
@@ -114,7 +114,7 @@ def test_presentation_record_to_model():
     assert model.verified is True
 
 
-def test_presentation_record_to_model_no_by_format():
+def test_presentation_record_to_model_no_by_format() -> None:
     # Test with a record having no by_format
     record = V20PresExRecord(
         pres_ex_id="pres-ex-id",
@@ -141,7 +141,7 @@ def test_presentation_record_to_model_no_by_format():
     assert model.verified is False
 
 
-def test_presentation_record_to_model_empty_by_format():
+def test_presentation_record_to_model_empty_by_format() -> None:
     # Test with a record having no by_format
     record = V20PresExRecord(
         pres_ex_id="pres-ex-id",
@@ -169,7 +169,7 @@ def test_presentation_record_to_model_empty_by_format():
     assert model.verified is False
 
 
-def test_string_to_bool():
+def test_string_to_bool() -> None:
     assert string_to_bool("true") is True
     assert string_to_bool("false") is False
     assert string_to_bool(None) is None

@@ -119,7 +119,7 @@ async def assert_both_webhooks_received(
     if not field_name:
         raise ValueError(f"Unsupported topic: {topic}")
 
-    async def check_webhook(client, field_id):
+    async def check_webhook(client, field_id) -> dict[str, Any]:
         return await check_webhook_state(
             client, topic=topic, state=state, filter_map={field_name: field_id}
         )

@@ -14,7 +14,7 @@ from app.tests.util.models.dummy_txn_record_publish import txn_record
     "publish_revocation_response",
     [None, TxnOrPublishRevocationsResult(txn=[txn_record])],
 )
-async def test_publish_revocations_success(publish_revocation_response):
+async def test_publish_revocations_success(publish_revocation_response) -> None:
     mock_aries_controller = AsyncMock()
     mock_publish_revocations = AsyncMock(return_value=publish_revocation_response)
 
@@ -59,7 +59,7 @@ async def test_publish_revocations_success(publish_revocation_response):
 )
 async def test_publish_revocations_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-):
+) -> None:
     mock_aries_controller = AsyncMock()
     mock_publish_revocations = AsyncMock(
         side_effect=exception_class(
@@ -89,7 +89,7 @@ async def test_publish_revocations_fail_acapy_error(
 
 
 @pytest.mark.anyio
-async def test_publish_revocations_fail_timeout():
+async def test_publish_revocations_fail_timeout() -> None:
     mock_aries_controller = AsyncMock()
     mock_publish_revocations = AsyncMock(
         return_value=TxnOrPublishRevocationsResult(txn=[txn_record])

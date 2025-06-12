@@ -15,7 +15,7 @@ sample_cred_def_id = "J5Pvam9KqK8ZPQWtvhAxSx:3:CL:8:Epic"
 
 
 @pytest.mark.anyio
-async def test_create_credential_definition_success():
+async def test_create_credential_definition_success() -> None:
     mock_aries_controller = AsyncMock(spec=AcaPyClient)
     mock_publisher = AsyncMock()
 
@@ -61,7 +61,7 @@ async def test_create_credential_definition_success():
 
 
 @pytest.mark.anyio
-async def test_create_credential_definition_with_revocation():
+async def test_create_credential_definition_with_revocation() -> None:
     mock_aries_controller = AsyncMock(spec=AcaPyClient)
     mock_publisher = AsyncMock()
     mock_publisher.publish_anoncreds_credential_definition.return_value = CredDefResult(
@@ -100,7 +100,7 @@ async def test_create_credential_definition_with_revocation():
 
 
 @pytest.mark.anyio
-async def test_create_credential_definition_invalid_issuer():
+async def test_create_credential_definition_invalid_issuer() -> None:
     mock_aries_controller = AsyncMock(spec=AcaPyClient)
     create_cred_def_payload = CreateCredentialDefinition(
         schema_id="test_schema_id", tag="test_tag", support_revocation=False

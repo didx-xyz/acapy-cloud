@@ -13,7 +13,7 @@ from app.routes.issuer import store_credential
 
 
 @pytest.mark.anyio
-async def test_store_credential_success():
+async def test_store_credential_success() -> None:
     mock_aries_controller = AsyncMock()
     mock_aries_controller.issue_credential_v2_0.store_credential = AsyncMock()
 
@@ -43,7 +43,7 @@ async def test_store_credential_success():
 )
 async def test_store_credential_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-):
+) -> None:
     mock_aries_controller = AsyncMock()
     mock_aries_controller.issue_credential_v2_0.store_credential = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)

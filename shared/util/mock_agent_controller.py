@@ -23,7 +23,7 @@ from app.dependencies.role import Role
 from shared.constants import GOVERNANCE_AGENT_API_KEY, GOVERNANCE_LABEL
 
 
-async def noop():
+async def noop() -> None:
     return None
 
 
@@ -47,25 +47,25 @@ def get_mock_agent_controller() -> AcaPyClient:
 
 
 class MockContextManagedController:
-    def __init__(self, controller):
+    def __init__(self, controller: AcaPyClient) -> None:
         """Initialize the mock context managed controller."""
         self.controller = controller
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> AcaPyClient:
         """Enter mock context manager"""
         return self.controller
 
-    async def __aexit__(self, exc_type, exc, tb):
+    async def __aexit__(self, exc_type, exc, tb) -> None:  # noqa: ANN001
         """Exit mock context manager"""
 
 
 @pytest.fixture
-def mock_agent_controller():
+def mock_agent_controller() -> AcaPyClient:
     return get_mock_agent_controller()
 
 
 @pytest.fixture
-def mock_context_managed_controller():
+def mock_context_managed_controller() -> MockContextManagedController:
     return MockContextManagedController
 
 

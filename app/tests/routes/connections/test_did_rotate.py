@@ -13,7 +13,7 @@ from app.routes.connections import rotate_did
 
 
 @pytest.mark.anyio
-async def test_rotate_did_success():
+async def test_rotate_did_success() -> None:
     rotate_response = Rotate(to_did="did:cheqd:12345")
     mock_aries_controller = AsyncMock()
     mock_aries_controller.did_rotate.rotate = AsyncMock(return_value=rotate_response)
@@ -51,7 +51,7 @@ async def test_rotate_did_success():
 )
 async def test_rotate_did_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-):
+) -> None:
     mock_aries_controller = AsyncMock()
     mock_aries_controller.did_rotate.rotate = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)

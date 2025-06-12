@@ -15,7 +15,7 @@ CONNECTIONS_BASE_PATH = connections_router.prefix
 @pytest.mark.anyio
 async def test_create_invitation_oob(
     bob_member_client: RichAsyncClient,
-):
+) -> None:
     invitation_response = await bob_member_client.post(
         OOB_BASE_PATH + "/create-invitation", json={"create_connection": True}
     )
@@ -31,7 +31,7 @@ async def test_create_invitation_oob(
 async def test_accept_invitation_oob(
     bob_member_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-):
+) -> None:
     invitation_response = await bob_member_client.post(
         OOB_BASE_PATH + "/create-invitation",
         json={
@@ -77,7 +77,7 @@ async def test_accept_invitation_oob(
 async def test_oob_connect_via_public_did(
     bob_member_client: RichAsyncClient,
     faber_anoncreds_acapy_client: AcaPyClient,
-):
+) -> None:
     faber_public_did = await faber_anoncreds_acapy_client.wallet.get_public_did()
     connect_response = await bob_member_client.post(
         OOB_BASE_PATH + "/connect-public-did",

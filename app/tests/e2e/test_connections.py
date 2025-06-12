@@ -18,7 +18,7 @@ expected_keys = ("connection_id", "state", "created_at", "updated_at", "invitati
 async def test_get_connections(
     bob_member_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-):
+) -> None:
     connection_alias = "TempAliceBobConnection"
 
     bob_and_alice_connection = await create_bob_alice_connection(
@@ -101,7 +101,7 @@ async def test_get_connections(
 async def test_get_connection_by_id(
     bob_member_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-):
+) -> None:
     connection_alias = "TempAliceBobConnectionById"
 
     bob_and_alice_connection = await create_bob_alice_connection(
@@ -127,7 +127,7 @@ async def test_get_connection_by_id(
 async def test_delete_connection(
     bob_member_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-):
+) -> None:
     connection_alias = "TempAliceBobConnectionDelete"
 
     bob_and_alice_connection = await create_bob_alice_connection(
@@ -162,7 +162,7 @@ async def test_delete_connection(
 )
 async def test_get_connections_paginated(
     bob_member_client: RichAsyncClient, alice_member_client: RichAsyncClient
-):
+) -> None:
     num_connections_to_test = 5
     test_alias = "test_pagination"
 

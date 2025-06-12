@@ -13,7 +13,7 @@ did = "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
 
 
 @pytest.mark.anyio
-async def test_set_public_did_success():
+async def test_set_public_did_success() -> None:
     mock_aries_controller = AsyncMock()
     mock_set_public_did = AsyncMock(return_value=Mock())
 
@@ -41,7 +41,7 @@ async def test_set_public_did_success():
 )
 async def test_set_public_did_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-):
+) -> None:
     mock_aries_controller = AsyncMock()
     mock_set_public_did = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)

@@ -11,7 +11,7 @@ wallet_name = "some_wallet_name"
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("group_id", [None, "some_group"])
-async def test_get_tenants_success(group_id):
+async def test_get_tenants_success(group_id) -> None:
     # Setup wallets return object including the group_id it belongs to
     wallets_return_obj = AsyncMock()
     wallets_return_obj.results = ["some_wallets", "and_another_one", "why_not_another"]
@@ -50,7 +50,7 @@ async def test_get_tenants_success(group_id):
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("group_id", [None, "some_group"])
-async def test_get_tenants_success_no_wallets(group_id):
+async def test_get_tenants_success_no_wallets(group_id) -> None:
     # Setup wallets return object to be an empty list
     wallets_return_obj = AsyncMock()
     wallets_return_obj.results = []

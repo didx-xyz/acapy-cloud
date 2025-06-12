@@ -22,7 +22,7 @@ actor_did = new_actor["did"]
 actor_name = new_actor["name"]
 
 
-def generate_actor():
+def generate_actor() -> dict[str, str]:
     return {
         "id": random_string(8),
         "name": random_string(8),
@@ -34,7 +34,7 @@ def generate_actor():
 
 
 @pytest.mark.anyio
-async def test_get_actors():
+async def test_get_actors() -> None:
     async with RichAsyncClient() as client:
         response = await client.get(f"{TRUST_REGISTRY_URL}/registry/actors")
 
@@ -42,7 +42,7 @@ async def test_get_actors():
 
 
 @pytest.mark.anyio
-async def test_register_actor():
+async def test_register_actor() -> None:
     payload = json.dumps(new_actor)
     name_payload = generate_actor()
     name_payload["name"] = new_actor["name"]
@@ -103,7 +103,7 @@ async def test_register_actor():
 
 
 @pytest.mark.anyio
-async def test_get_actor():
+async def test_get_actor() -> None:
     async with RichAsyncClient(raise_status_error=False) as client:
         # test by id
         response = await client.get(f"{TRUST_REGISTRY_URL}/registry/actors/{actor_id}")
@@ -147,7 +147,7 @@ async def test_get_actor():
 
 
 @pytest.mark.anyio
-async def test_update_actor():
+async def test_update_actor() -> None:
     async with RichAsyncClient(raise_status_error=False) as client:
         response = await client.put(
             f"{TRUST_REGISTRY_URL}/registry/actors/{actor_id}",
@@ -169,7 +169,7 @@ async def test_update_actor():
 
 
 @pytest.mark.anyio
-async def test_update_actor_x():
+async def test_update_actor_x() -> None:
     updated_actor = new_actor.copy()
     updated_actor["did"] = None
 
@@ -187,7 +187,7 @@ async def test_update_actor_x():
 
 
 @pytest.mark.anyio
-async def test_remove_actors():
+async def test_remove_actors() -> None:
     async with RichAsyncClient(raise_status_error=False) as client:
         response = await client.delete(
             f"{TRUST_REGISTRY_URL}/registry/actors/{actor_id}"

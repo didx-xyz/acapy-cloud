@@ -20,7 +20,7 @@ from app.services.acapy_ledger import (
 
 
 @pytest.mark.anyio
-async def test_get_taa_success(mock_agent_controller: AcaPyClient):
+async def test_get_taa_success(mock_agent_controller: AcaPyClient) -> None:
     taa_info = TAAInfo(taa_required=True, taa_record=TAARecord(digest="digest"))
     mock_agent_controller.ledger.fetch_taa.return_value = TAAResult(result=taa_info)
 
@@ -30,7 +30,7 @@ async def test_get_taa_success(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_get_taa_failure(mock_agent_controller: AcaPyClient):
+async def test_get_taa_failure(mock_agent_controller: AcaPyClient) -> None:
     mock_agent_controller.ledger.fetch_taa.return_value = TAAResult(
         result=TAAInfo(taa_required=True)
     )
@@ -42,7 +42,7 @@ async def test_get_taa_failure(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_accept_taa_success(mock_agent_controller: AcaPyClient):
+async def test_accept_taa_success(mock_agent_controller: AcaPyClient) -> None:
     taa_record = TAARecord(digest="digest")
     mock_agent_controller.ledger.accept_taa.return_value = None
 
@@ -51,7 +51,7 @@ async def test_accept_taa_success(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_accept_taa_failure(mock_agent_controller: AcaPyClient):
+async def test_accept_taa_failure(mock_agent_controller: AcaPyClient) -> None:
     mock_agent_controller.ledger.accept_taa.side_effect = ApiException(status=500)
 
     with pytest.raises(CloudApiException) as exc:
@@ -63,7 +63,7 @@ async def test_accept_taa_failure(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_get_did_endpoint_success(mock_agent_controller: AcaPyClient):
+async def test_get_did_endpoint_success(mock_agent_controller: AcaPyClient) -> None:
     expected_response = GetDIDEndpointResponse(endpoint="http://example.com")
     mock_agent_controller.ledger.get_did_endpoint.return_value = expected_response
 
@@ -72,7 +72,7 @@ async def test_get_did_endpoint_success(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_get_did_endpoint_failure(mock_agent_controller: AcaPyClient):
+async def test_get_did_endpoint_failure(mock_agent_controller: AcaPyClient) -> None:
     mock_agent_controller.ledger.get_did_endpoint.return_value = None
 
     with pytest.raises(CloudApiException) as exc:
@@ -82,7 +82,7 @@ async def test_get_did_endpoint_failure(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_accept_taa_if_required(mock_agent_controller: AcaPyClient):
+async def test_accept_taa_if_required(mock_agent_controller: AcaPyClient) -> None:
     taa_info = TAAInfo(taa_required=True, taa_record=TAARecord(digest="digest"))
     mock_agent_controller.ledger.fetch_taa.return_value = TAAResult(result=taa_info)
     mock_agent_controller.ledger.accept_taa.return_value = None
@@ -94,7 +94,7 @@ async def test_accept_taa_if_required(mock_agent_controller: AcaPyClient):
 @pytest.mark.anyio
 async def test_schema_id_from_credential_definition_id_seq_no_anoncreds(
     mock_agent_controller: AcaPyClient,
-):
+) -> None:
     schema_id = "Ehx3RZSV38pn3MYvxtHhbQ:2:schema_name:1.0.1"
     seq_no = "58279"
     cred_def_id_seq_no = f"Ehx3RZSV38pn3MYvxtHhbQ:3:CL:{seq_no}:tag"
@@ -116,7 +116,7 @@ async def test_schema_id_from_credential_definition_id_seq_no_anoncreds(
 @pytest.mark.anyio
 async def test_schema_id_from_credential_definition_id_schema_id(
     mock_agent_controller: AcaPyClient,
-):
+) -> None:
     schema_id = "Ehx3RZSV38pn3MYvxtHhbQ:2:schema_name:1.0.1"
     cred_def_id_schema_id = f"Ehx3RZSV38pn3MYvxtHhbQ:3:CL:{schema_id}:tag"
 
@@ -201,7 +201,7 @@ async def test_schema_id_from_credential_definition_id_schema_id(
 @pytest.mark.anyio
 async def test_schema_id_from_credential_definition_id_no_schema_askar_anoncreds(
     mock_agent_controller: AcaPyClient,
-):
+) -> None:
     seq_no = "58276"
     cred_def_id_seq_no = f"Ehx3RZSV38pn3MYvxtHhbQ:3:CL:{seq_no}:tag"
 

@@ -22,7 +22,7 @@ async def test_get_credential_exchange_records_paginated(
     faber_anoncreds_client: RichAsyncClient,
     anoncreds_credential_definition_id: str,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
-):
+) -> None:
     issuer_client = faber_anoncreds_client
     connection = faber_anoncreds_and_alice_connection
     credential_definition_id = anoncreds_credential_definition_id

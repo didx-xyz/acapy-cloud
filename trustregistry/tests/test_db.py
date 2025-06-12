@@ -5,7 +5,7 @@ import pytest
 from trustregistry.db import get_db, schema_id_gen
 
 
-def test_schema_id_gen():
+def test_schema_id_gen() -> None:
     mock_context = MagicMock()
     mock_context.get_current_parameters.return_value = {
         "did": "did",
@@ -15,7 +15,7 @@ def test_schema_id_gen():
     assert schema_id_gen(mock_context) == "did:2:name:version"
 
 
-def test_get_db():
+def test_get_db() -> None:
     with patch("trustregistry.db.SessionLocal", autospec=True) as mock_session_local:
         mock_session = MagicMock()
         mock_session_local.return_value = mock_session

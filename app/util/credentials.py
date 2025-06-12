@@ -11,7 +11,7 @@ def cred_ex_id_no_version(cred_ex_id: str) -> str:
         raise CloudApiValueError("credential_exchange_id must start with prefix `v2-`.")
 
 
-def strip_protocol_prefix(cred_ex_id: str | None):
+def strip_protocol_prefix(cred_ex_id: str | None) -> str | None:
     if cred_ex_id is None:
         return None
 

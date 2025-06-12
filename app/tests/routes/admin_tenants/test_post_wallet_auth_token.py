@@ -13,7 +13,7 @@ wallet_name = "some_wallet_name"
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("group_id", [None, "some_group"])
-async def test_post_wallet_auth_token_success(group_id):
+async def test_post_wallet_auth_token_success(group_id) -> None:
     # Mock the structure of admin_controller -> multitenancy -> get_auth_token
     multitenancy_mock = AsyncMock(get_auth_token=AsyncMock())
     admin_controller_mock = AsyncMock(multitenancy=multitenancy_mock)
@@ -53,7 +53,7 @@ async def test_post_wallet_auth_token_success(group_id):
 
 
 @pytest.mark.anyio
-async def test_post_wallet_auth_token_fail_wrong_group():
+async def test_post_wallet_auth_token_fail_wrong_group() -> None:
     # Setup wallet return object including the group_id it belongs to
     wallet_return_obj = AsyncMock()
     wallet_return_obj.settings = {"wallet.group_id": "correct_group"}

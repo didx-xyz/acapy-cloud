@@ -1,4 +1,4 @@
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -12,17 +12,17 @@ state = "some_state"
 
 
 @pytest.fixture()
-def mock_request():
+def mock_request() -> Mock:
     return Mock()
 
 
 @pytest.fixture()
-def mock_auth():
+def mock_auth() -> Mock:
     return Mock()
 
 
 @pytest.fixture()
-def mock_verify_wallet_access():
+def mock_verify_wallet_access() -> AsyncMock:
     with patch("app.routes.sse.verify_wallet_access", new=Mock()) as mocked:
         yield mocked
 
@@ -34,7 +34,7 @@ async def test_get_sse_subscribe_event_with_field_and_state(
     mock_auth,  # pylint: disable=redefined-outer-name
     mock_verify_wallet_access,  # pylint: disable=redefined-outer-name
     group_id: str | None,
-):
+) -> None:
     # Mock sse_subscribe_event_with_field_and_state function to not actually attempt to connect to an SSE stream
     sse_subscribe_event_with_field_and_state_mock = Mock()
 

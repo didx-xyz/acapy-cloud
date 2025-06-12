@@ -75,6 +75,7 @@ line-length = 88
 lint.pycodestyle.max-line-length = 120
 target-version = "py312"
 lint.select = [
+  "ANN",   # flake8-annotations (type annotations)
   "ASYNC", # flake8-async (async/await)
   "B",     # flake8-bugbear (detect likely bugs)
   "C",     # mccabe (code complexity)
@@ -92,6 +93,10 @@ lint.select = [
   "W",     # pycodestyle warnings (style warnings)
 ]
 lint.ignore = [
+  # Annotations:
+  "ANN002", # Missing type annotation for *args
+  "ANN003", # Missing type annotation for **kwargs
+
   # Docstring related:
   "D100", # Missing docstring in the module
   "D101", # Missing docstring in the class
@@ -122,6 +127,9 @@ lint.ignore = [
   "PLE1205", # Too many arguments detected for loguru {} formatted strings
 ]
 exclude = [".git/*", ".venv/*"]
+
+[tool.ruff.lint.per-file-ignores]
+"*/tests/*" = ["ANN001"] # Don't require function type annotations in tests
 
 [build-system]
 requires = ["poetry-core>=2.1"]

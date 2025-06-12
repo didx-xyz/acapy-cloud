@@ -1,6 +1,7 @@
 import asyncio
 import importlib
 import json
+from collections.abc import AsyncGenerator
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -30,7 +31,7 @@ sample_message_data = {
 
 
 @pytest.fixture
-async def mock_nats_client():
+async def mock_nats_client() -> AsyncGenerator[JetStreamContext, None]:
     with patch("nats.connect") as mock_connect:
         mock_nats = AsyncMock(spec=NATSClient)
         mock_jetstream = AsyncMock(spec=JetStreamContext)
@@ -41,7 +42,7 @@ async def mock_nats_client():
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("nats_creds_file", [None, "some_file"])
-async def test_init_nats_client(nats_creds_file):
+async def test_init_nats_client(nats_creds_file) -> None:
     mock_nats_client = AsyncMock(spec=NATSClient)  # pylint: disable=redefined-outer-name
 
     with (
@@ -56,7 +57,7 @@ async def test_init_nats_client(nats_creds_file):
 @pytest.mark.parametrize(
     "exception", [ConnectionClosedError, TimeoutError, NoServersError]
 )
-async def test_init_nats_client_error(exception):
+async def test_init_nats_client_error(exception) -> None:
     with patch("nats.connect", side_effect=exception):
         with pytest.raises(exception):
             async for _ in init_nats_client():
@@ -66,7 +67,7 @@ async def test_init_nats_client_error(exception):
 @pytest.mark.anyio
 async def test_nats_events_processor_subscribe(
     mock_nats_client,  # pylint: disable=redefined-outer-name
-):
+) -> None:
     processor = NatsEventsProcessor(mock_nats_client)
     mock_subscription = AsyncMock(spec=JetStreamContext.PullSubscription)
     mock_nats_client.pull_subscribe.return_value = mock_subscription
@@ -99,7 +100,7 @@ async def test_nats_events_processor_subscribe(
 async def test_nats_events_processor_subscribe_error(
     mock_nats_client,  # pylint: disable=redefined-outer-name
     exception,
-):
+) -> None:
     processor = NatsEventsProcessor(mock_nats_client)
     mock_nats_client.pull_subscribe.side_effect = exception
 
@@ -119,7 +120,7 @@ async def test_nats_events_processor_subscribe_error(
 async def test_process_events(
     mock_nats_client,  # pylint: disable=redefined-outer-name
     group_id,
-):
+) -> None:
     processor = NatsEventsProcessor(mock_nats_client)
     mock_subscription = AsyncMock()
     mock_nats_client.pull_subscribe.return_value = mock_subscription
@@ -154,7 +155,7 @@ async def test_process_events(
 @pytest.mark.anyio
 async def test_process_events_cancelled_error(
     mock_nats_client,  # pylint: disable=redefined-outer-name
-):
+) -> None:
     processor = NatsEventsProcessor(mock_nats_client)
     mock_subscription = AsyncMock()
     mock_nats_client.pull_subscribe.return_value = mock_subscription
@@ -179,7 +180,7 @@ async def test_process_events_cancelled_error(
 @pytest.mark.anyio
 async def test_process_events_fetch_timeout_error(
     mock_nats_client,  # pylint: disable=redefined-outer-name
-):
+) -> None:
     processor = NatsEventsProcessor(mock_nats_client)
     mock_subscription = AsyncMock()
     mock_nats_client.pull_subscribe.return_value = mock_subscription
@@ -204,14 +205,14 @@ async def test_process_events_fetch_timeout_error(
 @pytest.mark.anyio
 async def test_process_events_timeout_error_handling(
     mock_nats_client,  # pylint: disable=redefined-outer-name
-):
+) -> None:
     mock_subscription = AsyncMock()
 
     # Counter to track the number of TimeoutErrors raised
     timeout_error_count = 0
 
     # Function to simulate fetch behaviour
-    async def fetch_side_effect(**_):
+    async def fetch_side_effect(**_) -> list[AsyncMock]:
         nonlocal timeout_error_count
         if timeout_error_count < MAX_TIMEOUT_ERRORS:
             timeout_error_count += 1
@@ -271,7 +272,7 @@ async def test_process_events_timeout_error_handling(
 @pytest.mark.anyio
 async def test_process_events_bad_subscription_error_on_unsubscribe(
     mock_nats_client,  # pylint: disable=redefined-outer-name
-):
+) -> None:
     processor = NatsEventsProcessor(mock_nats_client)
     mock_subscription = AsyncMock()
     mock_nats_client.pull_subscribe.return_value = mock_subscription
@@ -314,7 +315,7 @@ async def test_process_events_bad_subscription_error_on_unsubscribe(
 @pytest.mark.anyio
 async def test_process_events_base_exception(
     mock_nats_client,  # pylint: disable=redefined-outer-name
-):
+) -> None:
     processor = NatsEventsProcessor(mock_nats_client)
     mock_subscription = AsyncMock()
     mock_nats_client.pull_subscribe.return_value = mock_subscription
@@ -350,7 +351,7 @@ async def test_process_events_base_exception(
 @pytest.mark.anyio
 async def test_check_jetstream_working(
     mock_nats_client,  # pylint: disable=redefined-outer-name
-):
+) -> None:
     processor = NatsEventsProcessor(mock_nats_client)
     mock_nats_client.account_info.return_value = AsyncMock(streams=2, consumers=5)
 
@@ -367,7 +368,7 @@ async def test_check_jetstream_working(
 @pytest.mark.anyio
 async def test_check_jetstream_no_streams(
     mock_nats_client,  # pylint: disable=redefined-outer-name
-):
+) -> None:
     processor = NatsEventsProcessor(mock_nats_client)
     mock_nats_client.account_info.return_value = AsyncMock(streams=0, consumers=0)
 
@@ -384,7 +385,7 @@ async def test_check_jetstream_no_streams(
 @pytest.mark.anyio
 async def test_check_jetstream_exception(
     mock_nats_client,  # pylint: disable=redefined-outer-name
-):
+) -> None:
     processor = NatsEventsProcessor(mock_nats_client)
     mock_nats_client.account_info.side_effect = Exception("Test exception")
 
@@ -397,7 +398,7 @@ async def test_check_jetstream_exception(
 @pytest.mark.anyio
 async def test_retry_logging(
     mock_nats_client,  # pylint: disable=redefined-outer-name
-):
+) -> None:
     processor = NatsEventsProcessor(mock_nats_client)
 
     # Create a mock logger
@@ -425,7 +426,7 @@ async def test_retry_logging(
 @pytest.mark.anyio
 async def test_general_error_handling(
     mock_nats_client,  # pylint: disable=redefined-outer-name
-):
+) -> None:
     processor = NatsEventsProcessor(mock_nats_client)
     mock_subscription = AsyncMock()
     mock_nats_client.pull_subscribe.return_value = mock_subscription
@@ -454,7 +455,7 @@ async def test_general_error_handling(
     mock_subscription.unsubscribe.assert_called_once()
 
 
-def test_heartbeat_validation():
+def test_heartbeat_validation() -> None:
     with patch(
         "os.getenv",
         side_effect=lambda key, default=None: (

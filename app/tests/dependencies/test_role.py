@@ -1,7 +1,7 @@
 from app.dependencies.role import Role
 
 
-def test_role_properties():
+def test_role_properties() -> None:
     assert Role.TENANT.role_name == "tenant"
     assert Role.TENANT.is_admin is False
     assert Role.TENANT.is_multitenant is True

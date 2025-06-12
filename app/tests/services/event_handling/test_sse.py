@@ -32,7 +32,7 @@ lines_list = [line1, line2, line3]
 # Fixture for async generator lines
 @pytest.fixture
 def async_lines() -> AsyncGenerator[str, Any]:
-    async def _lines():
+    async def _lines() -> AsyncGenerator[str, Any]:
         yield line1
         yield line2
         yield line3
@@ -95,7 +95,7 @@ def patch_yield_lines_with_disconnect_check(
 async def test_yield_lines_with_disconnect_check_success(
     response_mock,  # pylint: disable=redefined-outer-name
     mock_request,  # pylint: disable=redefined-outer-name
-):
+) -> None:
     # Execute yield_lines_with_disconnect_check and collect results
     results = [
         line
@@ -109,7 +109,7 @@ async def test_yield_lines_with_disconnect_check_success(
 async def test_yield_lines_with_disconnect_check_disconnects(
     response_mock,  # pylint: disable=redefined-outer-name
     mock_request,  # pylint: disable=redefined-outer-name
-):
+) -> None:
     # Override the mock request to simulate a disconnection after the first yield
     mock_request.is_disconnected.side_effect = [False, True]
 
@@ -126,7 +126,7 @@ async def test_yield_lines_with_disconnect_check_disconnects(
 async def test_sse_subscribe_event_with_field_and_state_exception(
     exception_async_context_manager_mock,  # pylint: disable=redefined-outer-name
     mock_request,  # pylint: disable=redefined-outer-name
-):
+) -> None:
     # Patch the stream method of RichAsyncClient to use our prepared context manager mock
     with patch(
         "shared.util.rich_async_client.RichAsyncClient.stream",
@@ -159,7 +159,7 @@ async def test_sse_subscribe_event_with_field_and_state_success(
     mock_request,  # pylint: disable=redefined-outer-name
     patch_yield_lines_with_disconnect_check,  # pylint: disable=redefined-outer-name
     group_id: str | None,
-):
+) -> None:
     expected_params = {"look_back": 60}
     if group_id:  # Optional param
         expected_params["group_id"] = group_id

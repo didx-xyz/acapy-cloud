@@ -15,7 +15,7 @@ class DummyModel(BaseModel):
 
     @field_validator("field")
     @classmethod
-    def validate_regex(cls, value):
+    def validate_regex(cls, value: str) -> str:
         """Validates the regular expression"""
         if not re.match(r"^[\d+]$", value):
             raise ValueError(error_msg)
@@ -23,7 +23,7 @@ class DummyModel(BaseModel):
 
 
 @pytest.mark.anyio
-async def test_handle_model_with_validation_error():
+async def test_handle_model_with_validation_error() -> None:
     mock_logger = Mock()
     # Replace the class itself with a mock that raises ValidationError on instantiation
     with pytest.raises(CloudApiValueError) as exc_info:

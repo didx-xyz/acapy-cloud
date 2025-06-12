@@ -51,7 +51,7 @@ async def test_send_proof_request_v2(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mock_agent_controller.connection.get_connection.return_value = conn_record
 
     mock_agent_controller.wallet.get_public_did.side_effect = CloudApiException(
@@ -90,7 +90,7 @@ async def test_send_proof_request_v2_exception(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         VerifierV2, "send_proof_request", side_effect=CloudApiException("ERROR")
     )
@@ -121,7 +121,7 @@ async def test_send_proof_request_v2_no_response(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(VerifierV2, "send_proof_request", return_value=None)
 
     mocker.patch.object(
@@ -155,7 +155,7 @@ async def test_send_proof_request_v2_no_response(
 async def test_create_proof_request(
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         VerifierV2, "create_proof_request", return_value=presentation_exchange_record
     )
@@ -173,7 +173,7 @@ async def test_create_proof_request(
 async def test_create_proof_request_exception(
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         VerifierV2, "create_proof_request", side_effect=CloudApiException("ERROR")
     )
@@ -191,7 +191,7 @@ async def test_create_proof_request_exception(
 @pytest.mark.anyio
 async def test_create_proof_request_no_result(
     mock_tenant_auth: AcaPyAuth, mocker: MockerFixture
-):
+) -> None:
     mocker.patch.object(VerifierV2, "create_proof_request", return_value=None)
     result = await test_module.create_proof_request(
         body=test_module.CreateProofRequest(
@@ -209,7 +209,7 @@ async def test_accept_proof_request_v2(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         VerifierV2, "accept_proof_request", return_value=presentation_exchange_record
     )
@@ -245,7 +245,7 @@ async def test_accept_proof_request_v2_exception(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         VerifierV2, "accept_proof_request", side_effect=CloudApiException("ERROR")
     )
@@ -282,7 +282,7 @@ async def test_accept_proof_request_v2_no_result(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(VerifierV2, "accept_proof_request", return_value=None)
     mocker.patch.object(
         VerifierV2, "get_proof_record", return_value=presentation_exchange_record
@@ -321,7 +321,7 @@ async def test_accept_proof_request_v2_no_connection(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     presentation_exchange_record_no_conn = presentation_exchange_record.model_copy()
     presentation_exchange_record_no_conn.connection_id = None
 
@@ -365,7 +365,7 @@ async def test_reject_proof_request(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         test_module,
         "client_from_auth",
@@ -407,7 +407,7 @@ async def test_reject_proof_request_bad_state(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         test_module,
         "client_from_auth",
@@ -448,7 +448,7 @@ async def test_delete_proof(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         test_module,
         "client_from_auth",
@@ -471,7 +471,7 @@ async def test_delete_proof_exception(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         test_module,
         "client_from_auth",
@@ -494,7 +494,7 @@ async def test_get_proof_record(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         test_module,
         "client_from_auth",
@@ -521,7 +521,7 @@ async def test_get_proof_record_exception(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         test_module,
         "client_from_auth",
@@ -544,7 +544,7 @@ async def test_get_proof_record_no_result(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         test_module,
         "client_from_auth",
@@ -570,7 +570,7 @@ async def test_get_proof_records(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         test_module,
         "client_from_auth",
@@ -615,7 +615,7 @@ async def test_get_proof_records_exception(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         test_module,
         "client_from_auth",
@@ -646,7 +646,7 @@ async def test_get_proof_records_no_result(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         test_module,
         "client_from_auth",
@@ -687,7 +687,7 @@ async def test_get_credentials_by_proof_id(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         test_module,
         "client_from_auth",
@@ -742,7 +742,7 @@ async def test_get_credentials_by_proof_id_exception(
     mock_context_managed_controller: MockContextManagedController,
     mock_tenant_auth: AcaPyAuth,
     mocker: MockerFixture,
-):
+) -> None:
     mocker.patch.object(
         test_module,
         "client_from_auth",
@@ -766,10 +766,10 @@ async def test_get_credentials_by_proof_id_exception(
 
 
 @pytest.mark.anyio
-async def test_get_credentials_by_proof_id_bad_limit():
+async def test_get_credentials_by_proof_id_bad_limit() -> None:
     client = TestClient(app)
 
-    def override_auth():
+    def override_auth() -> str:
         return "mocked_auth"
 
     app.dependency_overrides[acapy_auth_from_header] = override_auth
@@ -796,7 +796,7 @@ async def test_get_credentials_by_proof_id_bad_limit():
 
 
 @pytest.mark.anyio
-async def test_get_credentials_by_proof_id_with_limit_offset():
+async def test_get_credentials_by_proof_id_with_limit_offset() -> None:
     mock_aries_controller = AsyncMock()
 
     with patch("app.routes.verifier.client_from_auth") as mock_client_from_auth:

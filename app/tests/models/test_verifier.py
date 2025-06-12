@@ -12,7 +12,7 @@ from app.models.verifier import (
 from shared.exceptions.cloudapi_value_error import CloudApiValueError
 
 
-def test_proof_request_base_model():
+def test_proof_request_base_model() -> None:
     with pytest.raises(CloudApiValueError) as exc:
         ProofRequestBase(anoncreds_proof_request=None)
     assert exc.value.detail == (
@@ -38,7 +38,7 @@ def test_proof_request_base_model():
     )
 
 
-def test_accept_proof_request_model():
+def test_accept_proof_request_model() -> None:
     AcceptProofRequest(
         proof_id="abc",
         dif_presentation_spec=DIFPresSpec(),
@@ -78,7 +78,7 @@ def test_accept_proof_request_model():
     )
 
 
-def test_reject_proof_request_model():
+def test_reject_proof_request_model() -> None:
     RejectProofRequest(proof_id="abc", problem_report="valid message")
 
     with pytest.raises(CloudApiValueError) as exc:
