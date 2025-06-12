@@ -172,6 +172,8 @@ export default function (data) {
   }, { perspective: "Holder" });
 
   const issuerData = JSON.stringify({
+    issuer_wallet_name: wallet.issuer_wallet_name,
+    issuer_wallet_id: wallet.issuer_wallet_id,
     credential_exchange_id: issuerCredentialExchangeId,
     issuer_access_token: wallet.issuer_access_token,
     issuer_credential_definition_id: wallet.issuer_credential_definition_id,
