@@ -170,9 +170,7 @@ async def test_process_events_cancelled_error(
             stop_event=stop_event,
             duration=0.01,
         ) as event_generator:
-            events = []
-            async for event in event_generator:
-                events.append(event)
+            events = [event async for event in event_generator]
 
     assert len(events) == 0
     assert stop_event.is_set()
@@ -197,9 +195,7 @@ async def test_process_events_fetch_timeout_error(
         stop_event=stop_event,
         duration=0.01,
     ) as event_generator:
-        events = []
-        async for event in event_generator:
-            events.append(event)
+        events = [event async for event in event_generator]
 
     assert len(events) == 0
     assert stop_event.is_set()
@@ -300,9 +296,7 @@ async def test_process_events_bad_subscription_error_on_unsubscribe(
         stop_event=stop_event,
         duration=0.01,
     ) as event_generator:
-        events = []
-        async for event in event_generator:
-            events.append(event)
+        events = [event async for event in event_generator]
 
     # Assert no events are yielded
     assert len(events) == 0
@@ -340,9 +334,7 @@ async def test_process_events_base_exception(
             stop_event=stop_event,
             duration=0.01,
         ) as event_generator:
-            events = []
-            async for event in event_generator:
-                events.append(event)
+            events = [event async for event in event_generator]
 
     # Assert no events are yielded due to the base exception
     assert len(events) == 0
@@ -451,9 +443,7 @@ async def test_general_error_handling(
             stop_event=stop_event,
             duration=0.01,
         ) as event_generator:
-            events = []
-            async for event in event_generator:
-                events.append(event)
+            events = [event async for event in event_generator]
 
     # Assert no events are yielded due to the error
     assert len(events) == 0

@@ -75,17 +75,18 @@ line-length = 88
 lint.pycodestyle.max-line-length = 120
 target-version = "py312"
 lint.select = [
-  "B",   # flake8-bugbear (detect likely bugs)
-  "C",   # mccabe (code complexity)
-  "D",   # pydocstyle (docstring style)
-  "E",   # pycodestyle errors (style errors)
-  "F",   # pyflakes (detect invalid Python code)
-  "I",   # isort (import sorting)
-  "N",   # pep8-naming (naming conventions)
-  "PL",  # pylint
-  "RUF", # ruff-specific rules
-  "UP",  # pyupgrade (upgrade syntax)
-  "W",   # pycodestyle warnings (style warnings)
+  "ASYNC", # flake8-async (async/await)
+  "B",     # flake8-bugbear (detect likely bugs)
+  "C",     # mccabe (code complexity)
+  "D",     # pydocstyle (docstring style)
+  "E",     # pycodestyle errors (style errors)
+  "F",     # pyflakes (detect invalid Python code)
+  "I",     # isort (import sorting)
+  "N",     # pep8-naming (naming conventions)
+  "PL",    # pylint
+  "RUF",   # ruff-specific rules
+  "UP",    # pyupgrade (upgrade syntax)
+  "W",     # pycodestyle warnings (style warnings)
 ]
 lint.ignore = [
   # Docstring related:
