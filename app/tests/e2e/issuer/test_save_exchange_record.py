@@ -117,7 +117,7 @@ async def test_request_credential_with_save_exchange_record(
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
     alice_member_client: RichAsyncClient,
     save_exchange_record: bool,
-) -> None:
+):
     # This test asserts that the holder can control `save_exchange_records` behaviour
     credential = {
         "connection_id": faber_anoncreds_and_alice_connection.faber_connection_id,
@@ -210,7 +210,7 @@ async def test_get_cred_exchange_records(
     anoncreds_credential_definition_id: str,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
     alice_member_client: RichAsyncClient,
-) -> None:
+):
     # Fetch existing records so we can filter to exclude them. Necessary to cater for long running / regression tests
     existing_records = (
         await alice_member_client.get(CREDENTIALS_BASE_PATH + "?state=offer-received")

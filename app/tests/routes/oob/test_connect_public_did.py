@@ -15,7 +15,7 @@ created_connection = ConnRecord(
 
 
 @pytest.mark.anyio
-async def test_connect_to_public_did_success() -> None:
+async def test_connect_to_public_did_success():
     mock_aries_controller = AsyncMock()
     mock_aries_controller.did_exchange.create_request = AsyncMock(
         return_value=created_connection

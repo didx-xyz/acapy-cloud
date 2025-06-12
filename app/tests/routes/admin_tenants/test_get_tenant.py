@@ -12,7 +12,7 @@ wallet_name = "some_wallet_name"
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("group_id", [None, "some_group"])
-async def test_get_tenant_success(group_id) -> None:
+async def test_get_tenant_success(group_id):
     admin_controller_mock = AsyncMock()
 
     # Patch the dependencies
@@ -51,7 +51,7 @@ async def test_get_tenant_success(group_id) -> None:
 
 
 @pytest.mark.anyio
-async def test_get_tenant_fail_wrong_group() -> None:
+async def test_get_tenant_fail_wrong_group():
     # Setup wallet return object including the group_id it belongs to
     wallet_return_obj = AsyncMock()
     wallet_return_obj.settings = {"wallet.group_id": "correct_group"}

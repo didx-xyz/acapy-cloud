@@ -12,7 +12,7 @@ from app.services.definitions.credential_definitions import get_credential_defin
 
 
 @pytest.mark.anyio
-async def test_get_credential_definitions_success() -> None:
+async def test_get_credential_definitions_success():
     mock_aries_controller = AsyncMock()
 
     mock_cred_def_ids = [
@@ -53,7 +53,7 @@ async def test_get_credential_definitions_success() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_credential_definitions_with_filters() -> None:
+async def test_get_credential_definitions_with_filters():
     mock_aries_controller = AsyncMock()
 
     mock_cred_def_ids = ["cred_def_1"]
@@ -91,7 +91,7 @@ async def test_get_credential_definitions_with_filters() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_credential_definitions_no_results() -> None:
+async def test_get_credential_definitions_no_results():
     mock_aries_controller = AsyncMock()
 
     with patch(
@@ -107,7 +107,7 @@ async def test_get_credential_definitions_no_results() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_credential_definitions_some_missing() -> None:
+async def test_get_credential_definitions_some_missing():
     mock_aries_controller = AsyncMock()
 
     mock_cred_def_ids = ["cred_def_1", "cred_def_2"]

@@ -22,7 +22,7 @@ async def test_predicate_proofs_anoncreds(
     alice_member_client: RichAsyncClient,
     issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     predicate: str,
-) -> None:
+):
     request_body = {
         "anoncreds_proof_request": {
             "requested_attributes": {},

@@ -37,7 +37,7 @@ async def test_proof_revoked_credential_anoncreds(
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
-) -> None:
+):
     await proof_revoked_credential(
         proof_type="anoncreds",
         credential_definition_id=anoncreds_credential_definition_id_revocable,
@@ -139,7 +139,7 @@ async def test_regression_proof_revoked_anoncreds_credential(
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
-) -> None:
+):
     await regression_proof_revoked_credential(
         "anoncreds",
         get_or_issue_regression_anoncreds_revoked,

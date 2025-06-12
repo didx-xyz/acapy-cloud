@@ -19,7 +19,7 @@ cred_def_response = CredentialDefinition(
 
 
 @pytest.mark.anyio
-async def test_create_credential_definition_success() -> None:
+async def test_create_credential_definition_success():
     mock_aries_controller = AsyncMock()
 
     with (
@@ -63,7 +63,7 @@ async def test_create_credential_definition_success() -> None:
 )
 async def test_create_credential_definition_fail_acapy_error(
     expected_status_code, expected_detail
-) -> None:
+):
     mock_aries_controller = AsyncMock()
 
     with (

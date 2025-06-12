@@ -40,7 +40,7 @@ schema1 = Schema(did="did123", name="schema1", version="1.0")
         ([db_actor1, db_actor2], 0, 2),
     ],
 )
-def test_get_actors(db_session_mock: Session, expected, skip, limit) -> None:
+def test_get_actors(db_session_mock: Session, expected, skip, limit):
     db_session_mock.scalars.return_value.all.return_value = expected
 
     with patch("trustregistry.crud.select") as select_mock:
@@ -58,7 +58,7 @@ def test_get_actors(db_session_mock: Session, expected, skip, limit) -> None:
     "expected, actor_did",
     [(db_actor1, "did:123"), (None, "did:not_in_db")],
 )
-def test_get_actor_by_did(db_session_mock: Session, expected, actor_did) -> None:
+def test_get_actor_by_did(db_session_mock: Session, expected, actor_did):
     db_session_mock.scalars.return_value.first.return_value = expected
 
     with patch("trustregistry.crud.select") as select_mock:
@@ -79,7 +79,7 @@ def test_get_actor_by_did(db_session_mock: Session, expected, actor_did) -> None
 @pytest.mark.parametrize(
     "expected, actor_name", [(db_actor1, "Alice"), (None, "NotInDB")]
 )
-def test_get_actor_by_name(db_session_mock: Session, expected, actor_name) -> None:
+def test_get_actor_by_name(db_session_mock: Session, expected, actor_name):
     db_session_mock.scalars.return_value.one_or_none.return_value = expected
 
     with patch("trustregistry.crud.select") as select_mock:
@@ -97,7 +97,7 @@ def test_get_actor_by_name(db_session_mock: Session, expected, actor_name) -> No
 
 
 @pytest.mark.parametrize("expected, actor_id", [(db_actor1, "1"), (None, "NotInDB")])
-def test_get_actor_by_id(db_session_mock: Session, expected, actor_id) -> None:
+def test_get_actor_by_id(db_session_mock: Session, expected, actor_id):
     db_session_mock.scalars.return_value.first.return_value = expected
 
     with patch("trustregistry.crud.select") as select_mock:
@@ -114,7 +114,7 @@ def test_get_actor_by_id(db_session_mock: Session, expected, actor_id) -> None:
         select_mock(db.Actor).where.assert_called_once()
 
 
-def test_create_actor(db_session_mock: Session) -> None:
+def test_create_actor(db_session_mock: Session):
     db_actor = db.Actor(**actor1.model_dump())
 
     result = crud.create_actor(db_session_mock, actor1)
@@ -138,7 +138,7 @@ def test_create_actor(db_session_mock: Session) -> None:
         "unknown_orig",
     ],
 )
-def test_create_actor_already_exists(db_session_mock: Session, orig: str) -> None:
+def test_create_actor_already_exists(db_session_mock: Session, orig: str):
     db_session_mock.add.side_effect = IntegrityError(
         orig=orig, params=None, statement=None
     )
@@ -147,7 +147,7 @@ def test_create_actor_already_exists(db_session_mock: Session, orig: str) -> Non
         crud.create_actor(db_session_mock, actor1)
 
 
-def test_create_actor_exception(db_session_mock: Session) -> None:
+def test_create_actor_exception(db_session_mock: Session):
     db_session_mock.add.side_effect = RuntimeError("Some error")
 
     with pytest.raises(RuntimeError):
@@ -155,7 +155,7 @@ def test_create_actor_exception(db_session_mock: Session) -> None:
 
 
 @pytest.mark.parametrize("actor, actor_id", [(actor1, "1"), (None, "NotInDB")])
-def test_delete_actor(db_session_mock: Session, actor, actor_id) -> None:
+def test_delete_actor(db_session_mock: Session, actor, actor_id):
     db_session_mock.scalars.return_value.one_or_none.return_value = actor
     with (
         patch("trustregistry.crud.select") as select_mock,
@@ -182,7 +182,7 @@ def test_delete_actor(db_session_mock: Session, actor, actor_id) -> None:
 @pytest.mark.parametrize("new_actor, old_actor ", [(actor1, db_actor1), (actor1, None)])
 def test_update_actor(
     db_session_mock: Session, new_actor: Actor, old_actor: db.Actor
-) -> None:
+):
     db_session_mock.scalars.return_value.one_or_none.return_value = old_actor
 
     if not old_actor:
@@ -207,7 +207,7 @@ def test_update_actor(
         ([db_schema1, db_schema2], 0, 2),
     ],
 )
-def test_get_schemas(db_session_mock: Session, expected, skip, limit) -> None:
+def test_get_schemas(db_session_mock: Session, expected, skip, limit):
     db_session_mock.scalars.return_value.all.return_value = expected
 
     with patch("trustregistry.crud.select") as select_mock:
@@ -224,7 +224,7 @@ def test_get_schemas(db_session_mock: Session, expected, skip, limit) -> None:
 @pytest.mark.parametrize(
     "expected, schema_id", [(db_schema1, "123"), (None, "id_not_in_db")]
 )
-def test_get_schema_by_id(db_session_mock: Session, expected, schema_id) -> None:
+def test_get_schema_by_id(db_session_mock: Session, expected, schema_id):
     db_session_mock.scalars.return_value.first.return_value = expected
 
     with patch("trustregistry.crud.select") as select_mock:
@@ -245,7 +245,7 @@ def test_get_schema_by_id(db_session_mock: Session, expected, schema_id) -> None
 @pytest.mark.parametrize(
     "old_schema, new_schema", [(None, schema1), (db_schema1, schema1)]
 )
-def test_create_schema(db_session_mock: Session, old_schema, new_schema) -> None:
+def test_create_schema(db_session_mock: Session, old_schema, new_schema):
     schema = db.Schema(**new_schema.model_dump())
     db_session_mock.scalars.return_value.one_or_none.return_value = old_schema
     if old_schema:
@@ -278,7 +278,7 @@ def test_create_schema(db_session_mock: Session, old_schema, new_schema) -> None
         (schema1, None),
     ],
 )
-def test_update_schema(db_session_mock: Session, new_schema, old_schema) -> None:
+def test_update_schema(db_session_mock: Session, new_schema, old_schema):
     db_session_mock.scalars.return_value.one_or_none.return_value = old_schema
     if not old_schema:
         with pytest.raises(SchemaDoesNotExistError):
@@ -297,7 +297,7 @@ def test_update_schema(db_session_mock: Session, new_schema, old_schema) -> None
 @pytest.mark.parametrize(
     "schema, schema_id", [(db_schema1, "did123:2:schema1:1.0"), (None, "not_in_db")]
 )
-def test_delete_schema(db_session_mock: Session, schema, schema_id) -> None:
+def test_delete_schema(db_session_mock: Session, schema, schema_id):
     db_session_mock.scalars.return_value.one_or_none.return_value = schema
     with (
         patch("trustregistry.crud.select") as select_mock,

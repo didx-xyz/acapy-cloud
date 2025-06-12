@@ -42,7 +42,7 @@ acapy_anoncreds_response = GetSchemaResult(
 
 
 @pytest.mark.anyio
-async def test_get_schema_by_id_success() -> None:
+async def test_get_schema_by_id_success():
     mock_aries_controller = AsyncMock()
     mock_aries_controller.anoncreds_schemas.get_schema = AsyncMock(
         return_value=acapy_anoncreds_response
@@ -72,7 +72,7 @@ async def test_get_schema_by_id_fail_acapy_error(
     exception_class,
     expected_status_code,
     expected_detail,
-) -> None:
+):
     mock_aries_controller = AsyncMock()
     mock_aries_controller.anoncreds_schemas.get_schema = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
@@ -93,7 +93,7 @@ async def test_get_schema_by_id_fail_acapy_error(
 
 
 @pytest.mark.anyio
-async def test_get_schema_by_id_404() -> None:
+async def test_get_schema_by_id_404():
     mock_aries_controller = AsyncMock()
     mock_aries_controller.anoncreds_schemas.get_schema = AsyncMock(
         return_value=SchemaGetResult(var_schema=None)
@@ -115,7 +115,7 @@ async def test_get_schema_by_id_404() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_schema_by_id_askar_anoncreds() -> None:
+async def test_get_schema_by_id_askar_anoncreds():
     mock_aries_controller = AsyncMock()
     mock_aries_controller.anoncreds_schemas.get_schema = AsyncMock(
         return_value=acapy_anoncreds_response
@@ -137,7 +137,7 @@ async def test_get_schema_by_id_askar_anoncreds() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_schema_by_id_var_schema_not_found() -> None:
+async def test_get_schema_by_id_var_schema_not_found():
     mock_aries_controller = AsyncMock()
     # Simulate a response where var_schema is None
     mock_aries_controller.anoncreds_schemas.get_schema = AsyncMock(

@@ -5,7 +5,7 @@ from shared.models.trustregistry import Actor, Schema
 from trustregistry import db
 
 
-def test_actor() -> None:
+def test_actor():
     actor = Actor(
         id="mickey-mouse",
         name="Mickey Mouse",
@@ -21,7 +21,7 @@ def test_actor() -> None:
     assert actor.did == "did:key:abc"
 
 
-def test_schema() -> None:
+def test_schema():
     schema = Schema(did="abc", name="schema", version="0.4.20")
 
     assert schema.did == "abc"
@@ -39,7 +39,7 @@ def test_schema() -> None:
         Schema(did="abc", name="schema", version="0:4:20")
 
 
-def test_db_actor() -> None:
+def test_db_actor():
     actor = db.Actor(
         id="mickey-mouse",
         name="Mickey Mouse",
@@ -55,7 +55,7 @@ def test_db_actor() -> None:
     assert actor.did == "abc"
 
 
-def test_db_schema() -> None:
+def test_db_schema():
     schema = db.Schema(did="abc", name="schema", version="0.4.20")
 
     assert schema.did == "abc"

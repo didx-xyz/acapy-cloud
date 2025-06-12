@@ -14,7 +14,7 @@ def db_session_mock() -> Mock:
     return session
 
 
-def test_create_app() -> None:
+def test_create_app():
     assert app.title == "Trust Registry"
 
     routes = [route.path for route in app.routes]
@@ -38,7 +38,7 @@ async def test_lifespan_migrations_needed(
     mock_config,
     mock_check_migrations,
     mock_engine,
-) -> None:
+):
     mock_check_migrations.return_value = False
     mock_config.return_value = MagicMock()
     mock_inspector = MagicMock()
@@ -75,7 +75,7 @@ async def test_lifespan_migration_error(
     mock_config,
     mock_check_migrations,
     mock_engine,
-) -> None:
+):
     # Mock return values
     mock_check_migrations.return_value = False
     mock_config.return_value = MagicMock()
@@ -110,7 +110,7 @@ async def test_lifespan_no_migrations_needed(
     mock_config,
     mock_check_migrations,
     mock_engine,
-) -> None:
+):
     mock_check_migrations.return_value = True
     mock_config.return_value = MagicMock()
     mock_inspector = MagicMock()
@@ -161,7 +161,7 @@ def test_check_migrations(
     current_rev,
     head_rev,
     expected,
-) -> None:
+):
     # Set up mocks
     mock_engine = MagicMock()
     mock_alembic_cfg = MagicMock()
@@ -217,7 +217,7 @@ def test_check_migrations(
 
 
 @pytest.mark.anyio
-async def test_root(db_session_mock) -> None:  # pylint: disable=redefined-outer-name
+async def test_root(db_session_mock):  # pylint: disable=redefined-outer-name
     schemas = [
         db.Schema(id="123", did="did:123", name="schema1", version="1.0"),
         db.Schema(id="456", did="did:123", name="schema2", version="1.0"),
@@ -239,7 +239,7 @@ async def test_root(db_session_mock) -> None:  # pylint: disable=redefined-outer
 
 
 @pytest.mark.anyio
-async def test_registry(db_session_mock) -> None:  # pylint: disable=redefined-outer-name
+async def test_registry(db_session_mock):  # pylint: disable=redefined-outer-name
     with patch("trustregistry.main.root") as mock_root:
         mock_root.return_value = {"actors": "actors", "schemas": "schemas"}
 

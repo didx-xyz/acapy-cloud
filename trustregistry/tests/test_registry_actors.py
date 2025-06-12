@@ -9,7 +9,7 @@ from trustregistry.registry import registry_actors
 
 
 @pytest.mark.anyio
-async def test_get_actors() -> None:
+async def test_get_actors():
     with patch("trustregistry.registry.registry_actors.crud.get_actors") as mock_crud:
         actor = Actor(
             id="1", name="Alice", roles=["issuer"], did="did:cheqd:testnet:1234"
@@ -21,7 +21,7 @@ async def test_get_actors() -> None:
 
 
 @pytest.mark.anyio
-async def test_register_actor() -> None:
+async def test_register_actor():
     with patch("trustregistry.registry.registry_actors.crud.create_actor") as mock_crud:
         actor = Actor(
             id="1", name="Alice", roles=["issuer"], did="did:cheqd:testnet:1234"
@@ -36,7 +36,7 @@ async def test_register_actor() -> None:
 @pytest.mark.parametrize(
     "exception, status_code", [(ActorAlreadyExistsError, 409), (Exception, 500)]
 )
-async def test_register_actor_x(exception, status_code) -> None:
+async def test_register_actor_x(exception, status_code):
     with patch("trustregistry.registry.registry_actors.crud.create_actor") as mock_crud:
         actor = Actor(
             id="1", name="Alice", roles=["verifier"], did="did:cheqd:testnet:1234"
@@ -67,7 +67,7 @@ async def test_register_actor_x(exception, status_code) -> None:
         ),
     ],
 )
-async def test_update_actor(actor_id: str, actor: Actor) -> None:
+async def test_update_actor(actor_id: str, actor: Actor):
     with patch("trustregistry.registry.registry_actors.crud.update_actor") as mock_crud:
         mock_crud.return_value = actor
 
@@ -85,7 +85,7 @@ async def test_update_actor(actor_id: str, actor: Actor) -> None:
 
 
 @pytest.mark.anyio
-async def test_update_actor_x() -> None:
+async def test_update_actor_x():
     with patch("trustregistry.registry.registry_actors.crud.update_actor") as mock_crud:
         actor = Actor(
             id="1", name="Alice", roles=["issuer"], did="did:cheqd:testnet:1234"
@@ -99,7 +99,7 @@ async def test_update_actor_x() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_actor_by_did() -> None:
+async def test_get_actor_by_did():
     with patch(
         "trustregistry.registry.registry_actors.crud.get_actor_by_did"
     ) as mock_crud:
@@ -113,7 +113,7 @@ async def test_get_actor_by_did() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_actor_by_did_x() -> None:
+async def test_get_actor_by_did_x():
     with patch(
         "trustregistry.registry.registry_actors.crud.get_actor_by_did"
     ) as mock_crud:
@@ -126,7 +126,7 @@ async def test_get_actor_by_did_x() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_actor_by_id() -> None:
+async def test_get_actor_by_id():
     with patch(
         "trustregistry.registry.registry_actors.crud.get_actor_by_id"
     ) as mock_crud:
@@ -140,7 +140,7 @@ async def test_get_actor_by_id() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_actor_by_id_x() -> None:
+async def test_get_actor_by_id_x():
     with patch(
         "trustregistry.registry.registry_actors.crud.get_actor_by_id"
     ) as mock_crud:
@@ -153,7 +153,7 @@ async def test_get_actor_by_id_x() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_actor_by_name() -> None:
+async def test_get_actor_by_name():
     with patch(
         "trustregistry.registry.registry_actors.crud.get_actor_by_name"
     ) as mock_crud:
@@ -167,7 +167,7 @@ async def test_get_actor_by_name() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_actor_by_name_x() -> None:
+async def test_get_actor_by_name_x():
     with patch(
         "trustregistry.registry.registry_actors.crud.get_actor_by_name"
     ) as mock_crud:
@@ -180,7 +180,7 @@ async def test_get_actor_by_name_x() -> None:
 
 
 @pytest.mark.anyio
-async def test_delete_actor() -> None:
+async def test_delete_actor():
     with patch("trustregistry.registry.registry_actors.crud.delete_actor") as mock_crud:
         mock_crud.return_value = None
         result = await registry_actors.remove_actor("1")
@@ -189,7 +189,7 @@ async def test_delete_actor() -> None:
 
 
 @pytest.mark.anyio
-async def test_delete_actor_x() -> None:
+async def test_delete_actor_x():
     with patch("trustregistry.registry.registry_actors.crud.delete_actor") as mock_crud:
         mock_crud.side_effect = ActorDoesNotExistError()
         with pytest.raises(HTTPException) as ex:

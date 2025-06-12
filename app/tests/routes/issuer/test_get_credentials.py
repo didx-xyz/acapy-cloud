@@ -9,7 +9,7 @@ from app.routes.issuer import get_credentials
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("mock_v2_records", [[], ["v2_rec"]])
-async def test_get_credentials_success(mock_v2_records) -> None:
+async def test_get_credentials_success(mock_v2_records):
     mock_aries_controller = AsyncMock()
 
     with (
@@ -39,7 +39,7 @@ async def test_get_credentials_success(mock_v2_records) -> None:
 )
 async def test_get_credentials_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-) -> None:
+):
     mock_aries_controller = AsyncMock()
     issuer = AsyncMock()
     issuer.get_records = AsyncMock(

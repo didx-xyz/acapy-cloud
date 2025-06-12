@@ -37,7 +37,7 @@ def acapy_call() -> AsyncMock:
 @pytest.mark.anyio
 async def test_handle_acapy_call_with_bad_request_exception(
     acapy_call, mock_logger
-) -> None:
+):
     acapy_call.side_effect = BadRequestException(reason="Bad Request", status=400)
 
     acapy_call.__name__ = dummy_acapy_call
@@ -53,7 +53,7 @@ async def test_handle_acapy_call_with_bad_request_exception(
 @pytest.mark.anyio
 async def test_handle_acapy_call_with_unauthorized_exception(
     acapy_call, mock_logger
-) -> None:
+):
     acapy_call.side_effect = UnauthorizedException(reason="Unauthorized", status=401)
 
     with pytest.raises(CloudApiException) as exc_info:
@@ -68,7 +68,7 @@ async def test_handle_acapy_call_with_unauthorized_exception(
 @pytest.mark.anyio
 async def test_handle_acapy_call_with_forbidden_exception(
     acapy_call, mock_logger
-) -> None:
+):
     acapy_call.side_effect = ForbiddenException(reason="Forbidden", status=403)
 
     with pytest.raises(CloudApiException) as exc_info:
@@ -83,7 +83,7 @@ async def test_handle_acapy_call_with_forbidden_exception(
 @pytest.mark.anyio
 async def test_handle_acapy_call_with_not_found_exception(
     acapy_call, mock_logger
-) -> None:
+):
     acapy_call.side_effect = NotFoundException(reason="Not Found", status=404)
 
     with pytest.raises(CloudApiException) as exc_info:
@@ -96,7 +96,7 @@ async def test_handle_acapy_call_with_not_found_exception(
 
 
 @pytest.mark.anyio
-async def test_handle_acapy_call_with_validation_error(acapy_call, mock_logger) -> None:
+async def test_handle_acapy_call_with_validation_error(acapy_call, mock_logger):
     # Create a dummy ValidationError
     acapy_call.side_effect = ValidationError.from_exception_data(
         "Foo",
@@ -117,7 +117,7 @@ async def test_handle_acapy_call_with_validation_error(acapy_call, mock_logger) 
 @pytest.mark.anyio
 async def test_handle_acapy_call_with_api_exception_422(
     acapy_call, mock_logger
-) -> None:
+):
     acapy_call.side_effect = ApiException(reason="Unprocessable Entity", status=422)
 
     with pytest.raises(CloudApiException) as exc_info:
@@ -134,7 +134,7 @@ async def test_handle_acapy_call_with_api_exception_422(
 @pytest.mark.anyio
 async def test_handle_acapy_call_with_api_exception_500(
     acapy_call, mock_logger
-) -> None:
+):
     acapy_call.side_effect = ApiException(reason="Internal Server Error", status=500)
 
     with pytest.raises(CloudApiException) as exc_info:
@@ -149,7 +149,7 @@ async def test_handle_acapy_call_with_api_exception_500(
 @pytest.mark.anyio
 async def test_handle_acapy_call_with_generic_exception(
     acapy_call, mock_logger
-) -> None:
+):
     acapy_call.side_effect = Exception("Something went wrong")
 
     with pytest.raises(CloudApiException) as exc_info:

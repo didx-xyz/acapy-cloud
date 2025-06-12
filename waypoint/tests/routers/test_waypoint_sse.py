@@ -71,7 +71,7 @@ def async_generator_mock() -> Callable[
 
 
 @pytest.mark.anyio
-async def test_check_disconnection() -> None:
+async def test_check_disconnection():
     request = AsyncMock(spec=Request)
     request.is_disconnected.return_value = True
 
@@ -88,7 +88,7 @@ async def test_check_disconnection() -> None:
 async def test_sse_event_stream_generator_wallet_id_topic_field_desired_state(
     nats_processor_mock,  # pylint: disable=redefined-outer-name
     request_mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     async def mock_event_generator() -> AsyncGenerator[
         CloudApiWebhookEventGeneric, None
     ]:
@@ -121,7 +121,7 @@ async def test_sse_event_stream_generator_wallet_id_topic_field_desired_state(
 @pytest.mark.anyio
 async def test_sse_event_stream_generator_disconnects(
     nats_processor_mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     request = AsyncMock(spec=Request)
     request.is_disconnected.return_value = True
 
@@ -157,7 +157,7 @@ async def test_sse_event_stream_generator_disconnects(
 async def test_nats_event_stream_generator_cancelled_error_handling(
     nats_processor_mock,  # pylint: disable=redefined-outer-name
     request_mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     background_tasks = BackgroundTasks()
 
     async def mock_event_generator():  # noqa: ANN202
@@ -194,7 +194,7 @@ async def test_sse_event_stream(
     async_generator_mock,  # pylint: disable=redefined-outer-name
     nats_processor_mock,  # pylint: disable=redefined-outer-name
     request_mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     with patch(
         "waypoint.routers.sse.nats_event_stream_generator"
     ) as nats_event_stream_generator_mock:

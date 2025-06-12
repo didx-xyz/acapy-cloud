@@ -12,7 +12,7 @@ wallet_name = "some_wallet_name"
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("group_id", [None, "some_group"])
-async def test_delete_tenant_by_id_success(group_id) -> None:
+async def test_delete_tenant_by_id_success(group_id):
     # Mock the structure of admin_controller -> multitenancy -> delete_wallet
     multitenancy_mock = AsyncMock(delete_wallet=AsyncMock())
     admin_controller_mock = AsyncMock(multitenancy=multitenancy_mock)
@@ -53,7 +53,7 @@ async def test_delete_tenant_by_id_success(group_id) -> None:
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("group_id", [None, "some_group"])
-async def test_delete_tenant_by_id_success_actor(group_id) -> None:
+async def test_delete_tenant_by_id_success_actor(group_id):
     # Mock the structure of admin_controller -> multitenancy -> delete_wallet
     multitenancy_mock = AsyncMock(delete_wallet=AsyncMock())
     admin_controller_mock = AsyncMock(multitenancy=multitenancy_mock)
@@ -100,7 +100,7 @@ async def test_delete_tenant_by_id_success_actor(group_id) -> None:
 
 
 @pytest.mark.anyio
-async def test_delete_tenant_by_id_fail_wrong_group() -> None:
+async def test_delete_tenant_by_id_fail_wrong_group():
     # Setup wallet return object including the group_id it belongs to
     wallet_return_obj = AsyncMock()
     wallet_return_obj.settings = {"wallet.group_id": "correct_group"}

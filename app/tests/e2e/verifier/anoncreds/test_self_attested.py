@@ -19,7 +19,7 @@ async def test_self_attested_attributes_anoncreds(
     acme_and_alice_connection: AcmeAliceConnect,
     alice_member_client: RichAsyncClient,
     issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
-) -> None:
+):
     request_body = {
         "anoncreds_proof_request": {
             "requested_attributes": {

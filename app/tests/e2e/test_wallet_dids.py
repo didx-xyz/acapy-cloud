@@ -27,7 +27,7 @@ async def create_did_mock(governance_client: RichAsyncClient) -> str:
 @pytest.mark.anyio
 async def test_list_dids(
     governance_client: RichAsyncClient, mock_governance_auth: AcaPyAuthVerified
-) -> None:
+):
     # Capture the existing DIDs before the request
     initial_dids = await list_dids(auth=mock_governance_auth)
     initial_dids_set = {x.did for x in initial_dids}
@@ -48,7 +48,7 @@ async def test_list_dids(
 
 
 @pytest.mark.anyio
-async def test_create_local_did(governance_client: RichAsyncClient) -> None:
+async def test_create_local_did(governance_client: RichAsyncClient):
     response = await governance_client.post(WALLET_BASE_PATH)
 
     assert response.status_code == 200
@@ -61,7 +61,7 @@ async def test_create_local_did(governance_client: RichAsyncClient) -> None:
 @pytest.mark.anyio
 async def test_get_public_did(
     governance_client: RichAsyncClient, mock_governance_auth: AcaPyAuthVerified
-) -> None:
+):
     response = await governance_client.get(f"{WALLET_BASE_PATH}/public")
 
     assert response.status_code == 200
@@ -75,7 +75,7 @@ async def test_get_public_did(
 
 
 @pytest.mark.anyio
-async def test_get_did_endpoint(governance_client: RichAsyncClient) -> None:
+async def test_get_did_endpoint(governance_client: RichAsyncClient):
     did = await create_did_mock(governance_client)
     response = await governance_client.get(f"{WALLET_BASE_PATH}/{did}/endpoint")
     assert response.status_code == 200

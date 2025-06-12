@@ -37,7 +37,7 @@ from shared.models.presentation_exchange import (
 @pytest.mark.parametrize("proof_type", ["ld_proof", "anoncreds"])
 async def test_create_proof_request(
     mock_agent_controller: AcaPyClient, proof_type
-) -> None:
+):
     present_proof_v2_0 = mock_agent_controller.present_proof_v2_0
     present_proof_v2_0.create_proof_request.return_value = (
         v20_presentation_exchange_records[0]
@@ -61,7 +61,7 @@ async def test_create_proof_request(
 @pytest.mark.parametrize("error_detail", ["Error msg", "is dynamic"])
 async def test_create_proof_request_exception(
     mock_agent_controller: AcaPyClient, status_code: int, error_detail: str
-) -> None:
+):
     mock_agent_controller.present_proof_v2_0.create_proof_request.side_effect = (
         ApiException(reason=error_detail, status=status_code)
     )
@@ -84,7 +84,7 @@ async def test_create_proof_request_exception(
 @pytest.mark.parametrize("proof_type", ["ld_proof", "anoncreds"])
 async def test_send_proof_request(
     mock_agent_controller: AcaPyClient, proof_type
-) -> None:
+):
     mock_agent_controller.present_proof_v2_0.send_request_free.return_value = (
         v20_presentation_exchange_records[0]
     )
@@ -109,7 +109,7 @@ async def test_send_proof_request(
 @pytest.mark.parametrize("error_detail", ["Error msg", "is dynamic"])
 async def test_send_proof_request_exception(
     mock_agent_controller: AcaPyClient, status_code: int, error_detail: str
-) -> None:
+):
     with pytest.raises(ValidationError):
         await VerifierV2.send_proof_request(
             mock_agent_controller,
@@ -139,7 +139,7 @@ async def test_send_proof_request_exception(
 @pytest.mark.parametrize("proof_type", ["ld_proof", "anoncreds"])
 async def test_accept_proof_request(
     mock_agent_controller: AcaPyClient, proof_type
-) -> None:
+):
     mock_agent_controller.present_proof_v2_0.send_presentation.return_value = (
         v20_presentation_exchange_records[0]
     )
@@ -170,7 +170,7 @@ async def test_accept_proof_request(
 @pytest.mark.parametrize("error_detail", ["Error msg", "is dynamic"])
 async def test_accept_proof_request_exception(
     mock_agent_controller: AcaPyClient, status_code: int, error_detail: str
-) -> None:
+):
     mock_agent_controller.present_proof_v2_0.send_presentation.side_effect = (
         ApiException(reason=error_detail, status=status_code)
     )
@@ -195,7 +195,7 @@ async def test_accept_proof_request_exception(
 
 
 @pytest.mark.anyio
-async def test_reject_proof_reject(mock_agent_controller: AcaPyClient) -> None:
+async def test_reject_proof_reject(mock_agent_controller: AcaPyClient):
     mock_agent_controller.present_proof_v2_0.delete_record.return_value = {}
     mock_agent_controller.present_proof_v2_0.report_problem.return_value = {}
 
@@ -214,7 +214,7 @@ async def test_reject_proof_reject(mock_agent_controller: AcaPyClient) -> None:
 @pytest.mark.parametrize("error_detail", ["Error msg", "is dynamic"])
 async def test_reject_proof_reject_exception_report(
     mock_agent_controller: AcaPyClient, status_code: int, error_detail: str
-) -> None:
+):
     mock_agent_controller.present_proof_v2_0.report_problem.side_effect = ApiException(
         reason=error_detail, status=status_code
     )
@@ -238,7 +238,7 @@ async def test_reject_proof_reject_exception_report(
 @pytest.mark.parametrize("error_detail", ["Error msg", "is dynamic"])
 async def test_reject_proof_reject_exception_delete(
     mock_agent_controller: AcaPyClient, status_code: int, error_detail: str
-) -> None:
+):
     mock_agent_controller.present_proof_v2_0.report_problem.return_value = {}
     mock_agent_controller.present_proof_v2_0.delete_record.side_effect = ApiException(
         reason=error_detail, status=status_code
@@ -259,7 +259,7 @@ async def test_reject_proof_reject_exception_delete(
 
 
 @pytest.mark.anyio
-async def test_get_proof_records(mock_agent_controller: AcaPyClient) -> None:
+async def test_get_proof_records(mock_agent_controller: AcaPyClient):
     mock_agent_controller.present_proof_v2_0.get_records.return_value = (
         V20PresExRecordList(results=v20_presentation_exchange_records)
     )
@@ -279,7 +279,7 @@ async def test_get_proof_records(mock_agent_controller: AcaPyClient) -> None:
 @pytest.mark.parametrize("error_detail", ["Error msg", "is dynamic"])
 async def test_get_proof_records_exception(
     mock_agent_controller: AcaPyClient, status_code: int, error_detail: str
-) -> None:
+):
     mock_agent_controller.present_proof_v2_0.get_records.side_effect = ApiException(
         reason=error_detail, status=status_code
     )
@@ -296,7 +296,7 @@ async def test_get_proof_records_exception(
 
 
 @pytest.mark.anyio
-async def test_get_proof_record(mock_agent_controller: AcaPyClient) -> None:
+async def test_get_proof_record(mock_agent_controller: AcaPyClient):
     mock_agent_controller.present_proof_v2_0.get_record.return_value = (
         v20_presentation_exchange_records[0]
     )
@@ -314,7 +314,7 @@ async def test_get_proof_record(mock_agent_controller: AcaPyClient) -> None:
 @pytest.mark.parametrize("error_detail", ["Error msg", "is dynamic"])
 async def test_get_proof_record_exception(
     mock_agent_controller: AcaPyClient, status_code: int, error_detail: str
-) -> None:
+):
     mock_agent_controller.present_proof_v2_0.get_record.side_effect = ApiException(
         reason=error_detail, status=status_code
     )
@@ -331,7 +331,7 @@ async def test_get_proof_record_exception(
 
 
 @pytest.mark.anyio
-async def test_delete_proof(mock_agent_controller: AcaPyClient) -> None:
+async def test_delete_proof(mock_agent_controller: AcaPyClient):
     mock_agent_controller.present_proof_v2_0.delete_record.return_value = None
     result = await VerifierV2.delete_proof(
         controller=mock_agent_controller, proof_id="v2-abc"
@@ -344,7 +344,7 @@ async def test_delete_proof(mock_agent_controller: AcaPyClient) -> None:
 @pytest.mark.parametrize("error_detail", ["Error msg", "is dynamic"])
 async def test_delete_proof_exception(
     mock_agent_controller: AcaPyClient, status_code: int, error_detail: str
-) -> None:
+):
     mock_agent_controller.present_proof_v2_0.delete_record.side_effect = ApiException(
         reason=error_detail, status=status_code
     )
@@ -364,7 +364,7 @@ async def test_delete_proof_exception(
 @pytest.mark.parametrize("empty_result", [True, False])
 async def test_get_credentials_by_proof_id(
     mock_agent_controller: AcaPyClient, empty_result: bool
-) -> None:
+):
     mock_agent_controller.present_proof_v2_0.get_matching_credentials.return_value = (
         [] if empty_result else [IndyCredPrecis(cred_info=IndyCredInfo())]
     )
@@ -386,7 +386,7 @@ async def test_get_credentials_by_proof_id(
 @pytest.mark.parametrize("error_detail", ["Error msg", "is dynamic"])
 async def test_get_credentials_by_proof_id_exception(
     mock_agent_controller: AcaPyClient, status_code: int, error_detail: str
-) -> None:
+):
     mock_agent_controller.present_proof_v2_0.get_matching_credentials.side_effect = (
         ApiException(reason=error_detail, status=status_code)
     )

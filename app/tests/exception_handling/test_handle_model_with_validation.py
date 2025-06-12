@@ -23,7 +23,7 @@ class DummyModel(BaseModel):
 
 
 @pytest.mark.anyio
-async def test_handle_model_with_validation_error() -> None:
+async def test_handle_model_with_validation_error():
     mock_logger = Mock()
     # Replace the class itself with a mock that raises ValidationError on instantiation
     with pytest.raises(CloudApiValueError) as exc_info:

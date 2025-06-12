@@ -18,7 +18,7 @@ from shared.constants import GOVERNANCE_ACAPY_API_KEY, TENANT_ACAPY_API_KEY
 
 
 @pytest.mark.anyio
-async def test_governance_agent(governance_acapy_client: AcaPyClient) -> None:
+async def test_governance_agent(governance_acapy_client: AcaPyClient):
     assert isinstance(governance_acapy_client, AcaPyClient)
     assert (
         governance_acapy_client.configuration.host
@@ -29,7 +29,7 @@ async def test_governance_agent(governance_acapy_client: AcaPyClient) -> None:
 
 
 @pytest.mark.anyio
-async def test_tenant_agent() -> None:
+async def test_tenant_agent():
     alice_acapy_client = get_tenant_acapy_client(token="Alice")
     assert isinstance(alice_acapy_client, AcaPyClient)
     assert alice_acapy_client.configuration.host == Role.TENANT.agent_type.base_url
@@ -38,13 +38,13 @@ async def test_tenant_agent() -> None:
 
 
 @pytest.mark.anyio
-async def test_tenant_admin_agent(tenant_admin_acapy_client) -> None:
+async def test_tenant_admin_agent(tenant_admin_acapy_client):
     assert isinstance(tenant_admin_acapy_client, AcaPyClient)
     assert tenant_admin_acapy_client.api_key == TENANT_ACAPY_API_KEY
     assert "Authorization" not in tenant_admin_acapy_client.api_client.default_headers
 
 
-def test_get_governance_controller() -> None:
+def test_get_governance_controller():
     with patch("app.dependencies.acapy_clients.AcaPyClient") as mock_acapy_client:
         get_governance_controller()
         mock_acapy_client.assert_called_with(
@@ -53,7 +53,7 @@ def test_get_governance_controller() -> None:
         )
 
 
-def test_get_tenant_admin_controller() -> None:
+def test_get_tenant_admin_controller():
     with patch("app.dependencies.acapy_clients.AcaPyClient") as mock_acapy_client:
         get_tenant_admin_controller()
         mock_acapy_client.assert_called_with(
@@ -62,7 +62,7 @@ def test_get_tenant_admin_controller() -> None:
         )
 
 
-def test_get_tenant_controller() -> None:
+def test_get_tenant_controller():
     auth_token = "fake-jwt-token"
     with patch("app.dependencies.acapy_clients.AcaPyClient") as mock_acapy_client:
         get_tenant_controller(auth_token)
@@ -82,7 +82,7 @@ def test_get_tenant_controller() -> None:
     ],
 )
 @pytest.mark.anyio
-async def test_client_from_auth(is_multitenant, is_admin) -> None:
+async def test_client_from_auth(is_multitenant, is_admin):
     auth = AcaPyAuthVerified(token="dummy-token", role=Mock(), wallet_id=Mock())
     auth.role.is_multitenant = is_multitenant
     auth.role.is_admin = is_admin
@@ -92,7 +92,7 @@ async def test_client_from_auth(is_multitenant, is_admin) -> None:
     assert isinstance(client, AcaPyClient)
 
 
-def test_client_from_auth_missing_auth() -> None:
+def test_client_from_auth_missing_auth():
     with pytest.raises(HTTPException) as exc_info:
         client_from_auth(None)
     assert exc_info.value.status_code == 403

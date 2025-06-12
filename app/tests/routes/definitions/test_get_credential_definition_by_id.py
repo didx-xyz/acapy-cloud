@@ -31,7 +31,7 @@ final_response = CredentialDefinitionModel(
 
 
 @pytest.mark.anyio
-async def test_get_credential_definition_by_id_success() -> None:
+async def test_get_credential_definition_by_id_success():
     mock_aries_controller = AsyncMock()
     mock_aries_controller.anoncreds_credential_definitions.get_credential_definition = (
         AsyncMock(return_value=anoncreds_cred_def_acapy_result)
@@ -66,7 +66,7 @@ async def test_get_credential_definition_by_id_success() -> None:
 )
 async def test_get_credential_definition_by_id_error(
     exception_class, expected_status_code, expected_detail
-) -> None:
+):
     mock_aries_controller = AsyncMock()
     mock_aries_controller.anoncreds_credential_definitions.get_credential_definition = (
         AsyncMock(
@@ -95,7 +95,7 @@ async def test_get_credential_definition_by_id_error(
 
 
 @pytest.mark.anyio
-async def test_get_credential_definition_by_id_404() -> None:
+async def test_get_credential_definition_by_id_404():
     mock_aries_controller = AsyncMock()
     mock_aries_controller.anoncreds_credential_definitions.get_credential_definition = (
         AsyncMock(return_value=None)

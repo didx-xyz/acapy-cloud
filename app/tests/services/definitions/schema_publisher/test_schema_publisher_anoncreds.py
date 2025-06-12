@@ -68,7 +68,7 @@ credential_schema = CredentialSchema(
 
 
 @pytest.mark.anyio
-async def test_publish_anoncreds_schema_success(publisher) -> None:
+async def test_publish_anoncreds_schema_success(publisher):
     final_result = credential_schema
     with (
         patch(
@@ -86,7 +86,7 @@ async def test_publish_anoncreds_schema_success(publisher) -> None:
 
 
 @pytest.mark.anyio
-async def test_publish_anoncreds_schema_already_exists(publisher) -> None:
+async def test_publish_anoncreds_schema_already_exists(publisher):
     mock_schema_request = anoncreds_schema_request
     mock_existing_schema = credential_schema
 
@@ -110,7 +110,7 @@ async def test_publish_anoncreds_schema_already_exists(publisher) -> None:
 
 
 @pytest.mark.anyio
-async def test_publish_anoncreds_schema_unhandled_exception(publisher) -> None:
+async def test_publish_anoncreds_schema_unhandled_exception(publisher):
     mock_schema_request = anoncreds_schema_request
 
     with patch(
@@ -124,7 +124,7 @@ async def test_publish_anoncreds_schema_unhandled_exception(publisher) -> None:
 
 
 @pytest.mark.anyio
-async def test_publish_anoncreds_schema_no_schema_id(publisher) -> None:
+async def test_publish_anoncreds_schema_no_schema_id(publisher):
     mock_schema_request = anoncreds_schema_request
     mock_result = SchemaResult(
         schema_state=SchemaState(
@@ -145,7 +145,7 @@ async def test_publish_anoncreds_schema_no_schema_id(publisher) -> None:
 
 
 @pytest.mark.anyio
-async def test_publish_anoncreds_schema_timeout_error(publisher) -> None:
+async def test_publish_anoncreds_schema_timeout_error(publisher):
     mock_schema_request = anoncreds_schema_request
     mock_result = SchemaResult(
         schema_state=SchemaState(
@@ -171,7 +171,7 @@ async def test_publish_anoncreds_schema_timeout_error(publisher) -> None:
 
 
 @pytest.mark.anyio
-async def test_publish_anoncreds_schema_missing_transaction_id(publisher) -> None:
+async def test_publish_anoncreds_schema_missing_transaction_id(publisher):
     mock_schema_request = anoncreds_schema_request
     mock_result = SchemaResult(
         schema_state=SchemaState(
@@ -193,7 +193,7 @@ async def test_publish_anoncreds_schema_missing_transaction_id(publisher) -> Non
 
 
 @pytest.mark.anyio
-async def test_publish_anoncreds_schema_unexpected_state(publisher) -> None:
+async def test_publish_anoncreds_schema_unexpected_state(publisher):
     mock_schema_request = anoncreds_schema_request
     mock_result = SchemaResult(
         schema_state=SchemaState(
@@ -216,7 +216,7 @@ async def test_publish_anoncreds_schema_unexpected_state(publisher) -> None:
 
 
 @pytest.mark.anyio
-async def test_handle_existing_anoncreds_schema_success(publisher) -> None:
+async def test_handle_existing_anoncreds_schema_success(publisher):
     mock_schema_request = anoncreds_schema_request
     # Only return a schema with a valid var_schema
     with (
@@ -237,7 +237,7 @@ async def test_handle_existing_anoncreds_schema_success(publisher) -> None:
 
 
 @pytest.mark.anyio
-async def test_handle_existing_anoncreds_schema_different_attributes(publisher) -> None:
+async def test_handle_existing_anoncreds_schema_different_attributes(publisher):
     mock_schema_request = anoncreds_schema_request
     # Only return a schema with a valid var_schema but different attributes
     mock_schema = GetSchemaResult(
@@ -265,7 +265,7 @@ async def test_handle_existing_anoncreds_schema_different_attributes(publisher) 
 
 
 @pytest.mark.anyio
-async def test_handle_existing_anoncreds_schema_no_schemas_found(publisher) -> None:
+async def test_handle_existing_anoncreds_schema_no_schemas_found(publisher):
     mock_schema_request = anoncreds_schema_request
     # Return empty schema_ids list
     with patch(
@@ -283,7 +283,7 @@ async def test_handle_existing_anoncreds_schema_no_schemas_found(publisher) -> N
 @pytest.mark.anyio
 async def test_handle_existing_anoncreds_schema_multiple_schemas_found(
     publisher,
-) -> None:
+):
     mock_schema_request = anoncreds_schema_request
     # Return two schema_ids; only one call to handle_acapy_call is expected
     with patch(
@@ -303,7 +303,7 @@ async def test_handle_existing_anoncreds_schema_multiple_schemas_found(
 @pytest.mark.anyio
 async def test_handle_existing_anoncreds_schema_new_did_one_schema_found(
     publisher,
-) -> None:
+):
     mock_schema_request = anoncreds_schema_request
     # Only return a schema with a valid var_schema
     with patch(

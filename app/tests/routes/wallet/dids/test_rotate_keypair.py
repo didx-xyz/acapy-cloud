@@ -14,7 +14,7 @@ did = "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
 
 
 @pytest.mark.anyio
-async def test_rotate_keypair_success() -> None:
+async def test_rotate_keypair_success():
     mock_aries_controller = AsyncMock()
     mock_aries_controller.wallet.rotate_keypair = AsyncMock(return_value=Mock())
 
@@ -39,7 +39,7 @@ async def test_rotate_keypair_success() -> None:
 )
 async def test_rotate_keypair_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-) -> None:
+):
     mock_aries_controller = AsyncMock()
     mock_aries_controller.wallet.rotate_keypair = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)

@@ -12,7 +12,7 @@ from app.routes.issuer import remove_credential_exchange_record
 
 
 @pytest.mark.anyio
-async def test_remove_credential_exchange_record_success() -> None:
+async def test_remove_credential_exchange_record_success():
     mock_aries_controller = AsyncMock()
     mock_aries_controller.issue_credential_v2_0.delete_record = AsyncMock()
 
@@ -41,7 +41,7 @@ async def test_remove_credential_exchange_record_success() -> None:
 )
 async def test_remove_credential_exchange_record_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-) -> None:
+):
     mock_aries_controller = AsyncMock()
     mock_aries_controller.issue_credential_v2_0.delete_record = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)

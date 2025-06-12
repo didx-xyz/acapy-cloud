@@ -19,7 +19,7 @@ DEFINITIONS_BASE_PATH = definitions_router.prefix
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_create_anoncreds_schema(
     anoncreds_schema_definition: CredentialSchema,
-) -> None:
+):
     expected_schema_name = (
         "test_anoncreds_schema"
         if TestMode.clean_run in TestMode.fixture_params
@@ -36,7 +36,7 @@ async def test_get_anoncreds_schema(
     anoncreds_schema_definition: CredentialSchema,
     faber_anoncreds_client: RichAsyncClient,
     meld_co_anoncreds_client: RichAsyncClient,
-) -> None:
+):
     schema_id = anoncreds_schema_definition.id
     schema_name = anoncreds_schema_definition.name
     schema_version = anoncreds_schema_definition.version
@@ -75,7 +75,7 @@ async def test_create_anoncreds_credential_definition(
     faber_anoncreds_acapy_client: AcaPyClient,
     faber_anoncreds_client: RichAsyncClient,
     support_revocation: bool,
-) -> None:
+):
     schema_id = anoncreds_schema_definition.id
     tag = random_string(5)
     credential_definition = CreateCredentialDefinition(

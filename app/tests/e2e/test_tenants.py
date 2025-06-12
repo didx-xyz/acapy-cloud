@@ -24,7 +24,7 @@ group_id = "TestGroup"
     TestMode.regression_run in TestMode.fixture_params,
     reason=skip_regression_test_reason,
 )
-async def test_post_wallet_auth_token(tenant_admin_client: RichAsyncClient) -> None:
+async def test_post_wallet_auth_token(tenant_admin_client: RichAsyncClient):
     response = await tenant_admin_client.post(
         TENANTS_BASE_PATH,
         json={
@@ -79,7 +79,7 @@ async def test_post_wallet_auth_token(tenant_admin_client: RichAsyncClient) -> N
 )
 async def test_create_tenant_member_wo_wallet_name(
     tenant_admin_client: RichAsyncClient, tenant_admin_acapy_client: AcaPyClient
-) -> None:
+):
     wallet_label = uuid4().hex
     response = await tenant_admin_client.post(
         TENANTS_BASE_PATH,
@@ -123,7 +123,7 @@ async def test_create_tenant_member_wo_wallet_name(
 )
 async def test_create_tenant_member_w_wallet_name(
     tenant_admin_client: RichAsyncClient, tenant_admin_acapy_client: AcaPyClient
-) -> None:
+):
     wallet_label = uuid4().hex
     wallet_name = "TestWalletName"
     create_tenant_payload = {
@@ -180,7 +180,7 @@ async def test_create_tenant_member_w_wallet_name(
 async def test_create_tenant_issuer(
     tenant_admin_client: RichAsyncClient,
     tenant_admin_acapy_client: AcaPyClient,
-) -> None:
+):
     wallet_label = uuid4().hex
     response = await tenant_admin_client.post(
         TENANTS_BASE_PATH,
@@ -244,7 +244,7 @@ async def test_create_tenant_issuer(
 )
 async def test_create_tenant_verifier(
     tenant_admin_client: RichAsyncClient, tenant_admin_acapy_client: AcaPyClient
-) -> None:
+):
     wallet_label = uuid4().hex
     response = await tenant_admin_client.post(
         TENANTS_BASE_PATH,
@@ -308,7 +308,7 @@ async def test_create_tenant_verifier(
 async def test_update_tenant_verifier_to_issuer(
     tenant_admin_client: RichAsyncClient,
     tenant_admin_acapy_client: AcaPyClient,
-) -> None:
+):
     wallet_label = uuid4().hex
     image_url = "https://image.ca"
     response = await tenant_admin_client.post(
@@ -429,7 +429,7 @@ async def test_update_tenant_verifier_to_issuer(
     TestMode.regression_run in TestMode.fixture_params,
     reason=skip_regression_test_reason,
 )
-async def test_get_tenants(tenant_admin_client: RichAsyncClient) -> None:
+async def test_get_tenants(tenant_admin_client: RichAsyncClient):
     response = await tenant_admin_client.post(
         TENANTS_BASE_PATH,
         json={
@@ -490,7 +490,7 @@ async def test_get_tenants(tenant_admin_client: RichAsyncClient) -> None:
     TestMode.regression_run in TestMode.fixture_params,
     reason=skip_regression_test_reason,
 )
-async def test_get_tenants_by_group(tenant_admin_client: RichAsyncClient) -> None:
+async def test_get_tenants_by_group(tenant_admin_client: RichAsyncClient):
     wallet_label = uuid4().hex
     response = await tenant_admin_client.post(
         TENANTS_BASE_PATH,
@@ -535,7 +535,7 @@ async def test_get_tenants_by_group(tenant_admin_client: RichAsyncClient) -> Non
     TestMode.regression_run in TestMode.fixture_params,
     reason=skip_regression_test_reason,
 )
-async def test_get_tenants_by_wallet_name(tenant_admin_client: RichAsyncClient) -> None:
+async def test_get_tenants_by_wallet_name(tenant_admin_client: RichAsyncClient):
     wallet_name = uuid4().hex
     response = await tenant_admin_client.post(
         TENANTS_BASE_PATH,
@@ -594,7 +594,7 @@ async def test_get_tenants_by_wallet_name(tenant_admin_client: RichAsyncClient) 
     TestMode.regression_run in TestMode.fixture_params,
     reason=skip_regression_test_reason,
 )
-async def test_get_tenant(tenant_admin_client: RichAsyncClient) -> None:
+async def test_get_tenant(tenant_admin_client: RichAsyncClient):
     wallet_name = uuid4().hex
     wallet_label = "abc"
     image_url = "https://image.ca"
@@ -654,7 +654,7 @@ async def test_get_tenant(tenant_admin_client: RichAsyncClient) -> None:
 )
 async def test_delete_tenant(
     tenant_admin_client: RichAsyncClient, tenant_admin_acapy_client: AcaPyClient
-) -> None:
+):
     wallet_label = uuid4().hex
     response = await tenant_admin_client.post(
         TENANTS_BASE_PATH,
@@ -707,7 +707,7 @@ async def test_delete_tenant(
 )
 async def test_extra_settings(
     tenant_admin_client: RichAsyncClient, tenant_admin_acapy_client: AcaPyClient
-) -> None:
+):
     # Create tenant with custom wallet settings
     created_tenant_response = await tenant_admin_client.post(
         TENANTS_BASE_PATH,
@@ -766,7 +766,7 @@ async def test_extra_settings(
     TestMode.regression_run in TestMode.fixture_params,
     reason=skip_regression_test_reason,
 )
-async def test_create_tenant_validation(tenant_admin_client: RichAsyncClient) -> None:
+async def test_create_tenant_validation(tenant_admin_client: RichAsyncClient):
     # Assert that 422 is raised when unacceptable special chars are used in wallet label or name
     # The following chars are either reserved or unsafe to use in URIs without encoding
     for char in [
@@ -848,7 +848,7 @@ async def test_create_tenant_validation(tenant_admin_client: RichAsyncClient) ->
     TestMode.regression_run in TestMode.fixture_params,
     reason=skip_regression_test_reason,
 )
-async def test_get_wallets_paginated(tenant_admin_client: RichAsyncClient) -> None:
+async def test_get_wallets_paginated(tenant_admin_client: RichAsyncClient):
     num_wallets_to_test = 5
     test_group = "TestPaginationGroup"
     wallet_names = []

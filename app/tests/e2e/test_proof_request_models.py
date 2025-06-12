@@ -32,7 +32,7 @@ async def test_proof_model_failures(
     alice_member_client: RichAsyncClient,
     name: str,
     version: str,
-) -> None:
+):
     acme_connection_id = acme_and_alice_connection.acme_connection_id
     alice_connection_id = acme_and_alice_connection.alice_connection_id
 

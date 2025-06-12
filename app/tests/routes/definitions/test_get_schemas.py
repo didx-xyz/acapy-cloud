@@ -52,7 +52,7 @@ schema_response = [
         ),
     ],
 )
-async def test_get_schemas_success(params, response, role) -> None:
+async def test_get_schemas_success(params, response, role):
     mock_aries_controller = AsyncMock()
     mock_auth = AcaPyAuth(token="mocked_token", role=role)
 
@@ -96,7 +96,7 @@ async def test_get_schemas_success(params, response, role) -> None:
         (500, "Internal Server Error", Role.GOVERNANCE),
     ],
 )
-async def test_get_schemas_failure(error_code, detail, role) -> None:
+async def test_get_schemas_failure(error_code, detail, role):
     mock_aries_controller = AsyncMock()
     mock_auth = AcaPyAuth(token="mocked_token", role=role)
 

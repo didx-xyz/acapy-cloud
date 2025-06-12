@@ -16,7 +16,7 @@ from app.services.issuer.acapy_issuer_v2 import IssuerV2
 @pytest.mark.anyio
 @pytest.mark.parametrize("record_type", ["anoncreds", "ld_proof", "bad"])
 @pytest.mark.parametrize("save_exchange_record", [None, True, False])
-async def test_request_credential_success(record_type, save_exchange_record) -> None:
+async def test_request_credential_success(record_type, save_exchange_record):
     mock_aries_controller = AsyncMock()
     issuer = Mock()
     issuer.request_credential = IssuerV2.request_credential
@@ -78,7 +78,7 @@ async def test_request_credential_success(record_type, save_exchange_record) -> 
 )
 async def test_request_credential_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-) -> None:
+):
     mock_aries_controller = AsyncMock()
     issuer = Mock()
     issuer.request_credential = IssuerV2.request_credential
@@ -114,7 +114,7 @@ async def test_request_credential_fail_acapy_error(
 
 
 @pytest.mark.anyio
-async def test_request_credential_fail_bad_record() -> None:
+async def test_request_credential_fail_bad_record():
     mock_aries_controller = AsyncMock()
     issuer = Mock()
     issuer.request_credential = IssuerV2.request_credential

@@ -17,7 +17,7 @@ skip_reason = "Clear pending revocations is not yet implemented in AnonCreds"
 
 @pytest.mark.anyio
 @pytest.mark.skip(reason=skip_reason)
-async def test_clear_pending_revocations_success() -> None:
+async def test_clear_pending_revocations_success():
     mock_aries_controller = AsyncMock()
 
     with (
@@ -55,7 +55,7 @@ async def test_clear_pending_revocations_success() -> None:
 )
 async def test_clear_pending_revocations_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-) -> None:
+):
     mock_aries_controller = AsyncMock()
     mock_aries_controller.revocation.clear_pending_revocations = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
@@ -82,7 +82,7 @@ async def test_clear_pending_revocations_fail_acapy_error(
 
 @pytest.mark.anyio
 @pytest.mark.skip(reason=skip_reason)
-async def test_clear_pending_revocations_fail_anoncreds_error() -> None:
+async def test_clear_pending_revocations_fail_anoncreds_error():
     mock_aries_controller = AsyncMock()
 
     with (

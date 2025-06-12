@@ -28,7 +28,7 @@ from app.tests.routes.issuer.test_create_offer import anoncreds_cred, ld_cred
         ),
     ],
 )
-async def test_send_credential_success(credential) -> None:
+async def test_send_credential_success(credential):
     mock_aries_controller = AsyncMock()
     mock_aries_controller.issue_credential_v2_0.issue_credential_automated = AsyncMock()
 
@@ -62,7 +62,7 @@ async def test_send_credential_success(credential) -> None:
 )
 async def test_send_credential_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-) -> None:
+):
     mock_aries_controller = AsyncMock()
     mock_aries_controller.issue_credential_v2_0.issue_credential_automated = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
@@ -94,7 +94,7 @@ async def test_send_credential_fail_acapy_error(
 
 
 @pytest.mark.anyio
-async def test_send_credential_fail_bad_public_did() -> None:
+async def test_send_credential_fail_bad_public_did():
     credential = SendCredential(
         anoncreds_credential_detail=anoncreds_cred,
         connection_id="abc",

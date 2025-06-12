@@ -15,7 +15,7 @@ test_oob_record = OobRecord(
 
 
 @pytest.mark.anyio
-async def test_accept_oob_invitation_success() -> None:
+async def test_accept_oob_invitation_success():
     mock_aries_controller = AsyncMock()
     mock_aries_controller.out_of_band.receive_invitation = AsyncMock(
         return_value=test_oob_record

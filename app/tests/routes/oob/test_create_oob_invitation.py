@@ -28,7 +28,7 @@ test_attachments = [AttachmentDef(id="test_id", type="credential-offer")]
         CreateOobInvitation(attachments=test_attachments),
     ],
 )
-async def test_create_oob_invitation_success(body) -> None:
+async def test_create_oob_invitation_success(body):
     mock_aries_controller = AsyncMock()
     mock_aries_controller.out_of_band.create_invitation = AsyncMock(
         return_value=test_invitation_record

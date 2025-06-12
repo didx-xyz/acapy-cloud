@@ -27,7 +27,7 @@ def publisher(mock_controller, mock_logger) -> CredentialDefinitionPublisher:
 
 
 @pytest.mark.anyio
-async def test_publish_anoncreds_credential_definition_success(publisher) -> None:
+async def test_publish_anoncreds_credential_definition_success(publisher):
     mock_request_body = MagicMock()
     mock_result = MagicMock()
 
@@ -44,7 +44,7 @@ async def test_publish_anoncreds_credential_definition_success(publisher) -> Non
 @pytest.mark.anyio
 async def test_publish_anoncreds_credential_definition_already_exists(
     publisher,
-) -> None:
+):
     mock_request_body = MagicMock()
 
     with patch(
@@ -58,7 +58,7 @@ async def test_publish_anoncreds_credential_definition_already_exists(
 
 
 @pytest.mark.anyio
-async def test_publish_anoncreds_credential_definition_other_error(publisher) -> None:
+async def test_publish_anoncreds_credential_definition_other_error(publisher):
     mock_request_body = MagicMock()
 
     with patch(
@@ -75,7 +75,7 @@ async def test_publish_anoncreds_credential_definition_other_error(publisher) ->
 
 
 @pytest.mark.anyio
-async def test_wait_for_revocation_registry_success(publisher) -> None:
+async def test_wait_for_revocation_registry_success(publisher):
     mock_cred_def_id = "test_cred_def_id"
 
     with (
@@ -92,7 +92,7 @@ async def test_wait_for_revocation_registry_success(publisher) -> None:
 
 
 @pytest.mark.anyio
-async def test_wait_for_revocation_registry_timeout(publisher) -> None:
+async def test_wait_for_revocation_registry_timeout(publisher):
     mock_cred_def_id = "test_cred_def_id"
 
     with (

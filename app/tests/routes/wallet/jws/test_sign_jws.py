@@ -10,7 +10,7 @@ from app.routes.wallet.jws import sign_jws
 
 
 @pytest.mark.anyio
-async def test_sign_jws_success() -> None:
+async def test_sign_jws_success():
     jws = (
         "eyJ0eXAiOiAiSldUIiwgImFsZyI6ICJFZERTQSIsICJraWQiOiAiZGlkOnNvdjpBR2d1UjRtYzE4NlR3MTFLZVdkNHFxI2"
         "tleS0xIn0.eyJ0ZXN0IjogInRlc3RfdmFsdWUifQ.3IxwPkA2niDxCsd12kDRVveR-aPBJx7YibWy9fbrFTSWbITQ16CqA0"
@@ -48,7 +48,7 @@ async def test_sign_jws_success() -> None:
 
 
 @pytest.mark.anyio
-async def test_sign_jws_validation_error() -> None:
+async def test_sign_jws_validation_error():
     error_msg = "Validation error message"
 
     # Create a request that will trigger a ValidationError

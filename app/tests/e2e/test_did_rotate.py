@@ -20,7 +20,7 @@ async def test_rotate_did(
     alice_acapy_client: AcaPyClient,
     faber_anoncreds_acapy_client: AcaPyClient,
     did_method: str,
-) -> None:
+):
     # First, create did-exchange connections between Alice and Faber:
     faber_public_did = await acapy_wallet.get_public_did(
         controller=faber_anoncreds_acapy_client
@@ -63,7 +63,7 @@ async def test_hangup_did_rotation(
     alice_member_client: RichAsyncClient,
     faber_anoncreds_client: RichAsyncClient,
     faber_anoncreds_acapy_client: AcaPyClient,
-) -> None:
+):
     # First, create did-exchange connections between Alice and Faber:
     faber_public_did = await acapy_wallet.get_public_did(
         controller=faber_anoncreds_acapy_client

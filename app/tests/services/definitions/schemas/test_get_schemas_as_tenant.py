@@ -31,7 +31,7 @@ mock_schemas = [
 
 
 @pytest.mark.anyio
-async def test_get_schemas_as_tenant_all() -> None:
+async def test_get_schemas_as_tenant_all():
     mock_aries_controller = AsyncMock(spec=AcaPyClient)
 
     with (
@@ -52,7 +52,7 @@ async def test_get_schemas_as_tenant_all() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_schemas_as_tenant_by_id() -> None:
+async def test_get_schemas_as_tenant_by_id():
     mock_aries_controller = AsyncMock(spec=AcaPyClient)
 
     mock_schema = mock_schemas[0]
@@ -76,7 +76,7 @@ async def test_get_schemas_as_tenant_by_id() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_schemas_as_tenant_filter_issuer_did() -> None:
+async def test_get_schemas_as_tenant_filter_issuer_did():
     mock_aries_controller = AsyncMock(spec=AcaPyClient)
 
     with (
@@ -98,7 +98,7 @@ async def test_get_schemas_as_tenant_filter_issuer_did() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_schemas_as_tenant_filter_name() -> None:
+async def test_get_schemas_as_tenant_filter_name():
     mock_aries_controller = AsyncMock(spec=AcaPyClient)
 
     with (
@@ -120,7 +120,7 @@ async def test_get_schemas_as_tenant_filter_name() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_schemas_as_tenant_filter_version() -> None:
+async def test_get_schemas_as_tenant_filter_version():
     mock_aries_controller = AsyncMock(spec=AcaPyClient)
 
     with (

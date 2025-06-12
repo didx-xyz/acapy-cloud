@@ -8,7 +8,7 @@ from app.models.tenants import (
 from shared.exceptions.cloudapi_value_error import CloudApiValueError
 
 
-def test_create_tenant_model_wallet_label() -> None:
+def test_create_tenant_model_wallet_label():
     CreateTenantRequest(wallet_label="a")
 
     with pytest.raises(CloudApiValueError) as exc:
@@ -24,7 +24,7 @@ def test_create_tenant_model_wallet_label() -> None:
     )
 
 
-def test_create_tenant_model_wallet_name() -> None:
+def test_create_tenant_model_wallet_name():
     CreateTenantRequest(wallet_label="a", wallet_name="a")
 
     with pytest.raises(CloudApiValueError) as exc:
@@ -40,7 +40,7 @@ def test_create_tenant_model_wallet_name() -> None:
     )
 
 
-def test_create_tenant_model_group_id() -> None:
+def test_create_tenant_model_group_id():
     CreateTenantRequest(wallet_label="a", group_id="a")
 
     with pytest.raises(CloudApiValueError) as exc:
@@ -56,7 +56,7 @@ def test_create_tenant_model_group_id() -> None:
     )
 
 
-def test_update_tenant_model_wallet_label() -> None:
+def test_update_tenant_model_wallet_label():
     UpdateTenantRequest(wallet_label="abc")  # only wallet_label required
 
     with pytest.raises(CloudApiValueError) as exc:

@@ -21,7 +21,7 @@ sample_did = DID(
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("return_list", [DIDList(), DIDList(results=[sample_did])])
-async def test_list_dids_success(return_list) -> None:
+async def test_list_dids_success(return_list):
     mock_aries_controller = AsyncMock()
     mock_aries_controller.wallet.get_dids = AsyncMock(return_value=return_list)
 
@@ -52,7 +52,7 @@ async def test_list_dids_success(return_list) -> None:
 )
 async def test_list_dids_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-) -> None:
+):
     mock_aries_controller = AsyncMock()
     mock_get_dids = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)

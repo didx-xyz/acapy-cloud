@@ -8,7 +8,7 @@ from app.services.issuer.acapy_issuer_v2 import IssuerV2
 
 
 @pytest.mark.anyio
-async def test_get_credential_success() -> None:
+async def test_get_credential_success():
     mock_aries_controller = AsyncMock()
     issuer = Mock()
     issuer.get_record = AsyncMock()
@@ -39,7 +39,7 @@ async def test_get_credential_success() -> None:
 )
 async def test_get_credential_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-) -> None:
+):
     mock_aries_controller = AsyncMock()
     issuer = Mock()
     issuer.get_record = AsyncMock(

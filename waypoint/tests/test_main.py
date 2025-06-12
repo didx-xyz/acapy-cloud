@@ -8,7 +8,7 @@ from waypoint.routers import sse
 from waypoint.services.nats_service import NatsEventsProcessor
 
 
-def test_create_app() -> None:
+def test_create_app():
     assert app.title == "Waypoint Service"
     routes = [route.path for route in app.routes]
 
@@ -32,7 +32,7 @@ def nats_events_processor_mock() -> AsyncMock:
 @pytest.mark.anyio
 async def test_app_lifespan(
     nats_events_processor_mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     container_mock = AsyncMock(
         nats_events_processor=AsyncMock(return_value=nats_events_processor_mock),
         wire=MagicMock(),
@@ -48,7 +48,7 @@ async def test_app_lifespan(
 
 
 @pytest.mark.anyio
-async def test_health_live() -> None:
+async def test_health_live():
     response = await health_live()
     assert response == {"status": "live"}
 
@@ -56,7 +56,7 @@ async def test_health_live() -> None:
 @pytest.mark.anyio
 async def test_health_ready_success(
     nats_events_processor_mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     nats_events_processor_mock.check_jetstream.return_value = {
         "is_working": True,
         "streams_count": 1,
@@ -74,7 +74,7 @@ async def test_health_ready_success(
 @pytest.mark.anyio
 async def test_health_ready_jetstream_not_working(
     nats_events_processor_mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     nats_events_processor_mock.check_jetstream.return_value = {
         "is_working": False,
         "error": "No streams available",
@@ -93,7 +93,7 @@ async def test_health_ready_jetstream_not_working(
 @pytest.mark.anyio
 async def test_health_ready_timeout(
     nats_events_processor_mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     nats_events_processor_mock.check_jetstream.side_effect = TimeoutError()
 
     with pytest.raises(HTTPException) as exc_info:
@@ -109,7 +109,7 @@ async def test_health_ready_timeout(
 @pytest.mark.anyio
 async def test_health_ready_unexpected_error(
     nats_events_processor_mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     nats_events_processor_mock.check_jetstream.side_effect = Exception(
         "Unexpected error"
     )
@@ -124,7 +124,7 @@ async def test_health_ready_unexpected_error(
 @pytest.mark.anyio
 async def test_health_ready_with_timeout(
     nats_events_processor_mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     nats_events_processor_mock.check_jetstream.side_effect = (
         TimeoutError  # Simulate a slow response
     )

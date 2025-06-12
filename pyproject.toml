@@ -129,7 +129,10 @@ lint.ignore = [
 exclude = [".git/*", ".venv/*"]
 
 [tool.ruff.lint.per-file-ignores]
-"*/tests/*" = ["ANN001"] # Don't require function type annotations in tests
+"*/tests/*" = [ # Don't require these rules for tests
+  "ANN001", # Missing type annotation for function argument
+  "ANN201", # Missing return type annotation for public function
+]
 
 [build-system]
 requires = ["poetry-core>=2.1"]

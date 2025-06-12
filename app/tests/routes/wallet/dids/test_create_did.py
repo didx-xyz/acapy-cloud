@@ -80,7 +80,7 @@ from app.routes.wallet.dids import create_did
         ),
     ],
 )
-async def test_create_did_success(request_body, create_body) -> None:
+async def test_create_did_success(request_body, create_body):
     mock_aries_controller = AsyncMock()
 
     with (
@@ -124,7 +124,7 @@ async def test_create_did_success(request_body, create_body) -> None:
 )
 async def test_create_did_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-) -> None:
+):
     mock_aries_controller = AsyncMock()
     mock_create_did = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)

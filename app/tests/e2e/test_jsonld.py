@@ -60,7 +60,7 @@ async def test_sign_jsonld(
     faber_anoncreds_acapy_client: AcaPyClient,
     faber_anoncreds_client: RichAsyncClient,
     issue_anoncreds_credential_to_alice: CredentialExchange,
-) -> None:
+):
     # First assert 422 error for providing both pub_did and verkey:
     credential_id = issue_anoncreds_credential_to_alice["credential_exchange_id"][3:]
     with pytest.raises(CloudApiValueError) as exc:
@@ -137,7 +137,7 @@ async def test_verify_jsonld(
     alice_member_client: RichAsyncClient,
     faber_anoncreds_acapy_client: AcaPyClient,
     faber_anoncreds_client: RichAsyncClient,
-) -> None:
+):
     jsonld_verify = JsonLdVerifyRequest(
         public_did="abcde",
         verkey=signed_doc["verkey"],

@@ -10,7 +10,7 @@ from app.routes.wallet.jws import verify_jws
 
 
 @pytest.mark.anyio
-async def test_verify_jws_success() -> None:
+async def test_verify_jws_success():
     # Sample JWS string
     jws = (
         "eyJ0eXAiOiAiSldUIiwgImFsZyI6ICJFZERTQSIsICJraWQiOiAiZGlkOnNvdjpBR2d1UjRtYzE4NlR3MTFLZVdkNHFxI2"
@@ -67,7 +67,7 @@ async def test_verify_jws_success() -> None:
 
 
 @pytest.mark.anyio
-async def test_verify_jws_validation_error() -> None:
+async def test_verify_jws_validation_error():
     error_msg = "field required"
     modified_error_msg = error_msg.replace(
         "jwt", "jws"

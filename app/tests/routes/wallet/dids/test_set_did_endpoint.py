@@ -16,7 +16,7 @@ did = "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
 
 
 @pytest.mark.anyio
-async def test_set_did_endpoint_success() -> None:
+async def test_set_did_endpoint_success():
     mock_aries_controller = AsyncMock()
     mock_aries_controller.wallet.set_did_endpoint = AsyncMock()
 
@@ -56,7 +56,7 @@ async def test_set_did_endpoint_success() -> None:
 )
 async def test_set_did_endpoint_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-) -> None:
+):
     mock_aries_controller = AsyncMock()
     mock_aries_controller.wallet.set_did_endpoint = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)

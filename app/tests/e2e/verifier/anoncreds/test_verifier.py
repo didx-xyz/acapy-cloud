@@ -34,7 +34,7 @@ async def test_send_anoncreds_proof_request(
     acme_and_alice_connection: AcmeAliceConnect,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-) -> None:
+):
     request_body = {
         "connection_id": acme_and_alice_connection.acme_connection_id,
         "anoncreds_proof_request": sample_anoncreds_proof_request().to_dict(),
@@ -76,7 +76,7 @@ async def test_accept_anoncreds_proof_request(
     acme_client: RichAsyncClient,
     anoncreds_credential_definition_id: str,
     acme_and_alice_connection: AcmeAliceConnect,
-) -> None:
+):
     request_body = {
         "connection_id": acme_and_alice_connection.acme_connection_id,
         "anoncreds_proof_request": {
@@ -163,7 +163,7 @@ async def test_reject_anoncreds_proof_request(
     alice_member_client: RichAsyncClient,
     acme_client: RichAsyncClient,
     delete_proof_record: bool,
-) -> None:
+):
     request_body = {
         "connection_id": acme_and_alice_connection.acme_connection_id,
         "anoncreds_proof_request": sample_anoncreds_proof_request().to_dict(),
@@ -236,7 +236,7 @@ async def test_get_proof_and_get_proofs_anoncreds(
     anoncreds_credential_definition_id: str,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-) -> None:
+):
     acme_connection_id = acme_and_alice_connection.acme_connection_id
 
     request_body = {
@@ -396,7 +396,7 @@ async def test_get_proof_and_get_proofs_anoncreds(
 async def test_delete_anoncreds_proof(
     acme_and_alice_connection: AcmeAliceConnect,
     acme_client: RichAsyncClient,
-) -> None:
+):
     request_body = {
         "connection_id": acme_and_alice_connection.acme_connection_id,
         "anoncreds_proof_request": sample_anoncreds_proof_request().to_dict(),
@@ -418,7 +418,7 @@ async def test_get_anoncreds_credentials_for_request(
     acme_and_alice_connection: AcmeAliceConnect,
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-) -> None:
+):
     request_body = {
         "connection_id": acme_and_alice_connection.acme_connection_id,
         "anoncreds_proof_request": sample_anoncreds_proof_request().to_dict(),
@@ -478,7 +478,7 @@ async def test_accept_anoncreds_proof_request_verifier_has_issuer_role(
     alice_member_client: RichAsyncClient,
     meld_co_anoncreds_client: RichAsyncClient,
     meld_co_anoncreds_and_alice_connection: MeldCoAliceConnect,
-) -> None:
+):
     request_body = {
         "connection_id": meld_co_anoncreds_and_alice_connection.meld_co_connection_id,
         "anoncreds_proof_request": sample_anoncreds_proof_request(
@@ -557,7 +557,7 @@ async def test_saving_of_anoncreds_presentation_exchange_records(
     acme_and_alice_connection: AcmeAliceConnect,
     acme_save_exchange_record: bool | None,
     alice_save_exchange_record: bool | None,
-) -> None:
+):
     request_body = {
         "connection_id": acme_and_alice_connection.acme_connection_id,
         "anoncreds_proof_request": sample_anoncreds_proof_request(
@@ -660,7 +660,7 @@ async def test_regression_proof_valid_anoncreds_credential(
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
-) -> None:
+):
     unix_timestamp = int(time.time())
     credential_id = get_or_issue_regression_anoncreds_valid.credential_id
     credential_definition_id_revocable = (
@@ -740,7 +740,7 @@ async def test_restrictions_on_attr(
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     value: str,
-) -> None:
+):
     request_body = {
         "connection_id": acme_and_alice_connection.acme_connection_id,
         "anoncreds_proof_request": {

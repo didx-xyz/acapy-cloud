@@ -20,7 +20,7 @@ connection_response = Connection(
 
 
 @pytest.mark.anyio
-async def test_get_connection_by_id_success() -> None:
+async def test_get_connection_by_id_success():
     mock_aries_controller = AsyncMock()
     mock_aries_controller.connection.get_connection = AsyncMock(
         return_value=connection_response
@@ -60,7 +60,7 @@ async def test_get_connection_by_id_success() -> None:
 )
 async def test_get_connection_by_id_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-) -> None:
+):
     mock_aries_controller = AsyncMock()
     mock_aries_controller.connection.get_connection = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)

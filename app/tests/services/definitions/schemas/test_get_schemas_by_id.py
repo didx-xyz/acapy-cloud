@@ -21,7 +21,7 @@ attribute_names_2 = ["attr2"]
 
 
 @pytest.mark.anyio
-async def test_get_schemas_by_id_empty_list() -> None:
+async def test_get_schemas_by_id_empty_list():
     mock_aries_controller = AsyncMock(spec=AcaPyClient)
 
     result = await get_schemas_by_id(mock_aries_controller, [])
@@ -30,7 +30,7 @@ async def test_get_schemas_by_id_empty_list() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_schemas_by_id_error_handling() -> None:
+async def test_get_schemas_by_id_error_handling():
     mock_aries_controller = AsyncMock()
 
     mock_schema_ids = [schema_id_1, schema_id_2]
@@ -46,7 +46,7 @@ async def test_get_schemas_by_id_error_handling() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_schemas_by_id_anoncreds_success() -> None:
+async def test_get_schemas_by_id_anoncreds_success():
     mock_aries_controller = AsyncMock()
     mock_schema_ids = [schema_id_1, schema_id_2]
     mock_schema_results = [
@@ -102,7 +102,7 @@ async def test_get_schemas_by_id_anoncreds_success() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_schemas_by_id_no_schemas_returned() -> None:
+async def test_get_schemas_by_id_no_schemas_returned():
     mock_aries_controller = AsyncMock()
     mock_schema_ids = []
 

@@ -14,7 +14,7 @@ MESSAGING_BASE_PATH = router.prefix
 @pytest.mark.anyio
 async def test_send_trust_ping(
     bob_and_alice_connection: BobAliceConnect, alice_member_client: RichAsyncClient
-) -> None:
+):
     trustping_msg = TrustPingMsg(
         connection_id=bob_and_alice_connection.alice_connection_id, comment="Asdf"
     )
@@ -34,7 +34,7 @@ async def test_send_message(
     bob_and_alice_connection: BobAliceConnect,
     alice_member_client: RichAsyncClient,
     bob_member_client: RichAsyncClient,
-) -> None:
+):
     message = Message(
         connection_id=bob_and_alice_connection.alice_connection_id, content="Asdf"
     )

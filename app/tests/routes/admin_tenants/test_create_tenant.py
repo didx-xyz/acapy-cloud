@@ -39,7 +39,7 @@ create_tenant_body = CreateTenantRequest(
     "roles",
     [[], ["issuer"], ["verifier"], ["issuer", "verifier"]],
 )
-async def test_create_tenant_success(roles) -> None:
+async def test_create_tenant_success(roles):
     # Create tenant request body
     body = create_tenant_body.model_copy(update={"roles": roles})
     wallet_label = create_tenant_body.wallet_label
@@ -135,7 +135,7 @@ async def test_create_tenant_success(roles) -> None:
     "roles",
     [[], ["issuer"], ["verifier"], ["issuer", "verifier"]],
 )
-async def test_create_tenant_fail_trust_registry_error(roles) -> None:
+async def test_create_tenant_fail_trust_registry_error(roles):
     with (
         patch(
             "app.routes.admin.tenants.assert_actor_name",
@@ -158,7 +158,7 @@ async def test_create_tenant_fail_trust_registry_error(roles) -> None:
     "roles",
     [[], ["issuer"], ["verifier"], ["issuer", "verifier"]],
 )
-async def test_create_tenant_fail_actor_exists(roles) -> None:
+async def test_create_tenant_fail_actor_exists(roles):
     wallet_label = "abc"
     with (
         patch(
@@ -187,7 +187,7 @@ async def test_create_tenant_fail_actor_exists(roles) -> None:
     "roles",
     [[], ["issuer"], ["verifier"], ["issuer", "verifier"]],
 )
-async def test_create_tenant_fail_wallet_name_exists(roles) -> None:
+async def test_create_tenant_fail_wallet_name_exists(roles):
     with (
         patch(
             "app.routes.admin.tenants.handle_acapy_call",
@@ -221,7 +221,7 @@ async def test_create_tenant_fail_wallet_name_exists(roles) -> None:
 )
 async def test_create_tenant_fail_wallet_creation(
     status_code, error_msg, roles
-) -> None:
+):
     # Create tenant should raise the same error message / status code of create wallet failure
     with (
         patch(
@@ -247,7 +247,7 @@ async def test_create_tenant_fail_wallet_creation(
     "roles",
     [["issuer"], ["verifier"], ["issuer", "verifier"]],
 )
-async def test_create_tenant_fail_onboard_exception(exception, roles) -> None:
+async def test_create_tenant_fail_onboard_exception(exception, roles):
     mock_admin_controller = AsyncMock()
     mock_admin_controller.multitenancy.create_wallet = AsyncMock(
         return_value=create_wallet_response

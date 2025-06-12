@@ -9,7 +9,7 @@ from tails.routers.tails import get_file_by_hash
 
 
 @pytest.mark.anyio
-async def test_get_file_by_hash_success() -> None:
+async def test_get_file_by_hash_success():
     tails_hash = "testhash"
     mock_s3_client = MagicMock()
     mock_head_response = {
@@ -44,7 +44,7 @@ async def test_get_file_by_hash_success() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_file_by_hash_not_found() -> None:
+async def test_get_file_by_hash_not_found():
     tails_hash = "notfound"
 
     error_response = {"Error": {"Code": "404", "Message": "Not Found"}}
@@ -62,7 +62,7 @@ async def test_get_file_by_hash_not_found() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_file_by_hash_s3_error() -> None:
+async def test_get_file_by_hash_s3_error():
     tails_hash = "error"
 
     error_response = {"Error": {"Code": "OtherError"}}

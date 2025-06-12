@@ -9,7 +9,7 @@ from trustregistry.registry import registry_schemas
 
 
 @pytest.mark.anyio
-async def test_get_schemas() -> None:
+async def test_get_schemas():
     with patch("trustregistry.registry.registry_schemas.crud.get_schemas") as mock_crud:
         schema = Schema(
             did="WgWxqztrNooG92RXvxSTWv",
@@ -24,7 +24,7 @@ async def test_get_schemas() -> None:
 
 
 @pytest.mark.anyio
-async def test_register_schema() -> None:
+async def test_register_schema():
     with patch(
         "trustregistry.registry.registry_schemas.crud.create_schema"
     ) as mock_crud:
@@ -45,7 +45,7 @@ async def test_register_schema() -> None:
 
 
 @pytest.mark.anyio
-async def test_register_schema_cheqd() -> None:
+async def test_register_schema_cheqd():
     with (
         patch(
             "trustregistry.registry.registry_schemas.crud.create_schema"
@@ -78,7 +78,7 @@ async def test_register_schema_cheqd() -> None:
 
 
 @pytest.mark.anyio
-async def test_register_schema_x() -> None:
+async def test_register_schema_x():
     with patch(
         "trustregistry.registry.registry_schemas.crud.create_schema"
     ) as mock_crud:
@@ -111,7 +111,7 @@ async def test_register_schema_x() -> None:
         ),
     ],
 )
-async def test_update_schema(schema_id, new_schema_id) -> None:
+async def test_update_schema(schema_id, new_schema_id):
     with patch(
         "trustregistry.registry.registry_schemas.crud.update_schema"
     ) as mock_crud:
@@ -135,7 +135,7 @@ async def test_update_schema(schema_id, new_schema_id) -> None:
 
 
 @pytest.mark.anyio
-async def test_update_schema_x() -> None:
+async def test_update_schema_x():
     with patch(
         "trustregistry.registry.registry_schemas.crud.update_schema"
     ) as mock_crud:
@@ -152,7 +152,7 @@ async def test_update_schema_x() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_schema_by_id() -> None:
+async def test_get_schema_by_id():
     with patch(
         "trustregistry.registry.registry_schemas.crud.get_schema_by_id"
     ) as mock_crud:
@@ -171,7 +171,7 @@ async def test_get_schema_by_id() -> None:
 
 
 @pytest.mark.anyio
-async def test_get_schema_by_id_x() -> None:
+async def test_get_schema_by_id_x():
     with patch(
         "trustregistry.registry.registry_schemas.crud.get_schema_by_id"
     ) as mock_crud:
@@ -186,7 +186,7 @@ async def test_get_schema_by_id_x() -> None:
 
 
 @pytest.mark.anyio
-async def test_remove_schema() -> None:
+async def test_remove_schema():
     with patch(
         "trustregistry.registry.registry_schemas.crud.delete_schema"
     ) as mock_crud:
@@ -205,7 +205,7 @@ async def test_remove_schema() -> None:
 
 
 @pytest.mark.anyio
-async def test_remove_schema_x() -> None:
+async def test_remove_schema_x():
     with patch(
         "trustregistry.registry.registry_schemas.crud.delete_schema"
     ) as mock_crud:

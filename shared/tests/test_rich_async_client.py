@@ -11,7 +11,7 @@ retry_duration = 0.05
 
 
 @pytest.mark.anyio
-async def test_rich_async_client_initialization() -> None:
+async def test_rich_async_client_initialization():
     client = RichAsyncClient(
         name="TestClient", retries=2, retry_on=[502], retry_wait_seconds=retry_duration
     )
@@ -24,7 +24,7 @@ async def test_rich_async_client_initialization() -> None:
 @pytest.mark.anyio
 async def test_rich_async_client_get_success(
     mock_response,  # pylint: disable=redefined-outer-name,unused-argument
-) -> None:
+):
     async with RichAsyncClient() as client:
         response = await client.get(test_url)
         assert response.status_code == 200
@@ -34,7 +34,7 @@ async def test_rich_async_client_get_success(
 @pytest.mark.anyio
 async def test_rich_async_client_post_success(
     mock_response,  # pylint: disable=redefined-outer-name,unused-argument
-) -> None:
+):
     async with RichAsyncClient() as client:
         response = await client.post(test_url, json={"key": "value"})
         assert response.status_code == 200
@@ -44,7 +44,7 @@ async def test_rich_async_client_post_success(
 @pytest.mark.anyio
 async def test_rich_async_client_put_success(
     mock_response,  # pylint: disable=redefined-outer-name,unused-argument
-) -> None:
+):
     async with RichAsyncClient() as client:
         response = await client.put(test_url, json={"key": "value"})
         assert response.status_code == 200
@@ -54,7 +54,7 @@ async def test_rich_async_client_put_success(
 @pytest.mark.anyio
 async def test_rich_async_client_delete_success(
     mock_response,  # pylint: disable=redefined-outer-name,unused-argument
-) -> None:
+):
     async with RichAsyncClient() as client:
         response = await client.delete(test_url)
         assert response.status_code == 200
@@ -62,7 +62,7 @@ async def test_rich_async_client_delete_success(
 
 
 @pytest.mark.anyio
-async def test_rich_async_client_retry_on_502(monkeypatch) -> None:
+async def test_rich_async_client_retry_on_502(monkeypatch):
     # Use a list to simulate the sequence of responses
     responses = [
         Response(502, request=Request("GET", test_url), text="Bad Gateway"),
@@ -89,7 +89,7 @@ async def test_rich_async_client_retry_on_502(monkeypatch) -> None:
 
 
 @pytest.mark.anyio
-async def test_rich_async_client_no_retry_on_404(monkeypatch) -> None:
+async def test_rich_async_client_no_retry_on_404(monkeypatch):
     async def mock_get(_, __) -> Never:
         # Simulate a 404 error
         response = Response(404, request=Request("GET", test_url), text="Not Found")
@@ -107,7 +107,7 @@ async def test_rich_async_client_no_retry_on_404(monkeypatch) -> None:
 
 
 @pytest.mark.anyio
-async def test_rich_async_client_retry_on_connect_timeout(monkeypatch) -> None:
+async def test_rich_async_client_retry_on_connect_timeout(monkeypatch):
     attempts = []
 
     async def mock_get(_, __) -> Response:

@@ -51,7 +51,7 @@ anoncreds_cred = AnonCredsCredential(
         ),
     ],
 )
-async def test_create_offer_success(credential) -> None:
+async def test_create_offer_success(credential):
     mock_aries_controller = AsyncMock()
     issuer = Mock()
     issuer.create_offer = AsyncMock()
@@ -88,7 +88,7 @@ async def test_create_offer_success(credential) -> None:
 )
 async def test_create_offer_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-) -> None:
+):
     mock_aries_controller = AsyncMock()
     mock_aries_controller.issue_credential_v2_0.create_offer = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
@@ -119,7 +119,7 @@ async def test_create_offer_fail_acapy_error(
 
 
 @pytest.mark.anyio
-async def test_create_offer_fail_bad_public_did() -> None:
+async def test_create_offer_fail_bad_public_did():
     credential = CreateOffer(anoncreds_credential_detail=anoncreds_cred)
 
     mock_aries_controller = AsyncMock()

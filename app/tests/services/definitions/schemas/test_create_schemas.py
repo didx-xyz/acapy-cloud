@@ -17,7 +17,7 @@ sample_attribute_names = ["attr1", "attr2"]
 
 
 @pytest.mark.anyio
-async def test_create_schema_anoncreds_success() -> None:
+async def test_create_schema_anoncreds_success():
     mock_aries_controller = AsyncMock()
 
     mock_schema_publisher = AsyncMock()

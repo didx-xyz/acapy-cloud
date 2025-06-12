@@ -24,7 +24,7 @@ from app.main import (
 from shared.exceptions.cloudapi_value_error import CloudApiValueError
 
 
-def test_create_app() -> None:
+def test_create_app():
     with patch("os.getenv") as mock_getenv:
         mock_getenv.return_value = "False"  # Mock the 'prod' environment variable
         created_app = create_app()
@@ -48,7 +48,7 @@ def test_create_app() -> None:
         ("unknown", []),
     ],
 )
-def test_routes_for_role(role, expected) -> None:
+def test_routes_for_role(role, expected):
     assert routes_for_role(role) == expected
 
 
@@ -63,11 +63,11 @@ def test_routes_for_role(role, expected) -> None:
         ("unknown", default_docs_description),
     ],
 )
-def test_description_for_roles(role, expected) -> None:
+def test_description_for_roles(role, expected):
     assert acapy_cloud_description(role) == expected
 
 
-def test_read_openapi_yaml() -> None:
+def test_read_openapi_yaml():
     # Mock the openapi() function to return a sample openapi dictionary
     app.openapi = MagicMock(
         return_value={
@@ -85,7 +85,7 @@ def test_read_openapi_yaml() -> None:
 
 
 @pytest.mark.anyio
-async def test_universal_exception_handler() -> None:
+async def test_universal_exception_handler():
     dummy_validation_error = pydantic.ValidationError.from_exception_data(
         "Foo",
         [{"type": "greater_than", "loc": ("a", 2), "input": 4, "ctx": {"gt": 5}}],

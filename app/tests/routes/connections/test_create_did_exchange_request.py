@@ -59,7 +59,7 @@ async def test_create_did_exchange_request_success(
     expected_use_did,
     expected_use_did_method,
     expected_use_public_did,
-) -> None:
+):
     mock_aries_controller = AsyncMock()
     mock_aries_controller.did_exchange.create_request = AsyncMock(
         return_value=created_connection
@@ -118,7 +118,7 @@ async def test_create_did_exchange_request_success(
 )
 async def test_create_did_exchange_request_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
-) -> None:
+):
     mock_aries_controller = AsyncMock()
     mock_aries_controller.did_exchange.create_request = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)

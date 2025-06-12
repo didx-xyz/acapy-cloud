@@ -7,7 +7,7 @@ from shared.util.resolve_cheqd_resources import resolve_cheqd_schema
 
 
 @pytest.mark.anyio
-async def test_resolve_cheqd_schema_success() -> None:
+async def test_resolve_cheqd_schema_success():
     mock_response = Mock()
     mock_response.json.return_value = {"id": "schema1", "name": "Test Schema"}
     with (
@@ -25,7 +25,7 @@ async def test_resolve_cheqd_schema_success() -> None:
 
 
 @pytest.mark.anyio
-async def test_resolve_cheqd_schema_http_exception() -> None:
+async def test_resolve_cheqd_schema_http_exception():
     http_exc = HTTPException(status_code=404, detail="Not found")
     with (
         patch(
@@ -43,7 +43,7 @@ async def test_resolve_cheqd_schema_http_exception() -> None:
 
 
 @pytest.mark.anyio
-async def test_resolve_cheqd_schema_unexpected_exception() -> None:
+async def test_resolve_cheqd_schema_unexpected_exception():
     with (
         patch(
             "shared.util.resolve_cheqd_resources.client.get",

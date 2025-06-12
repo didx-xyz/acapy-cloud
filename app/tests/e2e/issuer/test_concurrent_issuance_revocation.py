@@ -48,7 +48,7 @@ async def test_concurrent_issuance_sequential_revocation(
     alice_member_client: RichAsyncClient,
     anoncreds_credential_definition_id_revocable: str,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
-) -> None:
+):
     # Fetch existing records so we can filter to exclude them
     existing_records = (
         await alice_member_client.get(CREDENTIALS_BASE_PATH + "?state=offer-received")

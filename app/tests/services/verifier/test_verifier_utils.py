@@ -56,7 +56,7 @@ pres_exchange = PresentationExchange(
 @pytest.mark.parametrize(
     "mock_async_client", ["app.services.trust_registry.schemas"], indirect=True
 )
-async def test_are_valid_schemas(mock_async_client: Mock) -> None:
+async def test_are_valid_schemas(mock_async_client: Mock):
     # schemas are valid
     schemas = [
         {
@@ -85,7 +85,7 @@ async def test_are_valid_schemas(mock_async_client: Mock) -> None:
 
 
 @pytest.mark.anyio
-async def test_get_schema_ids(mock_agent_controller: AcaPyClient) -> None:
+async def test_get_schema_ids(mock_agent_controller: AcaPyClient):
     first_cred_record = IndyCredInfo(
         schema_id="NR6Y28AiZ893utPSfoQRrz:2:test_schema:0.3"
     )
@@ -129,7 +129,7 @@ async def test_get_schema_ids(mock_agent_controller: AcaPyClient) -> None:
 
 
 @pytest.mark.anyio
-async def test_ed25519_verkey_to_did_key() -> None:
+async def test_ed25519_verkey_to_did_key():
     got_key = ed25519_verkey_to_did_key(
         key="H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"
     )
@@ -137,7 +137,7 @@ async def test_ed25519_verkey_to_did_key() -> None:
 
 
 @pytest.mark.anyio
-async def test_is_verifier() -> None:
+async def test_is_verifier():
     # False
     actor = sample_actor.model_copy(update={"roles": ["issuer"]})
     assert is_verifier(actor=actor) is False
@@ -151,7 +151,7 @@ async def test_is_verifier() -> None:
 @pytest.mark.parametrize(
     "mock_async_client", ["app.services.trust_registry.actors"], indirect=True
 )
-async def test_get_actor(mock_async_client: Mock) -> None:
+async def test_get_actor(mock_async_client: Mock):
     # gets actor
     mock_async_client.get = AsyncMock(
         return_value=Response(200, json=sample_actor.model_dump())
@@ -171,7 +171,7 @@ async def test_get_actor(mock_async_client: Mock) -> None:
 @pytest.mark.anyio
 async def test_assert_valid_prover_invitation_key(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     conn_record = ConnRecord(
         connection_id=pres_exchange.connection_id,
         invitation_key="H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV",
@@ -224,7 +224,7 @@ async def test_assert_valid_prover_invitation_key(
 @pytest.mark.anyio
 async def test_assert_valid_prover_public_did(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     conn_record = ConnRecord(
         connection_id=pres_exchange.connection_id, their_public_did=sample_did
     )
@@ -276,7 +276,7 @@ async def test_assert_valid_prover_public_did(
 @pytest.mark.anyio
 async def test_assert_valid_prover_x_no_public_did_no_invitation_key(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     conn_record = ConnRecord(connection_id=pres_exchange.connection_id)
 
     mock_agent_controller.connection.get_connection.return_value = conn_record
@@ -302,7 +302,7 @@ async def test_assert_valid_prover_x_no_public_did_no_invitation_key(
 @pytest.mark.anyio
 async def test_assert_valid_prover_x_actor_invalid_role(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     actor = sample_actor.model_copy(update={"roles": ["issuer"]})
 
     conn_record = ConnRecord(
@@ -337,7 +337,7 @@ async def test_assert_valid_prover_x_actor_invalid_role(
 @pytest.mark.anyio
 async def test_assert_valid_prover_could_not_fetch_actor_recover_label(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     conn_record = ConnRecord(
         connection_id=pres_exchange.connection_id,
         their_public_did="xxx",
@@ -381,7 +381,7 @@ async def test_assert_valid_prover_could_not_fetch_actor_recover_label(
 @pytest.mark.anyio
 async def test_assert_valid_prover_x_could_not_fetch_actor_exc(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     conn_record = ConnRecord(
         connection_id=pres_exchange.connection_id,
         their_public_did="xxx",
@@ -417,7 +417,7 @@ async def test_assert_valid_prover_x_could_not_fetch_actor_exc(
 @pytest.mark.anyio
 async def test_assert_valid_prover_x_could_not_fetch_actor_exc2(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     conn_record = ConnRecord(
         connection_id=pres_exchange.connection_id,
         their_public_did="xxx",
@@ -450,7 +450,7 @@ async def test_assert_valid_prover_x_could_not_fetch_actor_exc2(
 @pytest.mark.anyio
 async def test_assert_valid_prover_x_invalid_schemas(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     conn_record = ConnRecord(
         connection_id=pres_exchange.connection_id, their_public_did="xxx"
     )
@@ -488,7 +488,7 @@ async def test_assert_valid_prover_x_invalid_schemas(
 @pytest.mark.anyio
 async def test_assert_valid_prover_x_no_schemas(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     conn_record = ConnRecord(
         connection_id=pres_exchange.connection_id, their_public_did="xxx"
     )
@@ -522,7 +522,7 @@ async def test_assert_valid_prover_x_no_schemas(
 @pytest.mark.anyio
 async def test_assert_valid_prover_x_no_connection_id(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     test_pres_exchange = pres_exchange.model_copy(update={"connection_id": None})
 
     with (
@@ -546,7 +546,7 @@ async def test_assert_valid_prover_x_no_connection_id(
 @pytest.mark.anyio
 async def test_assert_valid_prover_x_no_connection_id2(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     test_pres_exchange = pres_exchange.model_copy(
         update={
             "connection_id": "a-connection-id",
@@ -576,7 +576,7 @@ async def test_assert_valid_prover_x_no_connection_id2(
 @pytest.mark.anyio
 async def test_assert_valid_verifier_invitation_key(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     conn = ConnRecord(
         connection_id="a-connection-id",
         invitation_key="H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV",
@@ -604,7 +604,7 @@ async def test_assert_valid_verifier_invitation_key(
 @pytest.mark.anyio
 async def test_assert_valid_verifier_public_did(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     # valid
     with (
         patch(
@@ -625,7 +625,7 @@ async def test_assert_valid_verifier_public_did(
 @pytest.mark.anyio
 async def test_assert_valid_verifier_x_no_public_did_no_invitation_key(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     conn = ConnRecord(
         connection_id="a-connection-id",
     )
@@ -653,7 +653,7 @@ async def test_assert_valid_verifier_x_no_public_did_no_invitation_key(
 @pytest.mark.anyio
 async def test_assert_valid_verifier_x_not_verifier(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     actor = sample_actor.model_copy(update={"roles": ["issuer"]})
 
     conn = ConnRecord(
@@ -687,7 +687,7 @@ async def test_assert_valid_verifier_x_not_verifier(
 @pytest.mark.anyio
 async def test_assert_valid_verifier_could_not_fetch_actor_recover_label(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     # valid with recovery from actor not found, using label
     with (
         patch(
@@ -719,7 +719,7 @@ async def test_assert_valid_verifier_could_not_fetch_actor_recover_label(
 @pytest.mark.anyio
 async def test_assert_valid_verifier_x_could_not_fetch_actor_exc(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     # failure to attempt recovery by reading wallet_label: No actor
     with (
         patch(
@@ -755,7 +755,7 @@ async def test_assert_valid_verifier_x_could_not_fetch_actor_exc(
 @pytest.mark.anyio
 async def test_assert_valid_verifier_x_could_not_fetch_actor_exc2(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     # failure to attempt recovery by reading wallet_label
     with (
         patch(
@@ -787,7 +787,7 @@ async def test_assert_valid_verifier_x_could_not_fetch_actor_exc2(
 @pytest.mark.anyio
 async def test_assert_valid_verifier_x_could_not_fetch_actor_exc3(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     # failure to attempt recovery by reading wallet_label
     with (
         patch(
@@ -815,7 +815,7 @@ async def test_assert_valid_verifier_x_could_not_fetch_actor_exc3(
 @pytest.mark.anyio
 async def test_assert_valid_verifier_x_could_not_fetch_actor_exc4(
     mock_agent_controller: AcaPyClient,
-) -> None:
+):
     # failure to attempt recovery by reading wallet_label
     with (
         patch(

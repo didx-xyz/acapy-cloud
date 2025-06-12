@@ -34,7 +34,7 @@ sample_did = "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
 @pytest.mark.anyio
 async def test_assert_valid_issuer(
     mocker: MockerFixture,
-) -> None:
+):
     service_path = "app.services.trust_registry"
     actors_path = f"{service_path}.actors"
     schema_path = f"{service_path}.util.schema"
@@ -100,7 +100,7 @@ async def test_assert_valid_issuer(
 )
 async def test_actor_has_role(
     mock_async_client: Mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     actor_id = "id"
     verifier = Actor(id=actor_id, name="abc", roles=["verifier"], did=sample_did)
     issuer = Actor(id=actor_id, name="abc", roles=["issuer"], did=sample_did)
@@ -133,7 +133,7 @@ async def test_actor_has_role(
 )
 async def test_actor_by_did(
     mock_async_client: Mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     actor = Actor(
         id="governance",
         roles=["verifier"],
@@ -171,7 +171,7 @@ def dump_json(input_list: list[Actor]) -> list[dict[str, Any]]:
 )
 async def test_actor_with_role(
     mock_async_client: Mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     actors = [
         Actor(id="a", roles=["issuer"], name="test", did="did:test"),
         Actor(id="b", roles=["issuer"], name="test", did="did:test"),
@@ -216,7 +216,7 @@ async def test_actor_with_role(
 )
 async def test_registry_has_schema(
     mock_async_client: Mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     schema_id = "did:name:version"
     # mock has schema
     response = Response(
@@ -253,7 +253,7 @@ async def test_registry_has_schema(
 )
 async def test_register_schema(
     mock_async_client: Mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     schema_id = "WgWxqztrNooG92RXvxSTWv:2:schema_name:1.0"
     mock_async_client.post = AsyncMock(return_value=Response(200))
     await register_schema(schema_id=schema_id)
@@ -273,7 +273,7 @@ async def test_register_schema(
 )
 async def test_register_actor(
     mock_async_client: Mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     actor = Actor(
         id="actor-id",
         name="actor-name",
@@ -304,7 +304,7 @@ async def test_register_actor(
 )
 async def test_remove_actor_by_id(
     mock_async_client: Mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     actor_id = "actor_id"
     mock_async_client.delete = AsyncMock(return_value=Response(200))
     await remove_actor_by_id(actor_id=actor_id)
@@ -323,7 +323,7 @@ async def test_remove_actor_by_id(
 )
 async def test_remove_schema_by_id(
     mock_async_client: Mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     schema_id = "schema_id"
     mock_async_client.delete = AsyncMock(return_value=Response(200))
     await remove_schema_by_id(schema_id=schema_id)
@@ -346,7 +346,7 @@ async def test_remove_schema_by_id(
 )
 async def test_update_actor(
     mock_async_client: Mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     actor_id = "actor_id"
     actor = Actor(
         id=actor_id,
@@ -382,7 +382,7 @@ async def test_update_actor(
 )
 async def test_assert_actor_name(
     mock_async_client: Mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     # test actor exists
     name = "Numuhukumakiaki'aialunamor"
     actor = Actor(
@@ -415,7 +415,7 @@ async def test_assert_actor_name(
 )
 async def test_get_schemas(
     mock_async_client: Mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     schemas = [
         {
             "did": "CW2GEk5zZ7DcF818i3gLUs",
@@ -452,7 +452,7 @@ async def test_get_schemas(
 )
 async def test_get_schema_by_id(
     mock_async_client: Mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     schema = {
         "did": "CW2GEk5zZ7DcF818i3gLUs",
         "name": "test_schema",
@@ -481,7 +481,7 @@ async def test_get_schema_by_id(
 )
 async def test_get_actor(
     mock_async_client: Mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     actor_id = "418bec12-7252-4edf-8bef-ee8dd661f934"
     actor_name = "faber_GWNKQ"
 
@@ -537,7 +537,7 @@ async def test_get_actor(
 )
 async def test_get_issuers(
     mock_async_client: Mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     actors = [
         Actor(
             id="418bec12-7252-4edf-8bef-ee8dd661f934",
@@ -562,7 +562,7 @@ async def test_get_issuers(
 )
 async def test_get_verifiers(
     mock_async_client: Mock,  # pylint: disable=redefined-outer-name
-) -> None:
+):
     actors = [
         Actor(
             id="418bec12-7252-4edf-8bef-ee8dd661f934",

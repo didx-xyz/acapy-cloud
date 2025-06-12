@@ -4,7 +4,7 @@ from app.models.jsonld import JsonLdSignRequest, JsonLdVerifyRequest
 from shared.exceptions.cloudapi_value_error import CloudApiValueError
 
 
-def test_json_ld_sign_request() -> None:
+def test_json_ld_sign_request():
     # Valid:
     JsonLdSignRequest(credential_id="abc")
 
@@ -24,7 +24,7 @@ def test_json_ld_sign_request() -> None:
     )
 
 
-def test_json_ld_verify_request() -> None:
+def test_json_ld_verify_request():
     # Valid:
     JsonLdVerifyRequest(doc={}, verkey="abc", public_did=None)
 

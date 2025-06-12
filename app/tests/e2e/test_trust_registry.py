@@ -16,7 +16,7 @@ async def test_get_schemas(
     anoncreds_schema_definition: CredentialSchema,  # pylint: disable=unused-argument
     anoncreds_schema_definition_alt,  # pylint: disable=unused-argument
     trust_registry_client: RichAsyncClient,
-) -> None:
+):
     schemas_response = await trust_registry_client.get(
         f"{CLOUDAPI_TRUST_REGISTRY_PATH}/schemas"
     )
@@ -31,7 +31,7 @@ async def test_get_schemas(
 async def test_get_schema_by_id(
     anoncreds_schema_definition: CredentialSchema,
     trust_registry_client: RichAsyncClient,
-) -> None:
+):
     schema_response = await trust_registry_client.get(
         f"{CLOUDAPI_TRUST_REGISTRY_PATH}/schemas/{anoncreds_schema_definition.id}"
     )
@@ -57,7 +57,7 @@ async def test_get_actors(
     faber_anoncreds_issuer: CreateTenantResponse,
     faber_anoncreds_acapy_client: AcaPyClient,
     trust_registry_client: RichAsyncClient,
-) -> None:
+):
     # Test getting all actors
     all_actors = await trust_registry_client.get(
         f"{CLOUDAPI_TRUST_REGISTRY_PATH}/actors"
@@ -112,7 +112,7 @@ async def test_get_actors(
 
 
 @pytest.mark.anyio
-async def test_get_actors_x(trust_registry_client: RichAsyncClient) -> None:
+async def test_get_actors_x(trust_registry_client: RichAsyncClient):
     with pytest.raises(HTTPException) as exc:
         await trust_registry_client.get(
             f"{CLOUDAPI_TRUST_REGISTRY_PATH}/actors?actor_name=Bad_actor_name"
@@ -143,7 +143,7 @@ async def test_get_actors_x(trust_registry_client: RichAsyncClient) -> None:
 async def test_get_issuers(
     faber_anoncreds_issuer: CreateTenantResponse,  # pylint: disable=unused-argument
     trust_registry_client: RichAsyncClient,
-) -> None:
+):
     actors = await trust_registry_client.get(
         f"{CLOUDAPI_TRUST_REGISTRY_PATH}/actors/issuers"
     )
@@ -154,7 +154,7 @@ async def test_get_issuers(
 async def test_get_verifiers(
     acme_verifier: CreateTenantResponse,  # pylint: disable=unused-argument
     trust_registry_client: RichAsyncClient,
-) -> None:
+):
     actors = await trust_registry_client.get(
         f"{CLOUDAPI_TRUST_REGISTRY_PATH}/actors/verifiers"
     )

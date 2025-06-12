@@ -32,7 +32,7 @@ async def test_accept_proof_request_oob(
     issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     alice_member_client: RichAsyncClient,
     bob_member_client: RichAsyncClient,
-) -> None:
+):
     # Create the proof request against aca-py
     create_proof_request = CreateProofRequest(
         anoncreds_proof_request=sample_anoncreds_proof_request(),
@@ -131,7 +131,7 @@ async def test_accept_proof_request_verifier_oob_connection(
     issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
-) -> None:
+):
     # Create connection between holder and verifier
     # We need to use the multi-use didcomm invitation from the trust registry
     acme_wallet_id = get_wallet_id_from_async_client(acme_client)
