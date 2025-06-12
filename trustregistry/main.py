@@ -1,7 +1,6 @@
 import os
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Any
 
 from alembic import command
 from alembic.config import Config
@@ -120,7 +119,7 @@ async def scalar_html() -> HTMLResponse:
 
 
 @app.get("/")
-async def root(db_session: Session = Depends(get_db)) -> dict[str, Any]:
+async def root(db_session: Session = Depends(get_db)):  # noqa: ANN201
     logger.debug("GET request received: Fetch actors and schemas from registry")
     db_schemas = crud.get_schemas(db_session)
     db_actors = crud.get_actors(db_session)
@@ -130,5 +129,5 @@ async def root(db_session: Session = Depends(get_db)) -> dict[str, Any]:
 
 
 @app.get("/registry")
-async def registry(db_session: Session = Depends(get_db)) -> dict[str, Any]:
+async def registry(db_session: Session = Depends(get_db)):  # noqa: ANN201
     return await root(db_session)
