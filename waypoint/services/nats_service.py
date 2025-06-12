@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import orjson
-from loguru import Logger
+from loguru._logger import Logger
 from nats.errors import BadSubscriptionError, ConnectionClosedError, Error
 from nats.js.api import ConsumerConfig, DeliverPolicy
 from nats.js.client import JetStreamContext
