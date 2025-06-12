@@ -35,9 +35,7 @@ from shared.models.presentation_exchange import (
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("proof_type", ["ld_proof", "anoncreds"])
-async def test_create_proof_request(
-    mock_agent_controller: AcaPyClient, proof_type
-):
+async def test_create_proof_request(mock_agent_controller: AcaPyClient, proof_type):
     present_proof_v2_0 = mock_agent_controller.present_proof_v2_0
     present_proof_v2_0.create_proof_request.return_value = (
         v20_presentation_exchange_records[0]
@@ -82,9 +80,7 @@ async def test_create_proof_request_exception(
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("proof_type", ["ld_proof", "anoncreds"])
-async def test_send_proof_request(
-    mock_agent_controller: AcaPyClient, proof_type
-):
+async def test_send_proof_request(mock_agent_controller: AcaPyClient, proof_type):
     mock_agent_controller.present_proof_v2_0.send_request_free.return_value = (
         v20_presentation_exchange_records[0]
     )
@@ -137,9 +133,7 @@ async def test_send_proof_request_exception(
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("proof_type", ["ld_proof", "anoncreds"])
-async def test_accept_proof_request(
-    mock_agent_controller: AcaPyClient, proof_type
-):
+async def test_accept_proof_request(mock_agent_controller: AcaPyClient, proof_type):
     mock_agent_controller.present_proof_v2_0.send_presentation.return_value = (
         v20_presentation_exchange_records[0]
     )

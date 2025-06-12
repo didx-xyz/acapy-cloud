@@ -219,9 +219,7 @@ async def test_create_tenant_fail_wallet_name_exists(roles):
     "roles",
     [[], ["issuer"], ["verifier"], ["issuer", "verifier"]],
 )
-async def test_create_tenant_fail_wallet_creation(
-    status_code, error_msg, roles
-):
+async def test_create_tenant_fail_wallet_creation(status_code, error_msg, roles):
     # Create tenant should raise the same error message / status code of create wallet failure
     with (
         patch(

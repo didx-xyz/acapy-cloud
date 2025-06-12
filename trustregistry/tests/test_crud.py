@@ -180,9 +180,7 @@ def test_delete_actor(db_session_mock: Session, actor, actor_id):
 
 
 @pytest.mark.parametrize("new_actor, old_actor ", [(actor1, db_actor1), (actor1, None)])
-def test_update_actor(
-    db_session_mock: Session, new_actor: Actor, old_actor: db.Actor
-):
+def test_update_actor(db_session_mock: Session, new_actor: Actor, old_actor: db.Actor):
     db_session_mock.scalars.return_value.one_or_none.return_value = old_actor
 
     if not old_actor:
