@@ -47,10 +47,10 @@ export const options = {
   },
 };
 
-const inputFilepath = `../output/${outputPrefix}-create-invitation.json`;
+const inputFilepath = `../output/${outputPrefix}-create-invitation.jsonl`;
 const data = open(inputFilepath, "r");
-const outputFilepath = `output/${outputPrefix}-create-credentials.json`;
-const epochOutputFilepath = `output/${outputPrefix}-epoch-timestamps.json`;
+const outputFilepath = `output/${outputPrefix}-create-credentials.jsonl`;
+const epochOutputFilepath = `output/${outputPrefix}-epoch-timestamps.jsonl`;
 
 // Helper function to get the issuer index using pre-calculated assignments
 function getIssuerIndex(vu, iter) {
@@ -125,7 +125,7 @@ export default function (data) {
     field: "thread_id",
     fieldId: threadId,
     state: "offer-received",
-    maxAttempts: 10,
+    // maxAttempts: 10,
     lookBack: 60,
     sseTag: "credential_offer_received",
   }, { perspective: "Holder" });
@@ -166,12 +166,14 @@ export default function (data) {
     field: "credential_exchange_id",
     fieldId: holderCredentialExchangeId,
     state: "done",
-    maxAttempts: 10,
+    // maxAttempts: 10,
     lookBack: 60,
     sseTag: "credential_received",
   }, { perspective: "Holder" });
 
   const issuerData = JSON.stringify({
+    issuer_wallet_name: wallet.issuer_wallet_name,
+    issuer_wallet_id: wallet.issuer_wallet_id,
     credential_exchange_id: issuerCredentialExchangeId,
     issuer_access_token: wallet.issuer_access_token,
     issuer_credential_definition_id: wallet.issuer_credential_definition_id,

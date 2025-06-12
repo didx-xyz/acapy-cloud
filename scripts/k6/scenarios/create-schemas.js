@@ -7,7 +7,7 @@ import file from "k6/x/file";
 import { getAuthHeaders } from "./auth.js";
 import { createSchema, getSchema, getWalletIndex } from "../libs/functions.js";
 
-const outputFilepath = "output/create-schemas.json";
+const outputFilepath = "output/create-schemas.jsonl";
 const vus = Number.parseInt(__ENV.VUS, 10);
 const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
 const schemaPrefix = __ENV.SCHEMA_PREFIX;

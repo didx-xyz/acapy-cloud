@@ -52,11 +52,11 @@ export const options = {
 };
 
 const testFunctionReqs = new Counter("test_function_reqs");     // successful completions
-const inputFilepath = `../output/${holderPrefix}-create-holders.json`;
-const inputFilepathIssuer = `../output/${issuerPrefix}-create-issuers.json`;
+const inputFilepath = `../output/${holderPrefix}-create-holders.jsonl`;
+const inputFilepathIssuer = `../output/${issuerPrefix}-create-issuers.jsonl`;
 const data = open(inputFilepath, "r");
 const dataIssuer = open(inputFilepathIssuer, "r");
-const outputFilepath = `output/${outputPrefix}-create-invitation.json`;
+const outputFilepath = `output/${outputPrefix}-create-invitation.jsonl`;
 
 export function setup() {
   const holders = data.trim().split("\n").map(JSON.parse);

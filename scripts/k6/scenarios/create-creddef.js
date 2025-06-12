@@ -38,7 +38,7 @@ export const options = {
   },
 };
 
-const inputFilepath = `../output/${issuerPrefix}-create-issuers.json`;
+const inputFilepath = `../output/${issuerPrefix}-create-issuers.jsonl`;
 const data = open(inputFilepath, "r");
 
 export function setup() {

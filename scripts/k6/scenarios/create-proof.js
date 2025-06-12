@@ -41,17 +41,17 @@ export const options = {
   },
   tags: {
     test_run_id: "phased-issuance",
-    test_phase: "create-proofs",
+    test_phase: __ENV.IS_REVOKED === "true" ? "create-proofs-unverified" : "create-proofs-verified",
     version: `${version}`,
   },
 };
 
 const testFunctionReqs = new Counter("test_function_reqs");
 
-const inputFilepath = `../output/${outputPrefix}-create-invitation.json`;
+const inputFilepath = `../output/${outputPrefix}-create-invitation.jsonl`;
 const data = open(inputFilepath, "r");
 // Add path to epoch timestamps file
-const epochInputFilepath = `../output/${outputPrefix}-epoch-timestamps.json`;
+const epochInputFilepath = `../output/${outputPrefix}-epoch-timestamps.jsonl`;
 // Read epoch data in init stage
 let epochData = null;
 try {
@@ -185,7 +185,7 @@ export default function (data) {
     field: "thread_id",
     fieldId: threadId,
     state: "done",
-    maxAttempts: 1,
+    // maxAttempts: 3,
     lookBack: 60,
     sseTag: "proof_done",
   }, { perspective: "Holder" });

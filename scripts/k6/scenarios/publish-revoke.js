@@ -7,19 +7,23 @@ import {
   checkRevoked,
   getWalletIndex,
   publishRevocation,
+  retry,
 } from "../libs/functions.js";
+import { log } from "../libs/k6Functions.js";
 
 const holderPrefix = __ENV.HOLDER_PREFIX;
 const issuerPrefix = __ENV.ISSUER_PREFIX;
 const outputPrefix = `${issuerPrefix}-${holderPrefix}`;
 
-const inputFilepath = `../output/${outputPrefix}-create-credentials.json`;
+const inputFilepath = `../output/${outputPrefix}-create-credentials.jsonl`;
 const data = open(inputFilepath, "r");
 
 const vus = Number.parseInt(__ENV.VUS, 10);
 const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
 const testFunctionReqs = new Counter("test_function_reqs");
 const sleepDuration = Number.parseInt(__ENV.SLEEP_DURATION, 0);
+
+const version = __ENV.VERSION;
 
 export const options = {
   scenarios: {
@@ -42,14 +46,12 @@ export const options = {
   tags: {
     test_run_id: "phased-issuance",
     test_phase: "publish-revoke",
+    version: `${version}`,
   },
 };
 
 export function setup() {
   const tenants = data.trim().split("\n").map(JSON.parse);
-
-  // Publish revocations for all issuers (assuming each tenant has an issuer)
-  console.log("Publishing revocations for all issuers...");
 
   // Get unique issuer access tokens to avoid duplicate publishes
   const uniqueIssuers = [
@@ -57,7 +59,27 @@ export function setup() {
   ];
 
   for (const issuerToken of uniqueIssuers) {
-    const publishRevocationResponse = publishRevocation(issuerToken);
+    // Find the tenant data for this issuer token to get wallet info
+    const issuerTenant = tenants.find(
+      (tenant) => tenant.issuer_access_token === issuerToken
+    );
+
+    log.info(`Publishing revocation for issuer: ${issuerTenant.issuer_wallet_name} (ID: ${issuerTenant.issuer_wallet_id})`);
+
+    let publishRevocationResponse;
+    try {
+      publishRevocationResponse = retry(() => {
+        const response = publishRevocation(issuerToken);
+        if (response.status !== 200) {
+          throw new Error(`publishRevocation Non-200 status: ${response.status} ${response.body}`);
+        }
+        return response;
+      }, 5, 1000, "publishRevocation");
+    } catch (e) {
+      console.error(`Failed after retries: ${e.message}`);
+      publishRevocationResponse = e.response || e;
+    }
+
     check(publishRevocationResponse, {
       "Revocation published successfully": (r) => {
         if (r.status !== 200) {
@@ -68,12 +90,9 @@ export function setup() {
         return true;
       },
     });
-    // sleep(2); // Small delay between publishes
   }
 
   console.log(`Published revocations for ${uniqueIssuers.length} issuer(s)`);
-  // sleep(30); // Allow time for revocations to propagate
-
   return { tenants };
 }
 
@@ -105,6 +124,6 @@ export default function (data) {
     },
   });
 
-  sleep(sleepDuration);
+  // sleep(sleepDuration);
   testFunctionReqs.add(1);
 }

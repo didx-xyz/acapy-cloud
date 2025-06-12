@@ -58,7 +58,7 @@ const wallets = new SharedArray("wallets", () => {
   return walletsArray;
 });
 
-const filepath = `output/${outputPrefix}-create-holders.json`;
+const filepath = `output/${outputPrefix}-create-holders.jsonl`;
 
 export function setup() {
   const { tenantAdminHeaders } = getAuthHeaders();
