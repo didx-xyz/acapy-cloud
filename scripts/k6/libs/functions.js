@@ -874,7 +874,7 @@ export function genericPolling({
   const endpoint = `${__ENV.CLOUDAPI_URL}/tenant/v1/sse/${walletId}/${topic}/${field}/${fieldId}/${state}?look_back=${lookBack}`;
 
   // Backoff delays in seconds: 0.5, 1, 2, 5
-  const delays = [0.5, 1, 2, 5];
+  const delays = [0.5, 1, 2, 3];
 
   let attempts = 0;
   const startTime = new Date();
