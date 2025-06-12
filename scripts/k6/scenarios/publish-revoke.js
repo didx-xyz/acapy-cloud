@@ -7,7 +7,9 @@ import {
   checkRevoked,
   getWalletIndex,
   publishRevocation,
+  retry,
 } from "../libs/functions.js";
+import { log } from "../libs/k6Functions.js";
 
 const holderPrefix = __ENV.HOLDER_PREFIX;
 const issuerPrefix = __ENV.ISSUER_PREFIX;
@@ -51,9 +53,6 @@ export const options = {
 export function setup() {
   const tenants = data.trim().split("\n").map(JSON.parse);
 
-  // Publish revocations for all issuers (assuming each tenant has an issuer)
-  console.log("Publishing revocations for all issuers...");
-
   // Get unique issuer access tokens to avoid duplicate publishes
   const uniqueIssuers = [
     ...new Set(tenants.map((tenant) => tenant.issuer_access_token)),
@@ -65,11 +64,22 @@ export function setup() {
       (tenant) => tenant.issuer_access_token === issuerToken
     );
 
-    console.log(
-      `Publishing revocation for issuer: ${issuerTenant.walletName} (ID: ${issuerTenant.walletId})`
-    );
+    log.info(`Publishing revocation for issuer: ${issuerTenant.issuer_wallet_name} (ID: ${issuerTenant.issuer_wallet_id})`);
 
-    const publishRevocationResponse = publishRevocation(issuerToken);
+    let publishRevocationResponse;
+    try {
+      publishRevocationResponse = retry(() => {
+        const response = publishRevocation(issuerToken);
+        if (response.status !== 200) {
+          throw new Error(`publishRevocation Non-200 status: ${response.status} ${response.body}`);
+        }
+        return response;
+      }, 5, 1000, "publishRevocation");
+    } catch (e) {
+      console.error(`Failed after retries: ${e.message}`);
+      publishRevocationResponse = e.response || e;
+    }
+
     check(publishRevocationResponse, {
       "Revocation published successfully": (r) => {
         if (r.status !== 200) {
@@ -80,12 +90,9 @@ export function setup() {
         return true;
       },
     });
-    // sleep(2); // Small delay between publishes
   }
 
   console.log(`Published revocations for ${uniqueIssuers.length} issuer(s)`);
-  // sleep(30); // Allow time for revocations to propagate
-
   return { tenants };
 }
 
