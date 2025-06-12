@@ -36,6 +36,5 @@ async def test_health_ready_failure():
 @pytest.mark.anyio
 async def test_docs():
     response = await scalar_html()
-    print(response.body)
     assert response.status_code == 200
     assert "html" in response.body.decode("utf-8")

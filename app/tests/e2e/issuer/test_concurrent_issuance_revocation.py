@@ -35,9 +35,7 @@ async def check_unique_cred_rev_ids(
                 f"Duplicate cred_rev_id found: {cred_rev_id} for credential {cred_ex_id}"
             )
 
-    print(f"Unique cred_rev_ids found: {len(seen)}")
     seen.sort()
-    print(f"Credential revocation IDs: {seen}")
 
 
 @pytest.mark.anyio
