@@ -162,7 +162,7 @@ export default function (data) {
         throw new Error(`Non-200 status: ${response.status}`);
       }
       return response;
-    }, 5, 2000);
+    }, 5, 2000, "Accept proof request");
   } catch (error) {
     console.error(`Failed after retries: ${error.message}`);
     acceptProofResponse = error.response || error;

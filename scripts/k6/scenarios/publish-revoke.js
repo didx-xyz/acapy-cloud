@@ -8,6 +8,7 @@ import {
   getWalletIndex,
   publishRevocation,
   retry,
+  pollAndCheck,
 } from "../libs/functions.js";
 import { log } from "../libs/k6Functions.js";
 
@@ -123,6 +124,18 @@ export default function (data) {
       return true;
     },
   });
+
+  pollAndCheck({
+    accessToken:  wallet.issuer_access_token,
+    walletId: wallet.issuer_wallet_id,
+    topic: "issuer_cred_rev",
+    field: "cred_ex_id",
+    fieldId: wallet.credential_exchange_id.substring(3),
+    state: "revoked",
+    maxAttempts: 3,
+    lookBack: 60,
+    sseTag: "credential-revoked"
+  }, { perspective: "Issuer" });
 
   // sleep(sleepDuration);
   testFunctionReqs.add(1);
