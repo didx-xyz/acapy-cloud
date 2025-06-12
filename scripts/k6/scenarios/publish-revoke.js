@@ -11,6 +11,7 @@ import {
   pollAndCheck,
 } from "../libs/functions.js";
 import { log } from "../libs/k6Functions.js";
+import { request } from "k6/http";
 
 const holderPrefix = __ENV.HOLDER_PREFIX;
 const issuerPrefix = __ENV.ISSUER_PREFIX;
@@ -132,8 +133,9 @@ export default function (data) {
     field: "cred_ex_id",
     fieldId: wallet.credential_exchange_id.substring(3),
     state: "revoked",
-    maxAttempts: 3,
+    maxAttempts: 4, // (1+0.5) + (1+1) + (1+2) + (1+3) = 10.5s
     lookBack: 60,
+    requestTimeout: 1,
     sseTag: "credential-revoked"
   }, { perspective: "Issuer" });
 
