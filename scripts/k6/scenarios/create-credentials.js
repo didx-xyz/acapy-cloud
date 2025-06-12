@@ -125,7 +125,7 @@ export default function (data) {
     field: "thread_id",
     fieldId: threadId,
     state: "offer-received",
-    maxAttempts: 10,
+    // maxAttempts: 10,
     lookBack: 60,
     sseTag: "credential_offer_received",
   }, { perspective: "Holder" });
@@ -166,7 +166,7 @@ export default function (data) {
     field: "credential_exchange_id",
     fieldId: holderCredentialExchangeId,
     state: "done",
-    maxAttempts: 10,
+    // maxAttempts: 10,
     lookBack: 60,
     sseTag: "credential_received",
   }, { perspective: "Holder" });
