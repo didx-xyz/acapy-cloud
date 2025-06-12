@@ -65,7 +65,7 @@ def mock_agent_controller() -> AcaPyClient:
 
 
 @pytest.fixture
-def mock_context_managed_controller() -> MockContextManagedController:
+def mock_context_managed_controller() -> type[MockContextManagedController]:
     return MockContextManagedController
 
 

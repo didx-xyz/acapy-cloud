@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -22,7 +23,7 @@ def mock_auth() -> Mock:
 
 
 @pytest.fixture()
-def mock_verify_wallet_access() -> AsyncMock:
+def mock_verify_wallet_access() -> Generator[AsyncMock, None, None]:
     with patch("app.routes.sse.verify_wallet_access", new=Mock()) as mocked:
         yield mocked
 
