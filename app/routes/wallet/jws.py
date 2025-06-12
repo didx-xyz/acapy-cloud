@@ -21,7 +21,6 @@ router = APIRouter(prefix="/v1/wallet/jws", tags=["wallet"])
 
 @router.post(
     "/sign",
-    response_model=JWSCreateResponse,
     summary="Sign JWS",
 )
 async def sign_jws(
@@ -117,7 +116,6 @@ async def sign_jws(
 
 @router.post(
     "/verify",
-    response_model=JWSVerifyResponse,
     summary="Verify JWS",
 )
 async def verify_jws(

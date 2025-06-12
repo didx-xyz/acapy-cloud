@@ -1,6 +1,6 @@
 [project]
 name = "acapy-cloud"
-version = "5.0.0-rc4"
+version = "5.0.0-rc5"
 description = "Main project configuration for acapy-cloud"
 authors = [
   { name = "Mourits de Beer", email = "mourits.debeer@didx.co.za" },
@@ -59,6 +59,7 @@ pre-commit = "~4.2.0"
 pytest = "~8.3.2"
 pytest-cov = "~6.1.0"
 pytest-mock = "~3.14.0"
+pytest-ruff = "^0.4.1"
 pytest-xdist = "^3.6.1"
 ruff = "~0.11.12"
 
@@ -74,17 +75,21 @@ line-length = 88
 lint.pycodestyle.max-line-length = 120
 target-version = "py312"
 lint.select = [
-  "B",   # flake8-bugbear (detect likely bugs)
-  "C",   # mccabe (code complexity)
-  "D",   # pydocstyle (docstring style)
-  "E",   # pycodestyle errors (style errors)
-  "F",   # pyflakes (detect invalid Python code)
-  "I",   # isort (import sorting)
-  "N",   # pep8-naming (naming conventions)
-  "PL",  # pylint
-  "RUF", # ruff-specific rules
-  "UP",  # pyupgrade (upgrade syntax)
-  "W",   # pycodestyle warnings (style warnings)
+  "ASYNC", # flake8-async (async/await)
+  "B",     # flake8-bugbear (detect likely bugs)
+  "C",     # mccabe (code complexity)
+  "D",     # pydocstyle (docstring style)
+  "E",     # pycodestyle errors (style errors)
+  "F",     # pyflakes (detect invalid Python code)
+  "FAST",  # fastapi
+  "I",     # isort (import sorting)
+  "N",     # pep8-naming (naming conventions)
+  "PERF",  # perflint (performance anti-patterns)
+  "PL",    # pylint
+  "RUF",   # ruff-specific rules
+  "T20",   # flake8-print (print statements)
+  "UP",    # pyupgrade (upgrade syntax)
+  "W",     # pycodestyle warnings (style warnings)
 ]
 lint.ignore = [
   # Docstring related:
@@ -107,6 +112,7 @@ lint.ignore = [
   "PLR0915", # Too many statements
 
   # Maybe fix:
+  "FAST002", # FastAPI dependency without `Annotated`
   "PLR2004", # Magic value used in comparison, consider replacing `500` with a constant variable
 
   # Won't fix:
@@ -115,7 +121,7 @@ lint.ignore = [
   # False positives:
   "PLE1205", # Too many arguments detected for loguru {} formatted strings
 ]
-exclude = [".git/*"]
+exclude = [".git/*", ".venv/*"]
 
 [build-system]
 requires = ["poetry-core>=2.1"]

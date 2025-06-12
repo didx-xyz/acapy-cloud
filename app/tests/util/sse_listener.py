@@ -34,7 +34,7 @@ class SseListener:
         field,
         field_id,
         desired_state,
-        timeout: int = DEFAULT_LISTENER_TIMEOUT,
+        timeout: int = DEFAULT_LISTENER_TIMEOUT,  # noqa: ASYNC109
         look_back: int = 15,
     ) -> dict[str, Any]:
         """Start listening for SSE events. When an event is received that matches the specified parameters."""

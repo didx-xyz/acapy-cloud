@@ -170,17 +170,18 @@ async def test_sse_subscribe_event_with_field_and_state_success(
         return_value=configured_async_context_manager_mock,
     ) as mock_stream:
         # Execute the sse_subscribe_event_with_field_and_state and collect results
-        results = []
-        async for line in sse_subscribe_event_with_field_and_state(
-            request=mock_request,
-            group_id=group_id,
-            wallet_id=wallet_id,
-            topic=topic,
-            field=field,
-            field_id=field_id,
-            desired_state=state,
-        ):
-            results.append(line)
+        results = [
+            line
+            async for line in sse_subscribe_event_with_field_and_state(
+                request=mock_request,
+                group_id=group_id,
+                wallet_id=wallet_id,
+                topic=topic,
+                field=field,
+                field_id=field_id,
+                desired_state=state,
+            )
+        ]
 
         # Verify the collected lines
         assert results == lines_list

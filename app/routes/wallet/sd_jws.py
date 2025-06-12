@@ -21,7 +21,6 @@ router = APIRouter(prefix="/v1/wallet/sd-jws", tags=["wallet"])
 
 @router.post(
     "/sign",
-    response_model=SDJWSCreateResponse,
     summary="Sign SD-JWS",
 )
 async def sign_sd_jws(
@@ -136,7 +135,6 @@ async def sign_sd_jws(
 
 @router.post(
     "/verify",
-    response_model=SDJWSVerifyResponse,
     summary="Verify SD-JWS",
 )
 async def verify_sd_jws(

@@ -6,7 +6,7 @@ ADMIN_API_KEY = "adminApiKey"
 
 # pylint: disable=invalid-name
 
-PROJECT_VERSION = os.getenv("PROJECT_VERSION", "5.0.0-rc4")
+PROJECT_VERSION = os.getenv("PROJECT_VERSION", "5.0.0-rc5")
 
 # the ACAPY_LABEL field with which the governance agent is initialised
 GOVERNANCE_LABEL = os.getenv("GOVERNANCE_ACAPY_LABEL", "Governance")

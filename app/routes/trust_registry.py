@@ -10,7 +10,7 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/v1/trust-registry", tags=["trust-registry"])
 
 
-@router.get("/schemas", response_model=list[Schema])
+@router.get("/schemas")
 async def get_schemas() -> list[Schema]:
     """Fetch the schemas from the trust registry.
 
@@ -26,7 +26,7 @@ async def get_schemas() -> list[Schema]:
     return schemas
 
 
-@router.get("/schemas/{schema_id:path}", response_model=Schema)
+@router.get("/schemas/{schema_id:path}")
 async def get_schema_by_id(schema_id: str) -> Schema:  # noqa: D417
     """Retrieve schema by id.
 
@@ -51,7 +51,7 @@ async def get_schema_by_id(schema_id: str) -> Schema:  # noqa: D417
         raise HTTPException(404, f"Schema with id: {schema_id} not found")
 
 
-@router.get("/actors", response_model=list[Actor])
+@router.get("/actors")
 async def get_actors(  # noqa: D417
     actor_did: str | None = None,
     actor_id: str | None = None,
@@ -119,7 +119,7 @@ async def get_actors(  # noqa: D417
         raise HTTPException(404, "Actor not found")
 
 
-@router.get("/actors/issuers", response_model=list[Actor])
+@router.get("/actors/issuers")
 async def get_issuers() -> list[Actor]:
     """Fetch the issuers from the trust registry.
 
@@ -135,7 +135,7 @@ async def get_issuers() -> list[Actor]:
     return issuers
 
 
-@router.get("/actors/verifiers", response_model=list[Actor])
+@router.get("/actors/verifiers")
 async def get_verifiers() -> list[Actor]:
     """Fetch the verifiers from the trust registry.
 

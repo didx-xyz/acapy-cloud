@@ -28,7 +28,7 @@ async def test_revoke_many_credentials(
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
 ):
-    time.sleep(10)  # moment for revocation registry to update
+    await asyncio.sleep(10)  # moment for revocation registry to update
     # todo: remove sleep when issue resolved: https://github.com/openwallet-foundation/acapy/issues/3018
 
     # Do proof request

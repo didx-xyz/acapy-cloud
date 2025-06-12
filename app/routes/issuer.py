@@ -26,7 +26,7 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/v1/issuer/credentials", tags=["issuer"])
 
 
-@router.post("", summary="Send Holder a Credential", response_model=CredentialExchange)
+@router.post("", summary="Send Holder a Credential")
 async def send_credential(
     credential: SendCredential,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
@@ -104,7 +104,6 @@ async def send_credential(
 @router.post(
     "/create-offer",
     summary="Create a Credential Offer (not bound to a connection)",
-    response_model=CredentialExchange,
 )
 async def create_offer(
     credential: CreateOffer,
@@ -181,7 +180,6 @@ async def create_offer(
 @router.post(
     "/{credential_exchange_id}/request",
     summary="Accept a Credential Offer",
-    response_model=CredentialExchange,
 )
 async def request_credential(  # noqa: D417
     credential_exchange_id: str,
@@ -254,7 +252,6 @@ async def request_credential(  # noqa: D417
 @router.post(
     "/{credential_exchange_id}/store",
     summary="Store a Received Credential in Wallet",
-    response_model=CredentialExchange,
 )
 async def store_credential(  # noqa: D417
     credential_exchange_id: str,
@@ -298,7 +295,6 @@ async def store_credential(  # noqa: D417
 @router.get(
     "",
     summary="Fetch Credential Exchange Records",
-    response_model=list[CredentialExchange],
 )
 async def get_credentials(
     limit: int | None = limit_query_parameter,
@@ -372,7 +368,6 @@ async def get_credentials(
 @router.get(
     "/{credential_exchange_id}",
     summary="Fetch a single Credential Exchange Record",
-    response_model=CredentialExchange,
 )
 async def get_credential(  # noqa: D417
     credential_exchange_id: str,

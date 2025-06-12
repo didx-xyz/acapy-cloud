@@ -19,7 +19,6 @@ router = APIRouter(prefix="/v1/wallet/credentials", tags=["wallet"])
 
 @router.get(
     "",
-    response_model=CredInfoList,
     summary="Fetch a list of credentials from the wallet",
 )
 async def list_credentials(
@@ -70,7 +69,6 @@ async def list_credentials(
 
 @router.get(
     "/{credential_id}",
-    response_model=CredInfo,
     summary="Fetch a credential by ID",
 )
 async def get_credential_record(  # noqa: D417
@@ -140,7 +138,6 @@ async def delete_credential(  # noqa: D417
 
 @router.get(
     "/{credential_id}/mime-types",
-    response_model=AttributeMimeTypesResult,
     summary="Retrieve attribute MIME types of a credential",
 )
 async def get_credential_mime_types(  # noqa: D417
@@ -180,7 +177,6 @@ async def get_credential_mime_types(  # noqa: D417
 
 @router.get(
     "/{credential_id}/revocation-status",
-    response_model=CredRevokedResult,
     summary="Get revocation status of a credential",
 )
 async def get_credential_revocation_status(  # noqa: D417
@@ -232,7 +228,6 @@ async def get_credential_revocation_status(  # noqa: D417
 
 @router.get(
     "/w3c",
-    response_model=VCRecordList,
     summary="Fetch a list of W3C credentials from the wallet",
 )
 async def list_w3c_credentials(
@@ -283,7 +278,6 @@ async def list_w3c_credentials(
 
 @router.get(
     "/w3c/{credential_id}",
-    response_model=VCRecord,
     summary="Fetch a W3C credential by ID",
 )
 async def get_w3c_credential(  # noqa: D417

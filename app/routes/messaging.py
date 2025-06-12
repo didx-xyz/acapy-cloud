@@ -52,9 +52,7 @@ async def send_messages(
     logger.debug("Successfully sent message.")
 
 
-@router.post(
-    "/trust-ping", summary="Send Trust Ping", response_model=PingRequestResponse
-)
+@router.post("/trust-ping", summary="Send Trust Ping")
 async def send_trust_ping(
     trustping_msg: TrustPingMsg,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),

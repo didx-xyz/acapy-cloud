@@ -108,6 +108,7 @@
     "patchers",
     "pathspec",
     "paymentaddr",
+    "perflint",
     "pgadmin",
     "pgpool",
     "PIPESTATUS",

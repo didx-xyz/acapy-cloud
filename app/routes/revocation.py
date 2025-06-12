@@ -72,7 +72,6 @@ async def revoke_credential(
 @router.get(
     "/revocation/record",
     summary="Fetch a Revocation Record",
-    response_model=IssuerCredRevRecord,
 )
 async def get_credential_revocation_record(  # noqa: D417
     credential_exchange_id: str | None = None,
@@ -226,7 +225,6 @@ async def publish_revocations(
 @router.post(
     "/clear-pending-revocations",
     summary="Clear Pending Revocations",
-    response_model=ClearPendingRevocationsResult,
 )
 async def clear_pending_revocations(
     clear_pending_request: ClearPendingRevocationsRequest,
