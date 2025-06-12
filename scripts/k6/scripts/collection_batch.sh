@@ -55,12 +55,12 @@ multiply_vus() {
 
 should_init_issuer() {
   local issuer_prefix="$1"
-  ! [[ -f "./output/${issuer_prefix}-create-issuers.json" ]]
+  ! [[ -f "./output/${issuer_prefix}-create-issuers.jsonl" ]]
 }
 
 should_create_holders() {
   local holder_prefix="$1"
-  ! [[ -f "./output/${holder_prefix}-create-holders.json" ]]
+  ! [[ -f "./output/${holder_prefix}-create-holders.jsonl" ]]
 }
 
 init() {
