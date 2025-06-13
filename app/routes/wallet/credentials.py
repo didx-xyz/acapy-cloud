@@ -9,6 +9,10 @@ from app.dependencies.acapy_clients import client_from_auth
 from app.dependencies.auth import AcaPyAuth, acapy_auth_from_header
 from app.exceptions import handle_acapy_call
 from app.models.wallet import CredInfo, CredInfoList, VCRecord, VCRecordList
+from app.services.wallet.wallet_credential import (
+    add_revocation_info,
+    check_non_revokable,
+)
 from app.util.pagination import limit_query_parameter, offset_query_parameter
 from shared.log_config import get_logger
 
@@ -25,6 +29,7 @@ async def list_credentials(
     limit: int | None = limit_query_parameter,
     offset: int | None = offset_query_parameter,
     wql: str | None = None,
+    check_revoked: bool = False,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> CredInfoList:
     """Fetch a list of credentials from the wallet
@@ -62,6 +67,21 @@ async def list_credentials(
             offset=offset,
             wql=wql,
         )
+        results = CredInfoList.model_validate(results.model_dump())
+
+        logger.debug("Checking for non-revokable credentials")
+        results = await check_non_revokable(
+            cred_info_list=results,
+            logger=logger,
+        )
+
+        if check_revoked:
+            logger.debug("Adding revocation information to credentials")
+            results = await add_revocation_info(
+                cred_info_list=results,
+                aries_controller=aries_controller,
+                logger=logger,
+            )
 
     logger.debug("Successfully listed credentials.")
     return results
