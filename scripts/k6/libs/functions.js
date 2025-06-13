@@ -823,6 +823,7 @@ export function publishRevocation(issuerAccessToken) {
       "x-api-key": issuerAccessToken,
       "Content-Type": "application/json",
     },
+    timeout: "120s",
   };
   try {
     const requestBody = {
