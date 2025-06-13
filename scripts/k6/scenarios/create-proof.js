@@ -123,8 +123,9 @@ export default function (data) {
     field: "thread_id",
     fieldId: threadId,
     state: "request-received",
-    maxAttempts: 1,
+    maxAttempts: 3,
     lookBack: 60,
+    requestTimeout: 5,
     sseTag: "proof_request_received",
   }, { perspective: "Holder" });
 
@@ -136,7 +137,7 @@ export default function (data) {
   try {
     credentialId = retry(() => {
       return getProofIdCredentials(wallet.access_token, proofId, epochTimestamp);
-    }, 5, 10000, 'Get credential ID');
+    }, 5, 2000, 'Get credential ID');
   } catch (error) {
     console.error(`Failed to get proof credentials after retries: ${error.message}`);
   }
@@ -184,9 +185,10 @@ export default function (data) {
     topic: "proofs",
     field: "thread_id",
     fieldId: threadId,
-    state: "done",
-    // maxAttempts: 3,
+    maxAttempts: 3,
     lookBack: 60,
+    state: "done",
+    requestTimeout: 5,
     sseTag: "proof_done",
   }, { perspective: "Holder" });
 
