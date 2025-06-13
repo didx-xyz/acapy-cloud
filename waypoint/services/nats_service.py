@@ -2,10 +2,13 @@ import asyncio
 import functools
 import os
 import time
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
+from typing import Any
 
 import orjson
+from loguru._logger import Logger
 from nats.errors import BadSubscriptionError, ConnectionClosedError, Error
 from nats.js.api import ConsumerConfig, DeliverPolicy
 from nats.js.client import JetStreamContext
@@ -54,11 +57,11 @@ class NatsEventsProcessor:
     return an async generator that will yield events.
     """
 
-    def __init__(self, jetstream: JetStreamContext):
+    def __init__(self, jetstream: JetStreamContext) -> None:
         """Initialize the NATS events processor."""
         self.js_context: JetStreamContext = jetstream
 
-    def _retry_log(self, bound_logger, retry_state: RetryCallState):
+    def _retry_log(self, bound_logger: Logger, retry_state: RetryCallState) -> None:
         """Log retry attempts."""
         if retry_state.outcome.failed:
             exception = retry_state.outcome.exception()
@@ -111,7 +114,7 @@ class NatsEventsProcessor:
             after=retry_log_with_bound_logger,
             stop=stop_never,
         )
-        async def pull_subscribe():
+        async def pull_subscribe() -> JetStreamContext.PullSubscription:
             try:
                 bound_logger.trace("Attempting to subscribe to JetStream")
                 subscription = await self.js_context.pull_subscribe(
@@ -143,7 +146,7 @@ class NatsEventsProcessor:
         stop_event: asyncio.Event,
         duration: int | None = None,
         look_back: int | None = None,
-    ):
+    ) -> AsyncGenerator[AsyncGenerator[CloudApiWebhookEventGeneric, None], Any, None]:
         duration = duration or SSE_TIMEOUT
         look_back = look_back or SSE_LOOK_BACK
         request_uuid = uuid4()
@@ -169,7 +172,9 @@ class NatsEventsProcessor:
         # Format the time in the required format
         start_time = look_back_time.isoformat(timespec="milliseconds") + "Z"
 
-        async def event_generator(*, subscription: JetStreamContext.PullSubscription):
+        async def event_generator(
+            *, subscription: JetStreamContext.PullSubscription
+        ) -> AsyncGenerator[CloudApiWebhookEventGeneric, None]:
             try:
                 num_timeout_errors = 0
                 end_time = time.time() + duration
@@ -272,7 +277,7 @@ class NatsEventsProcessor:
             bound_logger.exception("Unexpected error processing events")
             raise e
 
-    async def check_jetstream(self):
+    async def check_jetstream(self) -> dict[str, Any]:
         try:
             account_info = await self.js_context.account_info()
             is_working = account_info.streams > 0

@@ -1,7 +1,7 @@
 import asyncio
 from logging import Logger
 
-from aries_cloudcontroller import AcaPyClient
+from aries_cloudcontroller import AcaPyClient, CredDefPostRequest, CredDefResult
 
 from app.exceptions import CloudApiException, handle_acapy_call
 from app.services.revocation_registry import wait_for_active_registry
@@ -9,12 +9,14 @@ from shared.constants import REGISTRY_CREATION_TIMEOUT
 
 
 class CredentialDefinitionPublisher:
-    def __init__(self, controller: AcaPyClient, logger: Logger):
+    def __init__(self, controller: AcaPyClient, logger: Logger) -> None:
         """Initialize the credential definition publisher."""
         self._logger = logger
         self._controller = controller
 
-    async def publish_anoncreds_credential_definition(self, request_body):
+    async def publish_anoncreds_credential_definition(
+        self, request_body: CredDefPostRequest
+    ) -> CredDefResult:
         try:
             result = await handle_acapy_call(
                 logger=self._logger,
@@ -42,7 +44,7 @@ class CredentialDefinitionPublisher:
 
         return result
 
-    async def wait_for_revocation_registry(self, credential_definition_id):
+    async def wait_for_revocation_registry(self, credential_definition_id: str) -> None:
         try:
             self._logger.debug("Waiting for revocation registry creation")
             await asyncio.wait_for(

@@ -17,7 +17,7 @@ WALLET_BASE_PATH = router.prefix
 skip_set_public_did = os.getenv("SKIP_SET_PUBLIC_DID") is not None
 
 
-async def create_did_mock(governance_client: RichAsyncClient):
+async def create_did_mock(governance_client: RichAsyncClient) -> str:
     did_response = await governance_client.post(WALLET_BASE_PATH)
     did_response = did_response.json()
     did = did_response["did"]

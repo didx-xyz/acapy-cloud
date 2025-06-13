@@ -58,7 +58,9 @@ async def test_sign_jws_x(alice_member_client: RichAsyncClient):
 
 
 @pytest.mark.anyio
-async def test_sign_and_verify_jws_success(alice_member_client: RichAsyncClient):
+async def test_sign_and_verify_jws_success(
+    alice_member_client: RichAsyncClient,
+):
     # Create DID:key for Alice
     did_info = await alice_member_client.post(
         "v1/wallet/dids", json=DIDCreate(method="key").model_dump()

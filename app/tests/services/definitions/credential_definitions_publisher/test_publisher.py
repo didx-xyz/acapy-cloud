@@ -12,17 +12,17 @@ from app.services.definitions.credential_definition_publisher import (
 
 
 @pytest.fixture
-def mock_logger():
+def mock_logger() -> MagicMock:
     return MagicMock()
 
 
 @pytest.fixture
-def mock_controller():
+def mock_controller() -> AsyncMock:
     return AsyncMock()
 
 
 @pytest.fixture
-def publisher(mock_controller, mock_logger):
+def publisher(mock_controller, mock_logger) -> CredentialDefinitionPublisher:
     return CredentialDefinitionPublisher(mock_controller, mock_logger)
 
 
@@ -42,7 +42,9 @@ async def test_publish_anoncreds_credential_definition_success(publisher):
 
 
 @pytest.mark.anyio
-async def test_publish_anoncreds_credential_definition_already_exists(publisher):
+async def test_publish_anoncreds_credential_definition_already_exists(
+    publisher,
+):
     mock_request_body = MagicMock()
 
     with patch(

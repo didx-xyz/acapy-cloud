@@ -12,11 +12,11 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/v1/jsonld", tags=["jsonld"])
 
 
-@router.post("/sign", response_model=SignResponse)
+@router.post("/sign")
 async def sign_jsonld(
     body: JsonLdSignRequest,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
-):
+) -> SignResponse:
     """Sign a JSON-LD structure"""
     bound_logger = logger.bind(
         # Do not log credential data:

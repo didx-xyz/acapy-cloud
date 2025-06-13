@@ -99,7 +99,9 @@ async def test_jwt_invalid_token_error(tenant_admin_client: RichAsyncClient):
     TestMode.regression_run in TestMode.fixture_params,
     reason=skip_regression_test_reason,
 )
-async def test_invalid_token_error_after_rotation(tenant_admin_client: RichAsyncClient):
+async def test_invalid_token_error_after_rotation(
+    tenant_admin_client: RichAsyncClient,
+):
     # Step 1: Create a tenant and get a valid access token
     response = await tenant_admin_client.post(
         TENANTS_BASE_PATH,

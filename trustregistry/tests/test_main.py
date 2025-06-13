@@ -9,7 +9,7 @@ from trustregistry.main import app, check_migrations, lifespan, registry, root
 
 
 @pytest.fixture
-def db_session_mock():
+def db_session_mock() -> Mock:
     session = Mock(spec=Session)
     return session
 

@@ -66,7 +66,7 @@ async def test_get_actors(
     actors = all_actors.json()
 
     # Helper function to verify actor structure
-    def verify_actor_structure(actor_data):
+    def verify_actor_structure(actor_data) -> None:
         assert actor_data["id"]
         assert actor_data["name"]
         assert actor_data["roles"]

@@ -17,7 +17,7 @@ class CreateOobInvitation(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def validate_one_of_create_connection_or_attachments(cls, values):
+    def validate_one_of_create_connection_or_attachments(cls, values: dict) -> dict:
         create, attachments = values.get("create_connection"), values.get("attachments")
         if not create and not attachments:
             raise CloudApiValueError(

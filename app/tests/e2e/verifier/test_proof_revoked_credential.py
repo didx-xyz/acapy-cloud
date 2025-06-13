@@ -53,7 +53,7 @@ async def proof_revoked_credential(
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
-):
+) -> None:
     await asyncio.sleep(14)  # moment for revocation registry to update
     # todo: remove sleep when issue resolved: https://github.com/openwallet-foundation/acapy/issues/3018
 
@@ -155,7 +155,7 @@ async def regression_proof_revoked_credential(
     acme_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     acme_and_alice_connection: AcmeAliceConnect,
-):
+) -> None:
     await asyncio.sleep(14)  # moment for revocation registry to update
     # todo: remove sleep when issue resolved: https://github.com/openwallet-foundation/acapy/issues/3018
 

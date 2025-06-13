@@ -62,7 +62,7 @@ async def assert_both_connections_ready(
 
 async def create_bob_alice_connection(
     alice_member_client: RichAsyncClient, bob_member_client: RichAsyncClient, alias: str
-):
+) -> BobAliceConnect:
     # Bob create invitation
     bob_invitation = (
         await bob_member_client.post(

@@ -34,7 +34,7 @@ for xml_file in xml_files:
                 )
 
 
-def sorting_key(list_of_test):
+def sorting_key(list_of_test: str) -> int:
     return sum(len(files) for files in fail_json[list_of_test].values())
 
 

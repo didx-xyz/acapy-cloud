@@ -15,7 +15,7 @@ class DummyModel(BaseModel):
 
     @field_validator("field")
     @classmethod
-    def validate_regex(cls, value):
+    def validate_regex(cls, value: str) -> str:
         """Validates the regular expression"""
         if not re.match(r"^[\d+]$", value):
             raise ValueError(error_msg)

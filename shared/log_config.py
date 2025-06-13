@@ -1,6 +1,7 @@
 import os
 import sys
 from datetime import datetime
+from typing import Any
 
 import orjson
 from loguru._logger import Core as _Core
@@ -26,7 +27,7 @@ color_map = {
 
 
 # Define custom formatter for this module
-def formatter_builder(color: str):
+def formatter_builder(color: str) -> str:
     return (
         "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
         "<level>{level: <8}</level> | "
@@ -37,7 +38,7 @@ def formatter_builder(color: str):
 
 
 # Define custom formatter for serialized logs
-def _serialize_record(record):
+def _serialize_record(record: dict[str, Any]) -> str:
     record_time: datetime = record["time"]
 
     # format the time field to ISO8601 format
@@ -98,7 +99,7 @@ def _serialize_record(record):
 loggers = {}
 
 
-def get_log_file_path(main_module_name) -> str:
+def get_log_file_path(main_module_name: str) -> str:
     # The absolute path of this file's directory
     config_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -111,7 +112,7 @@ def get_log_file_path(main_module_name) -> str:
 
 
 # Export this logger
-def get_logger(name: str):
+def get_logger(name: str) -> _Logger:
     # Get the main module name
     main_module_name = name.split(".")[0]
 

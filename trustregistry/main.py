@@ -1,4 +1,5 @@
 import os
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from alembic import command
@@ -6,6 +7,7 @@ from alembic.config import Config
 from alembic.migration import MigrationContext
 from alembic.script import ScriptDirectory
 from fastapi import Depends, FastAPI
+from fastapi.responses import HTMLResponse
 from scalar_fastapi import get_scalar_api_reference
 from sqlalchemy import inspect
 from sqlalchemy.engine import Engine
@@ -65,7 +67,7 @@ def check_migrations(db_engine: Engine, alembic_cfg: Config) -> bool:
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI):
+async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
     alembic_cfg = Config("alembic.ini")
 
     if not check_migrations(engine, alembic_cfg):
@@ -89,7 +91,7 @@ async def lifespan(_: FastAPI):
     # shutdown logic after
 
 
-def create_app():
+def create_app() -> FastAPI:
     application = FastAPI(
         root_path=ROOT_PATH,
         title=OPENAPI_NAME,
@@ -109,7 +111,7 @@ app = create_app()
 
 # Use Scalar instead of Swagger
 @app.get("/docs", include_in_schema=False)
-async def scalar_html():
+async def scalar_html() -> HTMLResponse:
     return get_scalar_api_reference(
         openapi_url=app.openapi_url,
         title=app.title,
@@ -117,7 +119,7 @@ async def scalar_html():
 
 
 @app.get("/")
-async def root(db_session: Session = Depends(get_db)):
+async def root(db_session: Session = Depends(get_db)):  # noqa: ANN201
     logger.debug("GET request received: Fetch actors and schemas from registry")
     db_schemas = crud.get_schemas(db_session)
     db_actors = crud.get_actors(db_session)
@@ -127,5 +129,5 @@ async def root(db_session: Session = Depends(get_db)):
 
 
 @app.get("/registry")
-async def registry(db_session: Session = Depends(get_db)):
+async def registry(db_session: Session = Depends(get_db)):  # noqa: ANN201
     return await root(db_session)

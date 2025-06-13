@@ -1,6 +1,7 @@
 import asyncio
 import importlib
 import json
+from collections.abc import AsyncGenerator
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -30,7 +31,7 @@ sample_message_data = {
 
 
 @pytest.fixture
-async def mock_nats_client():
+async def mock_nats_client() -> AsyncGenerator[JetStreamContext, None]:
     with patch("nats.connect") as mock_connect:
         mock_nats = AsyncMock(spec=NATSClient)
         mock_jetstream = AsyncMock(spec=JetStreamContext)
@@ -211,7 +212,7 @@ async def test_process_events_timeout_error_handling(
     timeout_error_count = 0
 
     # Function to simulate fetch behaviour
-    async def fetch_side_effect(**_):
+    async def fetch_side_effect(**_) -> list[AsyncMock]:
         nonlocal timeout_error_count
         if timeout_error_count < MAX_TIMEOUT_ERRORS:
             timeout_error_count += 1

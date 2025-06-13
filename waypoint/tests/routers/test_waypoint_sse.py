@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import AsyncGenerator, Callable
 from unittest.mock import ANY, AsyncMock, patch
 
 import pytest
@@ -43,21 +44,26 @@ expected_cloudapi_event = CloudApiWebhookEventGeneric(
 
 
 @pytest.fixture
-def nats_processor_mock():
+def nats_processor_mock() -> AsyncMock:
     mock = AsyncMock(spec=NatsEventsProcessor)
     return mock
 
 
 @pytest.fixture
-def request_mock():
+def request_mock() -> AsyncMock:
     mock_request = AsyncMock(spec=Request)
     mock_request.is_disconnected.return_value = False
     return mock_request
 
 
 @pytest.fixture
-def async_generator_mock():
-    async def _mock_gen(*args):
+def async_generator_mock() -> Callable[
+    [list[CloudApiWebhookEventGeneric]],
+    AsyncGenerator[CloudApiWebhookEventGeneric, None],
+]:
+    async def _mock_gen(
+        *args: list[CloudApiWebhookEventGeneric],
+    ) -> AsyncGenerator[CloudApiWebhookEventGeneric, None]:
         for value in args[0]:
             yield value
 
@@ -83,7 +89,9 @@ async def test_sse_event_stream_generator_wallet_id_topic_field_desired_state(
     nats_processor_mock,  # pylint: disable=redefined-outer-name
     request_mock,  # pylint: disable=redefined-outer-name
 ):
-    async def mock_event_generator():
+    async def mock_event_generator() -> AsyncGenerator[
+        CloudApiWebhookEventGeneric, None
+    ]:
         yield expected_cloudapi_event
 
     nats_processor_mock.process_events.return_value.__aenter__.return_value = (
@@ -117,7 +125,9 @@ async def test_sse_event_stream_generator_disconnects(
     request = AsyncMock(spec=Request)
     request.is_disconnected.return_value = True
 
-    async def mock_event_generator():
+    async def mock_event_generator() -> AsyncGenerator[
+        CloudApiWebhookEventGeneric, None
+    ]:
         yield dummy_cloudapi_event
         yield expected_cloudapi_event
 
@@ -150,7 +160,7 @@ async def test_nats_event_stream_generator_cancelled_error_handling(
 ):
     background_tasks = BackgroundTasks()
 
-    async def mock_event_generator():
+    async def mock_event_generator():  # noqa: ANN202
         raise asyncio.CancelledError
         yield  # Make this function an asynchronous generator
 

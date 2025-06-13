@@ -10,8 +10,8 @@ async def coroutine_with_retry(
     coroutine_func: Callable[..., Coroutine[Any, Any, T]],
     args: tuple,
     logger: Logger,
-    max_attempts=5,
-    retry_delay=2,
+    max_attempts: int = 5,
+    retry_delay: int = 2,
 ) -> T:
     result = None
     for attempt in range(max_attempts):
@@ -41,7 +41,7 @@ async def coroutine_with_retry_until_value(
     coroutine_func: Callable[..., Coroutine[Any, Any, T]],
     args: tuple,
     field_name: str | None,
-    expected_value: Any,
+    expected_value: Any,  # noqa: ANN401
     logger: Logger,
     max_attempts: int = 5,
     retry_delay: int = 2,

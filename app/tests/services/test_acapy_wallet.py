@@ -93,7 +93,9 @@ async def test_create_cheqd_did_success(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_create_cheqd_did_success_no_seed(mock_agent_controller: AcaPyClient):
+async def test_create_cheqd_did_success_no_seed(
+    mock_agent_controller: AcaPyClient,
+):
     did_create_request = DIDCreate(method="cheqd")
 
     expected_did = "did:cheqd:testnet:zxywv987654321"
@@ -124,7 +126,9 @@ async def test_create_cheqd_did_success_no_seed(mock_agent_controller: AcaPyClie
 
 
 @pytest.mark.anyio
-async def test_create_cheqd_did_fail_missing_did(mock_agent_controller: AcaPyClient):
+async def test_create_cheqd_did_fail_missing_did(
+    mock_agent_controller: AcaPyClient,
+):
     did_create_request = DIDCreate(method="cheqd", options={"network": "testnet"})
 
     mock_agent_controller.did.did_cheqd_create_post.return_value = (
@@ -138,7 +142,9 @@ async def test_create_cheqd_did_fail_missing_did(mock_agent_controller: AcaPyCli
 
 
 @pytest.mark.anyio
-async def test_create_cheqd_did_fail_missing_verkey(mock_agent_controller: AcaPyClient):
+async def test_create_cheqd_did_fail_missing_verkey(
+    mock_agent_controller: AcaPyClient,
+):
     did_create_request = DIDCreate(method="cheqd", options={"network": "testnet"})
 
     mock_agent_controller.did.did_cheqd_create_post.return_value = (

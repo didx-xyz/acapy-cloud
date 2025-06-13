@@ -22,7 +22,7 @@ actor_did = new_actor["did"]
 actor_name = new_actor["name"]
 
 
-def generate_actor():
+def generate_actor() -> dict[str, str]:
     return {
         "id": random_string(8),
         "name": random_string(8),

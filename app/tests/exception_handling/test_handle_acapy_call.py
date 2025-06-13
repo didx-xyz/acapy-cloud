@@ -22,13 +22,13 @@ dummy_acapy_call = "dummy_acapy_call"
 
 # Mock logger to avoid actual logging during tests
 @pytest.fixture
-def mock_logger():
+def mock_logger() -> Mock:
     return Mock(spec=Logger)
 
 
 # Sample Async function to simulate ACA-Py call
 @pytest.fixture
-def acapy_call():
+def acapy_call() -> AsyncMock:
     mock = AsyncMock()
     mock.__name__ = dummy_acapy_call
     return mock

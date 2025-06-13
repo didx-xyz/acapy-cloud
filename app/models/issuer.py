@@ -24,7 +24,7 @@ class CredentialBase(SaveExchangeRecordField):
     anoncreds_credential_detail: AnonCredsCredential | None = None
 
     @model_validator(mode="after")
-    def check_credential_detail(self):
+    def check_credential_detail(self) -> "CredentialBase":
         if (
             self.anoncreds_credential_detail is None
             and self.ld_credential_detail is None

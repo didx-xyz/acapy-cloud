@@ -62,7 +62,9 @@ async def test_revoke_credential(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_publish_pending_revocations_success(mock_agent_controller: AcaPyClient):
+async def test_publish_pending_revocations_success(
+    mock_agent_controller: AcaPyClient,
+):
     with patch(
         "app.services.revocation_registry.validate_rev_reg_ids"
     ) as mock_validate_rev_reg_ids:
@@ -129,7 +131,9 @@ async def test_publish_pending_revocations_empty_response(
 
 
 @pytest.mark.anyio
-async def test_publish_pending_revocations_failure(mock_agent_controller: AcaPyClient):
+async def test_publish_pending_revocations_failure(
+    mock_agent_controller: AcaPyClient,
+):
     error_message = "Failed to publish due to network error"
     status_code = 500
 
@@ -170,7 +174,9 @@ async def test_publish_pending_revocations_failure(mock_agent_controller: AcaPyC
 
 
 @pytest.mark.anyio
-async def test_clear_pending_revocations_success(mock_agent_controller: AcaPyClient):
+async def test_clear_pending_revocations_success(
+    mock_agent_controller: AcaPyClient,
+):
     expected_result_map = {"rev_reg_id1": []}
 
     # Simulate successful validation
@@ -203,7 +209,9 @@ async def test_clear_pending_revocations_success(mock_agent_controller: AcaPyCli
 
 
 @pytest.mark.anyio
-async def test_clear_pending_revocations_failure(mock_agent_controller: AcaPyClient):
+async def test_clear_pending_revocations_failure(
+    mock_agent_controller: AcaPyClient,
+):
     error_message = "Failed to clear due to network error"
     status_code = 500
 
@@ -369,7 +377,9 @@ async def test_validate_rev_reg_ids_success(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_validate_rev_reg_ids_non_existent(mock_agent_controller: AcaPyClient):
+async def test_validate_rev_reg_ids_non_existent(
+    mock_agent_controller: AcaPyClient,
+):
     # Mock ApiException for non-existent revocation registry ID
     mock_agent_controller.revocation.get_registry.side_effect = ApiException(
         status=404, reason="Registry ID does not exist"
@@ -526,7 +536,9 @@ async def test_get_pending_revocations_result_none(
 
 
 @pytest.mark.anyio
-async def test_get_created_active_registries(mock_agent_controller: AcaPyClient):
+async def test_get_created_active_registries(
+    mock_agent_controller: AcaPyClient,
+):
     active_registries = ["reg_id_1", "reg_id_2"]
 
     anoncreds_revocation = mock_agent_controller.anoncreds_revocation
@@ -543,7 +555,9 @@ async def test_get_created_active_registries(mock_agent_controller: AcaPyClient)
 
 
 @pytest.mark.anyio
-async def test_get_created_active_registries_error(mock_agent_controller: AcaPyClient):
+async def test_get_created_active_registries_error(
+    mock_agent_controller: AcaPyClient,
+):
     anoncreds_revocation = mock_agent_controller.anoncreds_revocation
     anoncreds_revocation.get_revocation_registries.side_effect = ApiException(
         reason="Error", status=500
@@ -615,7 +629,9 @@ async def test_revoke_credential_auto_publish_timeout(
 
 
 @pytest.mark.anyio
-async def test_revoke_credential_no_result_returned(mock_agent_controller: AcaPyClient):
+async def test_revoke_credential_no_result_returned(
+    mock_agent_controller: AcaPyClient,
+):
     mock_agent_controller.anoncreds_revocation.revoke.return_value = None
     mock_agent_controller.anoncreds_revocation.get_cred_rev_record.return_value = (
         MagicMock(

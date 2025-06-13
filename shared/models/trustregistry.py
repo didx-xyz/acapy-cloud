@@ -17,7 +17,7 @@ class Actor(BaseModel):
 
     @field_validator("did")
     @classmethod
-    def did_validator(cls, did: str):
+    def did_validator(cls, did: str) -> str:
         if not did.startswith("did:"):
             raise CloudApiValueError("Only fully qualified DIDs allowed.")
 
@@ -38,7 +38,7 @@ class Schema(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def validate_and_set_values(cls, values: Union[dict, "Schema"]):
+    def validate_and_set_values(cls, values: Union[dict, "Schema"]) -> dict:
         # pydantic v2 removed safe way to get key, because `values` can be a dict or this type
         if not isinstance(values, dict):
             values = values.__dict__

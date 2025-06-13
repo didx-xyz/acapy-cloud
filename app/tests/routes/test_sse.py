@@ -1,4 +1,5 @@
-from unittest.mock import Mock, patch
+from collections.abc import Generator
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -12,17 +13,17 @@ state = "some_state"
 
 
 @pytest.fixture()
-def mock_request():
+def mock_request() -> Mock:
     return Mock()
 
 
 @pytest.fixture()
-def mock_auth():
+def mock_auth() -> Mock:
     return Mock()
 
 
 @pytest.fixture()
-def mock_verify_wallet_access():
+def mock_verify_wallet_access() -> Generator[AsyncMock, None, None]:
     with patch("app.routes.sse.verify_wallet_access", new=Mock()) as mocked:
         yield mocked
 

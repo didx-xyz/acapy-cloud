@@ -107,7 +107,9 @@ async def test_get_records_empty(mock_agent_controller: AcaPyClient):
 
 
 @pytest.mark.anyio
-async def test_get_records_with_query_params(mock_agent_controller: AcaPyClient):
+async def test_get_records_with_query_params(
+    mock_agent_controller: AcaPyClient,
+):
     mock_agent_controller.issue_credential_v2_0.get_records.return_value = (
         V20CredExRecordListResult(results=[v2_record])
     )

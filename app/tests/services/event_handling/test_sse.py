@@ -32,7 +32,7 @@ lines_list = [line1, line2, line3]
 # Fixture for async generator lines
 @pytest.fixture
 def async_lines() -> AsyncGenerator[str, Any]:
-    async def _lines():
+    async def _lines() -> AsyncGenerator[str, Any]:
         yield line1
         yield line2
         yield line3

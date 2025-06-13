@@ -20,7 +20,7 @@ class JWSCreateRequest(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def check_at_least_one_field_is_populated(cls, values):
+    def check_at_least_one_field_is_populated(cls, values: dict) -> dict:
         did, verification_method = values.get("did"), values.get("verification_method")
         if not did and not verification_method:
             raise CloudApiValueError(
@@ -34,7 +34,7 @@ class JWSCreateRequest(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def check_payload_is_populated(cls, values):
+    def check_payload_is_populated(cls, values: dict) -> dict:
         payload = values.get("payload")
         if not payload:
             raise CloudApiValueError("`payload` must be populated.")

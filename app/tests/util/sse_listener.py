@@ -21,7 +21,7 @@ class SseListener:
         self,
         wallet_id: str,
         topic: str,
-    ):
+    ) -> None:
         """Initialize the SSE listener."""
         logger.debug(
             "Starting SseListener for wallet id `{}` and topic `{}`", wallet_id, topic

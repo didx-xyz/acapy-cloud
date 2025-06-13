@@ -65,7 +65,7 @@ class CreateTenantRequest(BaseModel):
 
     @field_validator("wallet_label", mode="before")
     @classmethod
-    def validate_wallet_label(cls, v):
+    def validate_wallet_label(cls, v: str) -> str:
         if len(v) > 100:
             raise CloudApiValueError("wallet_label has a max length of 100 characters")
 
@@ -78,7 +78,7 @@ class CreateTenantRequest(BaseModel):
 
     @field_validator("wallet_name", mode="before")
     @classmethod
-    def validate_wallet_name(cls, v):
+    def validate_wallet_name(cls, v: str | None) -> str | None:
         if v:
             if len(v) > 100:
                 raise CloudApiValueError(
@@ -95,7 +95,7 @@ class CreateTenantRequest(BaseModel):
 
     @field_validator("group_id", mode="before")
     @classmethod
-    def validate_group_id(cls, v):
+    def validate_group_id(cls, v: str | None) -> str | None:
         if v:
             if len(v) > 50:
                 raise CloudApiValueError("group_id has a max length of 50 characters")
@@ -119,7 +119,7 @@ class UpdateTenantRequest(BaseModel):
 
     @field_validator("wallet_label", mode="before")
     @classmethod
-    def validate_wallet_label(cls, v):
+    def validate_wallet_label(cls, v: str) -> str:
         if len(v) > 100:
             raise CloudApiValueError("wallet_label has a max length of 100 characters")
 

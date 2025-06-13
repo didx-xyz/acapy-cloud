@@ -93,7 +93,9 @@ async def test_onboard_issuer_no_public_did(
 
 
 @pytest.mark.anyio
-async def test_onboard_verifier_public_did_exists(mock_agent_controller: AcaPyClient):
+async def test_onboard_verifier_public_did_exists(
+    mock_agent_controller: AcaPyClient,
+):
     with patch(
         "app.services.acapy_wallet.get_public_did",
         return_value=did_object,
@@ -111,7 +113,9 @@ async def test_onboard_verifier_public_did_exists(mock_agent_controller: AcaPyCl
 
 
 @pytest.mark.anyio
-async def test_onboard_verifier_no_public_did(mock_agent_controller: AcaPyClient):
+async def test_onboard_verifier_no_public_did(
+    mock_agent_controller: AcaPyClient,
+):
     did_key = "did:key:123#456"
     invitation_url = "https://invitation.com/"
 
@@ -142,7 +146,9 @@ async def test_onboard_verifier_no_public_did(mock_agent_controller: AcaPyClient
 
 
 @pytest.mark.anyio
-async def test_onboard_verifier_no_recipient_keys(mock_agent_controller: AcaPyClient):
+async def test_onboard_verifier_no_recipient_keys(
+    mock_agent_controller: AcaPyClient,
+):
     mock_agent_controller.out_of_band.create_invitation.return_value = InvitationRecord(
         invitation=InvitationMessage(services=[{"recipientKeys": []}]),
     )
@@ -160,7 +166,9 @@ async def test_onboard_verifier_no_recipient_keys(mock_agent_controller: AcaPyCl
 
 
 @pytest.mark.anyio
-async def test_onboard_verifier_invalid_invitation(mock_agent_controller: AcaPyClient):
+async def test_onboard_verifier_invalid_invitation(
+    mock_agent_controller: AcaPyClient,
+):
     mock_agent_controller.out_of_band.create_invitation.return_value = InvitationRecord(
         invitation=InvitationMessage(services=[]),
     )

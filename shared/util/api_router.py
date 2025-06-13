@@ -1,5 +1,4 @@
 from collections.abc import Callable
-from typing import Any
 
 from fastapi import APIRouter as FastAPIRouter
 from fastapi.types import DecoratedCallable
@@ -12,7 +11,7 @@ from fastapi.types import DecoratedCallable
 # See discussion at: https://github.com/tiangolo/fastapi/issues/2060#issuecomment-834868906
 class APIRouter(FastAPIRouter):
     def api_route(
-        self, path: str, *, include_in_schema: bool = True, **kwargs: Any
+        self, path: str, *, include_in_schema: bool = True, **kwargs
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         if len(path) > 1 and path.endswith("/"):
             path = path[:-1]

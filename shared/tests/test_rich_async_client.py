@@ -1,3 +1,5 @@
+from typing import NoReturn
+
 import pytest
 from fastapi import HTTPException
 from httpx import AsyncClient, ConnectTimeout, HTTPStatusError, Request, Response
@@ -67,7 +69,7 @@ async def test_rich_async_client_retry_on_502(monkeypatch):
         Response(200, request=Request("GET", test_url), text="Success"),
     ]
 
-    async def mock_get(_, __):
+    async def mock_get(_, __) -> Response:
         # Pop the first response from the list
         response = responses.pop(0)
         if response.status_code == 502:
@@ -88,7 +90,7 @@ async def test_rich_async_client_retry_on_502(monkeypatch):
 
 @pytest.mark.anyio
 async def test_rich_async_client_no_retry_on_404(monkeypatch):
-    async def mock_get(_, __):
+    async def mock_get(_, __) -> NoReturn:
         # Simulate a 404 error
         response = Response(404, request=Request("GET", test_url), text="Not Found")
         raise HTTPStatusError("Not Found", request=response.request, response=response)
@@ -108,7 +110,7 @@ async def test_rich_async_client_no_retry_on_404(monkeypatch):
 async def test_rich_async_client_retry_on_connect_timeout(monkeypatch):
     attempts = []
 
-    async def mock_get(_, __):
+    async def mock_get(_, __) -> Response:
         if len(attempts) < 1:
             attempts.append(1)
             raise ConnectTimeout("Connection timed out")
@@ -125,8 +127,8 @@ async def test_rich_async_client_retry_on_connect_timeout(monkeypatch):
 
 
 @pytest.fixture
-def mock_response(monkeypatch):
-    async def mock_send(*_, **__):
+def mock_response(monkeypatch) -> None:
+    async def mock_send(*_, **__) -> Response:
         return Response(200, request=Request("GET", test_url), text="Success")
 
     monkeypatch.setattr(RichAsyncClient, "_request_with_retries", mock_send)

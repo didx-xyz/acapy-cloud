@@ -1,11 +1,13 @@
+from collections.abc import Generator
+
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, Session, mapped_column
 
 from trustregistry.database import Base, SessionLocal
 from trustregistry.list_type import StringList
 
 
-def get_db():
+def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
     try:
         yield db
@@ -13,7 +15,7 @@ def get_db():
         db.close()
 
 
-def schema_id_gen(context):
+def schema_id_gen(context) -> str:  # noqa: ANN001
     parameters = context.get_current_parameters()
     did = parameters["did"]
     name = parameters["name"]

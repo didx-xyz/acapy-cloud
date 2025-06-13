@@ -42,7 +42,7 @@ async def test_get_anoncreds_schema(
     schema_version = anoncreds_schema_definition.version
     schema_attributes = anoncreds_schema_definition.attribute_names
 
-    def assert_schema_response(schema_response: dict):
+    def assert_schema_response(schema_response: dict) -> None:
         # Helper method to assert schema response has expected values
         assert schema_response["id"] == schema_id
         assert schema_response["name"] == schema_name

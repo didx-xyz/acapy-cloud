@@ -769,7 +769,7 @@ async def test_get_credentials_by_proof_id_exception(
 async def test_get_credentials_by_proof_id_bad_limit():
     client = TestClient(app)
 
-    def override_auth():
+    def override_auth() -> str:
         return "mocked_auth"
 
     app.dependency_overrides[acapy_auth_from_header] = override_auth

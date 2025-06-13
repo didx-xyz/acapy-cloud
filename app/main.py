@@ -7,7 +7,7 @@ import yaml
 from aries_cloudcontroller import ApiException
 from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import HTTPException
-from fastapi.responses import ORJSONResponse
+from fastapi.responses import HTMLResponse, ORJSONResponse
 from scalar_fastapi import get_scalar_api_reference
 
 from app.exceptions import CloudApiException
@@ -117,7 +117,7 @@ app = create_app()
 
 # Use Scalar instead of Swagger
 @app.get("/docs", include_in_schema=False)
-async def scalar_html():
+async def scalar_html() -> HTMLResponse:
     openapi_url = os.path.join(ROOT_PATH, app.openapi_url.lstrip("/"))
     return get_scalar_api_reference(
         openapi_url=openapi_url,

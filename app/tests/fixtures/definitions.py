@@ -56,7 +56,7 @@ async def get_clean_or_regression_test_schema(
     faber_client: RichAsyncClient,
     test_mode: str,
     governance_client: RichAsyncClient,
-):
+) -> CredentialSchema:
     if test_mode == TestMode.clean_run:
         definition = CreateSchema(
             name=name,
@@ -112,7 +112,7 @@ async def anoncreds_schema_definition_alt(
 
 async def fetch_or_create_regression_test_cred_def(
     client: RichAsyncClient, schema: CredentialSchema, support_revocation: bool
-):
+) -> CredentialDefinition:
     regression_test_cred_def_tag = "RegressionTestTag"
     schema_id = schema.id
 

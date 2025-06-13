@@ -574,7 +574,9 @@ async def test_assert_valid_prover_x_no_connection_id2(
 
 
 @pytest.mark.anyio
-async def test_assert_valid_verifier_invitation_key(mock_agent_controller: AcaPyClient):
+async def test_assert_valid_verifier_invitation_key(
+    mock_agent_controller: AcaPyClient,
+):
     conn = ConnRecord(
         connection_id="a-connection-id",
         invitation_key="H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV",
@@ -600,7 +602,9 @@ async def test_assert_valid_verifier_invitation_key(mock_agent_controller: AcaPy
 
 
 @pytest.mark.anyio
-async def test_assert_valid_verifier_public_did(mock_agent_controller: AcaPyClient):
+async def test_assert_valid_verifier_public_did(
+    mock_agent_controller: AcaPyClient,
+):
     # valid
     with (
         patch(
@@ -647,7 +651,9 @@ async def test_assert_valid_verifier_x_no_public_did_no_invitation_key(
 
 
 @pytest.mark.anyio
-async def test_assert_valid_verifier_x_not_verifier(mock_agent_controller: AcaPyClient):
+async def test_assert_valid_verifier_x_not_verifier(
+    mock_agent_controller: AcaPyClient,
+):
     actor = sample_actor.model_copy(update={"roles": ["issuer"]})
 
     conn = ConnRecord(

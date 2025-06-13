@@ -15,7 +15,7 @@ class JsonLdSignRequest(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def validate_credential_provided(cls, values):
+    def validate_credential_provided(cls, values: dict) -> dict:
         cred, cred_id = values.get("credential"), values.get("credential_id")
         if not cred and not cred_id:
             raise CloudApiValueError(
@@ -25,7 +25,7 @@ class JsonLdSignRequest(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def validate_not_both_verkey_and_pub_did(cls, values):
+    def validate_not_both_verkey_and_pub_did(cls, values: dict) -> dict:
         verkey, pub_did = values.get("verkey"), values.get("pub_did")
         if verkey and pub_did:
             raise CloudApiValueError(
@@ -41,7 +41,7 @@ class JsonLdVerifyRequest(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def validate_not_both_verkey_and_pub_did(cls, values):
+    def validate_not_both_verkey_and_pub_did(cls, values: dict) -> dict:
         verkey, pub_did = values.get("verkey"), values.get("public_did")
         if verkey and pub_did:
             raise CloudApiValueError(

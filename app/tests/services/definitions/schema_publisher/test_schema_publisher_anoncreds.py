@@ -20,12 +20,12 @@ from app.services.definitions.schema_publisher import SchemaPublisher
 
 
 @pytest.fixture
-def mock_logger():
+def mock_logger() -> MagicMock:
     return MagicMock()
 
 
 @pytest.fixture
-def mock_controller():
+def mock_controller() -> AsyncMock:
     return AsyncMock()
 
 
@@ -281,7 +281,9 @@ async def test_handle_existing_anoncreds_schema_no_schemas_found(publisher):
 
 
 @pytest.mark.anyio
-async def test_handle_existing_anoncreds_schema_multiple_schemas_found(publisher):
+async def test_handle_existing_anoncreds_schema_multiple_schemas_found(
+    publisher,
+):
     mock_schema_request = anoncreds_schema_request
     # Return two schema_ids; only one call to handle_acapy_call is expected
     with patch(
@@ -299,7 +301,9 @@ async def test_handle_existing_anoncreds_schema_multiple_schemas_found(publisher
 
 
 @pytest.mark.anyio
-async def test_handle_existing_anoncreds_schema_new_did_one_schema_found(publisher):
+async def test_handle_existing_anoncreds_schema_new_did_one_schema_found(
+    publisher,
+):
     mock_schema_request = anoncreds_schema_request
     # Only return a schema with a valid var_schema
     with patch(

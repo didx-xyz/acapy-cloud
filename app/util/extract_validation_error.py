@@ -1,7 +1,7 @@
 from pydantic import ValidationError
 
 
-def extract_validation_error_msg(e: ValidationError):
+def extract_validation_error_msg(e: ValidationError) -> str:
     output = ""
     for error in e.errors():
         loc = error.get("loc") or ["Error:"]

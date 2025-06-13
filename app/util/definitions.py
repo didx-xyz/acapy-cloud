@@ -8,7 +8,7 @@ from aries_cloudcontroller import (
 from app.models.definitions import CredentialDefinition, CredentialSchema
 
 
-def anoncreds_credential_schema(schema: SchemaState):
+def anoncreds_credential_schema(schema: SchemaState) -> CredentialSchema:
     return CredentialSchema(
         id=schema.schema_id,
         name=schema.var_schema.name,
@@ -17,7 +17,7 @@ def anoncreds_credential_schema(schema: SchemaState):
     )
 
 
-def credential_schema_from_acapy(schema: ModelSchema):
+def credential_schema_from_acapy(schema: ModelSchema) -> CredentialSchema:
     return CredentialSchema(
         id=schema.id,
         name=schema.name,
@@ -26,7 +26,7 @@ def credential_schema_from_acapy(schema: ModelSchema):
     )
 
 
-def anoncreds_schema_from_acapy(schema: GetSchemaResult):
+def anoncreds_schema_from_acapy(schema: GetSchemaResult) -> CredentialSchema:
     return CredentialSchema(
         id=schema.schema_id,
         attribute_names=schema.var_schema.attr_names,
@@ -37,7 +37,7 @@ def anoncreds_schema_from_acapy(schema: GetSchemaResult):
 
 def credential_definition_from_acapy(
     credential_definition: GetCredDefResult,
-):
+) -> CredentialDefinition:
     return CredentialDefinition(
         id=credential_definition.credential_definition_id,
         tag=credential_definition.credential_definition.tag,

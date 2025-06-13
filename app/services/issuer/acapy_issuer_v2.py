@@ -96,7 +96,7 @@ class IssuerV2(Issuer):
     @classmethod
     def _get_credential_preview_and_filter(
         cls, credential: CredentialBase, bound_logger: Logger
-    ):
+    ) -> tuple[V20CredPreview | None, V20CredFilter]:
         credential_preview = None
         credential_type = credential.get_credential_type()
         if credential_type == "ld_proof":

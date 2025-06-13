@@ -24,7 +24,7 @@ def test_create_app():
 
 
 @pytest.fixture
-def nats_events_processor_mock():
+def nats_events_processor_mock() -> AsyncMock:
     mock = AsyncMock(spec=NatsEventsProcessor)
     return mock
 

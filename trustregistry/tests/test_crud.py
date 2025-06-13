@@ -17,7 +17,7 @@ from trustregistry.crud import (
 
 
 @pytest.fixture
-def db_session_mock():
+def db_session_mock() -> Mock:
     session = Mock(spec=Session)
     return session
 

@@ -26,7 +26,7 @@ class ProofRequestBase(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def check_proof_request(cls, values: Union[dict, "ProofRequestBase"]):
+    def check_proof_request(cls, values: Union[dict, "ProofRequestBase"]) -> dict:
         # pydantic v2 removed safe way to get key, because `values` can be a dict or this type
         if not isinstance(values, dict):
             values = values.__dict__
@@ -79,7 +79,7 @@ class AcceptProofRequest(ProofId, SaveExchangeRecordField):
 
     @model_validator(mode="before")
     @classmethod
-    def validate_specs(cls, values: Union[dict, "ProofRequestBase"]):
+    def validate_specs(cls, values: Union[dict, "ProofRequestBase"]) -> dict:
         # pydantic v2 removed safe way to get key, because `values` can be a dict or this type
         if not isinstance(values, dict):
             values = values.__dict__
@@ -123,7 +123,7 @@ class RejectProofRequest(ProofId):
 
     @field_validator("problem_report", mode="before")
     @classmethod
-    def validate_problem_report(cls, value):
+    def validate_problem_report(cls, value: str) -> str:
         if value == "":
             raise CloudApiValueError("problem_report cannot be an empty string")
         return value
