@@ -1,4 +1,4 @@
-from typing import Never
+from typing import NoReturn
 
 import pytest
 from fastapi import HTTPException
@@ -90,7 +90,7 @@ async def test_rich_async_client_retry_on_502(monkeypatch):
 
 @pytest.mark.anyio
 async def test_rich_async_client_no_retry_on_404(monkeypatch):
-    async def mock_get(_, __) -> Never:
+    async def mock_get(_, __) -> NoReturn:
         # Simulate a 404 error
         response = Response(404, request=Request("GET", test_url), text="Not Found")
         raise HTTPStatusError("Not Found", request=response.request, response=response)
