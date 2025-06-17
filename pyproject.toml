@@ -68,7 +68,14 @@ ruff = "~0.11.12"
 omit = ["*/tests/*", "*/.venv/*", "*/site-packages/*"]
 
 [tool.mypy]
-exclude = ["scripts/*", "app/tests/*", "tails/tests/*", "trustregistry/tests/*", "waypoint/tests/*"]
+exclude = [
+  "scripts/*",
+  "app/tests/*",
+  "shared/tests/*",
+  "tails/tests/*",
+  "trustregistry/tests/*",
+  "waypoint/tests/*",
+]
 
 [tool.pytest.ini_options]
 addopts = "--junitxml=junit.xml -p no:cacheprovider --cov-report=xml --cov-report=term:skip-covered"
