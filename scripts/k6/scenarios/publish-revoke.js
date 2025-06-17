@@ -72,31 +72,43 @@ export function setup() {
 
     let publishRevocationResponse;
     try {
-      publishRevocationResponse = retry(() => {
-        const response = publishRevocation(issuerToken);
-        if (response.status !== 200) {
-          throw new Error(`publishRevocation Non-200 status: ${response.status} ${response.body}`);
+      // Check if we're in fire-and-forget mode from ENV var
+      const fireAndForget = __ENV.FIRE_AND_FORGET_REVOCATION === 'true';
+
+      // Call the function with the ENV var setting
+      publishRevocationResponse = publishRevocation(issuerToken, fireAndForget);
+
+      // Just log the result if needed
+      if (fireAndForget) {
+        log.info('Publish revocation fired in setup (fire-and-forget mode)');
+      } else {
+        // Only validate if we're not in fire-and-forget mode
+        if (!publishRevocationResponse || publishRevocationResponse.status !== 200) {
+          throw new Error('Failed to publish revocation in setup');
         }
-        return response;
-      }, 5, 1000, "publishRevocation");
+        log.info('Publish revocation completed in setup');
+      }
     } catch (e) {
       console.error(`Failed after retries: ${e.message}`);
       publishRevocationResponse = e.response || e;
     }
 
-    check(publishRevocationResponse, {
-      "Revocation published successfully": (r) => {
-        if (r.status !== 200) {
-          throw new Error(
-            `Setup: Unexpected response while publishing revocation: ${r.response}`
-          );
+    // Only do the check if NOT fire-and-forget
+    if (__ENV.FIRE_AND_FORGET_REVOCATION !== 'true') {
+      check(publishRevocationResponse, {
+        "Revocation published successfully": (r) => {
+          if (r.status !== 200) {
+            throw new Error(
+              `Setup: Unexpected response while publishing revocation: ${r.response}`
+            );
+          }
+          return true;
         }
-        return true;
-      },
-    });
+      });
+    }
   }
 
-  console.log(`Published revocations for ${uniqueIssuers.length} issuer(s)`);
+  log.info(`Published revocations for ${uniqueIssuers.length} issuer(s)`);
   return { tenants };
 }
 
@@ -110,6 +122,19 @@ export default function (data) {
     wallet.issuer_access_token,
     wallet.credential_exchange_id
   );
+
+  pollAndCheck({
+    accessToken:  wallet.issuer_access_token,
+    walletId: wallet.issuer_wallet_id,
+    topic: "issuer_cred_rev",
+    field: "cred_ex_id",
+    fieldId: wallet.credential_exchange_id.substring(3),
+    state: "revoked",
+    maxAttempts: 4, // (1+0.5) + (1+1) + (1+2) + (1+3) = 10.5s
+    lookBack: 60,
+    requestTimeout: 1,
+    sseTag: "credential-revoked"
+  }, { perspective: "Issuer" });
 
   check(checkRevokedCredentialResponse, {
     "Credential state is revoked": (r) => {
@@ -127,19 +152,6 @@ export default function (data) {
       return true;
     },
   });
-
-  pollAndCheck({
-    accessToken:  wallet.issuer_access_token,
-    walletId: wallet.issuer_wallet_id,
-    topic: "issuer_cred_rev",
-    field: "cred_ex_id",
-    fieldId: wallet.credential_exchange_id.substring(3),
-    state: "revoked",
-    maxAttempts: 4, // (1+0.5) + (1+1) + (1+2) + (1+3) = 10.5s
-    lookBack: 60,
-    requestTimeout: 1,
-    sseTag: "credential-revoked"
-  }, { perspective: "Issuer" });
 
   // sleep(sleepDuration);
   testFunctionReqs.add(1);
