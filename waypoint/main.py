@@ -26,16 +26,16 @@ async def app_lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Waypoint Service startup")
 
     container = Container()
-    await container.init_resources()
+    await container.init_resources()  # type: ignore
 
     container.wire(modules=[__name__, sse])
 
-    await container.nats_events_processor()
+    await container.nats_events_processor()  # type: ignore
 
     yield
 
     logger.debug("Shutting down Waypoint service...")
-    await container.shutdown_resources()
+    await container.shutdown_resources()  # type: ignore
     logger.info("Waypoint Service shutdown")
 
 

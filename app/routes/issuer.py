@@ -227,7 +227,7 @@ async def request_credential(  # noqa: D417
             )
             schema_id = record.schema_id
         elif record.type == "ld_proof":
-            issuer_did = record.did
+            issuer_did = record.did  # type: ignore
         else:
             raise CloudApiException(f"Unsupported credential type: {record.type}")
 

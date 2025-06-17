@@ -32,7 +32,7 @@ def tenant_from_wallet_record(wallet_record: WalletRecordWithGroupId) -> Tenant:
         wallet_id=wallet_record.wallet_id,
         wallet_label=label,
         wallet_name=wallet_name,
-        created_at=wallet_record.created_at,
+        created_at=wallet_record.created_at,  # type: ignore
         updated_at=wallet_record.updated_at,
         image_url=image_url,
         group_id=group_id,

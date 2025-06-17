@@ -100,7 +100,7 @@ class NatsEventsProcessor:
 
         config = ConsumerConfig(
             deliver_policy=DeliverPolicy.BY_START_TIME,
-            opt_start_time=start_time,
+            opt_start_time=start_time,  # type: ignore
         )
 
         # This is a custom retry decorator that will retry on TimeoutError

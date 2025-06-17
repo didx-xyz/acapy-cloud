@@ -7,7 +7,7 @@ from shared.log_config import Logger
 T = TypeVar("T", bound=Any)
 
 
-async def coroutine_with_retry(
+async def coroutine_with_retry(  # type: ignore
     coroutine_func: Callable[..., Coroutine[Any, Any, T]],
     args: tuple,
     logger: Logger,
@@ -36,7 +36,7 @@ async def coroutine_with_retry(
             await asyncio.sleep(retry_delay)
 
 
-async def coroutine_with_retry_until_value(
+async def coroutine_with_retry_until_value(  # type: ignore
     coroutine_func: Callable[..., Coroutine[Any, Any, T]],
     args: tuple,
     field_name: str | None,

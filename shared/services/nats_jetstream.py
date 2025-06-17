@@ -126,7 +126,7 @@ async def init_nats_client() -> AsyncGenerator[JetStreamContext, Any]:
     logger.info("Connecting to NATS server with kwargs {} ...", connect_kwargs)
 
     try:
-        nats_client: NATSClient = await nats.connect(**connect_kwargs)
+        nats_client: NATSClient = await nats.connect(**connect_kwargs)  # type: ignore
     except (NoServersError, TimeoutError, ConnectionClosedError) as e:
         logger.error("Failed to establish initial NATS connection: {}", e)
         raise e  # Initial failure is always an error
