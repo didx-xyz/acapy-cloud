@@ -132,6 +132,7 @@ ruff format --check
 find . -type f -name "Tiltfile" | while read -r file; do
   ruff format --check --diff "$file"
 done
+mypy . --ignore-missing-imports --check-untyped-defs --install-types --non-interactive
 """
 
 [tasks."bootstrap:kubeconfig"]
