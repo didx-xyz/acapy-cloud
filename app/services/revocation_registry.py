@@ -283,59 +283,6 @@ async def get_credential_revocation_record(
     return result
 
 
-async def get_credential_definition_id_from_exchange_id(
-    controller: AcaPyClient, credential_exchange_id: str
-) -> str | None:
-    """Get the credential definition id from the credential exchange id.
-
-    Args:
-        controller (AcaPyClient): aca-py client
-        credential_exchange_id (str): The credential exchange ID.
-
-    Returns:
-        credential_definition_id (Optional[str]): The credential definition ID or None.
-
-    """
-    bound_logger = logger.bind(body={"credential_exchange_id": credential_exchange_id})
-    bound_logger.debug("Fetching credential definition id from exchange id")
-
-    cred_ex_id = strip_protocol_prefix(credential_exchange_id)
-
-    try:
-        cred_ex_record = await handle_acapy_call(
-            logger=bound_logger,
-            acapy_call=controller.issue_credential_v2_0.get_record,
-            cred_ex_id=cred_ex_id,
-        )
-        rev_reg_id = cred_ex_record.anoncreds.rev_reg_id
-        rev_reg_parts = rev_reg_id.split(":")
-        credential_definition_id = ":".join(
-            [
-                rev_reg_parts[2],
-                "3",
-                "CL",  # NOTE: update this with other signature types in future
-                rev_reg_parts[-4],
-                rev_reg_parts[-1],
-            ]
-        )
-    except CloudApiException as err:
-        bound_logger.info(
-            "An Exception was caught while getting v2 record: '{}'",
-            err.detail,
-        )
-        return
-    except (KeyError, AttributeError):
-        bound_logger.exception(
-            "Exception caught while constructing cred def id from record."
-        )
-        return
-
-    bound_logger.debug(
-        "Successfully obtained cred definition id from the cred exchange id."
-    )
-    return credential_definition_id
-
-
 async def validate_rev_reg_ids(
     controller: AcaPyClient, revocation_registry_credential_map: dict[str, list[str]]
 ) -> None:
