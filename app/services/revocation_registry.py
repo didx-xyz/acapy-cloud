@@ -177,7 +177,7 @@ async def publish_pending_revocations(
             "Unexpected response from publish_revocations: `{}`. Perhaps empty publish request?",
             result,
         )
-        return
+        return None
 
 
 async def clear_pending_revocations(
