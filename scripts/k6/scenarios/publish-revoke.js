@@ -130,9 +130,9 @@ export default function (data) {
     field: "cred_ex_id",
     fieldId: wallet.credential_exchange_id.substring(3),
     state: "revoked",
-    maxAttempts: 4, // (1+0.5) + (1+1) + (1+2) + (1+3) = 10.5s
+    maxAttempts: 10, // (1+0.5) + (1+1) + (1+2) + (1+3) = 10.5s
     lookBack: 60,
-    requestTimeout: 1,
+    requestTimeout: 5,
     sseTag: "credential-revoked"
   }, { perspective: "Issuer" });
 
