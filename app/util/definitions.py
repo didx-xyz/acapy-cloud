@@ -13,8 +13,8 @@ logger = get_logger(__name__)
 
 def anoncreds_credential_schema(schema: SchemaState) -> CredentialSchema:
     if not schema.schema_id or not schema.var_schema:  # pragma: no cover
-        logger.error("Schema is missing required fields: {}", schema)
-        raise ValueError(f"Schema is missing required fields: {schema}")
+        logger.error("Schema state is missing required fields: {}", schema)
+        raise ValueError(f"Schema state is missing required fields: {schema}")
 
     return CredentialSchema(
         id=schema.schema_id,
@@ -41,8 +41,8 @@ def credential_schema_from_acapy(schema: ModelSchema) -> CredentialSchema:
 
 def anoncreds_schema_from_acapy(schema: GetSchemaResult) -> CredentialSchema:
     if not schema.schema_id or not schema.var_schema:  # pragma: no cover
-        logger.error("Schema is missing required fields: {}", schema)
-        raise ValueError(f"Schema is missing required fields: {schema}")
+        logger.error("Schema result is missing required fields: {}", schema)
+        raise ValueError(f"Schema result is missing required fields: {schema}")
 
     return CredentialSchema(
         id=schema.schema_id,
