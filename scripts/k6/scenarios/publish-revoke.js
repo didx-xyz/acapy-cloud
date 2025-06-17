@@ -118,23 +118,36 @@ export default function (data) {
   const wallet = tenants[walletIndex];
 
   // Check if credential is revoked
-  const checkRevokedCredentialResponse = checkRevoked(
-    wallet.issuer_access_token,
-    wallet.credential_exchange_id
-  );
+  let checkRevokedCredentialResponse;
+  try {
+    checkRevokedCredentialResponse = retry(() => {
+      const response = checkRevoked(
+        wallet.issuer_access_token,
+        wallet.credential_exchange_id
+      );
+      if (response.status !== 200) {
+        throw new Error(`Non-200 status: ${response.status}`);
+      }
+      return response;
+    }, 5, 2000, "checkRevokedCredentialResponse");
+  } catch (error) {
+    console.error(`Failed after retries: ${error.message}`);
+    checkRevokedCredentialResponse = error.response || error;
+  }
 
-  pollAndCheck({
-    accessToken:  wallet.issuer_access_token,
-    walletId: wallet.issuer_wallet_id,
-    topic: "issuer_cred_rev",
-    field: "cred_ex_id",
-    fieldId: wallet.credential_exchange_id.substring(3),
-    state: "revoked",
-    maxAttempts: 10, // (1+0.5) + (1+1) + (1+2) + (1+3) = 10.5s
-    lookBack: 60,
-    requestTimeout: 5,
-    sseTag: "credential-revoked"
-  }, { perspective: "Issuer" });
+  // No point in polling as the events are available immediately.
+  // pollAndCheck({
+  //   accessToken:  wallet.issuer_access_token,
+  //   walletId: wallet.issuer_wallet_id,
+  //   topic: "issuer_cred_rev",
+  //   field: "cred_ex_id",
+  //   fieldId: wallet.credential_exchange_id.substring(3),
+  //   state: "revoked",
+  //   maxAttempts: 10, // (1+0.5) + (1+1) + (1+2) + (1+3) = 10.5s
+  //   lookBack: 60,
+  //   requestTimeout: 5,
+  //   sseTag: "credential-revoked"
+  // }, { perspective: "Issuer" });
 
   check(checkRevokedCredentialResponse, {
     "Credential state is revoked": (r) => {
