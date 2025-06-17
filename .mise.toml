@@ -135,6 +135,10 @@ done
 mypy . --ignore-missing-imports --check-untyped-defs --install-types --non-interactive
 """
 
+[tasks."mypy"]
+description = "Run mypy"
+run = "mypy . --ignore-missing-imports --check-untyped-defs --install-types --non-interactive"
+
 [tasks."bootstrap:kubeconfig"]
 description = "Set KUBECONFIG"
 run = "mise set --env local --file mise.local.toml KUBECONFIG=$(pwd)/.mise/kubeconfig.yaml"
