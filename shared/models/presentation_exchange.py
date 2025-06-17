@@ -1,4 +1,4 @@
-from typing import Literal, get_args
+from typing import Any, Literal, get_args
 
 from aries_cloudcontroller import (
     IndyEQProof,
@@ -209,17 +209,8 @@ def presentation_record_to_model(record: V20PresExRecord) -> PresentationExchang
 
     # Role and State are typing.Literal types.
     # Check if record values are valid / match expected values.
-    if record.role and record.role not in get_args(Role):  # pragma: no cover
-        logger.warning("Presentation record has invalid role: {}", record)
-        role = None
-    else:
-        role = record.role
-
-    if record.state and record.state not in get_args(State):  # pragma: no cover
-        logger.warning("Presentation record has invalid state: {}", record)
-        state = None
-    else:
-        state = record.state
+    role = _validate_field(record.role, Role, "role")
+    state = _validate_field(record.state, State, "state")
 
     return PresentationExchange(
         connection_id=record.connection_id,
@@ -235,6 +226,20 @@ def presentation_record_to_model(record: V20PresExRecord) -> PresentationExchang
         updated_at=record.updated_at,
         verified=string_to_bool(record.verified),
     )
+
+
+def _validate_field(
+    record_field: str | None,
+    field_type: Any,  # noqa: ANN401
+    field_name: str,
+) -> str | None:
+    """Validate that a field is in the allowed values for a given type."""
+    if record_field and record_field not in get_args(field_type):  # pragma: no cover
+        logger.warning(
+            "Presentation record has invalid {}: {}", field_name, record_field
+        )
+        return None
+    return record_field
 
 
 def string_to_bool(verified: str | None) -> bool | None:

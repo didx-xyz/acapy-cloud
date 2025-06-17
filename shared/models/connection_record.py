@@ -1,4 +1,4 @@
-from typing import Literal, get_args
+from typing import Any, Literal, get_args
 
 from aries_cloudcontroller import ConnRecord
 from pydantic import BaseModel
@@ -52,37 +52,14 @@ class Connection(BaseModel):
 def conn_record_to_connection(record: ConnRecord) -> Connection:
     # Role and State are typing.Literal types.
     # Check if record values are valid / match expected values.
-    if record.connection_protocol and record.connection_protocol not in get_args(
-        Protocol
-    ):  # pragma: no cover
-        logger.warning("Connection record has invalid connection protocol: {}", record)
-        connection_protocol = None
-    else:
-        connection_protocol = record.connection_protocol
-
-    if record.invitation_mode and record.invitation_mode not in get_args(
-        InvitationMode
-    ):  # pragma: no cover
-        logger.warning("Connection record has invalid invitation mode: {}", record)
-        invitation_mode = None
-    else:
-        invitation_mode = record.invitation_mode
-
-    if record.their_role and record.their_role not in get_args(
-        Role
-    ):  # pragma: no cover
-        logger.warning("Connection record has invalid their role: {}", record)
-        their_role = None
-    else:
-        their_role = record.their_role
-
-    if record.rfc23_state and record.rfc23_state not in get_args(
-        State
-    ):  # pragma: no cover
-        logger.warning("Connection record has invalid state: {}", record)
-        state = None
-    else:
-        state = record.rfc23_state
+    connection_protocol = _validate_field(
+        record.connection_protocol, Protocol, "connection protocol"
+    )
+    invitation_mode = _validate_field(
+        record.invitation_mode, InvitationMode, "invitation mode"
+    )
+    their_role = _validate_field(record.their_role, Role, "their role")
+    state = _validate_field(record.rfc23_state, State, "state")
 
     return Connection(
         alias=record.alias,
@@ -101,3 +78,15 @@ def conn_record_to_connection(record: ConnRecord) -> Connection:
         their_role=their_role,  # type: ignore
         updated_at=record.updated_at,
     )
+
+
+def _validate_field(
+    record_field: str | None,
+    field_type: Any,  # noqa: ANN401
+    field_name: str,
+) -> str | None:
+    """Validate that a field is in the allowed values for a given type."""
+    if record_field and record_field not in get_args(field_type):  # pragma: no cover
+        logger.warning("Connection record has invalid {}: {}", field_name, record_field)
+        return None
+    return record_field

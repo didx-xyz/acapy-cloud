@@ -1,4 +1,4 @@
-from typing import Literal, get_args
+from typing import Any, Literal, get_args
 
 from aries_cloudcontroller import V20CredExRecord
 from pydantic import BaseModel, Field
@@ -81,17 +81,8 @@ def credential_record_to_model_v2(record: V20CredExRecord) -> CredentialExchange
             credential = cred_offer.get("credential", {})
             issuer_did = credential.get("issuer")
 
-    if record.role and record.role not in get_args(Role):  # pragma: no cover
-        logger.warning("Credential record has invalid role: {}", record)
-        role = None
-    else:
-        role = record.role
-
-    if record.state and record.state not in get_args(State):  # pragma: no cover
-        logger.warning("Credential record has invalid state: {}", record)
-        state = None
-    else:
-        state = record.state
+    role = _validate_field(record.role, Role, "role")
+    state = _validate_field(record.state, State, "state")
 
     return CredentialExchange(
         attributes=attributes,
@@ -108,6 +99,18 @@ def credential_record_to_model_v2(record: V20CredExRecord) -> CredentialExchange
         updated_at=record.updated_at,
         type=cred_type,
     )
+
+
+def _validate_field(
+    record_field: str | None,
+    field_type: Any,  # noqa: ANN401
+    field_name: str,
+) -> str | None:
+    """Validate that a field is in the allowed values for a given type."""
+    if record_field and record_field not in get_args(field_type):  # pragma: no cover
+        logger.warning("Credential record has invalid {}: {}", field_name, record_field)
+        return None
+    return record_field
 
 
 def schema_cred_def_from_record(
