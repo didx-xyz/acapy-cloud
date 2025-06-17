@@ -110,9 +110,17 @@ scenario_revoke_credentials() {
 
 scenario_publish_revoke() {
   export IS_REVOKED=true
+
   local original_vus=${BASE_VUS}
   local original_iters=${BASE_ITERATIONS}
-  xk6 run -o output-statsd ./scenarios/publish-revoke.js -e ITERATIONS="${original_iters}" -e VUS="${original_vus}"
+
+  # Adjust VUs if FIRE_AND_FORGET_REVOCATION is true
+  local vus=${original_vus}
+  if [[ "${FIRE_AND_FORGET_REVOCATION}" == "true" ]]; then
+    vus=$((original_vus * original_iters))
+  fi
+
+  xk6 run -o output-statsd ./scenarios/publish-revoke.js -e ITERATIONS="1" -e VUS="${vus}"
 }
 
 scenario_create_proof_unverified() {
