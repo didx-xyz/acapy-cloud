@@ -1,5 +1,3 @@
-from logging import Logger
-
 from aries_cloudcontroller import (
     AcaPyClient,
     V20CredAttrSpec,
@@ -21,7 +19,7 @@ from app.exceptions import (
 from app.models.issuer import CredentialBase, CredentialWithConnection
 from app.services.issuer.acapy_issuer import Issuer
 from app.util.credentials import cred_ex_id_no_version
-from shared.log_config import get_logger
+from shared.log_config import Logger, get_logger
 from shared.models.credential_exchange import (
     CredentialExchange,
     credential_record_to_model_v2,
@@ -98,11 +96,10 @@ class IssuerV2(Issuer):
         cls, credential: CredentialBase, bound_logger: Logger
     ) -> tuple[V20CredPreview | None, V20CredFilter]:
         credential_preview = None
-        credential_type = credential.get_credential_type()
-        if credential_type == "ld_proof":
+        if credential.ld_credential_detail:
             cred_filter = V20CredFilter(ld_proof=credential.ld_credential_detail)
 
-        elif credential_type == "anoncreds":
+        elif credential.anoncreds_credential_detail:
             bound_logger.debug("Getting credential preview from attributes")
             credential_preview = cls.__preview_from_attributes(
                 attributes=credential.anoncreds_credential_detail.attributes

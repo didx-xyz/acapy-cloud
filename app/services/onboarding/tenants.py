@@ -1,3 +1,5 @@
+from typing import Any
+
 from aries_cloudcontroller import (
     AcaPyClient,
     UpdateWalletRequestWithGroupId,
@@ -47,12 +49,13 @@ async def handle_tenant_update(
         )
 
     if actor:
+        existing_label = actor.name
         existing_roles = actor.roles
         existing_image_url = actor.image_url
         added_roles = list(set(new_roles) - set(existing_roles))
 
         if new_label or added_roles or new_image_url:  # Only update actor if
-            update_dict = {}
+            update_dict: dict[str, Any] = {}
             if new_label:
                 update_dict["name"] = new_label
 
@@ -65,8 +68,14 @@ async def handle_tenant_update(
                     wallet_id=wallet_id,
                 )
 
+                if not token_response.token:  # pragma: no cover
+                    bound_logger.error(
+                        "No token returned from get_auth_token: {}", token_response
+                    )
+                    raise CloudApiException("Cannot onboard tenant without token.", 500)
+
                 onboard_result = await onboard_tenant(
-                    tenant_label=new_label,
+                    tenant_label=new_label or existing_label,
                     roles=added_roles,
                     wallet_auth_token=token_response.token,
                     wallet_id=wallet_id,

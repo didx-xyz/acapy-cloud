@@ -1,4 +1,5 @@
 from collections.abc import AsyncGenerator
+from typing import Any
 
 from fastapi import Request
 from httpx import HTTPError, Response, Timeout
@@ -61,7 +62,7 @@ async def sse_subscribe_event_with_field_and_state(
         }
     )
 
-    params = {}
+    params: dict[str, Any] = {}
     if group_id:  # Optional params
         params["group_id"] = group_id
     if look_back:

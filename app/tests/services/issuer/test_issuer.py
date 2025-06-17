@@ -328,6 +328,10 @@ async def test_create_offer(
         return_value=mock_context_managed_controller(mock_agent_controller),
     )
     v2_credential = MagicMock(spec=CredentialBase)
+    v2_credential.anoncreds_credential_detail = AnonCredsCredential(
+        credential_definition_id=cred_def_id,
+        attributes={"name": "John", "age": "23"},
+    )
 
     v2_record = MagicMock(spec=CredentialExchange)
     IssuerV2.create_offer = AsyncMock(return_value=v2_record)

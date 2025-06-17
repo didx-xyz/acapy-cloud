@@ -23,7 +23,9 @@ async def get_schemas(db_session: Session = Depends(get_db)) -> list[Schema]:
     logger.debug("GET request received: Fetch all schemas")
     db_schemas = crud.get_schemas(db_session)
 
-    return db_schemas
+    # Convert database models to pydantic models
+    result = [Schema(**schema.__dict__) for schema in db_schemas]
+    return result
 
 
 @router.post("")

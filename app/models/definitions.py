@@ -11,7 +11,7 @@ sample_attribute_names = ["name", "age"]
 
 
 class SchemaType(str, Enum):
-    ANONCREDS: str = "anoncreds"
+    ANONCREDS = "anoncreds"
 
 
 class CreateCredentialDefinition(BaseModel):

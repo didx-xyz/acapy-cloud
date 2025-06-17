@@ -1,10 +1,10 @@
-from logging import Logger
 from typing import TypeVar
 
 from pydantic import BaseModel, ValidationError
 
 from app.util.extract_validation_error import extract_validation_error_msg
 from shared.exceptions import CloudApiValueError
+from shared.log_config import Logger
 
 T = TypeVar("T", bound=BaseModel)
 

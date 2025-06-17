@@ -1,4 +1,3 @@
-from logging import Logger
 from unittest.mock import AsyncMock, Mock
 
 import pytest
@@ -13,6 +12,7 @@ from pydantic import ValidationError
 
 from app.exceptions.cloudapi_exception import CloudApiException
 from app.exceptions.handle_acapy_call import handle_acapy_call
+from shared.log_config import Logger
 
 dummy_acapy_call = "dummy_acapy_call"
 

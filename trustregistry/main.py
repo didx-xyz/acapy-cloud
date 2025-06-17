@@ -44,6 +44,9 @@ def check_migrations(db_engine: Engine, alembic_cfg: Config) -> bool:
         )
         try:
             initial_revision = script.get_base()
+            if not initial_revision:  # pragma: no cover
+                logger.error("No initial revision found")
+                return False
             command.stamp(alembic_cfg, initial_revision)
             logger.info(
                 "Database stamped with initial migration version: {}", initial_revision

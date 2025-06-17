@@ -5,7 +5,7 @@ from aries_cloudcontroller import (
     ClearPendingRevocationsRequest,
     CredRevRecordResult,
     CredRevRecordResultSchemaAnonCreds,
-    IssuerCredRevRecord,
+    IssuerCredRevRecordSchemaAnonCreds,
     PublishRevocationsOptions,
     PublishRevocationsResultSchemaAnonCreds,
     PublishRevocationsSchemaAnonCreds,
@@ -219,7 +219,7 @@ async def clear_pending_revocations(
         ) from e
 
     result = ClearPendingRevocationsResult(
-        revocation_registry_credential_map=clear_result.rrid2crid
+        revocation_registry_credential_map=clear_result.rrid2crid or {}
     )
     bound_logger.debug("Successfully cleared pending revocations.")
     return result
@@ -230,7 +230,7 @@ async def get_credential_revocation_record(
     credential_exchange_id: str | None = None,
     credential_revocation_id: str | None = None,
     revocation_registry_id: str | None = None,
-) -> IssuerCredRevRecord:
+) -> IssuerCredRevRecordSchemaAnonCreds | None:
     """Get the revocation status for a credential
 
     Args:
@@ -256,7 +256,7 @@ async def get_credential_revocation_record(
     bound_logger.debug("Fetching the revocation status for a credential exchange")
 
     try:
-        result = await handle_acapy_call(
+        cred_rev_record = await handle_acapy_call(
             logger=bound_logger,
             acapy_call=controller.anoncreds_revocation.get_cred_rev_record,
             cred_ex_id=strip_protocol_prefix(credential_exchange_id),
@@ -268,16 +268,19 @@ async def get_credential_revocation_record(
             f"Failed to get revocation status: {e.detail}", e.status_code
         ) from e
 
-    if not isinstance(result, CredRevRecordResultSchemaAnonCreds | CredRevRecordResult):
+    if not isinstance(
+        cred_rev_record, CredRevRecordResultSchemaAnonCreds | CredRevRecordResult
+    ):
         bound_logger.error(
-            "Unexpected type returned from get_revocation_status: `{}`.", result
+            "Unexpected type returned from get_revocation_status: `{}`.",
+            cred_rev_record,
         )
         raise CloudApiException(
             "Error retrieving revocation status for credential exchange ID "
             f"`{credential_exchange_id}`."
         )
 
-    result = result.result
+    result = cred_rev_record.result
 
     bound_logger.debug("Successfully retrieved revocation status.")
     return result
@@ -381,7 +384,7 @@ async def get_created_active_registries(
             cred_def_id=cred_def_id,
             state="finished",
         )
-        return reg.rev_reg_ids
+        return reg.rev_reg_ids if reg.rev_reg_ids else []
     except CloudApiException as e:
         detail = (
             "Error while creating credential definition: "
@@ -394,8 +397,8 @@ async def wait_for_active_registry(
     controller: AcaPyClient,
     cred_def_id: str,
 ) -> list[str]:
-    active_registries = []
-    sleep_duration = 0  # First sleep should be 0
+    active_registries: list[str] = []
+    sleep_duration = 0.0  # First sleep should be 0
 
     # we want both active registries ready before trying to publish revocations to it
     while len(active_registries) < 2:

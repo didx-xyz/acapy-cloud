@@ -1,6 +1,6 @@
 from typing import Literal, Union
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from shared.exceptions import CloudApiValueError
 
@@ -31,10 +31,10 @@ def calc_schema_id(did: str, name: str, version: str) -> str:
 
 
 class Schema(BaseModel):
-    did: str = Field(default=None)
-    name: str = Field(default=None)
-    version: str = Field(default=None)
-    id: str = Field(default=None)
+    did: str
+    name: str
+    version: str
+    id: str
 
     @model_validator(mode="before")
     @classmethod

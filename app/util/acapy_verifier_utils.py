@@ -81,7 +81,7 @@ async def assert_valid_prover(  # pylint: disable=R0912
     if not is_verifier(actor=actor):
         raise CloudApiException("Actor is missing required role 'verifier'.", 403)
 
-    if presentation.get_proof_type() == "anoncreds":
+    if presentation.anoncreds_presentation_spec:
         # Get schema ids
         bound_logger.debug(
             "Getting schema ids from presentation for AnonCreds presentation"

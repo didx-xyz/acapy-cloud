@@ -6,9 +6,16 @@ from aries_cloudcontroller import (
 )
 
 from app.models.definitions import CredentialDefinition, CredentialSchema
+from shared.log_config import get_logger
+
+logger = get_logger(__name__)
 
 
 def anoncreds_credential_schema(schema: SchemaState) -> CredentialSchema:
+    if not schema.schema_id or not schema.var_schema:  # pragma: no cover
+        logger.error("Schema is missing required fields: {}", schema)
+        raise ValueError(f"Schema is missing required fields: {schema}")
+
     return CredentialSchema(
         id=schema.schema_id,
         name=schema.var_schema.name,
@@ -18,6 +25,12 @@ def anoncreds_credential_schema(schema: SchemaState) -> CredentialSchema:
 
 
 def credential_schema_from_acapy(schema: ModelSchema) -> CredentialSchema:
+    if (
+        not schema.id or not schema.name or not schema.version or not schema.attr_names
+    ):  # pragma: no cover
+        logger.error("Schema is missing required fields: {}", schema)
+        raise ValueError(f"Schema is missing required fields: {schema}")
+
     return CredentialSchema(
         id=schema.id,
         name=schema.name,
@@ -27,6 +40,10 @@ def credential_schema_from_acapy(schema: ModelSchema) -> CredentialSchema:
 
 
 def anoncreds_schema_from_acapy(schema: GetSchemaResult) -> CredentialSchema:
+    if not schema.schema_id or not schema.var_schema:  # pragma: no cover
+        logger.error("Schema is missing required fields: {}", schema)
+        raise ValueError(f"Schema is missing required fields: {schema}")
+
     return CredentialSchema(
         id=schema.schema_id,
         attribute_names=schema.var_schema.attr_names,
@@ -36,10 +53,23 @@ def anoncreds_schema_from_acapy(schema: GetSchemaResult) -> CredentialSchema:
 
 
 def credential_definition_from_acapy(
-    credential_definition: GetCredDefResult,
+    cred_def_result: GetCredDefResult,
 ) -> CredentialDefinition:
+    cred_def_id = cred_def_result.credential_definition_id
+    cred_def = cred_def_result.credential_definition
+    if (
+        not cred_def_id or not cred_def or not cred_def.tag or not cred_def.schema_id
+    ):  # pragma: no cover
+        logger.error(
+            "Credential definition is missing required fields: {}",
+            cred_def_result,
+        )
+        raise ValueError(
+            f"Credential definition is missing required fields: {cred_def_result}"
+        )
+
     return CredentialDefinition(
-        id=credential_definition.credential_definition_id,
-        tag=credential_definition.credential_definition.tag,
-        schema_id=credential_definition.credential_definition.schema_id,
+        id=cred_def_id,
+        tag=cred_def.tag,
+        schema_id=cred_def.schema_id,
     )

@@ -3,7 +3,7 @@ import logging
 import ssl
 
 from fastapi import HTTPException
-from httpx import AsyncClient, ConnectTimeout, HTTPStatusError, Response
+from httpx import URL, AsyncClient, ConnectTimeout, HTTPStatusError, Response
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,9 @@ class RichAsyncClient(AsyncClient):
             response.raise_for_status()  # Raise exception for 4xx and 5xx status codes
         return response
 
-    async def _handle_error(self, e: HTTPStatusError, url: str, method: str) -> None:
+    async def _handle_error(
+        self, e: HTTPStatusError, url: URL | str, method: str
+    ) -> None:
         code = e.response.status_code
         message = e.response.text
         log_message = (
@@ -61,7 +63,9 @@ class RichAsyncClient(AsyncClient):
         logger.error(log_message)
         raise HTTPException(status_code=code, detail=message) from e
 
-    async def _request_with_retries(self, method: str, url: str, **kwargs) -> Response:
+    async def _request_with_retries(  # type: ignore
+        self, method: str, url: URL | str, **kwargs
+    ) -> Response:
         for attempt in range(self.retries):
             try:
                 response = await getattr(super(), method)(url, **kwargs)
@@ -70,7 +74,7 @@ class RichAsyncClient(AsyncClient):
                 if isinstance(e, HTTPStatusError):
                     code = e.response.status_code
                     if code not in self.retry_on or attempt >= self.retries - 1:
-                        await self._handle_error(e, url, method)
+                        await self._handle_error(e, url, method)  # Raises HTTPException
                     error_msg = f"failed with status code {code}"
                 else:
                     error_msg = "failed with httpx.ConnectTimeout"
@@ -81,16 +85,15 @@ class RichAsyncClient(AsyncClient):
                 )
                 logger.warning(log_message)
                 await asyncio.sleep(self.retry_wait_seconds)  # Wait before retrying
-                continue  # Retry the request
 
-    async def post(self, url: str, **kwargs) -> Response:
+    async def post(self, url: URL | str, **kwargs) -> Response:
         return await self._request_with_retries("post", url, **kwargs)
 
-    async def get(self, url: str, **kwargs) -> Response:
+    async def get(self, url: URL | str, **kwargs) -> Response:
         return await self._request_with_retries("get", url, **kwargs)
 
-    async def delete(self, url: str, **kwargs) -> Response:
+    async def delete(self, url: URL | str, **kwargs) -> Response:
         return await self._request_with_retries("delete", url, **kwargs)
 
-    async def put(self, url: str, **kwargs) -> Response:
+    async def put(self, url: URL | str, **kwargs) -> Response:
         return await self._request_with_retries("put", url, **kwargs)

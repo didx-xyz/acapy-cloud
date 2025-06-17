@@ -82,7 +82,7 @@ def routes_for_role(role: str) -> list:
     elif role == "public":
         return trust_registry_routes
     elif role == "*":
-        return set(tenant_admin_routes + tenant_routes + trust_registry_routes)
+        return list(set(tenant_admin_routes + tenant_routes + trust_registry_routes))
     else:
         return []
 
@@ -118,7 +118,11 @@ app = create_app()
 # Use Scalar instead of Swagger
 @app.get("/docs", include_in_schema=False)
 async def scalar_html() -> HTMLResponse:
-    openapi_url = os.path.join(ROOT_PATH, app.openapi_url.lstrip("/"))
+    openapi_url = (
+        os.path.join(ROOT_PATH, app.openapi_url.lstrip("/"))
+        if app.openapi_url
+        else None
+    )
     return get_scalar_api_reference(
         openapi_url=openapi_url,
         title=app.title,

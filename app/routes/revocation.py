@@ -1,4 +1,4 @@
-from aries_cloudcontroller import IssuerCredRevRecord
+from aries_cloudcontroller import IssuerCredRevRecordSchemaAnonCreds
 from fastapi import APIRouter, Depends
 
 from app.dependencies.acapy_clients import client_from_auth
@@ -78,7 +78,7 @@ async def get_credential_revocation_record(  # noqa: D417
     credential_revocation_id: str | None = None,
     revocation_registry_id: str | None = None,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
-) -> IssuerCredRevRecord:
+) -> IssuerCredRevRecordSchemaAnonCreds:
     """Get a credential revocation record
     ---
     Fetch a credential revocation record by providing the credential exchange id.
@@ -133,6 +133,10 @@ async def get_credential_revocation_record(  # noqa: D417
             credential_revocation_id=credential_revocation_id,
             revocation_registry_id=revocation_registry_id,
         )
+
+    if not revocation_record:  # pragma: no cover
+        bound_logger.info("Bad request: No revocation record found for request.")
+        raise CloudApiException("No revocation record found.", 404)
 
     bound_logger.debug("Successfully fetched credential revocation record.")
     return revocation_record

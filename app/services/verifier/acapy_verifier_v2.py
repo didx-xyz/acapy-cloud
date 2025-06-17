@@ -298,7 +298,7 @@ class VerifierV2(Verifier):
 
         try:
             bound_logger.debug("Getting v2 matching credentials from proof id")
-            result = await handle_acapy_call(
+            fetched_credentials = await handle_acapy_call(
                 logger=bound_logger,
                 acapy_call=controller.present_proof_v2_0.get_matching_credentials,
                 pres_ex_id=pres_ex_id,
@@ -312,11 +312,11 @@ class VerifierV2(Verifier):
                 e.status_code,
             ) from e
 
-        if result:
+        if fetched_credentials:
             bound_logger.debug("Successfully got matching v2 credentials.")
         else:
             bound_logger.debug("No matching v2 credentials obtained.")
 
         # Convert IndyCredPrecis to CredPrecis
-        result = [CredPrecis(**cred.model_dump()) for cred in result]
+        result = [CredPrecis(**cred.model_dump()) for cred in fetched_credentials]
         return result
