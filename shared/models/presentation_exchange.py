@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, get_args
 
 from aries_cloudcontroller import (
     IndyEQProof,
@@ -69,8 +69,8 @@ class NonRevocProof(IndyNonRevocProof):
 
 
 class PrimaryProof(IndyPrimaryProof):
-    eq_proof: EQProof | None = Field(default=None, description="Equality proof")
-    ge_proofs: list[GEProof] | None = Field(default=None, description="GE proofs")
+    eq_proof: EQProof | None = Field(default=None, description="Equality proof")  # type: ignore
+    ge_proofs: list[GEProof] | None = Field(default=None, description="GE proofs")  # type: ignore
 
 
 class ProofProofProofsProof(IndyProofProofProofsProof):
@@ -86,7 +86,7 @@ class ProofProof(IndyProofProof):
     aggregated_proof: ProofProofAggregatedProof | None = Field(
         default=None, description="Proof aggregated proof"
     )
-    proofs: list[ProofProofProofsProof] | None = Field(
+    proofs: list[ProofProofProofsProof] | None = Field(  # type: ignore
         default=None, description="Proof proofs"
     )
 
@@ -108,15 +108,15 @@ class ProofRequestedProofRevealedAttr(IndyProofRequestedProofRevealedAttr):
 
 
 class ProofRequestedProof(IndyProofRequestedProof):
-    predicates: dict[str, ProofRequestedProofPredicate] | None = Field(
+    predicates: dict[str, ProofRequestedProofPredicate] | None = Field(  # type: ignore
         default=None, description="Proof requested proof predicates."
     )
     revealed_attr_groups: dict[str, ProofRequestedProofRevealedAttrGroup] | None = (
-        Field(
+        Field(  # type: ignore
             default=None, description="Proof requested proof revealed attribute groups"
         )
     )
-    revealed_attrs: dict[str, ProofRequestedProofRevealedAttr] | None = Field(
+    revealed_attrs: dict[str, ProofRequestedProofRevealedAttr] | None = Field(  # type: ignore
         default=None, description="Proof requested proof revealed attributes"
     )
 
@@ -126,7 +126,7 @@ class ProofIdentifier(IndyProofIdentifier):
 
 
 class Proof(IndyProof):
-    identifiers: list[ProofIdentifier] | None = Field(
+    identifiers: list[ProofIdentifier] | None = Field(  # type: ignore
         default=None, description="Proof.identifiers content"
     )
     proof: ProofProof | None = Field(default=None, description="Proof.proof content")
@@ -157,10 +157,10 @@ class ProofReqAttrSpec(IndyProofReqAttrSpec):
 
 class ProofRequest(IndyProofRequest):
     non_revoked: ProofRequestNonRevoked | None = None
-    requested_attributes: dict[str, ProofReqAttrSpec] = Field(
+    requested_attributes: dict[str, ProofReqAttrSpec] = Field(  # type: ignore
         description="Requested attribute specifications of proof request"
     )
-    requested_predicates: dict[str, ProofReqPredSpec] = Field(
+    requested_predicates: dict[str, ProofReqPredSpec] = Field(  # type: ignore
         description="Requested predicate specifications of proof request"
     )
 
@@ -173,13 +173,13 @@ class PresentationExchange(BaseModel):
     # presentation_exchange_id stored as proof_id instead
 
     connection_id: str | None = None
-    created_at: str
+    created_at: str | None = None
     error_msg: str | None = None
     parent_thread_id: str | None = None
     presentation: Proof | None = None
     presentation_request: ProofRequest | None = None
-    proof_id: str
-    role: Role
+    proof_id: str | None = None
+    role: Role | None = None
     state: State | None = None
     thread_id: str | None = None
     updated_at: str | None = None
@@ -207,16 +207,30 @@ def presentation_record_to_model(record: V20PresExRecord) -> PresentationExchang
         else:
             logger.debug("Presentation record has no presentation request: {}", record)
 
+    # Role and State are typing.Literal types.
+    # Check if record values are valid / match expected values.
+    if record.role and record.role not in get_args(Role):  # pragma: no cover
+        logger.warning("Presentation record has invalid role: {}", record)
+        role = None
+    else:
+        role = record.role
+
+    if record.state and record.state not in get_args(State):  # pragma: no cover
+        logger.warning("Presentation record has invalid state: {}", record)
+        state = None
+    else:
+        state = record.state
+
     return PresentationExchange(
         connection_id=record.connection_id,
-        created_at=record.created_at,
+        created_at=record.created_at,  # type: ignore
         error_msg=record.error_msg,
         parent_thread_id=record.pres_request.id if record.pres_request else None,
         presentation=presentation,
         presentation_request=presentation_request,
         proof_id=f"v2-{record.pres_ex_id}",
-        role=record.role,
-        state=record.state,
+        role=role,  # type: ignore
+        state=state,  # type: ignore
         thread_id=record.thread_id,
         updated_at=record.updated_at,
         verified=string_to_bool(record.verified),
