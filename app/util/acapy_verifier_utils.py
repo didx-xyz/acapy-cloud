@@ -171,9 +171,11 @@ async def are_valid_schemas(schema_ids: list[str]) -> bool:
 
     schemas_from_tr = await fetch_schemas()
     schemas_ids_from_tr = [schema.id for schema in schemas_from_tr]
-    schemas_valid_list = [id in schemas_ids_from_tr for id in schema_ids]
 
-    return all(schemas_valid_list)
+    for schema_id in schema_ids:
+        if schema_id not in schemas_ids_from_tr:
+            return False
+    return True
 
 
 def is_verifier(actor: Actor) -> bool:
