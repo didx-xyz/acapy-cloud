@@ -270,9 +270,7 @@ paths:
           in: query
           required: false
           schema:
-            anyOf:
-              - type: integer
-              - type: 'null'
+            type: integer
             description: Number of seconds to look back for events
             default: 60
             title: Look Back
