@@ -165,10 +165,11 @@ async def publish_pending_revocations(
             "Successfully published pending AnonCreds revocations: {}.", result
         )
         # Cast integer cred_rev_ids to string
+        # TODO: Update TxnOrPublishRevocationsResult to support ints
         rrid2crid = result.rrid2crid if result.rrid2crid else {}
-        rrid2crid = {k: [str(i) for i in v] for k, v in result.rrid2crid.items()}
+        rrid2crid_str = {k: [str(i) for i in v] for k, v in rrid2crid.items()}
         return TxnOrPublishRevocationsResult(
-            rrid2crid=rrid2crid,
+            rrid2crid=rrid2crid_str,
             txn=None,
         )
     else:
@@ -445,6 +446,8 @@ async def get_pending_revocations(
             f"Error retrieving pending revocations for revocation registry with ID `{rev_reg_id}`."
         )
 
-    pending_revocations = result.result.pending_pub
+    pending_revocations = [  # cred_rev_id is always an int, but acapy can return strings
+        int(i) for i in result.result.pending_pub or []
+    ]
     bound_logger.debug("Successfully retrieved pending revocations.")
     return pending_revocations
