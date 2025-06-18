@@ -36,7 +36,7 @@ export const options = {
       maxDuration: "24h",
     },
   },
-  setupTimeout: "180s",
+  setupTimeout: "900s",
   teardownTimeout: "180s",
   maxRedirects: 4,
   thresholds: {
