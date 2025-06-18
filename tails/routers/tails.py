@@ -132,8 +132,8 @@ async def put_file_by_hash(
                 raise HTTPException(status_code=400, detail=message)
 
             logger.debug("Checking file content starts with '00 02'")
-            tmp_file.seek(0)
-            if tmp_file.read(2) != b"\x00\x02":
+            await tmp_file.seek(0)
+            if await tmp_file.read(2) != b"\x00\x02":
                 logger.error("File does not start with '00 02'")
                 raise HTTPException(
                     status_code=400, detail='File must start with "00 02".'
@@ -142,15 +142,15 @@ async def put_file_by_hash(
             # Since each tail is 128 bytes, tails file size must be a multiple of 128
             # plus the 2-byte version tag
             logger.debug("Checking file size is a multiple of 128 bytes")
-            tmp_file.seek(0, 2)
-            if (tmp_file.tell() - 2) % 128 != 0:
+            await tmp_file.seek(0, 2)
+            if (await tmp_file.tell() - 2) % 128 != 0:
                 logger.error("Tails file is not the correct size.")
                 raise HTTPException(
                     status_code=400, detail="Tails file is not the correct size."
                 )
 
             logger.debug("File content validated successfully, uploading to S3")
-            tmp_file.seek(0)  # Reset file pointer to the beginning
+            await tmp_file.seek(0)  # Reset file pointer to the beginning
             # Upload file to S3
             s3_client.upload_fileobj(
                 tmp_file,
@@ -168,11 +168,11 @@ async def put_file_by_hash(
             },
         )
     except ClientError as e:
-        logger.exception("S3 upload failed: %s", str(e))
+        logger.exception("S3 upload failed")
         raise HTTPException(status_code=500, detail="S3 upload failed") from e
     except HTTPException as e:
         logger.exception("HTTPException occurred")
         raise e
     except Exception as e:
-        logger.exception("Upload failed: %s", str(e))
+        logger.exception("Upload failed")
         raise HTTPException(status_code=500, detail="Upload failed") from e
