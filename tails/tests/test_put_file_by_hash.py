@@ -22,18 +22,18 @@ async def test_put_file_by_hash_success():
     mock_s3_client.head_object.side_effect = ClientError(error_response, "head_object")
 
     with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
-        with patch("tempfile.TemporaryFile") as mock_tmpfile:
-            # Setup temp file mock
-            tmp_file = MagicMock()
-            tmp_file.__enter__.return_value = tmp_file
-            tmp_file.read.side_effect = [
-                b"\x00\x02",
-                file_content,
-                b"",
-            ]  # for .read(2) and .read()
-            tmp_file.tell.return_value = len(file_content)
-            tmp_file.seek = MagicMock()
-            mock_tmpfile.return_value = tmp_file
+        with patch("aiofiles.tempfile.TemporaryFile") as mock_tmpfile:
+            # Setup temp file mock as async context manager
+            tmp_file = AsyncMock()
+            tmp_file.write = AsyncMock()
+            # Simulate sequence of reads: validation read, then any additional reads
+            tmp_file.read = AsyncMock(side_effect=[b"\x00\x02", file_content, b""])
+            tmp_file.tell = AsyncMock(return_value=len(file_content))
+            tmp_file.seek = AsyncMock()
+
+            # Setup async context manager
+            mock_tmpfile.return_value.__aenter__.return_value = tmp_file
+            mock_tmpfile.return_value.__aexit__ = _mock_aexit
 
             # Patch hash calculation to match tails_hash
             with (
@@ -88,13 +88,17 @@ async def test_put_file_by_hash_hash_mismatch():
     mock_s3_client.head_object.side_effect = ClientError(error_response, "head_object")
 
     with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
-        with patch("tempfile.TemporaryFile") as mock_tmpfile:
-            tmp_file = MagicMock()
-            tmp_file.__enter__.return_value = tmp_file
-            tmp_file.read.side_effect = [b"\x00\x02", file_content, b""]
-            tmp_file.tell.return_value = len(file_content)
-            tmp_file.seek = MagicMock()
-            mock_tmpfile.return_value = tmp_file
+        with patch("aiofiles.tempfile.TemporaryFile") as mock_tmpfile:
+            tmp_file = AsyncMock()
+            tmp_file.write = AsyncMock()
+            # Simulate sequence of reads: validation read, then any additional reads
+            tmp_file.read = AsyncMock(side_effect=[b"\x00\x02", file_content, b""])
+            tmp_file.tell = AsyncMock(return_value=len(file_content))
+            tmp_file.seek = AsyncMock()
+
+            # Setup async context manager
+            mock_tmpfile.return_value.__aenter__.return_value = tmp_file
+            mock_tmpfile.return_value.__aexit__ = _mock_aexit
 
             with (
                 patch("tails.routers.tails.hashlib.sha256") as mock_sha256,
@@ -126,13 +130,17 @@ async def test_put_file_by_hash_invalid_start():
     mock_s3_client.head_object.side_effect = ClientError(error_response, "head_object")
 
     with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
-        with patch("tempfile.TemporaryFile") as mock_tmpfile:
-            tmp_file = MagicMock()
-            tmp_file.__enter__.return_value = tmp_file
-            tmp_file.read.side_effect = [b"\x01\x02", file_content, b""]
-            tmp_file.tell.return_value = len(file_content)
-            tmp_file.seek = MagicMock()
-            mock_tmpfile.return_value = tmp_file
+        with patch("aiofiles.tempfile.TemporaryFile") as mock_tmpfile:
+            tmp_file = AsyncMock()
+            tmp_file.write = AsyncMock()
+            # Simulate sequence of reads: invalid start validation, then any additional reads
+            tmp_file.read = AsyncMock(side_effect=[b"\x01\x02", file_content, b""])
+            tmp_file.tell = AsyncMock(return_value=len(file_content))
+            tmp_file.seek = AsyncMock()
+
+            # Setup async context manager
+            mock_tmpfile.return_value.__aenter__.return_value = tmp_file
+            mock_tmpfile.return_value.__aexit__ = _mock_aexit
 
             with (
                 patch("tails.routers.tails.hashlib.sha256") as mock_sha256,
@@ -165,13 +173,17 @@ async def test_put_file_by_hash_invalid_size():
     mock_s3_client.head_object.side_effect = ClientError(error_response, "head_object")
 
     with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
-        with patch("tempfile.TemporaryFile") as mock_tmpfile:
-            tmp_file = MagicMock()
-            tmp_file.__enter__.return_value = tmp_file
-            tmp_file.read.side_effect = [b"\x00\x02", file_content, b""]
-            tmp_file.tell.return_value = len(file_content)
-            tmp_file.seek = MagicMock()
-            mock_tmpfile.return_value = tmp_file
+        with patch("aiofiles.tempfile.TemporaryFile") as mock_tmpfile:
+            tmp_file = AsyncMock()
+            tmp_file.write = AsyncMock()
+            # Simulate sequence of reads: validation read, then any additional reads
+            tmp_file.read = AsyncMock(side_effect=[b"\x00\x02", file_content, b""])
+            tmp_file.tell = AsyncMock(return_value=len(file_content))  # Invalid size
+            tmp_file.seek = AsyncMock()
+
+            # Setup async context manager
+            mock_tmpfile.return_value.__aenter__.return_value = tmp_file
+            mock_tmpfile.return_value.__aexit__ = _mock_aexit
 
             with (
                 patch("tails.routers.tails.hashlib.sha256") as mock_sha256,
@@ -198,22 +210,29 @@ async def test_put_file_by_hash_s3_error():
     mock_upload_file.content_type = "application/octet-stream"
 
     error_response = {"Error": {"Code": "OtherError"}}
-    with patch("tails.routers.tails.get_s3_client") as mock_get_s3_client:
-        mock_s3_client = MagicMock()
-        mock_get_s3_client.return_value = mock_s3_client
+    mock_s3_client = MagicMock()
+    with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
         # Mock head_object to raise 404 (file doesn't exist)
         not_found_response = {"Error": {"Code": "404", "Message": "Not Found"}}
         mock_s3_client.head_object.side_effect = ClientError(
             not_found_response, "head_object"
         )
+        # Mock upload_fileobj to raise error
+        mock_s3_client.upload_fileobj.side_effect = ClientError(
+            error_response, "upload_fileobj"
+        )
 
-        with patch("tempfile.TemporaryFile") as mock_tmpfile:
-            tmp_file = MagicMock()
-            tmp_file.__enter__.return_value = tmp_file
-            tmp_file.read.side_effect = [b"\x00\x02", file_content, b""]
-            tmp_file.tell.return_value = len(file_content)
-            tmp_file.seek = MagicMock()
-            mock_tmpfile.return_value = tmp_file
+        with patch("aiofiles.tempfile.TemporaryFile") as mock_tmpfile:
+            tmp_file = AsyncMock()
+            tmp_file.write = AsyncMock()
+            # Simulate sequence of reads: validation read, then any additional reads
+            tmp_file.read = AsyncMock(side_effect=[b"\x00\x02", file_content, b""])
+            tmp_file.tell = AsyncMock(return_value=len(file_content))
+            tmp_file.seek = AsyncMock()
+
+            # Setup async context manager
+            mock_tmpfile.return_value.__aenter__.return_value = tmp_file
+            mock_tmpfile.return_value.__aexit__ = _mock_aexit
 
             with (
                 patch("tails.routers.tails.hashlib.sha256") as mock_sha256,
@@ -226,9 +245,6 @@ async def test_put_file_by_hash_s3_error():
                 mock_sha.digest.return_value = b"digest"
                 mock_sha256.return_value = mock_sha
 
-                mock_s3_client.upload_fileobj.side_effect = ClientError(
-                    error_response, "upload_fileobj"
-                )
                 with pytest.raises(HTTPException) as exc:
                     await put_file_by_hash(tails_hash, mock_upload_file)
                 assert exc.value.status_code == 500
@@ -269,3 +285,8 @@ async def test_put_file_by_hash_head_object_other_error():
             await put_file_by_hash(tails_hash, mock_upload_file)
         assert exc.value.status_code == 500
         assert "Error checking file existence" in exc.value.detail
+
+
+async def _mock_aexit(*args) -> None:
+    """Create proper async __aexit__ that doesn't suppress exceptions"""
+    return None
