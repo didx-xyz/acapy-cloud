@@ -10,7 +10,7 @@ kubectl = "1.33"
 poetry = "2.1"
 pre-commit = "4.2"
 python = "3.12"
-tilt = "0.34"
+tilt = "0.35"
 usage = "latest"
 yq = "latest"
 
