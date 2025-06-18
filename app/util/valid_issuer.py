@@ -1,9 +1,8 @@
-from logging import Logger
-
 from aries_cloudcontroller import AcaPyClient
 
 from app.exceptions import CloudApiException
 from app.services.acapy_wallet import assert_public_did
+from shared.log_config import Logger
 
 
 async def assert_issuer_public_did(

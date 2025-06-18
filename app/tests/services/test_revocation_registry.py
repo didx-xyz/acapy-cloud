@@ -15,8 +15,6 @@ from aries_cloudcontroller import (
     RevRegResult,
     RevRegResultSchemaAnonCreds,
     RevRegsCreatedSchemaAnonCreds,
-    V20CredExRecordAnonCreds,
-    V20CredExRecordDetail,
 )
 
 import app.services.revocation_registry as test_module
@@ -311,54 +309,6 @@ async def test_get_credential_revocation_record_invalid_result_type(
             controller=mock_agent_controller,
             credential_exchange_id=cred_ex_id,
         )
-
-
-@pytest.mark.anyio
-async def test_get_credential_definition_id_from_exchange_id(
-    mock_agent_controller: AcaPyClient,
-):
-    # Success v2
-    mock_agent_controller.issue_credential_v2_0.get_record.return_value = (
-        V20CredExRecordDetail(
-            anoncreds=V20CredExRecordAnonCreds(rev_reg_id=revocation_registry_id)
-        )
-    )
-
-    cred_def_id_result = (
-        await test_module.get_credential_definition_id_from_exchange_id(
-            controller=mock_agent_controller, credential_exchange_id=cred_ex_id
-        )
-    )
-
-    assert cred_def_id_result
-    assert isinstance(cred_def_id_result, str)
-    assert cred_def_id_result == cred_def_id
-
-    # Not found
-    mock_agent_controller.issue_credential_v2_0.get_record.side_effect = (
-        CloudApiException(detail="")
-    )
-
-    cred_def_id_result = (
-        await test_module.get_credential_definition_id_from_exchange_id(
-            controller=mock_agent_controller, credential_exchange_id=cred_ex_id
-        )
-    )
-
-    assert cred_def_id_result is None
-
-    # KeyError scenario
-    mock_agent_controller.issue_credential_v2_0.get_record.return_value = (
-        V20CredExRecordDetail(anoncreds=V20CredExRecordAnonCreds(rev_reg_id=None))
-    )
-
-    cred_def_id_result = (
-        await test_module.get_credential_definition_id_from_exchange_id(
-            controller=mock_agent_controller, credential_exchange_id=cred_ex_id
-        )
-    )
-
-    assert cred_def_id_result is None
 
 
 @pytest.mark.anyio

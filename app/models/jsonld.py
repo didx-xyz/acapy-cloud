@@ -11,7 +11,7 @@ class JsonLdSignRequest(BaseModel):
     credential: dict[str, Any] | None = None
     verkey: str | None = None
     pub_did: str | None = None
-    signature_options: SignatureOptions | None = None
+    signature_options: SignatureOptions
 
     @model_validator(mode="before")
     @classmethod

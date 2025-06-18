@@ -1,7 +1,8 @@
-from logging import Logger
 from typing import TypeVar
 
 from pydantic import BaseModel, ValidationError
+
+from shared.log_config import Logger
 
 # Define generic type for `parse_json_with_error_handling`
 T = TypeVar("T", bound=BaseModel)

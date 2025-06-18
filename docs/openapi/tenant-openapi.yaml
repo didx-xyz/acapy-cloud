@@ -1021,7 +1021,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IssuerCredRevRecord'
+                $ref: '#/components/schemas/IssuerCredRevRecordSchemaAnonCreds'
         '422':
           description: Validation Error
           content:
@@ -2291,9 +2291,7 @@ paths:
           in: query
           required: false
           schema:
-            anyOf:
-              - type: integer
-              - type: 'null'
+            type: integer
             description: Number of seconds to look back for events
             default: 60
             title: Look Back
@@ -3507,14 +3505,15 @@ components:
           title: Type
           default: anoncreds
         updated_at:
-          type: string
+          anyOf:
+            - type: string
+            - type: 'null'
           title: Updated At
       type: object
       required:
         - created_at
         - credential_exchange_id
         - role
-        - updated_at
       title: CredentialExchange
     CredentialSchema:
       properties:
@@ -3622,9 +3621,7 @@ components:
     DIDCreate:
       properties:
         method:
-          anyOf:
-            - type: string
-            - type: 'null'
+          type: string
           title: Method
           description: Method for the requested DID. Supported methods are cheqd, key, web, did:peer:2, did:peer:4.
           default: cheqd
@@ -3641,9 +3638,7 @@ components:
           title: Seed
           description: Optional seed to use for DID. Must be enabled in configuration before use.
         key_type:
-          anyOf:
-            - type: string
-            - type: 'null'
+          type: string
           title: Key Type
           description: Key type to use for the DID key_pair. Validated with the chosen DID method's supported key types.
           default: ed25519
@@ -4282,7 +4277,7 @@ components:
       type: object
       title: InvitationRecord
       description: InvitationRecord
-    IssuerCredRevRecord:
+    IssuerCredRevRecordSchemaAnonCreds:
       properties:
         created_at:
           anyOf:
@@ -4339,8 +4334,8 @@ components:
           title: Updated At
           description: Time of last record update
       type: object
-      title: IssuerCredRevRecord
-      description: IssuerCredRevRecord
+      title: IssuerCredRevRecordSchemaAnonCreds
+      description: IssuerCredRevRecordSchemaAnonCreds
     JWSCreateRequest:
       properties:
         did:
@@ -4456,10 +4451,10 @@ components:
             - type: 'null'
           title: Pub Did
         signature_options:
-          anyOf:
-            - $ref: '#/components/schemas/SignatureOptions'
-            - type: 'null'
+          $ref: '#/components/schemas/SignatureOptions'
       type: object
+      required:
+        - signature_options
       title: JsonLdSignRequest
     JsonLdVerifyRequest:
       properties:
@@ -4745,9 +4740,7 @@ components:
       properties:
         pending_cred_rev_ids:
           items:
-            anyOf:
-              - type: integer
-              - type: 'null'
+            type: integer
           type: array
           title: Pending Cred Rev Ids
           default: []
@@ -4813,7 +4806,9 @@ components:
             - type: 'null'
           title: Connection Id
         created_at:
-          type: string
+          anyOf:
+            - type: string
+            - type: 'null'
           title: Created At
         error_msg:
           anyOf:
@@ -4834,13 +4829,17 @@ components:
             - $ref: '#/components/schemas/ProofRequest'
             - type: 'null'
         proof_id:
-          type: string
+          anyOf:
+            - type: string
+            - type: 'null'
           title: Proof Id
         role:
-          type: string
-          enum:
-            - prover
-            - verifier
+          anyOf:
+            - type: string
+              enum:
+                - prover
+                - verifier
+            - type: 'null'
           title: Role
         state:
           anyOf:
@@ -4873,10 +4872,6 @@ components:
             - type: 'null'
           title: Verified
       type: object
-      required:
-        - created_at
-        - proof_id
-        - role
       title: PresentationExchange
     PrimaryProof:
       properties:

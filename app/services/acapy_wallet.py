@@ -82,7 +82,7 @@ async def create_did(
 
         result = DID(
             did=did,
-            method=did_method,
+            method="cheqd",
             verkey=verkey,
             key_type="ed25519",
             posture="posted",
@@ -94,10 +94,13 @@ async def create_did(
             body=did_create.to_acapy_request(),
         )
 
-        result = did_response.result
-        if not result or not result.did or not result.verkey:
+        did_result = did_response.result
+        if (
+            not did_result or not did_result.did or not did_result.verkey
+        ):  # pragma: no cover
             logger.error("Failed to create DID: `{}`.", did_response)
             raise CloudApiException("Error creating did.")
+        result = did_result
 
     logger.debug("Successfully created local {} DID.", did_method)
     return result

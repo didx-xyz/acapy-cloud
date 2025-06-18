@@ -1,23 +1,23 @@
 import asyncio
 from collections.abc import Callable, Coroutine
-from logging import Logger
 from typing import Any, TypeVar
+
+from shared.log_config import Logger
 
 T = TypeVar("T", bound=Any)
 
 
-async def coroutine_with_retry(
+async def coroutine_with_retry(  # type: ignore
     coroutine_func: Callable[..., Coroutine[Any, Any, T]],
     args: tuple,
     logger: Logger,
     max_attempts: int = 5,
-    retry_delay: int = 2,
+    retry_delay: float = 2.0,
 ) -> T:
-    result = None
     for attempt in range(max_attempts):
         try:
             result = await coroutine_func(*args)
-            break
+            return result
         except Exception as e:  # pylint: disable=W0718
             if attempt + 1 == max_attempts:
                 logger.error("Maximum number of retries exceeded. Failing.")
@@ -34,10 +34,9 @@ async def coroutine_with_retry(
                 retry_delay,
             )
             await asyncio.sleep(retry_delay)
-    return result
 
 
-async def coroutine_with_retry_until_value(
+async def coroutine_with_retry_until_value(  # type: ignore
     coroutine_func: Callable[..., Coroutine[Any, Any, T]],
     args: tuple,
     field_name: str | None,
@@ -45,7 +44,7 @@ async def coroutine_with_retry_until_value(
     logger: Logger,
     max_attempts: int = 5,
     retry_delay: int = 2,
-) -> T:
+) -> T | None:
     """Executes a coroutine function with retries until it returns an expected value
     or until a maximum number of attempts is reached.
 

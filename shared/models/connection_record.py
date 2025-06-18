@@ -1,7 +1,17 @@
-from typing import Literal
+from typing import Any, Literal, get_args
 
 from aries_cloudcontroller import ConnRecord
 from pydantic import BaseModel
+
+from shared.log_config import get_logger
+
+logger = get_logger(__name__)
+
+Protocol = Literal["didexchange/1.0", "didexchange/1.1"]
+
+InvitationMode = Literal["once", "multi", "static"]
+
+Role = Literal["invitee", "requester", "inviter", "responder"]
 
 State = Literal[
     "active",
@@ -14,10 +24,6 @@ State = Literal[
     "invitation",
     "abandoned",
 ]
-
-Role = Literal["invitee", "requester", "inviter", "responder"]
-
-Protocol = Literal["didexchange/1.0", "didexchange/1.1"]
 
 
 class Connection(BaseModel):
@@ -32,7 +38,7 @@ class Connection(BaseModel):
     created_at: str | None = None
     error_msg: str | None = None
     invitation_key: str | None = None
-    invitation_mode: Literal["once", "multi", "static"] | None = None
+    invitation_mode: InvitationMode | None = None
     invitation_msg_id: str | None = None
     my_did: str | None = None
     state: str | None = None  # not State Literal because we use rfc23_state
@@ -43,21 +49,44 @@ class Connection(BaseModel):
     updated_at: str | None = None
 
 
-def conn_record_to_connection(connection_record: ConnRecord) -> Connection:
-    return Connection(
-        alias=connection_record.alias,
-        connection_id=connection_record.connection_id,
-        connection_protocol=connection_record.connection_protocol,
-        created_at=connection_record.created_at,
-        error_msg=connection_record.error_msg,
-        invitation_key=connection_record.invitation_key,
-        invitation_mode=connection_record.invitation_mode,
-        invitation_msg_id=connection_record.invitation_msg_id,
-        my_did=connection_record.my_did,
-        state=connection_record.rfc23_state,
-        their_did=connection_record.their_did,
-        their_label=connection_record.their_label,
-        their_public_did=connection_record.their_public_did,
-        their_role=connection_record.their_role,
-        updated_at=connection_record.updated_at,
+def conn_record_to_connection(record: ConnRecord) -> Connection:
+    # Role and State are typing.Literal types.
+    # Check if record values are valid / match expected values.
+    connection_protocol = _validate_field(
+        record.connection_protocol, Protocol, "connection protocol"
     )
+    invitation_mode = _validate_field(
+        record.invitation_mode, InvitationMode, "invitation mode"
+    )
+    their_role = _validate_field(record.their_role, Role, "their role")
+    state = _validate_field(record.rfc23_state, State, "state")
+
+    return Connection(
+        alias=record.alias,
+        connection_id=record.connection_id,
+        connection_protocol=connection_protocol,  # type: ignore
+        created_at=record.created_at,
+        error_msg=record.error_msg,
+        invitation_key=record.invitation_key,
+        invitation_mode=invitation_mode,  # type: ignore
+        invitation_msg_id=record.invitation_msg_id,
+        my_did=record.my_did,
+        state=state,  # type: ignore
+        their_did=record.their_did,
+        their_label=record.their_label,
+        their_public_did=record.their_public_did,
+        their_role=their_role,  # type: ignore
+        updated_at=record.updated_at,
+    )
+
+
+def _validate_field(
+    record_field: str | None,
+    field_type: Any,  # noqa: ANN401
+    field_name: str,
+) -> str | None:
+    """Validate that a field is in the allowed values for a given type."""
+    if record_field and record_field not in get_args(field_type):  # pragma: no cover
+        logger.warning("Connection record has invalid {}: {}", field_name, record_field)
+        return None
+    return record_field

@@ -1,6 +1,6 @@
 from typing import Any, Literal
 
-from aries_cloudcontroller import LDProofVCDetail, TxnOrPublishRevocationsResult
+from aries_cloudcontroller import LDProofVCDetail
 from pydantic import BaseModel, Field, model_validator
 
 from app.util.save_exchange_record import SaveExchangeRecordField
@@ -114,9 +114,7 @@ class RevokedResponse(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def extract_revoked_info(
-        cls, values: TxnOrPublishRevocationsResult
-    ) -> dict[str, Any]:
+    def extract_revoked_info(cls, values: dict) -> dict[str, Any]:
         if isinstance(values, dict) and "txn" in values:
             # This is a List of TransactionRecord
             txn_list: list[dict[str, Any]] = values.get("txn") or []
@@ -137,4 +135,4 @@ class RevokedResponse(BaseModel):
 
 
 class PendingRevocations(BaseModel):
-    pending_cred_rev_ids: list[int | None] = []
+    pending_cred_rev_ids: list[int] = []

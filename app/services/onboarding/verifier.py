@@ -1,3 +1,5 @@
+from typing import Any
+
 from aries_cloudcontroller import AcaPyClient, InvitationCreateRequest, InvitationRecord
 
 from app.exceptions import CloudApiException, handle_acapy_call
@@ -24,7 +26,7 @@ async def onboard_verifier(
     bound_logger = logger.bind(body={"verifier_label": verifier_label})
     bound_logger.info("Onboarding verifier")
 
-    onboarding_result = {}
+    onboarding_result: dict[str, Any] = {}
 
     # If the verifier already has a public did it doesn't need an invitation. The invitation
     # is just to bypass having to pay for a public did for every verifier
@@ -58,20 +60,37 @@ async def onboard_verifier(
                 # Because we're not creating an invitation with a public did the invitation will always
                 # contain a did:key as the first recipientKey in the first service
                 bound_logger.debug("Getting DID from verifier's invitation")
-                service = invitation.invitation.services[0]
-                if (
-                    service
-                    and "recipientKeys" in service
-                    and len(service["recipientKeys"]) > 0
-                ):
-                    did = service["recipientKeys"][0]
-                    if "#" in did:
-                        did = did.split("#")[0]
-                    onboarding_result["did"] = did
-                else:
-                    raise KeyError(  # pylint: disable=W0707
-                        f"RecipientKeys not present in the invitation service: `{service}`."
+                if not invitation.invitation.services:  # pragma: no cover
+                    bound_logger.error(
+                        "Invitation does not contain services: `{}`.", invitation
                     )
+                    raise KeyError("Invitation does not contain services.")
+
+                service = invitation.invitation.services[0]
+                if isinstance(service, dict):
+                    recipient_keys = service.get("recipientKeys")
+                    if not recipient_keys:  # pragma: no cover
+                        bound_logger.error(
+                            "RecipientKeys not present in the invitation service: `{}`.",
+                            service,
+                        )
+                        raise KeyError(
+                            "RecipientKeys not present in the invitation service."
+                        )
+                    if isinstance(recipient_keys, list) and len(recipient_keys) > 0:
+                        did: str = recipient_keys[0]
+                    else:  # pragma: no cover
+                        bound_logger.error(
+                            "RecipientKeys is not a list or is empty: `{}`.",
+                            recipient_keys,
+                        )
+                        raise KeyError("RecipientKeys is not a list or is empty.")
+                else:
+                    did = service
+
+                if "#" in did:
+                    did = did.split("#")[0]
+                onboarding_result["did"] = did
                 onboarding_result["didcomm_invitation"] = invitation.invitation_url
             except (KeyError, IndexError) as e:
                 bound_logger.error(

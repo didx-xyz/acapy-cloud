@@ -19,16 +19,21 @@ class SchemaID(BaseModel):
 
 
 @router.get("")
-async def get_schemas(db_session: Session = Depends(get_db)) -> list[Schema]:
+async def get_schemas(
+    db_session: Session = Depends(get_db),  # type: ignore
+) -> list[Schema]:
     logger.debug("GET request received: Fetch all schemas")
     db_schemas = crud.get_schemas(db_session)
 
-    return db_schemas
+    # Convert database models to pydantic models
+    result = [Schema(**schema.__dict__) for schema in db_schemas]
+    return result
 
 
 @router.post("")
 async def register_schema(
-    schema_id: SchemaID, db_session: Session = Depends(get_db)
+    schema_id: SchemaID,
+    db_session: Session = Depends(get_db),  # type: ignore
 ) -> Schema:
     bound_logger = logger.bind(body={"schema_id": schema_id})
     bound_logger.debug("POST request received: Register schema")
@@ -45,9 +50,10 @@ async def register_schema(
             # did:cheqd schema
             cheqd_schema = await resolve_cheqd_schema(schema_id.schema_id)
             schema = Schema(
+                did=cheqd_schema.get("did"),  # type: ignore
+                name=cheqd_schema.get("name"),  # type: ignore
+                version=cheqd_schema.get("version"),  # type: ignore
                 id=schema_id.schema_id,
-                name=cheqd_schema.get("name"),
-                version=cheqd_schema.get("version"),
             )
 
         create_schema_res = crud.create_schema(
@@ -63,7 +69,9 @@ async def register_schema(
 
 @router.put("/{schema_id}")
 async def update_schema(
-    schema_id: str, new_schema_id: SchemaID, db_session: Session = Depends(get_db)
+    schema_id: str,
+    new_schema_id: SchemaID,
+    db_session: Session = Depends(get_db),  # type: ignore
 ) -> Schema:
     bound_logger = logger.bind(
         body={"schema_id": schema_id, "new_schema_id": new_schema_id}
@@ -103,7 +111,10 @@ async def update_schema(
 
 
 @router.get("/{schema_id:path}")
-async def get_schema(schema_id: str, db_session: Session = Depends(get_db)) -> Schema:
+async def get_schema(
+    schema_id: str,
+    db_session: Session = Depends(get_db),  # type: ignore
+) -> Schema:
     bound_logger = logger.bind(body={"schema_id": schema_id})
     bound_logger.debug("GET request received: Fetch schema")
     try:
@@ -119,7 +130,10 @@ async def get_schema(schema_id: str, db_session: Session = Depends(get_db)) -> S
 
 
 @router.delete("/{schema_id}", status_code=204)
-async def remove_schema(schema_id: str, db_session: Session = Depends(get_db)) -> None:
+async def remove_schema(
+    schema_id: str,
+    db_session: Session = Depends(get_db),  # type: ignore
+) -> None:
     bound_logger = logger.bind(body={"schema_id": schema_id})
     bound_logger.debug("DELETE request received: Delete schema")
     try:

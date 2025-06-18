@@ -105,11 +105,13 @@ async def get_actors(  # noqa: D417
             "GET request received: Fetch actor by id from the trust registry"
         )
         actor = await registry_actors.fetch_actor_by_id(actor_id)
-    else:  # actor_name
+    elif actor_name:
         bound_logger.debug(
             "GET request received: Fetch actor by name from the trust registry"
         )
         actor = await registry_actors.fetch_actor_by_name(actor_name)
+    else:  # pragma: no cover - won't happen
+        raise HTTPException(400, "Bad request: No query parameter provided")
 
     if actor:
         bound_logger.debug("Successfully retrieved actor.")

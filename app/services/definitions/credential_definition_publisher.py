@@ -1,11 +1,11 @@
 import asyncio
-from logging import Logger
 
 from aries_cloudcontroller import AcaPyClient, CredDefPostRequest, CredDefResult
 
 from app.exceptions import CloudApiException, handle_acapy_call
 from app.services.revocation_registry import wait_for_active_registry
 from shared.constants import REGISTRY_CREATION_TIMEOUT
+from shared.log_config import Logger
 
 
 class CredentialDefinitionPublisher:

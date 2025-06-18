@@ -76,7 +76,7 @@ async def send_credential(
         public_did = await assert_issuer_public_did(aries_controller, bound_logger)
 
         schema_id = None
-        if credential_type == "anoncreds":
+        if credential.anoncreds_credential_detail:
             schema_id = await schema_id_from_credential_definition_id(
                 aries_controller,
                 credential.anoncreds_credential_detail.credential_definition_id,
@@ -156,7 +156,7 @@ async def create_offer(
         public_did = await assert_issuer_public_did(aries_controller, bound_logger)
 
         schema_id = None
-        if credential_type == "anoncreds":
+        if credential.anoncreds_credential_detail:
             schema_id = await schema_id_from_credential_definition_id(
                 aries_controller,
                 credential.anoncreds_credential_detail.credential_definition_id,
@@ -227,7 +227,7 @@ async def request_credential(  # noqa: D417
             )
             schema_id = record.schema_id
         elif record.type == "ld_proof":
-            issuer_did = record.did
+            issuer_did = record.did  # type: ignore
         else:
             raise CloudApiException(f"Unsupported credential type: {record.type}")
 

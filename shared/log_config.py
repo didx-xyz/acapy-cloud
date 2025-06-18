@@ -5,7 +5,7 @@ from typing import Any
 
 import orjson
 from loguru._logger import Core as _Core
-from loguru._logger import Logger as _Logger
+from loguru._logger import Logger
 
 STDOUT_LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 FILE_LOG_LEVEL = os.getenv("FILE_LOG_LEVEL", "DEBUG").upper()
@@ -96,7 +96,7 @@ def _serialize_record(record: dict[str, Any]) -> str:
 
 
 # This will hold our logger instances
-loggers = {}
+loggers: dict[str, Logger] = {}
 
 
 def get_log_file_path(main_module_name: str) -> str:
@@ -112,7 +112,7 @@ def get_log_file_path(main_module_name: str) -> str:
 
 
 # Export this logger
-def get_logger(name: str) -> _Logger:
+def get_logger(name: str) -> Logger:
     # Get the main module name
     main_module_name = name.split(".")[0]
 
@@ -121,7 +121,7 @@ def get_logger(name: str) -> _Logger:
         return loggers[main_module_name].bind(name=name)
 
     # Create a new logger instance
-    logger_ = _Logger(
+    logger_ = Logger(
         core=_Core(),
         exception=None,
         depth=0,
