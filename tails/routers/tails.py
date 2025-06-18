@@ -1,6 +1,7 @@
 import hashlib
 import os
 from collections.abc import Generator
+from io import BytesIO
 
 import aiofiles
 import base58
@@ -151,9 +152,15 @@ async def put_file_by_hash(
 
             logger.debug("File content validated successfully, uploading to S3")
             await tmp_file.seek(0)  # Reset file pointer to the beginning
+
+            # Read entire file content for upload to S3
+            # boto3 expects a synchronous file-like object, and aiofiles provides async
+            file_content = await tmp_file.read()
+            file_obj = BytesIO(file_content)
+
             # Upload file to S3
             s3_client.upload_fileobj(
-                tmp_file,
+                file_obj,
                 BUCKET_NAME,
                 tails_hash,
                 ExtraArgs={
