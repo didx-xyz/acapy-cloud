@@ -145,6 +145,7 @@ run = "ruff check"
 [tasks."lint:mypy"]
 description = "Only run mypy type checks"
 run = """
+#!/bin/bash
 mypy . --ignore-missing-imports \
        --check-untyped-defs \
        --install-types --non-interactive
