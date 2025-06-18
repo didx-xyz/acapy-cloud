@@ -1,4 +1,3 @@
-from logging import Logger
 from unittest.mock import Mock, patch
 
 import pytest
@@ -10,6 +9,7 @@ from app.services.wallet.wallet_credential import (
     add_revocation_info,
     check_non_revocable,
 )
+from shared.log_config import Logger
 
 
 @pytest.fixture

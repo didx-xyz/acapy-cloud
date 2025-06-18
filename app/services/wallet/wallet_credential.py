@@ -1,10 +1,9 @@
-from logging import Logger
-
 from aries_cloudcontroller import AcaPyClient
 
 from app.exceptions.handle_acapy_call import handle_acapy_call
 from app.models.verifier import Status
 from app.models.wallet import CredInfoList
+from shared.log_config import Logger
 
 
 async def add_revocation_info(
