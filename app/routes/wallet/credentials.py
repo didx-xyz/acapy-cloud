@@ -72,7 +72,6 @@ async def list_credentials(
         logger.debug("Checking for non-revocable credentials")
         results = await check_non_revocable(
             cred_info_list=results,
-            logger=logger,
         )
 
         if check_revoked:
@@ -80,7 +79,6 @@ async def list_credentials(
             results = await add_revocation_info(
                 cred_info_list=results,
                 aries_controller=aries_controller,
-                logger=logger,
             )
 
     logger.debug("Successfully listed credentials.")
