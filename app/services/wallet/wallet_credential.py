@@ -1,15 +1,16 @@
 from aries_cloudcontroller import AcaPyClient
 
 from app.exceptions.handle_acapy_call import handle_acapy_call
-from app.models.verifier import Status
+from app.models.verifier import RevocationStatus
 from app.models.wallet import CredInfoList
-from shared.log_config import Logger
+from shared.log_config import get_logger
+
+logger = get_logger(__name__)
 
 
 async def add_revocation_info(
     cred_info_list: CredInfoList,
     aries_controller: AcaPyClient,
-    logger: Logger,
 ) -> CredInfoList:
     """Add revocation information to the credential info list."""
     for cred_info in cred_info_list.results or []:
@@ -22,7 +23,9 @@ async def add_revocation_info(
                     credential_id=cred_info.credential_id,
                 )
                 cred_info.revocation_status = (
-                    Status.REVOKED if rev_status.revoked else Status.VALID
+                    RevocationStatus.REVOKED
+                    if rev_status.revoked
+                    else RevocationStatus.ACTIVE
                 )
             except Exception as e:
                 # Log the error and continue
@@ -31,18 +34,17 @@ async def add_revocation_info(
                     cred_info.credential_id,
                     e,
                 )
-                cred_info.revocation_status = Status.CHECK_FAILED
+                cred_info.revocation_status = RevocationStatus.CHECK_FAILED
     return cred_info_list
 
 
 async def check_non_revocable(
     cred_info_list: CredInfoList,
-    logger: Logger,
 ) -> CredInfoList:
     """Check if the credentials are non-revocable."""
     for cred_info in cred_info_list.results or []:
         if not cred_info.rev_reg_id or not cred_info.cred_rev_id:
-            cred_info.revocation_status = Status.NON_REVOCABLE
+            cred_info.revocation_status = None
             logger.debug(
                 "Credential {} is non-revocable (no revocation registry or revocation ID)",
                 cred_info.credential_id,
