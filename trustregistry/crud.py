@@ -25,7 +25,7 @@ def get_actors(db_session: Session, skip: int = 0, limit: int = 1000) -> list[db
     else:
         logger.warning("No actors retrieved from database.")
 
-    return result
+    return list(result)
 
 
 def get_actor_by_did(db_session: Session, actor_did: str) -> db.Actor:
@@ -189,6 +189,10 @@ def update_actor(db_session: Session, actor: Actor) -> db.Actor:
 
     updated_actor = result.first()
 
+    if not updated_actor:  # pragma: no cover - should never happen
+        bound_logger.error("Failed to update actor. Deleted before update complete?")
+        raise ActorDoesNotExistError
+
     bound_logger.debug("Successfully updated actor.")
     return updated_actor
 
@@ -210,7 +214,7 @@ def get_schemas(
     else:
         logger.warning("No schemas retrieved from database.")
 
-    return result
+    return list(result)
 
 
 def get_schema_by_id(db_session: Session, schema_id: str) -> db.Schema:
@@ -277,6 +281,10 @@ def update_schema(db_session: Session, schema: Schema, schema_id: str) -> db.Sch
     db_session.commit()
 
     updated_schema = result.first()
+
+    if not updated_schema:  # pragma: no cover - should never happen
+        bound_logger.error("Failed to update schema. Deleted before update complete?")
+        raise SchemaDoesNotExistError
 
     bound_logger.debug("Successfully updated schema on database.")
     return updated_schema

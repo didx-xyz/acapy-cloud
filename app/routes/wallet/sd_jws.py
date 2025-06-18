@@ -107,7 +107,7 @@ async def sign_sd_jws(
     """
     bound_logger = logger.bind(
         # Do not log payload:
-        body=body.model_dump(exclude="payload")
+        body=body.model_dump(exclude={"payload"})
     )
     bound_logger.debug("POST request received: Sign SD-JWS")
 

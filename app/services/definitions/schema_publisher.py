@@ -1,4 +1,4 @@
-from logging import Logger
+from typing import Any
 
 from aries_cloudcontroller import (
     AcaPyClient,
@@ -10,8 +10,12 @@ from aries_cloudcontroller import (
 from app.exceptions import CloudApiException, handle_acapy_call
 from app.models.definitions import CredentialSchema
 from app.services.trust_registry.schemas import register_schema
-from app.util.definitions import anoncreds_credential_schema
+from app.util.definitions import (
+    anoncreds_credential_schema,
+    anoncreds_schema_from_acapy,
+)
 from app.util.retry_method import coroutine_with_retry_until_value
+from shared.log_config import Logger
 
 
 class SchemaPublisher:
@@ -34,10 +38,7 @@ class SchemaPublisher:
             )
         except CloudApiException as e:
             if "already exist" in e.detail and e.status_code == 400:
-                schema_result = await self._handle_existing_anoncreds_schema(
-                    schema_request
-                )
-                return schema_result
+                return await self._handle_existing_anoncreds_schema(schema_request)
             else:
                 self._logger.warning(
                     "An unhandled Exception was caught while publishing schema: {}",
@@ -64,7 +65,11 @@ class SchemaPublisher:
             )
 
         if state == "wait":  # expected, since we require endorsement
-            transaction = schema_result.registration_metadata.get("txn")
+            transaction: dict[str, Any] | None = (
+                schema_result.registration_metadata.get("txn")
+                if schema_result.registration_metadata
+                else None
+            )
             transaction_id = transaction.get("transaction_id") if transaction else None
 
             if not transaction_id:
@@ -92,62 +97,76 @@ class SchemaPublisher:
 
         await register_schema(schema_id=schema_id)
 
-        schema_result = anoncreds_credential_schema(schema_result.schema_state)
-        return schema_result
+        return anoncreds_credential_schema(schema_result.schema_state)
 
     async def _handle_existing_anoncreds_schema(
-        self, schema: SchemaPostRequest
+        self, schema_post_request: SchemaPostRequest
     ) -> CredentialSchema:
         self._logger.info("Handling case of schema already existing on ledger")
         self._logger.debug("Fetching created schemas to find existing schema.")
 
+        schema = schema_post_request.var_schema
+        if not schema:  # pragma: no cover
+            self._logger.error(
+                "Schema post request is missing schema: {}", schema_post_request
+            )
+            raise CloudApiException("Schema post request is missing schema.", 400)
+
         fetched_schema_ids: GetSchemasResponse = await handle_acapy_call(
             logger=self._logger,
             acapy_call=self._controller.anoncreds_schemas.get_schemas,
-            schema_name=schema.var_schema.name,
-            schema_version=schema.var_schema.version,
+            schema_name=schema.name,
+            schema_version=schema.version,
         )
 
         self._logger.debug(
             "Found schemas with name `{}` and version `{}`: {}",
-            schema.var_schema.name,
-            schema.var_schema.version,
+            schema.name,
+            schema.version,
             fetched_schema_ids,
         )
 
-        fetch_schemas: list[GetSchemaResult] = [
-            await handle_acapy_call(
-                logger=self._logger,
-                acapy_call=self._controller.anoncreds_schemas.get_schema,
-                schema_id=schema_id,
-            )
-            for schema_id in fetched_schema_ids.schema_ids
-            if schema_id
-        ]
+        fetch_schemas: list[GetSchemaResult] = (
+            [
+                await handle_acapy_call(
+                    logger=self._logger,
+                    acapy_call=self._controller.anoncreds_schemas.get_schema,
+                    schema_id=schema_id,
+                )
+                for schema_id in fetched_schema_ids.schema_ids
+            ]
+            if fetched_schema_ids.schema_ids
+            else []
+        )
 
         if not fetch_schemas:
             raise CloudApiException("Could not publish schema.", 500)
         if len(fetch_schemas) > 1:
             error_message = (
-                f"Multiple schemas with name {schema.var_schema.name} "
-                f"and version {schema.var_schema.version} exist."
+                f"Multiple schemas with name {schema.name} "
+                f"and version {schema.version} exist."
                 f"These are: `{fetched_schema_ids.schema_ids!s}`."
             )
             raise CloudApiException(error_message, 409)
-        fetched_schema: GetSchemaResult = fetch_schemas[0]
+        get_schema_result: GetSchemaResult = fetch_schemas[0]
+        fetched_schema = get_schema_result.var_schema
+
+        if not fetched_schema:  # pragma: no cover
+            self._logger.error(
+                "No schema found in fetched schemas: {}", fetched_schema_ids.schema_ids
+            )
+            raise CloudApiException("Could not publish schema.", 500)
 
         # Schema exists with different attributes
-        if set(fetched_schema.var_schema.attr_names) != set(
-            schema.var_schema.attr_names
-        ):
+        if set(fetched_schema.attr_names) != set(schema.attr_names):
             error_message = (
                 "Error creating schema: Schema already exists with different attribute "
-                f"names. Given: `{set(schema.var_schema.attr_names)!s}`. "
-                f"Found: `{set(fetched_schema.var_schema.attr_names)!s}`."
+                f"names. Given: `{set(schema.attr_names)!s}`. "
+                f"Found: `{set(fetched_schema.attr_names)!s}`."
             )
             raise CloudApiException(error_message, 409)
 
-        result = anoncreds_credential_schema(fetched_schema)
+        result = anoncreds_schema_from_acapy(get_schema_result)
         self._logger.debug(
             "Schema already exists on ledger. Returning schema definition: `{}`.",
             result,

@@ -25,6 +25,7 @@ jobs:
           [tools]
           python = "3.12"
           "pipx:ruff" = "0.11.12"
+          "pipx:mypy" = "1.16.1"
           EOF
 
       - name: Set up Mise
@@ -46,3 +47,6 @@ jobs:
 
       - name: Check code lint rules with Ruff
         run: ruff check
+
+      - name: Check code with mypy
+        run: mypy . --ignore-missing-imports --check-untyped-defs --install-types --non-interactive

@@ -20,7 +20,7 @@ async def sign_jsonld(
     """Sign a JSON-LD structure"""
     bound_logger = logger.bind(
         # Do not log credential data:
-        body=body.model_dump(exclude="credential")
+        body=body.model_dump(exclude={"credential"})
     )
     bound_logger.debug("POST request received: Sign JsonLD")
 

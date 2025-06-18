@@ -10,7 +10,7 @@ logger = get_logger(__name__)
 client = RichAsyncClient()
 
 
-async def resolve_cheqd_schema(schema_id: str) -> dict | None:
+async def resolve_cheqd_schema(schema_id: str) -> dict:
     """Resolve a Cheqd schema by its ID.
 
     Parameters

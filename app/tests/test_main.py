@@ -44,7 +44,7 @@ def test_create_app():
         ("tenant", tenant_routes),
         ("tenant-admin", tenant_admin_routes),
         ("public", trust_registry_routes),
-        ("*", set(tenant_admin_routes + tenant_routes + trust_registry_routes)),
+        ("*", list(set(tenant_admin_routes + tenant_routes + trust_registry_routes))),
         ("unknown", []),
     ],
 )

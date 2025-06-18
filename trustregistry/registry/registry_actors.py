@@ -17,7 +17,9 @@ async def get_actors(db_session: Session = Depends(get_db)) -> list[Actor]:
     logger.debug("GET request received: Fetch all actors")
     db_actors = crud.get_actors(db_session)
 
-    return db_actors
+    # Convert database models to pydantic models
+    result = [Actor(**actor.__dict__) for actor in db_actors]
+    return result
 
 
 @router.post("")

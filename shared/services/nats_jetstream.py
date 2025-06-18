@@ -33,11 +33,12 @@ MAX_ATTEMPTS_BEFORE_ERROR = int(
 class NATSStatus:
     def __init__(self) -> None:
         """Initialize the NATS status tracker."""
-        self.last_disconnect_time = None
-        self.reconnect_attempts = 0
+        self.last_disconnect_time: float | None = None
+        self.reconnect_attempts: int = 0
 
     def _reset(self) -> None:
-        self.__init__()
+        self.last_disconnect_time = None
+        self.reconnect_attempts = 0
 
     async def error_callback(self, e: Exception) -> None:
         error_str = str(e).lower()
@@ -125,7 +126,7 @@ async def init_nats_client() -> AsyncGenerator[JetStreamContext, Any]:
     logger.info("Connecting to NATS server with kwargs {} ...", connect_kwargs)
 
     try:
-        nats_client: NATSClient = await nats.connect(**connect_kwargs)
+        nats_client: NATSClient = await nats.connect(**connect_kwargs)  # type: ignore
     except (NoServersError, TimeoutError, ConnectionClosedError) as e:
         logger.error("Failed to establish initial NATS connection: {}", e)
         raise e  # Initial failure is always an error

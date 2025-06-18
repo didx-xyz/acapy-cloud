@@ -5,7 +5,7 @@ from aries_cloudcontroller import (
     ClearPendingRevocationsRequest,
     CredRevRecordResult,
     CredRevRecordResultSchemaAnonCreds,
-    IssuerCredRevRecord,
+    IssuerCredRevRecordSchemaAnonCreds,
     PublishRevocationsOptions,
     PublishRevocationsResultSchemaAnonCreds,
     PublishRevocationsSchemaAnonCreds,
@@ -165,10 +165,11 @@ async def publish_pending_revocations(
             "Successfully published pending AnonCreds revocations: {}.", result
         )
         # Cast integer cred_rev_ids to string
+        # TODO: Update TxnOrPublishRevocationsResult to support ints
         rrid2crid = result.rrid2crid if result.rrid2crid else {}
-        rrid2crid = {k: [str(i) for i in v] for k, v in result.rrid2crid.items()}
+        rrid2crid_str = {k: [str(i) for i in v] for k, v in rrid2crid.items()}
         return TxnOrPublishRevocationsResult(
-            rrid2crid=rrid2crid,
+            rrid2crid=rrid2crid_str,
             txn=None,
         )
     else:
@@ -176,7 +177,7 @@ async def publish_pending_revocations(
             "Unexpected response from publish_revocations: `{}`. Perhaps empty publish request?",
             result,
         )
-        return
+        return None
 
 
 async def clear_pending_revocations(
@@ -219,7 +220,7 @@ async def clear_pending_revocations(
         ) from e
 
     result = ClearPendingRevocationsResult(
-        revocation_registry_credential_map=clear_result.rrid2crid
+        revocation_registry_credential_map=clear_result.rrid2crid or {}
     )
     bound_logger.debug("Successfully cleared pending revocations.")
     return result
@@ -230,7 +231,7 @@ async def get_credential_revocation_record(
     credential_exchange_id: str | None = None,
     credential_revocation_id: str | None = None,
     revocation_registry_id: str | None = None,
-) -> IssuerCredRevRecord:
+) -> IssuerCredRevRecordSchemaAnonCreds | None:
     """Get the revocation status for a credential
 
     Args:
@@ -256,7 +257,7 @@ async def get_credential_revocation_record(
     bound_logger.debug("Fetching the revocation status for a credential exchange")
 
     try:
-        result = await handle_acapy_call(
+        cred_rev_record = await handle_acapy_call(
             logger=bound_logger,
             acapy_call=controller.anoncreds_revocation.get_cred_rev_record,
             cred_ex_id=strip_protocol_prefix(credential_exchange_id),
@@ -268,72 +269,22 @@ async def get_credential_revocation_record(
             f"Failed to get revocation status: {e.detail}", e.status_code
         ) from e
 
-    if not isinstance(result, CredRevRecordResultSchemaAnonCreds | CredRevRecordResult):
+    if not isinstance(
+        cred_rev_record, CredRevRecordResultSchemaAnonCreds | CredRevRecordResult
+    ):
         bound_logger.error(
-            "Unexpected type returned from get_revocation_status: `{}`.", result
+            "Unexpected type returned from get_revocation_status: `{}`.",
+            cred_rev_record,
         )
         raise CloudApiException(
             "Error retrieving revocation status for credential exchange ID "
             f"`{credential_exchange_id}`."
         )
 
-    result = result.result
+    result = cred_rev_record.result
 
     bound_logger.debug("Successfully retrieved revocation status.")
     return result
-
-
-async def get_credential_definition_id_from_exchange_id(
-    controller: AcaPyClient, credential_exchange_id: str
-) -> str | None:
-    """Get the credential definition id from the credential exchange id.
-
-    Args:
-        controller (AcaPyClient): aca-py client
-        credential_exchange_id (str): The credential exchange ID.
-
-    Returns:
-        credential_definition_id (Optional[str]): The credential definition ID or None.
-
-    """
-    bound_logger = logger.bind(body={"credential_exchange_id": credential_exchange_id})
-    bound_logger.debug("Fetching credential definition id from exchange id")
-
-    cred_ex_id = strip_protocol_prefix(credential_exchange_id)
-
-    try:
-        cred_ex_record = await handle_acapy_call(
-            logger=bound_logger,
-            acapy_call=controller.issue_credential_v2_0.get_record,
-            cred_ex_id=cred_ex_id,
-        )
-        rev_reg_id = cred_ex_record.anoncreds.rev_reg_id
-        rev_reg_parts = rev_reg_id.split(":")
-        credential_definition_id = ":".join(
-            [
-                rev_reg_parts[2],
-                "3",
-                "CL",  # NOTE: update this with other signature types in future
-                rev_reg_parts[-4],
-                rev_reg_parts[-1],
-            ]
-        )
-    except CloudApiException as err:
-        bound_logger.info(
-            "An Exception was caught while getting v2 record: '{}'",
-            err.detail,
-        )
-        return
-    except (KeyError, AttributeError):
-        bound_logger.exception(
-            "Exception caught while constructing cred def id from record."
-        )
-        return
-
-    bound_logger.debug(
-        "Successfully obtained cred definition id from the cred exchange id."
-    )
-    return credential_definition_id
 
 
 async def validate_rev_reg_ids(
@@ -434,7 +385,7 @@ async def get_created_active_registries(
             cred_def_id=cred_def_id,
             state="finished",
         )
-        return reg.rev_reg_ids
+        return reg.rev_reg_ids if reg.rev_reg_ids else []
     except CloudApiException as e:
         detail = (
             "Error while creating credential definition: "
@@ -447,8 +398,8 @@ async def wait_for_active_registry(
     controller: AcaPyClient,
     cred_def_id: str,
 ) -> list[str]:
-    active_registries = []
-    sleep_duration = 0  # First sleep should be 0
+    active_registries: list[str] = []
+    sleep_duration = 0.0  # First sleep should be 0
 
     # we want both active registries ready before trying to publish revocations to it
     while len(active_registries) < 2:
@@ -495,6 +446,8 @@ async def get_pending_revocations(
             f"Error retrieving pending revocations for revocation registry with ID `{rev_reg_id}`."
         )
 
-    pending_revocations = result.result.pending_pub
+    pending_revocations = [  # cred_rev_id is always an int, but acapy can return strings
+        int(i) for i in result.result.pending_pub or []
+    ]
     bound_logger.debug("Successfully retrieved pending revocations.")
     return pending_revocations

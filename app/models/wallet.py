@@ -38,7 +38,7 @@ class DIDCreate(BaseModel):
 
     _supported_methods = ["cheqd", "key", "web", "did:peer:2", "did:peer:4"]
 
-    method: StrictStr | None = Field(
+    method: StrictStr = Field(
         default="cheqd",
         description=(
             "Method for the requested DID. Supported methods are "
@@ -50,7 +50,7 @@ class DIDCreate(BaseModel):
         default=None,
         description="Optional seed to use for DID. Must be enabled in configuration before use.",
     )
-    key_type: StrictStr | None = Field(
+    key_type: StrictStr = Field(
         default="ed25519",
         description="Key type to use for the DID key_pair. Validated with the chosen DID method's supported key types.",
         examples=["ed25519", "bls12381g2"],
@@ -77,6 +77,5 @@ class DIDCreate(BaseModel):
     def to_acapy_request(self) -> DIDCreateAcaPy:
         return DIDCreateAcaPy(
             method=self.method,
-            did=self.did,
             options=self.to_acapy_options(),
         )

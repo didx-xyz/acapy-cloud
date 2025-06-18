@@ -1,7 +1,11 @@
-from typing import Literal
+from typing import Any, Literal, get_args
 
 from aries_cloudcontroller import V20CredExRecord
 from pydantic import BaseModel, Field
+
+from shared.log_config import get_logger
+
+logger = get_logger(__name__)
 
 State = Literal[
     "proposal-sent",
@@ -43,7 +47,7 @@ class CredentialExchange(BaseModel):
     # Thread id can be None in connectionless exchanges
     thread_id: str | None = None
     type: str = "anoncreds"
-    updated_at: str
+    updated_at: str | None = None
 
 
 def credential_record_to_model_v2(record: V20CredExRecord) -> CredentialExchange:
@@ -77,21 +81,36 @@ def credential_record_to_model_v2(record: V20CredExRecord) -> CredentialExchange
             credential = cred_offer.get("credential", {})
             issuer_did = credential.get("issuer")
 
+    role = _validate_field(record.role, Role, "role")
+    state = _validate_field(record.state, State, "state")
+
     return CredentialExchange(
         attributes=attributes,
         connection_id=record.connection_id,
-        created_at=record.created_at,
+        created_at=record.created_at,  # type: ignore
         credential_definition_id=credential_definition_id,
         credential_exchange_id=credential_exchange_id,
         did=issuer_did,
         error_msg=record.error_msg,
-        role=record.role,
+        role=role,  # type: ignore
         schema_id=schema_id,
-        state=record.state,
+        state=state,  # type: ignore
         thread_id=record.thread_id,
         updated_at=record.updated_at,
         type=cred_type,
     )
+
+
+def _validate_field(
+    record_field: str | None,
+    field_type: Any,  # noqa: ANN401
+    field_name: str,
+) -> str | None:
+    """Validate that a field is in the allowed values for a given type."""
+    if record_field and record_field not in get_args(field_type):  # pragma: no cover
+        logger.warning("Credential record has invalid {}: {}", field_name, record_field)
+        return None
+    return record_field
 
 
 def schema_cred_def_from_record(

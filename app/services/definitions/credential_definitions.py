@@ -8,6 +8,7 @@ from aries_cloudcontroller import (
 )
 
 from app.exceptions import handle_acapy_call, handle_model_with_validation
+from app.exceptions.cloudapi_exception import CloudApiException
 from app.models.definitions import CreateCredentialDefinition, CredentialDefinition
 from app.services.definitions.credential_definition_publisher import (
     CredentialDefinitionPublisher,
@@ -68,7 +69,13 @@ async def create_credential_definition(
     result = await publisher.publish_anoncreds_credential_definition(request_body)
     credential_definition_id = (
         result.credential_definition_state.credential_definition_id
+        if result.credential_definition_state
+        else None
     )
+
+    if not credential_definition_id:  # pragma: no cover
+        bound_logger.error("Credential definition id not returned after publishing")
+        raise CloudApiException("Credential definition id not found after publishing")
 
     if support_revocation:
         await publisher.wait_for_revocation_registry(

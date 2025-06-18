@@ -1735,7 +1735,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IssuerCredRevRecord"
+                  "$ref": "#/components/schemas/IssuerCredRevRecordSchemaAnonCreds"
                 }
               }
             }
@@ -3868,14 +3868,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "type": "integer",
               "description": "Number of seconds to look back for events",
               "default": 60,
               "title": "Look Back"
@@ -6040,7 +6033,14 @@
             "default": "anoncreds"
           },
           "updated_at": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Updated At"
           }
         },
@@ -6048,8 +6048,7 @@
         "required": [
           "created_at",
           "credential_exchange_id",
-          "role",
-          "updated_at"
+          "role"
         ],
         "title": "CredentialExchange"
       },
@@ -6195,14 +6194,7 @@
       "DIDCreate": {
         "properties": {
           "method": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
             "title": "Method",
             "description": "Method for the requested DID. Supported methods are cheqd, key, web, did:peer:2, did:peer:4.",
             "default": "cheqd",
@@ -6227,14 +6219,7 @@
             "description": "Optional seed to use for DID. Must be enabled in configuration before use."
           },
           "key_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
             "title": "Key Type",
             "description": "Key type to use for the DID key_pair. Validated with the chosen DID method's supported key types.",
             "default": "ed25519",
@@ -7472,7 +7457,7 @@
         "title": "InvitationRecord",
         "description": "InvitationRecord"
       },
-      "IssuerCredRevRecord": {
+      "IssuerCredRevRecordSchemaAnonCreds": {
         "properties": {
           "created_at": {
             "anyOf": [
@@ -7584,8 +7569,8 @@
           }
         },
         "type": "object",
-        "title": "IssuerCredRevRecord",
-        "description": "IssuerCredRevRecord"
+        "title": "IssuerCredRevRecordSchemaAnonCreds",
+        "description": "IssuerCredRevRecordSchemaAnonCreds"
       },
       "JWSCreateRequest": {
         "properties": {
@@ -7772,17 +7757,13 @@
             "title": "Pub Did"
           },
           "signature_options": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/SignatureOptions"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/SignatureOptions"
           }
         },
         "type": "object",
+        "required": [
+          "signature_options"
+        ],
         "title": "JsonLdSignRequest"
       },
       "JsonLdVerifyRequest": {
@@ -8275,14 +8256,7 @@
         "properties": {
           "pending_cred_rev_ids": {
             "items": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "type": "integer"
             },
             "type": "array",
             "title": "Pending Cred Rev Ids",
@@ -8406,7 +8380,14 @@
             "title": "Connection Id"
           },
           "created_at": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Created At"
           },
           "error_msg": {
@@ -8452,14 +8433,28 @@
             ]
           },
           "proof_id": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Proof Id"
           },
           "role": {
-            "type": "string",
-            "enum": [
-              "prover",
-              "verifier"
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "prover",
+                  "verifier"
+                ]
+              },
+              {
+                "type": "null"
+              }
             ],
             "title": "Role"
           },
@@ -8520,11 +8515,6 @@
           }
         },
         "type": "object",
-        "required": [
-          "created_at",
-          "proof_id",
-          "role"
-        ],
         "title": "PresentationExchange"
       },
       "PrimaryProof": {

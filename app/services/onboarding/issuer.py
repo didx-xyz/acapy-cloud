@@ -15,7 +15,7 @@ async def onboard_issuer(
     *,
     issuer_controller: AcaPyClient,
     issuer_wallet_id: str,
-    issuer_label: str | None = None,
+    issuer_label: str,
 ) -> OnboardResult:
     """Onboard the controller as issuer.
 
@@ -58,6 +58,10 @@ async def onboard_issuer(
         multi_use=True,
         body=request_body,
     )
+
+    if not invitation.invitation_url:  # pragma: no cover
+        bound_logger.error("Invitation URL not returned after creating invitation")
+        raise CloudApiException("Invitation URL not found after creating invitation")
 
     return OnboardResult(
         did=issuer_did.did,

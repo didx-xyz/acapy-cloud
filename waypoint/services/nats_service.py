@@ -8,7 +8,6 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import orjson
-from loguru._logger import Logger
 from nats.errors import BadSubscriptionError, ConnectionClosedError, Error
 from nats.js.api import ConsumerConfig, DeliverPolicy
 from nats.js.client import JetStreamContext
@@ -28,7 +27,7 @@ from shared.constants import (
     SSE_LOOK_BACK,
     SSE_TIMEOUT,
 )
-from shared.log_config import get_logger
+from shared.log_config import Logger, get_logger
 from shared.models.webhook_events import CloudApiWebhookEventGeneric
 
 logger = get_logger(__name__)
@@ -63,7 +62,7 @@ class NatsEventsProcessor:
 
     def _retry_log(self, bound_logger: Logger, retry_state: RetryCallState) -> None:
         """Log retry attempts."""
-        if retry_state.outcome.failed:
+        if retry_state.outcome and retry_state.outcome.failed:
             exception = retry_state.outcome.exception()
             bound_logger.warning(
                 "Retry attempt {} failed due to {}: {}",
@@ -96,14 +95,12 @@ class NatsEventsProcessor:
         retry_log_with_bound_logger = functools.partial(self._retry_log, bound_logger)
 
         group_id = group_id or "*"
-        subscribe_kwargs = {
-            "subject": f"{NATS_STATE_SUBJECT}.{group_id}.{wallet_id}.{topic}.{state}",
-            "stream": NATS_STATE_STREAM,
-        }
+        subject = f"{NATS_STATE_SUBJECT}.{group_id}.{wallet_id}.{topic}.{state}"
+        stream = NATS_STATE_STREAM
 
         config = ConsumerConfig(
             deliver_policy=DeliverPolicy.BY_START_TIME,
-            opt_start_time=start_time,
+            opt_start_time=start_time,  # type: ignore
         )
 
         # This is a custom retry decorator that will retry on TimeoutError
@@ -118,7 +115,9 @@ class NatsEventsProcessor:
             try:
                 bound_logger.trace("Attempting to subscribe to JetStream")
                 subscription = await self.js_context.pull_subscribe(
-                    config=config, **subscribe_kwargs
+                    subject=subject,
+                    stream=stream,
+                    config=config,
                 )
                 bound_logger.debug("Successfully subscribed to JetStream")
                 return subscription
@@ -146,7 +145,7 @@ class NatsEventsProcessor:
         stop_event: asyncio.Event,
         duration: int | None = None,
         look_back: int | None = None,
-    ) -> AsyncGenerator[AsyncGenerator[CloudApiWebhookEventGeneric, None], Any, None]:
+    ) -> AsyncGenerator[AsyncGenerator[CloudApiWebhookEventGeneric, None], None]:
         duration = duration or SSE_TIMEOUT
         look_back = look_back or SSE_LOOK_BACK
         request_uuid = uuid4()

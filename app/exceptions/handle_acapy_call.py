@@ -1,5 +1,4 @@
 from collections.abc import Callable, Coroutine
-from logging import Logger
 from typing import Any, TypeVar
 
 from aries_cloudcontroller.exceptions import (
@@ -13,6 +12,7 @@ from pydantic import ValidationError
 
 from app.exceptions.cloudapi_exception import CloudApiException
 from app.util.extract_validation_error import extract_validation_error_msg
+from shared.log_config import Logger
 
 T = TypeVar("T", bound=Any)
 

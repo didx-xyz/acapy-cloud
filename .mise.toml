@@ -116,7 +116,7 @@ poetry run pytest -n auto --dist loadgroup $(find . -type d -path '*/tests/e2e' 
 description = "Format files"
 run = """
 #!/bin/bash
-ruff check --select I --fix
+ruff check --fix
 ruff format
 find . -type f -name "Tiltfile" | while read -r file; do
   ruff format "$file"
@@ -127,11 +127,28 @@ done
 description = "Check all files for formatting"
 run = """
 #!/bin/bash
-ruff check --select I
+ruff check
 ruff format --check
 find . -type f -name "Tiltfile" | while read -r file; do
   ruff format --check --diff "$file"
 done
+"""
+
+[tasks.lint]
+description = "Run static lint checks"
+depends = ["lint:ruff", "lint:mypy"]
+
+[tasks."lint:ruff"]
+description = "Only run ruff static checks"
+run = "ruff check"
+
+[tasks."lint:mypy"]
+description = "Only run mypy type checks"
+run = """
+#!/bin/bash
+mypy . --ignore-missing-imports \
+       --check-untyped-defs \
+       --install-types --non-interactive
 """
 
 [tasks."bootstrap:kubeconfig"]

@@ -1,13 +1,14 @@
 import base64
 import json
-from logging import Logger
 
 from aries_cloudcontroller import AcaPyClient, WalletRecordWithGroupId
 from fastapi import HTTPException
 
 from app.dependencies.acapy_clients import get_tenant_admin_controller
 from app.exceptions import handle_acapy_call
+from app.exceptions.cloudapi_exception import CloudApiException
 from app.models.tenants import Tenant
+from shared.log_config import Logger
 
 
 class WalletNotFoundException(HTTPException):
@@ -21,16 +22,17 @@ class WalletNotFoundException(HTTPException):
 
 
 def tenant_from_wallet_record(wallet_record: WalletRecordWithGroupId) -> Tenant:
-    label: str = wallet_record.settings.get("default_label") or ""
-    wallet_name: str = wallet_record.settings.get("wallet.name") or ""
-    image_url: str | None = wallet_record.settings.get("image_url")
-    group_id: str | None = wallet_record.settings.get("wallet.group_id")
+    wallet_settings = wallet_record.settings or {}
+    label: str = wallet_settings.get("default_label", "")
+    wallet_name: str = wallet_settings.get("wallet.name", "")
+    image_url: str | None = wallet_settings.get("image_url")
+    group_id: str | None = wallet_settings.get("wallet.group_id")
 
     return Tenant(
         wallet_id=wallet_record.wallet_id,
         wallet_label=label,
         wallet_name=wallet_name,
-        created_at=wallet_record.created_at,
+        created_at=wallet_record.created_at,  # type: ignore
         updated_at=wallet_record.updated_at,
         image_url=image_url,
         group_id=group_id,
@@ -49,6 +51,8 @@ def get_wallet_id_from_b64encoded_jwt(jwt: str) -> str:
 
 
 async def get_wallet_label_from_controller(aries_controller: AcaPyClient) -> str:
+    if not aries_controller.tenant_jwt:  # pragma: no cover
+        raise CloudApiException("Cannot get wallet label from controller.", 404)
     controller_token = aries_controller.tenant_jwt.split(".")[1]
     controller_wallet_id = get_wallet_id_from_b64encoded_jwt(controller_token)
     async with get_tenant_admin_controller() as admin_controller:
@@ -116,7 +120,9 @@ def assert_valid_group(
         HTTPException: If the wallet does not belong to the group_id.
 
     """
-    wallet_group_id = wallet.settings.get("wallet.group_id")
+    wallet_group_id = (
+        wallet.settings.get("wallet.group_id") if wallet.settings else None
+    )
     if group_id and wallet_group_id != group_id:
         logger.info("Bad request: wallet_id does not belong to group_id.")
 
