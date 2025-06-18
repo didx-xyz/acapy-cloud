@@ -71,7 +71,9 @@ async def get_file_by_hash(
 
     except ClientError as e:
         if e.response["Error"]["Code"] == "404":
+            logger.info("Bad request: File not found: {}", str(e))
             raise HTTPException(status_code=404, detail="File not found") from e
+        logger.exception("S3 download failed")
         raise HTTPException(status_code=500, detail=f"S3 download failed: {e!s}") from e
 
 
@@ -92,12 +94,13 @@ async def put_file_by_hash(
         try:
             logger.debug("Checking if file with hash {} exists in S3", tails_hash)
             s3_client.head_object(Bucket=BUCKET_NAME, Key=tails_hash)
+            logger.info("Bad request: File with hash {} already exists.", tails_hash)
             raise HTTPException(
                 status_code=409, detail=f"File with hash {tails_hash} already exists."
             )
         except ClientError as e:
             if e.response["Error"]["Code"] != "404":
-                logger.error(f"Error checking file existence: {e!s}")
+                logger.exception("Error checking file existence")
                 raise HTTPException(
                     status_code=500, detail=f"Error checking file existence: {e!s}"
                 ) from e
@@ -165,8 +168,11 @@ async def put_file_by_hash(
             },
         )
     except ClientError as e:
+        logger.exception("S3 upload failed")
         raise HTTPException(status_code=500, detail=f"S3 upload failed: {e!s}") from e
     except HTTPException as e:
+        logger.exception("HTTPException occurred")
         raise e
     except Exception as e:
+        logger.exception("Upload failed")
         raise HTTPException(status_code=500, detail=f"Upload failed: {e!s}") from e
