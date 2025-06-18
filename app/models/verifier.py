@@ -159,7 +159,7 @@ class CredInfo(BaseModel):
     )
     schema_id: str | None = Field(default=None, description="Schema identifier")
     revocation_status: Status = Field(
-        default="not-checked", description="Revoked status of the credential"
+        default=Status.NOT_CHECKED, description="Revocation status of the credential"
     )
 
 
