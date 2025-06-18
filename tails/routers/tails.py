@@ -84,13 +84,13 @@ async def put_file_by_hash(
     sha256 = hashlib.sha256()
 
     try:
-        logger.debug(f"File name: {tails.filename}")
+        logger.debug("File name: {}", tails.filename)
 
         s3_client = get_s3_client()
 
         # Check if the file already exists
         try:
-            logger.debug(f"Checking if file with hash {tails_hash} exists in S3")
+            logger.debug("Checking if file with hash {} exists in S3", tails_hash)
             s3_client.head_object(Bucket=BUCKET_NAME, Key=tails_hash)
             raise HTTPException(
                 status_code=409, detail=f"File with hash {tails_hash} already exists."
@@ -117,7 +117,7 @@ async def put_file_by_hash(
                 await tmp_file.write(chunk)
 
             logger.debug("Finished reading upload file")
-            logger.debug(f"SHA256 hash of uploaded file: {sha256.hexdigest()}")
+            logger.debug("SHA256 hash of uploaded file: {}", sha256.hexdigest())
             # Calculate final hash
             digest = sha256.digest()
             b58_digest = base58.b58encode(digest).decode("utf-8")

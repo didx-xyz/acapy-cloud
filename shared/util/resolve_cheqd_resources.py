@@ -24,7 +24,7 @@ async def resolve_cheqd_schema(schema_id: str) -> dict:
 
     """
     try:
-        logger.debug(f"Resolving Cheqd schema with schema_id: {schema_id}")
+        logger.debug("Resolving Cheqd schema with schema_id: {}", schema_id)
         response = await client.get(f"{RESOLVER_URL}/{schema_id}")
 
     except HTTPException as e:
