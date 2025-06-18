@@ -3,18 +3,12 @@ from unittest.mock import Mock, patch
 import pytest
 from aries_cloudcontroller import AcaPyClient
 
-from app.models.verifier import Status
+from app.models.verifier import RevocationStatus
 from app.models.wallet import CredInfo, CredInfoList
 from app.services.wallet.wallet_credential import (
     add_revocation_info,
     check_non_revocable,
 )
-from shared.log_config import Logger
-
-
-@pytest.fixture
-def mock_logger():
-    return Mock(spec=Logger)
 
 
 @pytest.fixture
@@ -23,7 +17,7 @@ def sample_cred_info():
     cred_info = CredInfo(
         rev_reg_id="rev-reg-456",
         cred_rev_id="789",
-        revocation_status=Status.NOT_CHECKED,
+        revocation_status=RevocationStatus.NOT_CHECKED,
     )
     # Force set the credential_id using model fields
     cred_info.__dict__["credential_id"] = "cred-123"
@@ -36,7 +30,7 @@ def sample_non_revocable_cred_info():
     cred_info = CredInfo(
         rev_reg_id=None,
         cred_rev_id=None,
-        revocation_status=Status.NOT_CHECKED,
+        revocation_status=RevocationStatus.NOT_CHECKED,
     )
     # Force set the credential_id using model fields
     cred_info.__dict__["credential_id"] = "cred-456"
@@ -64,21 +58,22 @@ def mock_agent_controller():
 async def test_add_revocation_info_valid_credential(
     mock_agent_controller: AcaPyClient,
     sample_cred_info_list: CredInfoList,
-    mock_logger: Logger,
 ):
     """Test adding revocation info for a valid, non-revoked credential."""
     # Mock the revocation status response - ensure it has the revoked attribute
     rev_status_response = Mock()
     rev_status_response.revoked = False
 
-    with patch(
-        "app.services.wallet.wallet_credential.handle_acapy_call",
-        return_value=rev_status_response,
-    ) as mock_handle_call:
+    with (
+        patch(
+            "app.services.wallet.wallet_credential.handle_acapy_call",
+            return_value=rev_status_response,
+        ) as mock_handle_call,
+        patch("app.services.wallet.wallet_credential.logger") as mock_logger,
+    ):
         result = await add_revocation_info(
             cred_info_list=sample_cred_info_list,
             aries_controller=mock_agent_controller,
-            logger=mock_logger,
         )
 
         # Verify the call was made correctly
@@ -89,14 +84,13 @@ async def test_add_revocation_info_valid_credential(
         )
 
         # Verify the revocation status was set correctly
-        assert result.results[0].revocation_status == Status.VALID
+        assert result.results[0].revocation_status == RevocationStatus.ACTIVE
 
 
 @pytest.mark.anyio
 async def test_add_revocation_info_revoked_credential(
     mock_agent_controller: AcaPyClient,
     sample_cred_info_list: CredInfoList,
-    mock_logger: Logger,
 ):
     """Test adding revocation info for a revoked credential."""
     # Mock the revocation status response - ensure it has the revoked attribute
@@ -110,28 +104,28 @@ async def test_add_revocation_info_revoked_credential(
         result = await add_revocation_info(
             cred_info_list=sample_cred_info_list,
             aries_controller=mock_agent_controller,
-            logger=mock_logger,
         )
 
         # Verify the revocation status was set correctly
-        assert result.results[0].revocation_status == Status.REVOKED
+        assert result.results[0].revocation_status == RevocationStatus.REVOKED
 
 
 @pytest.mark.anyio
 async def test_add_revocation_info_error_handling(
     mock_agent_controller: AcaPyClient,
     sample_cred_info_list: CredInfoList,
-    mock_logger: Logger,
 ):
     """Test error handling when fetching revocation status fails."""
-    with patch(
-        "app.services.wallet.wallet_credential.handle_acapy_call",
-        side_effect=Exception("Network error"),
-    ) as mock_handle_call:
+    with (
+        patch(
+            "app.services.wallet.wallet_credential.handle_acapy_call",
+            side_effect=Exception("Network error"),
+        ) as mock_handle_call,
+        patch("app.services.wallet.wallet_credential.logger") as mock_logger,
+    ):
         result = await add_revocation_info(
             cred_info_list=sample_cred_info_list,
             aries_controller=mock_agent_controller,
-            logger=mock_logger,
         )
 
         # Verify error was logged
@@ -142,13 +136,12 @@ async def test_add_revocation_info_error_handling(
         )
 
         # Verify the revocation status was set to CHECK_FAILED
-        assert result.results[0].revocation_status == Status.CHECK_FAILED
+        assert result.results[0].revocation_status == RevocationStatus.CHECK_FAILED
 
 
 @pytest.mark.anyio
 async def test_add_revocation_info_empty_list(
     mock_agent_controller: AcaPyClient,
-    mock_logger: Logger,
 ):
     """Test add_revocation_info with empty credential list."""
     empty_list = CredInfoList(results=[])
@@ -156,7 +149,6 @@ async def test_add_revocation_info_empty_list(
     result = await add_revocation_info(
         cred_info_list=empty_list,
         aries_controller=mock_agent_controller,
-        logger=mock_logger,
     )
 
     assert result.results == []
@@ -165,7 +157,6 @@ async def test_add_revocation_info_empty_list(
 @pytest.mark.anyio
 async def test_add_revocation_info_none_results(
     mock_agent_controller: AcaPyClient,
-    mock_logger: Logger,
 ):
     """Test add_revocation_info with None results."""
     none_results_list = CredInfoList(results=None)
@@ -173,7 +164,6 @@ async def test_add_revocation_info_none_results(
     result = await add_revocation_info(
         cred_info_list=none_results_list,
         aries_controller=mock_agent_controller,
-        logger=mock_logger,
     )
 
     assert result.results is None
@@ -182,20 +172,19 @@ async def test_add_revocation_info_none_results(
 @pytest.mark.anyio
 async def test_add_revocation_info_mixed_credentials(
     mock_agent_controller: AcaPyClient,
-    mock_logger: Logger,
 ):
     """Test add_revocation_info with mixed revocable/non-revocable credentials."""
     revocable_cred = CredInfo(
         rev_reg_id="rev-reg-456",
         cred_rev_id="789",
-        revocation_status=Status.NOT_CHECKED,
+        revocation_status=RevocationStatus.NOT_CHECKED,
     )
     revocable_cred.__dict__["credential_id"] = "cred-123"
 
     non_revocable_cred = CredInfo(
         rev_reg_id=None,
         cred_rev_id=None,
-        revocation_status=Status.NOT_CHECKED,
+        revocation_status=RevocationStatus.NOT_CHECKED,
     )
     non_revocable_cred.__dict__["credential_id"] = "cred-456"
 
@@ -212,122 +201,117 @@ async def test_add_revocation_info_mixed_credentials(
         result = await add_revocation_info(
             cred_info_list=mixed_list,
             aries_controller=mock_agent_controller,
-            logger=mock_logger,
         )
 
         # Only the revocable credential should have status updated
-        assert result.results[0].revocation_status == Status.VALID
-        assert result.results[1].revocation_status == Status.NOT_CHECKED
+        assert result.results[0].revocation_status == RevocationStatus.ACTIVE
+        assert result.results[1].revocation_status is None
 
 
 @pytest.mark.anyio
 async def test_check_non_revocable_valid_credential(
     sample_non_revocable_cred_info_list: CredInfoList,
-    mock_logger: Logger,
 ):
     """Test check_non_revocable with a non-revocable credential."""
-    result = await check_non_revocable(
-        cred_info_list=sample_non_revocable_cred_info_list,
-        logger=mock_logger,
-    )
+    with patch("app.services.wallet.wallet_credential.logger") as mock_logger:
+        result = await check_non_revocable(
+            cred_info_list=sample_non_revocable_cred_info_list,
+        )
 
-    # Verify the revocation status was set correctly
-    assert result.results[0].revocation_status == Status.NON_REVOCABLE
+        # Verify the revocation status was set correctly
+        assert result.results[0].revocation_status is None
 
-    # Verify debug log was called
-    mock_logger.debug.assert_called_once_with(
-        "Credential {} is non-revocable (no revocation registry or revocation ID)",
-        "cred-456",
-    )
+        # Verify debug log was called
+        mock_logger.debug.assert_called_once_with(
+            "Credential {} is non-revocable (no revocation registry or revocation ID)",
+            "cred-456",
+        )
 
 
 @pytest.mark.anyio
 async def test_check_non_revocable_revocable_credential(
     sample_cred_info_list: CredInfoList,
-    mock_logger: Logger,
 ):
     """Test check_non_revocable with a revocable credential."""
-    result = await check_non_revocable(
-        cred_info_list=sample_cred_info_list,
-        logger=mock_logger,
-    )
+    with patch("app.services.wallet.wallet_credential.logger") as mock_logger:
+        result = await check_non_revocable(
+            cred_info_list=sample_cred_info_list,
+        )
 
-    # Revocable credential should not have status changed
-    assert result.results[0].revocation_status == Status.NOT_CHECKED
+        # Revocable credential should not have status changed
+        assert result.results[0].revocation_status == RevocationStatus.NOT_CHECKED
 
-    # Debug log should not be called
-    mock_logger.debug.assert_not_called()
+        # Debug log should not be called
+        mock_logger.debug.assert_not_called()
 
 
 @pytest.mark.anyio
-async def test_check_non_revocable_empty_list(mock_logger: Logger):
+async def test_check_non_revocable_empty_list():
     """Test check_non_revocable with empty credential list."""
     empty_list = CredInfoList(results=[])
 
     result = await check_non_revocable(
         cred_info_list=empty_list,
-        logger=mock_logger,
     )
 
     assert result.results == []
 
 
 @pytest.mark.anyio
-async def test_check_non_revocable_none_results(mock_logger: Logger):
+async def test_check_non_revocable_none_results():
     """Test check_non_revocable with None results."""
     none_results_list = CredInfoList(results=None)
 
     result = await check_non_revocable(
         cred_info_list=none_results_list,
-        logger=mock_logger,
     )
 
     assert result.results is None
 
 
 @pytest.mark.anyio
-async def test_check_non_revocable_mixed_credentials(mock_logger: Logger):
+async def test_check_non_revocable_mixed_credentials():
     """Test check_non_revocable with mixed revocable/non-revocable credentials."""
     revocable_cred = CredInfo(
         rev_reg_id="rev-reg-456",
         cred_rev_id="789",
-        revocation_status=Status.NOT_CHECKED,
+        revocation_status=RevocationStatus.NOT_CHECKED,
     )
     revocable_cred.__dict__["credential_id"] = "cred-123"
 
     non_revocable_cred = CredInfo(
         rev_reg_id=None,
         cred_rev_id=None,
-        revocation_status=Status.NOT_CHECKED,
+        revocation_status=RevocationStatus.NOT_CHECKED,
     )
     non_revocable_cred.__dict__["credential_id"] = "cred-456"
 
     mixed_list = CredInfoList(results=[revocable_cred, non_revocable_cred])
 
-    result = await check_non_revocable(
-        cred_info_list=mixed_list,
-        logger=mock_logger,
-    )
+    with patch("app.services.wallet.wallet_credential.logger") as mock_logger:
+        result = await check_non_revocable(
+            cred_info_list=mixed_list,
+        )
 
-    # Only the non-revocable credential should have status updated
-    assert result.results[0].revocation_status == Status.NOT_CHECKED
-    assert result.results[1].revocation_status == Status.NON_REVOCABLE
+        # Only the non-revocable credential should have status updated
+        assert result.results[0].revocation_status == RevocationStatus.NOT_CHECKED
+        assert result.results[1].revocation_status is None
 
-    # Debug log should be called once for the non-revocable credential
-    mock_logger.debug.assert_called_once_with(
-        "Credential {} is non-revocable (no revocation registry or revocation ID)",
-        "cred-456",
-    )
+        # Debug log should be called once for the non-revocable credential
+        mock_logger.debug.assert_called_once_with(
+            "Credential {} is non-revocable (no revocation registry or revocation ID)",
+            "cred-456",
+        )
 
 
 @pytest.mark.anyio
-async def test_check_non_revocable_partial_revocation_info(mock_logger: Logger):
+async def test_check_non_revocable_partial_revocation_info():
     """Test check_non_revocable with credentials having partial revocation info."""
     # Credential with rev_reg_id but no cred_rev_id
     partial_cred_1 = CredInfo(
         rev_reg_id="rev-reg-456",
         cred_rev_id=None,
-        revocation_status=Status.NOT_CHECKED,
+        revocation_status=RevocationStatus.NOT_CHECKED,
     )
     partial_cred_1.__dict__["credential_id"] = "cred-123"
 
@@ -335,20 +319,20 @@ async def test_check_non_revocable_partial_revocation_info(mock_logger: Logger):
     partial_cred_2 = CredInfo(
         rev_reg_id=None,
         cred_rev_id="789",
-        revocation_status=Status.NOT_CHECKED,
+        revocation_status=RevocationStatus.NOT_CHECKED,
     )
     partial_cred_2.__dict__["credential_id"] = "cred-456"
 
     partial_list = CredInfoList(results=[partial_cred_1, partial_cred_2])
 
-    result = await check_non_revocable(
-        cred_info_list=partial_list,
-        logger=mock_logger,
-    )
+    with patch("app.services.wallet.wallet_credential.logger") as mock_logger:
+        result = await check_non_revocable(
+            cred_info_list=partial_list,
+        )
 
-    # Both should be marked as non-revocable since they don't have complete revocation info
-    assert result.results[0].revocation_status == Status.NON_REVOCABLE
-    assert result.results[1].revocation_status == Status.NON_REVOCABLE
+        # Both should be marked as non-revocable since they don't have complete revocation info
+        assert result.results[0].revocation_status is None
+        assert result.results[1].revocation_status is None
 
-    # Debug log should be called twice
-    assert mock_logger.debug.call_count == 2
+        # Debug log should be called twice
+        assert mock_logger.debug.call_count == 2
