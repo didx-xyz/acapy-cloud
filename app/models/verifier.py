@@ -17,11 +17,11 @@ from shared.exceptions import CloudApiValueError
 
 
 class Status(str, Enum):
-    VALID: str = "valid"
-    REVOKED: str = "revoked"
-    NON_REVOCABLE: str = "non-revocable"
-    NOT_CHECKED: str = "not-checked"
-    CHECK_FAILED: str = "check-failed"
+    VALID = "valid"
+    REVOKED = "revoked"
+    NON_REVOCABLE = "non-revocable"
+    NOT_CHECKED = "not-checked"
+    CHECK_FAILED = "check-failed"
 
 
 class AnonCredsPresentationRequest(AcaPyAnonCredsPresentationRequest):
