@@ -1,3 +1,4 @@
+import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -20,9 +21,9 @@ def setup_temp_file_mock(mock_tmpfile, file_content, validation_read=b"\x00\x02"
     # Setup async context manager
     mock_tmpfile.return_value.__aenter__.return_value = tmp_file
 
-    async def _mock_aexit(*args) -> None:
+    async def _mock_aexit(*_) -> None:
         """Create proper async __aexit__ that doesn't suppress exceptions"""
-        return None
+        await asyncio.sleep(0)
 
     mock_tmpfile.return_value.__aexit__ = _mock_aexit
     return tmp_file
