@@ -19,7 +19,7 @@ from shared.exceptions import CloudApiValueError
 class Status(str, Enum):
     VALID: str = "valid"
     REVOKED: str = "revoked"
-    NON_REVOKABLE: str = "non-revokable"
+    NON_REVOCABLE: str = "non-revocable"
     NOT_CHECKED: str = "not-checked"
     CHECK_FAILED: str = "check-failed"
 
