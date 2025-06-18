@@ -1,8 +1,8 @@
 import hashlib
 import os
-import tempfile
 from collections.abc import Generator
 
+import aiofiles
 import base58
 from boto3 import client as boto_client
 from botocore.client import BaseClient
@@ -103,7 +103,7 @@ async def put_file_by_hash(
                 ) from e
 
         # Use temporary file to calculate hash and validate content
-        with tempfile.TemporaryFile() as tmp_file:
+        async with aiofiles.tempfile.TemporaryFile() as tmp_file:
             logger.debug("Using temporary file for hash calculation and validation")
             # Read file in chunks to avoid memory issues
             chunk_size = 8192  # 8KB chunks
@@ -114,7 +114,7 @@ async def put_file_by_hash(
                     break
 
                 sha256.update(chunk)
-                tmp_file.write(chunk)
+                await tmp_file.write(chunk)
 
             logger.debug("Finished reading upload file")
             logger.debug(f"SHA256 hash of uploaded file: {sha256.hexdigest()}")
