@@ -8,6 +8,26 @@ from fastapi.responses import JSONResponse
 from tails.routers.tails import put_file_by_hash
 
 
+def setup_temp_file_mock(mock_tmpfile, file_content, validation_read=b"\x00\x02"):
+    """Helper to setup temp file mock as async context manager"""
+    tmp_file = AsyncMock()
+    tmp_file.write = AsyncMock()
+    # Simulate sequence of reads: validation read, then any additional reads
+    tmp_file.read = AsyncMock(side_effect=[validation_read, file_content, b""])
+    tmp_file.tell = AsyncMock(return_value=len(file_content))
+    tmp_file.seek = AsyncMock()
+
+    # Setup async context manager
+    mock_tmpfile.return_value.__aenter__.return_value = tmp_file
+
+    async def _mock_aexit(*args) -> None:
+        """Create proper async __aexit__ that doesn't suppress exceptions"""
+        return None
+
+    mock_tmpfile.return_value.__aexit__ = _mock_aexit
+    return tmp_file
+
+
 @pytest.mark.anyio
 async def test_put_file_by_hash_success():
     tails_hash = "testhash"
@@ -23,17 +43,7 @@ async def test_put_file_by_hash_success():
 
     with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
         with patch("aiofiles.tempfile.TemporaryFile") as mock_tmpfile:
-            # Setup temp file mock as async context manager
-            tmp_file = AsyncMock()
-            tmp_file.write = AsyncMock()
-            # Simulate sequence of reads: validation read, then any additional reads
-            tmp_file.read = AsyncMock(side_effect=[b"\x00\x02", file_content, b""])
-            tmp_file.tell = AsyncMock(return_value=len(file_content))
-            tmp_file.seek = AsyncMock()
-
-            # Setup async context manager
-            mock_tmpfile.return_value.__aenter__.return_value = tmp_file
-            mock_tmpfile.return_value.__aexit__ = _mock_aexit
+            setup_temp_file_mock(mock_tmpfile, file_content)
 
             # Patch hash calculation to match tails_hash
             with (
@@ -89,16 +99,7 @@ async def test_put_file_by_hash_hash_mismatch():
 
     with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
         with patch("aiofiles.tempfile.TemporaryFile") as mock_tmpfile:
-            tmp_file = AsyncMock()
-            tmp_file.write = AsyncMock()
-            # Simulate sequence of reads: validation read, then any additional reads
-            tmp_file.read = AsyncMock(side_effect=[b"\x00\x02", file_content, b""])
-            tmp_file.tell = AsyncMock(return_value=len(file_content))
-            tmp_file.seek = AsyncMock()
-
-            # Setup async context manager
-            mock_tmpfile.return_value.__aenter__.return_value = tmp_file
-            mock_tmpfile.return_value.__aexit__ = _mock_aexit
+            setup_temp_file_mock(mock_tmpfile, file_content)
 
             with (
                 patch("tails.routers.tails.hashlib.sha256") as mock_sha256,
@@ -131,16 +132,9 @@ async def test_put_file_by_hash_invalid_start():
 
     with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
         with patch("aiofiles.tempfile.TemporaryFile") as mock_tmpfile:
-            tmp_file = AsyncMock()
-            tmp_file.write = AsyncMock()
-            # Simulate sequence of reads: invalid start validation, then any additional reads
-            tmp_file.read = AsyncMock(side_effect=[b"\x01\x02", file_content, b""])
-            tmp_file.tell = AsyncMock(return_value=len(file_content))
-            tmp_file.seek = AsyncMock()
-
-            # Setup async context manager
-            mock_tmpfile.return_value.__aenter__.return_value = tmp_file
-            mock_tmpfile.return_value.__aexit__ = _mock_aexit
+            setup_temp_file_mock(
+                mock_tmpfile, file_content, validation_read=b"\x01\x02"
+            )
 
             with (
                 patch("tails.routers.tails.hashlib.sha256") as mock_sha256,
@@ -174,16 +168,7 @@ async def test_put_file_by_hash_invalid_size():
 
     with patch("tails.routers.tails.get_s3_client", return_value=mock_s3_client):
         with patch("aiofiles.tempfile.TemporaryFile") as mock_tmpfile:
-            tmp_file = AsyncMock()
-            tmp_file.write = AsyncMock()
-            # Simulate sequence of reads: validation read, then any additional reads
-            tmp_file.read = AsyncMock(side_effect=[b"\x00\x02", file_content, b""])
-            tmp_file.tell = AsyncMock(return_value=len(file_content))  # Invalid size
-            tmp_file.seek = AsyncMock()
-
-            # Setup async context manager
-            mock_tmpfile.return_value.__aenter__.return_value = tmp_file
-            mock_tmpfile.return_value.__aexit__ = _mock_aexit
+            setup_temp_file_mock(mock_tmpfile, file_content)
 
             with (
                 patch("tails.routers.tails.hashlib.sha256") as mock_sha256,
@@ -223,16 +208,7 @@ async def test_put_file_by_hash_s3_error():
         )
 
         with patch("aiofiles.tempfile.TemporaryFile") as mock_tmpfile:
-            tmp_file = AsyncMock()
-            tmp_file.write = AsyncMock()
-            # Simulate sequence of reads: validation read, then any additional reads
-            tmp_file.read = AsyncMock(side_effect=[b"\x00\x02", file_content, b""])
-            tmp_file.tell = AsyncMock(return_value=len(file_content))
-            tmp_file.seek = AsyncMock()
-
-            # Setup async context manager
-            mock_tmpfile.return_value.__aenter__.return_value = tmp_file
-            mock_tmpfile.return_value.__aexit__ = _mock_aexit
+            setup_temp_file_mock(mock_tmpfile, file_content)
 
             with (
                 patch("tails.routers.tails.hashlib.sha256") as mock_sha256,
@@ -285,8 +261,3 @@ async def test_put_file_by_hash_head_object_other_error():
             await put_file_by_hash(tails_hash, mock_upload_file)
         assert exc.value.status_code == 500
         assert "Error checking file existence" in exc.value.detail
-
-
-async def _mock_aexit(*args) -> None:
-    """Create proper async __aexit__ that doesn't suppress exceptions"""
-    return None
