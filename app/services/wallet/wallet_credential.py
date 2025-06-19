@@ -36,17 +36,3 @@ async def add_revocation_info(
                 )
                 cred_info.revocation_status = RevocationStatus.CHECK_FAILED
     return cred_info_list
-
-
-async def check_non_revocable(
-    cred_info_list: CredInfoList,
-) -> CredInfoList:
-    """Check if the credentials are non-revocable."""
-    for cred_info in cred_info_list.results or []:
-        if not cred_info.rev_reg_id or not cred_info.cred_rev_id:
-            cred_info.revocation_status = None
-            logger.debug(
-                "Credential {} is non-revocable (no revocation registry or revocation ID)",
-                cred_info.credential_id,
-            )
-    return cred_info_list
