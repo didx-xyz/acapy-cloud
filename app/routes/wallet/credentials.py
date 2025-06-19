@@ -3,7 +3,7 @@ from aries_cloudcontroller import (
     CredRevokedResult,
     W3CCredentialsListRequest,
 )
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from app.dependencies.acapy_clients import client_from_auth
 from app.dependencies.auth import AcaPyAuth, acapy_auth_from_header
@@ -25,8 +25,8 @@ router = APIRouter(prefix="/v1/wallet/credentials", tags=["wallet"])
 async def list_credentials(
     limit: int | None = limit_query_parameter,
     offset: int | None = offset_query_parameter,
-    wql: str | None = None,
-    check_revoked: bool = False,
+    wql: str | None = Query(None),
+    check_revoked: bool = Query(False),
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> CredInfoList:
     """Fetch a list of credentials from the wallet
@@ -46,6 +46,8 @@ async def list_credentials(
             The number of records to skip before starting to return records.
         wql: str
             A WQL query to filter records.
+        check_revoked: bool
+            If set to `True`, the revocation status of each credential will be checked.
 
     Returns
     -------
