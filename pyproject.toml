@@ -38,6 +38,7 @@ psycopg2-binary = "~2.9.6"
 sqlalchemy = "~2.0.40"
 
 [tool.poetry.group.tails.dependencies]
+aiofiles = "^24.1.0"
 boto3 = "~1.38.36"
 python-multipart = "~0.0.20"
 

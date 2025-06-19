@@ -1,8 +1,9 @@
 import hashlib
 import os
-import tempfile
 from collections.abc import Generator
+from io import BytesIO
 
+import aiofiles
 import base58
 from boto3 import client as boto_client
 from botocore.client import BaseClient
@@ -71,8 +72,10 @@ async def get_file_by_hash(
 
     except ClientError as e:
         if e.response["Error"]["Code"] == "404":
+            logger.info("Bad request: File not found: {}", str(e))
             raise HTTPException(status_code=404, detail="File not found") from e
-        raise HTTPException(status_code=500, detail=f"S3 download failed: {e!s}") from e
+        logger.exception("S3 download failed")
+        raise HTTPException(status_code=500, detail="S3 download failed") from e
 
 
 @router.put("/hash/{tails_hash}")
@@ -84,26 +87,27 @@ async def put_file_by_hash(
     sha256 = hashlib.sha256()
 
     try:
-        logger.debug(f"File name: {tails.filename}")
+        logger.debug("File name: {}", tails.filename)
 
         s3_client = get_s3_client()
 
         # Check if the file already exists
         try:
-            logger.debug(f"Checking if file with hash {tails_hash} exists in S3")
+            logger.debug("Checking if file with hash {} exists in S3", tails_hash)
             s3_client.head_object(Bucket=BUCKET_NAME, Key=tails_hash)
+            logger.info("Bad request: File with hash {} already exists.", tails_hash)
             raise HTTPException(
                 status_code=409, detail=f"File with hash {tails_hash} already exists."
             )
         except ClientError as e:
             if e.response["Error"]["Code"] != "404":
-                logger.error(f"Error checking file existence: {e!s}")
+                logger.exception("Error checking file existence")
                 raise HTTPException(
-                    status_code=500, detail=f"Error checking file existence: {e!s}"
+                    status_code=500, detail="Error checking file existence"
                 ) from e
 
         # Use temporary file to calculate hash and validate content
-        with tempfile.TemporaryFile() as tmp_file:
+        async with aiofiles.tempfile.TemporaryFile() as tmp_file:
             logger.debug("Using temporary file for hash calculation and validation")
             # Read file in chunks to avoid memory issues
             chunk_size = 8192  # 8KB chunks
@@ -114,25 +118,23 @@ async def put_file_by_hash(
                     break
 
                 sha256.update(chunk)
-                tmp_file.write(chunk)
+                await tmp_file.write(chunk)
 
             logger.debug("Finished reading upload file")
-            logger.debug(f"SHA256 hash of uploaded file: {sha256.hexdigest()}")
+            logger.debug("SHA256 hash of uploaded file: {}", sha256.hexdigest())
             # Calculate final hash
             digest = sha256.digest()
             b58_digest = base58.b58encode(digest).decode("utf-8")
 
             # Validate hash matches expected
             if tails_hash != b58_digest:
-                logger.error(f"Hash mismatch: Expected {tails_hash}, got {b58_digest}")
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Hash mismatch. Expected: {tails_hash}, Got: {b58_digest}",
-                )
+                message = f"Hash mismatch: Expected {tails_hash}, got {b58_digest}"
+                logger.error(message)
+                raise HTTPException(status_code=400, detail=message)
 
             logger.debug("Checking file content starts with '00 02'")
-            tmp_file.seek(0)
-            if tmp_file.read(2) != b"\x00\x02":
+            await tmp_file.seek(0)
+            if await tmp_file.read(2) != b"\x00\x02":
                 logger.error("File does not start with '00 02'")
                 raise HTTPException(
                     status_code=400, detail='File must start with "00 02".'
@@ -141,18 +143,24 @@ async def put_file_by_hash(
             # Since each tail is 128 bytes, tails file size must be a multiple of 128
             # plus the 2-byte version tag
             logger.debug("Checking file size is a multiple of 128 bytes")
-            tmp_file.seek(0, 2)
-            if (tmp_file.tell() - 2) % 128 != 0:
+            await tmp_file.seek(0, 2)
+            if (await tmp_file.tell() - 2) % 128 != 0:
                 logger.error("Tails file is not the correct size.")
                 raise HTTPException(
                     status_code=400, detail="Tails file is not the correct size."
                 )
 
             logger.debug("File content validated successfully, uploading to S3")
-            tmp_file.seek(0)  # Reset file pointer to the beginning
+            await tmp_file.seek(0)  # Reset file pointer to the beginning
+
+            # Read entire file content for upload to S3
+            # boto3 expects a synchronous file-like object, and aiofiles provides async
+            file_content = await tmp_file.read()
+            file_obj = BytesIO(file_content)
+
             # Upload file to S3
             s3_client.upload_fileobj(
-                tmp_file,
+                file_obj,
                 BUCKET_NAME,
                 tails_hash,
                 ExtraArgs={
@@ -167,8 +175,11 @@ async def put_file_by_hash(
             },
         )
     except ClientError as e:
-        raise HTTPException(status_code=500, detail=f"S3 upload failed: {e!s}") from e
+        logger.exception("S3 upload failed")
+        raise HTTPException(status_code=500, detail="S3 upload failed") from e
     except HTTPException as e:
+        logger.exception("HTTPException occurred")
         raise e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Upload failed: {e!s}") from e
+        logger.exception("Upload failed")
+        raise HTTPException(status_code=500, detail="Upload failed") from e

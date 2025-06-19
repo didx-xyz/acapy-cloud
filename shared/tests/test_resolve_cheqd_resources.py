@@ -20,7 +20,7 @@ async def test_resolve_cheqd_schema_success():
         result = await resolve_cheqd_schema("schema1")
         assert result == {"id": "schema1", "name": "Test Schema"}
         mock_logger.debug.assert_called_with(
-            "Resolving Cheqd schema with schema_id: schema1"
+            "Resolving Cheqd schema with schema_id: {}", "schema1"
         )
 
 
