@@ -172,6 +172,27 @@ spec:
             - name: data
               mountPath: /cheqd
         {{- end }}
+        {{- if .Values.lbService.enabled }}
+        - name: discover-lb-hostname
+          image: docker.io/bitnami/kubectl:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |-
+              set -eux
+
+              {{- if not .Values.lbService.hostname }}
+              kubectl get service {{ include "cheqd.fullname" . }}-lb \
+                --namespace {{ .Release.Namespace }} \
+                --output jsonpath='{.status.loadBalancer.ingress[0].hostname}' > /shared/hostname
+              {{- else }}
+              echo "{{ tpl .Values.lbService.hostname . }}" > /shared/hostname
+              {{- end }}
+          volumeMounts:
+            - name: shared
+              mountPath: /shared
+        {{- end }}
       containers:
         - name: cheqd
           securityContext:
@@ -179,12 +200,16 @@ spec:
           image: "{{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}{{ with .Values.image.digest | printf "@%s" . }}{{ end }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
-            - cheqd-noded
-            - start
+            - sh
+            - -c
+            - |-
+              REPLICA_ID=${POD_NAME##*-}
+              cheqd-noded start
+                {{- if .Values.lbService.enabled }} \
+                --p2p.laddr=tcp://0.0.0.0:$(({{ .Values.service.p2pPort }} + $REPLICA_ID)) \
+                --p2p.external-address=$(cat /shared/hostname):$(({{ .Values.service.p2pPort }} + $REPLICA_ID))
+                {{- end }}
           ports:
-            - name: p2p
-              containerPort: {{ .Values.service.p2pPort }}
-              protocol: TCP
             - name: rpc
               containerPort: {{ .Values.service.rpcPort }}
               protocol: TCP
@@ -205,7 +230,11 @@ spec:
               protocol: TCP
           env:
             - name: CHEQD_NODED_P2P_PERSISTENT_PEERS
-              value: "{{ range $i, $nodeId := .Values.nodeIds }}{{ if $i }},{{ end }}{{ $nodeId }}@{{ include "cheqd.fullname" $ }}-{{ $i }}.{{ include "cheqd.fullname" $ }}-headless.{{ $.Release.Namespace }}.svc.cluster.local:{{ $.Values.service.p2pPort }}{{ end }}"
+              value: "{{ range $i, $nodeId := .Values.nodeIds }}{{ if $i }},{{ end }}{{ $nodeId }}@{{ include "cheqd.fullname" $ }}-{{ $i }}.{{ include "cheqd.fullname" $ }}-headless.{{ $.Release.Namespace }}.svc.cluster.local:{{ add $i $.Values.service.p2pPort }}{{ end }}"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
             {{- range $k,$v := .Values.env }}
             - name: {{ $k }}
               {{- $type := printf "%s" (typeOf $v) }}
@@ -260,6 +289,10 @@ spec:
               readOnly: true
             {{- end }}
             {{- end }}
+            {{- if .Values.lbService.enabled }}
+            - name: shared
+              mountPath: /shared
+            {{- end }}
           {{- with .Values.volumeMounts }}
             {{- tpl (toYaml .) $ | nindent 12 }}
           {{- end }}
@@ -293,6 +326,10 @@ spec:
               - key: node_key.json
                 path: node_key.json
         {{- end }}
+        {{- end }}
+        {{- if .Values.lbService.enabled }}
+        - name: shared
+          emptyDir: {}
         {{- end }}
         {{- with .Values.volumes }}
           {{- tpl (toYaml .) $ | nindent 10 }}
