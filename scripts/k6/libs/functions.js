@@ -816,19 +816,26 @@ export function revokeCredentialAutoPublish(
   }
 }
 
-export function publishRevocation(issuerAccessToken) {
+export function publishRevocation(issuerAccessToken, fireAndForget = false) {
   const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/issuer/credentials/publish-revocations`;
   const params = {
     headers: {
       "x-api-key": issuerAccessToken,
       "Content-Type": "application/json",
     },
+    timeout: fireAndForget ? "5s" : "900s",
   };
+
   try {
     const requestBody = {
       revocation_registry_credential_map: {},
     };
     const response = http.post(url, JSON.stringify(requestBody), params);
+
+    if (fireAndForget) {
+      console.log("Publish revocation request fired (fire-and-forget)");
+      return true;
+    }
 
     if (response.status !== 200) {
       console.error(`Unexpected status code: ${response.status}`);
@@ -837,6 +844,10 @@ export function publishRevocation(issuerAccessToken) {
 
     return response;
   } catch (error) {
+    if (fireAndForget) {
+      console.warn(`Fire-and-forget publish revocation failed: ${error.message}`);
+      return false;
+    }
     console.error(`Error revoking credential: ${error.message}`);
     throw error;
   }
@@ -874,7 +885,7 @@ export function genericPolling({
   const endpoint = `${__ENV.CLOUDAPI_URL}/tenant/v1/sse/${walletId}/${topic}/${field}/${fieldId}/${state}?look_back=${lookBack}`;
 
   // Backoff delays in seconds: 0.5, 1, 2, 5
-  const delays = [0.5, 1, 2, 5];
+  const delays = [0.5, 1, 2, 3];
 
   let attempts = 0;
   const startTime = new Date();
