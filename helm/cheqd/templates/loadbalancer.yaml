@@ -1,0 +1,26 @@
+{{- if .Values.lbService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "cheqd.fullname" $ }}-lb
+  labels:
+    {{- include "cheqd.labels" $ | nindent 4 }}
+  {{- with $.Values.lbService.annotations }}
+  annotations:
+    {{- tpl (toYaml .) $ | nindent 4 }}
+  {{- end }}
+spec:
+  type: LoadBalancer
+  ports:
+    {{- range $i := until (int .Values.replicaCount) }}
+    - port: {{ add $.Values.service.p2pPort $i }}
+      targetPort: {{ add $.Values.service.p2pPort $i }}
+      protocol: TCP
+      name: p2p-{{ $i }}
+    {{- end }}
+    {{- with .Values.lbService.extraPorts }}
+    {{- tpl (toYaml .) $ | nindent 4 }}
+    {{- end }}
+  selector:
+    {{- include "cheqd.selectorLabels" $ | nindent 4 }}
+{{- end }}
