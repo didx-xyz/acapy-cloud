@@ -1,5 +1,5 @@
 from collections.abc import Callable, Coroutine
-from typing import Any, TypeVar
+from typing import Any
 
 from aries_cloudcontroller.exceptions import (
     ApiException,
@@ -14,10 +14,8 @@ from app.exceptions.cloudapi_exception import CloudApiException
 from app.util.extract_validation_error import extract_validation_error_msg
 from shared.log_config import Logger
 
-T = TypeVar("T", bound=Any)
 
-
-async def handle_acapy_call(
+async def handle_acapy_call[T](
     logger: Logger, acapy_call: Callable[..., Coroutine[Any, Any, T]], *args, **kwargs
 ) -> T:
     """Executes an ACA-Py client call with standardized error handling.
