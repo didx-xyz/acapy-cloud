@@ -101,6 +101,10 @@ async def test_get_credential_record_with_limit(
 
 
 @pytest.mark.anyio
+@pytest.mark.skipif(
+    TestMode.regression_run in TestMode.fixture_params,
+    reason="Skipping due to regression run",
+)
 async def test_wallet_revocation_status(
     alice_member_client: RichAsyncClient,
     issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
