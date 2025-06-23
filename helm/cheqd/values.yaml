@@ -46,6 +46,7 @@ podAnnotations:
   ad.datadoghq.com/logs_exclude: "false"
   # Exclude init containers from Datadog discovery
   ad.datadoghq.com/bootstrap-localnet.exclude: "true"
+  ad.datadoghq.com/discover-lb-hostname.exclude: "true"
   ad.datadoghq.com/download-genesis.exclude: "true"
   ad.datadoghq.com/download-snapshot.exclude: "true"
   # ad.datadoghq.com/cheqd.checks: >-
@@ -86,7 +87,7 @@ service:
   annotations: {}
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   apiPort: 1317
-  p2pPort: 26656
+  p2pPort: 26650
   rpcPort: 26657
   grpcPort: 9090
   grpcWebPort: 9091
@@ -97,11 +98,11 @@ lbService:
   enabled: false
   hostname: cheqd.127.0.0.1.nip.io
   annotations: {}
-  ports:
-    - name: p2p
-      port: 26656
-      protocol: TCP
-      targetPort: p2p
+  extraPorts: []
+    # - name: grpc
+    #   port: 9090
+    #   targetPort: grpc
+    #   protocol: TCP
 
 # This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingressDomain: 127.0.0.1.nip.io
@@ -136,7 +137,7 @@ resources: {}
   #   memory: 2Gi
   # limits:
   #   cpu: 4000m
-  #   memory: 4Gi
+  #   memory: 2.75Gi
 
 # This is to setup the startup, liveness, and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 startupProbe:
@@ -179,7 +180,7 @@ volumeMounts: []
 podAntiAffinityPreset: soft # soft or hard, ignored if `affinity` is set.
 affinity: {}
 
-## topologySpreadConstraints Topology Spread Constraints for Cheqd pods assignment spread across your cluster among failure-domains
+## Topology Spread Constraints for Cheqd pods assignment spread across your cluster among failure-domains
 ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
 topologySpreadConstraints: []
   # - maxSkew: 1 # Allow max 1 pods in the same zone
@@ -207,7 +208,25 @@ nodeAffinityPreset:
   ##
   values: []
 
+## Lifecycle hooks for the Cheqd container
+## Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks
+lifecycle:
+  preStop:
+    sleep:
+      seconds: 5
+
 env: {}
+  ## Provides the Go Runtime with a soft memory limit.
+  ## `go doc runtime/debug.SetMemoryLimit`
+  # GOMEMLIMIT:
+  #   valueFrom:
+  #     resourceFieldRef:
+  #       resource: requests.memory
+  ## Limits the number of OS threads that can execute user-level Go code simultaneously
+  # GOMAXPROCS:
+  #   valueFrom:
+  #     resourceFieldRef:
+  #       resource: limits.cpu
   # FOO: bar
   # BAZ:
   #   valueFrom:
@@ -635,7 +654,8 @@ config:
       # and will introspect on the listener or use UPnP
       # to figure out the address. ip and port are required
       # example: 159.89.10.97:26656
-      external_address: "{{ .Values.lbService.hostname }}:{{ .Values.service.p2pPort }}"
+      ## This is set as a CLI argument in the StatefulSet Template
+      # external_address: "{{ .Values.lbService.hostname }}:{{ .Values.service.p2pPort }}"
       # Comma separated list of seed nodes to connect to
       # https://raw.githubusercontent.com/cheqd/cheqd-node/refs/heads/main/networks/mainnet/seeds.txt
       # seeds: 258a9bfb822637bfca87daaab6181c10e7fd0910@seed1.eu.cheqd.net:26656,f565ff792b20977face9817df6acb268d41d4092@seed2.eu.cheqd.net:26656,388947cc7d901c5c06fedc4c26751634564d68e6@seed3.eu.cheqd.net:26656,9b30307a2a2819790d68c04bb62f5cf4028f447e@seed1.ap.cheqd.net:26656

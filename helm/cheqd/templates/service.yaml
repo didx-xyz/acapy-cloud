@@ -11,10 +11,6 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.p2pPort }}
-      targetPort: p2p
-      protocol: TCP
-      name: p2p
     - port: {{ .Values.service.rpcPort }}
       targetPort: rpc
       protocol: TCP
@@ -57,10 +53,6 @@ spec:
   clusterIP: None
   publishNotReadyAddresses: true
   ports:
-    - port: {{ .Values.service.p2pPort }}
-      targetPort: p2p
-      protocol: TCP
-      name: p2p
     - port: {{ .Values.service.rpcPort }}
       targetPort: rpc
       protocol: TCP
@@ -87,22 +79,3 @@ spec:
       name: grpc-web
   selector:
     {{- include "cheqd.selectorLabels" . | nindent 4 }}
-{{- if .Values.lbService.enabled }}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ include "cheqd.fullname" . }}-lb
-  labels:
-    {{- include "cheqd.labels" . | nindent 4 }}
-  {{- with .Values.lbService.annotations }}
-  annotations:
-    {{- tpl (toYaml .) $ | nindent 4 }}
-  {{- end }}
-spec:
-  type: LoadBalancer
-  ports:
-    {{- tpl (toYaml .Values.lbService.ports) $ | nindent 4 }}
-  selector:
-    {{- include "cheqd.selectorLabels" . | nindent 4 }}
-{{- end }}

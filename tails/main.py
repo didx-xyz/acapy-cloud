@@ -57,5 +57,6 @@ async def health_ready() -> dict[str, str]:
         # Test S3 connection
         s3_client.head_bucket(Bucket=BUCKET_NAME)
         return {"status": "healthy", "s3_connection": "ok"}
-    except Exception as e:
-        return {"status": "unhealthy", "error": str(e)}
+    except Exception:
+        logger.exception("Health check failed")
+        return {"status": "unhealthy", "error": "s3 connection failed"}
