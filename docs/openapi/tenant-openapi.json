@@ -3,7 +3,7 @@
   "info": {
     "title": "CloudAPI Tenant",
     "description": "\nWelcome to CloudAPI Tenant!\n\nFor detailed guidance on using the API, please visit our official documentation:\nhttps://www.didx.co.za/acapy-cloud/index.html\n",
-    "version": "5.0.0-rc5"
+    "version": "5.0.0-rc6"
   },
   "servers": [
     {
