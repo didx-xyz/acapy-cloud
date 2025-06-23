@@ -17,6 +17,8 @@ console:
     ingressClassName: nginx
     hostname: minio.127.0.0.1.nip.io
 
+updateStrategy:
+  type: Recreate
 persistence:
   enabled: true
   storageClass: ""
