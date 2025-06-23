@@ -3,6 +3,8 @@ command:
   - -c
   - |
     poetry run pytest \
+      --numprocesses 2 \
+      --dist loadgroup \
       --junitxml="/mnt/test_output.xml" \
       --cov-report=term-missing:skip-covered \
       --cov | tee /mnt/test_coverage.txt
