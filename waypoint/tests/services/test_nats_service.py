@@ -463,6 +463,6 @@ def test_heartbeat_validation():
         ),
     ):
         importlib.reload(importlib.import_module("waypoint.services.nats_service"))
-        from waypoint.services.nats_service import HEARTBEAT
+        from waypoint.services.nats_service import HEARTBEAT  # noqa: PLC0415, RUF100
 
     assert HEARTBEAT == 0.2  # Should be set to TIMEOUT / 5

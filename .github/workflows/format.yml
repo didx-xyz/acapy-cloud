@@ -24,7 +24,7 @@ jobs:
           cat <<EOF > .mise.toml
           [tools]
           python = "3.12"
-          "pipx:ruff" = "0.11.12"
+          "pipx:ruff" = "0.12.0"
           "pipx:mypy" = "1.16.1"
           EOF
 
