@@ -98,3 +98,31 @@ async def test_get_credential_record_with_limit(
         with pytest.raises(HTTPException) as exc:
             await alice_member_client.get(WALLET_CREDENTIALS_PATH, params=params)
         assert exc.value.status_code == 422
+
+
+@pytest.mark.anyio
+@pytest.mark.skipif(
+    TestMode.regression_run in TestMode.fixture_params,
+    reason="Skipping due to regression run",
+)
+async def test_wallet_revocation_status(
+    alice_member_client: RichAsyncClient,
+    issue_anoncreds_credential_to_alice: CredentialExchange,  # pylint: disable=unused-argument
+):
+    wallet_response = await alice_member_client.get(
+        WALLET_CREDENTIALS_PATH,
+        params={"check_revoked": False},
+    )
+    assert wallet_response.status_code == 200
+    wallet_credentials = wallet_response.json()["results"]
+    assert len(wallet_credentials) == 1
+    assert wallet_credentials[0]["revocation_status"] is None
+
+    wallet_response = await alice_member_client.get(
+        WALLET_CREDENTIALS_PATH,
+        params={"check_revoked": True},
+    )
+    assert wallet_response.status_code == 200
+    wallet_credentials = wallet_response.json()["results"]
+    assert len(wallet_credentials) == 1
+    assert wallet_credentials[0]["revocation_status"] is None
