@@ -218,21 +218,21 @@ lifecycle:
 env: {}
   ## Provides the Go Runtime with a soft memory limit.
   ## `go doc runtime/debug.SetMemoryLimit`
+  ## https://tip.golang.org/doc/gc-guide
   # GOMEMLIMIT:
   #   valueFrom:
   #     resourceFieldRef:
   #       resource: requests.memory
-  ## Limits the number of OS threads that can execute user-level Go code simultaneously
+  ## Determines the trade-off between GC CPU and memory.
+  ## https://tip.golang.org/doc/gc-guide#GOGC
+  # GOGC: 50 # Default is 100
+  ## Enable garbage collection trace output.
+  # GODEBUG: gctrace=1
+  ## Limits the number of OS threads that can execute user-level Go code simultaneously.
   # GOMAXPROCS:
   #   valueFrom:
   #     resourceFieldRef:
   #       resource: limits.cpu
-  # FOO: bar
-  # BAZ:
-  #   valueFrom:
-  #     secretKeyRef:
-  #       name: example-secret
-  #       key: baz
 
 
 ## When doing HA, we need to configure persistent peers to connect to each other.
