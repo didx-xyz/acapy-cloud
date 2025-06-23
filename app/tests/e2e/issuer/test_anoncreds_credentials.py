@@ -8,6 +8,7 @@ from app.routes.oob import router as oob_router
 from app.routes.wallet.credentials import router as credentials_router
 from app.tests.fixtures.credentials import sample_credential_attributes
 from app.tests.util.connections import FaberAliceConnect
+from app.tests.util.regression_testing import TestMode
 from app.tests.util.webhooks import check_webhook_state
 from shared import RichAsyncClient
 
@@ -168,6 +169,10 @@ async def test_send_credential_and_request(
 
 
 @pytest.mark.anyio
+@pytest.mark.skipif(
+    TestMode.regression_run in TestMode.fixture_params,
+    reason="Skipping due to regression run",
+)
 async def test_revoke_credential(
     faber_anoncreds_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
@@ -221,9 +226,9 @@ async def test_revoke_credential(
         params={"check_revoked": True},
     )
     assert wallet_response.status_code == 200
-    wallet_credentials = wallet_response.json()
+    wallet_credentials = wallet_response.json()["results"]
     assert len(wallet_credentials) == 1
-    assert wallet_credentials["results"][0]["revocation_status"] == "active"
+    assert wallet_credentials[0]["revocation_status"] == "active"
 
     response = await faber_anoncreds_client.post(
         f"{CREDENTIALS_BASE_PATH}/revoke",
@@ -241,15 +246,15 @@ async def test_revoke_credential(
         params={"check_revoked": True},
     )
     assert wallet_response.status_code == 200
-    wallet_credentials = wallet_response.json()
+    wallet_credentials = wallet_response.json()["results"]
     assert len(wallet_credentials) == 1
-    assert wallet_credentials["results"][0]["revocation_status"] == "revoked"
+    assert wallet_credentials[0]["revocation_status"] == "revoked"
 
     wallet_response = await alice_member_client.get(
         WALLET_CREDENTIALS_BASE_PATH,
         params={"check_revoked": False},
     )
     assert wallet_response.status_code == 200
-    wallet_credentials = wallet_response.json()
+    wallet_credentials = wallet_response.json()["results"]
     assert len(wallet_credentials) == 1
-    assert wallet_credentials["results"][0]["revocation_status"] == "not-checked"
+    assert wallet_credentials[0]["revocation_status"] == "not-checked"

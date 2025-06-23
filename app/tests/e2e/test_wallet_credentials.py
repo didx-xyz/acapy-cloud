@@ -110,15 +110,15 @@ async def test_wallet_revocation_status(
         params={"check_revoked": False},
     )
     assert wallet_response.status_code == 200
-    wallet_credentials = wallet_response.json()
+    wallet_credentials = wallet_response.json()["results"]
     assert len(wallet_credentials) == 1
-    assert wallet_credentials["results"][0]["revocation_status"] is None
+    assert wallet_credentials[0]["revocation_status"] is None
 
     wallet_response = await alice_member_client.get(
         WALLET_CREDENTIALS_PATH,
         params={"check_revoked": True},
     )
     assert wallet_response.status_code == 200
-    wallet_credentials = wallet_response.json()
+    wallet_credentials = wallet_response.json()["results"]
     assert len(wallet_credentials) == 1
-    assert wallet_credentials["results"][0]["revocation_status"] is None
+    assert wallet_credentials[0]["revocation_status"] is None
