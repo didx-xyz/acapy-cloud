@@ -1679,7 +1679,7 @@ paths:
       tags:
         - wallet
       summary: Fetch a list of credentials from the wallet
-      description: "Fetch a list of credentials from the wallet\n---\n\nThe `wql` (Wallet Query Language) parameter can be used to filter credentials returned from the wallet.\n\nThe following string will look for the credential with the attribute `age` with value `21`:\n\n    {\"attr::age::value\": \"21\"}\n\nOptional Parameters:\n---\n    limit: int\n        The number of records to return.\n    offset: int\n        The number of records to skip before starting to return records.\n    wql: str\n        A WQL query to filter records.\n\nReturns\n-------\n    CredInfoList\n        A list of credential records."
+      description: "Fetch a list of credentials from the wallet\n---\n\nThe `wql` (Wallet Query Language) parameter can be used to filter credentials returned from the wallet.\n\nThe following string will look for the credential with the attribute `age` with value `21`:\n\n    {\"attr::age::value\": \"21\"}\n\nOptional Parameters:\n---\n    limit: int\n        The number of records to return.\n    offset: int\n        The number of records to skip before starting to return records.\n    wql: str\n        A WQL query to filter records.\n    check_revoked: bool\n        If set to `True`, the revocation status of each credential will be checked.\n\nReturns\n-------\n    CredInfoList\n        A list of credential records."
       operationId: list_credentials_v1_wallet_credentials_get
       security:
         - APIKeyHeader: []
@@ -1717,6 +1717,13 @@ paths:
               - type: string
               - type: 'null'
             title: Wql
+        - name: check_revoked
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Check Revoked
       responses:
         '200':
           description: Successful Response
@@ -3280,6 +3287,11 @@ components:
             - type: 'null'
           title: Schema Id
           description: Schema identifier
+        revocation_status:
+          anyOf:
+            - $ref: '#/components/schemas/RevocationStatus'
+            - type: 'null'
+          description: Revocation status of the credential
       type: object
       title: CredInfo
     CredInfoList:
@@ -5326,6 +5338,14 @@ components:
           description: Revocation registry delta
       type: object
       title: RevRegWalletUpdatedResult
+    RevocationStatus:
+      type: string
+      enum:
+        - active
+        - revoked
+        - not-checked
+        - check-failed
+      title: RevocationStatus
     RevokeCredential:
       properties:
         credential_exchange_id:
