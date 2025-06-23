@@ -171,7 +171,7 @@ secretData:
   ACAPY_TENANT_AGENT_API_KEY: adminApiKey
   ACAPY_WALLET_KEY: verySecretGovernanceWalletKey
   ACAPY_WALLET_NAME: governance
-  # ACAPY_WALLET_SEED: verySecretPaddedWalletSeedPadded
+  WALLET_SEED: verySecretPaddedWalletSeedPadded
 
   ACAPY_WALLET_STORAGE_CONFIG: '{ "max_connections":10, "min_idle_count":10, "url":"cloudapi-postgresql:5432" }'
   ACAPY_WALLET_STORAGE_CREDS: '{ "account": "governance", "admin_account": "governance", "admin_password": "governance", "password": "governance" }'
@@ -231,6 +231,9 @@ env:
   ACAPY_REQUESTS_THROUGH_PUBLIC_DID: true
   ACAPY_EMIT_NEW_DIDCOMM_PREFIX: true
   ACAPY_EMIT_NEW_DIDCOMM_MIME_TYPE: true
+
+  ## Allows us to bootstrap the agent did with a seed
+  ACAPY_WALLET_ALLOW_INSECURE_SEED: true
 
   # ACAPY_LOG_CONFIG: /home/aries/logging_config.yaml
 

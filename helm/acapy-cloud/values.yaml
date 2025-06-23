@@ -307,3 +307,37 @@ istio:
     labels: {}
     annotations: {}
     patches: []
+
+jobs: {}
+  # example-job:
+  #   enabled: false
+  #   labels: {}
+  #   podLabels: {}
+  #   annotations:
+  #     helm.sh/hook: post-install,post-upgrade
+  #     helm.sh/hook-delete-policy: before-hook-creation
+  #   podAnnotations:
+  #     ad.datadoghq.com/exclude: "true"
+  #     sidecar.istio.io/inject: "false"
+  #   image: curlimages/curl
+  #   command:
+  #     - /bin/sh
+  #     - -c
+  #     - curl -sIX GET example.com
+  #   env: {}
+  #   #   FOO: bar
+  #   #   BAZ:
+  #   #     valueFrom:
+  #   #       secretKeyRef:
+  #   #         name: example-secret
+  #   #         key: baz
+  #   # restartPolicy: Never
+  #   podSecurityContext: {}
+  #     # fsGroup: 65534
+  #   securityContext:
+  #     capabilities:
+  #       drop:
+  #       - ALL
+  #     readOnlyRootFilesystem: true
+  #     runAsNonRoot: true
+  #     runAsUser: 65534
