@@ -34,7 +34,7 @@ def get_s3_client() -> BaseClient:
 async def get_file_by_hash(
     tails_hash: str,
 ) -> StreamingResponse:
-    """Stream file content from S3"""
+    """Get an AnonCreds Tails File from S3."""
     try:
         s3_client = get_s3_client()
 
@@ -83,7 +83,7 @@ async def put_file_by_hash(
     tails_hash: str,
     tails: UploadFile = File(...),
 ) -> JSONResponse:
-    """Upload a single file to S3."""
+    """Upload an AnonCreds Tails File to S3."""
     sha256 = hashlib.sha256()
 
     try:
@@ -111,17 +111,29 @@ async def put_file_by_hash(
             logger.debug("Using temporary file for hash calculation and validation")
             # Read file in chunks to avoid memory issues
             chunk_size = 8192  # 8KB chunks
+            first_chunk = True
 
             while True:
                 chunk = await tails.read(chunk_size)
                 if not chunk:
                     break
 
+                # Validate file starts with '00 02' on first chunk
+                if first_chunk:
+                    logger.debug("Checking file content starts with '00 02'")
+                    if not chunk.startswith(b"\x00\x02"):
+                        logger.error("File does not start with '00 02'")
+                        raise HTTPException(
+                            status_code=400, detail='File must start with "00 02".'
+                        )
+                    first_chunk = False
+
                 sha256.update(chunk)
                 await tmp_file.write(chunk)
 
             logger.debug("Finished reading upload file")
             logger.debug("SHA256 hash of uploaded file: {}", sha256.hexdigest())
+
             # Calculate final hash
             digest = sha256.digest()
             b58_digest = base58.b58encode(digest).decode("utf-8")
@@ -131,14 +143,6 @@ async def put_file_by_hash(
                 message = f"Hash mismatch: Expected {tails_hash}, got {b58_digest}"
                 logger.error(message)
                 raise HTTPException(status_code=400, detail=message)
-
-            logger.debug("Checking file content starts with '00 02'")
-            await tmp_file.seek(0)
-            if await tmp_file.read(2) != b"\x00\x02":
-                logger.error("File does not start with '00 02'")
-                raise HTTPException(
-                    status_code=400, detail='File must start with "00 02".'
-                )
 
             # Since each tail is 128 bytes, tails file size must be a multiple of 128
             # plus the 2-byte version tag
