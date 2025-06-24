@@ -267,9 +267,6 @@ snapshot:
   filename: cheqd-{{ .Values.networkId }}_{{ .Values.snapshot.date }}.tar.lz4
   url: https://cheqd-node-backups.ams3.digitaloceanspaces.com/{{ .Values.network }}/{{ .Values.snapshot.date }}/{{ tpl .Values.snapshot.filename . }}
   checksum: b188a8605dccffbdaa73ee61397ab7c5de82b59967e70f496c55cb98653ba816
-  podLabels: {}
-  podAnnotations:
-    ad.datadoghq.com/exclude: "true"
 
 config:
   app_toml:

@@ -1,0 +1,68 @@
+{{- $jobCount := 0 }}
+{{- range $k,$v := .Values.jobs }}
+{{- if .enabled }}
+{{- if gt $jobCount 0 }}
+---
+{{- end }}
+{{- $jobCount = add $jobCount 1 }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ tpl ($k) $ }}
+  labels:
+    {{- include "acapy-cloud.labels" $ | nindent 4 }}
+    {{- with .labels }}
+    {{- tpl (toYaml .) $ | nindent 4 }}
+    {{- end }}
+  {{- with .annotations }}
+  annotations:
+    {{- tpl (toYaml .) $ | nindent 4 }}
+  {{- end }}
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "acapy-cloud.labels" $ | nindent 8 }}
+        {{- with .podLabels }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+      {{- with .podAnnotations }}
+      annotations:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "acapy-cloud.serviceAccountName" $ }}
+      restartPolicy: {{ default "Never" .restartPolicy }}
+      securityContext:
+        {{- tpl (toYaml .podSecurityContext) $ | nindent 8 }}
+      {{- with .initContainers }}
+      initContainers:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+      {{- if .volumes }}
+      volumes:
+        {{- tpl (toYaml .volumes) $ | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ tpl ($k) $ }}
+          image: {{ tpl .image $ }}
+          imagePullPolicy: {{ tpl (default "IfNotPresent" .imagePullPolicy) $ }}
+          command: {{- tpl (toYaml .command) $ | nindent 12 }}
+          env:
+            {{- range $k,$v := .env }}
+            - name: {{ $k }}
+              {{- $type := printf "%s" (typeOf $v) }}
+              {{- if or (eq $type "string") (eq $type "float64") (eq $type "bool") }}
+              value: {{ tpl (toString $v) $ | quote }}
+              {{- else }}
+              {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 14 }}
+              {{- end }}
+            {{- end }}
+          securityContext:
+            {{- tpl (toYaml .securityContext) $ | nindent 12 }}
+          {{- if .volumeMounts }}
+          volumeMounts:
+            {{- tpl (toYaml .volumeMounts) $ | nindent 12 }}
+          {{- end }}
+{{- end }}
+{{- end }}

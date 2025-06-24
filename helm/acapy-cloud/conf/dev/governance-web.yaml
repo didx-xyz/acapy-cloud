@@ -223,3 +223,62 @@ istio:
                   paths:
                     - /governance
                     - /governance/*
+
+jobs:
+  # Post Install/Upgrade hook to bootstrap Governance DID
+  bootstrap-governance-did:
+    enabled: true
+    labels: {}
+    podLabels: {}
+    annotations:
+      helm.sh/hook: post-install,post-upgrade
+      helm.sh/hook-delete-policy: before-hook-creation
+    podAnnotations:
+      ad.datadoghq.com/exclude: "true"
+      sidecar.istio.io/inject: "false"
+    image: curlimages/curl
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -euo pipefail
+
+        # Check if Governance DID already exists
+        DID=$(curl ${URL}/governance/v1/wallet/dids \
+          -sX GET \
+          -H "X-API-Key: governance.${API_KEY}")
+        if echo "${DID}" | grep -q "did:cheqd"; then
+          echo "Governance DID already exists, skipping bootstrap."
+          echo "${DID}"
+          exit 0
+        fi
+
+        echo "Bootstrapping Governance DID..."
+        RESULT=$(curl ${URL}/governance/v1/wallet/dids \
+          -sX POST \
+          -H "Content-Type: application/json" \
+          -H "X-API-Key: governance.${API_KEY}" \
+          -d '{"method": "cheqd", "seed": "'${WALLET_SEED}'"}')
+
+        echo "DID created: ${RESULT}"
+    env:
+      URL: http://{{ include "acapy-cloud.fullname" . }}:{{ .Values.service.port }}
+      WALLET_SEED:
+        valueFrom:
+          secretKeyRef:
+            name: governance-agent-env
+            key: WALLET_SEED
+      API_KEY:
+        valueFrom:
+          secretKeyRef:
+            name: '{{ include "acapy-cloud.fullname" . }}-env'
+            key: ACAPY_GOVERNANCE_AGENT_API_KEY
+    podSecurityContext: {}
+      # fsGroup: 65534
+    securityContext:
+      capabilities:
+        drop:
+        - ALL
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 65534
