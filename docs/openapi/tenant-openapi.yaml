@@ -108,14 +108,11 @@ paths:
           schema:
             anyOf:
               - enum:
-                  - active
-                  - response
-                  - request
                   - start
+                  - invitation-sent
+                  - request-sent
+                  - response-received
                   - completed
-                  - init
-                  - error
-                  - invitation
                   - abandoned
                 type: string
               - type: 'null'
