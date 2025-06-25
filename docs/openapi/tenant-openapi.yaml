@@ -116,6 +116,7 @@ paths:
                   - init
                   - error
                   - invitation
+                  - invitation-sent
                   - abandoned
                 type: string
               - type: 'null'
