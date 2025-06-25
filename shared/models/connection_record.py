@@ -22,6 +22,7 @@ State = Literal[
     "init",
     "error",
     "invitation",
+    "invitation-sent",
     "abandoned",
 ]
 

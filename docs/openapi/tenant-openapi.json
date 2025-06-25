@@ -178,6 +178,7 @@
                     "init",
                     "error",
                     "invitation",
+                    "invitation-sent",
                     "abandoned"
                   ],
                   "type": "string"
