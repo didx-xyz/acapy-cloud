@@ -170,15 +170,11 @@
               "anyOf": [
                 {
                   "enum": [
-                    "active",
-                    "response",
-                    "request",
                     "start",
-                    "completed",
-                    "init",
-                    "error",
-                    "invitation",
                     "invitation-sent",
+                    "request-sent",
+                    "response-received",
+                    "completed",
                     "abandoned"
                   ],
                   "type": "string"

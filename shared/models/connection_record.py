@@ -14,15 +14,11 @@ InvitationMode = Literal["once", "multi", "static"]
 Role = Literal["invitee", "requester", "inviter", "responder"]
 
 State = Literal[
-    "active",
-    "response",
-    "request",
     "start",
-    "completed",
-    "init",
-    "error",
-    "invitation",
     "invitation-sent",
+    "request-sent",
+    "response-received",
+    "completed",
     "abandoned",
 ]
 
