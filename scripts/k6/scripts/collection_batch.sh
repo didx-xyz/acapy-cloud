@@ -159,7 +159,6 @@ cleanup() {
 run_batch() {
   local issuer_prefix="$1"
   local holder_batch_num="$2"
-  local deployments="$3"
 
   local holder_prefix="${BASE_HOLDER_PREFIX}_${holder_batch_num}k"
 
@@ -182,25 +181,23 @@ run_batch() {
     log "Holders already created for ${issuer_prefix} with prefix ${holder_prefix}, skipping..."
   fi
 
-  # Run the test scenarios
-  run_ha_iterations "${deployments}" scenario_create_invitations
-  run_ha_iterations "${deployments}" scenario_create_credentials
-  run_ha_iterations "${deployments}" scenario_create_proof_verified
+  # Run the test scenarios directly
+  scenario_create_invitations
+  scenario_create_credentials
+  scenario_create_proof_verified
   export USE_AUTO_PUBLISH=false
-  run_ha_iterations "${deployments}" scenario_revoke_credentials
-  run_ha_iterations "${deployments}" scenario_publish_revoke
-  run_ha_iterations "${deployments}" scenario_create_proof_unverified
+  scenario_revoke_credentials
+  scenario_publish_revoke
+  scenario_create_proof_unverified
 }
 
 run_collection() {
-  local deployments="$1"
-
   config
 
   for issuer in "${issuers[@]}"; do
     for batch_num in $(seq 1 "${TOTAL_BATCHES}"); do
       log "Running batch ${batch_num} for issuer ${issuer}"
-      run_batch "${issuer}" "${batch_num}" "${deployments}"
+      run_batch "${issuer}" "${batch_num}"
     done
   done
 }
