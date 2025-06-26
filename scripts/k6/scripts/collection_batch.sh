@@ -77,7 +77,7 @@ create_holders() {
   export HOLDER_PREFIX="${holder_prefix}"
   export SLEEP_DURATION=0
   local output_flags=$(get_output_flags)
-  xk6 run ${output_flags} ./scenarios/create-holders.js
+  xk6 run "${output_flags}" ./scenarios/create-holders.js
 }
 
 scenario_create_invitations() {
@@ -125,7 +125,7 @@ scenario_publish_revoke() {
   fi
 
   local output_flags=$(get_output_flags)
-  xk6 run ${output_flags} ./scenarios/publish-revoke.js -e ITERATIONS="${iters}" -e VUS="${vus}"
+  xk6 run "${output_flags}" ./scenarios/publish-revoke.js -e ITERATIONS="${iters}" -e VUS="${vus}"
 }
 
 scenario_create_proof_unverified() {
@@ -146,8 +146,8 @@ cleanup() {
     export HOLDER_PREFIX="${holder_prefix}"
 
     log "Cleaning up holders with prefix ${holder_prefix}..."
-    local output_flags=$(get_output_flags)
-    xk6 run ${output_flags} ./scenarios/delete-holders.js
+    local output_flags="$(get_output_flags)"
+    xk6 run "${output_flags}" ./scenarios/delete-holders.js
   done
 
   # Clean up issuers
@@ -156,7 +156,7 @@ cleanup() {
 
     log "Cleaning up issuer ${issuer}..."
     local output_flags=$(get_output_flags)
-    xk6 run ${output_flags} ./scenarios/delete-issuers.js -e ITERATIONS=1 -e VUS=1
+    xk6 run "${output_flags}" ./scenarios/delete-issuers.js -e ITERATIONS=1 -e VUS=1
   done
 }
 

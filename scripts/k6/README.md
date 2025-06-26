@@ -23,7 +23,7 @@ cp env.local .env.local
 
 ### Basic Usage (No Metrics)
 
-By default, the K6 framework runs without DataDog metrics collection for faster local development:
+By default, the K6 framework runs without DataDog metrics collection:
 
 ```sh
 # Default behavior - no StatsD dependency, no DataDog container
@@ -32,29 +32,20 @@ docker compose up
 
 ### With DataDog Metrics
 
-To enable StatsD metrics collection with DataDog (recommended for production/CI), use the `metrics` profile:
+To enable StatsD metrics collection with DataDog use the metrics compose file:
 
 ```sh
 # Enable StatsD metrics + DataDog container
-docker compose --profile metrics up
+docker compose -f compose.yaml -f compose.metrics.yaml up
 ```
 
 This approach automatically:
 - Starts the DataDog container with health checks
 - Enables StatsD metrics in K6 (`ENABLE_STATSD=true`)
 - Configures proper service dependencies
+- Waits for DataDog to be healthy before starting K6
 
-### Advanced Usage
-
-For manual control over the StatsD toggle without profiles:
-
-```sh
-# Explicitly disable metrics (same as default)
-ENABLE_STATSD=false docker compose up
-
-# Enable metrics without profile (requires manual DataDog setup)
-ENABLE_STATSD=true docker compose up xk6
-```
+The multiple compose files approach ensures clean separation and avoids dependency validation issues.
 
 ### Environment Variables
 

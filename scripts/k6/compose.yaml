@@ -4,21 +4,16 @@ services:
     container_name: xk6
     image: xk6
     tty: true
-    # Remove hard dependency on datadog - now conditional
-    # depends_on:
-    #   datadog:
-    #     condition: service_healthy
     volumes:
       # - ./output:/k6/output
       # - .env.local:/k6/.env.local
       - ../k6:/k6
-
     entrypoint: /bin/bash
     command: ./scripts/main.sh -c batch
     environment:
       # StatsD Configuration - conditional based on ENABLE_STATSD
       - ENABLE_STATSD=${ENABLE_STATSD:-false}
-      - K6_STATSD_ADDR=${K6_STATSD_ADDR:-}
+      - K6_STATSD_ADDR=${K6_STATSD_ADDR:-datadog:8125}
       - K6_CONSOLE_OUTPUT_FANCY=true
       - BASE_HOLDER_PREFIX=holder
       - BASE_VUS=5
@@ -34,36 +29,3 @@ services:
       - USE_AUTO_PUBLISH=false
       - DEBUG=false
       - FIRE_AND_FORGET_REVOCATION=false
-
-  datadog:
-    image: datadog/agent:latest
-    container_name: datadog
-    profiles: ["metrics"]
-    healthcheck:
-      test: ["CMD", "agent", "health"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-    env_file:
-      - .env.local    # Only load API key from here
-    environment:
-      - DD_SITE=datadoghq.eu
-      - DD_DOGSTATSD_NON_LOCAL_TRAFFIC=1
-      - DD_HOSTNAME=k6-metrics
-      - DD_DOGSTATSD_STATS_ENABLE=true
-      - DD_PROCESS_AGENT_ENABLED=false
-      - DOCKER_CONTENT_TRUST=1
-      - DD_LOG_LEVEL=warn
-    ports:
-      - "8125:8125/udp"
-
-  xk6-with-metrics:
-    extends:
-      service: xk6
-    profiles: ["metrics"]
-    depends_on:
-      datadog:
-        condition: service_healthy
-    environment:
-      - ENABLE_STATSD=true
-      - K6_STATSD_ADDR=datadog:8125
