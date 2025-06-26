@@ -45,6 +45,7 @@ async_engine = create_async_engine(
     pool_timeout=POSTGRES_POOL_TIMEOUT,
     pool_pre_ping=POSTGRES_POOL_PRE_PING,
     echo_pool=SQLALCHEMY_ECHO_POOL,
+    connect_args={"ssl": True},
 )
 
 # Session factories

@@ -76,7 +76,7 @@ initContainers:
     command: ['sh', '-c', 'until nc -z cloudapi-pgpool 5432; do echo waiting for pgproxy; sleep 2; done;']
 
 secretData:
-  POSTGRES_DATABASE_URL: postgresql://trust-registry:trust-registry@cloudapi-pgpool:5432/trust-registry?sslmode=prefer
+  POSTGRES_DATABASE_URL: postgresql://trust-registry:trust-registry@cloudapi-pgpool:5432/trust-registry
 
 env:
   LOG_LEVEL: warning
