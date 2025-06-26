@@ -204,7 +204,8 @@ spec:
             - -c
             - |-
               REPLICA_ID=${POD_NAME##*-}
-              cheqd-noded start
+              cheqd-noded start \
+                --moniker="{{ .Values.config.config_toml.moniker }} (${POD_NAME})"
                 {{- if .Values.lbService.enabled }} \
                 --p2p.laddr=tcp://0.0.0.0:$(({{ .Values.service.p2pPort }} + $REPLICA_ID)) \
                 --p2p.external-address=$(cat /shared/hostname):$(({{ .Values.service.p2pPort }} + $REPLICA_ID))
@@ -230,7 +231,11 @@ spec:
               protocol: TCP
           env:
             - name: CHEQD_NODED_P2P_PERSISTENT_PEERS
+              {{- if and .Values.lbService.enabled .Values.lbService.hostname }}
+              value: "{{ range $i, $nodeId := .Values.nodeIds }}{{ if $i }},{{ end }}{{ $nodeId }}@{{ $.Values.lbService.hostname }}:{{ add $i $.Values.service.p2pPort }}{{ end }}"
+              {{- else }}
               value: "{{ range $i, $nodeId := .Values.nodeIds }}{{ if $i }},{{ end }}{{ $nodeId }}@{{ include "cheqd.fullname" $ }}-{{ $i }}.{{ include "cheqd.fullname" $ }}-headless.{{ $.Release.Namespace }}.svc.cluster.local:{{ add $i $.Values.service.p2pPort }}{{ end }}"
+              {{- end }}
             - name: POD_NAME
               valueFrom:
                 fieldRef:
