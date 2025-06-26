@@ -21,6 +21,7 @@ POSTGRES_MAX_OVERFLOW = int(os.getenv("POSTGRES_MAX_OVERFLOW", "2"))
 POSTGRES_POOL_RECYCLE = int(os.getenv("POSTGRES_POOL_RECYCLE", "3600"))  # 1 hour
 POSTGRES_POOL_TIMEOUT = float(os.getenv("POSTGRES_POOL_TIMEOUT", "30"))
 POSTGRES_POOL_PRE_PING = os.getenv("POSTGRES_POOL_PRE_PING", "true").lower() == "true"
+POSTGRES_SSL_REQUIRED = os.getenv("POSTGRES_SSL_REQUIRED", "false").lower() == "true"
 
 # For debugging
 SQLALCHEMY_ECHO_POOL = os.getenv("SQLALCHEMY_ECHO_POOL", "false").lower() == "true"
@@ -34,6 +35,7 @@ engine = create_engine(
     pool_timeout=POSTGRES_POOL_TIMEOUT,
     pool_pre_ping=POSTGRES_POOL_PRE_PING,
     echo_pool=SQLALCHEMY_ECHO_POOL,
+    connect_args={"ssl": POSTGRES_SSL_REQUIRED},
 )
 
 # Async engine for application
@@ -45,7 +47,7 @@ async_engine = create_async_engine(
     pool_timeout=POSTGRES_POOL_TIMEOUT,
     pool_pre_ping=POSTGRES_POOL_PRE_PING,
     echo_pool=SQLALCHEMY_ECHO_POOL,
-    connect_args={"ssl": True},
+    connect_args={"ssl": POSTGRES_SSL_REQUIRED},
 )
 
 # Session factories
