@@ -1,0 +1,11 @@
+{{- if and (gt (int .Values.replicaCount) 1) .Values.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "cheqd.fullname" . }}
+spec:
+  maxUnavailable: {{ default 1 .Values.pdb.maxUnavailable }}
+  selector:
+    matchLabels:
+      {{- include "cheqd.selectorLabels" . | nindent 6 }}
+{{- end }}
