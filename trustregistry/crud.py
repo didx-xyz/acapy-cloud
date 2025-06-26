@@ -1,6 +1,6 @@
 from sqlalchemy import ScalarResult, delete, select, update
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.log_config import get_logger
 from shared.models.trustregistry import Actor, Schema
@@ -9,14 +9,17 @@ from trustregistry import db
 logger = get_logger(__name__)
 
 
-def get_actors(db_session: Session, skip: int = 0, limit: int = 1000) -> list[db.Actor]:
+async def get_actors(
+    db_session: AsyncSession, skip: int = 0, limit: int = 1000
+) -> list[db.Actor]:
     logger.info("Querying all actors from database (limit = {})", limit)
 
     query = select(db.Actor).offset(skip).limit(limit)
-    result = db_session.scalars(query).all()
+    result = await db_session.scalars(query)
+    actors = result.all()
 
-    if result:
-        num_rows = len(result)
+    if actors:
+        num_rows = len(actors)
         logger.debug("Successfully retrieved `{}` actors from database.", num_rows)
         if num_rows == limit:
             logger.warning(
@@ -25,58 +28,61 @@ def get_actors(db_session: Session, skip: int = 0, limit: int = 1000) -> list[db
     else:
         logger.warning("No actors retrieved from database.")
 
-    return list(result)
+    return list(actors)
 
 
-def get_actor_by_did(db_session: Session, actor_did: str) -> db.Actor:
+async def get_actor_by_did(db_session: AsyncSession, actor_did: str) -> db.Actor:
     bound_logger = logger.bind(body={"actor_did": actor_did})
     bound_logger.info("Querying actor by DID")
 
     query = select(db.Actor).where(db.Actor.did == actor_did)
-    result = db_session.scalars(query).first()
+    result = await db_session.scalars(query)
+    actor = result.first()
 
-    if result:
+    if actor:
         bound_logger.debug("Successfully retrieved actor from database.")
     else:
         bound_logger.info("Actor DID not found.")
         raise ActorDoesNotExistError
 
-    return result
+    return actor
 
 
-def get_actor_by_id(db_session: Session, actor_id: str) -> db.Actor:
+async def get_actor_by_id(db_session: AsyncSession, actor_id: str) -> db.Actor:
     bound_logger = logger.bind(body={"actor_id": actor_id})
     bound_logger.info("Querying actor by ID")
 
     query = select(db.Actor).where(db.Actor.id == actor_id)
-    result = db_session.scalars(query).first()
+    result = await db_session.scalars(query)
+    actor = result.first()
 
-    if result:
+    if actor:
         bound_logger.debug("Successfully retrieved actor from database.")
     else:
         bound_logger.info("Actor ID not found.")
         raise ActorDoesNotExistError
 
-    return result
+    return actor
 
 
-def get_actor_by_name(db_session: Session, actor_name: str) -> db.Actor:
+async def get_actor_by_name(db_session: AsyncSession, actor_name: str) -> db.Actor:
     bound_logger = logger.bind(body={"actor_name": actor_name})
     bound_logger.info("Query actor by name")
 
     query = select(db.Actor).where(db.Actor.name == actor_name)
-    result = db_session.scalars(query).one_or_none()
+    result = await db_session.scalars(query)
+    actor = result.one_or_none()
 
-    if result:
+    if actor:
         bound_logger.debug("Successfully retrieved actor from database")
     else:
         bound_logger.info("Actor name not found")
         raise ActorDoesNotExistError
 
-    return result
+    return actor
 
 
-def create_actor(db_session: Session, actor: Actor) -> db.Actor:
+async def create_actor(db_session: AsyncSession, actor: Actor) -> db.Actor:
     bound_logger = logger.bind(body={"actor": actor})
     bound_logger.info("Try to create actor in database")
 
@@ -84,14 +90,14 @@ def create_actor(db_session: Session, actor: Actor) -> db.Actor:
         bound_logger.debug("Adding actor to database")
         db_actor = db.Actor(**actor.model_dump())
         db_session.add(db_actor)
-        db_session.commit()
-        db_session.refresh(db_actor)
+        await db_session.commit()
+        await db_session.refresh(db_actor)
 
         bound_logger.debug("Successfully added actor to database.")
         return db_actor
 
     except IntegrityError as e:
-        db_session.rollback()
+        await db_session.rollback()
         constraint_violation = str(e.orig).lower()
 
         if "actors_pkey" in constraint_violation:
@@ -139,12 +145,13 @@ def create_actor(db_session: Session, actor: Actor) -> db.Actor:
         raise e
 
 
-def delete_actor(db_session: Session, actor_id: str) -> db.Actor:
+async def delete_actor(db_session: AsyncSession, actor_id: str) -> db.Actor:
     bound_logger = logger.bind(body={"actor_id": actor_id})
     bound_logger.info("Delete actor from database. First assert actor ID exists")
 
     query = select(db.Actor).where(db.Actor.id == actor_id)
-    db_actor = db_session.scalars(query).one_or_none()
+    result = await db_session.scalars(query)
+    db_actor = result.one_or_none()
 
     if not db_actor:
         bound_logger.info("Requested actor ID to delete does not exist in database.")
@@ -152,19 +159,20 @@ def delete_actor(db_session: Session, actor_id: str) -> db.Actor:
 
     bound_logger.debug("Deleting actor")
     query_delete = delete(db.Actor).where(db.Actor.id == actor_id)
-    db_session.execute(query_delete)
-    db_session.commit()
+    await db_session.execute(query_delete)
+    await db_session.commit()
 
     bound_logger.debug("Successfully deleted actor ID.")
     return db_actor
 
 
-def update_actor(db_session: Session, actor: Actor) -> db.Actor:
+async def update_actor(db_session: AsyncSession, actor: Actor) -> db.Actor:
     bound_logger = logger.bind(body={"actor": actor})
     bound_logger.info("Update actor in database. First assert actor ID exists")
 
     query = select(db.Actor).where(db.Actor.id == actor.id)
-    db_actor = db_session.scalars(query).one_or_none()
+    result = await db_session.scalars(query)
+    db_actor = result.one_or_none()
 
     if not db_actor:
         bound_logger.info("Requested actor ID to update does not exist in database.")
@@ -184,8 +192,8 @@ def update_actor(db_session: Session, actor: Actor) -> db.Actor:
         .returning(db.Actor)
     )
 
-    result: ScalarResult[db.Actor] = db_session.scalars(update_query)
-    db_session.commit()
+    result: ScalarResult[db.Actor] = await db_session.scalars(update_query)
+    await db_session.commit()
 
     updated_actor = result.first()
 
@@ -197,16 +205,18 @@ def update_actor(db_session: Session, actor: Actor) -> db.Actor:
     return updated_actor
 
 
-def get_schemas(
-    db_session: Session, skip: int = 0, limit: int = 1000
+async def get_schemas(
+    db_session: AsyncSession, skip: int = 0, limit: int = 1000
 ) -> list[db.Schema]:
-    logger.debug("Query all schemas from database (limit = {})", limit)
-    query = select(db.Schema).offset(skip).limit(limit)
-    result = db_session.scalars(query).all()
+    logger.info("Querying all schemas from database (limit = {})", limit)
 
-    if result:
-        num_rows = len(result)
-        logger.debug("Successfully retrieved {} schemas from database.", num_rows)
+    query = select(db.Schema).offset(skip).limit(limit)
+    result = await db_session.scalars(query)
+    schemas = result.all()
+
+    if schemas:
+        num_rows = len(schemas)
+        logger.debug("Successfully retrieved `{}` schemas from database.", num_rows)
         if num_rows == limit:
             logger.warning(
                 "The number of schemas returned is equal to limit used in the query."
@@ -214,71 +224,80 @@ def get_schemas(
     else:
         logger.warning("No schemas retrieved from database.")
 
-    return list(result)
+    return list(schemas)
 
 
-def get_schema_by_id(db_session: Session, schema_id: str) -> db.Schema:
+async def get_schema_by_id(db_session: AsyncSession, schema_id: str) -> db.Schema:
     bound_logger = logger.bind(body={"schema_id": schema_id})
-    bound_logger.info("Querying for schema by ID")
+    bound_logger.info("Querying schema by ID")
 
     query = select(db.Schema).where(db.Schema.id == schema_id)
-    result = db_session.scalars(query).first()
+    result = await db_session.scalars(query)
+    schema = result.first()
 
-    if not result:
-        bound_logger.info("Schema does not exist in database.")
+    if schema:
+        bound_logger.debug("Successfully retrieved schema from database.")
+    else:
+        bound_logger.info("Schema ID not found.")
         raise SchemaDoesNotExistError
 
-    return result
+    return schema
 
 
-def create_schema(db_session: Session, schema: Schema) -> db.Schema:
+async def create_schema(db_session: AsyncSession, schema: Schema) -> db.Schema:
     bound_logger = logger.bind(body={"schema": schema})
-    bound_logger.info(
-        "Create schema in database. First assert schema ID does not already exist"
-    )
+    bound_logger.info("Try to create schema in database")
 
-    query = select(db.Schema).where(db.Schema.id == schema.id)
-    db_schema = db_session.scalars(query).one_or_none()
+    try:
+        bound_logger.debug("Adding schema to database")
+        db_schema = db.Schema(**schema.model_dump())
+        db_session.add(db_schema)
+        await db_session.commit()
+        await db_session.refresh(db_schema)
 
-    if db_schema:
-        bound_logger.info("The requested schema ID already exists in database.")
-        raise SchemaAlreadyExistsError
+        bound_logger.debug("Successfully added schema to database.")
+        return db_schema
 
-    bound_logger.debug("Adding schema to database")
+    except IntegrityError as e:
+        await db_session.rollback()
+        bound_logger.info(
+            "Bad request: Schema already exists in database. {}", str(e.orig).lower()
+        )
+        raise SchemaAlreadyExistsError from e
 
-    db_schema = db.Schema(**schema.model_dump())
-    db_session.add(db_schema)
-    db_session.commit()
-    db_session.refresh(db_schema)
-
-    bound_logger.debug("Successfully added schema to database.")
-    return db_schema
+    except Exception as e:
+        bound_logger.exception("Something went wrong during schema creation.")
+        raise e
 
 
-def update_schema(db_session: Session, schema: Schema, schema_id: str) -> db.Schema:
+async def update_schema(
+    db_session: AsyncSession, schema: Schema, schema_id: str
+) -> db.Schema:
     bound_logger = logger.bind(body={"schema": schema, "schema_id": schema_id})
     bound_logger.info("Update schema in database. First assert schema ID exists")
 
     query = select(db.Schema).where(db.Schema.id == schema_id)
-    db_schema = db_session.scalars(query).one_or_none()
+    result = await db_session.scalars(query)
+    db_schema = result.one_or_none()
 
     if not db_schema:
-        bound_logger.debug(
-            "Requested to update a schema that does not exist in database."
-        )
+        bound_logger.info("Requested schema ID to update does not exist in database.")
         raise SchemaDoesNotExistError
 
-    bound_logger.debug("Updating schema on database")
-
+    bound_logger.debug("Updating schema")
     update_query = (
         update(db.Schema)
         .where(db.Schema.id == schema_id)
-        .values(id=schema.id, name=schema.name, version=schema.version, did=schema.did)
+        .values(
+            did=schema.did,
+            name=schema.name,
+            version=schema.version,
+        )
         .returning(db.Schema)
     )
 
-    result: ScalarResult[db.Schema] = db_session.scalars(update_query)
-    db_session.commit()
+    result: ScalarResult[db.Schema] = await db_session.scalars(update_query)
+    await db_session.commit()
 
     updated_schema = result.first()
 
@@ -286,29 +305,32 @@ def update_schema(db_session: Session, schema: Schema, schema_id: str) -> db.Sch
         bound_logger.error("Failed to update schema. Deleted before update complete?")
         raise SchemaDoesNotExistError
 
-    bound_logger.debug("Successfully updated schema on database.")
+    bound_logger.debug("Successfully updated schema.")
     return updated_schema
 
 
-def delete_schema(db_session: Session, schema_id: str) -> db.Schema:
+async def delete_schema(db_session: AsyncSession, schema_id: str) -> db.Schema:
     bound_logger = logger.bind(body={"schema_id": schema_id})
     bound_logger.info("Delete schema from database. First assert schema ID exists")
 
-    query_does_exists = select(db.Schema).where(db.Schema.id == schema_id)
-    db_schema = db_session.scalars(query_does_exists).one_or_none()
+    query = select(db.Schema).where(db.Schema.id == schema_id)
+    result = await db_session.scalars(query)
+    db_schema = result.one_or_none()
 
     if not db_schema:
+        bound_logger.info("Requested schema ID to delete does not exist in database.")
         raise SchemaDoesNotExistError
 
+    bound_logger.debug("Deleting schema")
     query_delete = delete(db.Schema).where(db.Schema.id == schema_id)
-    bound_logger.debug("Deleting schema from database")
-    db_session.execute(query_delete)
-    db_session.commit()
+    await db_session.execute(query_delete)
+    await db_session.commit()
 
-    bound_logger.debug("Successfully deleted schema from database.")
+    bound_logger.debug("Successfully deleted schema ID.")
     return db_schema
 
 
+# Exception classes
 class ActorAlreadyExistsError(Exception):
     """Raised when attempting to create an actor that already exists in the database."""
 
