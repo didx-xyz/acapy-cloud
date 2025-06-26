@@ -13,7 +13,7 @@ POSTGRES_DATABASE_URL = os.getenv(
 # Async engine for application use - automatically add asyncpg driver
 POSTGRES_ASYNC_DATABASE_URL = POSTGRES_DATABASE_URL.replace(
     "postgresql://", "postgresql+asyncpg://", 1
-)
+).split("?")[0]  # Ensure no query parameters are included
 
 # Pool settings optimized for pgpool
 POSTGRES_POOL_SIZE = int(os.getenv("POSTGRES_POOL_SIZE", "5"))
@@ -35,7 +35,6 @@ engine = create_engine(
     pool_timeout=POSTGRES_POOL_TIMEOUT,
     pool_pre_ping=POSTGRES_POOL_PRE_PING,
     echo_pool=SQLALCHEMY_ECHO_POOL,
-    connect_args={"ssl": POSTGRES_SSL_REQUIRED},
 )
 
 # Async engine for application
