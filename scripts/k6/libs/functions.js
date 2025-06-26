@@ -12,13 +12,6 @@ export function getWalletIndex(vu, iter, iterationsPerVu) {
   return (vu - 1) * iterationsPerVu + iter;
 }
 
-function logError(response, requestBody) {
-  console.error(`Response status: ${response.status}`);
-  console.error(`Response body: ${response.body}`);
-  if (requestBody) {
-    console.error(`Request body: ${requestBody}`);
-  }
-}
 
 export function createTenant(headers, wallet) {
   const url = `${__ENV.CLOUDAPI_URL}/tenant-admin/v1/tenants`;
@@ -43,7 +36,6 @@ export function createTenant(headers, wallet) {
   }
   // Request failed
   console.warn(`Request failed for VU: ${__VU}, ITER: ${__ITER}`);
-  logError(response, payload);
   throw new Error("Failed to create tenant");
 }
 
@@ -72,7 +64,6 @@ export function getWalletIdByWalletName(headers, walletName) {
     log.debug(`Response body: ${response.body}`);
     return null;
   }
-  logError(response);
   console.warn(`Request failed for wallet_name ${walletName}`);
   return null;
 }
@@ -92,7 +83,6 @@ export function getTrustRegistryActor(walletName) {
     // console.log(`Issuer found for actor_name ${walletName}`);
     return response;
   }
-  logError(response);
   console.warn(`Issuer not on Trust Registry: actor_name ${walletName}`);
   return null;
 }
@@ -189,11 +179,9 @@ export function createIssuerTenant(headers, walletName) {
     if (response.status >= 200 && response.status < 300) {
       return response;
     }
-    logError(response);
     console.warn(`Request failed for wallet_name ${walletName}`);
     return null;
   } catch (error) {
-    logError(response);
     console.error(`Error creating issuer tenant: ${error.message}`);
     throw error;
   }
@@ -409,7 +397,6 @@ export function createCredentialDefinition(
     if (response.status == 200) {
       return response;
     }
-    logError(response);
     console.warn(
       `Failed creating credential definition. Request Body: ${requestBody}`
     );
@@ -481,7 +468,7 @@ export function getCredentialDefinitionId(
     log.info(`Credential definition not found for tag ${credDefTag}`);
     return false;
   }
-  logError(response);
+  log.error(`Failed to check credential definition existence - Status: ${response.status}`);
   throw new Error("Failed to check credential definition existence");
 }
 
