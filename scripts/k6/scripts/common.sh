@@ -32,7 +32,7 @@ get_output_flags() {
 run_test() {
   local test_script="$1"
   local output_flags=$(get_output_flags)
-  xk6 run ${output_flags} "${test_script}"
+  xk6 run "${output_flags}" "${test_script}"
   local exit_code=$?
   if [[ ${exit_code} -ne 0 ]]; then
     echo "Test ${test_script} failed with exit code ${exit_code}" >&2
