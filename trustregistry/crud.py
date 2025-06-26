@@ -192,10 +192,10 @@ async def update_actor(db_session: AsyncSession, actor: Actor) -> db.Actor:
         .returning(db.Actor)
     )
 
-    result: ScalarResult[db.Actor] = await db_session.scalars(update_query)
+    update_result: ScalarResult[db.Actor] = await db_session.scalars(update_query)
     await db_session.commit()
 
-    updated_actor = result.first()
+    updated_actor = update_result.first()
 
     if not updated_actor:  # pragma: no cover - should never happen
         bound_logger.error("Failed to update actor. Deleted before update complete?")
@@ -296,10 +296,10 @@ async def update_schema(
         .returning(db.Schema)
     )
 
-    result: ScalarResult[db.Schema] = await db_session.scalars(update_query)
+    update_result: ScalarResult[db.Schema] = await db_session.scalars(update_query)
     await db_session.commit()
 
-    updated_schema = result.first()
+    updated_schema = update_result.first()
 
     if not updated_schema:  # pragma: no cover - should never happen
         bound_logger.error("Failed to update schema. Deleted before update complete?")
