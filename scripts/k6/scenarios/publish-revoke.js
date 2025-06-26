@@ -66,8 +66,8 @@ export function setup() {
       (tenant) => tenant.issuer_access_token === issuerToken
     );
 
-    log.info(`Sleeping for 15s before publishing revocation...`);
-    sleep(15); // Sleep for 15 seconds before publishing revocation
+    log.info(`Sleeping for 5s before publishing revocation...`);
+    sleep(5); // Sleep for 5 seconds before publishing revocation
     log.info(`Publishing revocation for issuer: ${issuerTenant.issuer_wallet_name} (ID: ${issuerTenant.issuer_wallet_id})`);
 
     let publishRevocationResponse;
@@ -129,13 +129,13 @@ export default function (data) {
         throw new Error(`Non-200 status: ${response.status}`);
       }
       return response;
-    }, 5, 2000, "checkRevokedCredentialResponse");
+    }, 3, 2000, "checkRevokedCredentialResponse");
   } catch (error) {
     console.error(`Failed after retries: ${error.message}`);
     checkRevokedCredentialResponse = error.response || error;
   }
 
-  // No point in polling as the events are available immediately.
+  // // No point in polling as the events are available immediately.
   // pollAndCheck({
   //   accessToken:  wallet.issuer_access_token,
   //   walletId: wallet.issuer_wallet_id,
@@ -143,9 +143,9 @@ export default function (data) {
   //   field: "cred_ex_id",
   //   fieldId: wallet.credential_exchange_id.substring(3),
   //   state: "revoked",
-  //   maxAttempts: 10, // (1+0.5) + (1+1) + (1+2) + (1+3) = 10.5s
+  //   maxAttempts: 1, // (1+0.5) + (1+1) + (1+2) + (1+3) = 10.5s
   //   lookBack: 60,
-  //   requestTimeout: 5,
+  //   requestTimeout: 2,
   //   sseTag: "credential-revoked"
   // }, { perspective: "Issuer" });
 
