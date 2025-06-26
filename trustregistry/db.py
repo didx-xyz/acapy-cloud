@@ -1,18 +1,32 @@
-from collections.abc import Generator
+from collections.abc import AsyncGenerator, Generator
 
 from sqlalchemy import String
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, Session, mapped_column
 
-from trustregistry.database import Base, SessionLocal
+from trustregistry.database import AsyncSessionLocal, Base, SessionLocal
 from trustregistry.list_type import StringList
 
 
 def get_db() -> Generator[Session, None, None]:
+    """Sync database session dependency for migration and sync operations."""
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
+
+async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
+    """Async database session dependency for application use."""
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
 
 
 def schema_id_gen(context) -> str:  # noqa: ANN001

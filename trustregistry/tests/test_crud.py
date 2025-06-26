@@ -1,8 +1,8 @@
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.models.trustregistry import Actor, Schema
 from trustregistry import crud, db
@@ -18,7 +18,13 @@ from trustregistry.crud import (
 
 @pytest.fixture
 def db_session_mock() -> Mock:
-    session = Mock(spec=Session)
+    session = Mock(spec=AsyncSession)
+    # Mock async methods
+    session.scalars = AsyncMock()
+    session.commit = AsyncMock()
+    session.rollback = AsyncMock()
+    session.refresh = AsyncMock()
+    session.execute = AsyncMock()
     return session
 
 
@@ -40,11 +46,15 @@ schema1 = Schema(did="did123", name="schema1", version="1.0")
         ([db_actor1, db_actor2], 0, 2),
     ],
 )
-def test_get_actors(db_session_mock: Session, expected, skip, limit):
-    db_session_mock.scalars.return_value.all.return_value = expected
+@pytest.mark.anyio
+async def test_get_actors(db_session_mock: AsyncSession, expected, skip, limit):
+    # Mock the result object that scalars returns
+    mock_result = Mock()
+    mock_result.all.return_value = expected
+    db_session_mock.scalars.return_value = mock_result
 
     with patch("trustregistry.crud.select") as select_mock:
-        actors = crud.get_actors(db_session_mock, skip=skip, limit=limit)
+        actors = await crud.get_actors(db_session_mock, skip=skip, limit=limit)
 
         db_session_mock.scalars.assert_called_once()
         assert actors == expected
@@ -58,19 +68,22 @@ def test_get_actors(db_session_mock: Session, expected, skip, limit):
     "expected, actor_did",
     [(db_actor1, "did:123"), (None, "did:not_in_db")],
 )
-def test_get_actor_by_did(db_session_mock: Session, expected, actor_did):
-    db_session_mock.scalars.return_value.first.return_value = expected
+@pytest.mark.anyio
+async def test_get_actor_by_did(db_session_mock: AsyncSession, expected, actor_did):
+    mock_result = Mock()
+    mock_result.first.return_value = expected
+    db_session_mock.scalars.return_value = mock_result
 
     with patch("trustregistry.crud.select") as select_mock:
         if expected:
-            actor = crud.get_actor_by_did(db_session_mock, actor_did=actor_did)
+            actor = await crud.get_actor_by_did(db_session_mock, actor_did=actor_did)
 
             db_session_mock.scalars.assert_called_once()
 
             assert actor == expected
         else:
             with pytest.raises(ActorDoesNotExistError):
-                crud.get_actor_by_did(db_session_mock, actor_did=actor_did)
+                await crud.get_actor_by_did(db_session_mock, actor_did=actor_did)
 
         select_mock.assert_called_once_with(db.Actor)
         select_mock(db.Actor).where.assert_called_once()
@@ -79,45 +92,54 @@ def test_get_actor_by_did(db_session_mock: Session, expected, actor_did):
 @pytest.mark.parametrize(
     "expected, actor_name", [(db_actor1, "Alice"), (None, "NotInDB")]
 )
-def test_get_actor_by_name(db_session_mock: Session, expected, actor_name):
-    db_session_mock.scalars.return_value.one_or_none.return_value = expected
+@pytest.mark.anyio
+async def test_get_actor_by_name(db_session_mock: AsyncSession, expected, actor_name):
+    mock_result = Mock()
+    mock_result.one_or_none.return_value = expected
+    db_session_mock.scalars.return_value = mock_result
 
     with patch("trustregistry.crud.select") as select_mock:
         if expected:
-            result = crud.get_actor_by_name(db_session_mock, actor_name=actor_name)
+            result = await crud.get_actor_by_name(
+                db_session_mock, actor_name=actor_name
+            )
 
             db_session_mock.scalars.assert_called_once()
             assert result == expected
         else:
             with pytest.raises(ActorDoesNotExistError):
-                crud.get_actor_by_name(db_session_mock, actor_name=actor_name)
+                await crud.get_actor_by_name(db_session_mock, actor_name=actor_name)
 
         select_mock.assert_called_once_with(db.Actor)
         select_mock(db.Actor).where.assert_called_once()
 
 
 @pytest.mark.parametrize("expected, actor_id", [(db_actor1, "1"), (None, "NotInDB")])
-def test_get_actor_by_id(db_session_mock: Session, expected, actor_id):
-    db_session_mock.scalars.return_value.first.return_value = expected
+@pytest.mark.anyio
+async def test_get_actor_by_id(db_session_mock: AsyncSession, expected, actor_id):
+    mock_result = Mock()
+    mock_result.first.return_value = expected
+    db_session_mock.scalars.return_value = mock_result
 
     with patch("trustregistry.crud.select") as select_mock:
         if expected:
-            result = crud.get_actor_by_id(db_session_mock, actor_id=actor_id)
+            result = await crud.get_actor_by_id(db_session_mock, actor_id=actor_id)
 
             db_session_mock.scalars.assert_called_once()
             assert result == expected
         else:
             with pytest.raises(ActorDoesNotExistError):
-                crud.get_actor_by_id(db_session_mock, actor_id=actor_id)
+                await crud.get_actor_by_id(db_session_mock, actor_id=actor_id)
 
         select_mock.assert_called_once_with(db.Actor)
         select_mock(db.Actor).where.assert_called_once()
 
 
-def test_create_actor(db_session_mock: Session):
+@pytest.mark.anyio
+async def test_create_actor(db_session_mock: AsyncSession):
     db_actor = db.Actor(**actor1.model_dump())
 
-    result = crud.create_actor(db_session_mock, actor1)
+    result = await crud.create_actor(db_session_mock, actor1)
 
     db_session_mock.add.assert_called_once()
     db_session_mock.commit.assert_called_once()
@@ -138,31 +160,37 @@ def test_create_actor(db_session_mock: Session):
         "unknown_orig",
     ],
 )
-def test_create_actor_already_exists(db_session_mock: Session, orig: str):
+@pytest.mark.anyio
+async def test_create_actor_already_exists(db_session_mock: AsyncSession, orig: str):
     db_session_mock.add.side_effect = IntegrityError(
         orig=orig, params=None, statement=None
     )
 
     with pytest.raises(ActorAlreadyExistsError):
-        crud.create_actor(db_session_mock, actor1)
+        await crud.create_actor(db_session_mock, actor1)
 
 
-def test_create_actor_exception(db_session_mock: Session):
+@pytest.mark.anyio
+async def test_create_actor_exception(db_session_mock: AsyncSession):
     db_session_mock.add.side_effect = RuntimeError("Some error")
 
     with pytest.raises(RuntimeError):
-        crud.create_actor(db_session_mock, actor1)
+        await crud.create_actor(db_session_mock, actor1)
 
 
 @pytest.mark.parametrize("actor, actor_id", [(actor1, "1"), (None, "NotInDB")])
-def test_delete_actor(db_session_mock: Session, actor, actor_id):
-    db_session_mock.scalars.return_value.one_or_none.return_value = actor
+@pytest.mark.anyio
+async def test_delete_actor(db_session_mock: AsyncSession, actor, actor_id):
+    mock_result = Mock()
+    mock_result.one_or_none.return_value = actor
+    db_session_mock.scalars.return_value = mock_result
+
     with (
         patch("trustregistry.crud.select") as select_mock,
         patch("trustregistry.crud.delete") as delete_mock,
     ):
         if actor:
-            result = crud.delete_actor(db_session_mock, actor_id=actor_id)
+            result = await crud.delete_actor(db_session_mock, actor_id=actor_id)
 
             select_mock.assert_called_once_with(db.Actor)
             select_mock(db.Actor).where.assert_called_once()
@@ -176,19 +204,30 @@ def test_delete_actor(db_session_mock: Session, actor, actor_id):
             assert result == actor
         else:
             with pytest.raises(ActorDoesNotExistError):
-                crud.delete_actor(db_session_mock, actor_id=actor_id)
+                await crud.delete_actor(db_session_mock, actor_id=actor_id)
 
 
 @pytest.mark.parametrize("new_actor, old_actor ", [(actor1, db_actor1), (actor1, None)])
-def test_update_actor(db_session_mock: Session, new_actor: Actor, old_actor: db.Actor):
-    db_session_mock.scalars.return_value.one_or_none.return_value = old_actor
+@pytest.mark.anyio
+async def test_update_actor(
+    db_session_mock: AsyncSession, new_actor: Actor, old_actor: db.Actor
+):
+    mock_result = Mock()
+    mock_result.one_or_none.return_value = old_actor
+    db_session_mock.scalars.return_value = mock_result
 
     if not old_actor:
         with pytest.raises(ActorDoesNotExistError):
-            crud.update_actor(db_session_mock, new_actor)
+            await crud.update_actor(db_session_mock, new_actor)
     else:
         with patch("trustregistry.crud.update") as update_mock:
-            crud.update_actor(db_session_mock, new_actor)
+            # Mock the result for the update query
+            mock_update_result = Mock()
+            mock_update_result.first.return_value = old_actor
+            # For update operations, we need to mock scalars twice
+            db_session_mock.scalars.side_effect = [mock_result, mock_update_result]
+
+            await crud.update_actor(db_session_mock, new_actor)
 
             update_mock.assert_called_once_with(db.Actor)
             update_mock(db.Actor).where.assert_called_once()
@@ -205,11 +244,14 @@ def test_update_actor(db_session_mock: Session, new_actor: Actor, old_actor: db.
         ([db_schema1, db_schema2], 0, 2),
     ],
 )
-def test_get_schemas(db_session_mock: Session, expected, skip, limit):
-    db_session_mock.scalars.return_value.all.return_value = expected
+@pytest.mark.anyio
+async def test_get_schemas(db_session_mock: AsyncSession, expected, skip, limit):
+    mock_result = Mock()
+    mock_result.all.return_value = expected
+    db_session_mock.scalars.return_value = mock_result
 
     with patch("trustregistry.crud.select") as select_mock:
-        schemas = crud.get_schemas(db_session_mock, skip=skip, limit=limit)
+        schemas = await crud.get_schemas(db_session_mock, skip=skip, limit=limit)
 
         db_session_mock.scalars.assert_called_once()
         assert schemas == expected
@@ -222,35 +264,46 @@ def test_get_schemas(db_session_mock: Session, expected, skip, limit):
 @pytest.mark.parametrize(
     "expected, schema_id", [(db_schema1, "123"), (None, "id_not_in_db")]
 )
-def test_get_schema_by_id(db_session_mock: Session, expected, schema_id):
-    db_session_mock.scalars.return_value.first.return_value = expected
+@pytest.mark.anyio
+async def test_get_schema_by_id(db_session_mock: AsyncSession, expected, schema_id):
+    mock_result = Mock()
+    mock_result.first.return_value = expected
+    db_session_mock.scalars.return_value = mock_result
 
     with patch("trustregistry.crud.select") as select_mock:
         if expected:
-            schema = crud.get_schema_by_id(db_session_mock, schema_id=schema_id)
+            schema = await crud.get_schema_by_id(db_session_mock, schema_id=schema_id)
 
             db_session_mock.scalars.assert_called_once()
 
             assert schema == expected
         else:
             with pytest.raises(SchemaDoesNotExistError):
-                crud.get_schema_by_id(db_session_mock, schema_id=schema_id)
+                await crud.get_schema_by_id(db_session_mock, schema_id=schema_id)
 
         select_mock.assert_called_once_with(db.Schema)
         select_mock(db.Schema).where.assert_called_once()
 
 
-@pytest.mark.parametrize(
-    "old_schema, new_schema", [(None, schema1), (db_schema1, schema1)]
-)
-def test_create_schema(db_session_mock: Session, old_schema, new_schema):
+@pytest.mark.parametrize("should_raise_integrity_error", [False, True])
+@pytest.mark.anyio
+async def test_create_schema(
+    db_session_mock: AsyncSession, should_raise_integrity_error
+):
+    new_schema = schema1
     schema = db.Schema(**new_schema.model_dump())
-    db_session_mock.scalars.return_value.one_or_none.return_value = old_schema
-    if old_schema:
+
+    if should_raise_integrity_error:
+        # Mock IntegrityError to test the exception handling
+        db_session_mock.add.side_effect = IntegrityError(
+            orig="duplicate key", params=None, statement=None
+        )
         with pytest.raises(SchemaAlreadyExistsError):
-            crud.create_schema(db_session_mock, new_schema)
+            await crud.create_schema(db_session_mock, new_schema)
+        db_session_mock.rollback.assert_called_once()
     else:
-        result = crud.create_schema(db_session_mock, new_schema)
+        # Test successful creation
+        result = await crud.create_schema(db_session_mock, new_schema)
         db_session_mock.add.assert_called_once()
         db_session_mock.commit.assert_called_once()
         db_session_mock.refresh.assert_called_once()
@@ -276,14 +329,24 @@ def test_create_schema(db_session_mock: Session, old_schema, new_schema):
         (schema1, None),
     ],
 )
-def test_update_schema(db_session_mock: Session, new_schema, old_schema):
-    db_session_mock.scalars.return_value.one_or_none.return_value = old_schema
+@pytest.mark.anyio
+async def test_update_schema(db_session_mock: AsyncSession, new_schema, old_schema):
+    mock_result = Mock()
+    mock_result.one_or_none.return_value = old_schema
+    db_session_mock.scalars.return_value = mock_result
+
     if not old_schema:
         with pytest.raises(SchemaDoesNotExistError):
-            crud.update_schema(db_session_mock, new_schema, new_schema.id)
+            await crud.update_schema(db_session_mock, new_schema, new_schema.id)
     else:
         with patch("trustregistry.crud.update") as update_mock:
-            crud.update_schema(db_session_mock, new_schema, new_schema.id)
+            # Mock the result for the update query
+            mock_update_result = Mock()
+            mock_update_result.first.return_value = old_schema
+            # For update operations, we need to mock scalars twice
+            db_session_mock.scalars.side_effect = [mock_result, mock_update_result]
+
+            await crud.update_schema(db_session_mock, new_schema, new_schema.id)
 
             update_mock.assert_called_once_with(db.Schema)
             update_mock(db.Schema).where.assert_called_once()
@@ -295,14 +358,18 @@ def test_update_schema(db_session_mock: Session, new_schema, old_schema):
 @pytest.mark.parametrize(
     "schema, schema_id", [(db_schema1, "did123:2:schema1:1.0"), (None, "not_in_db")]
 )
-def test_delete_schema(db_session_mock: Session, schema, schema_id):
-    db_session_mock.scalars.return_value.one_or_none.return_value = schema
+@pytest.mark.anyio
+async def test_delete_schema(db_session_mock: AsyncSession, schema, schema_id):
+    mock_result = Mock()
+    mock_result.one_or_none.return_value = schema
+    db_session_mock.scalars.return_value = mock_result
+
     with (
         patch("trustregistry.crud.select") as select_mock,
         patch("trustregistry.crud.delete") as delete_mock,
     ):
         if schema:
-            result = crud.delete_schema(db_session_mock, schema_id)
+            result = await crud.delete_schema(db_session_mock, schema_id)
 
             select_mock.assert_called_once_with(db.Schema)
             select_mock(db.Schema).where.assert_called_once()
@@ -316,4 +383,4 @@ def test_delete_schema(db_session_mock: Session, schema, schema_id):
             assert result == schema
         else:
             with pytest.raises(SchemaDoesNotExistError):
-                crud.delete_schema(db_session_mock, schema_id)
+                await crud.delete_schema(db_session_mock, schema_id)
