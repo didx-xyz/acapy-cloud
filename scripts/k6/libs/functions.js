@@ -5,7 +5,6 @@ import { check, sleep } from "k6";
 import http from "k6/http";
 import sse from "k6/x/sse";
 import { log } from "../libs/k6Functions.js";
-// let customDuration = new Trend('custom_duration', true);
 
 // Helper function to generate a unique, zero-based index for even distribution of operations
 export function getWalletIndex(vu, iter, iterationsPerVu) {
@@ -77,10 +76,8 @@ export function getTrustRegistryActor(walletName) {
   };
 
   const response = http.get(url);
-  // console.log(`Response: ${response}`)
   if (response.status === 200) {
     // Request was successful
-    // console.log(`Issuer found for actor_name ${walletName}`);
     return response;
   }
   console.warn(`Issuer not on Trust Registry: actor_name ${walletName}`);
@@ -105,15 +102,12 @@ export function getAccessTokenByWalletId(headers, walletId) {
     const responseData = JSON.parse(response.body);
     const accessToken = responseData.access_token;
     const end = new Date();
-    // customDuration.add(end - start, { step: 'getAccessTokenByWalletId' });
     return accessToken;
   }
   // Request failed
   console.error(`Request failed with status ${response.status}`);
   console.error(`Response body: ${response.body}`);
-  // throw new Error(`Failed to get access token: ${response.body}`);
   const end = new Date();
-  // customDuration.add(end - start, { step: 'getAccessTokenByWalletId' });
   return null;
 }
 
@@ -170,10 +164,6 @@ export function createIssuerTenant(headers, walletName) {
     },
   };
 
-  // console.log(`Payload: ${payload}`);
-  // console.log(`Params: ${JSON.stringify(params, null, 2)}`);
-  // console.log(`URL: ${url}`);
-
   try {
     const response = http.post(url, payload, params);
     if (response.status >= 200 && response.status < 300) {
@@ -224,11 +214,7 @@ export function createDidExchangeRequest(holderAccessToken, issuerPublicDid) {
   };
 
   try {
-    // console.log(`Request URL: ${url}`);
     const response = http.post(url, null, params);
-    // console.log(`Request params: ${JSON.stringify(params, null, 2)}`);
-    // console.log(`Holder Access tpoken: ${holderAccessToken}`);
-    // console.log(`Response: ${JSON.stringify(response, null, 2)}`);
     return response;
   } catch (error) {
     console.error(`Error creating invitation: ${error.message}`);
@@ -245,10 +231,7 @@ export function getHolderConnections(holderAccessToken, holderConnectionId) {
   };
 
   try {
-    // console.log(`Request URL: ${url}`);
     const response = http.get(url, params);
-    // console.log(`Request params: ${JSON.stringify(params, null, 2)}`);
-    // console.log(`Response: ${JSON.stringify(response, null, 2)}`);
     return response;
   } catch (error) {
     console.error(`Error getting holder connections: ${error.message}`);
@@ -265,11 +248,7 @@ export function getIssuerConnectionId(issuerAccessToken, holderDid) {
   };
 
   try {
-    // console.log(`Request URL: ${url}`);
     const response = http.get(url, params);
-    // console.log(`Request params: ${JSON.stringify(params, null, 2)}`);
-
-    // console.log(`VU ${__VU}: Iteration ${__ITER}: getIssuerConnectionId Response: ${JSON.stringify(response, null, 2)}`);
     return response;
   } catch (error) {
     console.error(`Error creating invitation: ${error.message}`);
@@ -418,7 +397,6 @@ export function getCredentialIdByThreadId(holderAccessToken, threadId) {
   // console.log(`holderAccessToken: ${holderAccessToken}`);
   try {
     const response = http.get(url, params);
-    // console.log(`Request headers: ${JSON.stringify(response.request.headers)}`);
     // Parse the response body
     const responseData = JSON.parse(response.body);
     // Iterate over the responseData array
@@ -519,7 +497,6 @@ export function getProofIdByThreadId(holderAccessToken, threadId) {
   // console.log(`holderAccessToken: ${holderAccessToken}`);
   try {
     const response = http.get(url, params);
-    // console.log(`Request headers: ${JSON.stringify(response.request.headers)}`);
     // Parse the response body
     const responseData = JSON.parse(response.body);
     // Iterate over the responseData array
@@ -528,7 +505,6 @@ export function getProofIdByThreadId(holderAccessToken, threadId) {
       // Check if the current object has a matching thread_id
       if (obj.thread_id === threadId) {
         // Return the credential_id if a match is found
-        // console.log(`Log of the request made: ${JSON.stringify(response.request)}`);
         return obj.proof_id;
       }
     }
@@ -557,7 +533,6 @@ export function getProofIdCredentials(holderAccessToken, proofId, dateOfIssue = 
   // console.log(`holderAccessToken: ${holderAccessToken}`);
   try {
     const response = http.get(url, params);
-    // console.log(`Request headers: ${JSON.stringify(response.request.headers)}`);
     // Parse the response body
     const responseData = JSON.parse(response.body);
 
@@ -592,7 +567,6 @@ export function getProofIdCredentials(holderAccessToken, proofId, dateOfIssue = 
     }
 
     // Throw an error if no match is found
-    // console.log(`Log of the request made: ${JSON.stringify(response.request)}`);
     throw new Error(
       `No match found for proofId: ${proofId}${dateOfIssue ? ` with date_of_issue: ${dateOfIssue}` : ''}`
     );
@@ -630,10 +604,6 @@ export function acceptProofRequest(holderAccessToken, proofId, referent) {
     };
 
     const response = http.post(url, JSON.stringify(requestBody), params);
-    // console.log(`holderAccessToken: ${holderAccessToken}`);
-    // console.log(`Response body: ${response.body}`);
-    // console.log(`Referent: ${referent}`);
-    // console.log(`ProofId: ${proofId}`);
     return response;
   } catch (error) {
     console.error(`Error accepting proof request: ${error.message}`);
@@ -664,10 +634,6 @@ export function getProof(issuerAccessToken, issuerConnectionId, proofThreadId) {
       connection_id: issuerConnectionId,
     };
     const response = http.get(url, params);
-    // console.log(`Response body: ${response.body}`);
-    // console.log(`IssuerAccessToken: ${issuerAccessToken}`);
-    // console.log(`IssuerConnectionId: ${issuerConnectionId}`);
-    // console.log(`ProofThreadId: ${proofThreadId}`);
     return response;
   } catch (error) {
     console.error(`Error getting proof: ${error.message}`);
@@ -721,7 +687,6 @@ export function createSchema(headers, schemaName, schemaVersion) {
     });
 
     const response = http.post(url, requestBody, params);
-    // console.log(`Response body: ${response.body}`);
     return response;
   } catch (error) {
     console.error(`Error creating schema: ${error.message}`);
@@ -739,7 +704,6 @@ export function getSchema(headers, schemaName, schemaVersion) {
 
   try {
     const response = http.get(url, params);
-    // console.log(`Response XXX body: ${response.body}`);
     return response;
   } catch (error) {
     console.error(`Error getting schema: ${error.message}`);
