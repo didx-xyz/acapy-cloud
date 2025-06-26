@@ -11,14 +11,14 @@ from fastapi.responses import HTMLResponse
 from scalar_fastapi import get_scalar_api_reference
 from sqlalchemy import inspect
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.constants import PROJECT_VERSION
 from shared.log_config import get_logger
 from shared.util.set_event_loop_policy import set_event_loop_policy
 from trustregistry import crud
-from trustregistry.database import engine
-from trustregistry.db import get_db
+from trustregistry.database import async_engine, engine
+from trustregistry.db import get_async_db
 from trustregistry.registry import registry_actors, registry_schemas
 
 set_event_loop_policy()
@@ -91,7 +91,9 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
         logger.debug("TrustRegistry tables created: `{}`", table_names)
     # start-up logic is before the yield
     yield
-    # shutdown logic after
+    # shutdown logic after - properly close async engine
+    await async_engine.dispose()
+    logger.info("Database connections closed")
 
 
 def create_app() -> FastAPI:
@@ -122,15 +124,15 @@ async def scalar_html() -> HTMLResponse:
 
 
 @app.get("/")
-async def root(db_session: Session = Depends(get_db)):  # noqa: ANN201
+async def root(db_session: AsyncSession = Depends(get_async_db)):  # noqa: ANN201
     logger.debug("GET request received: Fetch actors and schemas from registry")
-    db_schemas = crud.get_schemas(db_session)
-    db_actors = crud.get_actors(db_session)
+    db_schemas = await crud.get_schemas(db_session)
+    db_actors = await crud.get_actors(db_session)
     schemas_repr = [schema.id for schema in db_schemas]
     logger.debug("Successfully fetched actors and schemas from registry.")
     return {"actors": db_actors, "schemas": schemas_repr}
 
 
 @app.get("/registry")
-async def registry(db_session: Session = Depends(get_db)):  # noqa: ANN201
+async def registry(db_session: AsyncSession = Depends(get_async_db)):  # noqa: ANN201
     return await root(db_session)
