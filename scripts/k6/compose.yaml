@@ -28,8 +28,9 @@ services:
       - DENOMINATOR=1
       - FACTOR=1
       - OOB_INVITATION=true
-      - USE_AUTO_PUBLISH=true
+      - USE_AUTO_PUBLISH=false
       - DEBUG=false
+      - FIRE_AND_FORGET_REVOCATION=false
 
   datadog:
     image: datadog/agent:latest
