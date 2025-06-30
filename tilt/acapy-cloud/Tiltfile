@@ -457,22 +457,29 @@ def setup_cheqd_localnet(namespace, ingress_domain):
 
     build_enabled = cpu_arch == "arm64"
 
-    if build_enabled and not os.path.exists(cheqd_path):
-        clone_cmd = (
-            "git clone https://github.com/cheqd/cheqd-node.git --depth 1 "
-            + "--branch "
-            + cheqd_noded_version
-            + " "
-            + cheqd_path
-        )
-        print(color.green("Cloning cheqd-node repository..."))
-    else:
-        clone_cmd = "echo 'Cheqd node directory already exists or build is disabled, skipping clone'"
-        print(
-            color.green(
-                "Cheqd node directory already exists or build is disabled, skipping clone"
+    if build_enabled:
+        if not os.path.exists(cheqd_path):
+            print(color.green("Cloning cheqd-node repository..."))
+            clone_cmd = (
+                "git clone https://github.com/cheqd/cheqd-node.git --depth 1 "
+                + "--branch "
+                + cheqd_noded_version
+                + " "
+                + cheqd_path
             )
-        )
+        else:
+            print(color.green("Checking out correct branch/tag for cheqd-node..."))
+            clone_cmd = (
+                "cd "
+                + cheqd_path
+                + " && "
+                + "git fetch origin"
+                + " && "
+                + "git checkout "
+                + cheqd_noded_version
+            )
+    else:
+        clone_cmd = "echo 'Build is disabled, skipping cheqd-node setup'"
 
     local_resource(
         name="checkout-cheqd-node",
@@ -494,7 +501,7 @@ def setup_cheqd_localnet(namespace, ingress_domain):
                 "tag": cheqd_noded_version.lstrip("v"),
                 "dockerfile": project_root + "/tilt/.cheqd-node/docker/Dockerfile",
                 "context": project_root + "/tilt/.cheqd-node",
-                "ignore": ["**"],
+                "ignore": ["**", "!tilt/.cheqd-node"],
             },
             "flags": [
                 "--set",
@@ -503,23 +510,23 @@ def setup_cheqd_localnet(namespace, ingress_domain):
             "labels": ["11-cheqd"],
             "links": [
                 link(
-                    "http://api.cheqd." + ingress_domain,
+                    "http://api.cheqd.cloudapi." + ingress_domain,
                     "Cheqd API",
                 ),
                 link(
-                    "http://api.cheqd." + ingress_domain + "/swagger/",
+                    "http://api.cheqd.cloudapi." + ingress_domain + "/swagger/",
                     "Cheqd API Docs",
                 ),
                 link(
-                    "http://rpc.cheqd." + ingress_domain,
+                    "http://rpc.cheqd.cloudapi." + ingress_domain,
                     "Cheqd RPC",
                 ),
                 link(
-                    "https://grpc.cheqd." + ingress_domain,
+                    "https://grpc.cheqd.cloudapi." + ingress_domain,
                     "Cheqd gRPC",
                 ),
                 link(
-                    "http://grpc-web.cheqd." + ingress_domain,
+                    "http://grpc-web.cheqd.cloudapi." + ingress_domain,
                     "Cheqd gRPC Web",
                 ),
             ],
