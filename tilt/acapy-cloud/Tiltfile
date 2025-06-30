@@ -3,7 +3,7 @@ load("ext://color", "color")
 load("ext://helm_resource", "helm_resource", "helm_repo")
 
 # https://github.com/cheqd/cheqd-node
-cheqd_noded_version = "v3.1.9"
+cheqd_noded_version = "v4.1.0"
 # https://github.com/bitnami/charts/tree/main/bitnami/minio
 minio_version = "17.0.9"
 # https://github.com/rowanruseler/helm-charts/tree/main/charts/pgadmin4

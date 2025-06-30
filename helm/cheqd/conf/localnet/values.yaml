@@ -1,3 +1,6 @@
+image:
+  tag: 4.1.0
+
 podLabels:
   sidecar.istio.io/inject: "false"
 
