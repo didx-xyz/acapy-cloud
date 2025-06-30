@@ -2,8 +2,6 @@ load("../utils/Tiltfile", "namespace_create_wrap", "generate_ingress_domain")
 load("ext://color", "color")
 load("ext://helm_resource", "helm_resource", "helm_repo")
 
-# https://github.com/cheqd/cheqd-node
-cheqd_noded_version = "v4.1.0"
 # https://github.com/bitnami/charts/tree/main/bitnami/minio
 minio_version = "17.0.9"
 # https://github.com/rowanruseler/helm-charts/tree/main/charts/pgadmin4
@@ -453,56 +451,14 @@ def setup_cheqd_localnet(namespace, ingress_domain):
     print(color.green("Installing Cheqd Localnet..."))
 
     project_root = os.getcwd()
-    cheqd_path = project_root + "/tilt/.cheqd-node"
-
-    build_enabled = cpu_arch == "arm64"
-
-    if build_enabled:
-        if not os.path.exists(cheqd_path):
-            print(color.green("Cloning cheqd-node repository..."))
-            clone_cmd = (
-                "git clone https://github.com/cheqd/cheqd-node.git --depth 1 "
-                + "--branch "
-                + cheqd_noded_version
-                + " "
-                + cheqd_path
-            )
-        else:
-            print(color.green("Checking out correct branch/tag for cheqd-node..."))
-            clone_cmd = (
-                "cd "
-                + cheqd_path
-                + " && "
-                + "git fetch origin"
-                + " && "
-                + "git checkout "
-                + cheqd_noded_version
-            )
-    else:
-        clone_cmd = "echo 'Build is disabled, skipping cheqd-node setup'"
-
-    local_resource(
-        name="checkout-cheqd-node",
-        cmd=clone_cmd,
-        allow_parallel=True,
-        labels=["11-cheqd"],
-    )
 
     setup_cloudapi_service(
         "cheqd",
         "./helm/cheqd",
         namespace,
         ingress_domain,
-        build_enabled,
-        {
-            "depends": ["checkout-cheqd-node"],
-            "image": {
-                "registry": "ghcr.io",
-                "tag": cheqd_noded_version.lstrip("v"),
-                "dockerfile": project_root + "/tilt/.cheqd-node/docker/Dockerfile",
-                "context": project_root + "/tilt/.cheqd-node",
-                "ignore": ["**", "!tilt/.cheqd-node"],
-            },
+        build_enabled=False,
+        release_config={
             "flags": [
                 "--set",
                 "secrets.validatorMnemonic=" + cheqd_validator_mnemonic,
