@@ -1,6 +1,6 @@
 fullnameOverride: mediator
 
-replicaCount: 1
+replicaCount: 0
 
 podAnnotations:
   sidecar.istio.io/proxyCPU: 10m

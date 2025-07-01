@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.log_config import get_logger
 from shared.models.trustregistry import Actor
 from trustregistry import crud
-from trustregistry.db import get_db
+from trustregistry.db import get_async_db
 
 logger = get_logger(__name__)
 
@@ -13,9 +13,9 @@ router = APIRouter(prefix="/registry/actors", tags=["actor"])
 
 
 @router.get("")
-async def get_actors(db_session: Session = Depends(get_db)) -> list[Actor]:
+async def get_actors(db_session: AsyncSession = Depends(get_async_db)) -> list[Actor]:
     logger.debug("GET request received: Fetch all actors")
-    db_actors = crud.get_actors(db_session)
+    db_actors = await crud.get_actors(db_session)
 
     # Convert database models to pydantic models
     result = [Actor(**actor.__dict__) for actor in db_actors]
@@ -23,11 +23,13 @@ async def get_actors(db_session: Session = Depends(get_db)) -> list[Actor]:
 
 
 @router.post("")
-async def register_actor(actor: Actor, db_session: Session = Depends(get_db)) -> Actor:
+async def register_actor(
+    actor: Actor, db_session: AsyncSession = Depends(get_async_db)
+) -> Actor:
     bound_logger = logger.bind(body={"actor": actor})
     bound_logger.debug("POST request received: Register actor")
     try:
-        created_actor = crud.create_actor(db_session, actor=actor)
+        created_actor = await crud.create_actor(db_session, actor=actor)
     except crud.ActorAlreadyExistsError as e:
         bound_logger.info("Bad request: Actor already exists.")
         raise HTTPException(status_code=409, detail=str(e)) from e
@@ -40,7 +42,7 @@ async def register_actor(actor: Actor, db_session: Session = Depends(get_db)) ->
 
 @router.put("/{actor_id}")
 async def update_actor(
-    actor_id: str, actor: Actor, db_session: Session = Depends(get_db)
+    actor_id: str, actor: Actor, db_session: AsyncSession = Depends(get_async_db)
 ) -> Actor:
     bound_logger = logger.bind(body={"actor_id": actor_id, "actor": actor})
     bound_logger.debug("PUT request received: Update actor")
@@ -55,7 +57,7 @@ async def update_actor(
         actor.id = actor_id
 
     try:
-        update_actor_result = crud.update_actor(db_session, actor=actor)
+        update_actor_result = await crud.update_actor(db_session, actor=actor)
     except crud.ActorDoesNotExistError as e:
         bound_logger.info("Bad request: Actor with id not found.")
         raise HTTPException(
@@ -67,12 +69,12 @@ async def update_actor(
 
 @router.get("/did/{actor_did}")
 async def get_actor_by_did(
-    actor_did: str, db_session: Session = Depends(get_db)
+    actor_did: str, db_session: AsyncSession = Depends(get_async_db)
 ) -> Actor:
     bound_logger = logger.bind(body={"actor_did": actor_did})
     bound_logger.debug("GET request received: Get actor by DID")
     try:
-        actor = crud.get_actor_by_did(db_session, actor_did=actor_did)
+        actor = await crud.get_actor_by_did(db_session, actor_did=actor_did)
     except crud.ActorDoesNotExistError as e:
         bound_logger.info("Bad request: Actor with did not found.")
         raise HTTPException(
@@ -84,12 +86,12 @@ async def get_actor_by_did(
 
 @router.get("/{actor_id}")
 async def get_actor_by_id(
-    actor_id: str, db_session: Session = Depends(get_db)
+    actor_id: str, db_session: AsyncSession = Depends(get_async_db)
 ) -> Actor:
     bound_logger = logger.bind(body={"actor_id": actor_id})
     bound_logger.debug("GET request received: Get actor by ID")
     try:
-        actor = crud.get_actor_by_id(db_session, actor_id=actor_id)
+        actor = await crud.get_actor_by_id(db_session, actor_id=actor_id)
     except crud.ActorDoesNotExistError as e:
         bound_logger.info("Bad request: Actor with id not found.")
         raise HTTPException(
@@ -101,12 +103,12 @@ async def get_actor_by_id(
 
 @router.get("/name/{actor_name}")
 async def get_actor_by_name(
-    actor_name: str, db_session: Session = Depends(get_db)
+    actor_name: str, db_session: AsyncSession = Depends(get_async_db)
 ) -> Actor:
     bound_logger = logger.bind(body={"actor_name": actor_name})
     bound_logger.debug("GET request received: Get actor by name")
     try:
-        actor = crud.get_actor_by_name(db_session, actor_name=actor_name)
+        actor = await crud.get_actor_by_name(db_session, actor_name=actor_name)
     except crud.ActorDoesNotExistError as e:
         bound_logger.info("Bad request: Actor with name not found")
         raise HTTPException(
@@ -117,11 +119,13 @@ async def get_actor_by_name(
 
 
 @router.delete("/{actor_id}", status_code=204)
-async def remove_actor(actor_id: str, db_session: Session = Depends(get_db)) -> None:
+async def remove_actor(
+    actor_id: str, db_session: AsyncSession = Depends(get_async_db)
+) -> None:
     bound_logger = logger.bind(body={"actor_id": actor_id})
     bound_logger.debug("DELETE request received: Delete actor by ID")
     try:
-        crud.delete_actor(db_session, actor_id=actor_id)
+        await crud.delete_actor(db_session, actor_id=actor_id)
     except crud.ActorDoesNotExistError as e:
         bound_logger.info("Bad request: Actor with id not found.")
         raise HTTPException(

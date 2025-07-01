@@ -165,8 +165,9 @@ async def issue_alice_creds(
 
     faber_conn_id = faber_and_alice_connection.faber_connection_id
 
+    num_creds = 3
     faber_cred_ex_ids = []
-    for i in range(3):
+    for i in range(num_creds):
         credential = {
             "connection_id": faber_conn_id,
             "save_exchange_record": True,
@@ -186,8 +187,8 @@ async def issue_alice_creds(
 
     num_tries = 0
     num_credentials_returned = 0
-    while num_credentials_returned != 3 and num_tries < 10:
-        await asyncio.sleep(0.25)
+    while num_credentials_returned != num_creds and num_tries < 10:
+        await asyncio.sleep(1)
         alice_cred_ex_response = (
             await alice_member_client.get(
                 f"{CREDENTIALS_BASE_PATH}?connection_id={faber_and_alice_connection.alice_connection_id}"
@@ -201,9 +202,9 @@ async def issue_alice_creds(
         num_credentials_returned = len(alice_cred_ex_response)
         num_tries += 1
 
-    if num_credentials_returned != 3:
+    if num_credentials_returned != num_creds:
         pytest.fail(
-            f"Expected 3 credentials to be issued; only got {num_credentials_returned}"
+            f"Expected {num_creds} credentials to be issued; only got {num_credentials_returned}"
         )
 
     for cred in alice_cred_ex_response:
@@ -231,7 +232,7 @@ async def issue_alice_creds(
         if record["credential_exchange_id"] in faber_cred_ex_ids
     ]
 
-    assert len(cred_ex_response) == 3
+    assert len(cred_ex_response) == num_creds
 
     return [CredentialExchange(**cred) for cred in cred_ex_response]
 

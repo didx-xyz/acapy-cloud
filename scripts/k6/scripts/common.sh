@@ -21,9 +21,18 @@ wrn() {
   echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: WARNING: $@" >&1
 }
 
+get_output_flags() {
+  if [[ "${ENABLE_STATSD:-false}" == "true" ]]; then
+    echo "-o output-statsd"
+  else
+    echo ""
+  fi
+}
+
 run_test() {
   local test_script="$1"
-  xk6 run -o output-statsd "${test_script}"
+  local output_flags=$(get_output_flags)
+  xk6 run "${output_flags}" "${test_script}"
   local exit_code=$?
   if [[ ${exit_code} -ne 0 ]]; then
     echo "Test ${test_script} failed with exit code ${exit_code}" >&2

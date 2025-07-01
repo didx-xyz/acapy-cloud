@@ -21,21 +21,39 @@ Configure local environment variables:
 cp env.local .env.local
 ```
 
-### Shipping local k6 metrics to Datadog
+### Basic Usage (No Metrics)
+
+By default, the K6 framework runs without DataDog metrics collection:
 
 ```sh
-DOCKER_CONTENT_TRUST=1 \
-docker run -d \
-    --name datadog \
-    -v /var/run/docker.sock:/var/run/docker.sock:ro \
-    -v /proc/:/host/proc/:ro \
-    -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
-    -e DD_SITE="datadoghq.eu" \
-    -e DD_API_KEY=<YOUR_DATADOG_API_KEY> \
-    -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=1 \
-    -p 8125:8125/udp \
-    datadog/agent:latest
+# Default behavior - no StatsD dependency, no DataDog container
+docker compose up
 ```
+
+### With DataDog Metrics
+
+To enable StatsD metrics collection with DataDog use the metrics compose file:
+
+```sh
+# Enable StatsD metrics + DataDog container
+docker compose -f compose.yaml -f compose.metrics.yaml up
+```
+
+This approach automatically:
+- Starts the DataDog container with health checks
+- Enables StatsD metrics in K6 (`ENABLE_STATSD=true`)
+- Configures proper service dependencies
+- Waits for DataDog to be healthy before starting K6
+
+The multiple compose files approach ensures clean separation and avoids dependency validation issues.
+
+### Environment Variables
+
+Key configuration options:
+
+- `ENABLE_STATSD`: Enable/disable DataDog StatsD metrics (default: `false`)
+- `K6_STATSD_ADDR`: DataDog StatsD address (default: `datadog:8125` when enabled)
+- `K6_STATSD_PUSH_INTERVAL`: Metrics push interval in seconds (default: `5`)
 
 ## Running Biome to lint/format code
 

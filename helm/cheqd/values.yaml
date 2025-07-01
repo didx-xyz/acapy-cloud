@@ -12,6 +12,11 @@ fullnameOverride: ""
 # Going over 1 could cause your node to be slashed and jailed as your keys are assumed compromised.
 replicaCount: 1
 
+# This is for configuring a PodDisruptionBudget (PDB) more information can be found here: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
+pdb:
+  enabled: true
+  maxUnavailable: 1
+
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
   registry: ghcr.io
@@ -267,9 +272,6 @@ snapshot:
   filename: cheqd-{{ .Values.networkId }}_{{ .Values.snapshot.date }}.tar.lz4
   url: https://cheqd-node-backups.ams3.digitaloceanspaces.com/{{ .Values.network }}/{{ .Values.snapshot.date }}/{{ tpl .Values.snapshot.filename . }}
   checksum: b188a8605dccffbdaa73ee61397ab7c5de82b59967e70f496c55cb98653ba816
-  podLabels: {}
-  podAnnotations:
-    ad.datadoghq.com/exclude: "true"
 
 config:
   app_toml:

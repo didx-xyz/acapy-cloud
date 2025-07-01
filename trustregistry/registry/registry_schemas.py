@@ -1,13 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.log_config import get_logger
 from shared.models.trustregistry import Schema
 from shared.util.resolve_cheqd_resources import resolve_cheqd_schema
 from trustregistry import crud
-from trustregistry.db import get_db
+from trustregistry.db import get_async_db
 
 logger = get_logger(__name__)
 
@@ -20,10 +20,10 @@ class SchemaID(BaseModel):
 
 @router.get("")
 async def get_schemas(
-    db_session: Session = Depends(get_db),  # type: ignore
+    db_session: AsyncSession = Depends(get_async_db),  # type: ignore
 ) -> list[Schema]:
     logger.debug("GET request received: Fetch all schemas")
-    db_schemas = crud.get_schemas(db_session)
+    db_schemas = await crud.get_schemas(db_session)
 
     # Convert database models to pydantic models
     result = [Schema(**schema.__dict__) for schema in db_schemas]
@@ -33,7 +33,7 @@ async def get_schemas(
 @router.post("")
 async def register_schema(
     schema_id: SchemaID,
-    db_session: Session = Depends(get_db),  # type: ignore
+    db_session: AsyncSession = Depends(get_async_db),  # type: ignore
 ) -> Schema:
     bound_logger = logger.bind(body={"schema_id": schema_id})
     bound_logger.debug("POST request received: Register schema")
@@ -56,7 +56,7 @@ async def register_schema(
                 id=schema_id.schema_id,
             )
 
-        create_schema_res = crud.create_schema(
+        create_schema_res = await crud.create_schema(
             db_session,
             schema=schema,
         )
@@ -71,7 +71,7 @@ async def register_schema(
 async def update_schema(
     schema_id: str,
     new_schema_id: SchemaID,
-    db_session: Session = Depends(get_db),  # type: ignore
+    db_session: AsyncSession = Depends(get_async_db),  # type: ignore
 ) -> Schema:
     bound_logger = logger.bind(
         body={"schema_id": schema_id, "new_schema_id": new_schema_id}
@@ -95,7 +95,7 @@ async def update_schema(
     )
 
     try:
-        update_schema_res = crud.update_schema(
+        update_schema_res = await crud.update_schema(
             db_session,
             schema=new_schema,
             schema_id=schema_id,
@@ -113,12 +113,12 @@ async def update_schema(
 @router.get("/{schema_id:path}")
 async def get_schema(
     schema_id: str,
-    db_session: Session = Depends(get_db),  # type: ignore
+    db_session: AsyncSession = Depends(get_async_db),  # type: ignore
 ) -> Schema:
     bound_logger = logger.bind(body={"schema_id": schema_id})
     bound_logger.debug("GET request received: Fetch schema")
     try:
-        schema = crud.get_schema_by_id(db_session, schema_id=schema_id)
+        schema = await crud.get_schema_by_id(db_session, schema_id=schema_id)
     except crud.SchemaDoesNotExistError as e:
         bound_logger.info("Bad request: Schema with id not found.")
         raise HTTPException(
@@ -132,12 +132,12 @@ async def get_schema(
 @router.delete("/{schema_id}", status_code=204)
 async def remove_schema(
     schema_id: str,
-    db_session: Session = Depends(get_db),  # type: ignore
+    db_session: AsyncSession = Depends(get_async_db),  # type: ignore
 ) -> None:
     bound_logger = logger.bind(body={"schema_id": schema_id})
     bound_logger.debug("DELETE request received: Delete schema")
     try:
-        crud.delete_schema(db_session, schema_id=schema_id)
+        await crud.delete_schema(db_session, schema_id=schema_id)
     except crud.SchemaDoesNotExistError as e:
         bound_logger.info("Bad request: Schema with id not found.")
         raise HTTPException(
