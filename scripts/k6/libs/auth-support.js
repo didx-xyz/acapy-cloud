@@ -9,12 +9,12 @@ export function getOrgId() {
   return "dummy-org-id";
 }
 
-export function fetchClientSecretFromAPI() {
+export function fetchClientSecret() {
   console.log("Using dummy client secret for non-enterprise mode");
   return "dummy-client-secret";
 }
 
-export function fetchGovernanceSecretFromAPI() {
+export function fetchGovernanceSecret() {
   console.log("Using dummy governance secret for non-enterprise mode");
   return "dummy-governance-secret";
 }
