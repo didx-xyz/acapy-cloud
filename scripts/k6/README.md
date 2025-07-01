@@ -15,11 +15,7 @@ parallel with K8s Pytests.
 
 ## Running K6 Scripts
 
-Configure local environment variables:
-
-```sh
-cp env.local .env.local
-```
+Run with docker compose
 
 ### Basic Usage (No Metrics)
 
@@ -37,6 +33,15 @@ To enable StatsD metrics collection with DataDog use the metrics compose file:
 ```sh
 # Enable StatsD metrics + DataDog container
 docker compose -f compose.yaml -f compose.metrics.yaml up
+```
+
+It is recommended to start DataDog in a separate window to keep the logs specific to K6 clean:
+
+```sh
+# Start DataDog container separately
+docker compose -f compose.metrics.yaml up datadog
+# Start K6 in another terminal
+docker compose -f compose.metrics.yaml up xk6
 ```
 
 This approach automatically:

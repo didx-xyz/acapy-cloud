@@ -24,15 +24,17 @@ wrn() {
 get_output_flags() {
   if [[ "${ENABLE_STATSD:-false}" == "true" ]]; then
     echo "-o output-statsd"
-  else
-    echo ""
   fi
 }
 
 run_test() {
   local test_script="$1"
   local output_flags=$(get_output_flags)
-  xk6 run "${output_flags}" "${test_script}"
+  if [[ -n "${output_flags}" ]]; then
+    xk6 run ${output_flags} "${test_script}"
+  else
+    xk6 run "${test_script}"
+  fi
   local exit_code=$?
   if [[ ${exit_code} -ne 0 ]]; then
     echo "Test ${test_script} failed with exit code ${exit_code}" >&2
