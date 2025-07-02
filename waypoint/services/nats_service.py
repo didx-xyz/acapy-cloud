@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import orjson
+from nats.aio.msg import Msg
 from nats.errors import BadSubscriptionError, ConnectionClosedError, Error
 from nats.js.api import ConsumerConfig, DeliverPolicy
 from nats.js.client import JetStreamContext
@@ -145,7 +146,9 @@ class NatsEventsProcessor:
         stop_event: asyncio.Event,
         duration: int | None = None,
         look_back: int | None = None,
-    ) -> AsyncGenerator[AsyncGenerator[CloudApiWebhookEventGeneric, None], None]:
+    ) -> AsyncGenerator[
+        AsyncGenerator[tuple[CloudApiWebhookEventGeneric, Msg], None], None
+    ]:
         duration = duration or SSE_TIMEOUT
         look_back = look_back or SSE_LOOK_BACK
         request_uuid = uuid4()
@@ -173,7 +176,7 @@ class NatsEventsProcessor:
 
         async def event_generator(
             *, subscription: JetStreamContext.PullSubscription
-        ) -> AsyncGenerator[CloudApiWebhookEventGeneric, None]:
+        ) -> AsyncGenerator[tuple[CloudApiWebhookEventGeneric, Msg], None]:
             try:
                 num_timeout_errors = 0
                 end_time = time.time() + duration
@@ -192,8 +195,7 @@ class NatsEventsProcessor:
                         for message in messages:
                             event = orjson.loads(message.data)
                             bound_logger.trace("Received event: {}", event)
-                            yield CloudApiWebhookEventGeneric(**event)
-                            await message.ack()
+                            yield CloudApiWebhookEventGeneric(**event), message
 
                     except FetchTimeoutError:
                         # Fetch timeout, continue

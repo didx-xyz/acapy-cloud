@@ -55,7 +55,7 @@ async def nats_event_stream_generator(
     ) as event_generator:
         background_tasks.add_task(check_disconnect, request, stop_event)
 
-        async for event in event_generator:
+        async for event, msg in event_generator:
             if await request.is_disconnected():
                 logger.debug("Client disconnected")
                 stop_event.set()
@@ -65,6 +65,7 @@ async def nats_event_stream_generator(
             if payload.get(field) == field_id:
                 logger.trace("Event found yielding event {}", event)
                 yield event.model_dump_json()
+                await msg.ack()
                 stop_event.set()
                 break
 
