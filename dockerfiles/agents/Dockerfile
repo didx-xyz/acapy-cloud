@@ -1,4 +1,4 @@
-FROM ghcr.io/didx-xyz/acapy-agent:py3.12-1.3.0-20250625@sha256:b0cbe137c732ca5cedfd27c600ba767a7cdac0b7a555da4eeb799c481d41be11
+FROM ghcr.io/didx-xyz/acapy-agent:py3.12-test-1.3.1-20250702@sha256:967a31aa604bbda64d694672581688c31deec26a811547c331fdd6ed162c00dc
 
 USER root
 
