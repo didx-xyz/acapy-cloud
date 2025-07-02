@@ -149,6 +149,24 @@ class NatsEventsProcessor:
     ) -> AsyncGenerator[
         AsyncGenerator[tuple[CloudApiWebhookEventGeneric, Msg], None], None
     ]:
+        """Generator for NATS events.
+
+        Yields an async generator that will yield events with the message object.
+        The NATS message object is included so it can be ack'd if the event matches the request.
+
+        Args:
+            group_id: The group ID to subscribe to.
+            wallet_id: The wallet ID to subscribe to.
+            topic: The topic to subscribe to (e.g. "connections", "credentials", "proofs", etc.).
+            state: The desired state of the records to be returned.
+            stop_event: An event object to trigger stop of the generator.
+            duration: The duration to subscribe for.
+            look_back: The duration in seconds to look back for events.
+
+        Returns:
+            An async generator that will yield events with the message object.
+
+        """
         duration = duration or SSE_TIMEOUT
         look_back = look_back or SSE_LOOK_BACK
         request_uuid = uuid4()
