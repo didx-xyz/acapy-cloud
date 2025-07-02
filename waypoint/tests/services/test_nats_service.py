@@ -140,7 +140,7 @@ async def test_process_events(
         duration=0.01,
     ) as event_generator:
         events = []
-        async for event in event_generator:
+        async for event, _ in event_generator:
             events.append(event)
             stop_event.set()
 
@@ -149,7 +149,6 @@ async def test_process_events(
     assert events[0].payload["field"] == "value"
 
     mock_subscription.fetch.assert_called()
-    mock_message.ack.assert_called_once()
 
 
 @pytest.mark.anyio

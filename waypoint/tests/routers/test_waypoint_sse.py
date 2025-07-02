@@ -4,6 +4,7 @@ from unittest.mock import ANY, AsyncMock, patch
 
 import pytest
 from fastapi import BackgroundTasks, Request
+from nats.aio.msg import Msg
 from sse_starlette import EventSourceResponse
 
 from shared.constants import DISCONNECT_CHECK_PERIOD
@@ -90,9 +91,9 @@ async def test_sse_event_stream_generator_wallet_id_topic_field_desired_state(
     request_mock,  # pylint: disable=redefined-outer-name
 ):
     async def mock_event_generator() -> AsyncGenerator[
-        CloudApiWebhookEventGeneric, None
+        tuple[CloudApiWebhookEventGeneric, Msg], None
     ]:
-        yield expected_cloudapi_event
+        yield expected_cloudapi_event, AsyncMock(spec=Msg)
 
     nats_processor_mock.process_events.return_value.__aenter__.return_value = (
         mock_event_generator()
@@ -126,10 +127,10 @@ async def test_sse_event_stream_generator_disconnects(
     request.is_disconnected.return_value = True
 
     async def mock_event_generator() -> AsyncGenerator[
-        CloudApiWebhookEventGeneric, None
+        tuple[CloudApiWebhookEventGeneric, Msg], None
     ]:
-        yield dummy_cloudapi_event
-        yield expected_cloudapi_event
+        yield dummy_cloudapi_event, AsyncMock(spec=Msg)
+        yield expected_cloudapi_event, AsyncMock(spec=Msg)
 
     nats_processor_mock.process_events.return_value.__aenter__.return_value = (
         mock_event_generator()
