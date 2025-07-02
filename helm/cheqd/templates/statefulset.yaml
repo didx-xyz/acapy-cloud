@@ -231,10 +231,10 @@ spec:
               protocol: TCP
           env:
             - name: CHEQD_NODED_P2P_PERSISTENT_PEERS
-              {{- if and .Values.lbService.enabled .Values.lbService.hostname }}
-              value: "{{ range $i, $nodeId := .Values.nodeIds }}{{ if $i }},{{ end }}{{ $nodeId }}@{{ $.Values.lbService.hostname }}:{{ add $i $.Values.service.p2pPort }}{{ end }}"
+              {{- if .Values.lbService.enabled }}
+              value: "{{ range $i, $nodeId := .Values.nodeIds }}{{ if $i }},{{ end }}{{ $nodeId }}@{{ include "cheqd.fullname" $ }}-lb.{{ $.Release.Namespace }}.svc.{{ $.Values.clusterDomain }}:{{ add $i $.Values.service.p2pPort }}{{ end }}"
               {{- else }}
-              value: "{{ range $i, $nodeId := .Values.nodeIds }}{{ if $i }},{{ end }}{{ $nodeId }}@{{ include "cheqd.fullname" $ }}-{{ $i }}.{{ include "cheqd.fullname" $ }}-headless.{{ $.Release.Namespace }}.svc.cluster.local:{{ add $i $.Values.service.p2pPort }}{{ end }}"
+              value: "{{ range $i, $nodeId := .Values.nodeIds }}{{ if $i }},{{ end }}{{ $nodeId }}@{{ include "cheqd.fullname" $ }}-{{ $i }}.{{ include "cheqd.fullname" $ }}-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.clusterDomain }}:{{ add $i $.Values.service.p2pPort }}{{ end }}"
               {{- end }}
             - name: POD_NAME
               valueFrom:
