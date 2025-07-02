@@ -74,6 +74,9 @@ statefulSetLabels: {}
 # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 podLabels: {}
 
+# This is for setting the pod management policy more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#pod-management-policy
+podManagementPolicy: OrderedReady # OrderedReady or Parallel
+
 podSecurityContext:
   fsGroup: 1000
 
