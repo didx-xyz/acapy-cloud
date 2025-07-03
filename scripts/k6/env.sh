@@ -1,8 +1,4 @@
 #!/bin/bash
-# Source secret if it exists
-if [ -f "./.env.local" ]; then
-  source ./.env.local
-fi
 
 # StatsD/DataDog Configuration
 export ENABLE_STATSD=${ENABLE_STATSD:-false}
