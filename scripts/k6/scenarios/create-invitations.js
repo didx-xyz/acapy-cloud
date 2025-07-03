@@ -115,8 +115,8 @@ export default function (data) {
 
 
   let holderConnectionId;
-  let holderDid;
-  let holderFullDid;
+  let invitationMsgId;
+  // let holderFullDid;
 
   if (useOobInvitation) {
     // OOB Invitation flow
@@ -190,9 +190,9 @@ export default function (data) {
       },
     });
 
-    const { my_did: holderPrivateDidFull } = JSON.parse(getHolderPrivateDidResponse.body);
-    holderDid = holderPrivateDidFull.split(':').slice(0, 3).join(':');
-    holderFullDid = holderPrivateDidFull;
+    const { invitation_msg_id: invitationMsgIdTemp } = JSON.parse(getHolderPrivateDidResponse.body);
+    invitationMsgId = invitationMsgIdTemp;
+    // holderFullDid = holderPrivateDidFull;
   } else {
     // DIDExchange flow
     console.debug("Using DIDExchange flow");
@@ -241,8 +241,8 @@ export default function (data) {
     accessToken: issuer.accessToken,
     walletId: issuer.walletId,
     topic: "connections",
-    field: "their_did",
-    fieldId: holderFullDid,
+    field: "invitation_msg_id",
+    fieldId: invitationMsgId,
     state: "completed",
     maxAttempts: 3,
     lookBack: 60,
