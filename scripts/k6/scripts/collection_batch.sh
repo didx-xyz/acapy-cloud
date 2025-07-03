@@ -14,8 +14,6 @@ config() {
   export SCHEMA_VERSION=${SCHEMA_VERSION:-"0.1.0"}
   export BASE_HOLDER_PREFIX=${BASE_HOLDER_PREFIX:-"demoholder"}
   export TOTAL_BATCHES=${TOTAL_BATCHES:-2}  # New configuration parameter
-  export DENOMINATOR=${DENOMINATOR:-3}
-  export FACTOR=${FACTOR:-1}
   # Default issuers if none are provided
   default_issuers=("local_pop" "local_acc")
 
@@ -31,27 +29,6 @@ config() {
   export issuers
 }
 
-divide_vus() {
-  local base_vus=$1
-  local base_iters=$2
-  local denominator=$3
-
-  export VUS=$((base_vus / denominator))
-  export ITERATIONS=$((base_iters * denominator))
-
-  log "Recalculated VUs - VUs: ${VUS}, Iterations: ${ITERATIONS}"
-}
-
-multiply_vus() {
-  local base_vus=$1
-  local base_iters=$2
-  local factor=$3
-
-  export VUS=$((base_vus * factor))
-  export ITERATIONS=$((base_iters / factor))
-
-  log "Recalculated VUs - VUs: ${VUS}, Iterations: ${ITERATIONS}"
-}
 
 should_init_issuer() {
   local issuer_prefix="$1"
@@ -84,19 +61,14 @@ scenario_create_invitations() {
 }
 
 scenario_create_credentials() {
-  local original_vus=${BASE_VUS}
-  local original_iters=${BASE_ITERATIONS}
-
-  divide_vus "${original_vus}" "${original_iters}" "${DENOMINATOR}"
-
+  export VUS=${BASE_VUS}
+  export ITERATIONS=${BASE_ITERATIONS}
   run_test ./scenarios/create-credentials.js
 }
 
 scenario_create_proof_verified() {
-  local original_vus=${BASE_VUS}
-  local original_iters=${BASE_ITERATIONS}
-
-  multiply_vus "${original_vus}" "${original_iters}" "${FACTOR}"
+  export VUS=${BASE_VUS}
+  export ITERATIONS=${BASE_ITERATIONS}
   run_test ./scenarios/create-proof.js
 }
 
@@ -129,10 +101,8 @@ scenario_publish_revoke() {
 
 scenario_create_proof_unverified() {
   export IS_REVOKED=true
-  local original_vus=${BASE_VUS}
-  local original_iters=${BASE_ITERATIONS}
-
-  multiply_vus "${original_vus}" "${original_iters}" "${FACTOR}"
+  export VUS=${BASE_VUS}
+  export ITERATIONS=${BASE_ITERATIONS}
   run_test ./scenarios/create-proof.js
 }
 
