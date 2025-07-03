@@ -356,7 +356,7 @@ def build_cloudapi_service(service, image={}):
         deps=["./"],
         live_update=image.get("live_update", []),
         skips_local_docker=True,
-        ignore=["**/tests/**"] + image.get("ignore", []),
+        ignore=["scripts/k6/**", "**/tests/**"] + image.get("ignore", []),
     )
     return [registry + "/" + service]
 
