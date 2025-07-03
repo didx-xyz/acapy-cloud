@@ -239,8 +239,8 @@ export function getHolderConnections(holderAccessToken, holderConnectionId) {
   }
 }
 
-export function getIssuerConnectionId(issuerAccessToken, holderDid) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/connections?their_did=${holderDid}`;
+export function getIssuerConnectionId(issuerAccessToken, invitationMsgId) {
+  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/connections?invitation_msg_id=${invitationMsgId}`;
   const params = {
     headers: {
       "x-api-key": issuerAccessToken,

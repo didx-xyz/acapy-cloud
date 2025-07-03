@@ -116,8 +116,6 @@ export default function (data) {
 
   let holderConnectionId;
   let invitationMsgId;
-  let holderDid;
-  let holderFullDid;
 
   if (useOobInvitation) {
     // OOB Invitation flow
@@ -193,9 +191,7 @@ export default function (data) {
 
     const { invitation_msg_id: invitationMsgIdTemp } = JSON.parse(getHolderPrivateDidResponse.body);
     invitationMsgId = invitationMsgIdTemp;
-    const { my_did: holderPrivateDidFull } = JSON.parse(getHolderPrivateDidResponse.body);
-    holderDid = holderPrivateDidFull.split(':').slice(0, 3).join(':');
-    holderFullDid = holderPrivateDidFull;
+
   } else {
     // DIDExchange flow
     console.debug("Using DIDExchange flow");
@@ -222,10 +218,9 @@ export default function (data) {
         return true;
       },
     });
-    const responseBody = JSON.parse(createInvitationResponse.body);
+    const { invitation_msg_id: invitationMsgIdTemp } = JSON.parse(createInvitationResponse.body);
+    invitationMsgId = invitationMsgIdTemp;
     holderConnectionId = responseBody.connection_id;
-    const my_did = responseBody.my_did;
-    holderDid = my_did.split(':').slice(0, 3).join(':');
   }
 
   pollAndCheck({
@@ -257,7 +252,7 @@ export default function (data) {
   let getIssuerConnectionIdResponse;
   try {
     getIssuerConnectionIdResponse = retry(() => {
-      const response = getIssuerConnectionId(issuer.accessToken, holderDid);
+      const response = getIssuerConnectionId(issuer.accessToken, invitationMsgId);
       if (response.status !== 200) {
         throw new Error(`getIssuerConnectionId Non-200 status: ${response.status} ${response.body}`);
       }
