@@ -13,9 +13,6 @@ tilt/docker
 # Helm chart dependencies
 helm/**/charts
 
-# Cheqd Node
-tilt/.cheqd-node
-
 # Nats credentials
 **.creds
 

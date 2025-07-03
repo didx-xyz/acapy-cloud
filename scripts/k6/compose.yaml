@@ -8,6 +8,7 @@ services:
       - ../k6:/k6
     entrypoint: /bin/bash
     command: ./scripts/main.sh -c batch
+    network_mode: host
     environment:
       # StatsD Configuration - conditional based on ENABLE_STATSD
       - ENABLE_STATSD=${ENABLE_STATSD:-false}
@@ -23,7 +24,7 @@ services:
       - SCHEMA_VERSION=0.1.0
       - DENOMINATOR=1
       - FACTOR=1
-      - CLOUDAPI_URL=https://acapy-cloud.dev.didxtech.com
+      - CLOUDAPI_URL=http://cloudapi.127.0.0.1.nip.io
       - TENANT_ADMIN_API_KEY=adminApiKey
       - GOVERNANCE_API_KEY=adminApiKey
       - FIRE_AND_FORGET_REVOCATION=false
