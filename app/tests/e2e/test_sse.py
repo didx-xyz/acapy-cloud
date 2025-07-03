@@ -49,10 +49,7 @@ async def test_sse(
     wallet_id = bob_tenant.wallet_id
     sse_tasks = []
     for i in range(100):
-        task = (
-            await get_event_data(bob_member_client, wallet_id, f"test_sse_{i}"),
-            (f"Failed to get event data on attempt {i}"),
-        )
+        task = get_event_data(bob_member_client, wallet_id, f"test_sse_{i}")
         sse_tasks.append(task)
 
     results = await asyncio.gather(*sse_tasks)
