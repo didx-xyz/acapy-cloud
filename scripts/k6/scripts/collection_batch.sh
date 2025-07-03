@@ -16,7 +16,7 @@ config() {
   # Test configuration
   export SCHEMA_NAME=${SCHEMA_NAME:-"didx_acc"}
   export SCHEMA_VERSION=${SCHEMA_VERSION:-"0.1.0"}
-  export BASE_HOLDER_PREFIX=${BASE_HOLDER_PREFIX:-"demoholder"}
+  export HOLDER_PREFIX_TEMPLATE=${HOLDER_PREFIX_TEMPLATE:-"demoholder"}
   export TOTAL_BATCHES=${TOTAL_BATCHES:-2}
   
   # Default issuers if none are provided
@@ -43,6 +43,12 @@ should_init_issuer() {
 should_create_holders() {
   local holder_prefix="$1"
   ! [[ -f "./output/${holder_prefix}-create-holders.jsonl" ]]
+}
+
+# Helper function to build actual holder prefix from template + batch number
+get_holder_prefix() {
+  local batch_num="$1"
+  echo "${HOLDER_PREFIX_TEMPLATE}_${batch_num}k"
 }
 
 # Execution strategy functions
@@ -75,10 +81,10 @@ init() {
 
 create_holders() {
   local issuer_prefix="$1"
-  local holder_prefix="$2"
+  local batch_num="$2"
 
   export ISSUER_PREFIX="${issuer_prefix}"
-  export HOLDER_PREFIX="${holder_prefix}"
+  export HOLDER_PREFIX=$(get_holder_prefix "${batch_num}")
   export SLEEP_DURATION=0
   run_test ./scenarios/create-holders.js
 }
@@ -119,10 +125,9 @@ cleanup() {
 
   # Clean up holders
   for batch_num in $(seq 1 "${TOTAL_BATCHES}"); do
-    local holder_prefix="${BASE_HOLDER_PREFIX}_${batch_num}k"
-    export HOLDER_PREFIX="${holder_prefix}"
+    export HOLDER_PREFIX=$(get_holder_prefix "${batch_num}")
 
-    log "Cleaning up holders with prefix ${holder_prefix}..."
+    log "Cleaning up holders with prefix ${HOLDER_PREFIX}..."
     local output_flags="$(get_output_flags)"
     xk6 run ${output_flags} ./scenarios/delete-holders.js
   done
@@ -141,7 +146,7 @@ run_batch() {
   local issuer_prefix="$1"
   local holder_batch_num="$2"
 
-  local holder_prefix="${BASE_HOLDER_PREFIX}_${holder_batch_num}k"
+  local holder_prefix=$(get_holder_prefix "${holder_batch_num}")
 
   export ISSUER_PREFIX="${issuer_prefix}"
   export HOLDER_PREFIX="${holder_prefix}"
@@ -157,7 +162,7 @@ run_batch() {
   # Check and create holders if needed
   if should_create_holders "${holder_prefix}"; then
     log "Creating holders for ${issuer_prefix} with prefix ${holder_prefix}..."
-    create_holders "${issuer_prefix}" "${holder_prefix}"
+    create_holders "${issuer_prefix}" "${holder_batch_num}"
   else
     log "Holders already created for ${issuer_prefix} with prefix ${holder_prefix}, skipping..."
   fi
