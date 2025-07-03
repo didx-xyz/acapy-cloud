@@ -13,9 +13,10 @@ SSE_PATH = router.prefix
 async def get_event_data(
     client: RichAsyncClient,
     wallet_id: str,
+    alias: str,
 ) -> dict:
     """Helper function to get event data from SSE."""
-    url = f"{SSE_PATH}/{wallet_id}/connections/alias/test_sse_99/completed"
+    url = f"{SSE_PATH}/{wallet_id}/connections/alias/{alias}/completed"
 
     async with client.stream("GET", url) as response:
         async for line in response.aiter_lines():
@@ -46,8 +47,14 @@ async def test_sse(
     await asyncio.gather(*connection_tasks)
 
     wallet_id = bob_tenant.wallet_id
-
-    for i in range(50):
-        assert await get_event_data(bob_member_client, wallet_id), (
-            f"Failed to get event data on attempt {i}"
+    sse_tasks = []
+    for i in range(100):
+        task = (
+            await get_event_data(bob_member_client, wallet_id, f"test_sse_{i}"),
+            (f"Failed to get event data on attempt {i}"),
         )
+        sse_tasks.append(task)
+
+    results = await asyncio.gather(*sse_tasks)
+    for result in results:
+        assert result, "No event data received from SSE stream"
