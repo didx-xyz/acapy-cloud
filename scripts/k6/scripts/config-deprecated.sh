@@ -1,4 +1,7 @@
 #!/bin/bash
+# DEPRECATED: This configuration file is no longer used by collection_batch.sh workflow
+# Environment variables defined here were only used by deprecated functions in common-deprecated.sh
+# These were related to Kubernetes restart testing which is not part of the current workflow
 
 export NAMESPACE="dev-cloudapi"
 export ISSUER_PREFIX="k6_issuer_debug"
