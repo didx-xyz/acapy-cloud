@@ -116,7 +116,8 @@ export default function (data) {
 
   let holderConnectionId;
   let invitationMsgId;
-  // let holderFullDid;
+  let holderDid;
+  let holderFullDid;
 
   if (useOobInvitation) {
     // OOB Invitation flow
@@ -192,7 +193,9 @@ export default function (data) {
 
     const { invitation_msg_id: invitationMsgIdTemp } = JSON.parse(getHolderPrivateDidResponse.body);
     invitationMsgId = invitationMsgIdTemp;
-    // holderFullDid = holderPrivateDidFull;
+    const { my_did: holderPrivateDidFull } = JSON.parse(getHolderPrivateDidResponse.body);
+    holderDid = holderPrivateDidFull.split(':').slice(0, 3).join(':');
+    holderFullDid = holderPrivateDidFull;
   } else {
     // DIDExchange flow
     console.debug("Using DIDExchange flow");
