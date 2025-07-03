@@ -15,8 +15,8 @@ services:
       - K6_STATSD_ADDR=${K6_STATSD_ADDR:-datadog:8125}
       - K6_CONSOLE_OUTPUT_FANCY=true
       - BASE_HOLDER_PREFIX=holder
-      - BASE_VUS=1
-      - BASE_ITERATIONS=1
+      - VUS=1
+      - ITERATIONS=1
       - TOTAL_BATCHES=1
       - VERSION=0.1.0
       - ISSUERS=issuer
@@ -28,3 +28,6 @@ services:
       - TENANT_ADMIN_API_KEY=adminApiKey
       - GOVERNANCE_API_KEY=adminApiKey
       - FIRE_AND_FORGET_REVOCATION=false
+      - NUM_ISSUERS=1
+      - OOB_INVITATION=true # temporary until connect via pulbic DID on Cheqd is implemented
+      - USE_AUTO_PUBLISH=false

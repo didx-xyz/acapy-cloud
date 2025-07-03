@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source ./env.sh
+source ./env-deprecated.sh
 
 run_test() {
   xk6 run "$1"
