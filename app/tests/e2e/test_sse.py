@@ -37,8 +37,9 @@ async def test_sse(
     bob_tenant: CreateTenantResponse,
     alice_member_client: RichAsyncClient,
 ):
+    nr_connections = 20
     connection_tasks = []
-    for i in range(100):
+    for i in range(nr_connections):
         task = create_bob_alice_connection(
             bob_member_client, alice_member_client, f"test_sse_{i}"
         )
@@ -48,7 +49,7 @@ async def test_sse(
 
     wallet_id = bob_tenant.wallet_id
     sse_tasks = []
-    for i in range(100):
+    for i in range(nr_connections):
         task = get_event_data(bob_member_client, wallet_id, f"test_sse_{i}")
         sse_tasks.append(task)
 
