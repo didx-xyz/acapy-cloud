@@ -2,8 +2,6 @@ load("../utils/Tiltfile", "namespace_create_wrap", "generate_ingress_domain")
 load("ext://color", "color")
 load("ext://helm_resource", "helm_resource", "helm_repo")
 
-# https://github.com/cheqd/cheqd-node
-cheqd_noded_version = "v3.1.9"
 # https://github.com/bitnami/charts/tree/main/bitnami/minio
 minio_version = "17.0.9"
 # https://github.com/rowanruseler/helm-charts/tree/main/charts/pgadmin4
@@ -453,49 +451,14 @@ def setup_cheqd_localnet(namespace, ingress_domain):
     print(color.green("Installing Cheqd Localnet..."))
 
     project_root = os.getcwd()
-    cheqd_path = project_root + "/tilt/.cheqd-node"
-
-    build_enabled = cpu_arch == "arm64"
-
-    if build_enabled and not os.path.exists(cheqd_path):
-        clone_cmd = (
-            "git clone https://github.com/cheqd/cheqd-node.git --depth 1 "
-            + "--branch "
-            + cheqd_noded_version
-            + " "
-            + cheqd_path
-        )
-        print(color.green("Cloning cheqd-node repository..."))
-    else:
-        clone_cmd = "echo 'Cheqd node directory already exists or build is disabled, skipping clone'"
-        print(
-            color.green(
-                "Cheqd node directory already exists or build is disabled, skipping clone"
-            )
-        )
-
-    local_resource(
-        name="checkout-cheqd-node",
-        cmd=clone_cmd,
-        allow_parallel=True,
-        labels=["11-cheqd"],
-    )
 
     setup_cloudapi_service(
         "cheqd",
         "./helm/cheqd",
         namespace,
         ingress_domain,
-        build_enabled,
-        {
-            "depends": ["checkout-cheqd-node"],
-            "image": {
-                "registry": "ghcr.io",
-                "tag": cheqd_noded_version.lstrip("v"),
-                "dockerfile": project_root + "/tilt/.cheqd-node/docker/Dockerfile",
-                "context": project_root + "/tilt/.cheqd-node",
-                "ignore": ["**"],
-            },
+        build_enabled=False,
+        release_config={
             "flags": [
                 "--set",
                 "secrets.validatorMnemonic=" + cheqd_validator_mnemonic,
@@ -503,23 +466,23 @@ def setup_cheqd_localnet(namespace, ingress_domain):
             "labels": ["11-cheqd"],
             "links": [
                 link(
-                    "http://api.cheqd." + ingress_domain,
+                    "http://api.cheqd.cloudapi." + ingress_domain,
                     "Cheqd API",
                 ),
                 link(
-                    "http://api.cheqd." + ingress_domain + "/swagger/",
+                    "http://api.cheqd.cloudapi." + ingress_domain + "/swagger/",
                     "Cheqd API Docs",
                 ),
                 link(
-                    "http://rpc.cheqd." + ingress_domain,
+                    "http://rpc.cheqd.cloudapi." + ingress_domain,
                     "Cheqd RPC",
                 ),
                 link(
-                    "https://grpc.cheqd." + ingress_domain,
+                    "https://grpc.cheqd.cloudapi." + ingress_domain,
                     "Cheqd gRPC",
                 ),
                 link(
-                    "http://grpc-web.cheqd." + ingress_domain,
+                    "http://grpc-web.cheqd.cloudapi." + ingress_domain,
                     "Cheqd gRPC Web",
                 ),
             ],

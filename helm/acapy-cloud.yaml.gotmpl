@@ -9,7 +9,7 @@ environments:
       ddProfilingEnabled:
         default: false
         overrides: {}
-      cheqd:
+      cheqdLocalNet:
         enabled: true
         config: {}
       natsReplicaCount: 1
@@ -40,7 +40,7 @@ environments:
           # governance-agent: true
           # multitenant-web: true
           # tenant-web: true
-      cheqd:
+      cheqdLocalNet:
         enabled: true
         config:
           log_level: warn
@@ -114,7 +114,7 @@ releases:
     labels:
       app: cheqd
     namespace: {{ .Values.namespace }}
-    installed: {{ .Values.cheqd.enabled }}
+    installed: {{ .Values.cheqdLocalNet.enabled }}
     chart: ./cheqd
     version: 0.1.0
     values:
@@ -126,7 +126,7 @@ releases:
         {{- if not (eq .Environment.Name "local") }}
         ingress: null # Disable ingress for non-local environments
         {{- end }}
-      {{- with .Values.cheqd.config }}
+      {{- with .Values.cheqdLocalNet.config }}
       - config:
           config_toml:
             log_level: {{ .log_level }}
