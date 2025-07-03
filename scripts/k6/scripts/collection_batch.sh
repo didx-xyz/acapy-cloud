@@ -5,15 +5,20 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 config() {
-  # Global test configuration
-  export BASE_VUS=${BASE_VUS:-30}
-  export BASE_ITERATIONS=${BASE_ITERATIONS:-10}
-  export VUS=${BASE_VUS}
-  export ITERATIONS=${BASE_ITERATIONS}
+  # Base configuration (Docker Compose overridable)
+  export VUS=${VUS:-30}
+  export ITERATIONS=${ITERATIONS:-10}
+  
+  # Work-based configuration (derived from base values)
+  export TOTAL_WORK=$((VUS * ITERATIONS))  # Total operations to perform
+  export CONCURRENCY_LEVEL=${VUS}  # Parallel workers
+  
+  # Test configuration
   export SCHEMA_NAME=${SCHEMA_NAME:-"didx_acc"}
   export SCHEMA_VERSION=${SCHEMA_VERSION:-"0.1.0"}
   export BASE_HOLDER_PREFIX=${BASE_HOLDER_PREFIX:-"demoholder"}
-  export TOTAL_BATCHES=${TOTAL_BATCHES:-2}  # New configuration parameter
+  export TOTAL_BATCHES=${TOTAL_BATCHES:-2}
+  
   # Default issuers if none are provided
   default_issuers=("local_pop" "local_acc")
 
@@ -40,6 +45,28 @@ should_create_holders() {
   ! [[ -f "./output/${holder_prefix}-create-holders.jsonl" ]]
 }
 
+# Execution strategy functions
+run_scenario_parallel() {
+  local script="$1"
+  export VUS=${VUS}
+  export ITERATIONS=${ITERATIONS}
+  run_test "$script"
+}
+
+run_scenario_serial() {
+  local script="$1"
+  export VUS=1
+  export ITERATIONS=${TOTAL_WORK}
+  run_test "$script"
+}
+
+run_scenario_concurrent() {
+  local script="$1"
+  export VUS=${TOTAL_WORK}
+  export ITERATIONS=1
+  run_test "$script"
+}
+
 init() {
   local issuer_prefix="$1"
   export ISSUER_PREFIX="${issuer_prefix}"
@@ -57,53 +84,34 @@ create_holders() {
 }
 
 scenario_create_invitations() {
-  run_test ./scenarios/create-invitations.js
+  run_scenario_parallel ./scenarios/create-invitations.js
 }
 
 scenario_create_credentials() {
-  export VUS=${BASE_VUS}
-  export ITERATIONS=${BASE_ITERATIONS}
-  run_test ./scenarios/create-credentials.js
+  run_scenario_parallel ./scenarios/create-credentials.js
 }
 
 scenario_create_proof_verified() {
-  export VUS=${BASE_VUS}
-  export ITERATIONS=${BASE_ITERATIONS}
-  run_test ./scenarios/create-proof.js
+  run_scenario_parallel ./scenarios/create-proof.js
 }
 
 scenario_revoke_credentials() {
-  local iterations=$((ITERATIONS * VUS))
-  local vus=1
-  export VUS="${vus}"
-  export ITERATIONS="${iterations}"
-  run_test ./scenarios/revoke-credentials.js
+  run_scenario_serial ./scenarios/revoke-credentials.js
 }
 
 scenario_publish_revoke() {
   export IS_REVOKED=true
 
-  local original_vus=${BASE_VUS}
-  local original_iters=${BASE_ITERATIONS}
-
-  # Adjust VUs if FIRE_AND_FORGET_REVOCATION is true
-  local vus=${original_vus}
   if [[ "${FIRE_AND_FORGET_REVOCATION}" == "true" ]]; then
-    vus=$((original_vus * original_iters))
-    iters=1
+    run_scenario_concurrent ./scenarios/publish-revoke.js
   else
-    iters=$original_iters
+    run_scenario_parallel ./scenarios/publish-revoke.js
   fi
-
-  local output_flags=$(get_output_flags)
-  xk6 run ${output_flags} ./scenarios/publish-revoke.js -e ITERATIONS="${iters}" -e VUS="${vus}"
 }
 
 scenario_create_proof_unverified() {
   export IS_REVOKED=true
-  export VUS=${BASE_VUS}
-  export ITERATIONS=${BASE_ITERATIONS}
-  run_test ./scenarios/create-proof.js
+  run_scenario_parallel ./scenarios/create-proof.js
 }
 
 cleanup() {
