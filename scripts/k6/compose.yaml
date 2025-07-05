@@ -1,8 +1,8 @@
 services:
   xk6:
     build: .
+    image: ${XK6_IMAGE:-xk6}
     container_name: xk6
-    image: xk6
     tty: true
     volumes:
       - ../k6:/k6
@@ -14,9 +14,9 @@ services:
       - ENABLE_STATSD=${ENABLE_STATSD:-false}
       - K6_STATSD_ADDR=${K6_STATSD_ADDR:-datadog:8125}
       - K6_CONSOLE_OUTPUT_FANCY=true
-      - BASE_HOLDER_PREFIX=holder
-      - BASE_VUS=1
-      - BASE_ITERATIONS=1
+      - HOLDER_PREFIX_TEMPLATE=holder
+      - VUS=4
+      - ITERATIONS=1
       - TOTAL_BATCHES=1
       - VERSION=0.1.0
       - ISSUERS=issuer
@@ -24,7 +24,10 @@ services:
       - SCHEMA_VERSION=0.1.0
       - DENOMINATOR=1
       - FACTOR=1
-      - CLOUDAPI_URL=http://cloudapi.127.0.0.1.nip.io
-      - TENANT_ADMIN_API_KEY=adminApiKey
-      - GOVERNANCE_API_KEY=adminApiKey
+      - CLOUDAPI_URL=${CLOUDAPI_URL:-http://cloudapi.127.0.0.1.nip.io}
+      - TENANT_ADMIN_API_KEY=${TENANT_ADMIN_API_KEY:-adminApiKey}
+      - GOVERNANCE_API_KEY=${GOVERNANCE_API_KEY:-adminApiKey}
       - FIRE_AND_FORGET_REVOCATION=false
+      - NUM_ISSUERS=1
+      - OOB_INVITATION=true # temporary until connect via pulbic DID on Cheqd is implemented
+      - USE_AUTO_PUBLISH=false
