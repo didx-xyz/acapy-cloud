@@ -273,11 +273,15 @@ secrets: {}
 network: testnet # localnet, testnet, or mainnet
 networkId: testnet-6 # cheqd (localnet), testnet-6, or mainnet-1
 snapshot:
-  # https://snapshots.cheqd.net
+  ## https://snapshots.cheqd.net
+  ## https://www.polkachu.com/tendermint_snapshots/cheqd
+  ## https://www.publicnode.com/snapshots#cheqd
   date: 2025-06-10
   filename: cheqd-{{ .Values.networkId }}_{{ .Values.snapshot.date }}.tar.lz4
   url: https://cheqd-node-backups.ams3.digitaloceanspaces.com/{{ .Values.network }}/{{ .Values.snapshot.date }}/{{ tpl .Values.snapshot.filename . }}
   checksum: b188a8605dccffbdaa73ee61397ab7c5de82b59967e70f496c55cb98653ba816
+  # Delete the data directory to redownload the snapshot
+  reset: false
 
 config:
   app_toml:
