@@ -599,17 +599,27 @@ jobs:
       - name: Prepare output directory
         run: mkdir -p ${{ github.workspace }}/scripts/k6/output && chmod 777 ${{ github.workspace }}/scripts/k6/output
 
-      - name: Run k6 tests
+      - name: Run k6 cleanup
+        continue-on-error: true
         run: |
-          docker run --rm --network=host \
-            -v ${{ github.workspace }}/scripts/k6:/scripts \
-            -e CLOUDAPI_URL="https://acapy-cloud.dev.didxtech.com" \
-            -e GOVERNANCE_API_KEY="adminApiKey" \
-            -e TENANT_ADMIN_API_KEY="adminApiKey" \
-            --workdir /scripts \
-            --entrypoint /bin/sh \
-            ghcr.io/${{ github.repository_owner }}/acapy-cloud/xk6:${VERSION} \
-            /scripts/run_tests.sh
+          cd ${{ github.workspace }}/scripts/k6
+          docker compose run --rm xk6 ./scripts/main.sh -c batch -C
         shell: bash
         env:
           VERSION: ${{ inputs.image-version }}
+          XK6_IMAGE: ghcr.io/${{ github.repository_owner }}/acapy-cloud/xk6:${{ inputs.image-version }}
+          CLOUDAPI_URL: https://acapy-cloud.dev.didxtech.com
+          GOVERNANCE_API_KEY: adminApiKey
+          TENANT_ADMIN_API_KEY: adminApiKey
+
+      - name: Run k6 tests
+        run: |
+          cd ${{ github.workspace }}/scripts/k6
+          docker compose up --abort-on-container-exit
+        shell: bash
+        env:
+          VERSION: ${{ inputs.image-version }}
+          XK6_IMAGE: ghcr.io/${{ github.repository_owner }}/acapy-cloud/xk6:${{ inputs.image-version }}
+          CLOUDAPI_URL: https://acapy-cloud.dev.didxtech.com
+          GOVERNANCE_API_KEY: adminApiKey
+          TENANT_ADMIN_API_KEY: adminApiKey
