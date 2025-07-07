@@ -116,6 +116,10 @@ spec:
               mkdir -p /cheqd/config
               rm -rf /cheqd/lost+found
 
+              {{- if .Values.snapshot.reset }}
+              rm -rf /cheqd/data
+              {{- end }}
+
               # Check if data directory exists with expected content
               if [ -d /cheqd/data/application.db ] && \
                  [ -d /cheqd/data/blockstore.db ] && \
