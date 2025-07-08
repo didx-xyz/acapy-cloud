@@ -57,11 +57,11 @@ cleanup_k6() {
 
 usage() {
   cat <<EOF
-Usage: $(basename "$0") -c COLLECTION [-s STACK] [-C]
-  -c COLLECTION  Specify a test collection (required)
+Usage: $(basename "$0") -c batch [-s STACK] [-C]
+  -c batch       Run the batch test collection (required)
   -s STACK       Specify a stack to restart (WEBS, AGENT, SERVICE, AUTH, or ALL)
                  If not specified, no restarts will occur.
-  -C             Run only the cleanup function for the specified collection
+  -C             Run only the cleanup function
 EOF
   exit 1
 }
@@ -85,9 +85,9 @@ main() {
     esac
   done
 
-  # Check if collection is provided
-  if [[ -z "${collection}" ]]; then
-    echo "Error: Collection must be specified" >&2
+  # Check if collection is batch
+  if [[ "${collection}" != "batch" ]]; then
+    echo "Error: Only 'batch' collection is supported" >&2
     usage
   fi
 
@@ -102,26 +102,21 @@ main() {
     esac
   fi
 
-  local collection_script="${SCRIPT_DIR}/collection_${collection}.sh"
-  if [[ ! -f "${collection_script}" ]]; then
-    echo "Error: Unknown collection '${collection}'" >&2
-    exit 1
-  fi
-
-  source "${collection_script}"
+  # Source the batch script directly
+  source "${SCRIPT_DIR}/batch.sh"
 
   # Check if the cleanup function exists
   if ! declare -f cleanup >/dev/null; then
-    echo "Error: No cleanup function found for collection '${collection}'" >&2
+    echo "Error: No cleanup function found in batch script" >&2
     exit 1
   fi
 
   if ${cleanup_only}; then
-    echo "Running cleanup only for collection '${collection}'..."
+    echo "Running cleanup only for collection 'batch'..."
     config
     cleanup
   else
-    # Run the full collection
+    # Run the full batch collection
     run_collection "${deployments}"
   fi
 }
