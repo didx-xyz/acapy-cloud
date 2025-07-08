@@ -7,12 +7,9 @@ services:
     volumes:
       - ../k6:/k6
     entrypoint: /bin/bash
-    command: ./scripts/main.sh -c batch
+    command: ./scripts/main.sh
     network_mode: host
     environment:
-      # StatsD Configuration - conditional based on ENABLE_STATSD
-      - ENABLE_STATSD=${ENABLE_STATSD:-false}
-      - K6_STATSD_ADDR=${K6_STATSD_ADDR:-datadog:8125}
       - K6_CONSOLE_OUTPUT_FANCY=true
       - HOLDER_PREFIX_TEMPLATE=holder
       - VUS=4

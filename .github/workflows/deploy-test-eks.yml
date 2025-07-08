@@ -603,7 +603,7 @@ jobs:
         continue-on-error: true
         run: |
           cd ${{ github.workspace }}/scripts/k6
-          docker compose run --rm xk6 ./scripts/main.sh -c batch -C
+          docker compose run --rm xk6 ./scripts/main.sh -C
         shell: bash
         env:
           VERSION: ${{ inputs.image-version }}
