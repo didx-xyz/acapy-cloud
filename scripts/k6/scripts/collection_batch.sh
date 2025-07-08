@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
-
 config() {
   # Base configuration (Docker Compose overridable)
   export VUS=${VUS:-30}
