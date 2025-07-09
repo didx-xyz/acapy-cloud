@@ -271,7 +271,7 @@ export default function (data) {
   // log.debug(`Issuer connection ID Response Body: ${getIssuerConnectionIdResponse.body}`);
   const [{ connection_id: issuerConnectionId }] = JSON.parse(getIssuerConnectionIdResponse.body);
 
-  const holderData = JSON.stringify({
+  const connectionData = JSON.stringify({
     wallet_label: holder.wallet_label,
     wallet_name: holder.wallet_name,
     wallet_id: holder.wallet_id,
@@ -283,7 +283,7 @@ export default function (data) {
     issuer_access_token: issuer.access_token,
     issuer_credential_definition_id: issuer.credential_definition_id,
   });
-  file.appendString(outputFilepath, `${holderData}\n`);
+  file.appendString(outputFilepath, `${connectionData}\n`);
 
   testFunctionReqs.add(1);  // Count successful completions with tag
 }
