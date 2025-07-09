@@ -46,7 +46,7 @@ run = "poetry lock --regenerate"
 [tasks."tilt:up"]
 description = "Start Tilt"
 depends = ["kind:create"]
-run = "tilt up"
+run = "tilt up -- $@"
 
 [tasks."tilt:up:podman"]
 description = "Start Tilt with Podman"
