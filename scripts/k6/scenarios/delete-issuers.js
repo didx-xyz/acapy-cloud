@@ -34,7 +34,7 @@ export const options = {
   },
   tags: {
     test_run_id: "phased-issuance",
-    test_phase: "delete-holders",
+    test_phase: "delete-issuers",
   },
 };
 
@@ -78,8 +78,8 @@ export default function (data) {
   const wallet = wallets[walletIndex];
 
   const walletId = getWalletIdByWalletName(tenantAdminHeaders, wallet.wallet_name);
-  const deleteHolderResponse = deleteTenant(tenantAdminHeaders, walletId);
-  check(deleteHolderResponse, {
+  const deleteIssuerResponse = deleteTenant(tenantAdminHeaders, walletId);
+  check(deleteIssuerResponse, {
     "Delete Issuer Tenant Response status code is 204": (r) => {
       if (r.status !== 204 && r.status !== 200) {
         console.error(
