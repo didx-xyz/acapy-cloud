@@ -248,7 +248,7 @@ export default function (data) {
   }, { perspective: "Issuer" });
 
   // Issuer is now going to check
-  sleep(2);
+  // sleep(2);
   let getIssuerConnectionIdResponse;
   try {
     getIssuerConnectionIdResponse = retry(() => {
