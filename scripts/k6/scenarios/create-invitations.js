@@ -79,17 +79,17 @@ export default function (data) {
   const walletIndex = getWalletIndex(__VU, __ITER, iterations);
 
   const holders = data.holders;
-  const wallet = holders[walletIndex];
+  const holder = holders[walletIndex];
 
   const issuerIndex = getIssuerIndex(__VU, __ITER + 1);
   const issuer = issuers[issuerIndex];
 
-  log.debug(`Wallet Index: ${walletIndex}, Issuer Index: ${issuerIndex}, Issuer Wallet ID: ${issuer.walletId}`);
+  log.debug(`Wallet Index: ${walletIndex}, Issuer Index: ${issuerIndex}, Issuer Wallet ID: ${issuer.wallet_id}`);
 
   let publicDidResponse;
   try {
     publicDidResponse = retry(() => {
-      const response = getIssuerPublicDid(issuer.accessToken);
+      const response = getIssuerPublicDid(issuer.access_token);
       if (response.status !== 200) {
         throw new Error(`publicDidResponse: Non-200 status: ${response.body}`);
       }
@@ -123,7 +123,7 @@ export default function (data) {
     let createOobInvitationResponse;
     try {
       createOobInvitationResponse = retry(() => {
-        const response = createInvitation(issuer.accessToken, issuerPublicDid);
+        const response = createInvitation(issuer.access_token, issuerPublicDid);
         if (response.status !== 200) {
           throw new Error(`createOobInvitationResponse Non-200 status: ${response.body}`);
         }
@@ -148,7 +148,7 @@ export default function (data) {
     const { invitation: invitationObj } = JSON.parse(createOobInvitationResponse.body);
 
     const acceptInvitationResponse = acceptInvitation(
-      wallet.access_token,
+      holder.access_token,
       invitationObj
     );
 
@@ -168,7 +168,7 @@ export default function (data) {
     let getHolderPrivateDidResponse;
     try {
       getHolderPrivateDidResponse = retry(() => {
-        const response = getHolderConnections(wallet.access_token, holderConnectionId);
+        const response = getHolderConnections(holder.access_token, holderConnectionId);
         if (response.status !== 200) {
           throw new Error(`getHolderPrivateDidResponse Non-200 status: ${response.body}`);
         }
@@ -198,7 +198,7 @@ export default function (data) {
     let createInvitationResponse;
     try {
       createInvitationResponse = retry(() => {
-        const response = createDidExchangeRequest(wallet.access_token, issuerPublicDid);
+        const response = createDidExchangeRequest(holder.access_token, issuerPublicDid);
         if (response.status !== 200) {
           throw new Error(`createInvitationResponse Non-200 status: ${response.body}`);
         }
@@ -218,14 +218,14 @@ export default function (data) {
         return true;
       },
     });
-    const { invitation_msg_id: invitationMsgIdTemp } = JSON.parse(createInvitationResponse.body);
+    const { invitation_msg_id: invitationMsgIdTemp, connection_id: holderConnectionIdTemp } = JSON.parse(createInvitationResponse.body);
     invitationMsgId = invitationMsgIdTemp;
-    holderConnectionId = responseBody.connection_id;
+    holderConnectionId = holderConnectionIdTemp;
   }
 
   pollAndCheck({
-    accessToken: wallet.access_token,
-    walletId: wallet.wallet_id,
+    accessToken: holder.access_token,
+    walletId: holder.wallet_id,
     topic: "connections",
     field: "connection_id",
     fieldId: holderConnectionId,
@@ -236,8 +236,8 @@ export default function (data) {
   }, { perspective: "Holder" });
 
   pollAndCheck({
-    accessToken: issuer.accessToken,
-    walletId: issuer.walletId,
+    accessToken: issuer.access_token,
+    walletId: issuer.wallet_id,
     topic: "connections",
     field: "invitation_msg_id",
     fieldId: invitationMsgId,
@@ -248,11 +248,11 @@ export default function (data) {
   }, { perspective: "Issuer" });
 
   // Issuer is now going to check
-  sleep(2);
+  // sleep(2);
   let getIssuerConnectionIdResponse;
   try {
     getIssuerConnectionIdResponse = retry(() => {
-      const response = getIssuerConnectionId(issuer.accessToken, invitationMsgId);
+      const response = getIssuerConnectionId(issuer.access_token, invitationMsgId);
       if (response.status !== 200) {
         throw new Error(`getIssuerConnectionId Non-200 status: ${response.status} ${response.body}`);
       }
@@ -271,19 +271,19 @@ export default function (data) {
   // log.debug(`Issuer connection ID Response Body: ${getIssuerConnectionIdResponse.body}`);
   const [{ connection_id: issuerConnectionId }] = JSON.parse(getIssuerConnectionIdResponse.body);
 
-  const holderData = JSON.stringify({
-    wallet_label: wallet.wallet_label,
-    wallet_name: wallet.wallet_name,
-    wallet_id: wallet.wallet_id,
-    access_token: wallet.access_token,
+  const connectionData = JSON.stringify({
+    wallet_label: holder.wallet_label,
+    wallet_name: holder.wallet_name,
+    wallet_id: holder.wallet_id,
+    access_token: holder.access_token,
     connection_id: holderConnectionId,
     issuer_connection_id: issuerConnectionId,
-    issuer_wallet_name: issuer.walletName,
-    issuer_wallet_id: issuer.walletId,
-    issuer_access_token: issuer.accessToken,
-    issuer_credential_definition_id: issuer.credentialDefinitionId,
+    issuer_wallet_name: issuer.wallet_name,
+    issuer_wallet_id: issuer.wallet_id,
+    issuer_access_token: issuer.access_token,
+    issuer_credential_definition_id: issuer.credential_definition_id,
   });
-  file.appendString(outputFilepath, `${holderData}\n`);
+  file.appendString(outputFilepath, `${connectionData}\n`);
 
   testFunctionReqs.add(1);  // Count successful completions with tag
 }

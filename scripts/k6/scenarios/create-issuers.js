@@ -53,8 +53,8 @@ const wallets = new SharedArray("wallets", () => {
     i++
   ) {
     walletsArray.push({
-      walletLabel: `${issuerPrefix} ${i}`,
-      walletName: `${issuerPrefix}_${i}`,
+      wallet_label: `${issuerPrefix} ${i}`,
+      wallet_name: `${issuerPrefix}_${i}`,
     });
   }
   return walletsArray;
@@ -71,11 +71,11 @@ export default function (data) {
   const tenantAdminHeaders = data.tenantAdminHeaders;
   const walletIndex = getWalletIndex(__VU, __ITER, iterations); // __ITER starts from 0, adding 1 to align with the logic
   const wallet = wallets[walletIndex];
-  const credDefTag = wallet.walletName;
+  const credDefTag = wallet.wallet_name;
 
   const createIssuerTenantResponse = createIssuerTenant(
     tenantAdminHeaders,
-    wallet.walletName
+    wallet.wallet_name
   );
   check(createIssuerTenantResponse, {
     "Issuer tenant created successfully": (r) => r.status === 200,
@@ -86,17 +86,17 @@ export default function (data) {
   );
 
   const getTrustRegistryActorResponse = getTrustRegistryActor(
-    wallet.walletName
+    wallet.wallet_name
   );
   check(getTrustRegistryActorResponse, {
     "Trust Registry Actor Response status code is 200": (r) => {
       if (r.status !== 200) {
         console.error(
-          `Unexpected response status while getting trust registry actor for issuer tenant ${wallet.walletName}: ${r.status}`
+          `Unexpected response status while getting trust registry actor for issuer tenant ${wallet.wallet_name}: ${r.status}`
         );
         return false;
       }
-      // console.log(`Got trust registry actor for issuer tenant ${wallet.walletName} successfully.`);
+      // console.log(`Got trust registry actor for issuer tenant ${wallet.wallet_name} successfully.`);
       return true;
     },
   });
@@ -107,8 +107,8 @@ export default function (data) {
   // });
 
   const issuerData = JSON.stringify({
-    wallet_label: wallet.walletLabel,
-    wallet_name: wallet.walletName,
+    wallet_label: wallet.wallet_label,
+    wallet_name: wallet.wallet_name,
     wallet_id: walletId,
     access_token: accessToken,
   });

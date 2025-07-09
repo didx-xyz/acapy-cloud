@@ -52,14 +52,14 @@ export const options = {
 };
 
 export function setup() {
-  const tenants = data.trim().split("\n").map(JSON.parse);
-  return { tenants };
+  const issuers = data.trim().split("\n").map(JSON.parse);
+  return { issuers };
 }
 
 export default function (data) {
-  const tenants = data.tenants;
+  const issuers = data.issuers;
   const walletIndex = getWalletIndex(__VU, __ITER, iterations);
-  const wallet = tenants[walletIndex];
+  const issuer = issuers[walletIndex];
 
   // Check environment variable to determine revocation method
   const useAutoPublish =
@@ -71,8 +71,8 @@ export default function (data) {
   if (useAutoPublish) {
     // Option A: Use auto-publish (full flow)
     revokeCredentialResponse = revokeCredentialAutoPublish(
-      wallet.issuer_access_token,
-      wallet.credential_exchange_id
+      issuer.issuer_access_token,
+      issuer.credential_exchange_id
     );
     check(revokeCredentialResponse, {
       "Credential revoked successfully": (r) => {
@@ -81,15 +81,15 @@ export default function (data) {
             `VU ${__VU}: Iteration ${__ITER}: Unexpected response while revoking credential: ${r.response}`
           );
         }
-        log.debug(`Revoked: Wallet Index: ${walletIndex}, Issuer Connection ID: ${wallet.issuer_connection_id}`);
+        log.debug(`Revoked: Wallet Index: ${walletIndex}, Issuer Connection ID: ${issuer.issuer_connection_id}`);
         return true;
       },
     });
 
     // Check if credential is revoked when using auto-publish
     const checkRevokedCredentialResponse = checkRevoked(
-      wallet.issuer_access_token,
-      wallet.credential_exchange_id
+      issuer.issuer_access_token,
+      issuer.credential_exchange_id
     );
     check(checkRevokedCredentialResponse, {
       "Credential state is revoked": (r) => {
@@ -111,8 +111,8 @@ export default function (data) {
     // Option B: Only revoke (no publish, no check)
     // log.debug(`Revoking credential without auto-publish.`);
     revokeCredentialResponse = revokeCredential(
-      wallet.issuer_access_token,
-      wallet.credential_exchange_id
+      issuer.issuer_access_token,
+      issuer.credential_exchange_id
     );
     check(revokeCredentialResponse, {
       "Credential revoked successfully": (r) => {

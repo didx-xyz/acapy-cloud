@@ -3,9 +3,13 @@
 set -euo pipefail
 
 config() {
+  # Store user-configured values from Docker environment
+  export CONFIGURED_VUS=${VUS:-30}
+  export CONFIGURED_ITERATIONS=${ITERATIONS:-10}
+
   # Base configuration (Docker Compose overridable)
-  export VUS=${VUS:-30}
-  export ITERATIONS=${ITERATIONS:-10}
+  export VUS=${CONFIGURED_VUS}
+  export ITERATIONS=${CONFIGURED_ITERATIONS}
 
   # Work-based configuration (derived from base values)
   export TOTAL_WORK=$((VUS * ITERATIONS))  # Total operations to perform
@@ -52,8 +56,8 @@ get_holder_prefix() {
 # Execution strategy functions
 run_scenario_parallel() {
   local script="$1"
-  export VUS=${VUS}
-  export ITERATIONS=${ITERATIONS}
+  export VUS=${CONFIGURED_VUS}
+  export ITERATIONS=${CONFIGURED_ITERATIONS}
   run_test "$script"
 }
 

@@ -61,8 +61,8 @@ try {
 }
 
 export function setup() {
-  let tenants = data.trim().split("\n").map(JSON.parse);
-  tenants = shuffleArray(tenants);
+  let connections = data.trim().split("\n").map(JSON.parse);
+  connections = shuffleArray(connections);
 
   // Parse the epoch timestamp from the data read in init stage
   let epochTimestamp = null;
@@ -76,23 +76,23 @@ export function setup() {
     console.warn(`Could not parse epoch timestamp: ${error.message}`);
   }
 
-  return { tenants, epochTimestamp };
+  return { connections, epochTimestamp };
 }
 
 export default function (data) {
-  const tenants = data.tenants;
+  const connections = data.connections;
   const epochTimestamp = data.epochTimestamp;
   const walletIndex = getWalletIndex(__VU, __ITER, iterations);
-  const wallet = tenants[walletIndex];
+  const connection = connections[walletIndex];
 
-  // const sendProofRequestResponse = sendProofRequest(issuer.accessToken, wallet.issuer_connection_id);
-  log.debug(`walletIndex: ${walletIndex}, walletId: ${wallet.wallet_id}, issuerConnectionId: ${wallet.issuer_connection_id}, issuerAccessToken: ${wallet.issuer_access_token}`);
+  // const sendProofRequestResponse = sendProofRequest(issuer.accessToken, connection.issuer_connection_id);
+  log.debug(`walletIndex: ${walletIndex}, walletId: ${connection.wallet_id}, issuerConnectionId: ${connection.issuer_connection_id}, issuerAccessToken: ${connection.issuer_access_token}`);
   let sendProofRequestResponse;
   try {
     sendProofRequestResponse = retry(() => {
       const response = sendProofRequest(
-        wallet.issuer_access_token,
-        wallet.issuer_connection_id
+        connection.issuer_access_token,
+        connection.issuer_connection_id
       );
       if (response.status !== 200) {
         throw new Error(`Non-200 status: ${response.status}`);
@@ -117,8 +117,8 @@ export default function (data) {
   const { thread_id: threadId } = JSON.parse(sendProofRequestResponse.body);
 
   pollAndCheck({
-    accessToken: wallet.access_token,
-    walletId: wallet.wallet_id,
+    accessToken: connection.access_token,
+    walletId: connection.wallet_id,
     topic: "proofs",
     field: "thread_id",
     fieldId: threadId,
@@ -130,13 +130,13 @@ export default function (data) {
   }, { perspective: "Holder" });
 
   // TODO: return object and add check for the response
-  const proofId = getProofIdByThreadId(wallet.access_token, threadId);
+  const proofId = getProofIdByThreadId(connection.access_token, threadId);
   // console.log(`Proof ID: ${proofId}`);
 
   let credentialId;
   try {
     credentialId = retry(() => {
-      return getProofIdCredentials(wallet.access_token, proofId, epochTimestamp);
+      return getProofIdCredentials(connection.access_token, proofId, epochTimestamp);
     }, 5, 2000, 'Get credential ID');
   } catch (error) {
     console.error(`Failed to get proof credentials after retries: ${error.message}`);
@@ -155,7 +155,7 @@ export default function (data) {
   try {
     acceptProofResponse = retry(() => {
       const response = acceptProofRequest(
-        wallet.access_token,
+        connection.access_token,
         proofId,
         credentialId
       );
@@ -180,8 +180,8 @@ export default function (data) {
   });
 
   pollAndCheck({
-    accessToken: wallet.access_token,
-    walletId: wallet.wallet_id,
+    accessToken: connection.access_token,
+    walletId: connection.wallet_id,
     topic: "proofs",
     field: "thread_id",
     fieldId: threadId,
@@ -192,13 +192,13 @@ export default function (data) {
     sseTag: "proof_done",
   }, { perspective: "Holder" });
 
-  // const getProofResponse = getProof(issuer.accessToken, wallet.issuer_connection_id, threadId );
+  // const getProofResponse = getProof(issuer.accessToken, connection.issuer_connection_id, threadId );
   let getProofResponse;
   try {
     getProofResponse = retry(() => {
       const response = getProof(
-        wallet.issuer_access_token,
-        wallet.issuer_connection_id,
+        connection.issuer_access_token,
+        connection.issuer_connection_id,
         threadId
       );
       if (response.status !== 200) {
@@ -230,7 +230,7 @@ export default function (data) {
     }
     const responseBody = JSON.parse(r.body);
     if (responseBody[0].verified !== false) {
-      log.debug(`Wallet Index: ${walletIndex}, Issuer Connection ID: ${wallet.issuer_connection_id}`);
+      log.debug(`Wallet Index: ${walletIndex}, Issuer Connection ID: ${connection.issuer_connection_id}`);
       throw new Error(
         `Credential is not unverified. Current verification status: ${responseBody[0].verified}`
       );
