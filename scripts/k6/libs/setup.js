@@ -44,10 +44,10 @@ export function bootstrapIssuer(
     if (credentialDefinitionId) {
       log.info(`Credential definition already exists for issuer ${walletName}_0 - Skipping creation`)
       issuers.push({
-        walletName: walletName,
-        walletId: issuerWalletId,
-        accessToken: issuerAccessToken,
-        credentialDefinitionId,
+        wallet_name: walletName,
+        wallet_id: issuerWalletId,
+        access_token: issuerAccessToken,
+        credential_definition_id: credentialDefinitionId,
       });
     } else {
       log.info(`Credential definition not found for issuer ${walletName}_0 - Creating new one`);
@@ -77,10 +77,10 @@ export function bootstrapIssuer(
         );
         log.info(`definition created successfully for issuer ${walletName}_0`);
         issuers.push({
-          walletName: walletName,
-          walletId: issuerWalletId,
-          accessToken: issuerAccessToken,
-          credentialDefinitionId: credentialDefinitionId,
+          wallet_name: walletName,
+          wallet_id: issuerWalletId,
+          access_token: issuerAccessToken,
+          credential_definition_id: credentialDefinitionId,
         });
       } else {
         log.error(`Failed to create credential definition for issuer ${walletName}_0`);
