@@ -115,7 +115,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  HELM_VERSION_DEFAULT: v3.18.3
+  HELM_VERSION_DEFAULT: v3.18.4
   HELMFILE_VERSION_DEFAULT: v1.1.2
 
 jobs:

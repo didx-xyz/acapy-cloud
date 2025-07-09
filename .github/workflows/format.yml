@@ -21,6 +21,7 @@ jobs:
 
       - name: Overwrite .mise.toml # The full `mise.toml` isn't needed for this workflow
         run: |
+          rm -f .mise.lock
           cat <<EOF > .mise.toml
           [tools]
           python = "3.12"

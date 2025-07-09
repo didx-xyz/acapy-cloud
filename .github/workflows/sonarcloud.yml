@@ -54,6 +54,7 @@ jobs:
 
       - name: Overwrite .mise.toml # Simplify mise in this workflow
         run: |
+          rm -f .mise.lock
           cat <<EOF > .mise.toml
           [tools]
           poetry = "2.1"
@@ -71,7 +72,7 @@ jobs:
 
           [tasks."poetry:install"]
           description = "Poetry Install dependencies"
-          run = "poetry install"
+          run = "poetry install --with dev"
           EOF
 
       - name: Cache Python venv
