@@ -68,27 +68,27 @@ export function setup() {
   // Write epoch timestamp to file
   file.writeString(epochOutputFilepath, JSON.stringify({ epoch_timestamp: currentEpoch }) + "\n");
 
-  let holders = data.trim().split("\n").map(JSON.parse);
-  holders = shuffleArray(holders); // Randomize the order of holders
+  let invitations = data.trim().split("\n").map(JSON.parse);
+  invitations = shuffleArray(invitations); // Randomize the order of invitations
 
-  return { holders, epochTimestamp: currentEpoch };
+  return { invitations, epochTimestamp: currentEpoch };
 }
 
 export default function (data) {
-  const holders = data.holders;
+  const invitations = data.invitations;
   const epochTimestamp = data.epochTimestamp;
   const walletIndex = getWalletIndex(__VU, __ITER, iterations);
-  const holder = holders[walletIndex];
+  const invitation = invitations[walletIndex];
 
-  log.debug(`Wallet Index: ${walletIndex}, Issuer Wallet ID: ${holder.issuer_wallet_id}`);
+  log.debug(`Wallet Index: ${walletIndex}, Issuer Wallet ID: ${invitation.issuer_wallet_id}`);
 
   let createCredentialResponse;
   try {
     createCredentialResponse = retry(() => {
       const response = createCredential(
-        holder.issuer_access_token,
-        holder.issuer_credential_definition_id,
-        holder.issuer_connection_id,
+        invitation.issuer_access_token,
+        invitation.issuer_credential_definition_id,
+        invitation.issuer_connection_id,
         epochTimestamp.toString() // Pass epoch timestamp as date_of_issue
       );
       if (response.status !== 200) {
@@ -116,11 +116,11 @@ export default function (data) {
   const { thread_id: threadId, credential_exchange_id: issuerCredentialExchangeId } =
     JSON.parse(createCredentialResponse.body);
 
-  log.debug(`walletIndex: ${walletIndex}, walletId: ${holder.wallet_id} issuerConnectionId: ${holder.issuer_connection_id}`);
+  log.debug(`walletIndex: ${walletIndex}, walletId: ${invitation.wallet_id} issuerConnectionId: ${invitation.issuer_connection_id}`);
 
   pollAndCheck({
-    accessToken: holder.access_token,
-    walletId: holder.wallet_id,
+    accessToken: invitation.access_token,
+    walletId: invitation.wallet_id,
     topic: "credentials",
     field: "thread_id",
     fieldId: threadId,
@@ -132,12 +132,12 @@ export default function (data) {
 
   log.debug(`Accepting credential for thread ID: ${threadId}`);
 
-  const holderCredentialExchangeId = getCredentialIdByThreadId(holder.access_token, threadId);
+  const holderCredentialExchangeId = getCredentialIdByThreadId(invitation.access_token, threadId);
 
   let acceptCredentialResponse;
   try {
     acceptCredentialResponse = retry(() => {
-      const response = acceptCredential(holder.access_token, holderCredentialExchangeId);
+      const response = acceptCredential(invitation.access_token, holderCredentialExchangeId);
       if (response.status !== 200) {
         throw new Error(`Non-200 status: ${response.status}`);
       }
@@ -160,8 +160,8 @@ export default function (data) {
   });
 
   pollAndCheck({
-    accessToken: holder.access_token,
-    walletId: holder.wallet_id,
+    accessToken: invitation.access_token,
+    walletId: invitation.wallet_id,
     topic: "credentials",
     field: "credential_exchange_id",
     fieldId: holderCredentialExchangeId,
@@ -172,12 +172,12 @@ export default function (data) {
   }, { perspective: "Holder" });
 
   const issuerData = JSON.stringify({
-    issuer_wallet_name: holder.issuer_wallet_name,
-    issuer_wallet_id: holder.issuer_wallet_id,
+    issuer_wallet_name: invitation.issuer_wallet_name,
+    issuer_wallet_id: invitation.issuer_wallet_id,
     credential_exchange_id: issuerCredentialExchangeId,
-    issuer_access_token: holder.issuer_access_token,
-    issuer_credential_definition_id: holder.issuer_credential_definition_id,
-    issuer_connection_id: holder.issuer_connection_id,
+    issuer_access_token: invitation.issuer_access_token,
+    issuer_credential_definition_id: invitation.issuer_credential_definition_id,
+    issuer_connection_id: invitation.issuer_connection_id,
     date_of_issue: epochTimestamp, // Include the epoch timestamp in output. Currently redundant, but potentially useful for future reference
   });
   file.appendString(outputFilepath, `${issuerData}\n`);
