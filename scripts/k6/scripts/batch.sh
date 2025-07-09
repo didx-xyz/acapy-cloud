@@ -2,23 +2,21 @@
 
 set -euo pipefail
 
-source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
-
 config() {
   # Base configuration (Docker Compose overridable)
   export VUS=${VUS:-30}
   export ITERATIONS=${ITERATIONS:-10}
-  
+
   # Work-based configuration (derived from base values)
   export TOTAL_WORK=$((VUS * ITERATIONS))  # Total operations to perform
   export CONCURRENCY_LEVEL=${VUS}  # Parallel workers
-  
+
   # Test configuration
   export SCHEMA_NAME=${SCHEMA_NAME:-"didx_acc"}
   export SCHEMA_VERSION=${SCHEMA_VERSION:-"0.1.0"}
   export HOLDER_PREFIX_TEMPLATE=${HOLDER_PREFIX_TEMPLATE:-"demoholder"}
   export TOTAL_BATCHES=${TOTAL_BATCHES:-2}
-  
+
   # Default issuers if none are provided
   default_issuers=("local_pop" "local_acc")
 
@@ -48,7 +46,7 @@ should_create_holders() {
 # Helper function to build actual holder prefix from template + batch number
 get_holder_prefix() {
   local batch_num="$1"
-  echo "${HOLDER_PREFIX_TEMPLATE}_${batch_num}k"
+  echo "${HOLDER_PREFIX_TEMPLATE}_${batch_num}"
 }
 
 # Execution strategy functions

@@ -7,8 +7,11 @@ services:
       datadog:
         condition: service_healthy
     environment:
+      # StatsD Configuration
       - ENABLE_STATSD=true
-      - K6_STATSD_ADDR=datadog:8125
+      - K6_STATSD_ENABLE_TAGS=true
+      - K6_STATSD_ADDR=localhost:8125
+      - K6_STATSD_PUSH_INTERVAL=5
 
   datadog:
     image: datadog/agent:latest
