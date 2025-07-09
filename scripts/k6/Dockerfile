@@ -24,6 +24,5 @@ WORKDIR /k6
 COPY --chown=nobody:nobody scripts /k6/scripts
 COPY --chown=nobody:nobody scenarios /k6/scenarios
 COPY --chown=nobody:nobody libs /k6/libs
-COPY --chown=nobody:nobody env.sh /k6/env.sh
 
 ENTRYPOINT ["/bin/bash"]
