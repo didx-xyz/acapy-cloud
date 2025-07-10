@@ -758,7 +758,9 @@ def setup_cloudapi(build_enabled, expose, cheqd_self_hosted=True):
             "depends": ["did-resolver"],
             "flags": [
                 "--set",
-                "secretData.FEE_PAYER_TESTNET_MNEMONIC=" + cheqd_validator_mnemonic,
+                "secretData.FEE_PAYER_TESTNET_MNEMONIC=" + (
+                    "" if not cheqd_self_hosted else cheqd_validator_mnemonic
+                ),
             ] + ([
                 "--set",
                 "env.TESTNET_RPC_URL=https://rpc.cheqd.network",
