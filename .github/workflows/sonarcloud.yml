@@ -71,7 +71,7 @@ jobs:
 
           [tasks."poetry:install"]
           description = "Poetry Install dependencies"
-          run = "poetry install"
+          run = "poetry install --with dev"
           EOF
 
       - name: Cache Python venv

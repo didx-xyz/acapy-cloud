@@ -114,6 +114,7 @@ poetry run pytest -n auto --dist loadgroup $(find . -type d -path '*/tests/e2e' 
 
 [tasks.fmt]
 description = "Format files"
+depends = ["poetry:install"]
 run = """
 #!/bin/bash
 ruff check --fix
@@ -125,6 +126,7 @@ done
 
 [tasks."fmt:check"]
 description = "Check all files for formatting"
+depends = ["poetry:install"]
 run = """
 #!/bin/bash
 ruff check
@@ -140,10 +142,12 @@ depends = ["lint:ruff", "lint:mypy"]
 
 [tasks."lint:ruff"]
 description = "Only run ruff static checks"
+depends = ["poetry:install"]
 run = "ruff check"
 
 [tasks."lint:mypy"]
 description = "Only run mypy type checks"
+depends = ["poetry:install"]
 run = """
 #!/bin/bash
 mypy . --ignore-missing-imports \
