@@ -758,13 +758,17 @@ def setup_cloudapi(build_enabled, expose, cheqd_self_hosted=True):
             "depends": ["did-resolver"],
             "flags": [
                 "--set",
-                "secretData.FEE_PAYER_TESTNET_MNEMONIC=" + (
-                    "" if not cheqd_self_hosted else cheqd_validator_mnemonic
-                ),
-            ] + ([
-                "--set",
-                "env.TESTNET_RPC_URL=https://rpc.cheqd.network",
-            ] if not cheqd_self_hosted else []),
+                "secretData.FEE_PAYER_TESTNET_MNEMONIC="
+                + ("" if not cheqd_self_hosted else cheqd_validator_mnemonic),
+            ]
+            + (
+                [
+                    "--set",
+                    "env.TESTNET_RPC_URL=https://rpc.cheqd.network",
+                ]
+                if not cheqd_self_hosted
+                else []
+            ),
         },
         "did-registrar": {
             # https://github.com/decentralized-identity/universal-registrar
@@ -776,10 +780,15 @@ def setup_cloudapi(build_enabled, expose, cheqd_self_hosted=True):
             "flags": [
                 "--set",
                 "ingressDomain=" + ingress_domain,
-            ] + ([
-                "--set",
-                "env.TESTNET_ENDPOINT=grpc.cheqd.network:443\\,true\\,5s",
-            ] if not cheqd_self_hosted else []),
+            ]
+            + (
+                [
+                    "--set",
+                    "env.TESTNET_ENDPOINT=grpc.cheqd.network:443\\,true\\,5s",
+                ]
+                if not cheqd_self_hosted
+                else []
+            ),
             "links": [
                 link(
                     "http://resolver.cheqd." + ingress_domain + "/1.0/identifiers/",
