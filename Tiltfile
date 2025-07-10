@@ -17,6 +17,7 @@ config.define_bool(
     False,
     "Detect Host IP and set Ingress Domain Name to expose services outside of 'localhost' context",
 )
+config.define_bool("no-cheqd")
 cfg = config.parse()
 
 
@@ -83,7 +84,8 @@ cmd_button(
 # Setup acapy-cloud
 build_enabled = not cfg.get("no-build")
 expose = cfg.get("expose")
-setup_cloudapi(build_enabled, expose)
+cheqd_self_hosted = not cfg.get("no-cheqd")
+setup_cloudapi(build_enabled, expose, cheqd_self_hosted)
 
 if config.tilt_subcommand not in ("down"):
     # _FORCE_ Kube Context to `kind-acapy-cloud`

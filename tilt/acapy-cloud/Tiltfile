@@ -19,6 +19,7 @@ cheqd_validator_mnemonic = (
     "betray purity grief spatial rude select loud reason wolf harvest session awesome"
 )
 
+
 registry = "localhost:5001"
 
 # Detect CPU Architecture
@@ -447,7 +448,7 @@ def add_live_update(live_update_config, enabled):
     return []
 
 
-def setup_cheqd_localnet(namespace, ingress_domain):
+def setup_cheqd_localnet(namespace, ingress_domain, cheqd_self_hosted=True):
     print(color.green("Installing Cheqd Localnet..."))
 
     project_root = os.getcwd()
@@ -459,6 +460,7 @@ def setup_cheqd_localnet(namespace, ingress_domain):
         ingress_domain,
         build_enabled=False,
         release_config={
+            "enabled": cheqd_self_hosted,
             "flags": [
                 "--set",
                 "secrets.validatorMnemonic=" + cheqd_validator_mnemonic,
@@ -491,7 +493,7 @@ def setup_cheqd_localnet(namespace, ingress_domain):
     )
 
 
-def setup_cloudapi(build_enabled, expose):
+def setup_cloudapi(build_enabled, expose, cheqd_self_hosted=True):
     print(color.green("Installing CloudAPI..."))
 
     # Adopt and manage CloudAPI namespace
@@ -504,7 +506,7 @@ def setup_cloudapi(build_enabled, expose):
     ingress_domain = generate_ingress_domain(expose)
     print(color.green("Ingress Domain: " + ingress_domain))
 
-    setup_cheqd_localnet(namespace, ingress_domain)
+    setup_cheqd_localnet(namespace, ingress_domain, cheqd_self_hosted)
     setup_minio(namespace, ingress_domain)
     setup_nats(namespace)
     setup_pgadmin(namespace, ingress_domain)
@@ -756,8 +758,17 @@ def setup_cloudapi(build_enabled, expose):
             "depends": ["did-resolver"],
             "flags": [
                 "--set",
-                "secretData.FEE_PAYER_TESTNET_MNEMONIC=" + cheqd_validator_mnemonic,
-            ],
+                "secretData.FEE_PAYER_TESTNET_MNEMONIC="
+                + ("" if not cheqd_self_hosted else cheqd_validator_mnemonic),
+            ]
+            + (
+                [
+                    "--set",
+                    "env.TESTNET_RPC_URL=https://rpc.cheqd.network",
+                ]
+                if not cheqd_self_hosted
+                else []
+            ),
         },
         "did-registrar": {
             # https://github.com/decentralized-identity/universal-registrar
@@ -765,11 +776,19 @@ def setup_cloudapi(build_enabled, expose):
         },
         "did-resolver": {
             # https://github.com/cheqd/did-resolver
-            "depends": ["cheqd"],
+            "depends": ["cheqd"] if cheqd_self_hosted else [],
             "flags": [
                 "--set",
                 "ingressDomain=" + ingress_domain,
-            ],
+            ]
+            + (
+                [
+                    "--set",
+                    "env.TESTNET_ENDPOINT=grpc.cheqd.network:443\\,true\\,5s",
+                ]
+                if not cheqd_self_hosted
+                else []
+            ),
             "links": [
                 link(
                     "http://resolver.cheqd." + ingress_domain + "/1.0/identifiers/",
