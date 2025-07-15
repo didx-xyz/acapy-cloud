@@ -75,6 +75,8 @@ jobs:
           poetry run pytest \
             --durations=25 \
             --ignore ./tilt \
+            --ignore ./acapy \
+            --ignore ./plugins \
             --cov | tee test_output.txt
 
           EXIT_CODE=${PIPESTATUS[0]}
