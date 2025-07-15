@@ -345,9 +345,7 @@ components:
               type: object
             - type: 'null'
           title: Extra Settings
-          description: Optional per-tenant settings to configure wallet behaviour for advanced users.
-          examples:
-            - ACAPY_AUTO_ACCEPT_INVITES: false
+          description: Optional, advanced settings to configure wallet behaviour. If you don't know what these are, then you probably don't need them.
       type: object
       required:
         - wallet_label
@@ -517,9 +515,7 @@ components:
               type: object
             - type: 'null'
           title: Extra Settings
-          description: Optional per-tenant settings to configure wallet behaviour for advanced users.
-          examples:
-            - ACAPY_AUTO_ACCEPT_INVITES: false
+          description: Optional, advanced settings to configure wallet behaviour. If you don't know what these are, then you probably don't need them.
       type: object
       title: UpdateTenantRequest
     ValidationError:
