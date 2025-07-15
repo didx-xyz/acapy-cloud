@@ -2,10 +2,12 @@
 **
 
 # Except the following
+!acapy/
 !app/
-!dockerfiles/poetry-requirements.txt
-!dockerfiles/agents/pyproject.toml
 !dockerfiles/agents/poetry.lock
+!dockerfiles/agents/pyproject.toml
+!dockerfiles/poetry-requirements.txt
+!plugins/
 !scripts/
 !shared/
 !tails/

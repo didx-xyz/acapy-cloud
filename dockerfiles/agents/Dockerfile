@@ -1,11 +1,10 @@
-FROM ghcr.io/didx-xyz/acapy-agent:py3.12-1.3.1-20250702@sha256:6bff9f8c248a385f36e539f948fe43d005996451612d6da904b0d0299451d906
+# syntax = devthefuture/dockerfile-x # https://github.com/devthefuture-org/dockerfile-x
+FROM ./acapy/docker/Dockerfile
 
 USER root
 
 # Copy agent dependency definitions
 COPY dockerfiles/poetry-requirements.txt /plugin-deps/poetry-requirements.txt
-COPY dockerfiles/agents/pyproject.toml /plugin-deps/pyproject.toml
-COPY dockerfiles/agents/poetry.lock /plugin-deps/poetry.lock
 WORKDIR /plugin-deps
 
 # Install poetry with pinned hashes
@@ -13,6 +12,10 @@ RUN pip install --no-cache-dir -r poetry-requirements.txt --require-hashes
 
 # Install dependencies
 ENV POETRY_VIRTUALENVS_CREATE=false
+COPY dockerfiles/agents/pyproject.toml /plugin-deps/pyproject.toml
+COPY dockerfiles/agents/poetry.lock /plugin-deps/poetry.lock
+COPY plugins/cheqd /plugins/cheqd
+COPY plugins/nats_events /plugins/nats_events
 RUN poetry install
 
 WORKDIR /
