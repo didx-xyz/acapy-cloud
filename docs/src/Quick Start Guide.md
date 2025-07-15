@@ -111,7 +111,7 @@ For support with other shells, refer to the [Mise Shell Support Documentation](h
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/didx-xyz/acapy-cloud
+   git clone --recursive https://github.com/didx-xyz/acapy-cloud
    cd acapy-cloud
    ```
 
