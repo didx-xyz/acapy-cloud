@@ -1,4 +1,6 @@
-# syntax = devthefuture/dockerfile-x # https://github.com/devthefuture-org/dockerfile-x
+# syntax = devthefuture/dockerfile-x:1.4.2@sha256:4a6acf7a4b8c2626bed821577017dec454ab8bd3b33d8e8f06985ed6b36e89fb
+# https://github.com/devthefuture-org/dockerfile-x
+# https://docs.docker.com/build/buildkit/frontend/
 FROM ./acapy/docker/Dockerfile
 
 USER root
