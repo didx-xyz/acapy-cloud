@@ -100,6 +100,7 @@ scenario_create_credentials() {
 }
 
 scenario_create_proof_verified() {
+  export IS_REVOKED=false
   run_scenario_parallel ./scenarios/create-proof.js
 }
 
@@ -173,7 +174,6 @@ run_batch() {
   scenario_create_invitations
   scenario_create_credentials
   scenario_create_proof_verified
-  export USE_AUTO_PUBLISH=false
   scenario_revoke_credentials
   scenario_publish_revoke
   scenario_create_proof_unverified
