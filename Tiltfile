@@ -33,7 +33,7 @@ allow_k8s_contexts([kind_cluster_name])
 if config.tilt_subcommand in ("up", "ci"):
     print(color.green("Ensuring submodules are initialized and updated"))
     run_command(
-        "git submodule update --init --recursive",
+        "git submodule update --init --recursive --merge",
         dir=os.path.dirname(__file__),
     )
     print(color.green("Setting up Istio"))
