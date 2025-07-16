@@ -94,13 +94,24 @@ run = """
 #!/bin/bash
 cp .env.example .env
 source .env
-poetry run pytest . --ignore ./tilt $@
+poetry run pytest . \
+  --ignore ./tilt \
+  --ignore ./acapy \
+  --ignore ./plugins $@
 """
 
 [tasks."tests:unit"]
 description = "Run unit tests"
 depends = ["poetry:install"]
-run = "poetry run pytest -n auto --dist loadgroup -o 'norecursedirs=e2e' $@"
+run = """
+#!/bin/bash
+poetry run pytest -n auto \
+  --dist loadgroup \
+  -o 'norecursedirs=e2e' \
+  --ignore ./tilt \
+  --ignore ./acapy \
+  --ignore ./plugins $@
+"""
 
 [tasks."tests:e2e"]
 description = "Run e2e tests"
@@ -109,7 +120,13 @@ run = """
 #!/bin/bash
 cp .env.example .env
 source .env
-poetry run pytest -n auto --dist loadgroup $(find . -type d -path '*/tests/e2e' -not -path './tilt*') $@
+poetry run pytest $(\
+  find . \
+  -type d \
+  -path '*/tests/e2e' \
+  -not -path './tilt' \
+  -not -path './acapy' \
+  -not -path './plugins') $@
 """
 
 [tasks.fmt]
