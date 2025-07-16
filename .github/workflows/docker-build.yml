@@ -35,30 +35,38 @@ jobs:
           - image: agent
             context: .
             file: dockerfiles/agents/Dockerfile
+            build-args: BUILD_CONTEXT=./acapy
           - image: app
             context: .
             file: dockerfiles/app/Dockerfile
+            build-args: ""
           - image: pytest
             context: .
             file: dockerfiles/tests/Dockerfile
+            build-args: ""
           - image: tails-server
             context: .
             file: dockerfiles/tails/Dockerfile
+            build-args: ""
           - image: trust-registry
             context: .
             file: dockerfiles/trustregistry/Dockerfile
+            build-args: ""
           - image: waypoint
             context: .
             file: dockerfiles/waypoint/Dockerfile
+            build-args: ""
           - image: xk6
             context: ./scripts/k6
             file: ./scripts/k6/Dockerfile
+            build-args: ""
 
     steps:
       - name: Check out code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
+          submodules: recursive
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
@@ -79,6 +87,7 @@ jobs:
           cache-to: |
             type=gha,mode=min,scope=build-${{ matrix.image }}-${{ matrix.arch }}
           platforms: linux/${{ matrix.arch }}
+          build-args: ${{ matrix.build-args }}
 
   push:
     name: Push
@@ -104,31 +113,31 @@ jobs:
           - image: agent
             context: .
             file: dockerfiles/agents/Dockerfile
-            platforms: linux/amd64,linux/arm64
+            build-args: BUILD_CONTEXT=./acapy
           - image: app
             context: .
             file: dockerfiles/app/Dockerfile
-            platforms: linux/amd64,linux/arm64
+            build-args: ""
           - image: pytest
             context: .
             file: dockerfiles/tests/Dockerfile
-            platforms: linux/amd64,linux/arm64
+            build-args: ""
           - image: tails-server
             context: .
             file: dockerfiles/tails/Dockerfile
-            platforms: linux/amd64,linux/arm64
+            build-args: ""
           - image: trust-registry
             context: .
             file: dockerfiles/trustregistry/Dockerfile
-            platforms: linux/amd64,linux/arm64
+            build-args: ""
           - image: waypoint
             context: .
             file: dockerfiles/waypoint/Dockerfile
-            platforms: linux/amd64,linux/arm64
+            build-args: ""
           - image: xk6
             context: ./scripts/k6
             file: ./scripts/k6/Dockerfile
-            platforms: linux/amd64,linux/arm64
+            build-args: ""
 
     outputs:
       image_version: ${{ steps.meta.outputs.version }}
@@ -138,6 +147,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
+          submodules: recursive
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
@@ -179,4 +189,5 @@ jobs:
             type=gha,scope=build-${{ matrix.image }}-arm64
             type=gha,scope=build-${{ matrix.image }}-amd64
             type=registry,ref=ghcr.io/${{ github.repository_owner }}/acapy-cloud/${{ matrix.image }}:latest
-          platforms: ${{ matrix.platforms }}
+          platforms: linux/amd64,linux/arm64
+          build-args: ${{ matrix.build-args }}

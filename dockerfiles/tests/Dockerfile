@@ -13,7 +13,11 @@ RUN pip install --no-cache-dir -r poetry-requirements.txt --require-hashes
 ENV POETRY_VIRTUALENVS_CREATE=false
 RUN poetry install
 
-COPY . .
+COPY ./app ./app
+COPY ./shared ./shared
+COPY ./tails ./tails
+COPY ./trustregistry ./trustregistry
+COPY ./waypoint ./waypoint
 
 # docker compose overwrites this
 CMD ["pytest", "--junitxml=test_output.xml"]

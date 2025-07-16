@@ -75,8 +75,10 @@ omit = [
 
 [tool.mypy]
 exclude = [
-  "scripts/*",
+  "acapy/*",
   "app/tests/*",
+  "plugins/*",
+  "scripts/*",
   "shared/tests/*",
   "tails/tests/*",
   "trustregistry/tests/*",
@@ -143,7 +145,7 @@ lint.ignore = [
   # False positives:
   "PLE1205", # Too many arguments detected for loguru {} formatted strings
 ]
-exclude = [".git/*", ".venv/*"]
+exclude = [".git/*", ".venv/*", "acapy/*", "plugins/*"]
 
 [tool.ruff.lint.per-file-ignores]
 "*/tests/*" = [ # Don't require these rules for tests

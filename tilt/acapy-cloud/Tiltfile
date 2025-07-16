@@ -353,11 +353,20 @@ def build_cloudapi_service(service, image={}):
         + image.get("dockerfile", "Dockerfile is required")
         + " "
         + image.get("context", ".")
+        + " "
+        + " ".join(image.get("args", []))
         + " && docker push $EXPECTED_REF",
         deps=["./"],
         live_update=image.get("live_update", []),
         skips_local_docker=True,
-        ignore=["scripts/k6/**", "**/tests/**"] + image.get("ignore", []),
+        ignore=[
+            ".mypy_cache/**",
+            ".ruff_cache/**",
+            "**/*.isorted",
+            "**/tests/**",
+            "scripts/k6/**",
+        ]
+        + image.get("ignore", []),
     )
     return [registry + "/" + service]
 
@@ -526,13 +535,13 @@ def setup_cloudapi(build_enabled, expose, cheqd_self_hosted=True):
             "image": {
                 "dockerfile": "./dockerfiles/agents/Dockerfile",
                 "ignore": [
-                    "**/*.isorted",
                     "app/**",
                     "shared/**",
                     "tails/**",
                     "trustregistry/**",
                     "waypoint/**",
                 ],
+                "args": ["--build-arg BUILD_CONTEXT=./acapy"],
             },
         },
         "governance-web": {
@@ -557,7 +566,8 @@ def setup_cloudapi(build_enabled, expose, cheqd_self_hosted=True):
                     enabled=build_enabled,
                 ),
                 "ignore": [
-                    "**/*.isorted",
+                    "acapy/**",
+                    "plugins/**",
                     "scripts/**",
                     "tails/**",
                     "trustregistry/**",
@@ -576,13 +586,13 @@ def setup_cloudapi(build_enabled, expose, cheqd_self_hosted=True):
             "image": {
                 "dockerfile": "./dockerfiles/agents/Dockerfile",
                 "ignore": [
-                    "**/*.isorted",
                     "app/**",
                     "shared/**",
                     "tails/**",
                     "trustregistry/**",
                     "waypoint/**",
                 ],
+                "args": ["--build-arg BUILD_CONTEXT=./acapy"],
             },
         },
         "multitenant-web": {
@@ -607,7 +617,8 @@ def setup_cloudapi(build_enabled, expose, cheqd_self_hosted=True):
                     enabled=build_enabled,
                 ),
                 "ignore": [
-                    "**/*.isorted",
+                    "acapy/**",
+                    "plugins/**",
                     "scripts/**",
                     "tails/**",
                     "trustregistry/**",
@@ -633,7 +644,8 @@ def setup_cloudapi(build_enabled, expose, cheqd_self_hosted=True):
                     enabled=build_enabled,
                 ),
                 "ignore": [
-                    "**/*.isorted",
+                    "acapy/**",
+                    "plugins/**",
                     "scripts/**",
                     "tails/**",
                     "trustregistry/**",
@@ -659,7 +671,8 @@ def setup_cloudapi(build_enabled, expose, cheqd_self_hosted=True):
                     enabled=build_enabled,
                 ),
                 "ignore": [
-                    "**/*.isorted",
+                    "acapy/**",
+                    "plugins/**",
                     "scripts/**",
                     "tails/**",
                     "trustregistry/**",
@@ -689,8 +702,9 @@ def setup_cloudapi(build_enabled, expose, cheqd_self_hosted=True):
                     enabled=build_enabled,
                 ),
                 "ignore": [
-                    "**/*.isorted",
+                    "acapy/**",
                     "app/**",
+                    "plugins/**",
                     "scripts/**",
                     "tails/**",
                     "waypoint/**",
@@ -712,8 +726,9 @@ def setup_cloudapi(build_enabled, expose, cheqd_self_hosted=True):
                     enabled=build_enabled,
                 ),
                 "ignore": [
-                    "**/*.isorted",
+                    "acapy/**",
                     "app/**",
+                    "plugins/**",
                     "scripts/**",
                     "tails/**",
                     "trustregistry/**",
@@ -745,8 +760,9 @@ def setup_cloudapi(build_enabled, expose, cheqd_self_hosted=True):
                     enabled=build_enabled,
                 ),
                 "ignore": [
-                    "**/*.isorted",
+                    "acapy/**",
                     "app/**",
+                    "plugins/**",
                     "scripts/**",
                     "trustregistry/**",
                     "waypoint/**",
