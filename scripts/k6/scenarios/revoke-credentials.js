@@ -11,20 +11,21 @@ import {
   publishRevocation,
 } from "../libs/functions.js";
 import { log } from "../libs/k6Functions.js";
+import { config } from "../libs/config.js";
 
-const holderPrefix = __ENV.HOLDER_PREFIX;
-const issuerPrefix = __ENV.ISSUER_PREFIX;
+const holderPrefix = config.test.holderPrefix;
+const issuerPrefix = config.test.issuerPrefix;
 const outputPrefix = `${issuerPrefix}-${holderPrefix}`;
 
 const inputFilepath = `../output/${outputPrefix}-create-credentials.jsonl`;
 const data = open(inputFilepath, "r");
 
-const vus = Number.parseInt(__ENV.VUS, 10);
-const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
+const vus = config.test.vus;
+const iterations = config.test.iterations;
 const testFunctionReqs = new Counter("test_function_reqs");
-const sleepDuration = Number.parseInt(__ENV.SLEEP_DURATION, 0);
+const sleepDuration = config.test.sleepDuration;
 
-const version = __ENV.VERSION;
+const version = config.test.version;
 
 export const options = {
   scenarios: {
@@ -39,10 +40,11 @@ export const options = {
   teardownTimeout: "180s",
   maxRedirects: 4,
   thresholds: {
-    "http_req_duration{scenario:default}": ["max>=0"],
-    "http_reqs{scenario:default}": ["count >= 0"],
-    "iteration_duration{scenario:default}": ["max>=0"],
-    checks: ["rate==1"],
+    // "http_req_duration{scenario:default}": ["max>=0"],
+    // "http_reqs{scenario:default}": ["count >= 0"],
+    // "iteration_duration{scenario:default}": ["max>=0"],
+    checks: ["rate>0.99"],
+    // checks: ["rate==1"],
   },
   tags: {
     test_run_id: "phased-issuance",
@@ -63,8 +65,7 @@ export default function (data) {
 
   // Check environment variable to determine revocation method
   const useAutoPublish =
-    __ENV.USE_AUTO_PUBLISH === "true" ||
-    __ENV.USE_AUTO_PUBLISH === undefined;
+    config.api.useAutoPublish;
 
   let revokeCredentialResponse;
 

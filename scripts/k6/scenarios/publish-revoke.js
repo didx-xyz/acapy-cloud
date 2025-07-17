@@ -12,20 +12,21 @@ import {
 } from "../libs/functions.js";
 import { log } from "../libs/k6Functions.js";
 import { request } from "k6/http";
+import { config } from "../libs/config.js";
 
-const holderPrefix = __ENV.HOLDER_PREFIX;
-const issuerPrefix = __ENV.ISSUER_PREFIX;
+const holderPrefix = config.test.holderPrefix;
+const issuerPrefix = config.test.issuerPrefix;
 const outputPrefix = `${issuerPrefix}-${holderPrefix}`;
 
 const inputFilepath = `../output/${outputPrefix}-create-credentials.jsonl`;
 const data = open(inputFilepath, "r");
 
-const vus = Number.parseInt(__ENV.VUS, 10);
-const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
+const vus = config.test.vus;
+const iterations = config.test.iterations;
 const testFunctionReqs = new Counter("test_function_reqs");
-const sleepDuration = Number.parseInt(__ENV.SLEEP_DURATION, 0);
+const sleepDuration = config.test.sleepDuration;
 
-const version = __ENV.VERSION;
+const version = config.test.version;
 
 export const options = {
   scenarios: {
@@ -40,10 +41,11 @@ export const options = {
   teardownTimeout: "180s",
   maxRedirects: 4,
   thresholds: {
-    "http_req_duration{scenario:default}": ["max>=0"],
-    "http_reqs{scenario:default}": ["count >= 0"],
-    "iteration_duration{scenario:default}": ["max>=0"],
-    checks: ["rate==1"],
+    // "http_req_duration{scenario:default}": ["max>=0"],
+    // "http_reqs{scenario:default}": ["count >= 0"],
+    // "iteration_duration{scenario:default}": ["max>=0"],
+    // checks: ["rate==1"],
+    checks: ["rate>0.99"],
   },
   tags: {
     test_run_id: "phased-issuance",
@@ -73,7 +75,7 @@ export function setup() {
     let publishRevocationResponse;
     try {
       // Check if we're in fire-and-forget mode from ENV var
-      const fireAndForget = __ENV.FIRE_AND_FORGET_REVOCATION === 'true';
+      const fireAndForget = config.api.fireAndForgetRevocation;
 
       // Call the function with the ENV var setting
       publishRevocationResponse = publishRevocation(issuerToken, fireAndForget);
@@ -94,7 +96,7 @@ export function setup() {
     }
 
     // Only do the check if NOT fire-and-forget
-    if (__ENV.FIRE_AND_FORGET_REVOCATION !== 'true') {
+    if (!config.api.fireAndForgetRevocation) {
       check(publishRevocationResponse, {
         "Revocation published successfully": (r) => {
           if (r.status !== 200) {

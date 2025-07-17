@@ -1,6 +1,8 @@
 /* global __ENV, __ITER, __VU, console */
 /* eslint-disable no-undefined, no-console, camelcase */
 
+import { config } from './config.js';
+
 /**
  * K6 Logging Utility
  *
@@ -26,7 +28,7 @@
  * Supported methods: debug, info, error, warn
  * Only debug messages include the level name in the output prefix.
  */
-const DEBUG_ENABLED = __ENV.DEBUG === 'true' || __ENV.DEBUG === '1';
+const DEBUG_ENABLED = config.debug.enabled;
 
 // Helper function to generate prefix with timestamp
 function getLogPrefix(includeLevel = false) {
@@ -74,7 +76,7 @@ const log = {
  *   const shuffledData = shuffleArray(originalData);
  */
 function shuffleArray(array) {
-  const shouldShuffle = __ENV.SHUFFLE === 'true' || __ENV.SHUFFLE === '1';
+  const shouldShuffle = config.debug.shuffle;
 
   if (!shouldShuffle) {
     return array;

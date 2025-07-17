@@ -15,13 +15,14 @@ import {
   pollAndCheck,
 } from "../libs/functions.js";
 import { log, shuffleArray } from "../libs/k6Functions.js";
+import { config } from "../libs/config.js";
 
-const vus = Number.parseInt(__ENV.VUS, 10);
-const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
-const holderPrefix = __ENV.HOLDER_PREFIX;
-const issuerPrefix = __ENV.ISSUER_PREFIX;
+const vus = config.test.vus;
+const iterations = config.test.iterations;
+const holderPrefix = config.test.holderPrefix;
+const issuerPrefix = config.test.issuerPrefix;
 const outputPrefix = `${issuerPrefix}-${holderPrefix}`;
-const version = __ENV.VERSION;
+const version = config.test.version;
 
 export const options = {
   scenarios: {
@@ -41,7 +42,7 @@ export const options = {
   },
   tags: {
     test_run_id: "phased-issuance",
-    test_phase: __ENV.IS_REVOKED === "true" ? "create-proofs-unverified" : "create-proofs-verified",
+    test_phase: config.test.isRevoked ? "create-proofs-unverified" : "create-proofs-verified",
     version: `${version}`,
   },
 };
@@ -239,10 +240,10 @@ export default function (data) {
   };
 
   check(getProofResponse, {
-    [__ENV.IS_REVOKED === "true"
+    [config.test.isRevoked
       ? "Proof received and unverified"
       : "Proof received and verified"]:
-      __ENV.IS_REVOKED === "true" ? unverifiedCheck : verifiedCheck,
+      config.test.isRevoked ? unverifiedCheck : verifiedCheck,
   });
 
   testFunctionReqs.add(1);

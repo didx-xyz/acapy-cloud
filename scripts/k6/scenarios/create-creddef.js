@@ -5,12 +5,13 @@ import { check } from "k6";
 import { getAuthHeaders } from '../libs/auth.js';
 import { createCredentialDefinition } from "../libs/functions.js";
 import { createSchemaIfNotExists } from "../libs/schemaUtils.js";
+import { config } from "../libs/config.js";
 
-const vus = Number.parseInt(__ENV.VUS, 10);
-const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
-const schemaName = __ENV.SCHEMA_NAME;
-const schemaVersion = __ENV.SCHEMA_VERSION;
-const issuerPrefix = __ENV.ISSUER_PREFIX;
+const vus = config.test.vus;
+const iterations = config.test.iterations;
+const schemaName = config.schema.name;
+const schemaVersion = config.schema.version;
+const issuerPrefix = config.test.issuerPrefix;
 
 export const options = {
   scenarios: {

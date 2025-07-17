@@ -12,12 +12,13 @@ import {
   getTrustRegistryActor,
   getWalletIndex,
 } from "../libs/functions.js";
+import { config } from "../libs/config.js";
 
-const vus = Number.parseInt(__ENV.VUS, 10);
-const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
-const issuerPrefix = __ENV.ISSUER_PREFIX;
+const vus = config.test.vus;
+const iterations = config.test.iterations;
+const issuerPrefix = config.test.issuerPrefix;
 const outputPrefix = `${issuerPrefix}`;
-// const holderPrefix = __ENV.HOLDER_PREFIX;
+// const holderPrefix = config.test.holderPrefix;
 const filepath = `output/${outputPrefix}-create-issuers.jsonl`;
 
 export const options = {

@@ -13,13 +13,14 @@ import {
   retry,
   pollAndCheck,
 } from "../libs/functions.js";
+import { config } from "../libs/config.js";
 
-const vus = Number.parseInt(__ENV.VUS, 10);
-const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
-const holderPrefix = __ENV.HOLDER_PREFIX;
-const issuerPrefix = __ENV.ISSUER_PREFIX;
+const vus = config.test.vus;
+const iterations = config.test.iterations;
+const holderPrefix = config.test.holderPrefix;
+const issuerPrefix = config.test.issuerPrefix;
 const outputPrefix = `${issuerPrefix}-${holderPrefix}`;
-const version = __ENV.VERSION;
+const version = config.test.version;
 
 export const options = {
   scenarios: {

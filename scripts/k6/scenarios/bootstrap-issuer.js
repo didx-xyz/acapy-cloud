@@ -4,12 +4,13 @@
 import { bootstrapIssuer } from "../libs/setup.js";
 import file from "k6/x/file";
 import { log } from "../libs/k6Functions.js";
+import { config } from "../libs/config.js";
 
-const issuerPrefix = __ENV.ISSUER_PREFIX;
-const schemaName = __ENV.SCHEMA_NAME;
-const schemaVersion = __ENV.SCHEMA_VERSION;
-const numIssuers = __ENV.NUM_ISSUERS;
-const holderPrefix = __ENV.HOLDER_PREFIX;
+const issuerPrefix = config.test.issuerPrefix;
+const schemaName = config.schema.name;
+const schemaVersion = config.schema.version;
+const numIssuers = config.test.numIssuers;
+const holderPrefix = config.test.holderPrefix;
 const outputPrefix = `${issuerPrefix}`;
 
 const filepath = `output/${outputPrefix}-create-issuers.jsonl`;

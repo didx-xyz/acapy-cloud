@@ -20,10 +20,15 @@ Run with docker compose
 ### Basic Usage (No Metrics)
 
 By default, the K6 framework runs without DataDog metrics collection:
-
 ```sh
 # Default behavior - no StatsD dependency, no DataDog container
 docker compose up
+```
+
+To trigger cleanup of local files and acapy-cloud backend, use:
+
+```sh
+docker compose run --rm xk6 ./scripts/main.sh -C
 ```
 
 ### With DataDog Metrics
