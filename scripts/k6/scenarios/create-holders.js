@@ -8,14 +8,15 @@ import file from "k6/x/file";
 import { getAuthHeaders } from '../libs/auth.js';
 import { createTenant, getWalletIndex } from "../libs/functions.js";
 import { log } from "../libs/k6Functions.js";
+import { config } from "../libs/config.js";
 
-const vus = Number(__ENV.VUS || 1);
-const iterations = Number(__ENV.ITERATIONS || 10);
-const holderPrefix = __ENV.HOLDER_PREFIX || "holder";
-const issuerPrefix = __ENV.ISSUER_PREFIX || "issuer";
-const sleepDuration = Number(__ENV.SLEEP_DURATION || 0);
+const vus = config.test.vus;
+const iterations = config.test.iterations;
+const holderPrefix = config.test.holderPrefix;
+const issuerPrefix = config.test.issuerPrefix;
+const sleepDuration = config.test.sleepDuration;
 const outputPrefix = `${holderPrefix}`;
-const version = __ENV.VERSION;
+const version = config.test.version;
 
 export const options = {
   scenarios: {

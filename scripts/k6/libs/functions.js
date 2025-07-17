@@ -5,6 +5,7 @@ import { check, sleep } from "k6";
 import http from "k6/http";
 import sse from "k6/x/sse";
 import { log } from "../libs/k6Functions.js";
+import { config } from "./config.js";
 
 // Helper function to generate a unique, zero-based index for even distribution of operations
 export function getWalletIndex(vu, iter, iterationsPerVu) {
@@ -13,7 +14,7 @@ export function getWalletIndex(vu, iter, iterationsPerVu) {
 
 
 export function createTenant(headers, wallet) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant-admin/v1/tenants`;
+  const url = `${config.api.cloudApiUrl}/tenant-admin/v1/tenants`;
   const payload = JSON.stringify({
     wallet_label: wallet.wallet_label,
     wallet_name: wallet.wallet_name,
@@ -39,7 +40,7 @@ export function createTenant(headers, wallet) {
 }
 
 export function getWalletIdByWalletName(headers, walletName) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant-admin/v1/tenants?wallet_name=${walletName}`;
+  const url = `${config.api.cloudApiUrl}/tenant-admin/v1/tenants?wallet_name=${walletName}`;
   const params = {
     headers: {
       "Content-Type": "application/json",
@@ -68,7 +69,7 @@ export function getWalletIdByWalletName(headers, walletName) {
 }
 
 export function getTrustRegistryActor(walletName) {
-  const url = `${__ENV.CLOUDAPI_URL}/public/v1/trust-registry/actors?actor_name=${walletName}`;
+  const url = `${config.api.cloudApiUrl}/public/v1/trust-registry/actors?actor_name=${walletName}`;
   const params = {
     headers: {
       "Content-Type": "application/json",
@@ -86,7 +87,7 @@ export function getTrustRegistryActor(walletName) {
 
 export function getAccessTokenByWalletId(headers, walletId) {
   console.log(`Getting access token for wallet ID: ${walletId}`);
-  const url = `${__ENV.CLOUDAPI_URL}/tenant-admin/v1/tenants/${walletId}/access-token`;
+  const url = `${config.api.cloudApiUrl}/tenant-admin/v1/tenants/${walletId}/access-token`;
 
   const params = {
     headers: {
@@ -112,7 +113,7 @@ export function getAccessTokenByWalletId(headers, walletId) {
 }
 
 export function deleteTenant(headers, walletId) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant-admin/v1/tenants/${walletId}`;
+  const url = `${config.api.cloudApiUrl}/tenant-admin/v1/tenants/${walletId}`;
   const params = {
     headers: {
       ...headers,
@@ -147,7 +148,7 @@ export function deleteTenant(headers, walletId) {
 }
 
 export function createIssuerTenant(headers, walletName) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant-admin/v1/tenants`;
+  const url = `${config.api.cloudApiUrl}/tenant-admin/v1/tenants`;
   const payload = JSON.stringify({
     wallet_label: walletName,
     wallet_name: walletName,
@@ -178,7 +179,7 @@ export function createIssuerTenant(headers, walletName) {
 }
 
 export function createInvitation(issuerAccessToken) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/oob/create-invitation`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/oob/create-invitation`;
   const params = {
     headers: {
       "x-api-key": issuerAccessToken,
@@ -195,7 +196,7 @@ export function createInvitation(issuerAccessToken) {
 }
 
 export function getIssuerPublicDid(issuerAccessToken) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/wallet/dids/public`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/wallet/dids/public`;
   const params = {
     headers: {
       "x-api-key": issuerAccessToken,
@@ -206,7 +207,7 @@ export function getIssuerPublicDid(issuerAccessToken) {
 }
 
 export function createDidExchangeRequest(holderAccessToken, issuerPublicDid) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/connections/did-exchange/create-request?their_public_did=${issuerPublicDid}`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/connections/did-exchange/create-request?their_public_did=${issuerPublicDid}`;
   const params = {
     headers: {
       "x-api-key": holderAccessToken,
@@ -223,7 +224,7 @@ export function createDidExchangeRequest(holderAccessToken, issuerPublicDid) {
 }
 
 export function getHolderConnections(holderAccessToken, holderConnectionId) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/connections/${holderConnectionId}`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/connections/${holderConnectionId}`;
   const params = {
     headers: {
       "x-api-key": holderAccessToken,
@@ -240,7 +241,7 @@ export function getHolderConnections(holderAccessToken, holderConnectionId) {
 }
 
 export function getIssuerConnectionId(issuerAccessToken, invitationMsgId) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/connections?invitation_msg_id=${invitationMsgId}`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/connections?invitation_msg_id=${invitationMsgId}`;
   const params = {
     headers: {
       "x-api-key": issuerAccessToken,
@@ -257,7 +258,7 @@ export function getIssuerConnectionId(issuerAccessToken, invitationMsgId) {
 }
 
 export function acceptInvitation(holderAccessToken, invitationObj) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/oob/accept-invitation`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/oob/accept-invitation`;
   const params = {
     headers: {
       "x-api-key": holderAccessToken,
@@ -286,7 +287,7 @@ export function createCredential(
   issuerConnectionId,
   dateOfIssue = "2021-09-29" // Default value
 ) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/issuer/credentials`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/issuer/credentials`;
   const params = {
     headers: {
       "x-api-key": issuerAccessToken,
@@ -332,7 +333,7 @@ export function createCredential(
 }
 
 export function acceptCredential(holderAccessToken, credentialId) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/issuer/credentials/${credentialId}/request`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/issuer/credentials/${credentialId}/request`;
   const params = {
     headers: {
       "x-api-key": holderAccessToken,
@@ -354,7 +355,7 @@ export function createCredentialDefinition(
   credDefTag,
   schemaId
 ) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/definitions/credentials`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/definitions/credentials`;
   const params = {
     headers: {
       "x-api-key": issuerAccessToken,
@@ -387,7 +388,7 @@ export function createCredentialDefinition(
 }
 
 export function getCredentialIdByThreadId(holderAccessToken, threadId) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/issuer/credentials`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/issuer/credentials`;
   const params = {
     headers: {
       "x-api-key": holderAccessToken,
@@ -427,7 +428,7 @@ export function getCredentialDefinitionId(
   credDefTag,
   schemaVersion
 ) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/definitions/credentials?schema_version=${schemaVersion}`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/definitions/credentials?schema_version=${schemaVersion}`;
   const params = {
     headers: {
       "x-api-key": issuerAccessToken,
@@ -451,7 +452,7 @@ export function getCredentialDefinitionId(
 }
 
 export function sendProofRequest(issuerAccessToken, issuerConnectionId) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/verifier/send-request`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/verifier/send-request`;
   const params = {
     headers: {
       "x-api-key": issuerAccessToken,
@@ -487,7 +488,7 @@ export function sendProofRequest(issuerAccessToken, issuerConnectionId) {
 }
 
 export function getProofIdByThreadId(holderAccessToken, threadId) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/verifier/proofs?thread_id=${threadId}`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/verifier/proofs?thread_id=${threadId}`;
   const params = {
     headers: {
       "x-api-key": holderAccessToken,
@@ -523,7 +524,7 @@ export function getProofIdByThreadId(holderAccessToken, threadId) {
 }
 
 export function getProofIdCredentials(holderAccessToken, proofId, dateOfIssue = null) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/verifier/proofs/${proofId}/credentials`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/verifier/proofs/${proofId}/credentials`;
   const params = {
     headers: {
       "x-api-key": holderAccessToken,
@@ -578,7 +579,7 @@ export function getProofIdCredentials(holderAccessToken, proofId, dateOfIssue = 
 
 // tenant/v1/verifier/accept-request
 export function acceptProofRequest(holderAccessToken, proofId, referent) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/verifier/accept-request`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/verifier/accept-request`;
   const params = {
     headers: {
       "x-api-key": holderAccessToken,
@@ -612,7 +613,7 @@ export function acceptProofRequest(holderAccessToken, proofId, referent) {
 }
 
 export function getProof(issuerAccessToken, issuerConnectionId, proofThreadId) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/verifier/proofs?thread_id=${proofThreadId}`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/verifier/proofs?thread_id=${proofThreadId}`;
   const params = {
     headers: {
       "x-api-key": issuerAccessToken,
@@ -642,7 +643,7 @@ export function getProof(issuerAccessToken, issuerConnectionId, proofThreadId) {
 }
 
 export function getDocs() {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant-admin/docs`;
+  const url = `${config.api.cloudApiUrl}/tenant-admin/docs`;
   const params = {
     headers: {
       "Content-Type": "application/json",
@@ -658,7 +659,7 @@ export function getDocs() {
 }
 
 export function createSchema(headers, schemaName, schemaVersion) {
-  const url = `${__ENV.CLOUDAPI_URL}/governance/v1/definitions/schemas`;
+  const url = `${config.api.cloudApiUrl}/governance/v1/definitions/schemas`;
   const params = {
     headers: {
       ...headers,
@@ -695,7 +696,7 @@ export function createSchema(headers, schemaName, schemaVersion) {
 }
 
 export function getSchema(headers, schemaName, schemaVersion) {
-  const url = `${__ENV.CLOUDAPI_URL}/governance/v1/definitions/schemas?schema_name=${schemaName}&schema_version=${schemaVersion}`;
+  const url = `${config.api.cloudApiUrl}/governance/v1/definitions/schemas?schema_name=${schemaName}&schema_version=${schemaVersion}`;
   const params = {
     headers: {
       ...headers,
@@ -712,7 +713,7 @@ export function getSchema(headers, schemaName, schemaVersion) {
 }
 
 export function revokeCredential(issuerAccessToken, credentialExchangeId) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/issuer/credentials/revoke`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/issuer/credentials/revoke`;
   const params = {
     headers: {
       "x-api-key": issuerAccessToken,
@@ -741,7 +742,7 @@ export function revokeCredentialAutoPublish(
   issuerAccessToken,
   credentialExchangeId
 ) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/issuer/credentials/revoke`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/issuer/credentials/revoke`;
   const params = {
     headers: {
       "x-api-key": issuerAccessToken,
@@ -768,7 +769,7 @@ export function revokeCredentialAutoPublish(
 }
 
 export function publishRevocation(issuerAccessToken, fireAndForget = false) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/issuer/credentials/publish-revocations`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/issuer/credentials/publish-revocations`;
   const params = {
     headers: {
       "x-api-key": issuerAccessToken,
@@ -805,7 +806,7 @@ export function publishRevocation(issuerAccessToken, fireAndForget = false) {
 }
 
 export function checkRevoked(issuerAccessToken, credentialExchangeId) {
-  const url = `${__ENV.CLOUDAPI_URL}/tenant/v1/issuer/credentials/revocation/record?credential_exchange_id=${credentialExchangeId}`;
+  const url = `${config.api.cloudApiUrl}/tenant/v1/issuer/credentials/revocation/record?credential_exchange_id=${credentialExchangeId}`;
   const params = {
     headers: {
       "x-api-key": issuerAccessToken,
@@ -833,7 +834,7 @@ export function genericPolling({
   sseTag,
   requestTimeout = 14 // max 14s - will need to deal with SSE ping at 15s
 }) {
-  const endpoint = `${__ENV.CLOUDAPI_URL}/tenant/v1/sse/${walletId}/${topic}/${field}/${fieldId}/${state}?look_back=${lookBack}`;
+  const endpoint = `${config.api.cloudApiUrl}/tenant/v1/sse/${walletId}/${topic}/${field}/${fieldId}/${state}?look_back=${lookBack}`;
 
   // Backoff delays in seconds: 0.5, 1, 2, 5
   const delays = [0.5, 1, 2, 3];

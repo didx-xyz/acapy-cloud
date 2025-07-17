@@ -28,3 +28,4 @@ services:
       - NUM_ISSUERS=1
       - OOB_INVITATION=true # temporary until connect via pulbic DID on Cheqd is implemented
       - USE_AUTO_PUBLISH=false
+      - DEBUG=false

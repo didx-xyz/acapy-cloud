@@ -7,10 +7,11 @@ import { Counter } from "k6/metrics";
 import { getAuthHeaders } from '../libs/auth.js';
 import { deleteTenant, getWalletIdByWalletName, getWalletIndex } from "../libs/functions.js";
 import file from "k6/x/file"; // Add file import
+import { config } from "../libs/config.js";
 
-const vus = Number.parseInt(__ENV.VUS, 10);
-const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
-const issuerPrefix = __ENV.ISSUER_PREFIX;
+const vus = config.test.vus;
+const iterations = config.test.iterations;
+const issuerPrefix = config.test.issuerPrefix;
 const outputPrefix = `${issuerPrefix}`;
 
 export const options = {

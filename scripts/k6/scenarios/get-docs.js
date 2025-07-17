@@ -7,11 +7,12 @@ import { SharedArray } from "k6/data";
 import { Counter, Trend } from "k6/metrics";
 import { getBearerToken } from "../libs/auth.js";
 import { getDocs } from "../libs/functions.js";
+import { config } from "../libs/config.js";
 
-const vus = Number.parseInt(__ENV.VUS, 10);
-const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
-const issuerPrefix = __ENV.ISSUER_PREFIX;
-// const holderPrefix = __ENV.HOLDER_PREFIX;
+const vus = config.test.vus;
+const iterations = config.test.iterations;
+const issuerPrefix = config.test.issuerPrefix;
+// const holderPrefix = config.test.holderPrefix;
 
 export const options = {
   scenarios: {

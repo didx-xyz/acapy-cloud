@@ -16,17 +16,18 @@ import {
   pollAndCheck,
   getHolderConnections,
 } from "../libs/functions.js";
+import { config } from "../libs/config.js";
 
-const vus = Number.parseInt(__ENV.VUS, 10);
-const iterations = Number.parseInt(__ENV.ITERATIONS, 10);
-const issuerPrefix = __ENV.ISSUER_PREFIX;
-const holderPrefix = __ENV.HOLDER_PREFIX;
-const schemaName = __ENV.SCHEMA_NAME;
-const schemaVersion = __ENV.SCHEMA_VERSION;
-const numIssuers = __ENV.NUM_ISSUERS;
+const vus = config.test.vus;
+const iterations = config.test.iterations;
+const issuerPrefix = config.test.issuerPrefix;
+const holderPrefix = config.test.holderPrefix;
+const schemaName = config.schema.name;
+const schemaVersion = config.schema.version;
+const numIssuers = config.test.numIssuers;
 const outputPrefix = `${issuerPrefix}-${holderPrefix}`;
-const version = __ENV.VERSION;
-const useOobInvitation = __ENV.OOB_INVITATION === "true";
+const version = config.test.version;
+const useOobInvitation = config.api.oobInvitation;
 
 export const options = {
   scenarios: {
@@ -69,7 +70,7 @@ export function setup() {
 }
 
 function getIssuerIndex(vu, iter) {
-  const numIssuers = __ENV.NUM_ISSUERS;
+  const numIssuers = config.test.numIssuers;
   return (vu + iter - 2) % numIssuers;
 }
 

@@ -3,12 +3,13 @@
 
 import http from "k6/http";
 import { getOrgId, fetchClientSecret, fetchGovernanceSecret } from './auth-support.js';
+import { config } from './config.js';
 
 
 export function getAuthHeaders() {
   let tenantAdminHeaders, governanceHeaders;
 
-  if (__ENV.USE_ENTERPRISE === 'true') {
+  if (config.auth.useEnterprise) {
     // Only get tokens once for better performance
     console.log("Using Bearer token for authentication");
 
@@ -19,8 +20,8 @@ export function getAuthHeaders() {
     governanceHeaders = { 'Authorization': `Bearer ${governanceToken}` };
   } else {
     console.log("Using API keys for authentication");
-    tenantAdminHeaders = { 'x-api-key': `tenant-admin.${__ENV.TENANT_ADMIN_API_KEY}` };
-    governanceHeaders = { 'x-api-key': `governance.${__ENV.GOVERNANCE_API_KEY }` };
+    tenantAdminHeaders = { 'x-api-key': `tenant-admin.${config.auth.tenantAdminApiKey}` };
+    governanceHeaders = { 'x-api-key': `governance.${config.auth.governanceApiKey}` };
   }
 
   return { tenantAdminHeaders, governanceHeaders };
@@ -31,8 +32,8 @@ export function getBearerToken() {
   const clientSecret = fetchClientSecret();
   const orgId = getOrgId();
 
-  const url = `${__ENV.CLOUDAPI_URL}/auth/realms/${orgId}/protocol/openid-connect/token`;
-  const clientId = __ENV.CLIENT_ID;
+  const url = `${config.api.cloudApiUrl}/auth/realms/${orgId}/protocol/openid-connect/token`;
+  const clientId = config.auth.clientId;
   const requestBody = `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`;
 
   const response = http.post(url, requestBody, {
@@ -53,8 +54,8 @@ export function getBearerToken() {
 }
 
 export function getGovernanceBearerToken() {
-  const url = `${__ENV.CLOUDAPI_URL}/${__ENV.GOVERNANCE_OAUTH_ENDPOINT}`;
-  const clientId = __ENV.GOVERNANCE_CLIENT_ID;
+  const url = `${config.api.cloudApiUrl}/${config.auth.governanceOauthEndpoint}`;
+  const clientId = config.auth.governanceClientId;
   const clientSecret = fetchGovernanceSecret();
   const requestBody = `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`;
 
