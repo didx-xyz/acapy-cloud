@@ -31,9 +31,9 @@ kind_cluster_name = "kind-acapy-cloud"
 allow_k8s_contexts([kind_cluster_name])
 
 if config.tilt_subcommand in ("up", "ci"):
-    print(color.green("Ensuring submodules are initialized and updated"))
+    print(color.green("Ensuring submodules are initialized"))
     run_command(
-        "git submodule update --init --recursive --merge",
+        "git submodule status | awk '/^-/ {print $2}' | xargs -r git submodule update --init",
         dir=os.path.dirname(__file__),
     )
     print(color.green("Setting up Istio"))
