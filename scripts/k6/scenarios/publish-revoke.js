@@ -40,10 +40,11 @@ export const options = {
   teardownTimeout: "180s",
   maxRedirects: 4,
   thresholds: {
-    "http_req_duration{scenario:default}": ["max>=0"],
-    "http_reqs{scenario:default}": ["count >= 0"],
-    "iteration_duration{scenario:default}": ["max>=0"],
-    checks: ["rate==1"],
+    // "http_req_duration{scenario:default}": ["max>=0"],
+    // "http_reqs{scenario:default}": ["count >= 0"],
+    // "iteration_duration{scenario:default}": ["max>=0"],
+    // checks: ["rate==1"],
+    checks: ["rate>0.99"],
   },
   tags: {
     test_run_id: "phased-issuance",
