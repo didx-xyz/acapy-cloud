@@ -1,3 +1,4 @@
+import os
 from typing import Literal
 
 from aries_cloudcontroller import DID, AcaPyClient, InvitationCreateRequest
@@ -9,6 +10,8 @@ from app.services import acapy_wallet
 from shared.log_config import get_logger
 
 logger = get_logger(__name__)
+
+MAIN_NET = os.getenv("MAIN_NET", "false").lower() == "true"
 
 
 async def onboard_issuer(
@@ -95,9 +98,18 @@ async def onboard_issuer_no_public_did(
     )
     bound_logger.debug("Onboarding issuer that has no public DID")
 
-    issuer_did = await acapy_wallet.create_did(
-        issuer_controller, did_create=DIDCreate(method=did_method)
-    )
+    if MAIN_NET:
+        did_create = DIDCreate(
+            method=did_method,
+            network="mainnet",
+        )
+    else:
+        did_create = DIDCreate(
+            method=did_method,
+            network="testnet",
+        )
+
+    issuer_did = await acapy_wallet.create_did(issuer_controller, did_create=did_create)
 
     bound_logger.debug("Successfully registered DID for issuer: {}.", issuer_did)
     return issuer_did
