@@ -104,10 +104,7 @@ async def onboard_issuer_no_public_did(
             network="mainnet",
         )
     else:
-        did_create = DIDCreate(
-            method=did_method,
-            network="testnet",
-        )
+        did_create = DIDCreate(method=did_method)
 
     issuer_did = await acapy_wallet.create_did(issuer_controller, did_create=did_create)
 
