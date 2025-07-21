@@ -73,7 +73,7 @@ async def handle_acapy_call[T](
             # Handle other / 500 errors:
             logger.warning("Error during {}: {}", method_identifier, error_msg)
             raise CloudApiException(status_code=status, detail=error_msg) from e
-    except ClientConnectionResetError as e:
+    except ClientConnectionResetError as e:  # pragma: no cover
         logger.error("Client connection reset error")
         raise CloudApiException(
             status_code=500, detail="Client connection reset error"

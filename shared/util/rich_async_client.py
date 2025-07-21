@@ -84,12 +84,12 @@ class RichAsyncClient(AsyncClient):
                 )
                 logger.warning(log_message)
                 await asyncio.sleep(self.retry_wait_seconds)  # Wait before retrying
-            except httpx.RemoteProtocolError as e:
+            except httpx.RemoteProtocolError as e:  # pragma: no cover
                 logger.error("Remote protocol error: {}", str(e))
                 raise HTTPException(
                     status_code=500, detail="Remote protocol error"
                 ) from e
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 logger.exception(
                     "Unexpected error during RichAsyncClient request: {}", str(e)
                 )
