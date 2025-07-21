@@ -2,6 +2,7 @@ import asyncio
 import logging
 import ssl
 
+import httpx
 from fastapi import HTTPException
 from httpx import URL, AsyncClient, ConnectTimeout, HTTPStatusError, Response
 
@@ -51,9 +52,7 @@ class RichAsyncClient(AsyncClient):
             response.raise_for_status()  # Raise exception for 4xx and 5xx status codes
         return response
 
-    async def _handle_error(
-        self, e: HTTPStatusError, url: URL | str, method: str
-    ) -> None:
+    def _handle_error(self, e: HTTPStatusError, url: URL | str, method: str) -> None:
         code = e.response.status_code
         message = e.response.text
         log_message = (
@@ -74,7 +73,7 @@ class RichAsyncClient(AsyncClient):
                 if isinstance(e, HTTPStatusError):
                     code = e.response.status_code
                     if code not in self.retry_on or attempt >= self.retries - 1:
-                        await self._handle_error(e, url, method)  # Raises HTTPException
+                        self._handle_error(e, url, method)  # Raises HTTPException
                     error_msg = f"failed with status code {code}"
                 else:
                     error_msg = "failed with httpx.ConnectTimeout"
@@ -85,6 +84,18 @@ class RichAsyncClient(AsyncClient):
                 )
                 logger.warning(log_message)
                 await asyncio.sleep(self.retry_wait_seconds)  # Wait before retrying
+            except httpx.RemoteProtocolError as e:
+                logger.error("Remote protocol error: {}", str(e))
+                raise HTTPException(
+                    status_code=500, detail="Remote protocol error"
+                ) from e
+            except Exception as e:
+                logger.exception(
+                    "Unexpected error during RichAsyncClient request: {}", str(e)
+                )
+                raise HTTPException(
+                    status_code=500, detail="Internal server error"
+                ) from e
 
     async def post(self, url: URL | str, **kwargs) -> Response:
         return await self._request_with_retries("post", url, **kwargs)
