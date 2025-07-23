@@ -96,7 +96,7 @@ spec:
               if [ ! -f /cheqd/config/genesis.json ]; then
                 echo "Genesis file not found, downloading..."
                 wget -qO /cheqd/config/genesis.json \
-                  https://raw.githubusercontent.com/cheqd/cheqd-node/refs/heads/main/networks/{{ .Values.network }}/genesis.json
+                  https://raw.githubusercontent.com/cheqd/cheqd-node/refs/tags/v{{ .Values.image.tag | default .Chart.AppVersion }}/networks/{{ .Values.network }}/genesis.json
               else
                 echo "Genesis file already exists, skipping download."
               fi
@@ -132,33 +132,21 @@ spec:
               apk add --no-cache --update lz4 aria2
 
               SNAPSHOT_FILE="/cheqd/{{ tpl .Values.snapshot.filename . }}"
-              ARIA2_FILE="${SNAPSHOT_FILE}.aria2"
+              echo "Downloading snapshot..."
+              echo "Snapshot file: ${SNAPSHOT_FILE}"
+              echo "Snapshot network: {{ .Values.network }}"
 
-              # Download snapshot if needed
-              if [ -f "${ARIA2_FILE}" ]; then
-                echo "Partial download detected, continuing..."
-              elif [ -f "${SNAPSHOT_FILE}" ]; then
-                echo "Snapshot file already exists, skipping download..."
-              else
-                echo "Starting snapshot download..."
-              fi
-
-              if [ ! -f "${SNAPSHOT_FILE}" ] || [ -f "${ARIA2_FILE}" ]; then
-                echo "Downloading snapshot..."
-                echo "Snapshot date: {{ .Values.snapshot.date }}"
-                echo "Snapshot network: {{ .Values.network }}"
-
-                aria2c --split=8 \
-                  --max-connection-per-server=8 \
-                  --continue=true \
-                  {{- if .Values.snapshot.checksum }}
-                  --check-integrity=true \
-                  --checksum=sha-256={{ .Values.snapshot.checksum }} \
-                  {{- end }}
-                  --dir=/cheqd \
-                  --out={{ tpl .Values.snapshot.filename . }} \
-                  {{ tpl .Values.snapshot.url . }}
-              fi
+              # Download snapshot
+              aria2c --split=8 \
+                --max-connection-per-server=8 \
+                --continue=true \
+                {{- if .Values.snapshot.checksum }}
+                --check-integrity=true \
+                --checksum=sha-256={{ .Values.snapshot.checksum }} \
+                {{- end }}
+                --dir=/cheqd \
+                --out={{ tpl .Values.snapshot.filename . }} \
+                {{ tpl .Values.snapshot.url . }}
 
               # Extract snapshot
               echo "Extracting snapshot..."
