@@ -14,6 +14,8 @@ primary:
     whenDeleted: Delete
   podLabels:
     sidecar.istio.io/inject: "false"
+  pdb:
+    create: false
 replica:
   replicaCount: 0
   resourcesPreset: nano
@@ -26,3 +28,5 @@ replica:
   podLabels:
     sidecar.istio.io/inject: "false"
   podManagementPolicy: Parallel
+  pdb:
+    create: false
