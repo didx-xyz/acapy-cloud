@@ -70,7 +70,7 @@ async def test_revoke_many_credentials(
         await alice_member_client.get(
             f"{VERIFIER_BASE_PATH}/proofs/{alice_proof_exchange_id}/credentials"
         )
-    ).json()[0]["cred_info"]["referent"]
+    ).json()[0]["cred_info"]["credential_id"]
 
     # Send proof
     await alice_member_client.post(
@@ -114,6 +114,18 @@ async def revoke_many(
     if hasattr(request, "param") and request.param == "auto_publish_false":
         auto_publish = False
 
+    return await revoke_many_helper(
+        faber_anoncreds_client,
+        issue_many_creds,
+        auto_publish,
+    )
+
+
+async def revoke_many_helper(
+    faber_anoncreds_client: RichAsyncClient,
+    issue_many_creds: list[CredentialExchange],
+    auto_publish: bool = True,
+) -> list[CredentialExchange]:
     for cred in issue_many_creds:
         await faber_anoncreds_client.post(
             f"{CREDENTIALS_BASE_PATH}/revoke",
@@ -132,6 +144,23 @@ async def issue_many_creds(
     alice_member_client: RichAsyncClient,
     anoncreds_credential_definition_id_revocable: str,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
+    num_to_issue: int = 15,
+) -> list[CredentialExchange]:
+    return await issue_many_creds_helper(
+        faber_anoncreds_client,
+        alice_member_client,
+        anoncreds_credential_definition_id_revocable,
+        faber_anoncreds_and_alice_connection,
+        num_to_issue,
+    )
+
+
+async def issue_many_creds_helper(
+    faber_anoncreds_client: RichAsyncClient,
+    alice_member_client: RichAsyncClient,
+    anoncreds_credential_definition_id_revocable: str,
+    faber_anoncreds_and_alice_connection: FaberAliceConnect,
+    num_to_issue: int = 15,
 ) -> list[CredentialExchange]:
     # Fetch existing records so we can filter to exclude them. Necessary to cater for long running / regression tests
     existing_records = (
@@ -141,7 +170,6 @@ async def issue_many_creds(
     faber_conn_id = faber_anoncreds_and_alice_connection.faber_connection_id
 
     faber_cred_ex_ids = []
-    num_to_issue = 75
     for i in range(num_to_issue):  # Adjust the number as needed
         credential = {
             "connection_id": faber_conn_id,
