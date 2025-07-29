@@ -8,12 +8,14 @@ import pytest
 from app.models.definitions import CreateCredentialDefinition
 from app.models.tenants import CreateTenantResponse
 from app.services.revocation_registry import wait_for_active_registry
+from app.tests.e2e.experimental.rev_reg_resilience_testing.log_pattern_monitor import (
+    LogPatternMonitor,
+)
 from app.tests.fixtures.definitions import (
     DEFINITIONS_BASE_PATH,
     fetch_or_create_regression_test_schema_definition,
 )
 from app.tests.fixtures.member_acapy_clients import get_token
-from app.tests.resilience_testing.resilience_test_utils import LogPatternMonitor
 from app.tests.util.client import (
     get_governance_client,
     get_tenant_acapy_client,
