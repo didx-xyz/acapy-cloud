@@ -15,7 +15,7 @@ package-mode = false
 python = "~3.12.8"
 
 base58 = "~2.1.1"
-fastapi = "~0.115.10"
+fastapi = "~0.116.1"
 httpx = "~0.28.0"
 loguru = "~0.7.2"
 orjson = "~3.10.7"
