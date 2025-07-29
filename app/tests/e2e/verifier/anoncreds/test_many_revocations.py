@@ -6,6 +6,7 @@ import pytest
 from app.routes.issuer import router as issuer_router
 from app.routes.verifier import router as verifier_router
 from app.tests.util.connections import AcmeAliceConnect, FaberAliceConnect
+from app.tests.util.issuer import issue_many_credentials, revoke_many
 from app.tests.util.verifier import send_proof_request
 from app.tests.util.webhooks import assert_both_webhooks_received, check_webhook_state
 from shared import RichAsyncClient
@@ -105,136 +106,34 @@ async def test_revoke_many_credentials(
 
 
 @pytest.fixture(scope="function")
-async def revoke_many(
+async def revoke_many_fixture(
     request,
     faber_anoncreds_client: RichAsyncClient,
-    issue_many_creds: list[CredentialExchange],  # pylint: disable=redefined-outer-name
+    issue_many_credentials_fixture: list[CredentialExchange],  # pylint: disable=redefined-outer-name
 ) -> list[CredentialExchange]:
     auto_publish = True
     if hasattr(request, "param") and request.param == "auto_publish_false":
         auto_publish = False
 
-    return await revoke_many_helper(
+    return await revoke_many(
         faber_anoncreds_client,
-        issue_many_creds,
+        issue_many_credentials_fixture,
         auto_publish,
     )
 
 
-async def revoke_many_helper(
-    faber_anoncreds_client: RichAsyncClient,
-    issue_many_creds: list[CredentialExchange],
-    auto_publish: bool = True,
-) -> list[CredentialExchange]:
-    for cred in issue_many_creds:
-        await faber_anoncreds_client.post(
-            f"{CREDENTIALS_BASE_PATH}/revoke",
-            json={
-                "credential_exchange_id": cred.credential_exchange_id,
-                "auto_publish_on_ledger": auto_publish,
-            },
-        )
-
-    return issue_many_creds
-
-
 @pytest.fixture(scope="function")
-async def issue_many_creds(
+async def issue_many_credentials_fixture(
     faber_anoncreds_client: RichAsyncClient,
     alice_member_client: RichAsyncClient,
     anoncreds_credential_definition_id_revocable: str,
     faber_anoncreds_and_alice_connection: FaberAliceConnect,
     num_to_issue: int = 15,
 ) -> list[CredentialExchange]:
-    return await issue_many_creds_helper(
+    return await issue_many_credentials(
         faber_anoncreds_client,
         alice_member_client,
         anoncreds_credential_definition_id_revocable,
         faber_anoncreds_and_alice_connection,
         num_to_issue,
     )
-
-
-async def issue_many_creds_helper(
-    faber_anoncreds_client: RichAsyncClient,
-    alice_member_client: RichAsyncClient,
-    anoncreds_credential_definition_id_revocable: str,
-    faber_anoncreds_and_alice_connection: FaberAliceConnect,
-    num_to_issue: int = 15,
-) -> list[CredentialExchange]:
-    # Fetch existing records so we can filter to exclude them. Necessary to cater for long running / regression tests
-    existing_records = (
-        await alice_member_client.get(CREDENTIALS_BASE_PATH + "?state=offer-received")
-    ).json()
-
-    faber_conn_id = faber_anoncreds_and_alice_connection.faber_connection_id
-
-    faber_cred_ex_ids = []
-    for i in range(num_to_issue):  # Adjust the number as needed
-        credential = {
-            "connection_id": faber_conn_id,
-            "save_exchange_record": True,
-            "anoncreds_credential_detail": {
-                "credential_definition_id": anoncreds_credential_definition_id_revocable,
-                "attributes": {"speed": str(i), "name": "Alice", "age": "44"},
-            },
-        }
-
-        faber_cred_ex_id = (
-            await faber_anoncreds_client.post(
-                CREDENTIALS_BASE_PATH,
-                json=credential,
-            )
-        ).json()["credential_exchange_id"]
-        faber_cred_ex_ids += [faber_cred_ex_id]
-
-    num_tries = 0
-    num_credentials_returned = 0
-    while num_credentials_returned != num_to_issue and num_tries < 10:
-        await asyncio.sleep(0.25)
-        alice_cred_ex_response = (
-            await alice_member_client.get(
-                f"{CREDENTIALS_BASE_PATH}?connection_id={faber_anoncreds_and_alice_connection.alice_connection_id}"
-            )
-        ).json()
-        alice_cred_ex_response = [
-            record
-            for record in alice_cred_ex_response
-            if record not in existing_records
-        ]
-        num_credentials_returned = len(alice_cred_ex_response)
-        num_tries += 1
-
-    if num_credentials_returned != num_to_issue:
-        pytest.fail(
-            f"Expected num_to_issue credentials to be issued; only got {num_credentials_returned}"
-        )
-
-    for cred in alice_cred_ex_response:
-        await alice_member_client.post(
-            f"{CREDENTIALS_BASE_PATH}/{cred['credential_exchange_id']}/request", json={}
-        )
-        # wait for credential state "done" for each credential
-        await check_webhook_state(
-            client=alice_member_client,
-            topic="credentials",
-            state="done",
-            filter_map={
-                "credential_exchange_id": cred["credential_exchange_id"],
-            },
-        )
-
-    cred_ex_response = (
-        await faber_anoncreds_client.get(
-            CREDENTIALS_BASE_PATH + "?connection_id=" + faber_conn_id
-        )
-    ).json()
-    cred_ex_response = [
-        record
-        for record in cred_ex_response
-        if record["credential_exchange_id"] in faber_cred_ex_ids
-    ]
-
-    assert len(cred_ex_response) == num_to_issue
-
-    return [CredentialExchange(**cred) for cred in cred_ex_response]
