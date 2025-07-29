@@ -136,6 +136,7 @@ async def test_rev_reg_resilience():
     LOGGER.info(f"Create cred def status code: {create_cred_def_response.status_code}")
     LOGGER.info(f"Create cred def response: {create_cred_def_response.text}")
     assert create_cred_def_response.status_code // 100 == 5, "Expected 5xx error"
+    monitor.stop_monitoring()
 
     # Agent should be restarting
     LOGGER.info("Waiting 30 seconds for agent to restart")
