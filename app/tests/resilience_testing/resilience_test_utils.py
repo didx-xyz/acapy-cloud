@@ -22,14 +22,29 @@ class LogPatternMonitor:
         self.monitor_process = None
 
     def start_monitoring(self, log_pattern: str | None = None) -> subprocess.Popen:
-        """Start log pattern monitoring"""
+        """Start log pattern monitoring
+
+        Args:
+            log_pattern: Custom log pattern to monitor for. If None, uses script default.
+
+        Example patterns:
+            "Registering revocation registry definition"
+            "Uploading tails file"
+            "Emitting store revocation registry definition event"
+
+        """
         LOGGER.info("Starting log pattern monitoring...")
 
-        # If a custom pattern is provided, we could modify the script
-        # For now, we'll use the script as-is
+        # Build command with optional log pattern
+        cmd = [self.monitor_script_path]
+        if log_pattern:
+            cmd.append(log_pattern)
+            LOGGER.info(f"Using custom log pattern: '{log_pattern}'")
+        else:
+            LOGGER.info("Using default log pattern from script")
 
         self.monitor_process = subprocess.Popen(
-            [self.monitor_script_path],
+            cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,

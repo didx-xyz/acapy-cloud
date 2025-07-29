@@ -95,7 +95,27 @@ async def test_rev_reg_resilience():
 
     # Start pod monitor-and-kill script
     monitor = LogPatternMonitor(MONITOR_SCRIPT_PATH)
+
+    # Example: Use default pattern (Registering revocation registry definition)
     monitor.start_monitoring()
+
+    # Example: Monitor for tails file upload
+    # monitor.start_monitoring("Uploading tails file")
+
+    # Example: Monitor for store revocation registry definition event
+    # monitor.start_monitoring("Emitting store revocation registry definition event")
+
+    # Example: Monitor handling registry store request
+    # monitor.start_monitoring("Handling registry store request")
+
+    # Example: Monitor storing revocation registry definition
+    # monitor.start_monitoring("Storing revocation registry definition")
+
+    # Example: Monitor for finishing revocation registry definition
+    # monitor.start_monitoring("Finishing revocation registry definition")
+
+    # Example: Monitor for setting registry as active
+    # monitor.start_monitoring("Setting registry as active")
 
     # Issuer creates credential definition (revocable)
     LOGGER.info("Creating credential definition")
