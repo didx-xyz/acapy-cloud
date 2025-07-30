@@ -79,7 +79,6 @@ async def test_rev_reg_resilience():
         LOGGER.info(f"\tHolder {i} tenant created: {holder_name}")
 
         # Create connection between issuer and this holder
-        await asyncio.sleep(1.5)
         connection_alias = f"ResilienceTestConnection{i}_" + random_string(5)
         connection: BobAliceConnect = await create_bob_alice_connection(
             alice_member_client=holder_client,
@@ -177,6 +176,9 @@ async def test_rev_reg_resilience():
         asyncio.timeout(30),
     ):
         await wait_for_active_registry(issuer_acapy_client, cred_def_id)
+
+    LOGGER.info("Waiting additional 15 seconds to ensure rev reg is created")
+    await asyncio.sleep(15)
 
     # Phase 1: Issue 1 credential to each holder
     LOGGER.info("Phase 1: Issuing credentials to all holders")
