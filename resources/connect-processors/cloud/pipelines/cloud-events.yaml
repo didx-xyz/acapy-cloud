@@ -25,6 +25,18 @@ input:
           deliver: ${CLOUD_EVENTS_CREATE_NATS_INPUT_DELIVER:"all"}
           auth:
             user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+      - label: anoncreds_events
+        nats_jetstream:
+          urls:
+            - ${NATS_URL:nats://nats:4222}
+          subject: ${CLOUD_EVENTS_CREATE_NATS_INPUT_SUBJECT_PREFIX:anoncreds.record-with-state}.${CLOUD_EVENTS_CREATE_NATS_INPUT_TOPIC:*}
+          stream: ${CLOUD_EVENTS_CREATE_NATS_INPUT_STREAM:"acapy_events"}
+          durable: ${CLOUD_EVENTS_CREATE_NATS_INPUT_CONSUMER_NAME:anoncreds-events-processor}
+          queue: ${CLOUD_EVENTS_CREATE_NATS_INPUT_QUEUE_GROUP:""}
+          bind: ${CLOUD_EVENTS_CREATE_NATS_INPUT_BIND:false}
+          deliver: ${CLOUD_EVENTS_CREATE_NATS_INPUT_DELIVER:"all"}
+          auth:
+            user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
 
 pipeline:
   threads: ${CLOUD_EVENTS_CREATE_PIPELINE_THREADS:-1}
@@ -55,7 +67,10 @@ pipeline:
             "out_of_band": "oob",
             "present_proof": "proofs",
             "present_proof_v2_0": "proofs",
-            "problem_report": "problem_report"
+            "problem_report": "problem_report",
+            "credential-definition": "credential-definitions",
+            "revocation-registry-definition": "revocation-registry-definitions",
+            "revocation-list": "revocation-lists",
         }
         let category = this.payload.category
         let acapy_topic = this.payload.topic
