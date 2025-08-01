@@ -58,6 +58,11 @@ RESILIENCE_SCENARIOS = [
         description="Interrupt during revocation registry definition creation",
     ),
     ResilienceTestScenario(
+        name="create_registry_definition_event",
+        log_pattern="Emitting create revocation registry definition event",
+        description="Interrupt when emitting create registry definition event",
+    ),
+    ResilienceTestScenario(
         name="registry_definition_publish",
         log_pattern="Publishing revocation registry definition resource",
         description="Interrupt during revocation registry definition publish",
@@ -84,8 +89,8 @@ RESILIENCE_SCENARIOS = [
     ),
     ResilienceTestScenario(
         name="finishing_registry_definition",
-        log_pattern="Finishing revocation registry definition",
-        description="Interrupt while finishing registry definition",
+        log_pattern="Emitting rev reg def finished event",
+        description="Interrupt while emitting rev reg def finished event",
     ),
     ResilienceTestScenario(
         name="setting_active_registry",
@@ -93,14 +98,14 @@ RESILIENCE_SCENARIOS = [
         description="Interrupt while setting registry as active",
     ),
     ResilienceTestScenario(
-        name="create_registry_definition_event",
-        log_pattern="Emitting create revocation registry definition event",
-        description="Interrupt when emitting create registry definition event",
+        name="emitting_create_and_register_rev_list_event",
+        log_pattern="Emitting create and register revocation list",
+        description="Interrupt while emitting create and register revocation list",
     ),
     ResilienceTestScenario(
-        name="create_and_register_registry",
-        log_pattern="Creating and registering revocation registry definition",
-        description="Interrupt during create and register process",
+        name="storing_rev_list",
+        log_pattern="Storing revocation registry list",
+        description="Interrupt while storing revocation registry list",
     ),
 ]
 
@@ -193,9 +198,13 @@ async def run_resilience_scenario(
     # Issuer should get a timeout on their initial cred def create request
     LOGGER.info(f"Create cred def status code: {create_cred_def_response.status_code}")
     LOGGER.info(f"Create cred def response: {create_cred_def_response.text}")
-    assert create_cred_def_response.status_code // 100 == 5, (
-        f"Expected 5xx error for scenario {scenario.name}"
+
+    expected_status = 5  # 500 or 503 -- since agent is killed while creating rev regs
+    assert create_cred_def_response.status_code // 100 == expected_status, (
+        f"Expected {expected_status}xx for scenario {scenario.name}, got {create_cred_def_response.status_code}\n"
+        "NB: mt-agent must run with debug logging enabled in order for the monitor_and_kill_pod.sh script to work"
     )
+
     monitor.stop_monitoring()
 
     # Agent should be restarting
@@ -231,7 +240,9 @@ async def run_resilience_scenario(
                 # Successfully found the credential definition, exit retry loop
                 break
             else:
-                LOGGER.info(f"No matching cred def found for tag: {cred_def_tag}, retrying...")
+                LOGGER.info(
+                    f"No matching cred def found for tag: {cred_def_tag}, retrying..."
+                )
 
         except Exception as e:
             LOGGER.info(f"Error getting cred def: {e}, retrying...")
