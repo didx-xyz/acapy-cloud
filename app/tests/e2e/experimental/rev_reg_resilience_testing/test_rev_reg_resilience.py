@@ -199,10 +199,16 @@ async def run_resilience_scenario(
     LOGGER.info(f"Create cred def status code: {create_cred_def_response.status_code}")
     LOGGER.info(f"Create cred def response: {create_cred_def_response.text}")
 
-    expected_status = 5  # 500 or 503 -- since agent is killed while creating rev regs
+    if "storing_rev_list" in scenario.name:
+        # Note: this may be sporadic. Should mostly be 200, but can be 500 too, depending on timing
+        expected_status = 2  # 200
+    else:
+        expected_status = 5  # 500 or 503, since agent is killed while creating rev regs
+
     assert create_cred_def_response.status_code // 100 == expected_status, (
         f"Expected {expected_status}xx for scenario {scenario.name}, got {create_cred_def_response.status_code}\n"
-        "NB: mt-agent must run with debug logging enabled in order for the monitor_and_kill_pod.sh script to work"
+        "NB: mt-agent must run with debug logging enabled in order for the monitor_and_kill_pod.sh script to work\n"
+        "Also, some of the scenarios may succeed if the interruption is after both rev regs are created"
     )
 
     monitor.stop_monitoring()
