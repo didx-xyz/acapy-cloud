@@ -3,7 +3,7 @@
 set -e
 
 # Default log pattern if none provided
-DEFAULT_PATTERN="Creating and registering revocation registry definition"
+DEFAULT_PATTERN="Publishing revocation registry definition resource"
 LOG_PATTERN="${1:-$DEFAULT_PATTERN}"
 
 echo "🔍 Looking for multitenant-agent pod..."
@@ -22,21 +22,16 @@ echo "👀 Following logs and waiting for pattern match..."
 
 # Follow logs from now onwards and look for the specific pattern
 kubectl logs -f --tail=0 "$POD_NAME" | while IFS= read -r line; do
-    # Only process lines that start with timestamp and contain acapy_agent (faster with anchored pattern)
-    if echo "$line" | grep -q "^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\},[0-9]\{3\} acapy_agent\."; then
-        echo "$line"
+    # Check if the line matches our pattern
+    if echo "$line" | grep -q "$LOG_PATTERN"; then
+        echo ""
+        echo "🎯 Found pattern match! Deleting pod..."
 
-        # Check if the line matches our pattern
-        if echo "$line" | grep -q "$LOG_PATTERN"; then
-            echo ""
-            echo "🎯 Found pattern match! Deleting pod..."
+        # Kill the pod immediately
+        kubectl delete pod "$POD_NAME" --force --grace-period=0
 
-            # Kill the pod immediately
-            kubectl delete pod "$POD_NAME" --force --grace-period=0
-
-            echo "💀 Pod $POD_NAME has been deleted!"
-            break
-        fi
+        echo "💀 Pod $POD_NAME has been deleted!"
+        break
     fi
 done
 
