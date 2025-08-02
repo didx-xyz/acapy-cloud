@@ -29,7 +29,7 @@ async def check_webhook_state(
     topic: CloudApiTopics,
     state: str,
     filter_map: dict[str, str] | None = None,
-    max_duration: int = 45,
+    max_duration: int = 60,
     max_tries: int = 2,
     delay: float = 0.5,
     look_back: int = 15,
