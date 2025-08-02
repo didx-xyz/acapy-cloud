@@ -51,7 +51,7 @@ nats-py = { git = "https://github.com/ff137/nats.py", tag = "v2.10.0-w-orjson", 
   "orjson",
   "uuid_utils",
 ] }
-sse-starlette = "~2.3.3"
+sse-starlette = "~3.0.2"
 tenacity = "^9.1.0"
 uuid_utils = "^0.11.0"
 
