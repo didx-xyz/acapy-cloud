@@ -234,28 +234,41 @@ jobs:
       - /bin/sh
       - -c
       - |
-        set -euo pipefail
+        set -uo pipefail
 
-        # Check if Governance DID already exists
-        DID=$(curl ${URL}/governance/v1/wallet/dids \
-          -sX GET \
+        BASE_URL=http://{{ include "acapy-cloud.fullname" . }}:{{ .Values.service.port }}
+
+        # List all Governance DIDs
+        DIDS=$(curl ${BASE_URL}/governance/v1/wallet/dids \
+          -fsX GET \
           -H "X-API-Key: governance.${API_KEY}")
-        if echo "${DID}" | grep -q "did:cheqd"; then
-          echo "Governance DID already exists, skipping bootstrap."
-          echo "${DID}"
+
+        # If listing dids fails, exit with error
+        if [ $? -ne 0 ]; then
+          echo "Failed listing Governance DIDs. Exiting."
+          exit 1
+        fi
+
+        # Check if the list of DIDs is not empty
+        if [ "${DIDS}" != "[]" ]; then
+          echo "Governance DID already exists: ${DIDS}"
           exit 0
         fi
 
-        echo "Bootstrapping Governance DID..."
-        RESULT=$(curl ${URL}/governance/v1/wallet/dids \
-          -sX POST \
+        echo "No DIDs found, proceeding with bootstrap."
+        RESULT=$(curl ${BASE_URL}/governance/v1/wallet/dids \
+          -fsX POST \
           -H "Content-Type: application/json" \
           -H "X-API-Key: governance.${API_KEY}" \
           -d '{"method": "cheqd", "seed": "'${WALLET_SEED}'"}')
 
+        if [ $? -ne 0 ]; then
+          echo "Failed to create Governance DID. Exiting."
+          exit 1
+        fi
+
         echo "DID created: ${RESULT}"
     env:
-      URL: http://{{ include "acapy-cloud.fullname" . }}:{{ .Values.service.port }}
       WALLET_SEED:
         valueFrom:
           secretKeyRef:
