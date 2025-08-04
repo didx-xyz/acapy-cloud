@@ -11,7 +11,7 @@ from shared.log_config import get_logger
 
 logger = get_logger(__name__)
 
-MAIN_NET = os.getenv("MAIN_NET", "false").lower() == "true"
+IS_MAINNET = os.getenv("IS_MAINNET", "false").lower() == "true"
 
 
 async def onboard_issuer(
@@ -98,13 +98,10 @@ async def onboard_issuer_no_public_did(
     )
     bound_logger.debug("Onboarding issuer that has no public DID")
 
-    if MAIN_NET:
-        did_create = DIDCreate(
-            method=did_method,
-            network="mainnet",
-        )
-    else:
-        did_create = DIDCreate(method=did_method)
+    did_create = DIDCreate(
+        method=did_method,
+        network="mainnet" if IS_MAINNET else "testnet",
+    )
 
     issuer_did = await acapy_wallet.create_did(issuer_controller, did_create=did_create)
 
