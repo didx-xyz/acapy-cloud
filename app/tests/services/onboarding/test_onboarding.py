@@ -88,7 +88,7 @@ async def test_onboard_issuer_no_public_did(
         onboard_result.did == "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
     )  # TODO: cheqd
     acapy_wallet_create_did_mock.assert_called_once_with(
-        mock_agent_controller, did_create=DIDCreate(method="cheqd")
+        mock_agent_controller, did_create=DIDCreate(method="cheqd", network="testnet")
     )
 
 
