@@ -15,7 +15,7 @@ package-mode = false
 python = "~3.12.8"
 
 base58 = "~2.1.1"
-fastapi = "~0.115.10"
+fastapi = "~0.116.1"
 httpx = "~0.28.0"
 loguru = "~0.7.2"
 orjson = "~3.10.7"
@@ -40,7 +40,7 @@ sqlalchemy = {version = "~2.0.40", extras = ["asyncio"]}
 
 [tool.poetry.group.tails.dependencies]
 aiofiles = "^24.1.0"
-boto3 = "~1.39.1"
+boto3 = "~1.40.1"
 python-multipart = "~0.0.20"
 
 [tool.poetry.group.waypoint.dependencies]
@@ -51,13 +51,13 @@ nats-py = { git = "https://github.com/ff137/nats.py", tag = "v2.10.0-w-orjson", 
   "orjson",
   "uuid_utils",
 ] }
-sse-starlette = "~2.3.3"
+sse-starlette = "~3.0.2"
 tenacity = "^9.1.0"
 uuid_utils = "^0.11.0"
 
 [tool.poetry.group.dev.dependencies]
 anyio = "~4.9.0"
-mypy = "~1.16.0"
+mypy = "~1.17.1"
 pre-commit = "~4.2.0"
 pytest = "~8.4.1"
 pytest-cov = "~6.2.1"
