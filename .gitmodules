@@ -1,3 +1,6 @@
 [submodule "acapy"]
 	path = acapy
 	url = git@github.com:didx-xyz/acapy.git
+[submodule "plugins"]
+	path = plugins
+	url = git@github.com:didx-xyz/acapy-plugins.git
