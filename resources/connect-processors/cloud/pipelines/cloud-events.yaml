@@ -68,9 +68,10 @@ pipeline:
             "present_proof": "proofs",
             "present_proof_v2_0": "proofs",
             "problem_report": "problem_report",
-            "credential-definition": "credential-definitions",
-            "revocation-registry-definition": "revocation-registry-definitions",
-            "revocation-list": "revocation-lists",
+            "credential-definition": "credential-definition",
+            "revocation-registry-definition": "revocation-registry-definition",
+            "revocation-registry": "revocation-registry",
+            "revocation-list": "revocation-list",
         }
         let category = this.payload.category
         let acapy_topic = this.payload.topic
