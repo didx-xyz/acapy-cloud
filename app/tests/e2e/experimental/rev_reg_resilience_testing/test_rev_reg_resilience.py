@@ -339,7 +339,7 @@ async def run_resilience_scenario(
 
 
 @pytest.mark.anyio
-# @pytest.mark.skip(reason="Test is for local testing only")
+@pytest.mark.skip(reason="Test is for local testing only")
 async def test_rev_reg_resilience():
     """Test revocation registry resilience across multiple scenarios."""
     LOGGER.info("=== Starting Revocation Registry Resilience Test Suite ===")
