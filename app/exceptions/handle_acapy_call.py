@@ -1,7 +1,7 @@
 from collections.abc import Callable, Coroutine
 from typing import Any
 
-from aiohttp import ClientConnectionResetError
+import aiohttp
 from aries_cloudcontroller.exceptions import (
     ApiException,
     BadRequestException,
@@ -73,11 +73,14 @@ async def handle_acapy_call[T](
             # Handle other / 500 errors:
             logger.warning("Error during {}: {}", method_identifier, error_msg)
             raise CloudApiException(status_code=status, detail=error_msg) from e
-    except ClientConnectionResetError as e:  # pragma: no cover
-        logger.error("Client connection reset error")
+    except aiohttp.ClientConnectionResetError as e:  # pragma: no cover
+        logger.error("Client connection reset error: {}", e)
         raise CloudApiException(
             status_code=500, detail="Client connection reset error"
         ) from e
+    except aiohttp.ClientConnectionError as e:  # pragma: no cover
+        logger.error("Client connection error: {}", e)
+        raise CloudApiException(status_code=503, detail="Service unavailable") from e
     except Exception as e:
         # General exceptions:
         logger.exception("Unexpected exception from ACA-Py call")
