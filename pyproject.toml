@@ -56,7 +56,7 @@ tenacity = "^9.1.0"
 uuid_utils = "^0.11.0"
 
 [tool.poetry.group.dev.dependencies]
-anyio = "~4.9.0"
+anyio = "~4.10.0"
 mypy = "~1.17.1"
 pre-commit = "~4.2.0"
 pytest = "~8.4.1"
