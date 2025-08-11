@@ -13,7 +13,7 @@ pip install pip-tools
 Set the desired poetry version in the `poetry-version.in` file:
 
 ```txt
-poetry==2.1.3
+poetry==2.1.4
 ```
 
 To generate the poetry requirements file with pinned hashes, run:
