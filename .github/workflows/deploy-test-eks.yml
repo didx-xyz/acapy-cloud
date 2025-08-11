@@ -116,7 +116,7 @@ concurrency:
 
 env:
   HELM_VERSION_DEFAULT: v3.18.4
-  HELMFILE_VERSION_DEFAULT: v1.1.3
+  HELMFILE_VERSION_DEFAULT: v1.1.4
 
 jobs:
   deploy:
@@ -139,7 +139,7 @@ jobs:
           persist-credentials: false
 
       - name: Connect to EKS
-        uses: didx-xyz/workflows/connect-eks@db85590d7cdd99f3eb257b0526d905263eca8499 # master
+        uses: didx-xyz/workflows/connect-eks@f45db9156cccb0d7bd1ebf2c940fe5d55f4eb690 # master
         with:
           aws-region: af-south-1
           aws-role-arn: arn:aws:iam::402177810328:role/cicd
@@ -224,7 +224,7 @@ jobs:
           persist-credentials: false
 
       - name: Connect to EKS
-        uses: didx-xyz/workflows/connect-eks@db85590d7cdd99f3eb257b0526d905263eca8499 # master
+        uses: didx-xyz/workflows/connect-eks@f45db9156cccb0d7bd1ebf2c940fe5d55f4eb690 # master
         with:
           aws-region: af-south-1
           aws-role-arn: arn:aws:iam::402177810328:role/cicd
@@ -404,7 +404,7 @@ jobs:
           persist-credentials: false
 
       - name: Connect to EKS
-        uses: didx-xyz/workflows/connect-eks@db85590d7cdd99f3eb257b0526d905263eca8499 # master
+        uses: didx-xyz/workflows/connect-eks@f45db9156cccb0d7bd1ebf2c940fe5d55f4eb690 # master
         with:
           aws-region: af-south-1
           aws-role-arn: arn:aws:iam::402177810328:role/cicd
@@ -586,7 +586,7 @@ jobs:
           persist-credentials: false
 
       - name: Connect to EKS
-        uses: didx-xyz/workflows/connect-eks@db85590d7cdd99f3eb257b0526d905263eca8499 # master
+        uses: didx-xyz/workflows/connect-eks@f45db9156cccb0d7bd1ebf2c940fe5d55f4eb690 # master
         with:
           aws-region: af-south-1
           aws-role-arn: arn:aws:iam::402177810328:role/cicd
