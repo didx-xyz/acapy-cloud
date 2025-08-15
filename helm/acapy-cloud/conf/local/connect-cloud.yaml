@@ -48,7 +48,7 @@ initContainers:
     image: busybox
     command: ['sh', '-c', 'until nc -z nats 4222; do echo waiting for nats; sleep 2; done;']
   - name: nats-check
-    image: bitnami/natscli
+    image: docker.io/bitnamilegacy/natscli
     command:
       - sh
       - -c
