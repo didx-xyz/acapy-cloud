@@ -1,5 +1,5 @@
 load("../utils/Tiltfile", "namespace_create_wrap")
-load("ext://helm_resource", "helm_resource")
+load("ext://helm_resource", "helm_resource", "helm_repo")
 
 
 def setup_metrics_server():
@@ -8,23 +8,29 @@ def setup_metrics_server():
         namespace_labels=["istio-injection: disabled"],
     )
 
-    # https://github.com/bitnami/charts/tree/main/bitnami/metrics-server
+    helm_repo(
+        name="metrics-server",
+        url="https://kubernetes-sigs.github.io/metrics-server",
+        resource_name="metrics-server-repo",
+        labels=["10-helm-repos"],
+    )
+
+    # https://github.com/kubernetes-sigs/metrics-server/tree/master/charts/metrics-server
     helm_resource(
         name="metrics-server",
-        chart="oci://registry-1.docker.io/bitnamicharts/metrics-server",
+        chart="metrics-server/metrics-server",
         release_name="metrics-server",
         namespace=namespace,
         flags=[
             "--set",
             "apiService.create=true",
             "--set",
-            "extraArgs[0]=--metric-resolution=15s",
-            "--set",
-            "extraArgs[1]=--kubelet-insecure-tls",
+            "args[0]=--kubelet-insecure-tls",
             "--version",
-            "7.4.11",
+            "3.13.0",
             "--wait",
         ],
         labels=["30-monitoring"],
+        resource_deps=["metrics-server-repo"],
         auto_init=False,
     )
