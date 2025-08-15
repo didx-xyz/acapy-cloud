@@ -2,6 +2,13 @@
 ##
 fullnameOverride: nats
 
+global:
+  security:
+    # Required to override image repositories (`bitnami` -> `bitnamilegacy`)
+    # https://github.com/bitnami/charts/issues/35164
+    # https://github.com/bitnami/containers/issues/84600
+    allowInsecureImages: true
+
 postInstall:
   enabled: true
 
@@ -54,6 +61,10 @@ nats:
   ## @param fullnameOverride String to fully override common.names.fullname template
   ##
   fullnameOverride: nats
+  ## @param image.repository [default: bitnami/nats] NATS image repository
+  ##
+  image:
+    repository: bitnamilegacy/nats
 
   ## @param replicaCount Number of NATS nodes
   ##
@@ -189,3 +200,11 @@ nats:
     ## @param persistentVolumeClaimRetentionPolicy.whenDeleted Volume retention behavior that applies when the StatefulSet is deleted
     ##
     whenDeleted: Delete
+
+  ## Metrics / Prometheus NATS Exporter
+  ## ref: https://github.com/nats-io/prometheus-nats-exporter
+  ##
+  metrics:
+    ## @param metrics.image.repository [default: bitnami/nats-exporter] Prometheus metrics exporter image repository
+    image:
+      repository: bitnamilegacy/nats-exporter

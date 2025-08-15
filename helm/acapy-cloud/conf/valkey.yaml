@@ -1,6 +1,16 @@
 # https://github.com/bitnami/charts/tree/main/bitnami/valkey
+
+global:
+  security:
+    # Required to override image repositories (`bitnami` -> `bitnamilegacy`)
+    # https://github.com/bitnami/charts/issues/35164
+    # https://github.com/bitnami/containers/issues/84600
+    allowInsecureImages: true
+
 fullnameOverride: valkey
 architecture: replication
+image:
+  repository: bitnamilegacy/valkey
 auth:
   enabled: false
 primary:
@@ -30,3 +40,15 @@ replica:
   podManagementPolicy: Parallel
   pdb:
     create: false
+sentinel:
+  image:
+    repository: bitnamilegacy/valkey-sentinel
+metrics:
+  image:
+    repository: bitnamilegacy/valkey-exporter
+volumePermissions:
+  image:
+    repository: bitnamilegacy/os-shell
+kubectl:
+  image:
+    repository: bitnamilegacy/kubectl
