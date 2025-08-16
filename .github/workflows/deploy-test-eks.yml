@@ -152,7 +152,7 @@ jobs:
       - name: Helmfile Destroy
         if: inputs.reset-deployments
         # https://github.com/helmfile/helmfile-action
-        uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
+        uses: helmfile/helmfile-action@6f21d94fa797f5dfbc92b9db62c6832ac6639a88 # v2.0.5
         with:
           helmfile-args: |
             destroy \
@@ -184,7 +184,7 @@ jobs:
 
       - name: Helmfile Apply
         # https://github.com/helmfile/helmfile-action
-        uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
+        uses: helmfile/helmfile-action@6f21d94fa797f5dfbc92b9db62c6832ac6639a88 # v2.0.5
         with:
           helmfile-args: |
             apply \
@@ -237,7 +237,7 @@ jobs:
       - name: Helmfile run tests
         id: pytest
         # https://github.com/helmfile/helmfile-action
-        uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
+        uses: helmfile/helmfile-action@6f21d94fa797f5dfbc92b9db62c6832ac6639a88 # v2.0.5
         with:
           helmfile-args: |
             apply \
@@ -366,7 +366,7 @@ jobs:
 
       - name: Helmfile Destroy
         # https://github.com/helmfile/helmfile-action
-        uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
+        uses: helmfile/helmfile-action@6f21d94fa797f5dfbc92b9db62c6832ac6639a88 # v2.0.5
         if: always()
         with:
           helmfile-args: |
@@ -417,7 +417,7 @@ jobs:
       - name: Helmfile run tests
         id: regression
         # https://github.com/helmfile/helmfile-action
-        uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
+        uses: helmfile/helmfile-action@6f21d94fa797f5dfbc92b9db62c6832ac6639a88 # v2.0.5
         with:
           helmfile-args: |
             apply \
@@ -549,7 +549,7 @@ jobs:
 
       - name: Helmfile destroy
         # https://github.com/helmfile/helmfile-action
-        uses: helmfile/helmfile-action@712000e3d4e28c72778ecc53857746082f555ef3 # v2.0.4
+        uses: helmfile/helmfile-action@6f21d94fa797f5dfbc92b9db62c6832ac6639a88 # v2.0.5
         if: always()
         with:
           helmfile-args: |
