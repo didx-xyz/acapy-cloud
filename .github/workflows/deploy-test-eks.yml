@@ -344,7 +344,7 @@ jobs:
       - name: Create/Update test coverage comment
         if: steps.pytest.outcome == 'success'
         # https://github.com/MishaKav/pytest-coverage-comment
-        uses: MishaKav/pytest-coverage-comment@13d3c18e21895566c746187c9ea74736372e5e91 # v1.1.54
+        uses: MishaKav/pytest-coverage-comment@9638e4b1448019aba40c4aaaa1ade87a9f211aa1 # v1.1.56
         with:
           pytest-coverage-path: ./pytest/test_coverage.txt
           junitxml-path: ./pytest/test_output.xml
@@ -528,7 +528,7 @@ jobs:
       - name: Create/Update test coverage comment
         if: steps.regression.outcome == 'success'
         # https://github.com/MishaKav/pytest-coverage-comment
-        uses: MishaKav/pytest-coverage-comment@13d3c18e21895566c746187c9ea74736372e5e91 # v1.1.54
+        uses: MishaKav/pytest-coverage-comment@9638e4b1448019aba40c4aaaa1ade87a9f211aa1 # v1.1.56
         with:
           pytest-coverage-path: ./pytest-regression/test_coverage.txt
           junitxml-path: ./pytest-regression/test_output.xml
