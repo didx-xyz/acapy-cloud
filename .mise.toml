@@ -3,7 +3,7 @@
 "aqua:nats-io/natscli" = "0.2"
 helm = "3"
 helmfile = "1"
-istioctl = "1.26"
+istioctl = "1.27"
 jq = "latest"
 kind = "0.29"
 kubectl = "1.33"
