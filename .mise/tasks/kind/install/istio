@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# mise description="Install Istio in Kubernetes"
-# mise depends=["kind:create"]
+#MISE description="Install Istio in Kubernetes"
+#MISE depends=["kind:create"]
 
 # Ensure we are on the right kube context
 kubectl config use-context ${KIND_K8S_CONTEXT}

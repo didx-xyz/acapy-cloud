@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# mise description="Create Kubernetes Kind Cluster with Registry Caches"
-# mise outputs=[".mise/kubeconfig.yaml"]
-# mise depends=["kind:install:docker-registry", "kind:install:docker-cache"]
+#MISE description="Create Kubernetes Kind Cluster with Registry Caches"
+#MISE outputs=[".mise/kubeconfig.yaml"]
+#MISE depends=["kind:install:docker-registry", "kind:install:docker-cache"]
 
 set -o errexit
 

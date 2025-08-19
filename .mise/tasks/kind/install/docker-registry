@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# mise description="Start up the local Kind Docker Registry"
+#MISE description="Start up the local Kind Docker Registry"
 
 ## Setup local docker registry and caches
 # https://kind.sigs.k8s.io/docs/user/local-registry/
