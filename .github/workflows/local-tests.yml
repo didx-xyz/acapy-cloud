@@ -45,12 +45,6 @@ jobs:
           install: true
         env:
           MISE_JOBS: 4
-      - name: Load Mise env
-        run: |
-          mise env -s bash \
-              | grep -v 'export PATH=' \
-              | cut -d' ' -f2 \
-              >> "$GITHUB_ENV"
       - name: Install dependencies with Poetry
         run: mise run poetry:install
         env:
