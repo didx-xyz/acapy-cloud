@@ -1,7 +1,7 @@
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from aries_cloudcontroller import DIDEndpointWithType
+from aries_cloudcontroller import CustomDIDEndpointWithType
 from aries_cloudcontroller.exceptions import (
     ApiException,
     BadRequestException,
@@ -18,19 +18,13 @@ did = "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
 @pytest.mark.anyio
 async def test_set_did_endpoint_success():
     mock_aries_controller = AsyncMock()
-    mock_aries_controller.wallet.set_did_endpoint = AsyncMock()
+    mock_aries_controller.wallet.wallet_cheqd_set_did_endpoint_post = AsyncMock()
 
     request_body = SetDidEndpointRequest(endpoint="https://example.com")
     endpoint_type = "Endpoint"
 
     with (
         patch("app.routes.wallet.dids.client_from_auth") as mock_client_from_auth,
-        patch(
-            "app.routes.wallet.dids.handle_model_with_validation",
-            return_value=DIDEndpointWithType(
-                did=did, endpoint=request_body.endpoint, endpoint_type=endpoint_type
-            ),
-        ),
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
             mock_aries_controller
@@ -38,8 +32,8 @@ async def test_set_did_endpoint_success():
 
         await set_did_endpoint(did=did, body=request_body, auth="mocked_auth")
 
-        mock_aries_controller.wallet.set_did_endpoint.assert_awaited_once_with(
-            body=DIDEndpointWithType(
+        mock_aries_controller.wallet.wallet_cheqd_set_did_endpoint_post.assert_awaited_once_with(
+            body=CustomDIDEndpointWithType(
                 did=did, endpoint=request_body.endpoint, endpoint_type=endpoint_type
             ),
         )
@@ -58,7 +52,7 @@ async def test_set_did_endpoint_fail_acapy_error(
     exception_class, expected_status_code, expected_detail
 ):
     mock_aries_controller = AsyncMock()
-    mock_aries_controller.wallet.set_did_endpoint = AsyncMock(
+    mock_aries_controller.wallet.wallet_cheqd_set_did_endpoint_post = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
 

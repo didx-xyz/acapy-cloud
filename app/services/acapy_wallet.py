@@ -162,7 +162,9 @@ async def set_cheqd_did_endpoint(
     await handle_acapy_call(
         logger=logger,
         acapy_call=controller.wallet.wallet_cheqd_set_did_endpoint_post,
-        body=CustomDIDEndpointWithType(did=did, endpoint=endpoint),
+        body=CustomDIDEndpointWithType(
+            did=did, endpoint=endpoint, endpoint_type="Endpoint"
+        ),
     )
 
 
