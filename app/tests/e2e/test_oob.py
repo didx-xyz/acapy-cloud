@@ -72,7 +72,6 @@ async def test_accept_invitation_oob(
 
 
 @pytest.mark.anyio
-@pytest.mark.skip(reason="TODO: To be reviewed / fixed for cheqd")
 @pytest.mark.xdist_group(name="issuer_test_group")
 async def test_oob_connect_via_public_did(
     bob_member_client: RichAsyncClient,

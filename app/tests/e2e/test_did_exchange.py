@@ -15,7 +15,6 @@ TENANTS_BASE_PATH = tenants_router.prefix
 
 
 @pytest.mark.anyio
-@pytest.mark.skip(reason="TODO: To be reviewed / fixed for cheqd")
 @pytest.mark.parametrize(
     "use_did,use_did_method,use_public_did",
     [
