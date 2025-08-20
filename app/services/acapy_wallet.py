@@ -1,10 +1,19 @@
-from aries_cloudcontroller import DID, AcaPyClient, CreateCheqdDIDRequest
+import os
+
+from aries_cloudcontroller import (
+    DID,
+    AcaPyClient,
+    CreateCheqdDIDRequest,
+    CustomDIDEndpointWithType,
+)
 
 from app.exceptions import CloudApiException, handle_acapy_call
 from app.models.wallet import DIDCreate
 from shared.log_config import get_logger
 
 logger = get_logger(__name__)
+
+default_endpoint = os.getenv("ACAPY_ENDPOINT", "http://multitenant-agent:3020")
 
 
 async def assert_public_did(aries_controller: AcaPyClient) -> str:
@@ -80,6 +89,8 @@ async def create_did(
             logger.error("Failed to create cheqd DID: `{}`.", cheqd_did_response)
             raise CloudApiException("Error creating cheqd did.")
 
+        await set_cheqd_did_endpoint(controller, did=did)
+
         result = DID(
             did=did,
             method="cheqd",
@@ -140,6 +151,19 @@ async def set_public_did(
 
     logger.debug("Successfully set public DID.")
     return result
+
+
+async def set_cheqd_did_endpoint(
+    controller: AcaPyClient,
+    did: str,
+    endpoint: str = default_endpoint,
+) -> None:
+    """Set the endpoint for a cheqd DID."""
+    await handle_acapy_call(
+        logger=logger,
+        acapy_call=controller.wallet.wallet_cheqd_set_did_endpoint_post,
+        body=CustomDIDEndpointWithType(did=did, endpoint=endpoint),
+    )
 
 
 async def get_public_did(controller: AcaPyClient) -> DID:
