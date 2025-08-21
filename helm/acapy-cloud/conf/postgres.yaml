@@ -1,6 +1,16 @@
 # https://github.com/bitnami/charts/tree/main/bitnami/postgresql-ha
+
+global:
+  security:
+    # Required to override image repositories (`bitnami` -> `bitnamilegacy`)
+    # https://github.com/bitnami/charts/issues/35164
+    # https://github.com/bitnami/containers/issues/84600
+    allowInsecureImages: true
+
 fullnameOverride: cloudapi
 postgresql:
+  image:
+    repository: bitnamilegacy/postgresql-repmgr
   podAnnotations:
     sidecar.istio.io/proxyCPU: 10m
   podLabels:
@@ -33,6 +43,8 @@ persistentVolumeClaimRetentionPolicy:
   enabled: true
   whenDeleted: Delete
 pgpool:
+  image:
+    repository: bitnamilegacy/pgpool
   podAnnotations:
     sidecar.istio.io/proxyCPU: 10m
   podLabels:
@@ -55,3 +67,9 @@ pgpool:
   # PostgreSQL 15 -> 16 compatibility
   srCheckUsername: repmgr
   srCheckPassword: repmgr
+metrics:
+  image:
+    repository: bitnamilegacy/postgres-exporter
+volumePermissions:
+  image:
+    repository: bitnamilegacy/os-shell

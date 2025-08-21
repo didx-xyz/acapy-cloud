@@ -1,4 +1,22 @@
+# https://github.com/bitnami/charts/tree/main/bitnami/minio
+
+global:
+  security:
+    # Required to override image repositories (`bitnami` -> `bitnamilegacy`)
+    # https://github.com/bitnami/charts/issues/35164
+    # https://github.com/bitnami/containers/issues/84600
+    allowInsecureImages: true
+
 fullnameOverride: minio
+
+image:
+  repository: bitnamilegacy/minio
+clientImage:
+  repository: bitnamilegacy/minio-client
+defaultInitContainers:
+  volumePermissions:
+    image:
+      repository: bitnamilegacy/os-shell
 
 auth:
   rootUser: minio # minimum length of 3
@@ -10,6 +28,8 @@ ingress:
   hostname: minio-api.127.0.0.1.nip.io
 
 console:
+  image:
+    repository: bitnamilegacy/minio-object-browser
   podLabels:
     sidecar.istio.io/inject: "false"
   ingress:

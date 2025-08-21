@@ -166,7 +166,7 @@ spec:
         {{- end }}
         {{- if .Values.lbService.enabled }}
         - name: discover-lb-hostname
-          image: docker.io/bitnami/kubectl:latest
+          image: docker.io/bitnamilegacy/kubectl:latest
           imagePullPolicy: IfNotPresent
           command:
             - sh
