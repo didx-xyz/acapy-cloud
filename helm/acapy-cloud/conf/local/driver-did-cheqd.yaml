@@ -9,7 +9,7 @@ image:
   registry: ghcr.io
   name: cheqd/did-registrar
   pullPolicy: Always
-  tag: 2.6.0-1-g6979b43
+  tag: 2.6.2-develop.1-1-g8d9dd88
 
 service:
   appProtocol: http
