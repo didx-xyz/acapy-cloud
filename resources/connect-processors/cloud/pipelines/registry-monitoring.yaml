@@ -1,0 +1,325 @@
+input:
+  broker:
+    inputs:
+      - label: revocation_registry_events
+        nats_jetstream:
+          urls:
+            - ${NATS_URL:nats://nats:4222}
+          subject: ${REGISTRY_MONITORING_NATS_INPUT_SUBJECT:cloudapi.aries.events.*.*}
+          stream: ${REGISTRY_MONITORING_NATS_INPUT_STREAM:cloudapi_aries_events}
+          durable: ${REGISTRY_MONITORING_NATS_INPUT_CONSUMER:registry-monitor}
+          queue: ${REGISTRY_MONITORING_NATS_INPUT_QUEUE_GROUP:""}
+          bind: ${REGISTRY_MONITORING_NATS_INPUT_BIND:false}
+          deliver: ${REGISTRY_MONITORING_NATS_INPUT_DELIVER:"all"}
+          auth:
+            user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+
+pipeline:
+  threads: ${REGISTRY_MONITORING_PIPELINE_THREADS:1}
+  processors:
+    - label: remove_non_registry_events
+      switch:
+        - check: 'json("topic") == "revocation-registry-definition" || json("topic") == "revocation-list" || json("topic") == "revocation-registry"'
+          processors:
+            - mapping: |
+                #!blobl
+                root = this
+        - processors:
+            - mapping: |
+                #!blobl
+                root = deleted()
+
+    - log:
+        level: DEBUG
+        message: 'Registry Monitor - Received event: topic=${!json("topic")}, state=${!json("payload.state")}, wallet=${!json("wallet_id")}'
+
+    - label: get_request_id
+      mapping: |
+        #!blobl
+        root = this
+        meta request_id = this.payload.options.request_id
+        meta wallet_id = this.wallet_id
+        meta event = this
+
+    - label: check_if_request_id_exists_in_kv
+      branch:
+        # Clone current message (and meta) into the branch. We don't need the payload
+        # for the KV operation, but cloning is harmless and keeps things simple.
+        request_map: |
+          root = this
+        processors:
+          - nats_kv:
+              urls:
+                - ${NATS_URL:nats://nats:4222}
+              auth:
+                user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+              bucket: registry_flows
+              operation: keys
+              key: "${!meta(\"request_id\")}"
+        # Map KV results back into metadata without altering the original message.
+        result_map: |
+          meta key_response = this
+          let check_key = meta("request_id")
+          meta key_exists = this.length() > 0
+
+    - log:
+        level: INFO
+        message: 'Registry Monitor - Request ID: ${!meta("request_id")} response: ${!meta("key_response")} key_exists: ${!meta("key_exists")}'
+
+    - label: get_existing_state
+      switch:
+        - check: meta("key_exists") == "true"
+          processors:
+            - label: fetch_existing_state
+              branch:
+                request_map: |
+                  root = this
+                processors:
+                  - nats_kv:
+                      urls:
+                        - ${NATS_URL:nats://nats:4222}
+                      auth:
+                        user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+                      bucket: registry_flows
+                      operation: get
+                      key: "${!meta(\"request_id\")}"
+                result_map: |
+                  # Extract the actual value from the KV response and store in message payload
+                  root.existing_state = this
+
+        - check: meta("key_exists") == "false"
+          processors:
+            - mapping: |
+                #!blobl
+                root = this
+                root.existing_state = {}
+
+
+    - log:
+        level: info
+        message: 'Request ID: ${!meta("request_id")} state: ${!json("existing_state")}'
+
+    # Filter only revocation-related events
+    - label: filter_revocation_events
+      switch:
+        - check: 'json("topic") == "revocation-registry-definition"'
+          processors:
+            - label: check_state_reg_def
+              switch:
+                - check: 'json("payload.state") == "create-requested"'
+                  processors:
+                    - mapping: |
+                        #!blobl
+                        let cred_def_id = this.payload.cred_def_id.or("")
+                        let wallet_id = meta("wallet_id")
+                        let key_exists = meta("key_exists")
+                        let existing_state = this.existing_state.or({})
+                        root = if $key_exists == "true" {
+                          # In existing flow
+                          $existing_state.assign({
+                            "revocation_registry_definition": {
+                              "create_requested": "DONE"
+                            }
+                          })
+                        } else if this.payload.tag == "0" {
+                          # New cred def flow
+                          {
+                            "wallet_id": $wallet_id,
+                            "cred_def_id": $cred_def_id,
+                            "rev_reg_def_id": "",
+                            "type": "new_cred_def",
+                            "revocation_registry_definition": {
+                              "create_requested": "DONE"
+                            }
+                          }
+                        } else {
+                          # New backup flow
+                          {
+                            "wallet_id": $wallet_id,
+                            "cred_def_id": $cred_def_id,
+                            "rev_reg_def_id": "",
+                            "type": "new_backup",
+                            "revocation_registry_definition": {
+                              "create_requested": "DONE"
+                            }
+                          }
+                        }
+
+                - check: 'json("payload.state") == "create-response"'
+                  processors:
+                    - mapping: |
+                        #!blobl
+                        let flow_state = this.existing_state.or({})
+                        let rev_reg_def_id = this.payload.rev_reg_def_result.data.revocation_registry_definition_state.revocation_registry_definition_id.or("")
+
+                        root = if this.payload.failure != null {
+                          # Handle failure case
+                          $flow_state.assign({"create_response": {"failure": this.payload.failure}})
+                        } else if this.payload.options.old_rev_reg_def_id != null {
+                          # Handle success with old_rev_reg_def_id
+                          $flow_state.assign({
+                            "revocation_registry_definition": {"create_response": {"success": "True"}},
+                            "new_rev_reg_def_id": $rev_reg_def_id
+                          })
+                        } else {
+                          # Handle success without old_rev_reg_def_id
+                          $flow_state.assign({
+                            "revocation_registry_definition": {"create_response": {"success": "True"}},
+                            "rev_reg_def_id": $rev_reg_def_id
+                          })
+                        }
+                - check: 'json("payload.state") == "store-requested"'
+                  processors:
+                    - mapping: |
+                        #!blobl
+                        let flow_state = this.existing_state.or({})
+
+                        root = $flow_state.assign({"revocation_registry_definition": {"store_requested": "DONE"}})
+                - check: 'json("payload.state") == "store-response"'
+                  processors:
+                    - mapping: |
+                        #!blobl
+                        let flow_state = this.existing_state.or({})
+
+                        root = if this.payload.failure == null {
+                          $flow_state.assign({"revocation_registry_definition": {"store_response": {"success": "True"}}})
+                        } else {
+                          $flow_state.assign({"revocation_registry_definition": {"store_response": {"failure": this.payload.failure}}})
+                        }
+
+        - check: 'json("topic") == "revocation-list"'
+          processors:
+            - label: check_state_list
+              switch:
+                - check: 'json("payload.state") == "create-requested"'
+                  processors:
+                    - mapping: |
+                        #!blobl
+                        let flow_state = this.existing_state.or({})
+
+                        root = $flow_state.assign({"revocation_list": {"create_requested": "DONE"}})
+
+                - check: 'json("payload.state") == "create-response"'
+                  processors:
+                    - mapping: |
+                        #!blobl
+                        let flow_state = this.existing_state.or({})
+
+                        root = if this.payload.failure == null {
+                          $flow_state.assign({"revocation_list": {"create_response": {"success": "True"}}})
+                        } else {
+                          $flow_state.assign({"revocation_list": {"create_response": {"failure": this.payload.failure}}})
+                        }
+
+                - check: 'json("payload.state") == "store-requested"'
+                  processors:
+                    - mapping: |
+                        #!blobl
+                        let flow_state = this.existing_state.or({})
+
+                        root = $flow_state.assign({"revocation_list": {"store_requested": "DONE"}})
+
+                - check: 'json("payload.state") == "finished"'
+                  processors:
+                    - mapping: |
+                        #!blobl
+                        let flow_state = this.existing_state.or({})
+
+                        root = $flow_state.assign({"revocation_list": {"finished": "DONE"}})
+
+                - check: 'json("payload.state") == "store-response"'
+                  processors:
+                    - mapping: |
+                        #!blobl
+                        let flow_state = this.existing_state.or({})
+
+                        root = if this.payload.failure == null {
+                          $flow_state.assign({"revocation_list": {"store_response": {"success": "True"}}})
+                        } else {
+                          $flow_state.assign({"revocation_list": {"store_response": {"failure": this.payload.failure}}})
+                        }
+
+        - check: 'json("topic") == "revocation-registry"'
+          processors:
+            - label: check_state_reg_rev
+              switch:
+                - check: 'json("payload.state") == "full-detected"'
+                  processors:
+                    - mapping: |
+                        #!blobl
+                        let old_rev_reg_def_id = this.payload.rev_reg_def_id
+                        let cred_def_id = this.payload.cred_def_id
+                        let wallet_id = meta("wallet_id")
+                        let key_exists = meta("key_exists")
+                        let existing_state = this.existing_state.or({})
+                        root = if $key_exists == "true" {
+                          # In existing flow
+                          $existing_state.assign({
+                            "revocation_registry": {
+                              "full_detected": "DONE"
+                            }
+                          })
+                        } else {
+                          # In new full flow
+                          {
+                            "wallet_id": $wallet_id,
+                            "cred_def_id": $cred_def_id,
+                            "old_rev_reg_def_id": $old_rev_reg_def_id,
+                            "type": "full",
+                            "revocation_registry": {
+                              "full_detected": "DONE"
+                            }
+                          }
+                        }
+
+                - check: 'json("payload.state") == "full-handling-completed"'
+                  processors:
+                    - mapping: |
+                        #!blobl
+                        let flow_state = this.existing_state.or({})
+                        let new_active_rev_reg_def_id = this.payload.new_active_rev_reg_def_id.or("")
+
+                        root = if this.payload.failure == null {
+                          $flow_state.assign({
+                            "new_active_rev_reg_def_id": $new_active_rev_reg_def_id,
+                            "revocation_registry": {"full_handling_completed": {"success": "True"}}
+                          })
+                        } else {
+                          $flow_state.assign({"revocation_registry": {"full_handling_completed": {"failure": this.payload.failure}}})
+                        }
+
+                - check: 'json("payload.state") == "activation-requested"'
+                  processors:
+                    - mapping: |
+                        #!blobl
+                        let flow_state = this.existing_state.or({})
+
+                        root = $flow_state.assign({"revocation_registry": {"activation_requested": "DONE"}})
+
+                - check: 'json("payload.state") == "activation-response"'
+                  processors:
+                    - mapping: |
+                        #!blobl
+                        let flow_state = this.existing_state.or({})
+
+                        root = if this.payload.failure == null {
+                          $flow_state.assign({"revocation_registry": {"activation_response": {"success": "True"}}})
+                        } else {
+                          $flow_state.assign({"revocation_registry": {"activation_response": {"failure": this.payload.failure}}})
+                        }
+    - log:
+        level: DEBUG
+        message: "${!json()}"
+
+output:
+  broker:
+    outputs:
+      - nats_kv:
+          urls:
+            - ${NATS_URL:nats://nats:4222}
+          auth:
+            user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+          bucket: registry_flows
+          key: "${!meta(\"request_id\")}"
+      - stdout:
+          codec: lines
