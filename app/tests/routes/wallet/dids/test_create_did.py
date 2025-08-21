@@ -111,16 +111,7 @@ async def test_create_did_success(request_body, create_body):
                     logger=mock.ANY,
                     acapy_call=mock_aries_controller.did.did_cheqd_create_post,
                     body=create_body,
-                ),
-                mock.call(
-                    logger=mock.ANY,
-                    acapy_call=mock_aries_controller.wallet.wallet_cheqd_set_did_endpoint_post,
-                    body=CustomDIDEndpointWithType(
-                        did=mock_did,
-                        endpoint="http://multitenant-agent:3020",
-                        endpoint_type="Endpoint",
-                    ),
-                ),
+                )
             ]
             mock_handle_acapy_call.assert_has_awaits(expected_calls)
         else:
