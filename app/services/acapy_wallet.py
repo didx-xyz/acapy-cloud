@@ -89,8 +89,6 @@ async def create_did(
             logger.error("Failed to create cheqd DID: `{}`.", cheqd_did_response)
             raise CloudApiException("Error creating cheqd did.")
 
-        await set_cheqd_did_endpoint(controller, did=did)
-
         result = DID(
             did=did,
             method="cheqd",
