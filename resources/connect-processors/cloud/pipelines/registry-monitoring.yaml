@@ -128,6 +128,7 @@ pipeline:
                             "cred_def_id": $cred_def_id,
                             "rev_reg_def_id": "",
                             "type": "new_cred_def",
+                            "created_at": ts_unix_micros(),
                             "revocation_registry_definition": {
                               "create_requested": "DONE"
                             }
@@ -139,6 +140,7 @@ pipeline:
                             "cred_def_id": $cred_def_id,
                             "rev_reg_def_id": "",
                             "type": "new_backup",
+                            "created_at": ts_unix_micros(),
                             "revocation_registry_definition": {
                               "create_requested": "DONE"
                             }
@@ -253,7 +255,7 @@ pipeline:
                         let key_exists = meta("key_exists")
                         let existing_state = this.existing_state.or({})
                         root = if $key_exists == "true" {
-                          # In existing flow
+                          # There should not be existing state on full-detected
                           $existing_state.assign({
                             "revocation_registry": {
                               "full_detected": "DONE"
@@ -266,6 +268,7 @@ pipeline:
                             "cred_def_id": $cred_def_id,
                             "old_rev_reg_def_id": $old_rev_reg_def_id,
                             "type": "full",
+                            "created_at": ts_unix_micros(),
                             "revocation_registry": {
                               "full_detected": "DONE"
                             }
