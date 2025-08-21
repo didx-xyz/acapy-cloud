@@ -43,8 +43,6 @@ pipeline:
 
     - label: check_if_request_id_exists_in_kv
       branch:
-        # Clone current message (and meta) into the branch. We don't need the payload
-        # for the KV operation, but cloning is harmless and keeps things simple.
         request_map: |
           root = this
         processors:
@@ -56,10 +54,8 @@ pipeline:
               bucket: registry_flows
               operation: keys
               key: "${!meta(\"request_id\")}"
-        # Map KV results back into metadata without altering the original message.
         result_map: |
           meta key_response = this
-          let check_key = meta("request_id")
           meta key_exists = this.length() > 0
 
     - log:
@@ -99,7 +95,6 @@ pipeline:
         level: info
         message: 'Request ID: ${!meta("request_id")} state: ${!json("existing_state")}'
 
-    # Filter only revocation-related events
     - label: filter_revocation_events
       switch:
         - check: 'json("topic") == "revocation-registry-definition"'
@@ -113,7 +108,7 @@ pipeline:
                         let cred_def_id = this.payload.cred_def_id.or("")
                         let wallet_id = meta("wallet_id")
                         let key_exists = meta("key_exists")
-                        let existing_state = this.existing_state.or({})
+                        let existing_state = this.existing_state
                         root = if $key_exists == "true" {
                           # In existing flow
                           $existing_state.assign({
@@ -151,7 +146,7 @@ pipeline:
                   processors:
                     - mapping: |
                         #!blobl
-                        let flow_state = this.existing_state.or({})
+                        let flow_state = this.existing_state
                         let rev_reg_def_id = this.payload.rev_reg_def_result.data.revocation_registry_definition_state.revocation_registry_definition_id.or("")
 
                         root = if this.payload.failure != null {
@@ -170,18 +165,20 @@ pipeline:
                             "rev_reg_def_id": $rev_reg_def_id
                           })
                         }
+
                 - check: 'json("payload.state") == "store-requested"'
                   processors:
                     - mapping: |
                         #!blobl
-                        let flow_state = this.existing_state.or({})
+                        let flow_state = this.existing_state
 
                         root = $flow_state.assign({"revocation_registry_definition": {"store_requested": "DONE"}})
+
                 - check: 'json("payload.state") == "store-response"'
                   processors:
                     - mapping: |
                         #!blobl
-                        let flow_state = this.existing_state.or({})
+                        let flow_state = this.existing_state
 
                         root = if this.payload.failure == null {
                           $flow_state.assign({"revocation_registry_definition": {"store_response": {"success": "True"}}})
@@ -197,7 +194,7 @@ pipeline:
                   processors:
                     - mapping: |
                         #!blobl
-                        let flow_state = this.existing_state.or({})
+                        let flow_state = this.existing_state
 
                         root = $flow_state.assign({"revocation_list": {"create_requested": "DONE"}})
 
@@ -205,7 +202,7 @@ pipeline:
                   processors:
                     - mapping: |
                         #!blobl
-                        let flow_state = this.existing_state.or({})
+                        let flow_state = this.existing_state
 
                         root = if this.payload.failure == null {
                           $flow_state.assign({"revocation_list": {"create_response": {"success": "True"}}})
@@ -217,7 +214,7 @@ pipeline:
                   processors:
                     - mapping: |
                         #!blobl
-                        let flow_state = this.existing_state.or({})
+                        let flow_state = this.existing_state
 
                         root = $flow_state.assign({"revocation_list": {"store_requested": "DONE"}})
 
@@ -225,7 +222,7 @@ pipeline:
                   processors:
                     - mapping: |
                         #!blobl
-                        let flow_state = this.existing_state.or({})
+                        let flow_state = this.existing_state
 
                         root = $flow_state.assign({"revocation_list": {"finished": "DONE"}})
 
@@ -233,7 +230,7 @@ pipeline:
                   processors:
                     - mapping: |
                         #!blobl
-                        let flow_state = this.existing_state.or({})
+                        let flow_state = this.existing_state
 
                         root = if this.payload.failure == null {
                           $flow_state.assign({"revocation_list": {"store_response": {"success": "True"}}})
@@ -253,7 +250,7 @@ pipeline:
                         let cred_def_id = this.payload.cred_def_id
                         let wallet_id = meta("wallet_id")
                         let key_exists = meta("key_exists")
-                        let existing_state = this.existing_state.or({})
+                        let existing_state = this.existing_state
                         root = if $key_exists == "true" {
                           # There should not be existing state on full-detected
                           $existing_state.assign({
@@ -279,7 +276,7 @@ pipeline:
                   processors:
                     - mapping: |
                         #!blobl
-                        let flow_state = this.existing_state.or({})
+                        let flow_state = this.existing_state
                         let new_active_rev_reg_def_id = this.payload.new_active_rev_reg_def_id.or("")
 
                         root = if this.payload.failure == null {
@@ -295,7 +292,7 @@ pipeline:
                   processors:
                     - mapping: |
                         #!blobl
-                        let flow_state = this.existing_state.or({})
+                        let flow_state = this.existing_state
 
                         root = $flow_state.assign({"revocation_registry": {"activation_requested": "DONE"}})
 
@@ -303,7 +300,7 @@ pipeline:
                   processors:
                     - mapping: |
                         #!blobl
-                        let flow_state = this.existing_state.or({})
+                        let flow_state = this.existing_state
 
                         root = if this.payload.failure == null {
                           $flow_state.assign({"revocation_registry": {"activation_response": {"success": "True"}}})
