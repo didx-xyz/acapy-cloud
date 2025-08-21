@@ -15,7 +15,7 @@ input:
             user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
 
 pipeline:
-  threads: ${REGISTRY_MONITORING_PIPELINE_THREADS:1}
+  threads: 1
   processors:
     - label: remove_non_registry_events
       switch:
@@ -59,7 +59,7 @@ pipeline:
           meta key_exists = this.length() > 0
 
     - log:
-        level: INFO
+        level: DEBUG
         message: 'Registry Monitor - Request ID: ${!meta("request_id")} response: ${!meta("key_response")} key_exists: ${!meta("key_exists")}'
 
     - label: get_existing_state
@@ -92,7 +92,7 @@ pipeline:
 
 
     - log:
-        level: info
+        level: DEBUG
         message: 'Request ID: ${!meta("request_id")} state: ${!json("existing_state")}'
 
     - label: filter_revocation_events
@@ -123,7 +123,7 @@ pipeline:
                             "cred_def_id": $cred_def_id,
                             "rev_reg_def_id": "",
                             "type": "new_cred_def",
-                            "created_at": ts_unix_micros(),
+                            "created_at": now().ts_unix_micro(),
                             "revocation_registry_definition": {
                               "create_requested": "DONE"
                             }
@@ -135,7 +135,7 @@ pipeline:
                             "cred_def_id": $cred_def_id,
                             "rev_reg_def_id": "",
                             "type": "new_backup",
-                            "created_at": ts_unix_micros(),
+                            "created_at": now().ts_unix_micro(),
                             "revocation_registry_definition": {
                               "create_requested": "DONE"
                             }
@@ -265,7 +265,7 @@ pipeline:
                             "cred_def_id": $cred_def_id,
                             "old_rev_reg_def_id": $old_rev_reg_def_id,
                             "type": "full",
-                            "created_at": ts_unix_micros(),
+                            "created_at": now().ts_unix_micro(),
                             "revocation_registry": {
                               "full_detected": "DONE"
                             }
@@ -312,14 +312,10 @@ pipeline:
         message: "${!json()}"
 
 output:
-  broker:
-    outputs:
-      - nats_kv:
-          urls:
-            - ${NATS_URL:nats://nats:4222}
-          auth:
-            user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
-          bucket: registry_flows
-          key: "${!meta(\"request_id\")}"
-      - stdout:
-          codec: lines
+  nats_kv:
+    urls:
+      - ${NATS_URL:nats://nats:4222}
+    auth:
+      user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+    bucket: registry_flows
+    key: "${!meta(\"request_id\")}"
