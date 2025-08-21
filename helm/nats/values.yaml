@@ -14,7 +14,7 @@ postInstall:
   enabled: true
 
   kvs:
-    []
+    - registry_flows
 
   streams:
     cloudapi_aries_events:
