@@ -3,7 +3,7 @@ from unittest import mock
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from aries_cloudcontroller import CreateCheqdDIDRequest, CustomDIDEndpointWithType
+from aries_cloudcontroller import CreateCheqdDIDRequest
 from aries_cloudcontroller import DIDCreate as DIDCreateAcaPy
 from aries_cloudcontroller.exceptions import (
     ApiException,
