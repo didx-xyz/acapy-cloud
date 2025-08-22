@@ -1,22 +1,23 @@
-# https://github.com/bitnami/charts/tree/main/bitnami/minio
+# https://github.com/didx-xyz/bitnami-charts/tree/main/bitnami/minio
 
 global:
   security:
-    # Required to override image repositories (`bitnami` -> `bitnamilegacy`)
+    # Required to override image repositories (`docker.io/bitnami` -> `ghcr.io/didx-xyz/bitnami-oss`)
     # https://github.com/bitnami/charts/issues/35164
     # https://github.com/bitnami/containers/issues/84600
     allowInsecureImages: true
+  imageRegistry: ghcr.io
 
 fullnameOverride: minio
 
 image:
-  repository: bitnamilegacy/minio
+  repository: didx-xyz/bitnami-oss/minio
 clientImage:
-  repository: bitnamilegacy/minio-client
+  repository: didx-xyz/bitnami-oss/minio-client
 defaultInitContainers:
   volumePermissions:
     image:
-      repository: bitnamilegacy/os-shell
+      repository: didx-xyz/bitnami-oss/os-shell
 
 auth:
   rootUser: minio # minimum length of 3
@@ -29,7 +30,7 @@ ingress:
 
 console:
   image:
-    repository: bitnamilegacy/minio-object-browser
+    repository: didx-xyz/bitnami-oss/minio-object-browser
   podLabels:
     sidecar.istio.io/inject: "false"
   ingress:

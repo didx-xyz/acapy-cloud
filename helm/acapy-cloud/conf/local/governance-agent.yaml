@@ -97,7 +97,7 @@ startupProbe:
 
 initContainers:
   - name: nats-check
-    image: docker.io/bitnamilegacy/natscli
+    image: ghcr.io/didx-xyz/bitnami-oss/natscli
     command:
       - sh
       - -c

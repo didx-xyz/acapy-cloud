@@ -1,16 +1,17 @@
-# https://github.com/bitnami/charts/tree/main/bitnami/postgresql-ha
+# https://github.com/didx-xyz/bitnami-charts/tree/main/bitnami/postgresql-ha
 
 global:
   security:
-    # Required to override image repositories (`bitnami` -> `bitnamilegacy`)
+    # Required to override image repositories (`docker.io/bitnami` -> `ghcr.io/didx-xyz/bitnami-oss`)
     # https://github.com/bitnami/charts/issues/35164
     # https://github.com/bitnami/containers/issues/84600
     allowInsecureImages: true
+  imageRegistry: ghcr.io
 
 fullnameOverride: cloudapi
 postgresql:
   image:
-    repository: bitnamilegacy/postgresql-repmgr
+    repository: didx-xyz/bitnami-oss/postgresql-repmgr
   podAnnotations:
     sidecar.istio.io/proxyCPU: 10m
   podLabels:
@@ -36,7 +37,7 @@ postgresql:
         CREATE USER multitenant WITH PASSWORD 'multitenant' CREATEDB;
         CREATE USER mediator WITH PASSWORD 'mediator' CREATEDB;
       EOSQL
-  # https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  # https://github.com/didx-xyz/bitnami-charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   resourcesPreset: none
   maxConnections: 4500 # pgpool.numInitChildren * pgpool.maxPool
 persistentVolumeClaimRetentionPolicy:
@@ -44,7 +45,7 @@ persistentVolumeClaimRetentionPolicy:
   whenDeleted: Delete
 pgpool:
   image:
-    repository: bitnamilegacy/pgpool
+    repository: didx-xyz/bitnami-oss/pgpool
   podAnnotations:
     sidecar.istio.io/proxyCPU: 10m
   podLabels:
@@ -59,7 +60,7 @@ pgpool:
   reservedConnections: 5
   maxPool: 15             # Maximum cached connections per child process
   childMaxConnections: 30 # Maximum client connections per child process
-  # https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  # https://github.com/didx-xyz/bitnami-charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   resourcesPreset: none
   tls:
     enabled: false
@@ -69,7 +70,7 @@ pgpool:
   srCheckPassword: repmgr
 metrics:
   image:
-    repository: bitnamilegacy/postgres-exporter
+    repository: didx-xyz/bitnami-oss/postgres-exporter
 volumePermissions:
   image:
-    repository: bitnamilegacy/os-shell
+    repository: didx-xyz/bitnami-oss/os-shell

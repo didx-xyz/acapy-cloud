@@ -1,16 +1,17 @@
-# https://github.com/bitnami/charts/tree/main/bitnami/valkey
+# https://github.com/didx-xyz/bitnami-charts/tree/main/bitnami/valkey
 
 global:
   security:
-    # Required to override image repositories (`bitnami` -> `bitnamilegacy`)
+    # Required to override image repositories (`docker.io/bitnami` -> `ghcr.io/didx-xyz/bitnami-oss`)
     # https://github.com/bitnami/charts/issues/35164
     # https://github.com/bitnami/containers/issues/84600
     allowInsecureImages: true
+  imageRegistry: ghcr.io
 
 fullnameOverride: valkey
 architecture: replication
 image:
-  repository: bitnamilegacy/valkey
+  repository: didx-xyz/bitnami-oss/valkey
 auth:
   enabled: false
 primary:
@@ -42,13 +43,13 @@ replica:
     create: false
 sentinel:
   image:
-    repository: bitnamilegacy/valkey-sentinel
+    repository: didx-xyz/bitnami-oss/valkey-sentinel
 metrics:
   image:
-    repository: bitnamilegacy/valkey-exporter
+    repository: didx-xyz/bitnami-oss/valkey-exporter
 volumePermissions:
   image:
-    repository: bitnamilegacy/os-shell
+    repository: didx-xyz/bitnami-oss/os-shell
 kubectl:
   image:
-    repository: bitnamilegacy/kubectl
+    repository: didx-xyz/bitnami-oss/kubectl

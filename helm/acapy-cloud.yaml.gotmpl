@@ -151,7 +151,7 @@ releases:
           podAnnotations:
             ad.datadoghq.com/logs_exclude: "true" # Disable datadog log shipping
 
-  # https://github.com/bitnami/charts/tree/main/bitnami/nats
+  # https://github.com/didx-xyz/bitnami-charts/tree/main/bitnami/nats
   - name: nats
     labels:
       app: nats
@@ -164,12 +164,12 @@ releases:
           podLabels:
             tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
 
-  # https://github.com/bitnami/charts/tree/main/bitnami/valkey
+  # https://github.com/didx-xyz/bitnami-charts/tree/main/bitnami/valkey
   - name: valkey
     labels:
       app: valkey
     namespace: {{ .Values.namespace }}
-    chart: oci://registry-1.docker.io/bitnamicharts/valkey
+    chart: oci://ghcr.io/didx-xyz/bitnami-oss-charts/valkey
     version: 3.0.28
     values:
       - ./acapy-cloud/conf/valkey.yaml
@@ -180,12 +180,12 @@ releases:
           podLabels:
             tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
 
-  # https://github.com/bitnami/charts/tree/main/bitnami/postgresql-ha
+  # https://github.com/didx-xyz/bitnami-charts/tree/main/bitnami/postgresql-ha
   - name: postgres
     labels:
       app: postgres
     namespace: {{ .Values.namespace }}
-    chart: oci://registry-1.docker.io/bitnamicharts/postgresql-ha
+    chart: oci://ghcr.io/didx-xyz/bitnami-oss-charts/postgresql-ha
     version: 16.1.2
     values:
       - ./acapy-cloud/conf/postgres.yaml
@@ -256,11 +256,11 @@ releases:
           admission.datadoghq.com/enabled: "false"
           tags.datadoghq.com/env: acapy-cloud-{{ .Environment.Name }}
 
-  # https://github.com/bitnami/charts/tree/main/bitnami/minio
+  # https://github.com/didx-xyz/bitnami-charts/tree/main/bitnami/minio
   - name: minio
     installed: {{ .Values.minio.enabled }}
     namespace: {{ .Values.namespace }}
-    chart: oci://registry-1.docker.io/bitnamicharts/minio
+    chart: oci://ghcr.io/didx-xyz/bitnami-oss-charts/minio
     version: 17.0.19
     labels:
       app: minio
