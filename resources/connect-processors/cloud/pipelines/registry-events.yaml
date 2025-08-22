@@ -31,7 +31,7 @@ pipeline:
 
     - log:
         level: DEBUG
-        message: 'Registry Monitor - Received event: topic=${!json("topic")}, state=${!json("payload.state")}, wallet=${!json("wallet_id")}'
+        message: 'Registry Events - Received event: topic=${!json("topic")}, state=${!json("payload.state")}, wallet=${!json("wallet_id")}'
 
     - label: get_request_id
       mapping: |
@@ -60,7 +60,7 @@ pipeline:
 
     - log:
         level: DEBUG
-        message: 'Registry Monitor - Request ID: ${!meta("request_id")} response: ${!meta("key_response")} key_exists: ${!meta("key_exists")}'
+        message: 'Registry Events - Request ID: ${!meta("request_id")} response: ${!meta("key_response")} key_exists: ${!meta("key_exists")}'
 
     - label: get_existing_state
       switch:
