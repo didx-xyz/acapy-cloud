@@ -1,0 +1,150 @@
+input:
+  generate:
+    interval: ${REGISTRY_MONITOR_SCAN_INTERVAL:30s}
+    mapping: |
+      #!blobl
+      root = {
+        "scan_timestamp": now().ts_unix_micro(),
+        "scan_type": "kv_keys_check"
+      }
+
+pipeline:
+  threads: 1
+  processors:
+    - log:
+        level: DEBUG
+        message: 'Registry Monitor - Starting KV scan at ${!json("scan_timestamp")}'
+
+    - label: get_all_kv_keys
+      branch:
+        request_map: |
+          root = this
+        processors:
+          - nats_kv:
+              urls:
+                - ${NATS_URL:nats://nats:4222}
+              auth:
+                user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+              bucket: registry_flows
+              operation: keys
+        result_map: |
+          root.kv_keys = this
+          root.total_keys = this.length()
+
+    - log:
+        level: DEBUG
+        message: 'Registry Monitor - Found ${!json("total_keys")} keys in KV store'
+
+    - label: process_each_key
+      switch:
+        - check: 'json("total_keys") > 0'
+          processors:
+            - unarchive:
+                format: json_array
+                field: kv_keys
+
+            - label: fetch_flow_state
+              branch:
+                request_map: |
+                  root = {"key": this}
+                processors:
+                  - nats_kv:
+                      urls:
+                        - ${NATS_URL:nats://nats:4222}
+                      auth:
+                        user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+                      bucket: registry_flows
+                      operation: get
+                      key: "${!json(\"key\")}"
+                result_map: |
+                  root.request_id = this.key
+                  root.flow_state = this
+                  root.current_timestamp = now().ts_unix_micro()
+
+            - log:
+                level: DEBUG
+                message: 'Registry Monitor - Checking flow: ${!json("request_id")}'
+
+            - label: analyze_flow_health
+              mapping: |
+                #!blobl
+                let flow = this.flow_state
+                let current_time = this.current_timestamp
+                let created_at = $flow.created_at.or(0)
+                let age_seconds = ($current_time - $created_at) / 1000000
+                let age_minutes = $age_seconds / 60
+
+                # Check for failures
+                let has_failures = $flow.revocation_registry_definition.create_response.failure != null ||
+                                  $flow.revocation_registry_definition.store_response.failure != null ||
+                                  $flow.revocation_list.create_response.failure != null ||
+                                  $flow.revocation_list.store_response.failure != null ||
+                                  $flow.revocation_registry.full_handling_completed.failure != null ||
+                                  $flow.revocation_registry.activation_response.failure != null
+
+                # Check for timeouts (flows older than configured threshold)
+                let timeout_minutes = ${REGISTRY_MONITOR_TIMEOUT_MINUTES:10}
+                let is_timeout = $age_minutes > $timeout_minutes
+
+                # Check if flow is incomplete (missing expected final states)
+                let is_incomplete = match $flow.type {
+                  "new_cred_def" => $flow.revocation_registry_definition.store_response.success == null && !$has_failures,
+                  "new_backup" => $flow.revocation_registry_definition.store_response.success == null && !$has_failures,
+                  "full" => $flow.revocation_registry.activation_response.success == null && !$has_failures,
+                  _ => false
+                }
+
+                root = this.assign({
+                  "age_minutes": $age_minutes,
+                  "has_failures": $has_failures,
+                  "is_timeout": $is_timeout,
+                  "is_incomplete": $is_incomplete,
+                  "needs_attention": $has_failures || ($is_timeout && $is_incomplete)
+                })
+
+            - label: filter_problematic_flows
+              switch:
+                - check: 'json("needs_attention") == true'
+                  processors:
+                    - log:
+                        level: WARN
+                        message: 'Registry Monitor - ALERT: Flow ${!json("request_id")} needs attention - Age: ${!json("age_minutes")}min, HasFailures: ${!json("has_failures")}, IsTimeout: ${!json("is_timeout")}, IsIncomplete: ${!json("is_incomplete")}'
+
+                    - mapping: |
+                        #!blobl
+                        root = {
+                          "alert_type": "registry_flow_issue",
+                          "request_id": this.request_id,
+                          "wallet_id": this.flow_state.wallet_id,
+                          "cred_def_id": this.flow_state.cred_def_id,
+                          "flow_type": this.flow_state.type,
+                          "age_minutes": this.age_minutes,
+                          "has_failures": this.has_failures,
+                          "is_timeout": this.is_timeout,
+                          "is_incomplete": this.is_incomplete,
+                          "flow_state": this.flow_state,
+                          "timestamp": now().format_timestamp("2006-01-02T15:04:05Z07:00")
+                        }
+
+                - processors:
+                    - mapping: |
+                        #!blobl
+                        root = deleted()
+
+        - processors:
+            - log:
+                level: INFO
+                message: 'Registry Monitor - No keys found in KV store'
+            - mapping: |
+                #!blobl
+                root = deleted()
+
+output:
+  switch:
+    - check: 'json("alert_type") == "registry_flow_issue"'
+      output:
+        stdout:
+          codec: lines
+
+    - output:
+        drop: {}
