@@ -233,14 +233,16 @@ typing_extensions = {version = ">=4.5", markers = "python_version < \"3.13\""}
 trio = ["trio (>=0.26.1)"]
 
 [[package]]
-name = "aries_cloudcontroller"
-version = "1.3.1.post20250702"
+name = "aries-cloudcontroller"
+version = "1.3.2rc0.post20250822"
 description = "A simple python client for controlling an ACA-Py agent"
 optional = false
 python-versions = ">=3.9"
 groups = ["app"]
-files = []
-develop = false
+files = [
+    {file = "aries_cloudcontroller-1.3.2rc0.post20250822-py3-none-any.whl", hash = "sha256:9a98d20304a3d082d59fabff79618a93bc62fe5afc76ea17840827bec8200bdc"},
+    {file = "aries_cloudcontroller-1.3.2rc0.post20250822.tar.gz", hash = "sha256:8678bb1e9839a8568218ae2cec373a0c121701e586edd53f1d26339a1682ec38"},
+]
 
 [package.dependencies]
 aiohttp = ">=3.9.4,<4.0"
@@ -250,12 +252,6 @@ pydantic = ">=2.6,<3.0"
 python-dateutil = ">=2"
 typing-extensions = ">=4,<5.0"
 urllib3 = ">=2.1,<3"
-
-[package.source]
-type = "git"
-url = "https://github.com/didx-xyz/aries-cloudcontroller-python.git"
-reference = "feat/cheqd-20250818"
-resolved_reference = "325162d70fe4a016c4f2ab84901cda90fb607603"
 
 [[package]]
 name = "asyncpg"
@@ -1527,14 +1523,14 @@ testing = ["coverage", "pytest", "pytest-benchmark"]
 
 [[package]]
 name = "pre-commit"
-version = "4.2.0"
+version = "4.3.0"
 description = "A framework for managing and maintaining multi-language pre-commit hooks."
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "pre_commit-4.2.0-py2.py3-none-any.whl", hash = "sha256:a009ca7205f1eb497d10b845e52c838a98b6cdd2102a6c8e4540e94ee75c58bd"},
-    {file = "pre_commit-4.2.0.tar.gz", hash = "sha256:601283b9757afd87d40c4c4a9b2b5de9637a8ea02eaff7adc2d0fb4e04841146"},
+    {file = "pre_commit-4.3.0-py2.py3-none-any.whl", hash = "sha256:2b0747ad7e6e967169136edffee14c16e148a778a54e4f967921aa1ebf2308d8"},
+    {file = "pre_commit-4.3.0.tar.gz", hash = "sha256:499fe450cc9d42e9d58e606262795ecb64dd05438943c62b66f6a8673da30b16"},
 ]
 
 [package.dependencies]
@@ -1707,7 +1703,6 @@ files = [
     {file = "psycopg2_binary-2.9.10-cp313-cp313-musllinux_1_2_i686.whl", hash = "sha256:bb89f0a835bcfc1d42ccd5f41f04870c1b936d8507c6df12b7737febc40f0909"},
     {file = "psycopg2_binary-2.9.10-cp313-cp313-musllinux_1_2_ppc64le.whl", hash = "sha256:f0c2d907a1e102526dd2986df638343388b94c33860ff3bbe1384130828714b1"},
     {file = "psycopg2_binary-2.9.10-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:f8157bed2f51db683f31306aa497311b560f2265998122abe1dce6428bd86567"},
-    {file = "psycopg2_binary-2.9.10-cp313-cp313-win_amd64.whl", hash = "sha256:27422aa5f11fbcd9b18da48373eb67081243662f9b46e6fd07c3eb46e4535142"},
     {file = "psycopg2_binary-2.9.10-cp38-cp38-macosx_12_0_x86_64.whl", hash = "sha256:eb09aa7f9cecb45027683bb55aebaaf45a0df8bf6de68801a6afdc7947bb09d4"},
     {file = "psycopg2_binary-2.9.10-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:b73d6d7f0ccdad7bc43e6d34273f70d587ef62f824d7261c4ae9b8b1b6af90e8"},
     {file = "psycopg2_binary-2.9.10-cp38-cp38-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:ce5ab4bf46a211a8e924d307c1b1fcda82368586a19d0a24f8ae166f5c784864"},
@@ -2671,4 +2666,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.12.8"
-content-hash = "0f8eff681480fb46bcebae30f6f13b83adf1f9590e30012c6673317a7ba3d43f"
+content-hash = "a68f064a8c8bf2413197906a7a66596a876b7b1fcbca8cbbf49f07af2a13eb4f"
