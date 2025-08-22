@@ -4,6 +4,7 @@ import pytest
 from aries_cloudcontroller import AcaPyClient
 from fastapi import HTTPException
 
+from app.models.wallet import DIDCreate
 from app.routes.admin.tenants import router as tenants_router
 from app.routes.connections import router as connections_router
 from app.services import acapy_wallet
@@ -15,7 +16,6 @@ TENANTS_BASE_PATH = tenants_router.prefix
 
 
 @pytest.mark.anyio
-@pytest.mark.skip(reason="TODO: To be reviewed / fixed for cheqd")
 @pytest.mark.parametrize(
     "use_did,use_did_method,use_public_did",
     [
@@ -44,7 +44,9 @@ async def test_create_did_exchange_request(
     request_data = {"their_public_did": faber_public_did.did}
 
     if use_did:
-        new_did = await acapy_wallet.create_did(controller=alice_acapy_client)
+        new_did = await acapy_wallet.create_did(
+            controller=alice_acapy_client, did_create=DIDCreate(method="did:peer:4")
+        )
         request_data["use_did"] = new_did.did
 
     if use_did_method:

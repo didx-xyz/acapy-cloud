@@ -15,7 +15,6 @@ from .util import create_credential
 
 # Apply the marker to all tests in this module
 pytestmark = pytest.mark.xdist_group(name="issuer_test_group_3")
-pytestmark = pytest.mark.skip(reason="TODO: To be reviewed / fixed for cheqd")
 
 CREDENTIALS_BASE_PATH = issuer_router.prefix
 OOB_BASE_PATH = oob_router.prefix
