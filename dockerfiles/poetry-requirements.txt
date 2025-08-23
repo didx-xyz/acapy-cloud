@@ -575,9 +575,9 @@ urllib3==2.5.0 \
     # via
     #   dulwich
     #   requests
-virtualenv==20.32.0 \
-    --hash=sha256:2c310aecb62e5aa1b06103ed7c2977b81e042695de2697d01017ff0f1034af56 \
-    --hash=sha256:886bf75cadfdc964674e6e33eb74d787dff31ca314ceace03ca5810620f4ecf0
+virtualenv==20.34.0 \
+    --hash=sha256:341f5afa7eee943e4984a9207c025feedd768baff6753cd660c857ceb3e36026 \
+    --hash=sha256:44815b2c9dee7ed86e387b842a84f20b93f7f417f95886ca1996a72a4138eb1a
     # via poetry
 zstandard==0.24.0 \
     --hash=sha256:0101f835da7de08375f380192ff75135527e46e3f79bef224e3c49cb640fef6a \
