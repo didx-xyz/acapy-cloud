@@ -3,15 +3,15 @@ load("ext://color", "color")
 load("ext://helm_resource", "helm_resource", "helm_repo")
 
 # https://github.com/didx-xyz/bitnami-charts/tree/main/bitnami/minio
-minio_version = "17.0.19"
+minio_version = "17.0.21"
 # https://github.com/rowanruseler/helm-charts/tree/main/charts/pgadmin4
-pgadmin_version = "1.48.0"
+pgadmin_version = "1.49.0"
 # https://github.com/didx-xyz/bitnami-charts/tree/main/bitnami/postgresql-ha
-postgres_version = "16.1.2"
+postgres_version = "16.3.1"
 # https://github.com/redpanda-data/helm-charts/tree/main/charts/connect
 redpanda_connect_version = "3.0.3"
 # https://github.com/didx-xyz/bitnami-charts/tree/main/bitnami/valkey
-valkey_version = "3.0.28"
+valkey_version = "3.0.31"
 
 # Mnemonic for the Cheqd Localnet Validator
 # Will be used for Localnet as well as the Fee Payer for Cheqd DID Driver
