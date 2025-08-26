@@ -291,6 +291,33 @@ pipeline:
                         #!blobl
                         root = deleted()
 
+            - label: update_completed_flows
+              switch:
+                - check: 'json("is_complete") == true'
+                  processors:
+                    - log:
+                        level: INFO
+                        message: 'Registry Monitor - Flow completed: ${!json("request_id")} (${!json("flow_state.type")})'
+
+                    - mapping: |
+                        #!blobl
+                        # Store request_id in metadata and update flow state
+                        meta request_id = this.request_id
+                        root = this.flow_state
+                        root.completed = true
+
+                    - nats_kv:
+                        urls:
+                          - ${NATS_URL:nats://nats:4222}
+                        auth:
+                          user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+                        bucket: registry_flows
+                        operation: put
+                        key: "${!meta(\"request_id\")}"
+
+                - processors:
+                    - noop: {}
+
         - processors:
             - log:
                 level: INFO
