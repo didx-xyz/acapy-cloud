@@ -111,33 +111,15 @@ pipeline:
                 let age_seconds = ($current_time - $created_at) / 1000000
                 let age_minutes = $age_seconds / 60
 
-                # Check for failures
-                let has_failures = $flow.revocation_registry_definition.create_response.failure != null ||
-                                  $flow.revocation_registry_definition.store_response.failure != null ||
-                                  $flow.revocation_list.create_response.failure != null ||
-                                  $flow.revocation_list.store_response.failure != null ||
-                                  $flow.revocation_registry.full_handling_completed.failure != null ||
-                                  $flow.revocation_registry.activation_response.failure != null
-
                 # Check for timeouts (flows older than configured threshold)
                 let timeout_minutes = ${REGISTRY_MONITOR_TIMEOUT_MINUTES:10}
                 let is_timeout = $age_minutes > $timeout_minutes
 
-                # Check if flow is incomplete (missing expected final states)
-                let is_incomplete = match $flow.type {
-                  "new_cred_def" => $flow.revocation_registry_definition.store_response.success == null && !$has_failures,
-                  "new_backup" => $flow.revocation_registry_definition.store_response.success == null && !$has_failures,
-                  "full" => $flow.revocation_registry.activation_response.success == null && !$has_failures,
-                  _ => false
-                }
+                root = this
+                root.is_timeout = $is_timeout
+                root.age_minutes = $age_minutes
 
-                root = this.assign({
-                  "age_minutes": $age_minutes,
-                  "has_failures": $has_failures,
-                  "is_timeout": $is_timeout,
-                  "is_incomplete": $is_incomplete,
-                  "needs_attention": $has_failures || ($is_timeout && $is_incomplete)
-                })
+
 
             - label: filter_problematic_flows
               switch:
