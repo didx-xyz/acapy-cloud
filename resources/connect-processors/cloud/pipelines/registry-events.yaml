@@ -15,6 +15,7 @@ input:
             user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
 
 pipeline:
+  # one thread bc multiple threads can cause issues with state
   threads: 1
   processors:
     - label: remove_non_registry_events
