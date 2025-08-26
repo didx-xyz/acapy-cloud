@@ -106,7 +106,7 @@ pipeline:
               mapping: |
                 #!blobl
                 let flow = this.flow_state
-                let current_time = this.current_timestamp
+                let current_time = this.current_timestamp.or(now().ts_unix_micro())
                 let created_at = $flow.created_at.or(0)
                 let age_seconds = ($current_time - $created_at) / 1000000
                 let age_minutes = $age_seconds / 60
