@@ -47,9 +47,9 @@ postInstall:
         - anoncreds.>
       defaults: true
       storage: file
-    unprocessable_endorsements:
+    registry_health:
       subjects:
-        - unprocessable.>
+        - registry.>
       defaults: true
       storage: file
 
