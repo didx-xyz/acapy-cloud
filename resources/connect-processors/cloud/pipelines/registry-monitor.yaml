@@ -327,6 +327,6 @@ pipeline:
                 root = deleted()
 
 
-      output:
-        stdout:
-          codec: lines
+output:
+  stdout:
+    codec: lines
