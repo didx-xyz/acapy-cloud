@@ -323,6 +323,26 @@ pipeline:
 
                     - mapping: |
                         #!blobl
+                        meta level = "Critical"
+                        root = {
+                          "request_id": this.request_id,
+                          "needs_attention": this.needs_attention,
+                          "has_failure": this.has_failure,
+                          "is_timeout": this.is_timeout,
+                          "age_minutes": this.age_minutes,
+                          "flow_state": this.flow_state,
+                          "scan_timestamp": this.current_timestamp
+                        }
+
+                - check: 'json("has_failure") == true'
+                  processors:
+                    - log:
+                        level: WARN
+                        message: 'Registry Monitor - Flow needs attention: ${!json("request_id")} (${!json("flow_state.type")}) - timeout: ${!json("is_timeout")}, failure: ${!json("has_failure")}'
+
+                    - mapping: |
+                        #!blobl
+                        meta level = "Warning"
                         root = {
                           "request_id": this.request_id,
                           "needs_attention": this.needs_attention,
@@ -355,3 +375,4 @@ output:
     max_in_flight: ${REGISTRY_MONITOR_OUTPUT_MAX_IN_FLIGHT:100}
     headers:
       "Content-Type": "application/json"
+      "alert_level": "${!meta("level")}"
