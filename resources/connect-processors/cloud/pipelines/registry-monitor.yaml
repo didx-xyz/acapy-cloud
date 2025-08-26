@@ -100,7 +100,7 @@ pipeline:
 
             - log:
                 level: DEBUG
-                message: 'Registry Monitor - Checking flow: ${!json("request_id")}'
+                message: 'Registry Monitor - Checking flow: ${!json("")}'
 
             - label: analyze_flow_health
               mapping: |
