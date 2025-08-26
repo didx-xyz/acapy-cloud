@@ -353,6 +353,14 @@ pipeline:
                           "scan_timestamp": this.current_timestamp
                         }
 
+                - processors:
+                    - log:
+                        level: DEBUG
+                        message: 'Registry Monitor - Flow in progress, no action needed: ${!json("request_id")} (${!json("flow_state.type")})'
+                    - mapping: |
+                        #!blobl
+                        root = deleted()
+
         - processors:
             - log:
                 level: DEBUG
