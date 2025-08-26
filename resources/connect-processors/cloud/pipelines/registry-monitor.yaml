@@ -315,6 +315,10 @@ pipeline:
                         operation: put
                         key: "${!meta(\"request_id\")}"
 
+                    - mapping: |
+                        #!blobl
+                        root = deleted()
+
                 - check: 'json("needs_attention") == true'
                   processors:
                     - log:
