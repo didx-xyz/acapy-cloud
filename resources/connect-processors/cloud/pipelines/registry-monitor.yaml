@@ -353,9 +353,6 @@ pipeline:
                           "scan_timestamp": this.current_timestamp
                         }
 
-                - processors:
-                    - noop: {}
-
         - processors:
             - log:
                 level: DEBUG
@@ -375,4 +372,4 @@ output:
     max_in_flight: ${REGISTRY_MONITOR_OUTPUT_MAX_IN_FLIGHT:100}
     headers:
       "Content-Type": "application/json"
-      "alert_level": "${!meta("level")}"
+      "alert_level": "${!@level}"
