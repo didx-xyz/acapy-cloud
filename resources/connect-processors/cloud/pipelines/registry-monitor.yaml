@@ -76,6 +76,28 @@ pipeline:
                     - mapping: |
                         #!blobl
                         root = deleted()
+
+                - processors:
+                    - label: fetch_flow_state
+                      branch:
+                        request_map: |
+                          root = {"key": this.key_name}
+                        processors:
+                          - nats_kv:
+                              urls:
+                                - ${NATS_URL:nats://nats:4222}
+                              auth:
+                                user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+                              bucket: registry_flows
+                              operation: get
+                              key: "${!json(\"key\")}"
+                        result_map: |
+                          root = {
+                            "request_id": meta("nats_kv_key"),
+                            "flow_state": this,
+                            "current_timestamp": now().ts_unix_micro()
+                          }
+
             - log:
                 level: DEBUG
                 message: 'Registry Monitor - Checking flow: ${!json("request_id")}'
