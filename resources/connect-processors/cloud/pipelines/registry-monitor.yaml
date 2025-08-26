@@ -27,6 +27,7 @@ pipeline:
                 user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
               bucket: registry_flows
               operation: keys
+              key: ">"
         result_map: |
           root.kv_keys = this
           root.total_keys = this.length()
