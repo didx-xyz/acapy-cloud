@@ -71,7 +71,7 @@ pipeline:
                 - check: 'json("is_already_completed") == true'
                   processors:
                     - log:
-                        level: INFO
+                        level: DEBUG
                         message: 'Registry Monitor - Skipping completed flow: ${!json("key_name")}'
                     - mapping: |
                         #!blobl
@@ -296,7 +296,7 @@ pipeline:
                 - check: 'json("is_complete") == true'
                   processors:
                     - log:
-                        level: INFO
+                        level: DEBUG
                         message: 'Registry Monitor - Flow completed: ${!json("request_id")} (${!json("flow_state.type")})'
 
                     - mapping: |
@@ -338,7 +338,7 @@ pipeline:
 
         - processors:
             - log:
-                level: INFO
+                level: DEBUG
                 message: 'Registry Monitor - No keys found in KV store'
             - mapping: |
                 #!blobl
