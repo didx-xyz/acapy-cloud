@@ -291,7 +291,7 @@ pipeline:
                         #!blobl
                         root = deleted()
 
-            - label: update_completed_flows
+            - label: handle_flow_status
               switch:
                 - check: 'json("is_complete") == true'
                   processors:
@@ -315,6 +315,24 @@ pipeline:
                         operation: put
                         key: "${!meta(\"request_id\")}"
 
+                - check: 'json("needs_attention") == true || json("is_timeout") == true'
+                  processors:
+                    - log:
+                        level: WARN
+                        message: 'Registry Monitor - Flow needs attention: ${!json("request_id")} (${!json("flow_state.type")}) - timeout: ${!json("is_timeout")}, failure: ${!json("has_failure")}'
+
+                    - mapping: |
+                        #!blobl
+                        root = {
+                          "request_id": this.request_id,
+                          "needs_attention": this.needs_attention,
+                          "has_failure": this.has_failure,
+                          "is_timeout": this.is_timeout,
+                          "age_minutes": this.age_minutes,
+                          "flow_state": this.flow_state,
+                          "scan_timestamp": this.current_timestamp
+                        }
+
                 - processors:
                     - noop: {}
 
@@ -328,5 +346,13 @@ pipeline:
 
 
 output:
-  stdout:
-    codec: lines
+  nats_jetstream:
+    urls:
+      - ${NATS_URL:nats://nats:4222}
+    auth:
+      user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+    subject: ${REGISTRY_MONITOR_OUTPUT_SUBJECT:registry.monitor.alerts}
+    max_in_flight: ${REGISTRY_MONITOR_OUTPUT_MAX_IN_FLIGHT:100}
+    headers:
+      "Content-Type": "application/json"
+      "Registry-Monitor-Alert": "true"
