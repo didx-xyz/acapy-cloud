@@ -326,12 +326,7 @@ pipeline:
                 #!blobl
                 root = deleted()
 
-output:
-  switch:
-    - check: 'json("alert_type") == "registry_flow_issue"'
+
       output:
         stdout:
           codec: lines
-
-    - output:
-        drop: {}
