@@ -123,7 +123,60 @@ pipeline:
 
             - label: filter_problematic_flows
               switch:
-                - check: 'json("needs_attention") == true'
+                - check: 'json("flow_state.type") == "new_cred_def"'
+                  processors:
+                    - mapping: |
+                        #!blobl
+                        let flow = this.flow_state
+
+                        # Expected fields for new_cred_def
+                        let revocation_list_complete = (
+                          $flow.exists("revocation_list.create_requested") &&
+                          $flow.exists("revocation_list.create_response.success") &&
+                          $flow.exists("revocation_list.finished") &&
+                          $flow.exists("revocation_list.store_requested") &&
+                          $flow.exists("revocation_list.store_response.success")
+                        )
+
+                        let revocation_registry_complete = (
+                          $flow.exists("revocation_registry.activation_requested") &&
+                          $flow.exists("revocation_registry.activation_response")
+                        )
+
+                        let revocation_registry_definition_complete = (
+                          $flow.exists("revocation_registry_definition.create_requested") &&
+                          $flow.exists("revocation_registry_definition.create_response.success") &&
+                          $flow.exists("revocation_registry_definition.store_requested") &&
+                          $flow.exists("revocation_registry_definition.store_response.success")
+                        )
+
+                        # Check for failures in any response fields
+                        let has_failure = (
+                          $flow.exists("revocation_list.create_response.failure") ||
+                          $flow.exists("revocation_list.store_response.failure") ||
+                          $flow.exists("revocation_registry.activation_response.failure") ||
+                          $flow.exists("revocation_registry_definition.create_response.failure") ||
+                          $flow.exists("revocation_registry_definition.store_response.failure")
+                        )
+
+                        let is_complete = $revocation_list_complete && $revocation_registry_complete && $revocation_registry_definition_complete
+                        let needs_attention = !$is_complete
+
+                        root = this
+                        root.is_complete = $is_complete
+                        root.has_failure = $has_failure
+                        root.needs_attention = $needs_attention
+                        root.missing_fields = []
+
+                        if !$revocation_list_complete {
+                          root.missing_fields = root.missing_fields.append("revocation_list_incomplete")
+                        }
+                        if !$revocation_registry_complete {
+                          root.missing_fields = root.missing_fields.append("revocation_registry_incomplete")
+                        }
+                        if !$revocation_registry_definition_complete {
+                          root.missing_fields = root.missing_fields.append("revocation_registry_definition_incomplete")
+                        }
                   processors:
                     - log:
                         level: WARN
