@@ -223,20 +223,67 @@ pipeline:
                         if !$revocation_registry_definition_complete {
                           root.missing_fields = root.missing_fields.append("revocation_registry_definition_incomplete")
                         }
+
+                - check: 'json("flow_state.type") == "full"'
+                  processors:
                     - mapping: |
                         #!blobl
-                        root = {
-                          "alert_type": "registry_flow_issue",
-                          "request_id": this.request_id,
-                          "wallet_id": this.flow_state.wallet_id,
-                          "cred_def_id": this.flow_state.cred_def_id,
-                          "flow_type": this.flow_state.type,
-                          "age_minutes": this.age_minutes,
-                          "has_failures": this.has_failures,
-                          "is_timeout": this.is_timeout,
-                          "is_incomplete": this.is_incomplete,
-                          "flow_state": this.flow_state,
-                          "timestamp": now().format_timestamp("2006-01-02T15:04:05Z07:00")
+                        let flow = this.flow_state
+
+                        # Expected fields for full
+                        let revocation_list_complete = (
+                          $flow.exists("revocation_list.create_requested") &&
+                          $flow.exists("revocation_list.create_response.success") &&
+                          $flow.exists("revocation_list.finished") &&
+                          $flow.exists("revocation_list.store_requested") &&
+                          $flow.exists("revocation_list.store_response.success")
+                        )
+
+                        let revocation_registry_complete = (
+                          $flow.exists("revocation_registry.activation_requested") &&
+                          $flow.exists("revocation_registry.activation_response.success") &&
+                          $flow.exists("revocation_registry.full_detected") &&
+                          $flow.exists("revocation_registry.full_handling_completed.success")
+                        )
+
+                        let revocation_registry_definition_complete = (
+                          $flow.exists("revocation_registry_definition.create_requested") &&
+                          $flow.exists("revocation_registry_definition.create_response.success") &&
+                          $flow.exists("revocation_registry_definition.store_requested") &&
+                          $flow.exists("revocation_registry_definition.store_response.success")
+                        )
+
+                        # Check for failures in any response fields
+                        let has_failure = (
+                          $flow.exists("revocation_list.create_response.failure") ||
+                          $flow.exists("revocation_list.store_response.failure") ||
+                          $flow.exists("revocation_registry.activation_response.failure") ||
+                          $flow.exists("revocation_registry.full_handling_completed.failure") ||
+                          $flow.exists("revocation_registry_definition.create_response.failure") ||
+                          $flow.exists("revocation_registry_definition.store_response.failure")
+                        )
+
+                        let is_complete = (
+                          $revocation_list_complete &&
+                          $revocation_registry_complete &&
+                          $revocation_registry_definition_complete
+                        )
+                        let needs_attention = !$is_complete
+
+                        root = this
+                        root.is_complete = $is_complete
+                        root.has_failure = $has_failure
+                        root.needs_attention = $needs_attention
+                        root.missing_fields = []
+
+                        if !$revocation_list_complete {
+                          root.missing_fields = root.missing_fields.append("revocation_list_incomplete")
+                        }
+                        if !$revocation_registry_complete {
+                          root.missing_fields = root.missing_fields.append("revocation_registry_incomplete")
+                        }
+                        if !$revocation_registry_definition_complete {
+                          root.missing_fields = root.missing_fields.append("revocation_registry_definition_incomplete")
                         }
 
                 - processors:
