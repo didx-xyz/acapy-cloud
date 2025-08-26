@@ -177,11 +177,52 @@ pipeline:
                         if !$revocation_registry_definition_complete {
                           root.missing_fields = root.missing_fields.append("revocation_registry_definition_incomplete")
                         }
-                  processors:
-                    - log:
-                        level: WARN
-                        message: 'Registry Monitor - ALERT: Flow ${!json("request_id")} needs attention - Age: ${!json("age_minutes")}min, HasFailures: ${!json("has_failures")}, IsTimeout: ${!json("is_timeout")}, IsIncomplete: ${!json("is_incomplete")}'
 
+                - check: 'json("flow_state.type") == "new_backup"'
+                  processors:
+                    - mapping: |
+                        #!blobl
+                        let flow = this.flow_state
+
+                        # Expected fields for new_backup
+                        let revocation_list_complete = (
+                          $flow.exists("revocation_list.create_requested") &&
+                          $flow.exists("revocation_list.create_response.success") &&
+                          $flow.exists("revocation_list.finished") &&
+                          $flow.exists("revocation_list.store_requested") &&
+                          $flow.exists("revocation_list.store_response.success")
+                        )
+
+                        let revocation_registry_definition_complete = (
+                          $flow.exists("revocation_registry_definition.create_requested") &&
+                          $flow.exists("revocation_registry_definition.create_response.success") &&
+                          $flow.exists("revocation_registry_definition.store_requested") &&
+                          $flow.exists("revocation_registry_definition.store_response.success")
+                        )
+
+                        # Check for failures in any response fields
+                        let has_failure = (
+                          $flow.exists("revocation_list.create_response.failure") ||
+                          $flow.exists("revocation_list.store_response.failure") ||
+                          $flow.exists("revocation_registry_definition.create_response.failure") ||
+                          $flow.exists("revocation_registry_definition.store_response.failure")
+                        )
+
+                        let is_complete = $revocation_list_complete && $revocation_registry_definition_complete
+                        let needs_attention = !$is_complete
+
+                        root = this
+                        root.is_complete = $is_complete
+                        root.has_failure = $has_failure
+                        root.needs_attention = $needs_attention
+                        root.missing_fields = []
+
+                        if !$revocation_list_complete {
+                          root.missing_fields = root.missing_fields.append("revocation_list_incomplete")
+                        }
+                        if !$revocation_registry_definition_complete {
+                          root.missing_fields = root.missing_fields.append("revocation_registry_definition_incomplete")
+                        }
                     - mapping: |
                         #!blobl
                         root = {
