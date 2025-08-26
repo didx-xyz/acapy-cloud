@@ -160,7 +160,7 @@ pipeline:
                         )
 
                         let is_complete = $revocation_list_complete && $revocation_registry_complete && $revocation_registry_definition_complete
-                        let needs_attention = !$is_complete
+                        let needs_attention = !$is_complete && this.is_timeout
 
                         root = this
                         root.is_complete = $is_complete
@@ -209,7 +209,7 @@ pipeline:
                         )
 
                         let is_complete = $revocation_list_complete && $revocation_registry_definition_complete
-                        let needs_attention = !$is_complete
+                        let needs_attention = !$is_complete && this.is_timeout
 
                         root = this
                         root.is_complete = $is_complete
@@ -268,7 +268,7 @@ pipeline:
                           $revocation_registry_complete &&
                           $revocation_registry_definition_complete
                         )
-                        let needs_attention = !$is_complete
+                        let needs_attention = !$is_complete && this.is_timeout
 
                         root = this
                         root.is_complete = $is_complete
@@ -315,7 +315,7 @@ pipeline:
                         operation: put
                         key: "${!meta(\"request_id\")}"
 
-                - check: 'json("needs_attention") == true || json("is_timeout") == true'
+                - check: 'json("needs_attention") == true'
                   processors:
                     - log:
                         level: WARN
