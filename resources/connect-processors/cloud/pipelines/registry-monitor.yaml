@@ -40,11 +40,14 @@ pipeline:
       switch:
         - check: 'json("total_keys") > 0'
           processors:
+            - mapping: |
+                #!blobl
+                root = this.kv_keys
+
             - unarchive:
                 format: json_array
-                field: kv_keys
 
-            - label: fetch_flow_state
+            - label: check_if_completed
               branch:
                 request_map: |
                   root = {"key": this}
@@ -58,9 +61,11 @@ pipeline:
                       operation: get
                       key: "${!json(\"key\")}"
                 result_map: |
-                  root.request_id = this.key
-                  root.flow_state = this
-                  root.current_timestamp = now().ts_unix_micro()
+                  root = {
+                    "key_name": meta("nats_kv_key"),
+                    "is_already_completed": this.completed.or(false),
+                    "flow_data": this
+                  }
 
             - log:
                 level: DEBUG
