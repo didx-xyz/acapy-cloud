@@ -1,3 +1,5 @@
+import uuid
+
 import pytest
 from aries_cloudcontroller import (
     DID,
@@ -11,10 +13,11 @@ from app.exceptions import CloudApiException
 from app.models.wallet import DIDCreate
 from app.services import acapy_wallet
 
+did_cheqd = f"did:cheqd:testnet:{uuid.uuid4()}"
+
 
 @pytest.mark.anyio
 async def test_assert_public_did(mock_agent_controller: AcaPyClient):
-    did_cheqd = "did:cheqd:testnet:39be08a4-8971-43ee-8a10-821ad52f24c6"
     did_object = DID(
         did=did_cheqd,
         verkey="WgWxqztrNooG92RXvxSTWvWgWxqztrNooG92RXvxSTWv",
@@ -63,12 +66,11 @@ async def test_create_cheqd_did_success(mock_agent_controller: AcaPyClient):
         seed="testseed000000000000000000000001",
     )
 
-    expected_did = "did:cheqd:testnet:abcdef1234567890"
     expected_verkey = "WgWxqztrNooG92RXvxSTWvWgWxqztrNooG92RXvxSTWv"
 
     mock_agent_controller.did.did_cheqd_create_post.return_value = (
         CreateCheqdDIDResponse(
-            did=expected_did,
+            did=did_cheqd,
             verkey=expected_verkey,
         )
     )
@@ -77,7 +79,7 @@ async def test_create_cheqd_did_success(mock_agent_controller: AcaPyClient):
         mock_agent_controller, did_create=did_create_request
     )
 
-    assert created_did.did == expected_did
+    assert created_did.did == did_cheqd
     assert created_did.verkey == expected_verkey
     assert created_did.method == "cheqd"
     assert created_did.key_type == "ed25519"  # Default key_type for cheqd
@@ -98,12 +100,11 @@ async def test_create_cheqd_did_success_no_seed(
 ):
     did_create_request = DIDCreate(method="cheqd")
 
-    expected_did = "did:cheqd:testnet:zxywv987654321"
     expected_verkey = "HkPgtEv9hrGjGkVSkL4sT8HkPgtEv9hrGjGkVSkL4sT8"
 
     mock_agent_controller.did.did_cheqd_create_post.return_value = (
         CreateCheqdDIDResponse(
-            did=expected_did,
+            did=did_cheqd,
             verkey=expected_verkey,
         )
     )
@@ -112,7 +113,7 @@ async def test_create_cheqd_did_success_no_seed(
         mock_agent_controller, did_create=did_create_request
     )
 
-    assert created_did.did == expected_did
+    assert created_did.did == did_cheqd
     assert created_did.verkey == expected_verkey
     assert created_did.method == "cheqd"
 

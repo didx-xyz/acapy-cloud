@@ -2,6 +2,14 @@
 ##
 fullnameOverride: nats
 
+global:
+  security:
+    # Required to override image repositories (`docker.io/bitnami` -> `ghcr.io/didx-xyz/bitnami-oss`)
+    # https://github.com/bitnami/charts/issues/35164
+    # https://github.com/bitnami/containers/issues/84600
+    allowInsecureImages: true
+  imageRegistry: ghcr.io
+
 postInstall:
   enabled: true
 
@@ -49,11 +57,15 @@ postInstall:
 
   restartPolicy: Never
 
-# https://github.com/bitnami/charts/tree/main/bitnami/nats
+# https://github.com/didx-xyz/bitnami-charts/tree/main/bitnami/nats
 nats:
   ## @param fullnameOverride String to fully override common.names.fullname template
   ##
   fullnameOverride: nats
+  ## @param image.repository [default: bitnami/nats] NATS image repository
+  ##
+  image:
+    repository: didx-xyz/bitnami-oss/nats
 
   ## @param replicaCount Number of NATS nodes
   ##
@@ -128,7 +140,7 @@ nats:
   ## NATS resource requests and limits
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
   ## @param resourcesPreset Set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if resources is set (resources is recommended for production).
-  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ## More information: https://github.com/didx-xyz/bitnami-charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
   resourcesPreset: none
   ## @param resources Set container requests and limits for different resources like CPU or memory (essential for production workloads)
@@ -189,3 +201,11 @@ nats:
     ## @param persistentVolumeClaimRetentionPolicy.whenDeleted Volume retention behavior that applies when the StatefulSet is deleted
     ##
     whenDeleted: Delete
+
+  ## Metrics / Prometheus NATS Exporter
+  ## ref: https://github.com/nats-io/prometheus-nats-exporter
+  ##
+  metrics:
+    ## @param metrics.image.repository [default: bitnami/nats-exporter] Prometheus metrics exporter image repository
+    image:
+      repository: didx-xyz/bitnami-oss/nats-exporter

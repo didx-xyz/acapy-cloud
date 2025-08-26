@@ -1,3 +1,4 @@
+import uuid
 from unittest import mock
 from unittest.mock import AsyncMock, patch
 
@@ -93,24 +94,39 @@ async def test_create_did_success(request_body, create_body):
         )
 
         if request_body is None:
-            acapy_call = mock_aries_controller.did.did_cheqd_create_post
+            # For cheqd DID creation, there are two calls:
+            # 1. Create the DID
+            # 2. Set the DID endpoint
+            mock_did = f"did:cheqd:testnet:{uuid.uuid4()}"
             mock_handle_acapy_call.return_value = AsyncMock(
-                did="did:cheqd:1234",
+                did=mock_did,
                 verkey="a" * 131,  # Expected verkey length
             )
+
+            await create_did(did_create=request_body, auth="mocked_auth")
+
+            # Verify both calls were made
+            expected_calls = [
+                mock.call(
+                    logger=mock.ANY,
+                    acapy_call=mock_aries_controller.did.did_cheqd_create_post,
+                    body=create_body,
+                )
+            ]
+            mock_handle_acapy_call.assert_has_awaits(expected_calls)
         else:
             acapy_call = mock_aries_controller.wallet.create_did
             mock_handle_acapy_call.return_value = AsyncMock(
                 did=f"did:{request_body.method}:1234", verkey="1234"
             )
 
-        await create_did(did_create=request_body, auth="mocked_auth")
+            await create_did(did_create=request_body, auth="mocked_auth")
 
-        mock_handle_acapy_call.assert_awaited_once_with(
-            logger=mock.ANY,
-            acapy_call=acapy_call,
-            body=create_body,
-        )
+            mock_handle_acapy_call.assert_awaited_once_with(
+                logger=mock.ANY,
+                acapy_call=acapy_call,
+                body=create_body,
+            )
 
 
 @pytest.mark.anyio

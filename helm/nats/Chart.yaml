@@ -6,12 +6,12 @@ version: "9"
 appVersion: 2.x.x
 
 dependencies:
-  # https://github.com/bitnami/charts/tree/main/bitnami/common
+  # https://github.com/didx-xyz/bitnami-charts/tree/main/bitnami/common
   - name: common
-    repository: oci://registry-1.docker.io/bitnamicharts
+    repository: oci://ghcr.io/didx-xyz/bitnami-oss-charts
     version: 2.x.x
 
-  # https://github.com/bitnami/charts/tree/main/bitnami/nats
+  # https://github.com/didx-xyz/bitnami-charts/tree/main/bitnami/nats
   - name: nats
-    repository: oci://registry-1.docker.io/bitnamicharts
+    repository: oci://ghcr.io/didx-xyz/bitnami-oss-charts
     version: 9.x.x

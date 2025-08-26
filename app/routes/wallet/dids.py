@@ -228,26 +228,31 @@ async def set_did_endpoint(  # noqa: D417
             endpoint: str
 
     """
-    # "Endpoint" type is for making connections using public DIDs
     bound_logger = logger.bind(body={"did": did, "body": body})
     bound_logger.debug("POST request received: Get endpoint for DID")
 
+    # "Endpoint" type is for making connections using public DIDs
     endpoint_type = "Endpoint"
 
-    request_body = handle_model_with_validation(
-        logger=bound_logger,
-        model_class=DIDEndpointWithType,
-        did=did,
-        endpoint=body.endpoint,
-        endpoint_type=endpoint_type,
-    )
-
     async with client_from_auth(auth) as aries_controller:
-        bound_logger.debug("Setting DID endpoint")
-        await handle_acapy_call(
-            logger=logger,
-            acapy_call=aries_controller.wallet.set_did_endpoint,
-            body=request_body,
-        )
+        if did.startswith("did:cheqd:"):
+            await acapy_wallet.set_cheqd_did_endpoint(
+                aries_controller, did, body.endpoint
+            )
+        else:
+            request_body = handle_model_with_validation(
+                logger=bound_logger,
+                model_class=DIDEndpointWithType,
+                did=did,
+                endpoint=body.endpoint,
+                endpoint_type=endpoint_type,
+            )
+
+            bound_logger.debug("Setting DID endpoint")
+            await handle_acapy_call(
+                logger=logger,
+                acapy_call=aries_controller.wallet.set_did_endpoint,
+                body=request_body,
+            )
 
     bound_logger.debug("Successfully set DID endpoint.")

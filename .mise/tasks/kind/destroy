@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-# mise description="Destroy Kubernetes Kind Cluster"
+#MISE description="Destroy Kubernetes Kind Cluster"
 #USAGE flag "--destroy-registry-containers" help="Destroy Kind registry & cache containers"
 
 kind delete cluster --name ${KIND_CLUSTER_NAME}

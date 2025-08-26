@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# mise description="Start up the Docker Pullthrough Cache"
+#MISE description="Start up the Docker Pullthrough Cache"
 
 # Disable Docker cache in CI
 if [ -n "${GITHUB_ACTIONS}" ]; then

@@ -32,7 +32,7 @@ spec:
             - while ! nc -z {{ template "common.names.fullname" . }} {{ default 4222 .Values.nats.service.ports.client }}; do sleep 1; done
       containers:
         - name: natscli
-          image: bitnami/natscli:{{ default "latest" .Values.postInstall.cli.version }}
+          image: ghcr.io/didx-xyz/bitnami-oss/natscli:{{ default "latest" .Values.postInstall.cli.version }}
           command:
             - sh
             - -c
