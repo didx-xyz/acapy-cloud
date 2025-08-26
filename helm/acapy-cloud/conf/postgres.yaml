@@ -4,7 +4,7 @@ global:
   security:
     # Required to override image repositories (`docker.io/bitnami` -> `ghcr.io/didx-xyz/bitnami-oss`)
     # https://github.com/bitnami/charts/issues/35164
-    # https://github.com/bitnami/containers/issues/84600
+    # https://github.com/bitnami/containers/issues/83267
     allowInsecureImages: true
   imageRegistry: ghcr.io
 
