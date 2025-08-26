@@ -19,8 +19,6 @@ services:
       - ISSUERS=issuer
       - SCHEMA_NAME="schema"
       - SCHEMA_VERSION=0.1.0
-      - DENOMINATOR=1
-      - FACTOR=1
       - CLOUDAPI_URL=${CLOUDAPI_URL:-http://cloudapi.127.0.0.1.nip.io}
       - TENANT_ADMIN_API_KEY=${TENANT_ADMIN_API_KEY:-adminApiKey}
       - GOVERNANCE_API_KEY=${GOVERNANCE_API_KEY:-adminApiKey}
@@ -29,3 +27,4 @@ services:
       - OOB_INVITATION=true # temporary until connect via pulbic DID on Cheqd is implemented
       - USE_AUTO_PUBLISH=false
       - DEBUG=false
+      - SLEEP=0
