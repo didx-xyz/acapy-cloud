@@ -1,5 +1,3 @@
-import uuid
-
 import pytest
 from aries_cloudcontroller import (
     DID,
@@ -8,12 +6,13 @@ from aries_cloudcontroller import (
     CreateCheqdDIDResponse,
     DIDResult,
 )
+from uuid_utils import uuid4
 
 from app.exceptions import CloudApiException
 from app.models.wallet import DIDCreate
 from app.services import acapy_wallet
 
-did_cheqd = f"did:cheqd:testnet:{uuid.uuid4()}"
+did_cheqd = f"did:cheqd:testnet:{uuid4()}"
 
 
 @pytest.mark.anyio

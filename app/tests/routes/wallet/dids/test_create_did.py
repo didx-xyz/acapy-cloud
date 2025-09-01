@@ -1,4 +1,3 @@
-import uuid
 from unittest import mock
 from unittest.mock import AsyncMock, patch
 
@@ -10,6 +9,7 @@ from aries_cloudcontroller.exceptions import (
     BadRequestException,
     NotFoundException,
 )
+from uuid_utils import uuid4
 
 from app.models.wallet import DIDCreate
 from app.routes.wallet.dids import create_did
@@ -94,10 +94,7 @@ async def test_create_did_success(request_body, create_body):
         )
 
         if request_body is None:
-            # For cheqd DID creation, there are two calls:
-            # 1. Create the DID
-            # 2. Set the DID endpoint
-            mock_did = f"did:cheqd:testnet:{uuid.uuid4()}"
+            mock_did = f"did:cheqd:testnet:{uuid4()}"
             mock_handle_acapy_call.return_value = AsyncMock(
                 did=mock_did,
                 verkey="a" * 131,  # Expected verkey length
@@ -105,15 +102,11 @@ async def test_create_did_success(request_body, create_body):
 
             await create_did(did_create=request_body, auth="mocked_auth")
 
-            # Verify both calls were made
-            expected_calls = [
-                mock.call(
-                    logger=mock.ANY,
-                    acapy_call=mock_aries_controller.did.did_cheqd_create_post,
-                    body=create_body,
-                )
-            ]
-            mock_handle_acapy_call.assert_has_awaits(expected_calls)
+            mock_handle_acapy_call.assert_awaited_once_with(
+                logger=mock.ANY,
+                acapy_call=mock_aries_controller.did.did_cheqd_create_post,
+                body=create_body,
+            )
         else:
             acapy_call = mock_aries_controller.wallet.create_did
             mock_handle_acapy_call.return_value = AsyncMock(
