@@ -20,6 +20,7 @@ Run with docker compose
 ### Basic Usage (No Metrics)
 
 By default, the K6 framework runs without DataDog metrics collection:
+
 ```sh
 # Default behavior - no StatsD dependency, no DataDog container
 docker compose up
@@ -50,6 +51,7 @@ docker compose -f compose.metrics.yaml up xk6
 ```
 
 This approach automatically:
+
 - Starts the DataDog container with health checks
 - Enables StatsD metrics in K6 (`ENABLE_STATSD=true`)
 - Configures proper service dependencies
