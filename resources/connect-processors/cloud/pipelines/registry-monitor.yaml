@@ -1,0 +1,387 @@
+input:
+  generate:
+    interval: ${REGISTRY_MONITOR_SCAN_INTERVAL:30s}
+    mapping: |
+      #!blobl
+      root = {
+        "scan_timestamp": now().ts_unix_micro(),
+        "scan_type": "kv_keys_check"
+      }
+
+pipeline:
+  threads: -1
+  processors:
+    - log:
+        level: DEBUG
+        message: 'Registry Monitor - Starting KV scan at ${!json("scan_timestamp")}'
+
+    - label: get_all_kv_keys
+      branch:
+        request_map: |
+          root = this
+        processors:
+          - nats_kv:
+              urls:
+                - ${NATS_URL:nats://nats:4222}
+              auth:
+                user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+              bucket: registry_flows
+              operation: keys
+              key: ">"
+        result_map: |
+          root.kv_keys = this
+          root.total_keys = this.length()
+
+    - log:
+        level: DEBUG
+        message: 'Registry Monitor - Found ${!json("total_keys")} keys in KV store'
+
+    - label: process_each_key
+      switch:
+        - check: 'json("total_keys") > 0'
+          processors:
+            - mapping: |
+                #!blobl
+                root = this.kv_keys
+
+            - unarchive:
+                format: json_array
+
+            - label: check_if_completed
+              branch:
+                request_map: |
+                  root = {"key": this}
+                processors:
+                  - nats_kv:
+                      urls:
+                        - ${NATS_URL:nats://nats:4222}
+                      auth:
+                        user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+                      bucket: registry_flows
+                      operation: get
+                      key: "${!json(\"key\")}"
+                result_map: |
+                  root = {
+                    "key_name": meta("nats_kv_key"),
+                    "is_already_completed": this.completed.or(false),
+                    "flow_data": this
+                  }
+
+            - switch:
+                - check: 'json("is_already_completed") == true'
+                  processors:
+                    - log:
+                        level: DEBUG
+                        message: 'Registry Monitor - Skipping completed flow: ${!json("key_name")}'
+                    - mapping: |
+                        #!blobl
+                        root = deleted()
+
+                - processors:
+                    - label: fetch_flow_state
+                      branch:
+                        request_map: |
+                          root = {"key": this.key_name}
+                        processors:
+                          - nats_kv:
+                              urls:
+                                - ${NATS_URL:nats://nats:4222}
+                              auth:
+                                user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+                              bucket: registry_flows
+                              operation: get
+                              key: "${!json(\"key\")}"
+                        result_map: |
+                          root = {
+                            "request_id": meta("nats_kv_key"),
+                            "flow_state": this,
+                            "current_timestamp": now().ts_unix_micro()
+                          }
+
+            - log:
+                level: DEBUG
+                message: 'Registry Monitor - Checking flow: ${!json("")}'
+
+            - label: analyze_flow_health
+              mapping: |
+                #!blobl
+                let flow = this.flow_state
+                let current_time = this.current_timestamp.or(now().ts_unix_micro())
+                let created_at = $flow.created_at.or(0)
+                let age_seconds = ($current_time - $created_at) / 1000000
+                let age_minutes = $age_seconds / 60
+
+                # Check for timeouts (flows older than configured threshold)
+                let timeout_minutes = ${REGISTRY_MONITOR_TIMEOUT_MINUTES:10}
+                let is_timeout = $age_minutes > $timeout_minutes
+
+                root = this
+                root.is_timeout = $is_timeout
+                root.age_minutes = $age_minutes
+
+
+
+            - label: filter_problematic_flows
+              switch:
+                - check: 'json("flow_state.type") == "new_cred_def"'
+                  processors:
+                    - mapping: |
+                        #!blobl
+                        let flow = this.flow_state
+
+                        # Expected fields for new_cred_def
+                        let revocation_list_complete = (
+                          $flow.exists("revocation_list.create_requested") &&
+                          $flow.exists("revocation_list.create_response.success") &&
+                          $flow.exists("revocation_list.finished") &&
+                          $flow.exists("revocation_list.store_requested") &&
+                          $flow.exists("revocation_list.store_response.success")
+                        )
+
+                        let revocation_registry_complete = (
+                          $flow.exists("revocation_registry.activation_requested") &&
+                          $flow.exists("revocation_registry.activation_response")
+                        )
+
+                        let revocation_registry_definition_complete = (
+                          $flow.exists("revocation_registry_definition.create_requested") &&
+                          $flow.exists("revocation_registry_definition.create_response.success") &&
+                          $flow.exists("revocation_registry_definition.store_requested") &&
+                          $flow.exists("revocation_registry_definition.store_response.success")
+                        )
+
+                        # Check for failures in any response fields
+                        let has_failure = (
+                          $flow.exists("revocation_list.create_response.failure") ||
+                          $flow.exists("revocation_list.store_response.failure") ||
+                          $flow.exists("revocation_registry.activation_response.failure") ||
+                          $flow.exists("revocation_registry_definition.create_response.failure") ||
+                          $flow.exists("revocation_registry_definition.store_response.failure")
+                        )
+
+                        let is_complete = $revocation_list_complete && $revocation_registry_complete && $revocation_registry_definition_complete
+                        let needs_attention = !$is_complete && this.is_timeout
+
+                        root = this
+                        root.is_complete = $is_complete
+                        root.has_failure = $has_failure
+                        root.needs_attention = $needs_attention
+                        root.missing_fields = []
+
+                        if !$revocation_list_complete {
+                          root.missing_fields = root.missing_fields.append("revocation_list_incomplete")
+                        }
+                        if !$revocation_registry_complete {
+                          root.missing_fields = root.missing_fields.append("revocation_registry_incomplete")
+                        }
+                        if !$revocation_registry_definition_complete {
+                          root.missing_fields = root.missing_fields.append("revocation_registry_definition_incomplete")
+                        }
+
+                - check: 'json("flow_state.type") == "new_backup"'
+                  processors:
+                    - mapping: |
+                        #!blobl
+                        let flow = this.flow_state
+
+                        # Expected fields for new_backup
+                        let revocation_list_complete = (
+                          $flow.exists("revocation_list.create_requested") &&
+                          $flow.exists("revocation_list.create_response.success") &&
+                          $flow.exists("revocation_list.finished") &&
+                          $flow.exists("revocation_list.store_requested") &&
+                          $flow.exists("revocation_list.store_response.success")
+                        )
+
+                        let revocation_registry_definition_complete = (
+                          $flow.exists("revocation_registry_definition.create_requested") &&
+                          $flow.exists("revocation_registry_definition.create_response.success") &&
+                          $flow.exists("revocation_registry_definition.store_requested") &&
+                          $flow.exists("revocation_registry_definition.store_response.success")
+                        )
+
+                        # Check for failures in any response fields
+                        let has_failure = (
+                          $flow.exists("revocation_list.create_response.failure") ||
+                          $flow.exists("revocation_list.store_response.failure") ||
+                          $flow.exists("revocation_registry_definition.create_response.failure") ||
+                          $flow.exists("revocation_registry_definition.store_response.failure")
+                        )
+
+                        let is_complete = $revocation_list_complete && $revocation_registry_definition_complete
+                        let needs_attention = !$is_complete && this.is_timeout
+
+                        root = this
+                        root.is_complete = $is_complete
+                        root.has_failure = $has_failure
+                        root.needs_attention = $needs_attention
+                        root.missing_fields = []
+
+                        if !$revocation_list_complete {
+                          root.missing_fields = root.missing_fields.append("revocation_list_incomplete")
+                        }
+                        if !$revocation_registry_definition_complete {
+                          root.missing_fields = root.missing_fields.append("revocation_registry_definition_incomplete")
+                        }
+
+                - check: 'json("flow_state.type") == "full"'
+                  processors:
+                    - mapping: |
+                        #!blobl
+                        let flow = this.flow_state
+
+                        # Expected fields for full
+                        let revocation_list_complete = (
+                          $flow.exists("revocation_list.create_requested") &&
+                          $flow.exists("revocation_list.create_response.success") &&
+                          $flow.exists("revocation_list.finished") &&
+                          $flow.exists("revocation_list.store_requested") &&
+                          $flow.exists("revocation_list.store_response.success")
+                        )
+
+                        let revocation_registry_complete = (
+                          $flow.exists("revocation_registry.activation_requested") &&
+                          $flow.exists("revocation_registry.activation_response.success") &&
+                          $flow.exists("revocation_registry.full_detected") &&
+                          $flow.exists("revocation_registry.full_handling_completed.success")
+                        )
+
+                        let revocation_registry_definition_complete = (
+                          $flow.exists("revocation_registry_definition.create_requested") &&
+                          $flow.exists("revocation_registry_definition.create_response.success") &&
+                          $flow.exists("revocation_registry_definition.store_requested") &&
+                          $flow.exists("revocation_registry_definition.store_response.success")
+                        )
+
+                        # Check for failures in any response fields
+                        let has_failure = (
+                          $flow.exists("revocation_list.create_response.failure") ||
+                          $flow.exists("revocation_list.store_response.failure") ||
+                          $flow.exists("revocation_registry.activation_response.failure") ||
+                          $flow.exists("revocation_registry.full_handling_completed.failure") ||
+                          $flow.exists("revocation_registry_definition.create_response.failure") ||
+                          $flow.exists("revocation_registry_definition.store_response.failure")
+                        )
+
+                        let is_complete = (
+                          $revocation_list_complete &&
+                          $revocation_registry_complete &&
+                          $revocation_registry_definition_complete
+                        )
+                        let needs_attention = !$is_complete && this.is_timeout
+
+                        root = this
+                        root.is_complete = $is_complete
+                        root.has_failure = $has_failure
+                        root.needs_attention = $needs_attention
+                        root.missing_fields = []
+
+                        if !$revocation_list_complete {
+                          root.missing_fields = root.missing_fields.append("revocation_list_incomplete")
+                        }
+                        if !$revocation_registry_complete {
+                          root.missing_fields = root.missing_fields.append("revocation_registry_incomplete")
+                        }
+                        if !$revocation_registry_definition_complete {
+                          root.missing_fields = root.missing_fields.append("revocation_registry_definition_incomplete")
+                        }
+
+                - processors:
+                    - mapping: |
+                        #!blobl
+                        root = deleted()
+
+            - label: handle_flow_status
+              switch:
+                - check: 'json("is_complete") == true'
+                  processors:
+                    - log:
+                        level: DEBUG
+                        message: 'Registry Monitor - Flow completed: ${!json("request_id")} (${!json("flow_state.type")})'
+
+                    - mapping: |
+                        #!blobl
+                        # Store request_id in metadata and update flow state
+                        meta request_id = this.request_id
+                        root = this.flow_state
+                        root.completed = true
+
+                    - nats_kv:
+                        urls:
+                          - ${NATS_URL:nats://nats:4222}
+                        auth:
+                          user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+                        bucket: registry_flows
+                        operation: put
+                        key: "${!meta(\"request_id\")}"
+
+                    - mapping: |
+                        #!blobl
+                        root = deleted()
+
+                - check: 'json("needs_attention") == true'
+                  processors:
+                    - log:
+                        level: WARN
+                        message: 'Registry Monitor - Flow needs attention: ${!json("request_id")} (${!json("flow_state.type")}) - timeout: ${!json("is_timeout")}, failure: ${!json("has_failure")}'
+
+                    - mapping: |
+                        #!blobl
+                        meta level = "Critical"
+                        root = {
+                          "request_id": this.request_id,
+                          "needs_attention": this.needs_attention,
+                          "has_failure": this.has_failure,
+                          "is_timeout": this.is_timeout,
+                          "age_minutes": this.age_minutes,
+                          "flow_state": this.flow_state,
+                          "scan_timestamp": this.current_timestamp
+                        }
+
+                - check: 'json("has_failure") == true'
+                  processors:
+                    - log:
+                        level: WARN
+                        message: 'Registry Monitor - Flow needs attention: ${!json("request_id")} (${!json("flow_state.type")}) - timeout: ${!json("is_timeout")}, failure: ${!json("has_failure")}'
+
+                    - mapping: |
+                        #!blobl
+                        meta level = "Warning"
+                        root = {
+                          "request_id": this.request_id,
+                          "needs_attention": this.needs_attention,
+                          "has_failure": this.has_failure,
+                          "is_timeout": this.is_timeout,
+                          "age_minutes": this.age_minutes,
+                          "flow_state": this.flow_state,
+                          "scan_timestamp": this.current_timestamp
+                        }
+
+                - processors:
+                    - log:
+                        level: DEBUG
+                        message: 'Registry Monitor - Flow in progress, no action needed: ${!json("request_id")} (${!json("flow_state.type")})'
+                    - mapping: |
+                        #!blobl
+                        root = deleted()
+
+        - processors:
+            - log:
+                level: DEBUG
+                message: 'Registry Monitor - No keys found in KV store'
+            - mapping: |
+                #!blobl
+                root = deleted()
+
+
+output:
+  nats_jetstream:
+    urls:
+      - ${NATS_URL:nats://nats:4222}
+    auth:
+      user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
+    subject: ${REGISTRY_MONITOR_OUTPUT_SUBJECT:registry.monitor.alerts}
+    max_in_flight: ${REGISTRY_MONITOR_OUTPUT_MAX_IN_FLIGHT:100}
+    headers:
+      "Content-Type": "application/json"
+      "alert_level": "${!@level}"
