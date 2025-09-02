@@ -333,8 +333,6 @@ components:
                 type: boolean
               propertyNames:
                 enum:
-                  - ACAPY_INVITE_PUBLIC
-                  - ACAPY_PUBLIC_INVITES
                   - ACAPY_AUTO_ACCEPT_INVITES
                   - ACAPY_AUTO_ACCEPT_REQUESTS
                   - ACAPY_AUTO_PING_CONNECTION
@@ -342,10 +340,15 @@ components:
                   - ACAPY_AUTO_RESPOND_CREDENTIAL_OFFER
                   - ACAPY_AUTO_RESPOND_CREDENTIAL_REQUEST
                   - ACAPY_AUTO_VERIFY_PRESENTATION
+                  - ACAPY_ENABLE_AUTO_REVOCATION_RECOVERY
+                  - ACAPY_INVITE_PUBLIC
+                  - ACAPY_PUBLIC_INVITES
               type: object
             - type: 'null'
           title: Extra Settings
           description: Optional, advanced settings to configure wallet behaviour. If you don't know what these are, then you probably don't need them.
+          examples:
+            - ACAPY_ENABLE_AUTO_REVOCATION_RECOVERY: true
       type: object
       required:
         - wallet_label
@@ -503,8 +506,6 @@ components:
                 type: boolean
               propertyNames:
                 enum:
-                  - ACAPY_INVITE_PUBLIC
-                  - ACAPY_PUBLIC_INVITES
                   - ACAPY_AUTO_ACCEPT_INVITES
                   - ACAPY_AUTO_ACCEPT_REQUESTS
                   - ACAPY_AUTO_PING_CONNECTION
@@ -512,10 +513,15 @@ components:
                   - ACAPY_AUTO_RESPOND_CREDENTIAL_OFFER
                   - ACAPY_AUTO_RESPOND_CREDENTIAL_REQUEST
                   - ACAPY_AUTO_VERIFY_PRESENTATION
+                  - ACAPY_ENABLE_AUTO_REVOCATION_RECOVERY
+                  - ACAPY_INVITE_PUBLIC
+                  - ACAPY_PUBLIC_INVITES
               type: object
             - type: 'null'
           title: Extra Settings
           description: Optional, advanced settings to configure wallet behaviour. If you don't know what these are, then you probably don't need them.
+          examples:
+            - ACAPY_ENABLE_AUTO_REVOCATION_RECOVERY: true
       type: object
       title: UpdateTenantRequest
     ValidationError:
