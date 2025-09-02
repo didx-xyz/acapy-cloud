@@ -27,6 +27,7 @@ from app.models.tenants import (
     TenantAuth,
     UpdateTenantRequest,
 )
+from app.services.onboarding.issuer import handle_issuer_wallet_settings
 from app.services.onboarding.tenants import handle_tenant_update, onboard_tenant
 from app.services.trust_registry.actors import (
     fetch_actor_by_id,
@@ -141,6 +142,10 @@ async def create_tenant(
         )
     bound_logger.debug("Actor name is unique")
 
+    wallet_extra_settings = body.extra_settings or {}
+    if "issuer" in roles:
+        wallet_extra_settings = handle_issuer_wallet_settings(wallet_extra_settings)
+
     wallet_response = None
     body_request = handle_model_with_validation(
         logger=bound_logger,
@@ -152,7 +157,7 @@ async def create_tenant(
         wallet_name=wallet_name,
         wallet_type="askar-anoncreds",
         group_id=body.group_id,
-        extra_settings=body.extra_settings,
+        extra_settings=wallet_extra_settings,
     )
     async with get_tenant_admin_controller(admin_auth) as admin_controller:
         try:

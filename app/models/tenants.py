@@ -24,8 +24,6 @@ image_url_field = Field(
     examples=["https://upload.wikimedia.org/wikipedia/commons/7/70/Example.png"],
 )
 ExtraSettings = Literal[
-    "ACAPY_INVITE_PUBLIC",
-    "ACAPY_PUBLIC_INVITES",
     "ACAPY_AUTO_ACCEPT_INVITES",
     "ACAPY_AUTO_ACCEPT_REQUESTS",
     "ACAPY_AUTO_PING_CONNECTION",
@@ -33,16 +31,13 @@ ExtraSettings = Literal[
     "ACAPY_AUTO_RESPOND_CREDENTIAL_OFFER",
     "ACAPY_AUTO_RESPOND_CREDENTIAL_REQUEST",
     "ACAPY_AUTO_VERIFY_PRESENTATION",
-    # "ACAPY_LOG_LEVEL",
-    # "ACAPY_MONITOR_PING",
-    # "ACAPY_NOTIFY_REVOCATION",
-    # "ACAPY_AUTO_REQUEST_ENDORSEMENT",
-    # "ACAPY_AUTO_WRITE_TRANSACTIONS",
-    # "ACAPY_CREATE_REVOCATION_TRANSACTIONS",
-    # "ACAPY_ENDORSER_ROLE",
+    "ACAPY_ENABLE_AUTO_REVOCATION_RECOVERY",
+    "ACAPY_INVITE_PUBLIC",
+    "ACAPY_PUBLIC_INVITES",
 ]
 ExtraSettings_field = Field(
     None,
+    examples=[{"ACAPY_ENABLE_AUTO_REVOCATION_RECOVERY": True}],
     description=(
         "Optional, advanced settings to configure wallet behaviour. If you don't know what these are, "
         "then you probably don't need them."

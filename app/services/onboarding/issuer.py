@@ -107,3 +107,9 @@ async def onboard_issuer_no_public_did(
 
     bound_logger.debug("Successfully registered DID for issuer: {}.", issuer_did)
     return issuer_did
+
+
+def handle_issuer_wallet_settings(wallet_extra_settings: dict) -> dict:
+    if "ACAPY_ENABLE_AUTO_REVOCATION_RECOVERY" not in wallet_extra_settings:
+        wallet_extra_settings["ACAPY_ENABLE_AUTO_REVOCATION_RECOVERY"] = True
+    return wallet_extra_settings
