@@ -143,7 +143,7 @@ async def create_tenant(
     bound_logger.debug("Actor name is unique")
 
     wallet_extra_settings = body.extra_settings or {}
-    if "issuer" in roles:
+    if roles and "issuer" in roles:
         wallet_extra_settings = handle_issuer_wallet_settings(wallet_extra_settings)
 
     wallet_response = None
