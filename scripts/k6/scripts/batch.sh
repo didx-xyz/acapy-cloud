@@ -132,7 +132,7 @@ cleanup() {
 
     log "Cleaning up holders with prefix ${HOLDER_PREFIX}..."
     local output_flags="$(get_output_flags)"
-    xk6 run "${output_flags}" ./scenarios/delete-holders.js
+    xk6 run ${output_flags} ./scenarios/delete-holders.js
   done
 
   # Clean up issuers
@@ -141,7 +141,7 @@ cleanup() {
 
     log "Cleaning up issuer ${issuer}..."
     local output_flags=$(get_output_flags)
-    xk6 run "${output_flags}" ./scenarios/delete-issuers.js -e ITERATIONS=1 -e VUS=1
+    xk6 run ${output_flags} ./scenarios/delete-issuers.js -e ITERATIONS=1 -e VUS=1
   done
 }
 
