@@ -3,6 +3,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+K6_DIR="$(dirname "${SCRIPT_DIR}")"
 
 #------------------------------------------------------------------------------
 # Consolidated functions from common.sh
