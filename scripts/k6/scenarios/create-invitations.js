@@ -17,6 +17,7 @@ import {
   pollAndCheck,
   getHolderConnections,
 } from "../libs/functions.js";
+import { getAuthHeaders } from '../libs/auth.js';
 import { config } from "../libs/config.js";
 
 const vus = config.test.vus;
@@ -66,8 +67,9 @@ export function setup() {
   file.writeString(outputFilepath, "");
 
   const walletName = issuerPrefix;
+  const { tenantAdminHeaders } = getAuthHeaders();
 
-  return { issuers, holders };
+  return { issuers, holders, tenantAdminHeaders };
 }
 
 function getIssuerIndex(vu, iter) {
@@ -239,7 +241,7 @@ export default function (data) {
   }, { perspective: "Holder" });
 
   pollAndCheck({
-    accessToken: issuer.access_token,
+    headers: data.tenantAdminHeaders,
     walletId: issuer.wallet_id,
     topic: "connections",
     field: "their_did",
