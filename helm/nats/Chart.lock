@@ -1,9 +1,9 @@
 dependencies:
 - name: common
   repository: oci://ghcr.io/didx-xyz/bitnami-oss-charts
-  version: 2.31.4
+  version: 2.31.5
 - name: nats
   repository: oci://ghcr.io/didx-xyz/bitnami-oss-charts
-  version: 9.0.28
-digest: sha256:2767e1adff0501905e95041032b302d83f17e92b45e4eeb66636fc55af813291
-generated: "2025-08-25T11:52:18.784909+02:00"
+  version: 9.0.29
+digest: sha256:8e82536d75a580e78cf32b9f9f0dece30315f8a08fc1c7325b69617e86dd6435
+generated: "2025-09-03T14:19:21.116024+02:00"
