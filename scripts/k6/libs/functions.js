@@ -257,6 +257,24 @@ export function getIssuerConnectionId(issuerAccessToken, invitationMsgId) {
   }
 }
 
+
+export function getIssuerConnectionIdViaDid(issuerAccessToken, holderDid) {
+  const url = `${config.api.cloudApiUrl}/tenant/v1/connections?holder_did=${holderDid}`;
+  const params = {
+    headers: {
+      "x-api-key": issuerAccessToken,
+    },
+  };
+
+  try {
+    const response = http.get(url, params);
+    return response;
+  } catch (error) {
+    console.error(`Error creating invitation: ${error.message}`);
+    throw error;
+  }
+}
+
 export function acceptInvitation(holderAccessToken, invitationObj) {
   const url = `${config.api.cloudApiUrl}/tenant/v1/oob/accept-invitation`;
   const params = {
