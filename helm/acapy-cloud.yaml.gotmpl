@@ -170,7 +170,7 @@ releases:
       app: valkey
     namespace: {{ .Values.namespace }}
     chart: oci://ghcr.io/didx-xyz/bitnami-oss-charts/valkey
-    version: 3.0.31
+    version: 4.0.0
     values:
       - ./acapy-cloud/conf/valkey.yaml
       - primary:
@@ -186,7 +186,7 @@ releases:
       app: postgres
     namespace: {{ .Values.namespace }}
     chart: oci://ghcr.io/didx-xyz/bitnami-oss-charts/postgresql-ha
-    version: 16.3.1
+    version: 16.3.4
     values:
       - ./acapy-cloud/conf/postgres.yaml
       - postgresql:
@@ -261,7 +261,7 @@ releases:
     installed: {{ .Values.minio.enabled }}
     namespace: {{ .Values.namespace }}
     chart: oci://ghcr.io/didx-xyz/bitnami-oss-charts/minio
-    version: 17.0.21
+    version: 17.0.22
     labels:
       app: minio
     values:
