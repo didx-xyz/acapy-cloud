@@ -26,6 +26,6 @@ services:
       - GOVERNANCE_API_KEY=${GOVERNANCE_API_KEY:-adminApiKey}
       - FIRE_AND_FORGET_REVOCATION=false
       - NUM_ISSUERS=1
-      - OOB_INVITATION=true # temporary until connect via pulbic DID on Cheqd is implemented
+      - OOB_INVITATION=false
       - USE_AUTO_PUBLISH=false
       - DEBUG=false
