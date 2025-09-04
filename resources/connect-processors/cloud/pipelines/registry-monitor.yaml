@@ -380,7 +380,7 @@ output:
       - ${NATS_URL:nats://nats:4222}
     auth:
       user_credentials_file: ${NATS_AUTH_CREDENTIALS_FILE:""}
-    subject: ${REGISTRY_MONITOR_OUTPUT_SUBJECT:registry.monitor.alerts}
+    subject: ${REGISTRY_MONITOR_OUTPUT_SUBJECT:cloudapi.aries.monitor.alerts}
     max_in_flight: ${REGISTRY_MONITOR_OUTPUT_MAX_IN_FLIGHT:100}
     headers:
       "Content-Type": "application/json"
