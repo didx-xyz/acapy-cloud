@@ -47,11 +47,6 @@ postInstall:
         - anoncreds.>
       defaults: true
       storage: file
-    registry_health:
-      subjects:
-        - registry.>
-      defaults: true
-      storage: file
 
   cli:
     version: latest
