@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Get PR info
         id: pr
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             // Get PR Title
@@ -59,7 +59,7 @@ jobs:
           PR_TITLE: ${{ steps.pr.outputs.title }}
           PR_COMMENTS: ${{ steps.pr.outputs.comments_json }}
           GITMOJIS: ${{ steps.pr.outputs.gitmojis_json }}
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         if: always()
         with:
           script: |
@@ -106,7 +106,7 @@ jobs:
           PR_TITLE: ${{ steps.pr.outputs.title }}
           PR_COMMENTS: ${{ steps.pr.outputs.comments_json }}
           MAX_LENGTH: ${{ env.MAX_PR_TITLE_LENGTH }}
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         if: always()
         with:
           script: |
