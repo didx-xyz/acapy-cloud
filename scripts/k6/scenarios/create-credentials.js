@@ -1,7 +1,7 @@
 /* global __ENV, __ITER, __VU */
 /* eslint-disable no-undefined, no-console, camelcase */
 
-import { check } from "k6";
+import { check, sleep } from "k6";
 import { Counter } from "k6/metrics";
 import file from "k6/x/file";
 import { log, shuffleArray } from "../libs/k6Functions.js";
@@ -21,6 +21,7 @@ const holderPrefix = config.test.holderPrefix;
 const issuerPrefix = config.test.issuerPrefix;
 const outputPrefix = `${issuerPrefix}-${holderPrefix}`;
 const version = config.test.version;
+const sleepDuration = config.test.sleepDuration;
 
 export const options = {
   scenarios: {
@@ -183,4 +184,5 @@ export default function (data) {
   });
   file.appendString(outputFilepath, `${issuerData}\n`);
   testFunctionReqs.add(1);
+  sleep(sleepDuration);
 }
