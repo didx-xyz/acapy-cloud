@@ -207,6 +207,7 @@ async def create_did_exchange_request(  # noqa: D417
     use_did: str | None = None,
     use_did_method: str | None = None,
     use_public_did: bool = False,
+    reuse: bool = True,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> Connection:
     """Create a DID Exchange request
@@ -236,6 +237,8 @@ async def create_did_exchange_request(  # noqa: D417
             The method to use for the connection: "did:peer:2" or "did:peer:4".
         use_public_did: bool
             Use your public DID for this connection. Defaults to False.
+        reuse: bool
+            Whether to reuse existing completed connections with the same their_public_did. Defaults to True.
 
     Returns
     -------
@@ -253,6 +256,7 @@ async def create_did_exchange_request(  # noqa: D417
             "use_did": use_did,
             "use_did_method": use_did_method,
             "use_public_did": use_public_did,
+            "reuse": reuse,
         }
     )
     bound_logger.debug("POST request received: Create DID exchange request")
