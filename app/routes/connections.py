@@ -207,6 +207,7 @@ async def create_did_exchange_request(  # noqa: D417
     use_did: str | None = None,
     use_did_method: str | None = None,
     use_public_did: bool = False,
+    reuse: bool = True,
     auth: AcaPyAuth = Depends(acapy_auth_from_header),
 ) -> Connection:
     """Create a DID Exchange request
@@ -236,6 +237,8 @@ async def create_did_exchange_request(  # noqa: D417
             The method to use for the connection: "did:peer:2" or "did:peer:4".
         use_public_did: bool
             Use your public DID for this connection. Defaults to False.
+        reuse: bool
+            Whether to reuse existing completed connections with the same their_public_did. Defaults to True.
 
     Returns
     -------
@@ -253,11 +256,40 @@ async def create_did_exchange_request(  # noqa: D417
             "use_did": use_did,
             "use_did_method": use_did_method,
             "use_public_did": use_public_did,
+            "reuse": reuse,
         }
     )
     bound_logger.debug("POST request received: Create DID exchange request")
 
     async with client_from_auth(auth) as aries_controller:
+        # Check for existing connections with the same their_public_did if reuse is enabled
+        if reuse:
+            existing_connections = await handle_acapy_call(
+                logger=bound_logger,
+                acapy_call=aries_controller.connection.get_connections,
+                their_public_did=their_public_did,
+            )
+
+            if existing_connections.results:
+                # Filter for completed connections after DB query for better performance
+                completed_connections = [
+                    conn
+                    for conn in existing_connections.results
+                    if conn.rfc23_state == "completed"
+                ]
+
+                if completed_connections:
+                    bound_logger.debug(
+                        f"Found {len(completed_connections)} completed connection(s) "
+                        f"with their_public_did: {their_public_did}"
+                    )
+                    # Return the first completed connection instead of creating a new one
+                    result = conn_record_to_connection(completed_connections[0])
+                    bound_logger.debug(
+                        "Returning existing completed connection instead of creating new one."
+                    )
+                    return result
+
         connection_record = await handle_acapy_call(
             logger=bound_logger,
             acapy_call=aries_controller.did_exchange.create_request,
