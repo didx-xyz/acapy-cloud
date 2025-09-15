@@ -64,6 +64,10 @@ async def test_create_did_exchange_request_success(
     mock_aries_controller.did_exchange.create_request = AsyncMock(
         return_value=created_connection
     )
+    # Mock get_connections to return no existing connections
+    mock_aries_controller.connection.get_connections = AsyncMock(
+        return_value=AsyncMock(results=[])
+    )
 
     with (
         patch("app.routes.connections.client_from_auth") as mock_client_from_auth,
@@ -85,6 +89,9 @@ async def test_create_did_exchange_request_success(
             goal=body_params.get("goal"),
             goal_code=body_params.get("goal_code"),
             my_label=body_params.get("my_label"),
+            return_existing_connection=body_params.get(
+                "return_existing_connection", True
+            ),
             use_did=body_params.get("use_did"),
             use_did_method=body_params.get("use_did_method"),
             use_public_did=body_params.get("use_public_did", False),
@@ -123,6 +130,10 @@ async def test_create_did_exchange_request_fail_acapy_error(
     mock_aries_controller.did_exchange.create_request = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )
+    # Mock get_connections to return no existing connections
+    mock_aries_controller.connection.get_connections = AsyncMock(
+        return_value=AsyncMock(results=[])
+    )
 
     with (
         patch("app.routes.connections.client_from_auth") as mock_client_from_auth,
@@ -136,7 +147,236 @@ async def test_create_did_exchange_request_fail_acapy_error(
         await create_did_exchange_request(
             their_public_did=test_their_public_did,
             alias=None,
+            return_existing_connection=True,
             auth="mocked_auth",
         )
 
     assert exc.value.status_code == expected_status_code
+
+
+@pytest.mark.anyio
+async def test_create_did_exchange_request_returns_existing_completed_connection():
+    """Test that when return_existing_connection=True and completed connections exist, it returns the existing one."""
+    existing_connection = ConnRecord(
+        connection_id="existing_connection_id",
+        state="completed",
+        rfc23_state="completed",
+        their_did=test_their_public_did,
+    )
+
+    mock_aries_controller = AsyncMock()
+    # Mock get_connections to return an existing completed connection
+    mock_aries_controller.connection.get_connections = AsyncMock(
+        return_value=AsyncMock(results=[existing_connection])
+    )
+    # This should not be called since we return existing connection
+    mock_aries_controller.did_exchange.create_request = AsyncMock()
+
+    with (
+        patch("app.routes.connections.client_from_auth") as mock_client_from_auth,
+        patch(
+            "app.routes.connections.conn_record_to_connection",
+            return_value=existing_connection,
+        ) as mock_conn_record_to_connection,
+    ):
+        mock_client_from_auth.return_value.__aenter__.return_value = (
+            mock_aries_controller
+        )
+
+        response = await create_did_exchange_request(
+            their_public_did=test_their_public_did,
+            return_existing_connection=True,
+            auth="mocked_auth",
+        )
+
+        assert response == existing_connection
+
+        # Verify get_connections was called to check for existing connections
+        mock_aries_controller.connection.get_connections.assert_awaited_once_with(
+            their_public_did=test_their_public_did
+        )
+
+        # Verify create_request was NOT called since we returned existing connection
+        mock_aries_controller.did_exchange.create_request.assert_not_awaited()
+
+        # Verify conn_record_to_connection was called with existing connection
+        mock_conn_record_to_connection.assert_called_once_with(existing_connection)
+
+
+@pytest.mark.anyio
+async def test_create_did_exchange_request_creates_new_when_existing_not_completed():
+    """Test that when return_existing_connection=True but only non-completed connections exist, it creates a new one."""
+    existing_non_completed_connection = ConnRecord(
+        connection_id="existing_non_completed_id",
+        state="request-sent",
+        rfc23_state="request-sent",
+        their_did=test_their_public_did,
+    )
+
+    mock_aries_controller = AsyncMock()
+    # Mock get_connections to return an existing non-completed connection
+    mock_aries_controller.connection.get_connections = AsyncMock(
+        return_value=AsyncMock(results=[existing_non_completed_connection])
+    )
+    # This should be called since no completed connections exist
+    mock_aries_controller.did_exchange.create_request = AsyncMock(
+        return_value=created_connection
+    )
+
+    with (
+        patch("app.routes.connections.client_from_auth") as mock_client_from_auth,
+        patch(
+            "app.routes.connections.conn_record_to_connection",
+            return_value=created_connection,
+        ) as mock_conn_record_to_connection,
+    ):
+        mock_client_from_auth.return_value.__aenter__.return_value = (
+            mock_aries_controller
+        )
+
+        response = await create_did_exchange_request(
+            their_public_did=test_their_public_did,
+            return_existing_connection=True,
+            auth="mocked_auth",
+        )
+
+        assert response == created_connection
+
+        # Verify get_connections was called to check for existing connections
+        mock_aries_controller.connection.get_connections.assert_awaited_once_with(
+            their_public_did=test_their_public_did
+        )
+
+        # Verify create_request was called since no completed connections exist
+        mock_aries_controller.did_exchange.create_request.assert_awaited_once_with(
+            their_public_did=test_their_public_did,
+            alias=None,
+            auto_accept=True,
+            goal=None,
+            goal_code=None,
+            my_label=None,
+            protocol="didexchange/1.1",
+            use_did=None,
+            use_did_method=None,
+            use_public_did=False,
+        )
+
+        # Verify conn_record_to_connection was called with new connection
+        mock_conn_record_to_connection.assert_called_once_with(created_connection)
+
+
+@pytest.mark.anyio
+async def test_create_did_exchange_request_ignores_existing_when_return_existing_false():
+    """Test that when return_existing_connection=False, it always creates a new connection
+    even if existing ones exist.
+    """
+    existing_completed_connection = ConnRecord(
+        connection_id="existing_completed_id",
+        state="completed",
+        rfc23_state="completed",
+        their_did=test_their_public_did,
+    )
+
+    mock_aries_controller = AsyncMock()
+    # Mock get_connections - this should NOT be called when return_existing_connection=False
+    mock_aries_controller.connection.get_connections = AsyncMock(
+        return_value=AsyncMock(results=[existing_completed_connection])
+    )
+    # This should be called regardless of existing connections
+    mock_aries_controller.did_exchange.create_request = AsyncMock(
+        return_value=created_connection
+    )
+
+    with (
+        patch("app.routes.connections.client_from_auth") as mock_client_from_auth,
+        patch(
+            "app.routes.connections.conn_record_to_connection",
+            return_value=created_connection,
+        ) as mock_conn_record_to_connection,
+    ):
+        mock_client_from_auth.return_value.__aenter__.return_value = (
+            mock_aries_controller
+        )
+
+        response = await create_did_exchange_request(
+            their_public_did=test_their_public_did,
+            return_existing_connection=False,
+            auth="mocked_auth",
+        )
+
+        assert response == created_connection
+
+        # Verify get_connections was NOT called since return_existing_connection=False
+        mock_aries_controller.connection.get_connections.assert_not_awaited()
+
+        # Verify create_request was called to create new connection
+        mock_aries_controller.did_exchange.create_request.assert_awaited_once_with(
+            their_public_did=test_their_public_did,
+            alias=None,
+            auto_accept=True,
+            goal=None,
+            goal_code=None,
+            my_label=None,
+            protocol="didexchange/1.1",
+            use_did=None,
+            use_did_method=None,
+            use_public_did=False,
+        )
+
+        # Verify conn_record_to_connection was called with new connection
+        mock_conn_record_to_connection.assert_called_once_with(created_connection)
+
+
+@pytest.mark.anyio
+async def test_create_did_exchange_request_creates_new_when_no_existing_connections():
+    """Test that when return_existing_connection=True but no existing connections exist, it creates a new one."""
+    mock_aries_controller = AsyncMock()
+    # Mock get_connections to return no existing connections
+    mock_aries_controller.connection.get_connections = AsyncMock(
+        return_value=AsyncMock(results=[])
+    )
+    # This should be called since no existing connections exist
+    mock_aries_controller.did_exchange.create_request = AsyncMock(
+        return_value=created_connection
+    )
+
+    with (
+        patch("app.routes.connections.client_from_auth") as mock_client_from_auth,
+        patch(
+            "app.routes.connections.conn_record_to_connection",
+            return_value=created_connection,
+        ) as mock_conn_record_to_connection,
+    ):
+        mock_client_from_auth.return_value.__aenter__.return_value = (
+            mock_aries_controller
+        )
+
+        response = await create_did_exchange_request(
+            their_public_did=test_their_public_did,
+            return_existing_connection=True,
+            auth="mocked_auth",
+        )
+
+        assert response == created_connection
+
+        # Verify get_connections was called to check for existing connections
+        mock_aries_controller.connection.get_connections.assert_awaited_once_with(
+            their_public_did=test_their_public_did
+        )
+
+        # Verify create_request was called since no existing connections exist
+        mock_aries_controller.did_exchange.create_request.assert_awaited_once_with(
+            their_public_did=test_their_public_did,
+            alias=None,
+            auto_accept=True,
+            goal=None,
+            goal_code=None,
+            my_label=None,
+            protocol="didexchange/1.1",
+            use_did=None,
+            use_did_method=None,
+            use_public_did=False,
+        )
+
+        # Verify conn_record_to_connection was called with new connection
+        mock_conn_record_to_connection.assert_called_once_with(created_connection)
