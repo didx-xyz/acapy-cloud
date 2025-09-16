@@ -204,7 +204,7 @@ async def create_did_exchange_request(  # noqa: D417
     goal: str | None = None,
     goal_code: str | None = None,
     my_label: str | None = None,
-    return_existing_connection: bool = True,
+    reuse_connection: bool = True,
     use_did: str | None = None,
     use_did_method: str | None = None,
     use_public_did: bool = False,
@@ -231,7 +231,7 @@ async def create_did_exchange_request(  # noqa: D417
             Optional self-attested code for sharing the intent of the connection.
         my_label: str, optional
             Your label for the request.
-        return_existing_connection: bool
+        reuse_connection: bool
             If a connection with `their_public_did` already exists, return it instead of creating a new one.
             Defaults to True.
         use_did: str, optional
@@ -254,7 +254,7 @@ async def create_did_exchange_request(  # noqa: D417
             "goal": goal,
             "goal_code": goal_code,
             "my_label": my_label,
-            "return_existing_connection": return_existing_connection,
+            "reuse_connection": reuse_connection,
             "use_did": use_did,
             "use_did_method": use_did_method,
             "use_public_did": use_public_did,
@@ -263,7 +263,7 @@ async def create_did_exchange_request(  # noqa: D417
     bound_logger.debug("POST request received: Create DID exchange request")
 
     async with client_from_auth(auth) as aries_controller:
-        if return_existing_connection:
+        if reuse_connection:
             bound_logger.debug(
                 "Checking for existing connections with the same their_public_did"
             )
