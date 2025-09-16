@@ -25,7 +25,7 @@ async def test_rotate_did(
         controller=faber_anoncreds_acapy_client
     )
 
-    request_data = {"their_public_did": faber_public_did.did}
+    request_data = {"their_public_did": faber_public_did.did, "reuse_connection": False}
     response = await alice_member_client.post(
         f"{CONNECTIONS_BASE_PATH}/did-exchange/create-request", params=request_data
     )
@@ -67,7 +67,7 @@ async def test_hangup_did_rotation(
         controller=faber_anoncreds_acapy_client
     )
 
-    request_data = {"their_public_did": faber_public_did.did}
+    request_data = {"their_public_did": faber_public_did.did, "reuse_connection": False}
     response = await alice_member_client.post(
         f"{CONNECTIONS_BASE_PATH}/did-exchange/create-request", params=request_data
     )
