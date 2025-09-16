@@ -89,9 +89,7 @@ async def test_create_did_exchange_request_success(
             goal=body_params.get("goal"),
             goal_code=body_params.get("goal_code"),
             my_label=body_params.get("my_label"),
-            return_existing_connection=body_params.get(
-                "return_existing_connection", True
-            ),
+            reuse_connection=body_params.get("reuse_connection", True),
             use_did=body_params.get("use_did"),
             use_did_method=body_params.get("use_did_method"),
             use_public_did=body_params.get("use_public_did", False),
@@ -147,7 +145,7 @@ async def test_create_did_exchange_request_fail_acapy_error(
         await create_did_exchange_request(
             their_public_did=test_their_public_did,
             alias=None,
-            return_existing_connection=True,
+            reuse_connection=True,
             auth="mocked_auth",
         )
 
@@ -156,7 +154,7 @@ async def test_create_did_exchange_request_fail_acapy_error(
 
 @pytest.mark.anyio
 async def test_create_did_exchange_request_returns_existing_completed_connection():
-    """Test that when return_existing_connection=True and completed connections exist, it returns the existing one."""
+    """Test that when reuse_connection=True and completed connections exist, it returns the existing one."""
     existing_connection = ConnRecord(
         connection_id="existing_connection_id",
         state="completed",
@@ -185,7 +183,7 @@ async def test_create_did_exchange_request_returns_existing_completed_connection
 
         response = await create_did_exchange_request(
             their_public_did=test_their_public_did,
-            return_existing_connection=True,
+            reuse_connection=True,
             auth="mocked_auth",
         )
 
@@ -205,7 +203,7 @@ async def test_create_did_exchange_request_returns_existing_completed_connection
 
 @pytest.mark.anyio
 async def test_create_did_exchange_request_creates_new_when_existing_not_completed():
-    """Test that when return_existing_connection=True but only non-completed connections exist, it creates a new one."""
+    """Test that when reuse_connection=True but only non-completed connections exist, it creates a new one."""
     existing_non_completed_connection = ConnRecord(
         connection_id="existing_non_completed_id",
         state="request-sent",
@@ -236,7 +234,7 @@ async def test_create_did_exchange_request_creates_new_when_existing_not_complet
 
         response = await create_did_exchange_request(
             their_public_did=test_their_public_did,
-            return_existing_connection=True,
+            reuse_connection=True,
             auth="mocked_auth",
         )
 
@@ -266,8 +264,8 @@ async def test_create_did_exchange_request_creates_new_when_existing_not_complet
 
 
 @pytest.mark.anyio
-async def test_create_did_exchange_request_ignores_existing_when_return_existing_false():
-    """Test that when return_existing_connection=False, it always creates a new connection
+async def test_create_did_exchange_request_ignores_existing_when_reuse_false():
+    """Test that when reuse_connection=False, it always creates a new connection
     even if existing ones exist.
     """
     existing_completed_connection = ConnRecord(
@@ -278,7 +276,7 @@ async def test_create_did_exchange_request_ignores_existing_when_return_existing
     )
 
     mock_aries_controller = AsyncMock()
-    # Mock get_connections - this should NOT be called when return_existing_connection=False
+    # Mock get_connections - this should NOT be called when reuse_connection=False
     mock_aries_controller.connection.get_connections = AsyncMock(
         return_value=AsyncMock(results=[existing_completed_connection])
     )
@@ -300,13 +298,13 @@ async def test_create_did_exchange_request_ignores_existing_when_return_existing
 
         response = await create_did_exchange_request(
             their_public_did=test_their_public_did,
-            return_existing_connection=False,
+            reuse_connection=False,
             auth="mocked_auth",
         )
 
         assert response == created_connection
 
-        # Verify get_connections was NOT called since return_existing_connection=False
+        # Verify get_connections was NOT called since reuse_connection=False
         mock_aries_controller.connection.get_connections.assert_not_awaited()
 
         # Verify create_request was called to create new connection
@@ -329,7 +327,7 @@ async def test_create_did_exchange_request_ignores_existing_when_return_existing
 
 @pytest.mark.anyio
 async def test_create_did_exchange_request_creates_new_when_no_existing_connections():
-    """Test that when return_existing_connection=True but no existing connections exist, it creates a new one."""
+    """Test that when reuse_connection=True but no existing connections exist, it creates a new one."""
     mock_aries_controller = AsyncMock()
     # Mock get_connections to return no existing connections
     mock_aries_controller.connection.get_connections = AsyncMock(
@@ -353,7 +351,7 @@ async def test_create_did_exchange_request_creates_new_when_no_existing_connecti
 
         response = await create_did_exchange_request(
             their_public_did=test_their_public_did,
-            return_existing_connection=True,
+            reuse_connection=True,
             auth="mocked_auth",
         )
 
