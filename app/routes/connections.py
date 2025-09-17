@@ -214,6 +214,9 @@ async def create_did_exchange_request(  # noqa: D417
     ---
     This endpoint allows you to initiate a DID Exchange request with another party using their public DID.
 
+    NB: By default, returns existing completed connections with the same `their_public_did` instead of creating
+    new ones. Set `reuse_connection` to False to disable this behavior.
+
     The goal and goal_code parameters provide additional context for the request.
 
     Only one of `use_did`, `use_did_method` or `use_public_did` should be specified. If none of these are specified,
