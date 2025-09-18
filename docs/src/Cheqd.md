@@ -1,14 +1,14 @@
 # Cheqd
 
 The application is backed by the Cheqd verifiable data registry (VDR). This is made possible by the Cheqd plugin
-(see plugin folder) and supporting services namely the `did-resolver`, `driver-did-cheqd` and `did-registrar`
+(see plugin folder) and supporting services, namely the `did-resolver`, `driver-did-cheqd`, and `did-registrar`.
 
-Issuers will have public Cheqd DIDs and their DIDdocs can be found on the VDR.
+Issuers will have public Cheqd DIDs and their DIDDocs can be found on the VDR.
 
-If you have a local stack running you can find the DIDdoc with the [resolver](http://resolver.cheqd.127.0.0.1.nip.io/1.0/identifiers/)
-just add your issuers DID to the end of the url.
+If you have a local stack running, you can find the DIDDoc with the [resolver](http://resolver.cheqd.127.0.0.1.nip.io/1.0/identifiers/)
+by adding your issuer's DID to the end of the URL.
 
-See example DIDdoc from VDR below:
+See the example DIDDoc from the VDR below:
 
 ```json
 "didDocument": {
@@ -48,10 +48,10 @@ See example DIDdoc from VDR below:
   }
 ```
 
-## Rotate Cheqd DIDs singing Keys
+## Rotate Cheqd DID Signing Keys
 
-To be able to rotate the keys of a DID you need access to the wallet that contains the DID's keys.
- i.e. "be that tenant"
+To be able to rotate the keys of a DID, you need access to the wallet that contains the DID's keys
+(i.e., you need to authenticate as that tenant).
 
 ### Step 1: Generate new keys in the wallet
 
@@ -77,7 +77,7 @@ Response:
 }
 ```
 
-### Step 2: Prepare new DIDdoc payload
+### Step 2: Prepare new DIDDoc payload
 
 ```json
   "didDocument": {
@@ -116,8 +116,8 @@ Response:
 Note:
 
 - The `@context` field has been removed.
-- All instances of `...#key-1` has been replaced with `...key-2`, the `kid` from previous step
-- The `publicKeyMultibase` has been updated with new `multikey` from previous step
+- All instances of `...#key-1` have been replaced with `...#key-2`, the `kid` from the previous step
+- The `publicKeyMultibase` has been updated with the new `multikey` from the previous step
 
 ### Step 3: Make the update call
 
@@ -171,9 +171,9 @@ Hooray! 🥳🎉 Well done, the keys for the DID have been rotated.
 
 ## Import Cheqd DID
 
-An existing Cheqd DID can be added to a wallet if you have the `keys`, used to sign the DID, in your wallet.
+An existing Cheqd DID can be added to a wallet if you have the signing `keys` for that DID.
 
-Lets import the DID from this DIDdoc:
+Let's import the DID from this DIDDoc:
 
 ```json
   "didDocument": {
@@ -228,7 +228,7 @@ curl -X 'POST' \
 }'
 ```
 
-Note: Use the same `kid` as is on the DIDdoc
+Note: Use the same `kid` as appears in the DIDDoc.
 
 ### Step 2: Import DID
 
@@ -289,7 +289,7 @@ Response:
 }
 ```
 
-### Step 3: Set DID public
+### Step 3: Set DID to public
 
 ```bash
 curl -X 'POST' \
