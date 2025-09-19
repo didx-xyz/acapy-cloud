@@ -204,6 +204,7 @@ async def create_did_exchange_request(  # noqa: D417
     goal: str | None = None,
     goal_code: str | None = None,
     my_label: str | None = None,
+    reuse_connection: bool = True,
     use_did: str | None = None,
     use_did_method: str | None = None,
     use_public_did: bool = False,
@@ -212,6 +213,9 @@ async def create_did_exchange_request(  # noqa: D417
     """Create a DID Exchange request
     ---
     This endpoint allows you to initiate a DID Exchange request with another party using their public DID.
+
+    NB: By default, returns existing completed connections with the same `their_public_did` instead of creating
+    new ones. Set `reuse_connection` to False to disable this behavior.
 
     The goal and goal_code parameters provide additional context for the request.
 
@@ -230,6 +234,9 @@ async def create_did_exchange_request(  # noqa: D417
             Optional self-attested code for sharing the intent of the connection.
         my_label: str, optional
             Your label for the request.
+        reuse_connection: bool
+            If a connection with `their_public_did` already exists, return it instead of creating a new one.
+            Defaults to True.
         use_did: str, optional
             Your local DID to use for the connection.
         use_did_method: str, optional
@@ -250,6 +257,7 @@ async def create_did_exchange_request(  # noqa: D417
             "goal": goal,
             "goal_code": goal_code,
             "my_label": my_label,
+            "reuse_connection": reuse_connection,
             "use_did": use_did,
             "use_did_method": use_did_method,
             "use_public_did": use_public_did,
@@ -258,6 +266,40 @@ async def create_did_exchange_request(  # noqa: D417
     bound_logger.debug("POST request received: Create DID exchange request")
 
     async with client_from_auth(auth) as aries_controller:
+        if reuse_connection:
+            bound_logger.debug(
+                "Checking for existing connections with the same their_public_did"
+            )
+            existing_connections = await handle_acapy_call(
+                logger=bound_logger,
+                acapy_call=aries_controller.connection.get_connections,
+                their_public_did=their_public_did,
+            )
+
+            # Filter for completed connections after DB query for better performance
+            completed_connections = [
+                conn
+                for conn in existing_connections.results
+                if conn.rfc23_state == "completed"
+            ]
+
+            if completed_connections:
+                bound_logger.debug(
+                    "Found {} completed connection(s) with `their_public_did`: {}",
+                    len(completed_connections),
+                    their_public_did,
+                )
+                # Return the first completed connection instead of creating a new one
+                result = conn_record_to_connection(completed_connections[0])
+                bound_logger.debug(
+                    "Returning existing completed connection instead of creating new one."
+                )
+                return result
+            else:
+                bound_logger.debug(
+                    "No existing completed connections found. Creating new one."
+                )
+
         connection_record = await handle_acapy_call(
             logger=bound_logger,
             acapy_call=aries_controller.did_exchange.create_request,
