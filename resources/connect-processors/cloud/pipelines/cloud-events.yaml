@@ -83,6 +83,20 @@ pipeline:
         # Topic-specific transformations
         if $cloudapi_topic == "connections" {
             root.payload.state = $payload.rfc23_state.or($payload.state) # "deleted" only occurs in state, not rfc23_state
+
+            # Truncate did:peer:4 DIDs to short form (remove everything after and including 3rd colon)
+            if $payload.their_did != null && $payload.their_did.has_prefix("did:peer:4") {
+                let parts = $payload.their_did.split(":")
+                if $parts.length() > 3 {
+                    root.payload.their_did = $parts.slice(0, 3).join(":")
+                }
+            }
+            if $payload.my_did != null && $payload.my_did.has_prefix("did:peer:4") {
+                let parts = $payload.my_did.split(":")
+                if $parts.length() > 3 {
+                    root.payload.my_did = $parts.slice(0, 3).join(":")
+                }
+            }
         }
         if $cloudapi_topic == "endorsements" {
             root.payload.state = $payload.state.replace_all("_", "-")
