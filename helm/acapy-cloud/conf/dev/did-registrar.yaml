@@ -11,43 +11,18 @@ image:
   pullPolicy: Always
   tag: latest
   ## Multi-Arch Digest
-  digest: sha256:f94053ab9b7ee8104f88bc9ecceeb0353455a9559ec1ab933f9fab7588d67f16
+  digest: sha256:440f44e04c8e20130fdf82f3f934b97da7d8c87e41c28f099576b829b7b9867f
   ## If things start breaking, this is a known good SHA but isn't Multi-Arch
   # digest: sha256:d02207a156cb97dd79d3515bc90a963d12660c4ca82382f77ae6b5d32351267f
 
 env:
   ## Disable the Spring Boot banner
-  SPRING_MAIN_BANNER-MODE: off
+  SPRING_MAIN_BANNER_MODE: off
   ## Be very careful, this can do _a lot_ of logging
-  ## Valid levels are: TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF
-  LOGGING_LEVEL_ROOT: WARN
-  LOGGING_LEVEL_uniregistrar: WARN
-  JAVA_TOOL_OPTIONS: >-
-    -Dlog4j2.configurationFile=/tmp/log4j2.xml
-
-configFiles:
-  log4j2.xml:
-    path: /tmp/log4j2.xml
-    content: |-
-      <?xml version="1.0" encoding="UTF-8"?>
-      <Configuration status="WARN">
-          <Appenders>
-              <Console name="Console" target="SYSTEM_OUT">
-                  <PatternLayout>
-                      <Pattern>{"@timestamp":"%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}","@version":"1","message":"%enc{%m}{JSON}","logger_name":"%enc{%c}{JSON}","thread_name":"%enc{%t}{JSON}","level":"%p","level_value":%p{FATAL=50000, ERROR=40000, WARN=30000, INFO=20000, DEBUG=10000, TRACE=5000},"service":"universal-registrar"%notEmpty{,"stack_trace":"%enc{%xEx}{JSON}"}}%n</Pattern>
-                  </PatternLayout>
-              </Console>
-          </Appenders>
-
-          <Loggers>
-              <Root level="${env:LOGGING_LEVEL_ROOT:-info}">
-                  <AppenderRef ref="Console"/>
-              </Root>
-              <Logger name="uniregistrar" level="${env:LOGGING_LEVEL_uniregistrar:-debug}" additivity="false">
-                  <AppenderRef ref="Console"/>
-              </Logger>
-          </Loggers>
-      </Configuration>
+  ## Valid levels are: trace, debug, info, warn, error, fatal, off
+  LOGGING_LEVEL_ROOT: warn
+  LOGGING_LEVEL_uniregistrar: warn
+  LOGGING_FORMAT: json # plain or json
 
 service:
   appProtocol: http
