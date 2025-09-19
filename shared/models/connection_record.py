@@ -46,6 +46,15 @@ class Connection(BaseModel):
     updated_at: str | None = None
 
 
+def _truncate_did_peer_4(did: str | None) -> str | None:
+    """Truncate did:peer:4 DIDs to short form (remove everything after and including 3rd colon)."""
+    if did and did.startswith("did:peer:4"):
+        parts = did.split(":")
+        if len(parts) > 3:
+            return ":".join(parts[:3])
+    return did
+
+
 def conn_record_to_connection(record: ConnRecord) -> Connection:
     # Role and State are typing.Literal types.
     # Check if record values are valid / match expected values.
@@ -67,9 +76,9 @@ def conn_record_to_connection(record: ConnRecord) -> Connection:
         invitation_key=record.invitation_key,
         invitation_mode=invitation_mode,  # type: ignore
         invitation_msg_id=record.invitation_msg_id,
-        my_did=record.my_did,
+        my_did=_truncate_did_peer_4(record.my_did),
         state=state,  # type: ignore
-        their_did=record.their_did,
+        their_did=_truncate_did_peer_4(record.their_did),
         their_label=record.their_label,
         their_public_did=record.their_public_did,
         their_role=their_role,  # type: ignore
