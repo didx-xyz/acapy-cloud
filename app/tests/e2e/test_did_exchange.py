@@ -41,7 +41,10 @@ async def test_create_did_exchange_request(
         controller=faber_anoncreds_acapy_client
     )
 
-    request_data = {"their_public_did": faber_public_did.did}
+    request_data = {
+        "their_public_did": faber_public_did.did,
+        "reuse_connection": False,
+    }
 
     if use_did:
         new_did = await acapy_wallet.create_did(
