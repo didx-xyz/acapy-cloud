@@ -23,9 +23,9 @@ def test_connection_model():
         invitation_key="invitation-key-123",
         invitation_mode="once",
         invitation_msg_id="invitation-msg-id-123",
-        my_did="did:peer:4:abc123",
+        my_did="did:peer:4zQmWbS8XogSNphdDuq8dJeg3z7u72k1hFb5v1b98uzUVbTu:z3qDm8hHtipyThg5iZH9rj...LfE",
         state="completed",
-        their_did="did:peer:4:def456",
+        their_did="did:peer:4zQmd8CpeFPci817KDsbSAKWcXAE2mjvCQSasRewvbSF54Bd:z2M...kjm",
         their_label="Bob Agent",
         their_public_did="did:cheqd:testnet:123",
         their_role="invitee",
@@ -40,9 +40,15 @@ def test_connection_model():
     assert connection.invitation_key == "invitation-key-123"
     assert connection.invitation_mode == "once"
     assert connection.invitation_msg_id == "invitation-msg-id-123"
-    assert connection.my_did == "did:peer:4:abc123"
+    assert (
+        connection.my_did
+        == "did:peer:4zQmWbS8XogSNphdDuq8dJeg3z7u72k1hFb5v1b98uzUVbTu:z3qDm8hHtipyThg5iZH9rj...LfE"
+    )
     assert connection.state == "completed"
-    assert connection.their_did == "did:peer:4:def456"
+    assert (
+        connection.their_did
+        == "did:peer:4zQmd8CpeFPci817KDsbSAKWcXAE2mjvCQSasRewvbSF54Bd:z2M...kjm"
+    )
     assert connection.their_label == "Bob Agent"
     assert connection.their_public_did == "did:cheqd:testnet:123"
     assert connection.their_role == "invitee"
@@ -60,9 +66,9 @@ def test_conn_record_to_connection():
         invitation_key="H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV",
         invitation_mode="multi",
         invitation_msg_id="invitation-msg-id-456",
-        my_did="did:peer:4:xyz789:additional:data",
+        my_did="did:peer:4zQmWbS8XogSNphdDuq8dJeg3z7u72k1hFb5v1b98uzUVbTu:z3qDm8hHPpgti6CKpyThg5iZH9rj...LfE",
         rfc23_state="completed",
-        their_did="did:peer:4:uvw012:more:data",
+        their_did="did:peer:4zQmd8CpeFPci817KDsbSAKWcXAE2mjvCQSasRewvbSF54Bd:z2M...kjm",
         their_label="Remote Agent",
         their_public_did="did:cheqd:mainnet:456",
         their_role="inviter",
@@ -80,9 +86,14 @@ def test_conn_record_to_connection():
     assert connection.invitation_mode == "multi"
     assert connection.invitation_msg_id == "invitation-msg-id-456"
     # DIDs should be truncated to short form
-    assert connection.my_did == "did:peer:4"
+    assert (
+        connection.my_did == "did:peer:4zQmWbS8XogSNphdDuq8dJeg3z7u72k1hFb5v1b98uzUVbTu"
+    )
     assert connection.state == "completed"
-    assert connection.their_did == "did:peer:4"
+    assert (
+        connection.their_did
+        == "did:peer:4zQmd8CpeFPci817KDsbSAKWcXAE2mjvCQSasRewvbSF54Bd"
+    )
     assert connection.their_label == "Remote Agent"
     assert connection.their_public_did == "did:cheqd:mainnet:456"
     assert connection.their_role == "inviter"
@@ -127,19 +138,14 @@ def test_conn_record_to_connection_with_invalid_fields():
 
 def test_truncate_did_peer_4():
     # Test truncating did:peer:4 DIDs
-    long_did = "did:peer:4:abc123:def456:ghi789"
+    long_did = "did:peer:4zQmWbS8XogSNphdDuq8dJeg3z7u72k1hFb5v1b98uzUVbTu:z3qDm8hHPpgti6CKpyThg5iZH9rj...LfE"
     short_did = _truncate_did_peer_4(long_did)
-    assert short_did == "did:peer:4"
+    assert short_did == "did:peer:4zQmWbS8XogSNphdDuq8dJeg3z7u72k1hFb5v1b98uzUVbTu"
 
     # Test with minimal did:peer:4
-    minimal_did = "did:peer:4"
+    minimal_did = "did:peer:4zQmWbS8XogSNphdDuq8dJeg3z7u72k1hFb5v1b98uzUVbTu"
     result = _truncate_did_peer_4(minimal_did)
-    assert result == "did:peer:4"
-
-    # Test with did:peer:4 with one part
-    one_part_did = "did:peer:4:abc123"
-    result = _truncate_did_peer_4(one_part_did)
-    assert result == "did:peer:4"
+    assert result == "did:peer:4zQmWbS8XogSNphdDuq8dJeg3z7u72k1hFb5v1b98uzUVbTu"
 
     # Test with non-peer:4 DID
     other_did = "did:sov:123456"
