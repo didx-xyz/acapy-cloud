@@ -90,7 +90,7 @@ async def test_get_credential_revocation_record_fail_bad_request(
 ):
     with pytest.raises(
         HTTPException,
-        match="If credential_exchange_id is not provided then both "
+        match="If credential_exchange_id is not provided then both "  # noqa: RUF043
         "credential_revocation_id and revocation_registry_id must be provided.",
     ) as exc:
         await get_credential_revocation_record(

@@ -99,7 +99,7 @@ async def test_publish_revocations_fail_timeout():
         patch("app.routes.revocation.client_from_auth") as mock_client_from_auth,
         pytest.raises(
             CloudApiException,
-            match="Timeout waiting for endorser to accept the revocations request.",
+            match="Timeout waiting for endorser to accept the revocations request.",  # noqa: RUF043
         ) as exc,
         patch(
             "app.services.revocation_registry.publish_pending_revocations",

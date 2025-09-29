@@ -113,7 +113,7 @@ async def test_send_credential_fail_bad_public_did():
         ),
         pytest.raises(
             HTTPException,
-            match="Wallet making this request has no public DID. Only issuers with a public DID can make this request.",
+            match="Wallet making this request has no public DID. Only issuers with a public DID can make this request.",  # noqa: RUF043
         ) as exc,
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (

@@ -281,7 +281,8 @@ async def test_request_credential_x_no_schema_cred_def(
     IssuerV2.get_record = AsyncMock(return_value=v2_record)
 
     with pytest.raises(
-        Exception, match="Record has no credential definition or schema associated."
+        Exception,
+        match="Record has no credential definition or schema associated.",  # noqa: RUF043
     ):
         await test_module.request_credential(
             "v2-credential_exchange_id", auth=mock_tenant_auth

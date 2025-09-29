@@ -403,7 +403,7 @@ async def test_assert_valid_prover_x_could_not_fetch_actor_exc(
     ):
         with pytest.raises(
             CloudApiException,
-            match="An error occurred while asserting valid verifier. Please try again.",
+            match="An error occurred while asserting valid verifier. Please try again.",  # noqa: RUF043
         ):
             await assert_valid_prover(
                 aries_controller=mock_agent_controller,
@@ -433,11 +433,10 @@ async def test_assert_valid_prover_x_could_not_fetch_actor_exc2(
             return_value=pres_exchange,
         ),
         patch(
-            "app.util.acapy_verifier_utils.get_actor",
-            side_effect=Exception("Error."),
+            "app.util.acapy_verifier_utils.get_actor", side_effect=Exception("Error")
         ),
     ):
-        with pytest.raises(Exception, match="Error."):
+        with pytest.raises(Exception, match="Error"):
             await assert_valid_prover(
                 aries_controller=mock_agent_controller,
                 presentation=AcceptProofRequest(
@@ -531,7 +530,8 @@ async def test_assert_valid_prover_x_no_connection_id(
             return_value=test_pres_exchange,
         ),
         pytest.raises(
-            CloudApiException, match="No connection id associated with proof request."
+            CloudApiException,
+            match="No connection id associated with proof request.",  # noqa: RUF043
         ),
     ):
         await assert_valid_prover(
@@ -562,7 +562,7 @@ async def test_assert_valid_prover_x_no_connection_id2(
             "app.services.verifier.acapy_verifier_v2.VerifierV2.get_proof_record",
             return_value=test_pres_exchange,
         ),
-        pytest.raises(CloudApiException, match="Cannot proceed. No connection id."),
+        pytest.raises(CloudApiException, match="Cannot proceed. No connection id."),  # noqa: RUF043
     ):
         await assert_valid_prover(
             aries_controller=mock_agent_controller,
@@ -673,7 +673,7 @@ async def test_assert_valid_verifier_x_not_verifier(
     ):
         with pytest.raises(
             CloudApiException,
-            match="Flint is not a valid verifier in the trust registry.",
+            match="Flint is not a valid verifier in the trust registry.",  # noqa: RUF043
         ):
             await assert_valid_verifier(
                 aries_controller=mock_agent_controller,
@@ -801,7 +801,7 @@ async def test_assert_valid_verifier_x_could_not_fetch_actor_exc3(
     ):
         with pytest.raises(
             CloudApiException,
-            match="An error occurred while asserting valid verifier. Please try again.",
+            match="An error occurred while asserting valid verifier. Please try again.",  # noqa: RUF043
         ):
             await assert_valid_verifier(
                 aries_controller=mock_agent_controller,
@@ -824,10 +824,10 @@ async def test_assert_valid_verifier_x_could_not_fetch_actor_exc4(
         ),
         patch(
             "app.util.acapy_verifier_utils.fetch_actor_by_did",
-            side_effect=Exception("Error."),
+            side_effect=Exception("Error"),
         ),
     ):
-        with pytest.raises(Exception, match="Error."):
+        with pytest.raises(Exception, match="Error"):
             await assert_valid_verifier(
                 aries_controller=mock_agent_controller,
                 proof_request=SendProofRequest(

@@ -131,7 +131,7 @@ async def test_request_credential_fail_bad_record():
         pytest.raises(
             HTTPException,
             match=(
-                "Record has no credential definition or schema associated. "
+                "Record has no credential definition or schema associated. "  # noqa: RUF043
                 "This probably means you haven't received an offer yet."
             ),
         ) as exc,

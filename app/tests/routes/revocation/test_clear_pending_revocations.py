@@ -89,7 +89,7 @@ async def test_clear_pending_revocations_fail_anoncreds_error():
         patch("app.routes.revocation.client_from_auth") as mock_client_from_auth,
         pytest.raises(
             CloudApiException,
-            match="Clearing pending revocations is not supported for the 'anoncreds' wallet type.",
+            match="Clearing pending revocations is not supported for the 'anoncreds' wallet type.",  # noqa: RUF043
         ) as exc,
     ):
         mock_client_from_auth.return_value.__aenter__.return_value = (
