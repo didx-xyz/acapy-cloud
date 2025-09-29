@@ -144,7 +144,7 @@ async def test_create_did_exchange_request_success(
     mock_aries_controller,
     mock_patches,
 ):
-    mock_client_from_auth, mock_conn_record = mock_patches
+    mock_client_from_auth, _ = mock_patches
     setup_controller_context(mock_client_from_auth, mock_aries_controller)
 
     if not body_params:
@@ -191,7 +191,7 @@ async def test_create_did_exchange_request_fail_acapy_error(
     mock_aries_controller,
     mock_patches,
 ):
-    mock_client_from_auth, mock_conn_record = mock_patches
+    mock_client_from_auth, _ = mock_patches
     mock_aries_controller.did_exchange.create_request = AsyncMock(
         side_effect=exception_class(status=expected_status_code, reason=expected_detail)
     )

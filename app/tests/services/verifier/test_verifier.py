@@ -426,7 +426,7 @@ async def test_reject_proof_request_bad_state(
     with pytest.raises(
         CloudApiException,
         match=(
-            "400: Proof record must be in state `request-received` to reject; "
+            "400: Proof record must be in state `request-received` to reject; "  # noqa: RUF043
             "record has state: `done`."
         ),
     ):

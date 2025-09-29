@@ -37,7 +37,7 @@ async def test_get_public_did_success(expected_result):
 
         if not expected_result.result:
             # We expect a 404 when DID is not found
-            with pytest.raises(HTTPException, match="No public did found.") as exc:
+            with pytest.raises(HTTPException, match="No public did found.") as exc:  # noqa: RUF043
                 await get_public_did(auth="mocked_auth")
                 assert exc.status_code == 404
         else:

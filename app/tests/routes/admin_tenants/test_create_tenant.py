@@ -143,7 +143,7 @@ async def test_create_tenant_fail_trust_registry_error(roles):
         ),
         pytest.raises(
             CloudApiException,
-            match="An error occurred when trying to register actor. Please try again",
+            match="An error occurred when trying to register actor. Please try again",  # noqa: RUF043
         ) as exc,
     ):
         await create_tenant(

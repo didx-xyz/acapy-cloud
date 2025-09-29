@@ -135,7 +135,7 @@ async def test_create_cheqd_did_fail_missing_did(
         CreateCheqdDIDResponse(verkey="some_verkey")  # Missing did
     )
 
-    with pytest.raises(CloudApiException, match="Error creating cheqd did."):
+    with pytest.raises(CloudApiException, match="Error creating cheqd did."):  # noqa: RUF043
         await acapy_wallet.create_did(
             mock_agent_controller, did_create=did_create_request
         )
@@ -151,7 +151,7 @@ async def test_create_cheqd_did_fail_missing_verkey(
         CreateCheqdDIDResponse(did="some_did")  # Missing verkey
     )
 
-    with pytest.raises(CloudApiException, match="Error creating cheqd did."):
+    with pytest.raises(CloudApiException, match="Error creating cheqd did."):  # noqa: RUF043
         await acapy_wallet.create_did(
             mock_agent_controller, did_create=did_create_request
         )

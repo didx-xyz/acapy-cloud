@@ -89,7 +89,7 @@ async def test_assert_valid_issuer(
     )
     with pytest.raises(
         TrustRegistryException,
-        match="Actor actor-id does not have required role 'issuer'.",
+        match="Actor actor-id does not have required role 'issuer'.",  # noqa: RUF043
     ):
         await assert_valid_issuer(did=sample_did, schema_id=schema_id)
 
