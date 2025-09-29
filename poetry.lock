@@ -354,34 +354,34 @@ tests = ["PyHamcrest (>=2.0.2)", "mypy", "pytest (>=4.6)", "pytest-benchmark", "
 
 [[package]]
 name = "boto3"
-version = "1.40.21"
+version = "1.40.40"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["tails"]
 files = [
-    {file = "boto3-1.40.21-py3-none-any.whl", hash = "sha256:3772fb828864d3b7046c8bdf2f4860aaca4a79f25b7b060206c6a5f4944ea7f9"},
-    {file = "boto3-1.40.21.tar.gz", hash = "sha256:876ccc0b25517b992bd27976282510773a11ebc771aa5b836a238ea426c82187"},
+    {file = "boto3-1.40.40-py3-none-any.whl", hash = "sha256:385904de68623e1c341bdc095d94a30006843032c912adeb1e0752a343632ec6"},
+    {file = "boto3-1.40.40.tar.gz", hash = "sha256:f384d3a0410d0f1a4d4ae7aa69c41d0549c6ca5a76667dc25fc97d50ad6db740"},
 ]
 
 [package.dependencies]
-botocore = ">=1.40.21,<1.41.0"
+botocore = ">=1.40.40,<1.41.0"
 jmespath = ">=0.7.1,<2.0.0"
-s3transfer = ">=0.13.0,<0.14.0"
+s3transfer = ">=0.14.0,<0.15.0"
 
 [package.extras]
 crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.40.21"
+version = "1.40.40"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["tails"]
 files = [
-    {file = "botocore-1.40.21-py3-none-any.whl", hash = "sha256:574ecf9b68c1721650024a27e00e0080b6f141c281ebfce49e0d302969270ef4"},
-    {file = "botocore-1.40.21.tar.gz", hash = "sha256:f77e9c199df0252b14ea739a9ac99723940f6bde90f4c2e7802701553a62827b"},
+    {file = "botocore-1.40.40-py3-none-any.whl", hash = "sha256:68506142b3cde93145ef3ee0268f2444f2b68ada225a151f714092bbd3d6516a"},
+    {file = "botocore-1.40.40.tar.gz", hash = "sha256:78eb121a16a6481ed0f6e1aebe53a4f23aa121f34466846c13a5ca48fa980e31"},
 ]
 
 [package.dependencies]
@@ -2150,14 +2150,14 @@ files = [
 
 [[package]]
 name = "s3transfer"
-version = "0.13.1"
+version = "0.14.0"
 description = "An Amazon S3 Transfer Manager"
 optional = false
 python-versions = ">=3.9"
 groups = ["tails"]
 files = [
-    {file = "s3transfer-0.13.1-py3-none-any.whl", hash = "sha256:a981aa7429be23fe6dfc13e80e4020057cbab622b08c0315288758d67cabc724"},
-    {file = "s3transfer-0.13.1.tar.gz", hash = "sha256:c3fdba22ba1bd367922f27ec8032d6a1cf5f10c934fb5d68cf60fd5a23d936cf"},
+    {file = "s3transfer-0.14.0-py3-none-any.whl", hash = "sha256:ea3b790c7077558ed1f02a3072fb3cb992bbbd253392f4b6e9e8976941c7d456"},
+    {file = "s3transfer-0.14.0.tar.gz", hash = "sha256:eff12264e7c8b4985074ccce27a3b38a485bb7f7422cc8046fee9be4983e4125"},
 ]
 
 [package.dependencies]
@@ -2667,4 +2667,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.12.8"
-content-hash = "ae8024d22911a17dd479c8e85909ad9179ce93739aa2952cfb905dfd07d69326"
+content-hash = "6a9babef4bb147f43afdba87c7d612431f94a8d74027a4a2aef1796992ace108"
