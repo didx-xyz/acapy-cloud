@@ -30,11 +30,13 @@ async def test_governance_agent(governance_acapy_client: AcaPyClient):
 
 @pytest.mark.anyio
 async def test_tenant_agent():
-    alice_acapy_client = get_tenant_acapy_client(token="Alice")
-    assert isinstance(alice_acapy_client, AcaPyClient)
-    assert alice_acapy_client.configuration.host == Role.TENANT.agent_type.base_url
-    assert "Bearer " in alice_acapy_client.api_client.default_headers["Authorization"]
-    assert alice_acapy_client.api_key == TENANT_ACAPY_API_KEY
+    async with get_tenant_acapy_client(token="Alice") as alice_acapy_client:
+        assert isinstance(alice_acapy_client, AcaPyClient)
+        assert alice_acapy_client.configuration.host == Role.TENANT.agent_type.base_url
+        assert (
+            "Bearer " in alice_acapy_client.api_client.default_headers["Authorization"]
+        )
+        assert alice_acapy_client.api_key == TENANT_ACAPY_API_KEY
 
 
 @pytest.mark.anyio
@@ -88,15 +90,18 @@ async def test_client_from_auth(is_multitenant, is_admin):
     auth.role.is_admin = is_admin
     auth.role.agent_type = Mock(x_api_key="api-key", base_url="base-url")
 
-    client = client_from_auth(auth)
-    assert isinstance(client, AcaPyClient)
+    async with client_from_auth(auth) as client:
+        assert isinstance(client, AcaPyClient)
 
 
-def test_client_from_auth_missing_auth():
+@pytest.mark.anyio
+async def test_client_from_auth_missing_auth():
     with pytest.raises(HTTPException) as exc_info:
-        client_from_auth(None)
+        async with client_from_auth(None):
+            pass
     assert exc_info.value.status_code == 403
 
     with pytest.raises(HTTPException) as exc_info:
-        client_from_auth(AcaPyAuth(token="", role=Role.TENANT))
+        async with client_from_auth(AcaPyAuth(token="", role=Role.TENANT)):
+            pass
     assert exc_info.value.status_code == 403
