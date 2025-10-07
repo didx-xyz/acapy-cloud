@@ -257,6 +257,24 @@ export function getIssuerConnectionId(issuerAccessToken, invitationMsgId) {
   }
 }
 
+
+export function getIssuerConnectionIdViaDid(issuerAccessToken, holderDid) {
+  const url = `${config.api.cloudApiUrl}/tenant/v1/connections?holder_did=${holderDid}`;
+  const params = {
+    headers: {
+      "x-api-key": issuerAccessToken,
+    },
+  };
+
+  try {
+    const response = http.get(url, params);
+    return response;
+  } catch (error) {
+    console.error(`Error creating invitation: ${error.message}`);
+    throw error;
+  }
+}
+
 export function acceptInvitation(holderAccessToken, invitationObj) {
   const url = `${config.api.cloudApiUrl}/tenant/v1/oob/accept-invitation`;
   const params = {
@@ -824,6 +842,7 @@ export function checkRevoked(issuerAccessToken, credentialExchangeId) {
 
 export function genericPolling({
   accessToken,
+  headers,
   walletId,
   topic,
   field,
@@ -834,7 +853,16 @@ export function genericPolling({
   sseTag,
   requestTimeout = 14 // max 14s - will need to deal with SSE ping at 15s
 }) {
-  const endpoint = `${config.api.cloudApiUrl}/tenant/v1/sse/${walletId}/${topic}/${field}/${fieldId}/${state}?look_back=${lookBack}`;
+  // Determine the endpoint based on whether we have headers (tenant-admin) or accessToken (tenant)
+  const baseUrl = headers
+    ? `${config.api.cloudApiUrl}/tenant-admin/v1/sse`
+    : `${config.api.cloudApiUrl}/tenant/v1/sse`;
+  const endpoint = `${baseUrl}/${walletId}/${topic}/${field}/${fieldId}/${state}?look_back=${lookBack}`;
+
+  // Determine the request headers
+  const requestHeaders = headers
+    ? { ...headers, "Content-Type": "application/json" }
+    : { "x-api-key": accessToken, "Content-Type": "application/json" };
 
   // Backoff delays in seconds: 0.5, 1, 2, 5
   const delays = [0.5, 1, 2, 3];
@@ -850,10 +878,7 @@ export function genericPolling({
 
     // Make the HTTP request
     const response = http.get(endpoint, {
-      headers: {
-        "x-api-key": accessToken,
-        "Content-Type": "application/json"
-      },
+      headers: requestHeaders,
       timeout: requestTimeout * 1000, // Convert seconds to milliseconds
       tags: sseTag ? { name: sseTag } : { name: `GET_${topic}_${state}_Event` }
     });
