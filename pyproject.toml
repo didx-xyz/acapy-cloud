@@ -39,7 +39,7 @@ psycopg2-binary = "~2.9.6"
 sqlalchemy = { version = "~2.0.40", extras = ["asyncio"] }
 
 [tool.poetry.group.tails.dependencies]
-aiofiles = "^24.1.0"
+aiofiles = "^25.1.0"
 boto3 = "~1.40.1"
 python-multipart = "~0.0.20"
 
