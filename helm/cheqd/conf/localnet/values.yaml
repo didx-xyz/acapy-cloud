@@ -1,6 +1,6 @@
 # https://github.com/cheqd/cheqd-node
 image:
-  tag: 4.1.4
+  tag: 4.1.5
 
 podLabels:
   sidecar.istio.io/inject: "false"
