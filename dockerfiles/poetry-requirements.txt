@@ -422,9 +422,9 @@ packaging==25.0 \
     #   build
     #   findpython
     #   poetry
-pbs-installer[download,install]==2025.9.18 \
-    --hash=sha256:8ef55d7675698747505c237015d14c81759bd66a0d4c8b20cec9a2dc96e8434c \
-    --hash=sha256:c0a51a7c1e015723bd8396f02e15b5876e439f74b0f45bbac436b189f903219f
+pbs-installer[download,install]==2025.10.14 \
+    --hash=sha256:1e6d5ca8bd2260bd3b68d4d1f91dc6b609a63f8fa99791c5685c9207cbcccfbe \
+    --hash=sha256:6f14d7bf39e5ba9c628be2be76ebda2d2fb26e49d25c33c862fc4d6cca913a81
     # via poetry
 pkginfo==1.12.1.2 \
     --hash=sha256:5cd957824ac36f140260964eba3c6be6442a8359b8c48f4adf90210f33a04b7b \
