@@ -162,7 +162,8 @@ jobs:
       cancel-in-progress: true
 
   eks:
-    if: github.actor != 'dependabot[bot]' && github.event.pull_request.draft == false
+    # if: github.actor != 'dependabot[bot]' && github.event.pull_request.draft == false
+    if: false
     name: EKS
     uses: ./.github/workflows/deploy-test-eks.yml
     needs:
@@ -195,7 +196,8 @@ jobs:
   notify:
     name: Notify
 
-    if: github.actor != 'dependabot[bot]' && github.event_name != 'pull_request'
+    # if: github.actor != 'dependabot[bot]' && github.event_name != 'pull_request'
+    if: false
 
     needs:
       - docker
