@@ -23,7 +23,7 @@ pydantic = "~2.11.6"
 PyYAML = "~6.0.2"
 scalar-fastapi = "^1.3.0"
 uvicorn = "~0.37.0"
-uvloop = "^0.21.0"
+uvloop = "^0.22.1"
 
 [tool.poetry.group.app.dependencies]
 aiohttp = "~3.12.0"
