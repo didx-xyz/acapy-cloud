@@ -2,51 +2,53 @@
 
 [[package]]
 name = "acapy-agent-didx"
-version = "1.4.0-20251118"
+version = "1.4.0.post20251118"
 description = "(ACA-Py) A Cloud Agent Python is a foundation for building decentralized identity applications and services running in non-mobile environments. "
 optional = false
-python-versions = "^3.12"
+python-versions = ">=3.12,<4.0"
 groups = ["main"]
-files = []
-develop = false
+files = [
+    {file = "acapy_agent_didx-1.4.0.post20251118-py3-none-any.whl", hash = "sha256:15926b89a262c95043675eb9d7a5fc788f6f3afb0ce8fa6119dce3f73d49a262"},
+    {file = "acapy_agent_didx-1.4.0.post20251118.tar.gz", hash = "sha256:58ab616cc51c211511d2e8e9381f86f740274eb80e679b4085cb5a8d6243f12c"},
+]
 
 [package.dependencies]
 aiohttp = ">=3.11.16,<3.14.0"
-aiohttp-apispec-acapy = "~3.0.3"
+aiohttp-apispec-acapy = ">=3.0.3,<3.1.0"
 aiohttp-cors = ">=0.7,<0.9"
-anoncreds = "~0.2.3"
-apispec = "^6.6.0"
+anoncreds = ">=0.2.3,<0.3.0"
+apispec = ">=6.6.0,<7.0.0"
 aries-askar = ">=0.4.3"
-base58 = "~2.1.0"
-canonicaljson = "^2.0.0"
-ConfigArgParse = "~1.7"
-deepmerge = "^2.0"
-did-peer-2 = "^0.1.2"
-did-peer-4 = "^0.1.4"
+base58 = ">=2.1.0,<2.2.0"
+canonicaljson = ">=2.0.0,<3.0.0"
+ConfigArgParse = ">=1.7,<1.8"
+deepmerge = ">=2.0,<3.0"
+did-peer-2 = ">=0.1.2,<0.2.0"
+did-peer-4 = ">=0.1.4,<0.2.0"
 did-webvh = ">=1.0.0"
-indy-credx = "~1.1.1"
-indy-vdr = "~0.4.0"
-jsonpath-ng = "^1.7.0"
+indy-credx = ">=1.1.1,<1.2.0"
+indy-vdr = ">=0.4.0,<0.5.0"
+jsonpath-ng = ">=1.7.0,<2.0.0"
 Markdown = ">=3.7,<3.11"
-markupsafe = "^3.0.2"
-marshmallow = "~3.26.1"
-nest_asyncio = "~1.6.0"
+markupsafe = ">=3.0.2,<4.0.0"
+marshmallow = ">=3.26.1,<3.27.0"
+nest_asyncio = ">=1.6.0,<1.7.0"
 packaging = ">=24.2,<26.0"
-portalocker = "^3.1.1"
+portalocker = ">=3.1.1,<4.0.0"
 prompt_toolkit = ">=3.0,<3.1"
-psycopg = {version = "^3.2.1", extras = ["binary", "pool"]}
-pydid = "^0.5.1"
-pyjwt = "~2.10.1"
-pyld = "^2.0.4"
+psycopg = {version = ">=3.2.1,<4.0.0", extras = ["binary", "pool"]}
+pydid = ">=0.5.1,<0.6.0"
+pyjwt = ">=2.10.1,<2.11.0"
+pyld = ">=2.0.4,<3.0.0"
 pynacl = ">=1.5,<1.7"
-python-dateutil = "^2.9.0"
-python-json-logger = "^3.2.1"
-pyyaml = "~6.0.2"
-qrcode = {version = "^8.1", extras = ["pil"]}
-requests = "~2.32.3"
-rlp = "^4.1.0"
-sd-jwt = "^0.10.3"
-unflatten = "~0.2"
+python-dateutil = ">=2.9.0,<3.0.0"
+python-json-logger = ">=3.2.1,<4.0.0"
+pyyaml = ">=6.0.2,<6.1.0"
+qrcode = {version = ">=8.1,<9.0", extras = ["pil"]}
+requests = ">=2.32.3,<2.33.0"
+rlp = ">=4.1.0,<5.0.0"
+sd-jwt = ">=0.10.3,<0.11.0"
+unflatten = ">=0.2,<0.3"
 uuid_utils = ">=0.10,<0.12"
 
 [package.extras]
@@ -55,29 +57,24 @@ didcommv2 = ["didcomm-messaging (>=0.1.1a0,<0.2.0)"]
 sqlcipher = ["sqlcipher3-binary (>=0.5.4)"]
 
 [package.source]
-type = "git"
-url = "https://github.com/didx-xyz/acapy"
-reference = "1.4.0-20251118-rebase-changes"
-resolved_reference = "5e8e0a322956c9b6b49f9f37ff1ac9887ddf7d2f"
+type = "legacy"
+url = "https://test.pypi.org/simple"
+reference = "testpypi"
 
 [[package]]
 name = "acapy-wallet-groups-plugin"
-version = "1.4.0-20251118"
+version = "1.4.0.post20251118"
 description = "Agent plugin to add a group id to a wallet"
 optional = false
-python-versions = "^3.12.0"
+python-versions = "<4.0.0,>=3.12.0"
 groups = ["main"]
-files = []
-develop = false
+files = [
+    {file = "acapy_wallet_groups_plugin-1.4.0.post20251118-py3-none-any.whl", hash = "sha256:445419cd1028b55cdedc7cf35c778d8c5e1c57c6ad4d967d24b22c8e973264bf"},
+    {file = "acapy_wallet_groups_plugin-1.4.0.post20251118.tar.gz", hash = "sha256:97fb55d070d2418820db4cdeb02488f6af4b7ba514ac2b7385029ab51e206ef2"},
+]
 
 [package.dependencies]
-acapy-agent-didx = {git = "https://github.com/didx-xyz/acapy", branch = "1.4.0-20251118-rebase-changes"}
-
-[package.source]
-type = "git"
-url = "https://github.com/didx-xyz/acapy-wallet-groups-plugin.git"
-reference = "release-1.4.0-20251118"
-resolved_reference = "a6d25ce0330f3d76bf210072493529471b998ff8"
+acapy-agent-didx = ">=1.4.0.post20251118"
 
 [[package]]
 name = "aiohappyeyeballs"
@@ -661,7 +658,7 @@ develop = false
 valkey = "^6.1.0"
 
 [package.extras]
-aca-py = ["acapy-agent-didx @ git+https://github.com/didx-xyz/acapy@1.4.0-20251118-rebase-changes"]
+aca-py = ["acapy-agent-didx (>=1.4.0.post20251118)"]
 
 [package.source]
 type = "directory"
@@ -1981,7 +1978,7 @@ pydantic = "^2.7"
 uvicorn = "^0.38.0"
 
 [package.extras]
-aca-py = ["acapy-agent-didx @ git+https://github.com/didx-xyz/acapy@1.4.0-20251118-rebase-changes"]
+aca-py = ["acapy-agent-didx (>=1.4.0.post20251118)"]
 
 [package.source]
 type = "directory"
@@ -3431,4 +3428,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.12.8"
-content-hash = "9a8d784ee3b06d80a174bf6ccd939559c79759b79e0cc6fbb3a7626438081a5d"
+content-hash = "90e0f28fd1b0381288b546761ee6f5aab4d6dd0200dfd6a44c892c17042d243e"
