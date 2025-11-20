@@ -26,7 +26,7 @@ uvicorn = "~0.37.0"
 uvloop = "^0.21.0"
 
 [tool.poetry.group.app.dependencies]
-aiohttp = "~3.12.0"
+aiohttp = "~3.13.2"
 aiocache = "~0.12.0"
 aries-cloudcontroller = "==1.4.0.post20251118"
 pyjwt = "~2.10.0"
@@ -44,7 +44,7 @@ boto3 = "~1.40.1"
 python-multipart = "~0.0.20"
 
 [tool.poetry.group.waypoint.dependencies]
-aiohttp = "~3.12.0"
+aiohttp = "~3.13.2"
 dependency-injector = "^4.48.0"
 nats-py = { git = "https://github.com/ff137/nats.py", tag = "v2.10.0-w-orjson", extras = [
   "nkeys",
