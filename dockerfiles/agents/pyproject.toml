@@ -14,7 +14,7 @@ python = "~3.12.8"
 protobuf = "~6.33.1"
 
 # ACA-Py Plugins
-acapy-wallet-groups-plugin = "==1.3.2rc0.post20250825"
+acapy-wallet-groups-plugin = { git = "https://github.com/didx-xyz/acapy-wallet-groups-plugin.git", branch = "release-1.4.0-20251118" }
 nats-events = { path = "../../plugins/nats_events" }
 cheqd = { path = "../../plugins/cheqd" }
 
