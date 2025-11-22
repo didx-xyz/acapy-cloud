@@ -355,7 +355,7 @@ jobs:
 
       - name: Publish test report
         # https://github.com/mikepenz/action-junit-report
-        uses: mikepenz/action-junit-report@5b7ee5a21e8674b695313d769f3cbdfd5d4d53a4 # v6.0.0
+        uses: mikepenz/action-junit-report@e08919a3b1fb83a78393dfb775a9c37f17d8eea6 # v6.0.1
         if: steps.pytest.outcome == 'success'
         with:
           check_name: JUnit E2E Test Report
@@ -538,7 +538,7 @@ jobs:
           hide-comment: ${{ github.event_name != 'pull_request' }}
 
       - name: Publish test report
-        uses: mikepenz/action-junit-report@5b7ee5a21e8674b695313d769f3cbdfd5d4d53a4 # v6.0.0
+        uses: mikepenz/action-junit-report@e08919a3b1fb83a78393dfb775a9c37f17d8eea6 # v6.0.1
         if: steps.regression.outcome == 'success'
         with:
           check_name: JUnit Regression Test Report
