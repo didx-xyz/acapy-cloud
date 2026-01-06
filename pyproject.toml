@@ -26,7 +26,7 @@ uvicorn = "~0.38.0"
 uvloop = "~0.22.1"
 
 [tool.poetry.group.app.dependencies]
-aiohttp = "~3.13.2"
+aiohttp = "~3.13.3"
 aiocache = "~0.12.0"
 aries-cloudcontroller = "==1.4.0.post20251118"
 pyjwt = "~2.10.0"
@@ -44,7 +44,7 @@ boto3 = "~1.41.0"
 python-multipart = "~0.0.20"
 
 [tool.poetry.group.waypoint.dependencies]
-aiohttp = "~3.13.2"
+aiohttp = "~3.13.3"
 dependency-injector = "^4.48.0"
 nats-py = "~2.12.0"
 sse-starlette = "~3.0.2"
