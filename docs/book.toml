@@ -1,7 +1,6 @@
 [book]
 authors = ["cl0ete","ff137"]
 language = "en"
-multilingual = false
 src = "src"
 title = "acapy-cloud"
 [preprocessor.mermaid]
