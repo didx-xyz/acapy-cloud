@@ -13,9 +13,11 @@ import {
   getIssuerPublicDid,
   createDidExchangeRequest,
   getIssuerConnectionId,
+  getIssuerConnectionIdViaDid,
   pollAndCheck,
   getHolderConnections,
 } from "../libs/functions.js";
+import { getAuthHeaders } from '../libs/auth.js';
 import { config } from "../libs/config.js";
 
 const vus = config.test.vus;
@@ -65,8 +67,9 @@ export function setup() {
   file.writeString(outputFilepath, "");
 
   const walletName = issuerPrefix;
+  const { tenantAdminHeaders } = getAuthHeaders();
 
-  return { issuers, holders };
+  return { issuers, holders, tenantAdminHeaders };
 }
 
 function getIssuerIndex(vu, iter) {
@@ -117,6 +120,7 @@ export default function (data) {
 
   let holderConnectionId;
   let invitationMsgId;
+  let holderDid;
 
   if (useOobInvitation) {
     // OOB Invitation flow
@@ -219,8 +223,8 @@ export default function (data) {
         return true;
       },
     });
-    const { invitation_msg_id: invitationMsgIdTemp, connection_id: holderConnectionIdTemp } = JSON.parse(createInvitationResponse.body);
-    invitationMsgId = invitationMsgIdTemp;
+    const { my_did: holderDidTemp, connection_id: holderConnectionIdTemp, } = JSON.parse(createInvitationResponse.body);
+    holderDid = holderDidTemp;
     holderConnectionId = holderConnectionIdTemp;
   }
 
@@ -237,11 +241,11 @@ export default function (data) {
   }, { perspective: "Holder" });
 
   pollAndCheck({
-    accessToken: issuer.access_token,
+    headers: data.tenantAdminHeaders,
     walletId: issuer.wallet_id,
     topic: "connections",
-    field: "invitation_msg_id",
-    fieldId: invitationMsgId,
+    field: "their_did",
+    fieldId: holderDid,
     state: "completed",
     maxAttempts: 3,
     lookBack: 60,
@@ -250,19 +254,38 @@ export default function (data) {
 
   // Issuer is now going to check
   // sleep(2);
+  // TODO: OOB still uses invitationMsgId
   let getIssuerConnectionIdResponse;
+  // try {
+  //   getIssuerConnectionIdResponse = retry(() => {
+  //     const response = getIssuerConnectionId(issuer.access_token, invitationMsgId);
+  //     if (response.status !== 200) {
+  //       throw new Error(`getIssuerConnectionId Non-200 status: ${response.status} ${response.body}`);
+  //     }
+  //     if (response.body === "[]") {
+  //       throw new Error(`getIssuerConnectionId: Empty response body: ${response.body}`);
+  //     }
+  //     return response;
+  //   }
+  //   , 5, 1000, "getIssuerConnectionId");
+  // }
+  // catch (e) {
+  //   console.error(`Failed after retries: ${e.message}`);
+  //   getIssuerConnectionIdResponse = e.response || e;
+  // }
+  let shortHolderDid = holderDid.split(':').slice(0, 3).join(':');
   try {
     getIssuerConnectionIdResponse = retry(() => {
-      const response = getIssuerConnectionId(issuer.access_token, invitationMsgId);
+      const response = getIssuerConnectionIdViaDid(issuer.access_token, shortHolderDid);
       if (response.status !== 200) {
-        throw new Error(`getIssuerConnectionId Non-200 status: ${response.status} ${response.body}`);
+        throw new Error(`getIssuerConnectionIdViaDid Non-200 status: ${response.status} ${response.body}`);
       }
       if (response.body === "[]") {
-        throw new Error(`getIssuerConnectionId: Empty response body: ${response.body}`);
+        throw new Error(`getIssuerConnectionIdViaDid: Empty response body: ${response.body}`);
       }
       return response;
     }
-    , 5, 1000, "getIssuerConnectionId");
+    , 5, 1000, "getIssuerConnectionIdViaDid");
   }
   catch (e) {
     console.error(`Failed after retries: ${e.message}`);
