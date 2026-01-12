@@ -51,9 +51,9 @@ on:
 permissions: {}
 
 env:
-  HELM_VERSION: v3.19.0
-  HELMFILE_VERSION: v1.1.7
-  MISE_VERSION: 2025.10.9
+  HELM_VERSION: v3.19.4
+  HELMFILE_VERSION: v1.2.3
+  MISE_VERSION: 2026.1.1
 
   RESET_DEPLOYMENTS: ${{ github.event.inputs.reset-deployments || 'false' }}
   RUN_E2E_TESTS: ${{ github.event.inputs.run-e2e-tests || 'true' }}
