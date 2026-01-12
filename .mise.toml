@@ -3,14 +3,14 @@
 "aqua:nats-io/natscli" = "0.3"
 helm = "3"
 helmfile = "1"
-istioctl = "1.27"
+istioctl = "1.28"
 jq = "latest"
-kind = "0.30"
-kubectl = "1.34"
+kind = "0.31"
+kubectl = "1.35"
 poetry = "2.2"
-pre-commit = "4.3"
+pre-commit = "4.5"
 python = "3.12"
-tilt = "0.35"
+tilt = "0.36"
 usage = "latest"
 yq = "latest"
 
@@ -30,6 +30,7 @@ KIND_K8S_CONTEXT = "kind-{{env.KIND_CLUSTER_NAME}}"
 KIND_DOCKER_CACHE = "docker-cache"
 KIND_DOCKER_REGISTRY = "docker-registry"
 KIND_DOCKER_REGISTRY_PORT = "5001"
+KUBECONFIG = "{{config_root}}/.mise/kubeconfig.yaml"
 # Use Python/Mise managed virtual environment
 POETRY_VIRTUALENVS_CREATE = "false"
 # Setup Python Virtual Environment
@@ -171,10 +172,3 @@ mypy . --ignore-missing-imports \
        --check-untyped-defs \
        --install-types --non-interactive
 """
-
-[tasks."bootstrap:kubeconfig"]
-description = "Set KUBECONFIG"
-run = "mise set --env local --file mise.local.toml KUBECONFIG=$(pwd)/.mise/kubeconfig.yaml"
-
-[hooks]
-enter = ["mise bootstrap:kubeconfig"]
