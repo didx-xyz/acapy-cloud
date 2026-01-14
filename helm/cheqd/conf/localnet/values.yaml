@@ -44,6 +44,8 @@ network: localnet
 config:
   app_toml:
     minimum-gas-prices: 50ncheq
+    pricefeeder:
+      enable: true
   config_toml:
     moniker: ACA-Py Cloud Cheqd Localnet
     log_level: warn # Options: trace, debug, info, warn, error, fatal, panic
