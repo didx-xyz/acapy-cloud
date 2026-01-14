@@ -100,6 +100,13 @@ spec:
               else
                 echo "Genesis file already exists, skipping download."
               fi
+              if [ ! -f /cheqd/config/price-feeder.toml ]; then
+                echo "Price feeder config not found, downloading..."
+                wget -qO /cheqd/config/price-feeder.toml \
+                  https://raw.githubusercontent.com/cheqd/cheqd-node/refs/tags/v{{ .Values.image.tag | default .Chart.AppVersion }}/pricefeeder/price-feeder.toml
+              else
+                echo "Price feeder config already exists, skipping download."
+              fi
           volumeMounts:
             - name: data
               mountPath: /cheqd

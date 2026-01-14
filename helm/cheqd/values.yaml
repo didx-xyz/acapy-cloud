@@ -489,6 +489,17 @@ config:
       # implementations.
       max-txs: 5000
 
+    ###############################################################################
+    ###                        Price Feeder Configuration                       ###
+    ###############################################################################
+    pricefeeder:
+      # Absolute path to the price feeder configuration file.
+      config_path: /home/cheqd/.cheqdnode/config/price-feeder.toml
+      # Enable defines if the price feeder service should be enabled.
+      enabled: false
+      # Log level for the price feeder sidecar service.
+      log_level: info
+
   config_toml:
     #######################################################################
     ###                   Main Base Config Options                      ###
